@@ -14,7 +14,7 @@
     },
     {
       "name": "start",
-      "start": "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+      "start": "./start.sh"
     }
   ]
 }
