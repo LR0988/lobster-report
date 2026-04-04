@@ -3,11 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine
 from app import models
 from app.routers import news, financial, forum, world, dashboard, alerts
+from app.config import DEBUG
 
 # 建立資料表
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Lobster Report API", version="1.0.0")
+app = FastAPI(
+    title="Lobster Report API",
+    version="1.0.0",
+    debug=DEBUG
+)
 
 # CORS 設定
 app.add_middleware(
