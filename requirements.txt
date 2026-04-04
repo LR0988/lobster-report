@@ -1,0 +1,2 @@
+# Root requirements.txt for Railway Python detection
+# This file helps Railway detect Python project
