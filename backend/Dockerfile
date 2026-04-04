@@ -9,7 +9,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 安裝 Python 依賴
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --no-cache-dir -r requirements.txt
 
 # 複製程式碼
 COPY . .

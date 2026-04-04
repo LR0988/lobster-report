@@ -1,11 +1,10 @@
 # Nixpacks configuration for Lobster Report Backend
 
-# 設定 Python 版本
 [phases.setup]
 nixPkgs = ["python311", "postgresql"]
 commands = [
-  "pip install --upgrade pip",
-  "pip install -r requirements.txt"
+  "python -m pip install --upgrade pip",
+  "python -m pip install -r requirements.txt"
 ]
 
 [phases.build]
