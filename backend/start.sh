@@ -4,6 +4,9 @@
 
 echo "Starting Lobster Report Backend..."
 
+# 進入 backend 目錄
+cd /app
+
 # 檢查 uvicorn 是否安裝
 if ! command -v uvicorn &> /dev/null; then
     echo "Installing uvicorn..."
