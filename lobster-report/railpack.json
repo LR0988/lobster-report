@@ -1,0 +1,28 @@
+{
+  "builders": [
+    {
+      "name": "backend",
+      "path": "backend",
+      "builder": "nixpacks",
+      "nixpacksConfig": {
+        "phases": [
+          {
+            "name": "setup",
+            "nixPkgs": ["python311", "postgresql"],
+            "commands": [
+              "pip install -r requirements.txt"
+            ]
+          },
+          {
+            "name": "build",
+            "commands": []
+          },
+          {
+            "name": "start",
+            "start": "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+          }
+        ]
+      }
+    }
+  ]
+}
