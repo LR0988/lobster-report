@@ -4,10 +4,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # 從環境變數取得資料庫 URL
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://user:password@localhost:5432/lobster_report"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# 如果沒有設定 DATABASE_URL，使用預設值
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql://user:password@localhost:5432/lobster_report"
+
+print(f"DATABASE_URL: {DATABASE_URL}")  # 除錯用
 
 # 建立資料庫引擎
 engine = create_engine(DATABASE_URL)

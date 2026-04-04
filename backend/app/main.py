@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine
+from app.database import engine, DATABASE_URL
 from app import models
 from app.routers import news, financial, forum, world, dashboard, alerts
 from app.config import DEBUG
+
+print(f"Starting Lobster Report API with DATABASE_URL: {DATABASE_URL}")
 
 # 建立資料表
 models.Base.metadata.create_all(bind=engine)
