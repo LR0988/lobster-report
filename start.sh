@@ -7,6 +7,10 @@ echo "Starting Lobster Report Backend..."
 # 進入 backend 目錄
 cd backend
 
+# 安裝 Python 依賴（確保 uvicorn 可用）
+echo "Installing Python dependencies..."
+pip install -r requirements.txt
+
 # 檢查環境變數
 if [ -z "$DATABASE_URL" ]; then
     echo "ERROR: DATABASE_URL is not set"
