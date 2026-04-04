@@ -6,9 +6,10 @@ from sqlalchemy.orm import sessionmaker
 # 從環境變數取得資料庫 URL
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# 如果沒有設定 DATABASE_URL，使用預設值
+# 如果沒有設定 DATABASE_URL，使用 Railway 預設值
 if not DATABASE_URL:
-    DATABASE_URL = "postgresql://user:password@localhost:5432/lobster_report"
+    # 使用 Railway PostgreSQL 連線字串
+    DATABASE_URL = "postgresql://postgres:fagsfAayXKEmLgqxKNXzErFSTMIEDvDi@postgres.railway.internal:5432/railway"
 
 print(f"DATABASE_URL: {DATABASE_URL}")  # 除錯用
 
