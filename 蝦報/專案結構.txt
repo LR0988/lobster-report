@@ -1,0 +1,137 @@
+蝦報 (Shrimp Report) - 專案目錄結構
+
+shrimp-report/
+├── README.md                 # 專案總覽與架構說明
+├── 架構圖.txt                # 系統架構圖
+├── 專案結構.txt              # 本文件
+├── docker-compose.yml        # Docker 編排檔案
+├── .env.example             # 環境變數範本
+├── .gitignore               # Git 忽略檔案
+├── requirements.txt         # Python 依賴
+├── package.json             # Node.js 依賴 (前端)
+│
+├── backend/                  # 後端 (Python/FastAPI)
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py          # FastAPI 主程式
+│   │   ├── config.py        # 設定檔
+│   │   ├── database.py      # 資料庫連線
+│   │   ├── models.py        # 資料模型 (SQLAlchemy)
+│   │   ├── schemas.py       # Pydantic 模式
+│   │   ├── crud.py          # 資料庫操作
+│   │   ├── routers/         # API 路由
+│   │   │   ├── __init__.py
+│   │   │   ├── news.py      # 新聞相關 API
+│   │   │   ├── financial.py # 財報相關 API
+│   │   │   ├── forum.py     # 論壇相關 API
+│   │   │   ├── world.py     # 世界局勢 API
+│   │   │   ├── dashboard.py # 儀表板 API
+│   │   │   └── alerts.py    # 警報 API
+│   │   ├── services/        # 業務邏輯
+│   │   │   ├── __init__.py
+│   │   │   ├── news_service.py
+│   │   │   ├── financial_service.py
+│   │   │   ├── forum_service.py
+│   │   │   ├── world_service.py
+│   │   │   ├── ai_service.py
+│   │   │   └── alert_service.py
+│   │   ├── crawlers/        # 爬蟲模組
+│   │   │   ├── __init__.py
+│   │   │   ├── news_crawler.py
+│   │   │   ├── forum_crawler.py
+│   │   │   └── world_crawler.py
+│   │   └── utils/           # 工具函式
+│   │       ├── __init__.py
+│   │       ├── text_processor.py
+│   │       ├── sentiment_analyzer.py
+│   │       └── trend_calculator.py
+│   ├── tests/               # 測試
+│   │   ├── __init__.py
+│   │   ├── test_api.py
+│   │   └── test_services.py
+│   └── requirements.txt     # Python 依賴清單
+│
+├── frontend/                 # 前端 (React/TypeScript)
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── components/      # 元件
+│   │   │   ├── common/      # 通用元件
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── Sidebar.tsx
+│   │   │   │   └── Loading.tsx
+│   │   │   ├── dashboard/   # 儀表板元件
+│   │   │   │   ├── Dashboard.tsx
+│   │   │   │   ├── StatsCard.tsx
+│   │   │   │   └── ChartContainer.tsx
+│   │   │   ├── news/        # 新聞元件
+│   │   │   │   ├── NewsList.tsx
+│   │   │   │   ├── NewsCard.tsx
+│   │   │   │   └── NewsDetail.tsx
+│   │   │   ├── financial/   # 財報元件
+│   │   │   │   ├── FinancialList.tsx
+│   │   │   │   └── FinancialChart.tsx
+│   │   │   ├── forum/       # 論壇元件
+│   │   │   │   ├── ForumList.tsx
+│   │   │   │   └── ForumTrend.tsx
+│   │   │   └── world/       # 世界局勢元件
+│   │   │       ├── WorldMap.tsx
+│   │   │       └── EventList.tsx
+│   │   ├── pages/           # 頁面
+│   │   │   ├── Home.tsx     # 首頁
+│   │   │   ├── News.tsx     # 新聞頁面
+│   │   │   ├── Financial.tsx # 財報頁面
+│   │   │   ├── Forum.tsx    # 論壇頁面
+│   │   │   ├── World.tsx    # 世界局勢頁面
+│   │   │   └── Settings.tsx # 設定頁面
+│   │   ├── store/           # 狀態管理
+│   │   │   ├── index.ts
+│   │   │   ├── newsStore.ts
+│   │   │   ├── financialStore.ts
+│   │   │   └── userStore.ts
+│   │   ├── api/             # API 串接
+│   │   │   ├── index.ts
+│   │   │   ├── news.ts
+│   │   │   ├── financial.ts
+│   │   │   └── forum.ts
+│   │   ├── types/           # TypeScript 型別
+│   │   │   ├── index.ts
+│   │   │   ├── news.ts
+│   │   │   └── financial.ts
+│   │   ├── styles/          # 樣式
+│   │   │   └── globals.css
+│   │   └── App.tsx          # 應用程式入口
+│   ├── tests/               # 測試
+│   ├── package.json         # Node.js 依賴
+│   ├── tsconfig.json        # TypeScript 設定
+│   └── vite.config.ts       # Vite 設定
+│
+├── database/                 # 資料庫設定
+│   ├── migrations/          # 資料庫遷移
+│   │   ├── 001_initial.sql
+│   │   └── 002_add_alerts.sql
+│   └── seed/                # 初始資料
+│       └── sample_data.sql
+│
+├── scripts/                  # 腳本工具
+│   ├── setup.sh             # 環境設定腳本
+│   ├── deploy.sh            # 部署腳本
+│   └── backup.sh            # 備份腳本
+│
+├── docs/                     # 文件
+│   ├── API.md               # API 文件
+│   ├── ARCHITECTURE.md      # 架構文件
+│   └── USER_GUIDE.md        # 使用者指南
+│
+└── .github/                  # GitHub 設定
+    └── workflows/
+        └── ci-cd.yml        # CI/CD 流程
+
+─────────────────────────────────────────────────────────────────
+主要技術棧：
+- 後端：Python 3.11 + FastAPI + PostgreSQL + Redis
+- 前端：React 18 + TypeScript + Tailwind CSS
+- 部署：Docker + Docker Compose
+- 爬蟲：Scrapy / Playwright
+- AI：OpenAI API / Local LLM
+─────────────────────────────────────────────────────────────────
