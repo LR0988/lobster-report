@@ -1,32 +1,21 @@
 {
-  "builders": [
+  "language": "python",
+  "phases": [
     {
-      "name": "backend",
-      "path": "backend",
-      "builder": "nixpacks",
-      "nixpacksConfig": {
-        "phases": [
-          {
-            "name": "setup",
-            "nixPkgs": ["python311", "postgresql"],
-            "commands": [
-              "pip install -r requirements.txt"
-            ]
-          },
-          {
-            "name": "build",
-            "commands": []
-          },
-          {
-            "name": "start",
-            "start": "./start.sh"
-          }
-        ],
-        "variables": {
-          "NIXPACKS_PYTHON_VERSION": "3.11"
-        }
-        ]
-      }
+      "name": "setup",
+      "nixPkgs": ["python311", "postgresql"],
+      "commands": [
+        "cd backend",
+        "pip install -r requirements.txt"
+      ]
+    },
+    {
+      "name": "build",
+      "commands": []
+    },
+    {
+      "name": "start",
+      "start": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     }
   ]
 }
