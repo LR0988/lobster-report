@@ -1,8 +1,10 @@
 # Nixpacks configuration for Lobster Report Backend
 
+# 設定 Python 版本
 [phases.setup]
-nixPkgs = ["python311", "postgresql"]
+nixPkgs = ["python311", "python311Packages.pip", "postgresql"]
 commands = [
+  "pip install --upgrade pip",
   "pip install -r requirements.txt"
 ]
 
@@ -10,4 +12,4 @@ commands = [
 commands = []
 
 [start]
-cmd = "./start.sh"
+cmd = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"

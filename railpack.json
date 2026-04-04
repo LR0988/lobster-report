@@ -3,9 +3,10 @@
   "phases": [
     {
       "name": "setup",
-      "nixPkgs": ["python311", "postgresql"],
+      "nixPkgs": ["python311", "python311Packages.pip", "postgresql"],
       "commands": [
         "cd backend",
+        "pip install --upgrade pip",
         "pip install -r requirements.txt"
       ]
     },
@@ -15,7 +16,7 @@
     },
     {
       "name": "start",
-      "start": "cd backend && ./start.sh"
+      "start": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     }
   ]
 }

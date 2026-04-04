@@ -4,9 +4,11 @@
 
 echo "Starting Lobster Report Backend..."
 
-# 安裝 Python 依賴（確保 uvicorn 可用）
-echo "Installing Python dependencies..."
-pip install -r requirements.txt
+# 檢查 uvicorn 是否安裝
+if ! command -v uvicorn &> /dev/null; then
+    echo "Installing uvicorn..."
+    pip install uvicorn[standard]
+fi
 
 # 檢查環境變數
 if [ -z "$DATABASE_URL" ]; then
