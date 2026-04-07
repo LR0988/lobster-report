@@ -26,7 +26,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
+tg_goose.py
 # Node.js
 node_modules/
 npm-debug.log*
@@ -34,9 +34,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+
 # 記憶體檔案
 memory/*.md
 !memory/2026-04-04.md
+*.md
 
 # 系統檔案
 .DS_Store
