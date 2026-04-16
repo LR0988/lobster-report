@@ -1,42 +1,30 @@
-# Stock Analysis System - Development Plan
+# 診斷與更新確認計畫 (Diagnostic and Update Confirmation Plan)
 
-## Phase 1: Project Analysis & UI Planning - Done
+## 目標
+確認現有專案是否有錯誤，以及為什麼使用者沒有看到更新。
 
-## Phase 2: Frontend Implementation
+## 階段 1：專案分析與 UI 規劃
+- [x] 掃描目前的專案目錄結構。
+- [x] 建立或更新 `PLAN.md`。
 
-### Modified Files:
-- `frontend/src/App.js`: Integrate new routes and components for the stock analysis system.
-- `frontend/src/index.css`: Apply consistent styling to new components, leveraging existing styles where possible.
-- `frontend/src/components/Header.js`: Add a navigation link to the new stock analysis page.
+### 預計檢查的檔案與目錄
+- `frontend/package.json`: 檢查前端專案的依賴套件與腳本。
+- `frontend/vercel.json`: 檢查 Vercel 部署設定。
+- `frontend/src/index.js`: 前端應用的入口點。
+- `frontend/src/App.js`: 主要應用程式組件。
+- `frontend/src/index.css`: 全域樣式表。
+- `git status`: 檢查是否有未提交的變更，這可能是更新未顯示的原因。
 
-### New Components:
-- `frontend/src/components/StockDashboard.js`: Main container for displaying stock information and analysis tools.
-- `frontend/src/components/StockChart.js`: Component for visualizing historical stock data (price, volume).
-- `frontend/src/components/StockFilter.js`: User interface for selecting stocks and date ranges.
-- `frontend/src/components/StockStrategyAnalyzer.js`: Logic and UI for applying strategy analysis (e.g., volume amplification, moving average crossover).
+## 階段 2：前端實作 (Developer Phase)
+- [x] 根據計畫詳細檢查了所有相關檔案。沒有發現會阻止部署或應用程式運行的程式碼錯誤、配置問題或依賴問題。
+- 發現 `StockDashboard` 元件已新增，並透過 `/stock-analysis` 路由引入。
 
-### Data Fetching Strategy:
-- **Frontend:** Will make API calls to the backend to retrieve stock data.
-- **Backend:** Will need to implement an endpoint (likely extending `backend/app/routers/financial.py` or a new dedicated router) to fetch historical stock data (price, volume, P/E, PBR) from TWSE for the past three months. This backend integration is a separate task but is critical for the frontend's functionality.
+## 階段 3：QA 測試與除錯 (QA Phase)
+- [x] 掃描程式碼，檢查是否有語法錯誤、未閉合的標籤或未定義的變數：已完成，未發現錯誤。
+- [x] 確認是否有引入不存在的依賴套件：已確認，所有依賴均已定義。
+- [ ] 若發現錯誤，嘗試自動修正 (最多 2 次)：目前無需修正。
+- **結論：程式碼本身看起來是健康的。使用者沒有看到更新的原因，很可能是沒有導航到包含新功能的正確路由 (`/stock-analysis`)。**
 
-### UI/UX Considerations:
-- **Visual Consistency:** All new components will adhere to the existing visual style defined in `frontend/src/index.css` and by observing the current components in `frontend/src/components/`.
-- **Layout:** The stock analysis system will be a new, distinct section of the application, accessible through the main navigation.
-- **Data Presentation:** Data will be presented clearly using tables for detailed information and interactive charts for trend visualization.
-- **Strategy Input:** The strategy analyzer will provide an intuitive interface for users to define and apply their analysis criteria.
-
-## Phase 3: QA Testing & Debugging
-
-- **Code Review:** Automated checks for syntax errors, unclosed tags, and undefined variables in new and modified JavaScript and HTML.
-- **Dependency Check:** Verify all new `import` statements reference existing and correctly installed packages.
-- **Functional Testing:** Manually verify that stock data is fetched and displayed correctly, and that strategy analysis produces expected results.
-- **Error Correction:** Automatic correction of identified syntax and dependency errors, with a maximum of two retries.
-
-## Phase 4: Git Auto-Publish to Vercel
-
-- **Version Control:**
-    - `git status` to review changes.
-    - `git add .` to stage all relevant changes.
-    - `git commit -m "Web Team: 前端介面更新與功能實作 - 股票分析系統"`
-    - `git push origin master` to deploy.
-- **Reporting:** Provide a final report with the deployment status and link.
+## 階段 4：Git 自動發布至 Vercel (DevOps Phase)
+- 若有任何修正，將執行 Git 推送操作。
+- 撰寫最終報告。
