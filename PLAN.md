@@ -1,55 +1,42 @@
-# Project Plan: Forum Interface Transformation
+# Stock Analysis System - Development Plan
 
-## Phase 1: Project Analysis & UI Planning (Architect Phase)
+## Phase 1: Project Analysis & UI Planning - Done
 
-### Current Structure Overview:
-The project appears to be a React application residing in the `frontend/` directory.
-- `frontend/public/index.html`: Main HTML file.
-- `frontend/src/App.js`: Main React application component.
-- `frontend/src/index.css`: Global styles.
-- `frontend/src/index.js`: React entry point.
-- `frontend/package.json`: Contains project dependencies and scripts.
-- `frontend/vercel.json`: Vercel deployment configuration.
+## Phase 2: Frontend Implementation
 
-### Proposed Modifications:
+### Modified Files:
+- `frontend/src/App.js`: Integrate new routes and components for the stock analysis system.
+- `frontend/src/index.css`: Apply consistent styling to new components, leveraging existing styles where possible.
+- `frontend/src/components/Header.js`: Add a navigation link to the new stock analysis page.
 
-#### Existing Files to Modify:
-- `frontend/public/index.html`:
-    - Update page title to reflect a forum.
-    - Potentially add basic meta tags.
-- `frontend/src/App.js`:
-    - Refactor existing content to integrate forum layout.
-    - Implement routing for different forum sections (e.g., home, categories, individual posts).
-    - Integrate new forum components.
-- `frontend/src/index.css`:
-    - Add new CSS rules for forum-specific elements (e.g., post cards, comment sections, navigation).
-    - Ensure styling consistency with the original site's general aesthetic (e.g., color palette, typography).
+### New Components:
+- `frontend/src/components/StockDashboard.js`: Main container for displaying stock information and analysis tools.
+- `frontend/src/components/StockChart.js`: Component for visualizing historical stock data (price, volume).
+- `frontend/src/components/StockFilter.js`: User interface for selecting stocks and date ranges.
+- `frontend/src/components/StockStrategyAnalyzer.js`: Logic and UI for applying strategy analysis (e.g., volume amplification, moving average crossover).
 
-#### New Components to Add (within `frontend/src/components/`):
-- `Header.js`: Navigation bar with forum links (Home, Categories, New Post).
-- `Footer.js`: Standard website footer.
-- `ForumList.js`: Displays a list of forum topics/posts.
-- `ForumPost.js`: Displays a single forum post with content, author, date, and comments.
-- `NewPostForm.js`: A form for users to create new forum topics/posts.
-- `CategoryList.js`: Displays a list of forum categories.
+### Data Fetching Strategy:
+- **Frontend:** Will make API calls to the backend to retrieve stock data.
+- **Backend:** Will need to implement an endpoint (likely extending `backend/app/routers/financial.py` or a new dedicated router) to fetch historical stock data (price, volume, P/E, PBR) from TWSE for the past three months. This backend integration is a separate task but is critical for the frontend's functionality.
 
 ### UI/UX Considerations:
-- **Visual Style:** Adopt a clean, modern forum aesthetic. Prioritize readability for post content.
-- **Color Palette:** Attempt to derive colors from the existing site's `index.css` or general visual identity. If not explicitly defined, choose a neutral, professional palette.
-- **Typography:** Use clear, legible fonts for headings and body text.
-- **Layout:** Implement a responsive design that works well on desktop and mobile devices. Typical forum layout with a main content area and perhaps a sidebar for categories or popular topics.
+- **Visual Consistency:** All new components will adhere to the existing visual style defined in `frontend/src/index.css` and by observing the current components in `frontend/src/components/`.
+- **Layout:** The stock analysis system will be a new, distinct section of the application, accessible through the main navigation.
+- **Data Presentation:** Data will be presented clearly using tables for detailed information and interactive charts for trend visualization.
+- **Strategy Input:** The strategy analyzer will provide an intuitive interface for users to define and apply their analysis criteria.
 
-## Phase 2: Frontend Implementation (Developer Phase)
+## Phase 3: QA Testing & Debugging
 
-- Implement changes as per the above plan.
-- Ensure no breaking changes to `package.json` or `vercel.json`.
+- **Code Review:** Automated checks for syntax errors, unclosed tags, and undefined variables in new and modified JavaScript and HTML.
+- **Dependency Check:** Verify all new `import` statements reference existing and correctly installed packages.
+- **Functional Testing:** Manually verify that stock data is fetched and displayed correctly, and that strategy analysis produces expected results.
+- **Error Correction:** Automatic correction of identified syntax and dependency errors, with a maximum of two retries.
 
-## Phase 3: QA Testing & Debugging (QA Phase)
+## Phase 4: Git Auto-Publish to Vercel
 
-- Conduct syntax checks.
-- Verify dependency imports.
-- Automatic correction of identified errors.
-
-## Phase 4: Git Automatic Deployment to Vercel (DevOps Phase)
-
-- Standard Git workflow for deployment.
+- **Version Control:**
+    - `git status` to review changes.
+    - `git add .` to stage all relevant changes.
+    - `git commit -m "Web Team: 前端介面更新與功能實作 - 股票分析系統"`
+    - `git push origin master` to deploy.
+- **Reporting:** Provide a final report with the deployment status and link.

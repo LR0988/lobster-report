@@ -9,6 +9,7 @@ const Header = () => {
           <li><a href="/">Home</a></li>
           <li><a href="/categories">Categories</a></li>
           <li><a href="/new-post">New Post</a></li>
+          <li><a href="/stock-analysis">股票分析</a></li> {/* New navigation link */}
         </ul>
       </nav>
     </header>
