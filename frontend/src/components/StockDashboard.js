@@ -159,6 +159,7 @@ const PROMPT_KEY  = 'stock_screener_prompt';
 function StockDashboard() {
   const user = getCurrentUser();
   const navigate = useNavigate();
+  const [screeningStatus, setScreeningStatus] = useState('');
 
   if (!user) {
     return (
@@ -1552,20 +1553,82 @@ function StockDashboard() {
     }
   };
 
+  const SUPABASE_URL = "https://hvequgcognhytunjjsyp.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0";
+
   const runScreener = async () => {
     try {
       setLoading(true);
       setData(null);
       setSelectedStocks({});
-      const res = await stockFetch('/api/screener', {
+      setScreeningStatus('🚀 正在將選股條件派工至你家裡的 Mac...');
+
+      // 1. 發送任務至 Supabase 佇列
+      const createRes = await window.fetch(`${SUPABASE_URL}/rest/v1/stock_screener_jobs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          username: user?.username || 'hotpotlu',
+          status: 'pending',
+          config: config
+        })
       });
-      const json = await res.json();
-      setData(json.data);
+
+      if (!createRes.ok) {
+        throw new Error('無法發送選股任務至雲端中繼佇列');
+      }
+
+      const jobList = await createRes.json();
+      const jobId = jobList[0]?.id;
+      if (!jobId) throw new Error('任務建立異常');
+
+      setScreeningStatus(`📡 任務 #${jobId} 已送達！家裡的 Mac 正在從 4.9GB 資料庫進行高速計算...`);
+
+      // 2. 輪詢等待 Mac 完成任務 (每秒檢查一次，最多 45 秒)
+      let attempts = 0;
+      const maxAttempts = 45;
+      let completedJob = null;
+
+      while (attempts < maxAttempts) {
+        await new Promise(r => setTimeout(r, 1000));
+        attempts++;
+
+        const checkRes = await window.fetch(`${SUPABASE_URL}/rest/v1/stock_screener_jobs?id=eq.${jobId}`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          if (checkData && checkData.length > 0) {
+            const current = checkData[0];
+            if (current.status === 'completed') {
+              completedJob = current;
+              break;
+            } else if (current.status === 'error') {
+              throw new Error(current.error_message || '本機運算發生錯誤');
+            }
+          }
+        }
+      }
+
+      if (!completedJob) {
+        throw new Error('等候運算逾時，請確認家裡 Mac 的 stock_cloud_worker.py 是否正在運行中！');
+      }
+
+      // 3. 渲染結果
+      setData(completedJob.results || []);
+      setScreeningStatus(`✨ 計算完成！家裡 Mac 共命中 ${completedJob.results?.length || 0} 檔符合條件之個股。`);
+
     } catch (err) {
-      alert('無法連接到 API 伺服器，請確認 FastAPI 是否已啟動。');
+      alert(err.message || '選股篩選失敗');
     } finally {
       setLoading(false);
     }
@@ -1782,6 +1845,12 @@ function StockDashboard() {
               )}
               {data && <span style={{ color: 'var(--text-muted)', marginLeft: '1rem' }}>共 {data.length} 筆資料</span>}
             </div>
+
+            {screeningStatus && (
+              <div style={{ width: '100%', marginTop: '0.8rem', padding: '0.65rem 1.2rem', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '8px', color: '#93C5FD', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>{screeningStatus}</span>
+              </div>
+            )}
 
             {showPromptEditor && (
               <div className="api-key-block" style={{ marginTop: '1.5rem', flexDirection: 'column', alignItems: 'stretch', width: '100%', gap: '0.75rem' }}>
