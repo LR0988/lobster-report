@@ -55,12 +55,9 @@ const Header = () => {
       </div>
       <nav className="main-nav">
         <ul className="nav-list">
-          <li><Link to="/">📰 即時論壇</Link></li>
-          <li><Link to="/categories">📂 分類情報</Link></li>
-          <li><Link to="/new-post">✏️ 發表新文章</Link></li>
-          <li><Link to="/stock-analysis">📈 股票與財報分析</Link></li>
-          <li><Link to="/users">👥 使用者管理</Link></li>
-          {!user && <li><Link to="/login" className="nav-highlight">🔐 登入頁面</Link></li>}
+          <li><Link to="/">📈 台股智慧選股系統</Link></li>
+          <li><Link to="/users">👥 使用者權限管理</Link></li>
+          {!user && <li><Link to="/login" className="nav-highlight">🔐 登入系統</Link></li>}
         </ul>
       </nav>
     </header>
