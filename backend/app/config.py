@@ -17,7 +17,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # 伺服器設定
 HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", "8000"))
+PORT = int(os.getenv("PORT", "8001"))
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # API 金鑰 (可選)
