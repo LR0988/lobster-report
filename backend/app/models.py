@@ -82,3 +82,16 @@ class Alert(Base):
     severity = Column(String(20))  # low, medium, high, critical
     is_read = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+# 使用者模型
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(100), unique=True, index=True, nullable=True)
+    hashed_password = Column(String(200), nullable=False)
+    role = Column(String(20), default="admin")  # admin, editor, viewer
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+

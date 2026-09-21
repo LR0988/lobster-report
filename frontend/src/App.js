@@ -5,7 +5,9 @@ import Footer from './components/Footer';
 import ForumList from './components/ForumList';
 import NewPostForm from './components/NewPostForm';
 import CategoryList from './components/CategoryList';
-import StockDashboard from './components/StockDashboard'; // Import the new component
+import StockDashboard from './components/StockDashboard';
+import Login from './components/Login';
+import UserManagement from './components/UserManagement';
 import './index.css';
 
 function App() {
@@ -13,13 +15,14 @@ function App() {
     <Router>
       <div className="App">
         <Header />
-        <main className="main-content"> {/* Changed class name for general use */}
+        <main className="main-content">
           <Routes>
             <Route path="/" element={<ForumList />} />
             <Route path="/categories" element={<CategoryList />} />
             <Route path="/new-post" element={<NewPostForm />} />
-            <Route path="/stock-analysis" element={<StockDashboard />} /> {/* New route */}
-            {/* Add more routes here for individual posts, user profiles, etc. if needed */}
+            <Route path="/stock-analysis" element={<StockDashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/users" element={<UserManagement />} />
           </Routes>
         </main>
         <Footer />

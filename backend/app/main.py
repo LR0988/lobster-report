@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, DATABASE_URL
 from app import models
-from app.routers import news, financial, forum, world, dashboard, alerts
+from app.routers import news, financial, forum, world, dashboard, alerts, auth
 from app.config import DEBUG
 
 print(f"Starting Lobster Report API with DATABASE_URL: {DATABASE_URL}")
@@ -32,6 +32,7 @@ app.include_router(forum.router)
 app.include_router(world.router)
 app.include_router(dashboard.router)
 app.include_router(alerts.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def read_root():

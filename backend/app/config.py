@@ -1,11 +1,11 @@
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 資料庫設定
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://user:password@localhost:5432/lobster_report"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # 安全性設定
 SECRET_KEY = os.getenv(
