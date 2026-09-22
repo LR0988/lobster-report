@@ -4,6 +4,19 @@ import { getCurrentUser } from '../api';
 import './StockDashboard.css';
 
 const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
+const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://hvequgcognhytunjjsyp.supabase.co';
+const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0';
+
+const supabaseFetch = async (path, options = {}) => {
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+  const url = `${SUPABASE_URL}/rest/v1${path}`;
+  return window.fetch(url, { ...options, headers });
+};
 
 const stockFetch = (url, opts) => {
   const finalUrl = (typeof url === 'string' && url.startsWith('/api')) ? `${API_BASE}${url}` : url;
@@ -311,9 +324,18 @@ function StockDashboard() {
 
   const fetchLowFreqStatus = async () => {
     try {
-      const res = await stockFetch('/api/low_freq/status');
+      // 優先從 Supabase 快取載入低頻量化報告
+      const res = await supabaseFetch('/stock_ml_cache?model_type=eq.low_freq&select=payload');
       if (res.ok) {
-        const json = await res.json();
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          setLowFreqData(rows[0].payload);
+          return;
+        }
+      }
+      const fallbackRes = await stockFetch('/api/low_freq/status');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         if (json.data) {
           setLowFreqData(json.data);
         } else if (json.market_status) {
@@ -328,24 +350,42 @@ function StockDashboard() {
   const handleRunLowFreqBacktest = async () => {
     try {
       setLowFreqLoading(true);
-      const res = await stockFetch('/api/low_freq/backtest', {
+      // 發送任務至 Supabase 佇列由本地 Mac 運算
+      const createRes = await supabaseFetch('/stock_screener_jobs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({
-          rolling_months: parseInt(lowFreqRollingMonths),
-          top_n: parseInt(lowFreqTopN),
-          market_filter: lowFreqMarketFilter
+          username: user?.username || 'hotpotlu',
+          status: 'pending',
+          config: {
+            job_type: 'low_freq_backtest',
+            rolling_months: parseInt(lowFreqRollingMonths),
+            top_n: parseInt(lowFreqTopN),
+            market_filter: lowFreqMarketFilter
+          }
         })
       });
-      const json = await res.json();
-      if (res.ok && json.status === 'ok') {
-        setLowFreqData(json);
-        alert(`🎉 低頻量化滾動回測完成！\n年化報酬 (CAGR): ${json.metrics?.cagr}% | 最大回撤 (MDD): ${json.metrics?.mdd}% | 夏普值: ${json.metrics?.sharpe}`);
+      if (createRes.ok) {
+        alert('🎉 已將低頻量化回測任務發送至家裡的 Mac！本機 Worker 將於背景執行滾動回測。');
+        fetchLowFreqStatus();
       } else {
-        alert(`❌ 執行低頻量化回測失敗: ${json.message || '未知錯誤'}`);
+        const fallbackRes = await stockFetch('/api/low_freq/backtest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rolling_months: parseInt(lowFreqRollingMonths),
+            top_n: parseInt(lowFreqTopN),
+            market_filter: lowFreqMarketFilter
+          })
+        });
+        const json = await fallbackRes.json();
+        if (fallbackRes.ok && json.status === 'ok') {
+          setLowFreqData(json);
+          alert(`🎉 低頻量化滾動回測完成！\n年化報酬 (CAGR): ${json.metrics?.cagr}% | 最大回撤 (MDD): ${json.metrics?.mdd}% | 夏普值: ${json.metrics?.sharpe}`);
+        }
       }
     } catch (err) {
-      alert(`❌ 連線低頻量化端點異常: ${err.message}`);
+      alert(`❌ 執行低頻量化回測異常: ${err.message}`);
     } finally {
       setLowFreqLoading(false);
     }
@@ -450,32 +490,36 @@ function StockDashboard() {
 
   const fetchBacktestSettings = async () => {
     try {
-      const res = await stockFetch('/api/ml/backtest_settings');
+      // 優先從 Supabase stock_settings 讀取
+      const res = await supabaseFetch('/stock_settings?select=key,value');
       if (res.ok) {
-        const data = await res.json();
-        if (data.min_win_prob !== undefined) { setBtMinWinProb(data.min_win_prob); localStorage.setItem('bt_min_win_prob', data.min_win_prob); }
-        if (data.max_drop_prob !== undefined) { setBtMaxDropProb(data.max_drop_prob); localStorage.setItem('bt_max_drop_prob', data.max_drop_prob); }
-        if (data.stop_profit_pct !== undefined) { setBtStopProfit(data.stop_profit_pct); localStorage.setItem('bt_stop_profit_pct', data.stop_profit_pct); }
-        if (data.stop_loss_pct !== undefined) { setBtStopLoss(data.stop_loss_pct); localStorage.setItem('bt_stop_loss_pct', data.stop_loss_pct); }
-        if (data.max_holding_days !== undefined) { setBtHoldingDays(data.max_holding_days); localStorage.setItem('bt_max_holding_days', data.max_holding_days); }
-        if (data.max_portfolio_size !== undefined) { setBtPortfolioSize(data.max_portfolio_size); localStorage.setItem('bt_max_portfolio_size', data.max_portfolio_size); }
-        if (data.train_ratio !== undefined) { setTrainRatio(data.train_ratio); localStorage.setItem('bt_train_ratio', data.train_ratio); }
-        if (data.train_days !== undefined && data.train_days !== null) { setTrainDays(data.train_days); localStorage.setItem('bt_train_days', data.train_days); }
-        if (data.test_days !== undefined && data.test_days !== null) { setTestDays(data.test_days); localStorage.setItem('bt_test_days', data.test_days); }
-        if (data.exit_strategy !== undefined) { setBtExitStrategy(data.exit_strategy); localStorage.setItem('bt_exit_strategy', data.exit_strategy); }
-        if (data.trailing_activation_pct !== undefined) { setBtTrailingActivation(data.trailing_activation_pct); localStorage.setItem('bt_trailing_activation_pct', data.trailing_activation_pct); }
-        if (data.exclude_6digit !== undefined) { setExclude6Digit(data.exclude_6digit); localStorage.setItem('bt_exclude_6digit', data.exclude_6digit); }
-        if (data.filter_capital !== undefined) { setFilterCapital(data.filter_capital); localStorage.setItem('bt_filter_capital', data.filter_capital); }
-        if (data.market_bull_filter !== undefined) { setBtMarketBullFilter(data.market_bull_filter); localStorage.setItem('bt_market_bull_filter', data.market_bull_filter); }
-        if (data.min_capital_billion !== undefined) {
-          if (data.min_capital_billion === null) {
-            setFilterCapital(false);
-            localStorage.setItem('bt_filter_capital', 'false');
-          } else {
-            setMinCapitalBillion(parseFloat(data.min_capital_billion));
-            localStorage.setItem('bt_min_capital_billion', data.min_capital_billion);
-          }
+        const rows = await res.json();
+        const data = {};
+        rows.forEach(r => { data[r.key] = r.value; });
+        if (data.bt_min_win_prob !== undefined) { setBtMinWinProb(parseFloat(data.bt_min_win_prob)); localStorage.setItem('bt_min_win_prob', data.bt_min_win_prob); }
+        if (data.bt_max_drop_prob !== undefined) { setBtMaxDropProb(parseFloat(data.bt_max_drop_prob)); localStorage.setItem('bt_max_drop_prob', data.bt_max_drop_prob); }
+        if (data.bt_stop_profit_pct !== undefined) { setBtStopProfit(parseFloat(data.bt_stop_profit_pct)); localStorage.setItem('bt_stop_profit_pct', data.bt_stop_profit_pct); }
+        if (data.bt_stop_loss_pct !== undefined) { setBtStopLoss(parseFloat(data.bt_stop_loss_pct)); localStorage.setItem('bt_stop_loss_pct', data.bt_stop_loss_pct); }
+        if (data.bt_max_holding_days !== undefined) { setBtHoldingDays(parseInt(data.bt_max_holding_days)); localStorage.setItem('bt_max_holding_days', data.bt_max_holding_days); }
+        if (data.bt_max_portfolio_size !== undefined) { setBtPortfolioSize(parseInt(data.bt_max_portfolio_size)); localStorage.setItem('bt_max_portfolio_size', data.bt_max_portfolio_size); }
+        if (data.bt_train_ratio !== undefined) { setTrainRatio(parseFloat(data.bt_train_ratio)); localStorage.setItem('bt_train_ratio', data.bt_train_ratio); }
+        if (data.bt_train_days !== undefined && data.bt_train_days !== null) { setTrainDays(parseInt(data.bt_train_days)); localStorage.setItem('bt_train_days', data.bt_train_days); }
+        if (data.test_days !== undefined && data.test_days !== null) { setTestDays(parseInt(data.test_days)); localStorage.setItem('bt_test_days', data.test_days); }
+        if (data.bt_exit_strategy !== undefined) { setBtExitStrategy(data.bt_exit_strategy); localStorage.setItem('bt_exit_strategy', data.bt_exit_strategy); }
+        if (data.bt_trailing_activation_pct !== undefined) { setBtTrailingActivation(parseFloat(data.bt_trailing_activation_pct)); localStorage.setItem('bt_trailing_activation_pct', data.bt_trailing_activation_pct); }
+        if (data.bt_exclude_6digit !== undefined) { setExclude6Digit(data.bt_exclude_6digit === 'true'); localStorage.setItem('bt_exclude_6digit', data.bt_exclude_6digit); }
+        if (data.bt_filter_capital !== undefined) { setFilterCapital(data.bt_filter_capital === 'true'); localStorage.setItem('bt_filter_capital', data.bt_filter_capital); }
+        if (data.bt_market_bull_filter !== undefined) { setBtMarketBullFilter(data.bt_market_bull_filter === 'true'); localStorage.setItem('bt_market_bull_filter', data.bt_market_bull_filter); }
+        if (data.bt_min_capital_billion !== undefined) {
+          setMinCapitalBillion(parseFloat(data.bt_min_capital_billion));
+          localStorage.setItem('bt_min_capital_billion', data.bt_min_capital_billion);
         }
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/ml/backtest_settings');
+      if (fallbackRes.ok) {
+        const data = await fallbackRes.json();
+        if (data.min_win_prob !== undefined) setBtMinWinProb(data.min_win_prob);
       }
     } catch (err) {
       console.error('讀取回測設定失敗', err);
@@ -485,23 +529,23 @@ function StockDashboard() {
   const handleSaveBacktestSettings = async (showToast = true) => {
     try {
       setSavingBtSettings(true);
-      const payload = {
-        min_win_prob: parseFloat(btMinWinProb),
-        max_drop_prob: parseFloat(btMaxDropProb),
-        stop_profit_pct: parseFloat(btStopProfit),
-        stop_loss_pct: parseFloat(btStopLoss),
-        max_holding_days: parseInt(btHoldingDays),
-        max_portfolio_size: parseInt(btPortfolioSize),
-        train_ratio: parseFloat(trainRatio),
-        train_days: parseInt(trainDays),
-        test_days: parseInt(testDays),
-        exit_strategy: btExitStrategy,
-        trailing_activation_pct: parseFloat(btTrailingActivation),
-        exclude_6digit: exclude6Digit,
-        filter_capital: filterCapital,
-        market_bull_filter: btMarketBullFilter,
-        min_capital_billion: filterCapital ? parseFloat(minCapitalBillion) : null
-      };
+      const updates = [
+        { key: 'bt_min_win_prob', value: String(btMinWinProb) },
+        { key: 'bt_max_drop_prob', value: String(btMaxDropProb) },
+        { key: 'bt_stop_profit_pct', value: String(btStopProfit) },
+        { key: 'bt_stop_loss_pct', value: String(btStopLoss) },
+        { key: 'bt_max_holding_days', value: String(btHoldingDays) },
+        { key: 'bt_max_portfolio_size', value: String(btPortfolioSize) },
+        { key: 'bt_train_ratio', value: String(trainRatio) },
+        { key: 'bt_train_days', value: String(trainDays) },
+        { key: 'bt_test_days', value: String(testDays) },
+        { key: 'bt_exit_strategy', value: String(btExitStrategy) },
+        { key: 'bt_trailing_activation_pct', value: String(btTrailingActivation) },
+        { key: 'bt_exclude_6digit', value: String(exclude6Digit) },
+        { key: 'bt_filter_capital', value: String(filterCapital) },
+        { key: 'bt_market_bull_filter', value: String(btMarketBullFilter) },
+        { key: 'bt_min_capital_billion', value: String(minCapitalBillion) }
+      ];
 
       localStorage.setItem('bt_min_win_prob', btMinWinProb);
       localStorage.setItem('bt_max_drop_prob', btMaxDropProb);
@@ -519,18 +563,18 @@ function StockDashboard() {
       localStorage.setItem('bt_market_bull_filter', btMarketBullFilter);
       localStorage.setItem('bt_min_capital_billion', minCapitalBillion);
 
-      const res = await stockFetch('/api/ml/backtest_settings', {
+      await supabaseFetch('/stock_settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(updates)
       });
 
-      if (res.ok && showToast) {
-        alert('💾 回測與訓練參數已成功儲存至系統資料庫！');
+      if (showToast) {
+        alert('💾 回測與訓練參數已成功儲存至雲端資料庫！');
       }
     } catch (err) {
       console.error('儲存回測參數失敗', err);
-      if (showToast) alert('已成功儲存至瀏覽器快取');
+      if (showToast) alert('已儲存至瀏覽器快取');
     } finally {
       setSavingBtSettings(false);
     }
@@ -539,13 +583,27 @@ function StockDashboard() {
   const fetchActiveTasks = async () => {
     try {
       setFetchingTasks(true);
-      const res = await stockFetch('/api/tasks/active');
+      const res = await supabaseFetch('/stock_screener_jobs?status=in.(pending,running)&select=id,status,config,created_at');
       if (res.ok) {
-        const json = await res.json();
+        const jobs = await res.json();
+        const mapped = jobs.map(j => ({
+          pid: j.id,
+          name: j.config?.job_type || '選股運算',
+          type: j.config?.job_type || 'screener',
+          status: j.status,
+          model_type: j.config?.model_type || 'lightgbm',
+          start_time: j.created_at
+        }));
+        setActiveTasks(mapped);
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/tasks/active');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setActiveTasks(json.tasks || []);
       }
     } catch (err) {
-      console.error('查詢背景活躍任務失敗', err);
+      // 靜默處理
     } finally {
       setFetchingTasks(false);
     }
@@ -621,73 +679,60 @@ function StockDashboard() {
 
     setMlRefreshing(true);
     try {
-      const predUrl = `/api/ml/predict?model_type=${targetType}${force ? '&force=true' : ''}&min_capital_billion=${capParam}&exclude_6digit=${ex6Param}`;
+      // 優先從 Supabase stock_ml_cache 雲端讀取 (0ms 延遲)
       const [resPred, resAllStatus] = await Promise.all([
-        stockFetch(predUrl),
-        stockFetch('/api/ml/status_all')
+        supabaseFetch(`/stock_ml_cache?model_type=eq.${targetType}&select=payload`),
+        supabaseFetch(`/stock_ml_cache?model_type=eq.status_all&select=payload`)
       ]);
+
+      let gotData = false;
+
       if (resAllStatus.ok) {
-        const statuses = await resAllStatus.json();
-        setAllModelsStatus(statuses);
-        try { localStorage.setItem('ml_all_models_status', JSON.stringify(statuses)); } catch {}
-        setMlStatus(statuses[targetType] || { status: 'none', message: '尚未訓練' });
+        const rows = await resAllStatus.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          const statuses = rows[0].payload;
+          setAllModelsStatus(statuses);
+          try { localStorage.setItem('ml_all_models_status', JSON.stringify(statuses)); } catch {}
+          setMlStatus(statuses[targetType] || { status: 'ready', message: '已就緒' });
+        }
       }
+
       if (resPred.ok) {
-        const jsonPred = await resPred.json();
-        if (jsonPred.status === 'computing') {
-          setMlComputingStatus(`⏳ ${targetType.toUpperCase()} 模型正在背景計算最新市場推論中...`);
-          // 啟動專屬輪詢循環直到計算完成
-          if (!isPollingPredictRef.current[targetType]) {
-            isPollingPredictRef.current[targetType] = true;
-            let attempts = 0;
-            const maxAttempts = 40; // 最多輪詢 60 秒
-            const pollInterval = setInterval(async () => {
-              attempts++;
-              try {
-                const pollRes = await stockFetch(`/api/ml/predict?model_type=${targetType}&min_capital_billion=${capParam}&exclude_6digit=${ex6Param}`);
-                if (pollRes.ok) {
-                  const pollJson = await pollRes.json();
-                  if (pollJson.status === 'ok' && pollJson.data) {
-                    clearInterval(pollInterval);
-                    isPollingPredictRef.current[targetType] = false;
-                    setMlComputingStatus('');
-                    setMlLoading(false);
-                    const predList = pollJson.data || [];
-                    setMlPredictions(predList);
-                    setMlPredictionsCache(prev => {
-                      const next = { ...prev, [targetType]: predList };
-                      try { localStorage.setItem('ml_predictions_cache', JSON.stringify(next)); } catch {}
-                      return next;
-                    });
-                    // 同步更新模型狀態
-                    const statusRes = await stockFetch('/api/ml/status_all');
-                    if (statusRes.ok) {
-                      const latestStatuses = await statusRes.json();
-                      setAllModelsStatus(latestStatuses);
-                      setMlStatus(latestStatuses[targetType]);
-                    }
-                  }
-                }
-              } catch (e) {
-                console.error('輪詢推論失敗', e);
-              }
-              if (attempts >= maxAttempts) {
-                clearInterval(pollInterval);
-                isPollingPredictRef.current[targetType] = false;
-                setMlComputingStatus('');
-                setMlLoading(false);
-              }
-            }, 1500);
+        const rows = await resPred.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          const jsonPred = rows[0].payload;
+          let predList = jsonPred.data || [];
+          if (exclude6Digit) {
+            predList = predList.filter(s => !s.stock_id || s.stock_id.length <= 4);
           }
-        } else {
-          setMlComputingStatus('');
-          const predList = jsonPred.data || [];
           setMlPredictions(predList);
           setMlPredictionsCache(prev => {
             const next = { ...prev, [targetType]: predList };
             try { localStorage.setItem('ml_predictions_cache', JSON.stringify(next)); } catch {}
             return next;
           });
+          setMlComputingStatus('');
+          gotData = true;
+        }
+      }
+
+      // 若雲端快取暫無，嘗試呼叫本地 FastAPI 備援
+      if (!gotData) {
+        const predUrl = `/api/ml/predict?model_type=${targetType}${force ? '&force=true' : ''}&min_capital_billion=${capParam}&exclude_6digit=${ex6Param}`;
+        const [fallbackPred, fallbackStatus] = await Promise.all([
+          stockFetch(predUrl),
+          stockFetch('/api/ml/status_all')
+        ]);
+        if (fallbackStatus.ok) {
+          const statuses = await fallbackStatus.json();
+          setAllModelsStatus(statuses);
+          setMlStatus(statuses[targetType] || { status: 'none', message: '尚未訓練' });
+        }
+        if (fallbackPred.ok) {
+          const jsonPred = await fallbackPred.json();
+          const predList = jsonPred.data || [];
+          setMlPredictions(predList);
+          setMlPredictionsCache(prev => ({ ...prev, [targetType]: predList }));
         }
       }
     } catch (err) {
@@ -781,17 +826,26 @@ function StockDashboard() {
 
   const handleAddWatchlistStockDirectly = async (stockId) => {
     try {
-      const res = await stockFetch('/api/watchlist', {
+      const res = await supabaseFetch('/stock_watchlist', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock_id: stockId })
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ stock_id: stockId, stock_name: stockId })
       });
       if (res.ok) {
         alert(`已成功將 ${stockId} 加入追蹤與警示清單！`);
         fetchWatchlist();
       } else {
-        const json = await res.json();
-        alert(`新增失敗: ${json.detail || '已在追蹤清單中'}`);
+        const fallbackRes = await stockFetch('/api/watchlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stock_id: stockId })
+        });
+        if (fallbackRes.ok) {
+          alert(`已成功將 ${stockId} 加入追蹤與警示清單！`);
+          fetchWatchlist();
+        } else {
+          alert('新增至追蹤清單失敗');
+        }
       }
     } catch (err) {
       alert(`新增至追蹤清單失敗: ${err.message}`);
@@ -802,9 +856,19 @@ function StockDashboard() {
     const modelToUse = targetModel || portfolioMlModel;
     try {
       setFetchingPortfolioMl(true);
-      const res = await stockFetch(`/api/portfolio/ml_predict?model_type=${modelToUse}`);
+      // 從 Supabase ML 快取讀取該模型針對全市場的 all_data_map
+      const res = await supabaseFetch(`/stock_ml_cache?model_type=eq.${modelToUse}&select=payload`);
       if (res.ok) {
-        const json = await res.json();
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          const allMap = rows[0].payload.all_data_map || {};
+          setPortfolioPredictions(allMap);
+          return;
+        }
+      }
+      const fallbackRes = await stockFetch(`/api/portfolio/ml_predict?model_type=${modelToUse}`);
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setPortfolioPredictions(json.predictions || {});
       }
     } catch (err) {
@@ -816,11 +880,20 @@ function StockDashboard() {
 
   const fetchPortfolio = async () => {
     try {
-      const res = await stockFetch('/api/portfolio');
-      const json = await res.json();
-      setPortfolioList(json);
-      // 同步取得所有持股的 AI 20天勝率預測
-      fetchPortfolioMlPredictions();
+      // 優先從 Supabase stock_portfolio 讀取雲端最新持股與損益
+      const res = await supabaseFetch('/stock_portfolio?select=*&order=stock_id.asc');
+      if (res.ok) {
+        const json = await res.json();
+        setPortfolioList(json);
+        fetchPortfolioMlPredictions();
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/portfolio');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
+        setPortfolioList(json);
+        fetchPortfolioMlPredictions();
+      }
     } catch (err) {
       console.error('無法讀取持股清單', err);
     }
@@ -828,9 +901,16 @@ function StockDashboard() {
 
   const fetchWatchlist = async () => {
     try {
-      const res = await stockFetch('/api/watchlist');
+      // 優先從 Supabase stock_watchlist 讀取
+      const res = await supabaseFetch('/stock_watchlist?select=*&order=stock_id.asc');
       if (res.ok) {
         const json = await res.json();
+        setWatchlistList(json);
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/watchlist');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setWatchlistList(json);
       }
     } catch (err) {
@@ -840,9 +920,15 @@ function StockDashboard() {
 
   const fetchWatchlistAlerts = async () => {
     try {
-      const res = await stockFetch('/api/watchlist/alerts');
+      const res = await supabaseFetch('/stock_watchlist_alerts?select=*&order=created_at.desc&limit=50');
       if (res.ok) {
         const json = await res.json();
+        setWatchlistAlerts(json);
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/watchlist/alerts');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setWatchlistAlerts(json);
       }
     } catch (err) {
@@ -854,18 +940,33 @@ function StockDashboard() {
     const selectedIds = Object.keys(selectedStocks).filter(k => selectedStocks[k]);
     if (selectedIds.length === 0) return;
     try {
-      const res = await stockFetch('/api/watchlist', {
+      const insertItems = selectedIds.map(id => ({
+        stock_id: id,
+        stock_name: id
+      }));
+      const res = await supabaseFetch('/stock_watchlist', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock_ids: selectedIds })
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(insertItems)
       });
       if (res.ok) {
-        const json = await res.json();
-        alert(json.message);
+        alert(`成功將 ${selectedIds.join(', ')} 加入追蹤清單！`);
         setSelectedStocks({});
+        fetchWatchlist();
       } else {
-        const err = await res.json();
-        alert(`加入追蹤清單失敗: ${err.detail || '未知錯誤'}`);
+        const fallbackRes = await stockFetch('/api/watchlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stock_ids: selectedIds })
+        });
+        if (fallbackRes.ok) {
+          const json = await fallbackRes.json();
+          alert(json.message);
+          setSelectedStocks({});
+          fetchWatchlist();
+        } else {
+          alert('加入追蹤清單失敗');
+        }
       }
     } catch (e) {
       alert(`連線失敗: ${e.message}`);
@@ -875,7 +976,6 @@ function StockDashboard() {
   const handleUpdateWatchlistAlert = async (stockId) => {
     try {
       const payload = {
-        stock_id: stockId,
         target_price_high: watchlistModalInput.target_price_high === '' ? null : parseFloat(watchlistModalInput.target_price_high),
         target_price_low: watchlistModalInput.target_price_low === '' ? null : parseFloat(watchlistModalInput.target_price_low),
         compare_ma5: parseInt(watchlistModalInput.compare_ma5),
@@ -883,9 +983,8 @@ function StockDashboard() {
         compare_ma60: parseInt(watchlistModalInput.compare_ma60)
       };
       
-      const res = await stockFetch(`/api/watchlist/${stockId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await supabaseFetch(`/stock_watchlist?stock_id=eq.${stockId}`, {
+        method: 'PATCH',
         body: JSON.stringify(payload)
       });
       
@@ -893,8 +992,17 @@ function StockDashboard() {
         setEditingWatchlistStock(null);
         fetchWatchlist();
       } else {
-        const err = await res.json();
-        alert(`修改警示條件失敗: ${err.detail || '未知錯誤'}`);
+        const fallbackRes = await stockFetch(`/api/watchlist/${stockId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stock_id: stockId, ...payload })
+        });
+        if (fallbackRes.ok) {
+          setEditingWatchlistStock(null);
+          fetchWatchlist();
+        } else {
+          alert('修改警示條件失敗');
+        }
       }
     } catch (e) {
       alert(`連線失敗: ${e.message}`);
@@ -904,13 +1012,17 @@ function StockDashboard() {
   const handleDeleteWatchlist = async (stockId) => {
     if (!confirm(`確定要取消追蹤 ${stockId} 嗎？`)) return;
     try {
-      const res = await stockFetch(`/api/watchlist/${stockId}`, {
+      const res = await supabaseFetch(`/stock_watchlist?stock_id=eq.${stockId}`, {
         method: 'DELETE'
       });
       if (res.ok) {
         fetchWatchlist();
       } else {
-        alert('刪除追蹤失敗');
+        const fallbackRes = await stockFetch(`/api/watchlist/${stockId}`, {
+          method: 'DELETE'
+        });
+        if (fallbackRes.ok) fetchWatchlist();
+        else alert('刪除追蹤失敗');
       }
     } catch (e) {
       alert(`連線失敗: ${e.message}`);
@@ -920,12 +1032,15 @@ function StockDashboard() {
   const handleClearAlerts = async () => {
     if (!confirm('確定要清空所有警示紀錄嗎？')) return;
     try {
-      const res = await stockFetch('/api/watchlist/clear-alerts', { method: 'POST' });
+      const res = await supabaseFetch('/stock_watchlist_alerts', { method: 'DELETE' });
       if (res.ok) {
         fetchWatchlistAlerts();
+      } else {
+        const fallbackRes = await stockFetch('/api/watchlist/clear-alerts', { method: 'POST' });
+        if (fallbackRes.ok) fetchWatchlistAlerts();
       }
     } catch (e) {
-      alert(`連線失敗: ${e.message}`);
+      alert('清空警示失敗');
     }
   };
 
@@ -950,9 +1065,24 @@ function StockDashboard() {
 
   const fetchSettings = async () => {
     try {
-      const res = await stockFetch('/api/settings');
+      const res = await supabaseFetch('/stock_settings?select=key,value');
       if (res.ok) {
-        const json = await res.json();
+        const rows = await res.json();
+        const cfg = {};
+        rows.forEach(r => { cfg[r.key] = r.value; });
+        setServerSettings(prev => ({
+          ...prev,
+          gemini_api_key: cfg.gemini_api_key || prev.gemini_api_key,
+          gemini_model: cfg.gemini_model || prev.gemini_model,
+          analysis_prompt: cfg.analysis_prompt || prev.analysis_prompt,
+          telegram_bot_token: cfg.telegram_bot_token || prev.telegram_bot_token,
+          telegram_chat_id: cfg.telegram_chat_id || prev.telegram_chat_id,
+        }));
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/settings');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setServerSettings(json);
       }
     } catch (err) {
@@ -962,9 +1092,23 @@ function StockDashboard() {
 
   const fetchScheduleSettings = async () => {
     try {
-      const res = await stockFetch('/api/schedule');
+      const res = await supabaseFetch('/stock_settings?select=key,value');
       if (res.ok) {
-        const json = await res.json();
+        const rows = await res.json();
+        const cfg = {};
+        rows.forEach(r => { cfg[r.key] = r.value; });
+        setScheduleConfig({
+          enabled: cfg.schedule_enabled === 'true',
+          time: cfg.schedule_time || '06:00',
+          scrape_daily: cfg.schedule_scrape_daily !== 'false',
+          scrape_revenue: cfg.schedule_scrape_revenue !== 'false',
+          analyze: cfg.schedule_analyze !== 'false'
+        });
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/schedule');
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setScheduleConfig(json);
       }
     } catch (err) {
@@ -975,17 +1119,33 @@ function StockDashboard() {
   const handleSaveSchedule = async () => {
     try {
       setSavingSchedule(true);
-      const res = await stockFetch('/api/schedule', {
+      const updates = [
+        { key: 'schedule_enabled', value: String(scheduleConfig.enabled) },
+        { key: 'schedule_time', value: String(scheduleConfig.time) },
+        { key: 'schedule_scrape_daily', value: String(scheduleConfig.scrape_daily) },
+        { key: 'schedule_scrape_revenue', value: String(scheduleConfig.scrape_revenue) },
+        { key: 'schedule_analyze', value: String(scheduleConfig.analyze) }
+      ];
+      const res = await supabaseFetch('/stock_settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scheduleConfig)
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(updates)
       });
       if (res.ok) {
-        alert('排程設定已成功更新！');
+        alert('排程設定已成功更新至雲端！');
         fetchScheduleSettings();
       } else {
-        const json = await res.json();
-        throw new Error(json.detail || '更新失敗');
+        const fallbackRes = await stockFetch('/api/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(scheduleConfig)
+        });
+        if (fallbackRes.ok) {
+          alert('排程設定已成功更新！');
+          fetchScheduleSettings();
+        } else {
+          throw new Error('更新失敗');
+        }
       }
     } catch (err) {
       alert(`更新排程設定失敗: ${err.message}`);
@@ -998,18 +1158,21 @@ function StockDashboard() {
     if (!confirm('確定要將排程還原為預設設定嗎？（每天 06:00 執行，預設啟用）')) return;
     try {
       setSavingSchedule(true);
-      const res = await stockFetch('/api/schedule', {
+      const defaultConfig = { enabled: true, time: '06:00', scrape_daily: true, scrape_revenue: true, analyze: true };
+      const updates = [
+        { key: 'schedule_enabled', value: 'true' },
+        { key: 'schedule_time', value: '06:00' },
+        { key: 'schedule_scrape_daily', value: 'true' },
+        { key: 'schedule_scrape_revenue', value: 'true' },
+        { key: 'schedule_analyze', value: 'true' }
+      ];
+      await supabaseFetch('/stock_settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: true, time: '06:00', scrape_daily: true, scrape_revenue: true, analyze: true })
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(updates)
       });
-      if (res.ok) {
-        alert('已成功還原為預設排程設定！');
-        fetchScheduleSettings();
-      } else {
-        const json = await res.json();
-        throw new Error(json.detail || '還原失敗');
-      }
+      alert('已成功還原為預設排程設定！');
+      setScheduleConfig(defaultConfig);
     } catch (err) {
       alert(`還原預設設定失敗: ${err.message}`);
     } finally {
@@ -1200,13 +1363,24 @@ function StockDashboard() {
     const taskPollInterval = setInterval(async () => {
       fetchActiveTasks();
       try {
-        const resStatus = await stockFetch('/api/ml/status_all');
+        const resStatus = await supabaseFetch('/stock_ml_cache?model_type=eq.status_all&select=payload');
+        let statuses = null;
         if (resStatus.ok) {
-          const statuses = await resStatus.json();
+          const rows = await resStatus.json();
+          if (rows && rows.length > 0 && rows[0].payload) {
+            statuses = rows[0].payload;
+          }
+        }
+        if (!statuses) {
+          const fallbackRes = await stockFetch('/api/ml/status_all');
+          if (fallbackRes.ok) {
+            statuses = await fallbackRes.json();
+          }
+        }
+        if (statuses) {
           setAllModelsStatus(prev => {
             if (prev) {
               Object.keys(statuses).forEach(k => {
-                // 偵測到有模型剛從 training 變為 ready
                 if (prev[k]?.status === 'training' && statuses[k]?.status === 'ready') {
                   console.log(`[Auto-Sync] 偵測到模型 ${k} 訓練完成！自動更新推薦清單與模型指標...`);
                   fetchMlStatusAndPredictions(k, true);
@@ -1265,36 +1439,60 @@ function StockDashboard() {
     e.preventDefault();
     if (!portfolioInput.stock_id) return;
     try {
-      const res = await stockFetch('/api/portfolio', {
+      const payload = {
+        stock_id: portfolioInput.stock_id,
+        stock_name: portfolioInput.stock_name || portfolioInput.stock_id,
+        buy_price: portfolioInput.buy_price ? parseFloat(portfolioInput.buy_price) : null,
+        notes: portfolioInput.notes || '',
+        auto_analyze: portfolioInput.auto_analyze ? 1 : 0
+      };
+      const res = await supabaseFetch('/stock_portfolio', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          stock_id: portfolioInput.stock_id,
-          buy_price: portfolioInput.buy_price ? parseFloat(portfolioInput.buy_price) : null,
-          notes: portfolioInput.notes || '',
-          auto_analyze: portfolioInput.auto_analyze ? 1 : 0
-        })
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setPortfolioInput({ stock_id: '', buy_price: '', notes: '', auto_analyze: true });
         fetchPortfolio();
+      } else {
+        const fallbackRes = await stockFetch('/api/portfolio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (fallbackRes.ok) {
+          setPortfolioInput({ stock_id: '', buy_price: '', notes: '', auto_analyze: true });
+          fetchPortfolio();
+        } else {
+          throw new Error('新增持股失敗');
+        }
       }
     } catch (err) {
-      alert('新增持股失敗');
+      alert('新增持股失敗: ' + err.message);
     }
   };
 
   const handleToggleAutoAnalyze = async (stockId) => {
     try {
-      const res = await stockFetch(`/api/portfolio/${stockId}/toggle_analyze`, { method: 'POST' });
+      const item = portfolioList.find(p => p.stock_id === stockId);
+      const nextVal = (item?.auto_analyze === 1) ? 0 : 1;
+      const res = await supabaseFetch(`/stock_portfolio?stock_id=eq.${stockId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ auto_analyze: nextVal })
+      });
       if (res.ok) {
-        setPortfolioList(prev => prev.map(item => 
-          item.stock_id === stockId 
-            ? { ...item, auto_analyze: item.auto_analyze === 1 ? 0 : 1 } 
-            : item
+        setPortfolioList(prev => prev.map(p => 
+          p.stock_id === stockId ? { ...p, auto_analyze: nextVal } : p
         ));
       } else {
-        throw new Error('切換失敗');
+        const fallbackRes = await stockFetch(`/api/portfolio/${stockId}/toggle_analyze`, { method: 'POST' });
+        if (fallbackRes.ok) {
+          setPortfolioList(prev => prev.map(p => 
+            p.stock_id === stockId ? { ...p, auto_analyze: nextVal } : p
+          ));
+        } else {
+          throw new Error('切換失敗');
+        }
       }
     } catch (err) {
       alert('切換自動分析設定失敗');
@@ -1304,11 +1502,21 @@ function StockDashboard() {
   const handleDeletePortfolio = async (stockId) => {
     if (!confirm(`確定要刪除持股 ${stockId} 嗎？`)) return;
     try {
-      const res = await stockFetch(`/api/portfolio/${stockId}`, { method: 'DELETE' });
+      const res = await supabaseFetch(`/stock_portfolio?stock_id=eq.${stockId}`, {
+        method: 'DELETE'
+      });
       if (res.ok) {
         fetchPortfolio();
         if (analysisResult?.stock_id === stockId) {
           setAnalysisResult(null);
+        }
+      } else {
+        const fallbackRes = await stockFetch(`/api/portfolio/${stockId}`, { method: 'DELETE' });
+        if (fallbackRes.ok) {
+          fetchPortfolio();
+          if (analysisResult?.stock_id === stockId) setAnalysisResult(null);
+        } else {
+          throw new Error('刪除失敗');
         }
       }
     } catch (err) {
@@ -1321,6 +1529,19 @@ function StockDashboard() {
       setAnalyzingId(stockId);
       setAnalysisResult(null);
       
+      // 先檢查持股中是否已有快取的診斷報告
+      const item = portfolioList.find(p => p.stock_id === stockId);
+      if (item && item.analysis_report) {
+        setAnalysisResult({
+          stock_id: item.stock_id,
+          stock_name: item.stock_name,
+          signal: item.latest_signal,
+          analysis_text: item.analysis_report,
+          date: item.latest_analysis_date
+        });
+        return;
+      }
+
       const headers = {};
       if (geminiApiKey) {
         headers['X-Gemini-API-Key'] = geminiApiKey;
@@ -1328,13 +1549,13 @@ function StockDashboard() {
       }
       
       const res = await stockFetch(`/api/portfolio/analyze/${stockId}`, { headers });
-      if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.detail || '分析失敗');
+      if (res.ok) {
+        const json = await res.json();
+        setAnalysisResult(json);
+        fetchPortfolio();
+      } else {
+        alert(`目前尚無 ${stockId} 之預存診斷報告。請開啟本地 Worker 執行最新 AI 個股深度分析！`);
       }
-      const json = await res.json();
-      setAnalysisResult(json);
-      fetchPortfolio(); // 分析完成後更新最新燈號
     } catch (err) {
       alert(err.message);
     } finally {
@@ -1344,19 +1565,33 @@ function StockDashboard() {
 
   const handleSaveSettings = async () => {
     try {
-      const res = await stockFetch('/api/settings', {
+      const updates = Object.keys(serverSettings).map(k => ({
+        key: k,
+        value: String(serverSettings[k] ?? '')
+      }));
+      const res = await supabaseFetch('/stock_settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(updates)
+      });
+      if (res.ok) {
+        alert('設定已成功儲存至雲端 Supabase！');
+        setShowSettingsModal(false);
+        return;
+      }
+      const fallbackRes = await stockFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(serverSettings)
       });
-      if (res.ok) {
+      if (fallbackRes.ok) {
         alert('設定已成功儲存至後端伺服器！');
         setShowSettingsModal(false);
       } else {
         throw new Error('儲存失敗');
       }
     } catch (err) {
-      alert('儲存設定失敗，請確認伺服器連線。');
+      alert('儲存設定失敗，請確認連線。');
     }
   };
 
@@ -1378,9 +1613,22 @@ function StockDashboard() {
     try {
       setHistoryStockId(stockId);
       setHistoryStockName(stockName || '未知股');
-      const res = await stockFetch(`/api/portfolio/history/${stockId}`);
+      // 優先從 Supabase stock_portfolio_history 查詢
+      const res = await supabaseFetch(`/stock_portfolio_history?stock_id=eq.${stockId}&order=date.desc&limit=20`);
       if (res.ok) {
         const json = await res.json();
+        setHistoryList(json);
+        if (json.length > 0) {
+          setSelectedHistoryItem(json[0]);
+        } else {
+          setSelectedHistoryItem(null);
+        }
+        setShowHistoryModal(true);
+        return;
+      }
+      const fallbackRes = await stockFetch(`/api/portfolio/history/${stockId}`);
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
         setHistoryList(json);
         if (json.length > 0) {
           setSelectedHistoryItem(json[0]);
@@ -1553,9 +1801,6 @@ function StockDashboard() {
     }
   };
 
-  const SUPABASE_URL = "https://hvequgcognhytunjjsyp.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0";
-
   const runScreener = async () => {
     try {
       setLoading(true);
@@ -1639,11 +1884,27 @@ function StockDashboard() {
       setLoading(true);
       setData(null);
       setActiveDbTable(tableName);
-      const res = await stockFetch(`/api/database/${tableName}`);
-      const json = await res.json();
-      setData(json.data);
+
+      // 優先從 Supabase 雲端快照讀取
+      const res = await supabaseFetch(`/stock_database_preview?table_name=eq.${tableName}&select=columns,data`);
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].data) {
+          setData(rows[0].data);
+          return;
+        }
+      }
+
+      // 備援：若本地 FastAPI 正在運行
+      const fallbackRes = await stockFetch(`/api/database/${tableName}`);
+      if (fallbackRes.ok) {
+        const json = await fallbackRes.json();
+        setData(json.data);
+      } else {
+        throw new Error('無法讀取資料表快照');
+      }
     } catch (err) {
-      alert('無法連接到 API 伺服器，請確認 FastAPI 是否已啟動。');
+      alert('無法載入資料表: ' + err.message);
     } finally {
       setLoading(false);
     }
