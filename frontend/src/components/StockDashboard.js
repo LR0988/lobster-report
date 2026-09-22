@@ -311,6 +311,10 @@ function StockDashboard() {
   const [taskTimerTick, setTaskTimerTick] = useState(0);
   const [killingTaskPid, setKillingTaskPid] = useState(null);
 
+  // ML 子分頁視圖控制 ('predictions' | 'models' | 'backtest' | 'low_freq')
+  const [mlSubTab, setMlSubTab] = useState(() => localStorage.getItem('ml_sub_tab') || 'predictions');
+  const [trainSavedToast, setTrainSavedToast] = useState(false);
+
   // ML 預測表格排序狀態
 
   // ── 低頻量化交易 (Low-Frequency Quant) 狀態 ──
@@ -504,7 +508,8 @@ function StockDashboard() {
         if (data.bt_max_portfolio_size !== undefined) { setBtPortfolioSize(parseInt(data.bt_max_portfolio_size)); localStorage.setItem('bt_max_portfolio_size', data.bt_max_portfolio_size); }
         if (data.bt_train_ratio !== undefined) { setTrainRatio(parseFloat(data.bt_train_ratio)); localStorage.setItem('bt_train_ratio', data.bt_train_ratio); }
         if (data.bt_train_days !== undefined && data.bt_train_days !== null) { setTrainDays(parseInt(data.bt_train_days)); localStorage.setItem('bt_train_days', data.bt_train_days); }
-        if (data.test_days !== undefined && data.test_days !== null) { setTestDays(parseInt(data.test_days)); localStorage.setItem('bt_test_days', data.test_days); }
+        const savedTestDays = data.bt_test_days !== undefined && data.bt_test_days !== null ? data.bt_test_days : data.test_days;
+        if (savedTestDays !== undefined && savedTestDays !== null) { setTestDays(parseInt(savedTestDays)); localStorage.setItem('bt_test_days', savedTestDays); }
         if (data.bt_exit_strategy !== undefined) { setBtExitStrategy(data.bt_exit_strategy); localStorage.setItem('bt_exit_strategy', data.bt_exit_strategy); }
         if (data.bt_trailing_activation_pct !== undefined) { setBtTrailingActivation(parseFloat(data.bt_trailing_activation_pct)); localStorage.setItem('bt_trailing_activation_pct', data.bt_trailing_activation_pct); }
         if (data.bt_exclude_6digit !== undefined) { setExclude6Digit(data.bt_exclude_6digit === 'true'); localStorage.setItem('bt_exclude_6digit', data.bt_exclude_6digit); }
@@ -523,6 +528,44 @@ function StockDashboard() {
       }
     } catch (err) {
       console.error('讀取回測設定失敗', err);
+    }
+  };
+
+  // 獨立儲存 ML 訓練參數與條件（置頂專用，支援雲端與本地持久化）
+  const handleSaveTrainSettings = async (showToast = true) => {
+    try {
+      const updates = [
+        { key: 'bt_train_ratio', value: String(trainRatio) },
+        { key: 'bt_train_days', value: String(trainDays) },
+        { key: 'bt_test_days', value: String(testDays) },
+        { key: 'bt_exclude_6digit', value: String(exclude6Digit) },
+        { key: 'bt_filter_capital', value: String(filterCapital) },
+        { key: 'bt_min_capital_billion', value: String(minCapitalBillion) }
+      ];
+
+      localStorage.setItem('bt_train_ratio', trainRatio);
+      localStorage.setItem('bt_train_days', trainDays);
+      localStorage.setItem('bt_test_days', testDays);
+      localStorage.setItem('bt_exclude_6digit', exclude6Digit);
+      localStorage.setItem('bt_filter_capital', filterCapital);
+      localStorage.setItem('bt_min_capital_billion', minCapitalBillion);
+
+      await supabaseFetch('/stock_settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(updates)
+      });
+
+      if (showToast) {
+        setTrainSavedToast(true);
+        setTimeout(() => setTrainSavedToast(false), 3500);
+      }
+    } catch (err) {
+      console.error('儲存訓練設定失敗', err);
+      if (showToast) {
+        setTrainSavedToast(true);
+        setTimeout(() => setTrainSavedToast(false), 3500);
+      }
     }
   };
 
@@ -2250,22 +2293,22 @@ function StockDashboard() {
         {activeTab === 'ml' && (
           <div>
             {/* 🏃 背景任務即時監控看板 (Live Task Monitor Dashboard) */}
-            <div style={{
-              background: activeTasks.length > 0 ? 'linear-gradient(135deg, rgba(30, 58, 138, 0.3), rgba(15, 23, 42, 0.85))' : 'rgba(15, 23, 42, 0.4)',
-              border: activeTasks.length > 0 ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid var(--border-color)',
-              boxShadow: activeTasks.length > 0 ? '0 8px 24px rgba(37, 99, 235, 0.15)' : 'none',
-              borderRadius: '12px',
-              padding: '1.25rem',
-              marginBottom: '1.75rem',
-              transition: 'all 0.3s ease'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: activeTasks.length > 0 ? '1rem' : '0', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.2rem' }}>🏃</span>
-                    背景執行與訓練任務監控看板
-                  </h3>
-                  {activeTasks.length > 0 ? (
+            {activeTasks.length > 0 ? (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.9))',
+                border: '1px solid rgba(59, 130, 246, 0.6)',
+                boxShadow: '0 8px 24px rgba(37, 99, 235, 0.2)',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                marginBottom: '1.5rem',
+                transition: 'all 0.3s ease'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '1.2rem' }}>🏃</span>
+                      背景執行與訓練任務監控看板
+                    </h3>
                     <span style={{
                       background: 'rgba(16, 185, 129, 0.2)',
                       border: '1px solid #10B981',
@@ -2281,49 +2324,20 @@ function StockDashboard() {
                       <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block', boxShadow: '0 0 8px #10B981' }}></span>
                       {activeTasks.length} 個任務正在執行中
                     </span>
-                  ) : (
-                    <span style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: 'var(--text-muted)',
-                      fontSize: '0.78rem',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '20px'
-                    }}>
-                      目前無任何背景任務
-                    </span>
-                  )}
-                </div>
+                  </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <button
                     className="btn"
-                    style={{
-                      padding: '0.3rem 0.75rem',
-                      fontSize: '0.8rem',
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid var(--border-color)',
-                      color: 'white',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem'
-                    }}
+                    style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid var(--border-color)', color: 'white' }}
                     onClick={fetchActiveTasks}
                     disabled={fetchingTasks}
                   >
                     {fetchingTasks ? <span className="loader" style={{ width: '12px', height: '12px' }}></span> : '🔄 重新整理看板'}
                   </button>
                 </div>
-              </div>
 
-              {activeTasks.length === 0 ? (
-                <div style={{ padding: '0.75rem 0', color: 'var(--text-muted)', fontSize: '0.86rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>✨</span> 目前系統背景處於閒置就緒狀態，所有模型訓練或數據同步已完成。
-                </div>
-              ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1rem', marginTop: '0.75rem' }}>
                   {activeTasks.map(task => {
-                    // 計算前端即時動態累計時長
                     const currentElapsed = task.created_timestamp ? Math.max(0, Math.floor(Date.now() / 1000 - task.created_timestamp)) : task.elapsed_seconds;
                     const durationStr = formatSecondsToDuration(currentElapsed);
                     const isKilling = killingTaskPid === task.pid;
@@ -2332,19 +2346,16 @@ function StockDashboard() {
                       <div
                         key={task.id}
                         style={{
-                          background: 'rgba(15, 23, 42, 0.75)',
-                          border: '1px solid rgba(59, 130, 246, 0.35)',
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          border: '1px solid rgba(59, 130, 246, 0.4)',
                           borderRadius: '10px',
                           padding: '1rem 1.15rem',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
-                          gap: '0.75rem',
-                          position: 'relative',
-                          overflow: 'hidden'
+                          gap: '0.75rem'
                         }}
                       >
-                        {/* 頂部名稱與標籤 */}
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
                             <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#F1F5F9', lineHeight: '1.4' }}>
@@ -2363,7 +2374,6 @@ function StockDashboard() {
                             </span>
                           </div>
 
-                          {/* 核心數據看板：已執行時間高亮碼表 */}
                           <div style={{
                             background: 'rgba(0, 0, 0, 0.35)',
                             borderRadius: '8px',
@@ -2400,14 +2410,12 @@ function StockDashboard() {
                             </div>
                           </div>
 
-                          {/* 進度細節 */}
                           <div style={{ fontSize: '0.78rem', color: '#94A3B8', wordBreak: 'break-all', background: 'rgba(255,255,255,0.03)', padding: '0.4rem 0.6rem', borderRadius: '4px' }}>
                             <strong style={{ color: '#A5B4FC' }}>當前狀態: </strong>
                             {task.details}
                           </div>
                         </div>
 
-                        {/* 底部操作：一鍵強制終止 */}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.25rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                           <button
                             className="btn"
@@ -2439,8 +2447,33 @@ function StockDashboard() {
                     );
                   })}
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.6rem 1rem',
+                background: 'rgba(15, 23, 42, 0.45)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px',
+                marginBottom: '1.25rem',
+                fontSize: '0.84rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#94A3B8' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block', boxShadow: '0 0 6px #10B981' }}></span>
+                  <span>🟢 地端運算主機就緒 ｜ 目前無背景訓練任務</span>
+                </div>
+                <button
+                  className="btn"
+                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem', background: 'rgba(255, 255, 255, 0.06)', border: '1px solid var(--border-color)', color: 'white' }}
+                  onClick={fetchActiveTasks}
+                  disabled={fetchingTasks}
+                >
+                  {fetchingTasks ? '檢查中...' : '🔄 檢查主機狀態'}
+                </button>
+              </div>
+            )}
 
             {/* ML 模型訓練與控制面板 */}
             <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', background: 'rgba(15, 23, 42, 0.65)' }}>
@@ -2499,18 +2532,42 @@ function StockDashboard() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>當前選用模型:</span>
-                    <span style={{
-                      background: 'rgba(59, 130, 246, 0.3)',
-                      border: '1px solid #3B82F6',
-                      color: '#93C5FD',
-                      fontWeight: 'bold',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '6px',
-                      fontSize: '0.88rem'
-                    }}>
-                      🌟 {mlModelType?.toUpperCase()}
-                    </span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>切換選用模型:</span>
+                    <select
+                      value={mlModelType}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setMlModelType(val);
+                        localStorage.setItem('ml_model_type', val);
+                        fetchMlStatusAndPredictions(val);
+                      }}
+                      style={{
+                        background: 'rgba(15, 23, 42, 0.95)',
+                        border: '1px solid #3B82F6',
+                        color: '#93C5FD',
+                        fontWeight: 'bold',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: '6px',
+                        fontSize: '0.88rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {[
+                        { val: 'lightgbm', label: '⚡ LightGBM (推薦/高勝率)' },
+                        { val: 'xgboost', label: '🌲 XGBoost (經典量化)' },
+                        { val: 'attention_bilstm_xgb', label: '🔥 Attention BiLSTM-XGB (深度混合)' },
+                        { val: 'resnet50', label: '🧠 ResNet-50 (時序殘差網路)' },
+                        { val: 'tft', label: '⏳ Temporal Fusion Transformer' },
+                        { val: 'vsn_xlstm', label: '🧬 VSN-xLSTM (擴展記憶)' },
+                        { val: 'cnn_hybrid', label: '🌊 CNN-Attention (特徵融合)' },
+                        { val: 'patchtst', label: '🧩 PatchTST (分塊 Transformer)' },
+                        { val: 'rf', label: '🌳 Random Forest (隨機森林)' },
+                        { val: 'mlp', label: '🕸️ MLP Neural Net (多層感知)' },
+                        { val: 'lr', label: '📏 Logistic Regression (線性基準)' }
+                      ].map(m => (
+                        <option key={m.val} value={m.val}>{m.label}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -2575,8 +2632,593 @@ function StockDashboard() {
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* AI 模型載入與效能指標總覽對比表格 - 移至最上方 */}
+            {/* ⚙️ 模型訓練條件與參數配置 (置頂空間 UPPER SPACE) */}
+            <div className="glass-panel" style={{
+              padding: '1.25rem 1.5rem',
+              marginBottom: '1.5rem',
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.9))',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.25rem' }}>⚙️</span>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#93C5FD', fontWeight: 'bold' }}>
+                    模型訓練條件與參數配置
+                  </h3>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', padding: '0.15rem 0.45rem', borderRadius: '4px' }}>
+                    條件隨時儲存並同步至雲端
+                  </span>
+                </div>
+
+                {/* 快捷操作按鈕列 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  {trainSavedToast && (
+                    <span style={{
+                      background: 'rgba(16, 185, 129, 0.2)',
+                      border: '1px solid #10B981',
+                      color: '#6EE7B7',
+                      fontSize: '0.82rem',
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontWeight: 'bold'
+                    }}>
+                      ✅ 訓練條件已成功儲存！
+                    </span>
+                  )}
+                  <button
+                    className="btn"
+                    style={{
+                      padding: '0.4rem 0.9rem',
+                      fontSize: '0.85rem',
+                      background: 'rgba(59, 130, 246, 0.25)',
+                      border: '1px solid rgba(59, 130, 246, 0.6)',
+                      color: '#93C5FD',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontWeight: 'bold'
+                    }}
+                    onClick={() => handleSaveTrainSettings(true)}
+                  >
+                    💾 儲存訓練條件
+                  </button>
+                  <button
+                    className="btn"
+                    style={{
+                      padding: '0.4rem 1.1rem',
+                      fontSize: '0.85rem',
+                      background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                      color: 'white',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontWeight: 'bold',
+                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)'
+                    }}
+                    onClick={() => handleTrainMLModel(false)}
+                    disabled={mlLoading || allModelsStatus[mlModelType]?.status === 'training'}
+                  >
+                    {allModelsStatus[mlModelType]?.status === 'training' ? (
+                      <>
+                        <span className="loader" style={{ width: '12px', height: '12px', borderColor: 'white', borderBottomColor: 'transparent' }}></span>
+                        訓練中...
+                      </>
+                    ) : (
+                      <>🏋️ 訓練 {mlModelType.toUpperCase()} 模型</>
+                    )}
+                  </button>
+                  <button
+                    className="btn"
+                    style={{
+                      padding: '0.4rem 0.85rem',
+                      fontSize: '0.85rem',
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      color: '#FCA5A5',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}
+                    onClick={() => handleTrainMLModel(true)}
+                    disabled={mlLoading || allModelsStatus[mlModelType]?.status === 'training'}
+                    title="略過快取，強制在地端重新訓練特徵權重"
+                  >
+                    🔄 強制重訓
+                  </button>
+                </div>
+              </div>
+
+              {/* 條件參數 Grid 排版 */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '1.25rem',
+                background: 'rgba(0, 0, 0, 0.25)',
+                padding: '1.1rem',
+                borderRadius: '10px',
+                border: '1px solid rgba(255,255,255,0.06)'
+              }}>
+                {/* 區塊 1: 訓練與測試時間區間 */}
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span>📅</span> 數據長度配置
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.6rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+                        🏋️ 訓練天數 (交易日)
+                      </label>
+                      <input
+                        type="number"
+                        value={trainDays}
+                        onChange={e => {
+                          setTrainDays(e.target.value);
+                          localStorage.setItem('bt_train_days', e.target.value);
+                        }}
+                        style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.3rem' }}>
+                        {[90, 180, 360].map(d => (
+                          <button
+                            key={d}
+                            type="button"
+                            className="btn"
+                            style={{
+                              padding: '0.15rem 0.4rem',
+                              fontSize: '0.72rem',
+                              background: parseInt(trainDays) === d ? 'rgba(59, 130, 246, 0.35)' : 'rgba(255,255,255,0.05)',
+                              border: parseInt(trainDays) === d ? '1px solid #3B82F6' : '1px solid var(--border-color)',
+                              color: parseInt(trainDays) === d ? '#93C5FD' : 'var(--text-muted)'
+                            }}
+                            onClick={() => {
+                              setTrainDays(d);
+                              localStorage.setItem('bt_train_days', d);
+                            }}
+                          >
+                            {d}天
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+                        📊 測試/回測天數
+                      </label>
+                      <input
+                        type="number"
+                        value={testDays}
+                        onChange={e => {
+                          setTestDays(e.target.value);
+                          localStorage.setItem('bt_test_days', e.target.value);
+                        }}
+                        style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#A7F3D0', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.3rem' }}>
+                        {[30, 60, 90].map(d => (
+                          <button
+                            key={d}
+                            type="button"
+                            className="btn"
+                            style={{
+                              padding: '0.15rem 0.4rem',
+                              fontSize: '0.72rem',
+                              background: parseInt(testDays) === d ? 'rgba(16, 185, 129, 0.35)' : 'rgba(255,255,255,0.05)',
+                              border: parseInt(testDays) === d ? '1px solid #10B981' : '1px solid var(--border-color)',
+                              color: parseInt(testDays) === d ? '#A7F3D0' : 'var(--text-muted)'
+                            }}
+                            onClick={() => {
+                              setTestDays(d);
+                              localStorage.setItem('bt_test_days', d);
+                            }}
+                          >
+                            {d}天
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                      <span>分割比例</span>
+                      <span style={{ color: '#93C5FD', fontWeight: 'bold' }}>{Math.round(trainRatio * 100)}% 訓練 / {Math.round((1 - trainRatio) * 100)}% 測試</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="0.9"
+                      step="0.05"
+                      value={trainRatio}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        setTrainRatio(val);
+                        localStorage.setItem('bt_train_ratio', val);
+                      }}
+                      style={{ width: '100%', accentColor: '#3B82F6' }}
+                    />
+                  </div>
+                </div>
+
+                {/* 區塊 2: 標的過濾與排除條件 */}
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <span>🎯</span> 標的過濾與風控條件
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.08)'
+                    }}>
+                      <input
+                        type="checkbox"
+                        id="exclude-6digit-cb"
+                        checked={exclude6Digit}
+                        onChange={e => {
+                          setExclude6Digit(e.target.checked);
+                          localStorage.setItem('bt_exclude_6digit', e.target.checked);
+                        }}
+                        style={{ width: '17px', height: '17px', cursor: 'pointer', accentColor: '#3B82F6' }}
+                      />
+                      <label htmlFor="exclude-6digit-cb" style={{ fontSize: '0.82rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
+                        🚫 <strong>排除 6 碼股票（ETF、權證、特別股）</strong>
+                        <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          只訓練 4 碼純個股，避免指數與衍生品雜訊
+                        </span>
+                      </label>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      padding: '0.55rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.08)'
+                    }}>
+                      <input
+                        type="checkbox"
+                        id="filter-capital-cb"
+                        checked={filterCapital}
+                        onChange={e => {
+                          setFilterCapital(e.target.checked);
+                          localStorage.setItem('bt_filter_capital', e.target.checked);
+                        }}
+                        style={{ width: '17px', height: '17px', cursor: 'pointer', accentColor: '#10B981' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                          <label htmlFor="filter-capital-cb" style={{ fontSize: '0.82rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
+                            🏢 <strong>濾除股本過小之股票</strong>
+                          </label>
+                          {filterCapital && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>≥</span>
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.5"
+                                value={minCapitalBillion}
+                                onChange={e => {
+                                  setMinCapitalBillion(e.target.value);
+                                  localStorage.setItem('bt_min_capital_billion', e.target.value);
+                                }}
+                                style={{
+                                  width: '60px',
+                                  background: 'rgba(15,23,42,0.8)',
+                                  color: '#FDE68A',
+                                  border: '1px solid #F59E0B',
+                                  borderRadius: '4px',
+                                  padding: '0.15rem 0.35rem',
+                                  fontSize: '0.8rem',
+                                  textAlign: 'center'
+                                }}
+                              />
+                              <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>億</span>
+                            </div>
+                          )}
+                        </div>
+                        <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                          {filterCapital ? `僅納入總股本 ≥ ${minCapitalBillion} 億之高流動性主力標的` : '未啟用股本過濾（納入全部規模股票）'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. 🗂️ ML 功能視圖子分頁切換列 (Segmented Sub-Tabs) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1.25rem',
+              padding: '0.35rem',
+              background: 'rgba(15, 23, 42, 0.65)',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
+              overflowX: 'auto'
+            }}>
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  flex: '1',
+                  padding: '0.55rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  background: mlSubTab === 'predictions' ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'transparent',
+                  color: mlSubTab === 'predictions' ? 'white' : 'var(--text-muted)',
+                  border: mlSubTab === 'predictions' ? '1px solid #3B82F6' : '1px solid transparent',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={() => {
+                  setMlSubTab('predictions');
+                  localStorage.setItem('ml_sub_tab', 'predictions');
+                }}
+              >
+                <span>🎯</span>
+                <span>Top 30 飆股突破推薦</span>
+                {mlPredictions.length > 0 && (
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.2)', padding: '0.1rem 0.45rem', borderRadius: '10px' }}>
+                    {mlPredictions.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  flex: '1',
+                  padding: '0.55rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  background: mlSubTab === 'models' ? 'linear-gradient(135deg, #7C3AED, #6D28D9)' : 'transparent',
+                  color: mlSubTab === 'models' ? 'white' : 'var(--text-muted)',
+                  border: mlSubTab === 'models' ? '1px solid #8B5CF6' : '1px solid transparent',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={() => {
+                  setMlSubTab('models');
+                  localStorage.setItem('ml_sub_tab', 'models');
+                }}
+              >
+                <span>🏆</span>
+                <span>11款 AI 模型效能評比 &amp; 分位數</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  flex: '1',
+                  padding: '0.55rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  background: mlSubTab === 'backtest' ? 'linear-gradient(135deg, #D97706, #B45309)' : 'transparent',
+                  color: mlSubTab === 'backtest' ? 'white' : 'var(--text-muted)',
+                  border: mlSubTab === 'backtest' ? '1px solid #F59E0B' : '1px solid transparent',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={() => {
+                  setMlSubTab('backtest');
+                  localStorage.setItem('ml_sub_tab', 'backtest');
+                }}
+              >
+                <span>📊</span>
+                <span>策略量化歷史回測引擎</span>
+              </button>
+            </div>
+
+            {/* 子視圖 1: 🎯 Top 30 飆股突破推薦 */}
+            {mlSubTab === 'predictions' && (
+              <div>
+                {/* 預測標的列表 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                🚀 ML 預測「突破勝率與跌破風險雙向評估」推薦清單
+              </h3>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                {mlRefreshing && (
+                  <span style={{ fontSize: '0.8rem', color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span className="loader" style={{ width: '12px', height: '12px' }}></span> 背景同步中...
+                  </span>
+                )}
+                <button
+                  className="btn btn-secondary"
+                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem' }}
+                  onClick={() => fetchMlStatusAndPredictions(null, true)}
+                  disabled={mlLoading || mlRefreshing}
+                  title="強制重新執行全台股最新特徵推論並更新快取"
+                >
+                  🔄 強制重算預測
+                </button>
+              </div>
+            </div>
+
+            {mlPredictions && mlPredictions.length > 0 ? (
+              <div style={{ overflowX: 'auto' }}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th onClick={() => handleMlSort('win_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        🚀 突破勝率 (20%+) {mlSortField === 'win_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('drop_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        ⚠️ 跌破風險 (10%-) {mlSortField === 'drop_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('net_score')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        🛡️ 攻守評等 {mlSortField === 'net_score' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('stock_id')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        股票代號 {mlSortField === 'stock_id' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('stock_name')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        股票名稱 {mlSortField === 'stock_name' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('latest_price')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        最新收盤價 {mlSortField === 'latest_price' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('large_holder_ratio')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        千張大戶持股% {mlSortField === 'large_holder_ratio' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('large_holder_change')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        大戶週增減 {mlSortField === 'large_holder_change' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('foreign_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        外資連買 {mlSortField === 'foreign_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th onClick={() => handleMlSort('trust_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                        投信連買 {mlSortField === 'trust_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                      </th>
+                      <th>動作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getSortedPredictions().map((row, idx) => (
+                      <tr key={idx}>
+                        <td style={{ fontWeight: 'bold' }}>
+                          <span style={{
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '4px',
+                            background: row.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                            color: row.win_probability >= 35 ? '#FCA5A5' : '#FDE68A',
+                            border: row.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
+                            display: 'inline-block'
+                          }}>
+                            {row.win_probability}%
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 'bold' }}>
+                          <span style={{
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '4px',
+                            background: row.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : row.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                            color: row.drop_probability >= 40 ? '#F87171' : row.drop_probability <= 25 ? '#34D399' : 'white',
+                            border: row.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : row.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                            display: 'inline-block'
+                          }}>
+                            {row.drop_probability}%
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 'bold' }}>
+                          <span style={{
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '4px',
+                            background: row.risk_tag.includes('👑') ? 'rgba(245, 158, 11, 0.25)' : row.risk_tag.includes('🔴') ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
+                            color: row.risk_tag.includes('👑') ? '#FDE68A' : row.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD',
+                            border: row.risk_tag.includes('👑') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)',
+                            display: 'inline-block'
+                          }}>
+                            {row.risk_tag}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 'bold', color: '#60A5FA' }}>{row.stock_id}</td>
+                        <td style={{ fontWeight: 'bold' }}>{row.stock_name}</td>
+                        <td style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{row.latest_price} 元</td>
+                        <td>{row.large_holder_ratio}%</td>
+                        <td style={{ color: row.large_holder_change > 0 ? '#FCA5A5' : row.large_holder_change < 0 ? '#A7F3D0' : 'white' }}>
+                          {row.large_holder_change > 0 ? `▲${row.large_holder_change}%p` : row.large_holder_change < 0 ? `▼${Math.abs(row.large_holder_change)}%p` : '0%p'}
+                        </td>
+                        <td>{row.foreign_buy_days > 0 ? `連買 ${row.foreign_buy_days} 天` : '無'}</td>
+                        <td>{row.trust_buy_days > 0 ? `連買 ${row.trust_buy_days} 天` : '無'}</td>
+                        <td style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                          <button
+                            className="btn btn-save"
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                            onClick={() => handleAddWatchlistStockDirectly(row.stock_id)}
+                          >
+                            ➕ 加至追蹤
+                          </button>
+                          <button
+                            onClick={() => copyAiPrompt(row.stock_id)}
+                            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
+                          >
+                            📋 複製AI指令
+                          </button>
+                          <a
+                            href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
+                            target="_blank" rel="noreferrer"
+                            style={{ color: '#60A5FA', textDecoration: 'none', fontSize: '0.85rem' }}
+                          >🔍 Yahoo</a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
+                <p style={{ margin: 0, fontSize: '1.05rem' }}>尚無機器學習預測資料。</p>
+                <p style={{ margin: '0.5rem 0 1rem 0', fontSize: '0.85rem' }}>點擊上方「🏋️ 重新訓練模型」即可立即進行 AI 模型擬合與全台股波段飆股預測！</p>
+                <button
+                  type="button"
+                  className="btn btn-save"
+                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}
+                  onClick={handleTrainMLModel}
+                  disabled={mlLoading}
+                >
+                  🏋️ 立即進行 ML 模型訓練與預測
+                </button>
+              </div>
+            )}
+                {/* 特徵重要性排行榜 */}
+              {mlStatus && mlStatus.top_features && mlStatus.top_features.length > 0 && (
+                <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '1rem', border: '1px solid var(--border-color)' }}>
+                  <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#A7F3D0' }}>
+                    🏆 飆股判定 Top 特徵重要性排行榜 (Feature Importance)
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                    {mlStatus.top_features.slice(0, 6).map((item, idx) => (
+                      <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '0.5rem 0.75rem', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
+                          <span style={{ color: 'white', fontWeight: 'bold' }}>{idx + 1}. {item.feature}</span>
+                          <span style={{ color: '#60A5FA' }}>{item.importance}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              </div>
+            )}
+
+            {/* 子視圖 2: 🏆 11款 AI 模型效能評比 & 分位數 */}
+            {mlSubTab === 'models' && (
+              <div>
+                {/* AI 模型載入與效能指標總覽對比表格 - 移至最上方 */}
               <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <h4 style={{ margin: 0, fontSize: '1rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -2767,158 +3409,13 @@ function StockDashboard() {
                   </div>
                 )}
               </div>
-
-              {/* 客製化數據切割與訓練天數 & 標的過濾條件 */}
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
-                <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  ⚙️ 訓練與回測時間長度配置
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'center' }}>
-                  <div>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
-                      分割比例 ({Math.round(trainRatio * 100)}% 訓練 / {Math.round((1 - trainRatio) * 100)}% 測試)
-                    </label>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="0.9"
-                      step="0.05"
-                      value={trainRatio}
-                      onChange={e => {
-                        const val = parseFloat(e.target.value);
-                        setTrainRatio(val);
-                        localStorage.setItem('bt_train_ratio', val);
-                      }}
-                      style={{ width: '100%' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>🏋️ 訓練集資料長度 (交易日天數)</label>
-                    <input
-                      type="number"
-                      value={trainDays}
-                      onChange={e => {
-                        setTrainDays(e.target.value);
-                        localStorage.setItem('bt_train_days', e.target.value);
-                      }}
-                      placeholder="例: 180 天"
-                      style={{ width: '100%', background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>📊 測試/回測資料長度 (交易日天數)</label>
-                    <input
-                      type="number"
-                      value={testDays}
-                      onChange={e => {
-                        setTestDays(e.target.value);
-                        localStorage.setItem('bt_test_days', e.target.value);
-                      }}
-                      placeholder="例: 30 天"
-                      style={{ width: '100%', background: 'rgba(0,0,0,0.4)', color: 'white', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem' }}
-                    />
-                  </div>
-                </div>
-
-                {/* 🎯 標的過濾與排除條件 (標的資本額 & 6碼股票過濾) */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '1rem',
-                  marginTop: '1rem',
-                  paddingTop: '0.9rem',
-                  borderTop: '1px solid rgba(255,255,255,0.06)',
-                  alignItems: 'center'
-                }}>
-                  {/* 1. 排除 6 碼股票（ETF / 權證） */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.6rem',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    padding: '0.6rem 0.8rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.08)'
-                  }}>
-                    <input
-                      type="checkbox"
-                      id="exclude-6digit-cb"
-                      checked={exclude6Digit}
-                      onChange={e => {
-                        setExclude6Digit(e.target.checked);
-                        localStorage.setItem('bt_exclude_6digit', e.target.checked);
-                      }}
-                      style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#3B82F6' }}
-                    />
-                    <label htmlFor="exclude-6digit-cb" style={{ fontSize: '0.85rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
-                      🚫 <strong>排除 6 碼股票（ETF、權證與特別股）</strong>
-                      <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        只訓練 4 碼個股，避免權證與指數 ETF 雜訊干擾
-                      </span>
-                    </label>
-                  </div>
-
-                  {/* 2. 排除股本小於 10 億元之小型股 */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.6rem',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    padding: '0.6rem 0.8rem',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.08)'
-                  }}>
-                    <input
-                      type="checkbox"
-                      id="filter-capital-cb"
-                      checked={filterCapital}
-                      onChange={e => {
-                        setFilterCapital(e.target.checked);
-                        localStorage.setItem('bt_filter_capital', e.target.checked);
-                      }}
-                      style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#10B981' }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                        <label htmlFor="filter-capital-cb" style={{ fontSize: '0.85rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
-                          🏢 <strong>濾除股本小於門檻之股票</strong>
-                        </label>
-                        {filterCapital && (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>≥</span>
-                            <input
-                              type="number"
-                              min="0.1"
-                              step="0.5"
-                              value={minCapitalBillion}
-                              onChange={e => {
-                                setMinCapitalBillion(e.target.value);
-                                localStorage.setItem('bt_min_capital_billion', e.target.value);
-                              }}
-                              style={{
-                                width: '60px',
-                                background: 'rgba(0,0,0,0.5)',
-                                color: '#FDE68A',
-                                border: '1px solid #F59E0B',
-                                borderRadius: '4px',
-                                padding: '0.2rem 0.4rem',
-                                fontSize: '0.82rem',
-                                textAlign: 'center'
-                              }}
-                            />
-                            <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>億元</span>
-                          </div>
-                        )}
-                      </div>
-                      <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {filterCapital ? `依集保總股數×10元計算，僅納入股本 ≥ ${minCapitalBillion} 億之流動性主力股` : '未啟用股本過濾（納入所有規模之股票）'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
+            )}
 
-              {/* 客製化策略量化回測控制區塊 */}
+            {/* 子視圖 3: 📊 策略量化歷史回測引擎 */}
+            {mlSubTab === 'backtest' && (
+              <div>
+                {/* 客製化策略量化回測控制區塊 */}
               <div style={{ background: 'rgba(0,0,0,0.25)', padding: '1.25rem', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
                   <h4 style={{ margin: 0, fontSize: '1rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -3198,179 +3695,9 @@ function StockDashboard() {
                   </div>
                 )}
               </div>
-
-
-
-              {/* 特徵重要性排行榜 */}
-              {mlStatus && mlStatus.top_features && mlStatus.top_features.length > 0 && (
-                <div style={{ background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '1rem', border: '1px solid var(--border-color)' }}>
-                  <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#A7F3D0' }}>
-                    🏆 飆股判定 Top 特徵重要性排行榜 (Feature Importance)
-                  </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
-                    {mlStatus.top_features.slice(0, 6).map((item, idx) => (
-                      <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', padding: '0.5rem 0.75rem', borderRadius: '6px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
-                          <span style={{ color: 'white', fontWeight: 'bold' }}>{idx + 1}. {item.feature}</span>
-                          <span style={{ color: '#60A5FA' }}>{item.importance}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 預測標的列表 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🚀 ML 預測「突破勝率與跌破風險雙向評估」推薦清單
-              </h3>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                {mlRefreshing && (
-                  <span style={{ fontSize: '0.8rem', color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span className="loader" style={{ width: '12px', height: '12px' }}></span> 背景同步中...
-                  </span>
-                )}
-                <button
-                  className="btn btn-secondary"
-                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem' }}
-                  onClick={() => fetchMlStatusAndPredictions(null, true)}
-                  disabled={mlLoading || mlRefreshing}
-                  title="強制重新執行全台股最新特徵推論並更新快取"
-                >
-                  🔄 強制重算預測
-                </button>
-              </div>
-            </div>
-
-            {mlPredictions && mlPredictions.length > 0 ? (
-              <div style={{ overflowX: 'auto' }}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th onClick={() => handleMlSort('win_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        🚀 突破勝率 (20%+) {mlSortField === 'win_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('drop_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        ⚠️ 跌破風險 (10%-) {mlSortField === 'drop_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('net_score')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        🛡️ 攻守評等 {mlSortField === 'net_score' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('stock_id')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        股票代號 {mlSortField === 'stock_id' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('stock_name')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        股票名稱 {mlSortField === 'stock_name' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('latest_price')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        最新收盤價 {mlSortField === 'latest_price' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('large_holder_ratio')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        千張大戶持股% {mlSortField === 'large_holder_ratio' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('large_holder_change')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        大戶週增減 {mlSortField === 'large_holder_change' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('foreign_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        外資連買 {mlSortField === 'foreign_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('trust_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        投信連買 {mlSortField === 'trust_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th>動作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getSortedPredictions().map((row, idx) => (
-                      <tr key={idx}>
-                        <td style={{ fontWeight: 'bold' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            background: row.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                            color: row.win_probability >= 35 ? '#FCA5A5' : '#FDE68A',
-                            border: row.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
-                            display: 'inline-block'
-                          }}>
-                            {row.win_probability}%
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 'bold' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            background: row.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : row.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                            color: row.drop_probability >= 40 ? '#F87171' : row.drop_probability <= 25 ? '#34D399' : 'white',
-                            border: row.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : row.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
-                            display: 'inline-block'
-                          }}>
-                            {row.drop_probability}%
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 'bold' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            background: row.risk_tag.includes('👑') ? 'rgba(245, 158, 11, 0.25)' : row.risk_tag.includes('🔴') ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
-                            color: row.risk_tag.includes('👑') ? '#FDE68A' : row.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD',
-                            border: row.risk_tag.includes('👑') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)',
-                            display: 'inline-block'
-                          }}>
-                            {row.risk_tag}
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 'bold', color: '#60A5FA' }}>{row.stock_id}</td>
-                        <td style={{ fontWeight: 'bold' }}>{row.stock_name}</td>
-                        <td style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{row.latest_price} 元</td>
-                        <td>{row.large_holder_ratio}%</td>
-                        <td style={{ color: row.large_holder_change > 0 ? '#FCA5A5' : row.large_holder_change < 0 ? '#A7F3D0' : 'white' }}>
-                          {row.large_holder_change > 0 ? `▲${row.large_holder_change}%p` : row.large_holder_change < 0 ? `▼${Math.abs(row.large_holder_change)}%p` : '0%p'}
-                        </td>
-                        <td>{row.foreign_buy_days > 0 ? `連買 ${row.foreign_buy_days} 天` : '無'}</td>
-                        <td>{row.trust_buy_days > 0 ? `連買 ${row.trust_buy_days} 天` : '無'}</td>
-                        <td style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
-                          <button
-                            className="btn btn-save"
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                            onClick={() => handleAddWatchlistStockDirectly(row.stock_id)}
-                          >
-                            ➕ 加至追蹤
-                          </button>
-                          <button
-                            onClick={() => copyAiPrompt(row.stock_id)}
-                            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
-                          >
-                            📋 複製AI指令
-                          </button>
-                          <a
-                            href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
-                            target="_blank" rel="noreferrer"
-                            style={{ color: '#60A5FA', textDecoration: 'none', fontSize: '0.85rem' }}
-                          >🔍 Yahoo</a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
-                <p style={{ margin: 0, fontSize: '1.05rem' }}>尚無機器學習預測資料。</p>
-                <p style={{ margin: '0.5rem 0 1rem 0', fontSize: '0.85rem' }}>點擊上方「🏋️ 重新訓練模型」即可立即進行 AI 模型擬合與全台股波段飆股預測！</p>
-                <button
-                  type="button"
-                  className="btn btn-save"
-                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}
-                  onClick={handleTrainMLModel}
-                  disabled={mlLoading}
-                >
-                  🏋️ 立即進行 ML 模型訓練與預測
-                </button>
               </div>
             )}
+
           </div>
         )}
 
