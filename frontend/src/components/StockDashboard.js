@@ -743,7 +743,7 @@ function StockDashboard() {
     }
   };
 
-  // 載入/訓練 ML 模型（預設使用快取，已有存檔則直接載入）
+  // 載入/訓練 ML 模型（透過 Supabase 佇列派工至本機 Mac 運算）
   const handleTrainMLModel = async (forceRetrain = false, targetModelType = null) => {
     const targetType = targetModelType || mlModelType;
     try {
@@ -752,7 +752,41 @@ function StockDashboard() {
       const trainDaysVal = parseInt(trainDays) || 180;
       const testDaysVal = parseInt(testDays) || 30;
       const trainRatioVal = parseFloat(trainRatio) || 0.8;
-      const res = await stockFetch('/api/ml/train', {
+
+      // 1. 發送任務至 Supabase 佇列由本地 Mac Worker 運算
+      const createRes = await supabaseFetch('/stock_screener_jobs', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          username: user?.username || 'hotpotlu',
+          status: 'pending',
+          config: {
+            job_type: 'ml_train',
+            model_type: targetType,
+            train_ratio: trainRatioVal,
+            train_days: trainDaysVal,
+            test_days: testDaysVal,
+            force_retrain: forceRetrain,
+            min_capital_billion: filterCapital ? parseFloat(minCapitalBillion) : null,
+            exclude_6digit: exclude6Digit
+          }
+        })
+      });
+
+      if (createRes.ok) {
+        // 設定前端 UI 狀態為訓練中
+        setAllModelsStatus(prev => ({
+          ...prev,
+          [targetType]: { status: 'training', message: '正在本機背景訓練中...' }
+        }));
+        setMlStatus({ status: 'training', message: '正在本機背景訓練中...' });
+        alert(`🚀 已成功將「${targetType.toUpperCase()}」模型訓練任務下發至家裡的 Mac！\n本機 Worker 將於背景執行訓練，完成後自動更新最新指標與推薦清單。`);
+        fetchActiveTasks();
+        return;
+      }
+
+      // 備援：若本地 FastAPI 正在運行
+      const fallbackRes = await stockFetch('/api/ml/train', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -765,15 +799,9 @@ function StockDashboard() {
           exclude_6digit: exclude6Digit
         })
       });
-      const data = await res.json();
-      if (res.ok && data.status === 'ok') {
-        if (data.background) {
-          alert(data.message);
-        } else if (data.cached) {
-          alert(`✅ 已載入快取模型！\n模型: ${targetType.toUpperCase()}\n訓練時間: ${data.trained_at}`);
-        } else {
-          alert(`🏋️ 模型訓練完成！\n模型種類: ${targetType.toUpperCase()}\nAUC 得分: ${data.metrics?.auc}`);
-        }
+      const data = await fallbackRes.json();
+      if (fallbackRes.ok && data.status === 'ok') {
+        alert(data.message || '模型訓練已啟動');
         fetchMlStatusAndPredictions(targetType);
       } else {
         alert(`❌ 訓練模型失敗: ${data.message || '未知錯誤'}`);
@@ -790,35 +818,90 @@ function StockDashboard() {
     try {
       setBtLoading(true);
       handleSaveBacktestSettings(false);
-      const res = await stockFetch('/api/ml/backtest', {
+
+      const payload = {
+        job_type: 'ml_backtest',
+        model_type: mlModelType,
+        min_win_prob: parseFloat(btMinWinProb),
+        max_drop_prob: parseFloat(btMaxDropProb),
+        stop_profit_pct: parseFloat(btStopProfit),
+        stop_loss_pct: parseFloat(btStopLoss),
+        max_holding_days: parseInt(btHoldingDays),
+        max_portfolio_size: parseInt(btPortfolioSize),
+        train_ratio: parseFloat(trainRatio),
+        train_days: parseInt(trainDays),
+        test_days: parseInt(testDays),
+        exit_strategy: btExitStrategy,
+        trailing_activation_pct: parseFloat(btTrailingActivation),
+        min_capital_billion: filterCapital ? parseFloat(minCapitalBillion) : null,
+        exclude_6digit: exclude6Digit,
+        market_bull_filter: btMarketBullFilter
+      };
+
+      // 1. 發送回測任務至 Supabase 佇列
+      const createRes = await supabaseFetch('/stock_screener_jobs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({
-          model_type: mlModelType,
-          min_win_prob: parseFloat(btMinWinProb),
-          max_drop_prob: parseFloat(btMaxDropProb),
-          stop_profit_pct: parseFloat(btStopProfit),
-          stop_loss_pct: parseFloat(btStopLoss),
-          max_holding_days: parseInt(btHoldingDays),
-          max_portfolio_size: parseInt(btPortfolioSize),
-          train_ratio: parseFloat(trainRatio),
-          train_days: parseInt(trainDays),
-          test_days: parseInt(testDays),
-          exit_strategy: btExitStrategy,
-          trailing_activation_pct: parseFloat(btTrailingActivation),
-          min_capital_billion: filterCapital ? parseFloat(minCapitalBillion) : null,
-          exclude_6digit: exclude6Digit,
-          market_bull_filter: btMarketBullFilter
+          username: user?.username || 'hotpotlu',
+          status: 'pending',
+          config: payload
         })
       });
-      const json = await res.json();
-      if (res.ok && json.status === 'ok') {
+
+      if (createRes.ok) {
+        const jobList = await createRes.json();
+        const jobId = jobList[0]?.id;
+
+        if (jobId) {
+          // 輪詢等待本機 Mac 計算完成
+          let attempts = 0;
+          const maxAttempts = 60;
+          let completedJob = null;
+
+          while (attempts < maxAttempts) {
+            await new Promise(r => setTimeout(r, 1500));
+            attempts++;
+
+            const checkRes = await supabaseFetch(`/stock_screener_jobs?id=eq.${jobId}`);
+            if (checkRes.ok) {
+              const checkData = await checkRes.json();
+              if (checkData && checkData.length > 0) {
+                const current = checkData[0];
+                if (current.status === 'completed') {
+                  completedJob = current;
+                  break;
+                } else if (current.status === 'error') {
+                  throw new Error(current.error_message || '本機回測運算發生錯誤');
+                }
+              }
+            }
+          }
+
+          if (completedJob && completedJob.results) {
+            setBtResult(completedJob.results);
+            const totalRet = completedJob.results.metrics?.total_return_pct ?? completedJob.results.total_return_pct ?? 0;
+            const winRate = completedJob.results.metrics?.win_rate ?? completedJob.results.win_rate ?? 0;
+            alert(`🎉 策略回測完成！\n累積報酬率: ${totalRet}% | 勝率: ${winRate}%`);
+            return;
+          }
+        }
+      }
+
+      // 備援：若本地 FastAPI 正在運行
+      const fallbackRes = await stockFetch('/api/ml/backtest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await fallbackRes.json();
+      if (fallbackRes.ok && json.status === 'ok') {
         setBtResult(json);
       } else {
         alert(`執行策略回測失敗: ${json.message || '未知錯誤'}`);
       }
     } catch (err) {
-      alert(`連線回測端點失敗: ${err.message}`);
+      alert(`執行策略回測失敗: ${err.message}`);
     } finally {
       setBtLoading(false);
     }
@@ -1790,12 +1873,28 @@ function StockDashboard() {
   const runScraper = async (taskType) => {
     try {
       setLoading(true);
-      setScraperStatus(`⏳ 正在啟動「${taskType === 'daily' ? '每日股價' : '月營收'}」爬蟲任務...`);
+      setScraperStatus(`⏳ 正在將「${taskType === 'daily' ? '每日股價' : '月營收'}」爬蟲任務派工至你家裡的 Mac...`);
+      const createRes = await supabaseFetch('/stock_screener_jobs', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          username: user?.username || 'hotpotlu',
+          status: 'pending',
+          config: {
+            job_type: 'scraper',
+            task_type: taskType
+          }
+        })
+      });
+      if (createRes.ok) {
+        setScraperStatus(`✅ 爬蟲任務已下發至家裡的 Mac！本地 Worker 正在抓取最新資料。`);
+        return;
+      }
       const res = await stockFetch(`/api/scraper/${taskType}`, { method: 'POST' });
       const json = await res.json();
-      setScraperStatus(`✅ 任務已在背景啟動！伺服器正在抓取資料，請稍後。`);
+      setScraperStatus(`✅ 任務已在背景啟動！`);
     } catch (err) {
-      setScraperStatus('❌ 無法連接到 API 伺服器，請確認 FastAPI 是否已啟動。');
+      setScraperStatus('❌ 啟動爬蟲失敗: ' + err.message);
     } finally {
       setLoading(false);
     }
