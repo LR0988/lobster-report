@@ -75,6 +75,77 @@ const DEFAULT_CONFIG = {
   foreign_buy_days_min: 0, trust_buy_days_min: 0, inst_buy_days_min: 0,
 };
 
+const BUILTIN_SCREENER_PRESETS = [
+  {
+    id: 'strat1_breakout',
+    name: '🚀 爆量起漲季線',
+    desc: '策略一：爆量突破季線，尋找底部起漲第一根',
+    config: { ...DEFAULT_CONFIG, strat1: true, vol_min: 500000 }
+  },
+  {
+    id: 'strat2_pullback',
+    name: '📈 多頭排列凹洞量',
+    desc: '策略二：均線多頭排列 + 凹洞量回檔買點',
+    config: { ...DEFAULT_CONFIG, strat2: true, price_trend: 3 }
+  },
+  {
+    id: 'inst_lock',
+    name: '🏢 法人大戶鎖碼',
+    desc: '三大法人或外資/投信連買 + 千張大戶週增',
+    config: { ...DEFAULT_CONFIG, inst_buy_days_min: 3, large_holder_inc: true, vol_min: 500000 }
+  },
+  {
+    id: 'high_yield_value',
+    name: '💰 高殖利低估值',
+    desc: '殖利率 ≥ 5%，本益比 PE ≤ 15，股價淨值比 PB ≤ 2',
+    config: { ...DEFAULT_CONFIG, yield_min: 5, pe_max: 15, pb_max: 2, vol_min: 200000 }
+  },
+  {
+    id: 'large_holder_rush',
+    name: '👑 千張大戶強勢股',
+    desc: '千張大戶持股 ≥ 60% 且近週連續增加，站上 MA5',
+    config: { ...DEFAULT_CONFIG, large_holder_min: 60, large_holder_inc: true, price_trend: 1, vol_min: 300000 }
+  }
+];
+
+const SCREENER_COLUMN_LABELS = {
+  closing_price: '收盤價',
+  trade_volume: '成交量',
+  pe_ratio: '本益比(PE)',
+  pb_ratio: '淨值比(PB)',
+  yield_ratio: '殖利率(%)',
+  ma5: 'MA5',
+  ma20: 'MA20',
+  ma60: 'MA60',
+  large_holder_ratio: '大戶持股(%)',
+  large_holder_change: '大戶週增減',
+  foreign_buy_days: '外資連買',
+  trust_buy_days: '投信連買',
+  inst_buy_days: '法人連買'
+};
+
+const EXCLUDED_SCREENER_KEYS = new Set(['date', 'trading_date', 'stock_id', 'stock_name', 'id', 'ai_analysis']);
+
+const formatScreenerCellValue = (key, val) => {
+  if (val === null || val === undefined || val === '') return '-';
+  if (key === 'closing_price') {
+    const num = Number(val);
+    return isNaN(num) ? val : `$${num.toLocaleString(undefined, { minimumFractionDigits: num % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 })}`;
+  }
+  if (key === 'trade_volume') {
+    const num = Number(val);
+    return isNaN(num) ? val : num.toLocaleString();
+  }
+  if (key === 'yield_ratio') {
+    const num = Number(val);
+    return isNaN(num) ? `${val}%` : `${num}%`;
+  }
+  if (typeof val === 'number') {
+    return val.toLocaleString();
+  }
+  return String(val);
+};
+
 const DEFAULT_PROMPT = `請扮演一位資深的台股產業與籌碼分析師。
 我剛透過「量價突破/底部出量」的技術面篩選邏輯，挑出了 {stock_id} 這檔處於谷底上揚階段的股票。為了評估這是不是有效的起漲點，以及是否值得投入實質資金，請幫我利用你的網路搜尋功能，抓取最新的網路資訊（包括最新財報營收、法說會簡報、法人研究報告，以及 PTT 股票板、股市同學會、Threads 等論壇的最新討論與輿情），進行以下 5 個維度的深度查證與分析：
 1. 族群性與產業位階考核（打群架還是單打獨鬥？同業競合狀況）
@@ -205,6 +276,18 @@ function StockDashboard() {
   // 手機/桌面 顯示模式 ('card' 卡片模式 或 'table' 表格模式)
   const [portfolioViewMode, setPortfolioViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 'card' : 'table'));
   const [mlRecViewMode, setMlRecViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 'card' : 'table'));
+
+  // 智慧選股器常用條件預設集與自訂清單
+  const [customPresets, setCustomPresets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('screener_saved_presets');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+  const [activePresetId, setActivePresetId] = useState(null);
+  const [showSavePresetModal, setShowSavePresetModal] = useState(false);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [showFilterGrid, setShowFilterGrid] = useState(true);
 
   // Podcast 相關狀態
   const [podcastChannels, setPodcastChannels] = useState([]);
@@ -1208,6 +1291,17 @@ function StockDashboard() {
           telegram_bot_token: cfg.telegram_bot_token || prev.telegram_bot_token,
           telegram_chat_id: cfg.telegram_chat_id || prev.telegram_chat_id,
         }));
+        if (cfg.screener_presets) {
+          try {
+            const parsed = JSON.parse(cfg.screener_presets);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setCustomPresets(parsed);
+              localStorage.setItem('screener_saved_presets', cfg.screener_presets);
+            }
+          } catch (e) {
+            console.warn('解析雲端選股預設集失敗', e);
+          }
+        }
         return;
       }
       const fallbackRes = await stockFetch('/api/settings');
@@ -1947,7 +2041,61 @@ function StockDashboard() {
     }
   };
 
-  const runScreener = async () => {
+  // 同步自訂條件預設集至 localStorage 與 Supabase stock_settings
+  const persistCustomPresets = async (updatedList) => {
+    setCustomPresets(updatedList);
+    localStorage.setItem('screener_saved_presets', JSON.stringify(updatedList));
+    try {
+      await supabaseFetch('/stock_settings', {
+        method: 'POST',
+        headers: { 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({
+          key: 'screener_presets',
+          value: JSON.stringify(updatedList),
+          updated_at: new Date().toISOString()
+        })
+      });
+    } catch (err) {
+      console.warn('同步選股預設集至雲端失敗', err);
+    }
+  };
+
+  const handleSaveCurrentAsPreset = () => {
+    if (!newPresetName.trim()) {
+      alert('請輸入條件名稱！');
+      return;
+    }
+    const newPreset = {
+      id: `custom_${Date.now()}`,
+      name: newPresetName.trim(),
+      desc: '使用者自訂篩選條件',
+      config: { ...config },
+      isCustom: true
+    };
+    const updated = [...customPresets, newPreset];
+    persistCustomPresets(updated);
+    setActivePresetId(newPreset.id);
+    setShowSavePresetModal(false);
+    setNewPresetName('');
+    setSavedToast(true);
+    setTimeout(() => setSavedToast(false), 2500);
+  };
+
+  const handleDeletePreset = (id) => {
+    const updated = customPresets.filter(p => p.id !== id);
+    persistCustomPresets(updated);
+    if (activePresetId === id) setActivePresetId(null);
+  };
+
+  const handleApplyPresetAndRun = (preset) => {
+    setActivePresetId(preset.id);
+    setConfig(preset.config);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(preset.config));
+    runScreener(preset.config);
+  };
+
+  const runScreener = async (overrideConfig = null) => {
+    const activeConfig = overrideConfig || config;
     try {
       setLoading(true);
       setData(null);
@@ -1966,7 +2114,7 @@ function StockDashboard() {
         body: JSON.stringify({
           username: user?.username || 'hotpotlu',
           status: 'pending',
-          config: config
+          config: activeConfig
         })
       });
 
@@ -2132,9 +2280,237 @@ function StockDashboard() {
         {/* ===== 智慧選股器 ===== */}
         {activeTab === 'screener' && (
           <div>
-            <div className="filter-grid">
-              <div className="filter-section">
-                <h3>基本估值篩選</h3>
+            {/* 置頂快捷選股條件清單（一鍵點擊立即篩選） */}
+            <div className="screener-presets-card" style={{
+              background: 'rgba(30, 41, 59, 0.85)',
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              marginBottom: '1.25rem',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.6rem',
+                marginBottom: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#F1F5F9' }}>⚡ 常用選股條件清單</span>
+                  <span style={{ fontSize: '0.8rem', color: '#94A3B8', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '12px' }}>
+                    點擊任一條件立即篩選
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <button
+                    onClick={() => {
+                      setNewPresetName('');
+                      setShowSavePresetModal(true);
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, #10B981, #059669)',
+                      border: 'none',
+                      color: 'white',
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem'
+                    }}
+                    title="將目前的篩選參數記錄為新條件"
+                  >
+                    <span>➕ 儲存目前條件</span>
+                  </button>
+                  <button
+                    onClick={() => setShowFilterGrid(!showFilterGrid)}
+                    style={{
+                      background: 'rgba(255,255,255,0.08)',
+                      border: '1px solid var(--border-color)',
+                      color: '#CBD5E1',
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {showFilterGrid ? '收合篩選器 ▴' : '展開進階篩選器 ▾'}
+                  </button>
+                </div>
+              </div>
+
+              {/* 預設集 Chips 按鈕列表 */}
+              <div style={{
+                display: 'flex',
+                gap: '0.55rem',
+                overflowX: 'auto',
+                paddingBottom: '0.35rem',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin'
+              }}>
+                {/* 系統內建預設條件 */}
+                {BUILTIN_SCREENER_PRESETS.map(preset => {
+                  const isActive = activePresetId === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      onClick={() => handleApplyPresetAndRun(preset)}
+                      title={preset.desc}
+                      style={{
+                        padding: '0.45rem 0.85rem',
+                        borderRadius: '20px',
+                        border: isActive ? '1.5px solid #60A5FA' : '1px solid rgba(255,255,255,0.15)',
+                        background: isActive ? 'linear-gradient(135deg, rgba(37,99,235,0.6), rgba(30,58,138,0.7))' : 'rgba(15, 23, 42, 0.6)',
+                        color: isActive ? '#FFFFFF' : '#E2E8F0',
+                        fontSize: '0.88rem',
+                        fontWeight: isActive ? 'bold' : 'normal',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        boxShadow: isActive ? '0 0 10px rgba(59, 130, 246, 0.4)' : 'none',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {preset.name}
+                    </button>
+                  );
+                })}
+
+                {/* 使用者自訂儲存的條件 */}
+                {customPresets.map(preset => {
+                  const isActive = activePresetId === preset.id;
+                  return (
+                    <div
+                      key={preset.id}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        borderRadius: '20px',
+                        border: isActive ? '1.5px solid #34D399' : '1px solid rgba(52, 211, 153, 0.3)',
+                        background: isActive ? 'linear-gradient(135deg, rgba(5,150,105,0.6), rgba(6,78,59,0.7))' : 'rgba(6, 78, 59, 0.25)',
+                        padding: '0.2rem 0.5rem 0.2rem 0.85rem',
+                        gap: '0.35rem',
+                        whiteSpace: 'nowrap',
+                        boxShadow: isActive ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none'
+                      }}
+                    >
+                      <button
+                        onClick={() => handleApplyPresetAndRun(preset)}
+                        title={preset.desc || '點擊套用並篩選'}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: isActive ? '#FFFFFF' : '#A7F3D0',
+                          fontSize: '0.88rem',
+                          fontWeight: isActive ? 'bold' : 'normal',
+                          cursor: 'pointer',
+                          padding: '0.25rem 0'
+                        }}
+                      >
+                        ⭐ {preset.name}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`確定要刪除「${preset.name}」自訂條件嗎？`)) {
+                            handleDeletePreset(preset.id);
+                          }
+                        }}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: 'none',
+                          color: '#F87171',
+                          borderRadius: '50%',
+                          width: '18px',
+                          height: '18px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          padding: 0
+                        }}
+                        title="刪除此條件"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 儲存選股條件彈跳視窗 */}
+            {showSavePresetModal && (
+              <div className="modal-overlay" style={{ zIndex: 1000 }}>
+                <div className="modal-content" style={{ maxWidth: '420px', width: '92%' }}>
+                  <div className="analysis-header" style={{ marginBottom: '1rem' }}>
+                    <h3 className="analysis-title" style={{ fontSize: '1.1rem' }}>💾 儲存目前篩選條件</h3>
+                    <button className="close-btn" onClick={() => setShowSavePresetModal(false)}>×</button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                      將您目前的估值、均線與籌碼參數保存為自訂條件，未來可在清單中一鍵套用並自動篩選。
+                    </p>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.88rem', color: '#93C5FD' }}>
+                        條件名稱 (例如：低PE外資連買股、主力鎖碼破底翻)：
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="請輸入自訂條件名稱..."
+                        value={newPresetName}
+                        onChange={e => setNewPresetName(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') handleSaveCurrentAsPreset(); }}
+                        autoFocus
+                        style={{
+                          width: '100%',
+                          padding: '0.55rem 0.75rem',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                    <div style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      color: 'var(--text-muted)'
+                    }}>
+                      <div>PE: {config.pe_min || 0} ~ {config.pe_max || 9999} ｜ PB: {config.pb_min || 0} ~ {config.pb_max || 999}</div>
+                      <div>成交量: ≥ {Number(config.vol_min || 0).toLocaleString()} 股 ｜ 殖利率: ≥ {config.yield_min || 0}%</div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setShowSavePresetModal(false)}
+                      >
+                        取消
+                      </button>
+                      <button
+                        className="btn btn-save"
+                        onClick={handleSaveCurrentAsPreset}
+                        style={{ fontWeight: 'bold' }}
+                      >
+                        確認儲存
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showFilterGrid && (
+              <div className="filter-grid">
+                <div className="filter-section">
+                  <h3>基本估值篩選</h3>
                 <RangeInput label="本益比 (PE)" minKey="pe_min" maxKey="pe_max" config={config} setConfig={setConfig} step={0.5} isFloat />
                 <RangeInput label="股價淨值比 (PB)" minKey="pb_min" maxKey="pb_max" config={config} setConfig={setConfig} step={0.1} isFloat />
                 <RangeInput label="殖利率 (%)" minKey="yield_min" maxKey="yield_max" config={config} setConfig={setConfig} step={0.1} isFloat />
@@ -2237,6 +2613,7 @@ function StockDashboard() {
                 </div>
               </div>
             </div>
+            )}
 
             <div className="action-button-group" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
               <button className="btn btn-main" onClick={runScreener} disabled={loading}>
@@ -5416,9 +5793,59 @@ function StockDashboard() {
           </div>
         )}
 
-        {/* ===== 資料表格 ===== */}
+        {/* ===== 最新日期置頂橫幅 (智慧選股器) ===== */}
         {activeTab === 'screener' && sortedData && sortedData.length > 0 && (
-          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', marginTop: '2rem', flexWrap: 'wrap' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            marginTop: '1.75rem',
+            marginBottom: '0.75rem',
+            padding: '0.75rem 1.15rem',
+            background: 'linear-gradient(90deg, rgba(30, 58, 138, 0.4), rgba(15, 23, 42, 0.7))',
+            border: '1px solid rgba(96, 165, 250, 0.35)',
+            borderRadius: '10px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>🗓️</span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 'bold', color: '#93C5FD', fontSize: '0.98rem' }}>
+                    最新交易數據基準日：{sortedData.find(r => r.date || r.trading_date)?.date || sortedData[0]?.date || '最新交易日'}
+                  </span>
+                  <span style={{
+                    fontSize: '0.78rem',
+                    color: '#34D399',
+                    background: 'rgba(16, 185, 129, 0.18)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    fontWeight: 'bold'
+                  }}>
+                    共 {sortedData.length} 檔命中
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginTop: '2px' }}>
+                  ※ 列表已整合「股票代號+名稱」與快捷圖示，並自動排除每列冗餘日期，大幅節省橫向螢幕空間。
+                </div>
+              </div>
+            </div>
+            {activePresetId && (
+              <div style={{ fontSize: '0.85rem', color: '#E2E8F0', background: 'rgba(255,255,255,0.06)', padding: '4px 10px', borderRadius: '6px' }}>
+                當前策略：<strong style={{ color: '#60A5FA' }}>
+                  {[...BUILTIN_SCREENER_PRESETS, ...customPresets].find(p => p.id === activePresetId)?.name || '自訂篩選'}
+                </strong>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ===== 批次操作與模型選擇 ===== */}
+        {activeTab === 'screener' && sortedData && sortedData.length > 0 && (
+          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', marginTop: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 'bold' }}>🤖 選用分析模型:</span>
               <select
@@ -5473,82 +5900,218 @@ function StockDashboard() {
         )}
 
         {sortedData && sortedData.length > 0 && (
-          <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
-            <table>
-              <thead>
-                <tr>
-                  {activeTab === 'screener' && (
-                    <th style={{ width: '40px', textAlign: 'center' }}>
+          <div style={{ overflowX: 'auto', marginTop: '0.5rem' }}>
+            {activeTab === 'screener' ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: '38px', textAlign: 'center' }}>
                       <input
                         type="checkbox"
                         checked={sortedData.length > 0 && sortedData.every(row => selectedStocks[row.stock_id])}
                         onChange={toggleSelectAll}
+                        title="全選 / 取消全選"
                       />
                     </th>
-                  )}
-                  {Object.keys(sortedData[0]).map(key => {
-                    const isActive = sortConfig.key === key;
+                    <th
+                      onClick={() => handleSort('stock_id')}
+                      className="sortable-th"
+                      title="點擊依股票代號排序"
+                      style={{ whiteSpace: 'nowrap', minWidth: '120px' }}
+                    >
+                      股票標的
+                      <span className="sort-arrow">
+                        {sortConfig.key === 'stock_id' ? (sortConfig.dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
+                      </span>
+                    </th>
+                    <th style={{ width: '96px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      快捷
+                    </th>
+                    {Object.keys(sortedData[0])
+                      .filter(k => !EXCLUDED_SCREENER_KEYS.has(k))
+                      .map(key => {
+                        const isActive = sortConfig.key === key;
+                        const label = SCREENER_COLUMN_LABELS[key] || key;
+                        return (
+                          <th
+                            key={key}
+                            onClick={() => handleSort(key)}
+                            className="sortable-th"
+                            title={`點擊依「${label}」排序`}
+                            style={{ whiteSpace: 'nowrap' }}
+                          >
+                            {label}
+                            <span className="sort-arrow">
+                              {isActive ? (sortConfig.dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
+                            </span>
+                          </th>
+                        );
+                      })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedData.map((row, idx) => {
+                    const metricKeys = Object.keys(row).filter(k => !EXCLUDED_SCREENER_KEYS.has(k));
                     return (
-                      <th
-                        key={key}
-                        onClick={() => handleSort(key)}
-                        className="sortable-th"
-                        title={`點擊依「${key}」排序`}
-                      >
-                        {key}
-                        <span className="sort-arrow">
-                          {isActive ? (sortConfig.dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
-                        </span>
-                      </th>
+                      <tr key={row.stock_id || idx}>
+                        <td style={{ textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={!!selectedStocks[row.stock_id]}
+                            onChange={() => toggleSelectStock(row.stock_id)}
+                          />
+                        </td>
+                        <td style={{ whiteSpace: 'nowrap' }}>
+                          <span style={{ fontWeight: 'bold', color: '#60A5FA', marginRight: '0.45rem', fontSize: '0.92rem' }}>
+                            {row.stock_id}
+                          </span>
+                          <span style={{ fontWeight: '500', color: 'var(--text-main)', fontSize: '0.92rem' }}>
+                            {row.stock_name}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                            {row.stock_id ? (
+                              <>
+                                <a
+                                  href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title="查詢 Yahoo 即時報價與技術走勢"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(59, 130, 246, 0.18)',
+                                    border: '1px solid rgba(59, 130, 246, 0.45)',
+                                    color: '#93C5FD',
+                                    textDecoration: 'none',
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  🔍
+                                </a>
+                                <button
+                                  onClick={() => copyAiPrompt(row.stock_id)}
+                                  title="複製個股專用 AI 提示詞"
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(148, 163, 184, 0.15)',
+                                    border: '1px solid rgba(148, 163, 184, 0.35)',
+                                    color: '#E2E8F0',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  📋
+                                </button>
+                                <button
+                                  onClick={() => viewHistory(row.stock_id, row.stock_name)}
+                                  title={row.ai_analysis ? "閱讀 AI 深度健檢報告 (已生成)" : "檢視 / 產生 AI 智能健檢分析"}
+                                  style={{
+                                    position: 'relative',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    background: row.ai_analysis ? 'rgba(16, 185, 129, 0.25)' : 'rgba(139, 92, 246, 0.2)',
+                                    border: row.ai_analysis ? '1px solid rgba(16, 185, 129, 0.6)' : '1px solid rgba(139, 92, 246, 0.4)',
+                                    color: row.ai_analysis ? '#6EE7B7' : '#C4B5FD',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  🤖
+                                  {row.ai_analysis && (
+                                    <span style={{
+                                      position: 'absolute',
+                                      top: '-2px',
+                                      right: '-2px',
+                                      width: '7px',
+                                      height: '7px',
+                                      borderRadius: '50%',
+                                      background: '#10B981',
+                                      boxShadow: '0 0 4px #10B981'
+                                    }}></span>
+                                  )}
+                                </button>
+                              </>
+                            ) : '-'}
+                          </div>
+                        </td>
+                        {metricKeys.map(key => (
+                          <td key={key} style={{ whiteSpace: 'nowrap' }}>
+                            {formatScreenerCellValue(key, row[key])}
+                          </td>
+                        ))}
+                      </tr>
                     );
                   })}
-                  <th>動作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedData.map((row, idx) => (
-                  <tr key={idx}>
-                    {activeTab === 'screener' && (
-                      <td style={{ textAlign: 'center' }}>
-                        <input
-                          type="checkbox"
-                          checked={!!selectedStocks[row.stock_id]}
-                          onChange={() => toggleSelectStock(row.stock_id)}
-                        />
-                      </td>
-                    )}
-                    {Object.values(row).map((val, i) => (
-                      <td key={i}>{val !== null ? val.toString() : '-'}</td>
-                    ))}
-                    <td style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
-                      {row.stock_id ? (
-                        <>
-                          <a
-                            href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
-                            target="_blank" rel="noreferrer"
-                            style={{ color: '#60A5FA', textDecoration: 'none' }}
-                          >🔍 Yahoo</a>
-                          <button
-                            onClick={() => copyAiPrompt(row.stock_id)}
-                            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
-                          >📋 複製AI指令</button>
-                          {activeTab === 'screener' && (
-                            <button
-                              onClick={() => viewHistory(row.stock_id, row.stock_name)}
-                              style={{ background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.4)', color: '#93C5FD', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
-                            >
-                              📖 閱讀AI分析
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)' }}>-</span>
-                      )}
-                    </td>
+                </tbody>
+              </table>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    {Object.keys(sortedData[0]).map(key => {
+                      const isActive = sortConfig.key === key;
+                      return (
+                        <th
+                          key={key}
+                          onClick={() => handleSort(key)}
+                          className="sortable-th"
+                          title={`點擊依「${key}」排序`}
+                        >
+                          {key}
+                          <span className="sort-arrow">
+                            {isActive ? (sortConfig.dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
+                          </span>
+                        </th>
+                      );
+                    })}
+                    <th>動作</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sortedData.map((row, idx) => (
+                    <tr key={idx}>
+                      {Object.values(row).map((val, i) => (
+                        <td key={i}>{val !== null ? val.toString() : '-'}</td>
+                      ))}
+                      <td style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                        {row.stock_id ? (
+                          <>
+                            <a
+                              href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
+                              target="_blank" rel="noreferrer"
+                              style={{ color: '#60A5FA', textDecoration: 'none' }}
+                            >🔍 Yahoo</a>
+                            <button
+                              onClick={() => copyAiPrompt(row.stock_id)}
+                              style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
+                            >📋 複製AI指令</button>
+                          </>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 

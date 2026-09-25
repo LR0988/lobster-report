@@ -1429,6 +1429,25 @@ input:checked + .slider:before {
     padding-right: 0;
     max-height: 200px;
   }
+
+  /* 12. Screener Presets on Mobile */
+  .screener-presets-card {
+    padding: 0.85rem !important;
+  }
+}
+
+/* Screener Mini Icon Buttons */
+.screener-mini-icon-btn {
+  transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.screener-mini-icon-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.screener-mini-icon-btn:active {
+  transform: scale(0.95);
 }
 
 
