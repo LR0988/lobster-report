@@ -5,8 +5,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f4f7f6; /* Light background for the forum */
-  color: #333;
+  background-color: #0F172A;
+  color: #F8FAFC;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 code {
@@ -15,92 +17,73 @@ code {
 }
 
 .App {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-/* Forum Header Styles */
-.forum-header {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.forum-header h1 {
-  color: #2c3e50;
+  width: 100%;
+  max-width: 100%;
   margin: 0;
-  font-size: 2.5em;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Forum Post List Styles */
-.forum-post-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-/* Forum Post Styles */
-.forum-post {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
-}
-
-.forum-post:hover {
-  transform: translateY(-5px);
-}
-
-.forum-post h2 {
-  color: #34495e;
-  margin-top: 0;
-  font-size: 1.8em;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-.post-meta {
-  color: #7f8c8d;
-  font-size: 0.9em;
-  margin-bottom: 10px;
-}
-
-.post-content p {
-  line-height: 1.6;
-  color: #555;
+/* Header Styles - Dark Glassmorphism */
+.forum-header {
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  margin-bottom: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 /* Navigation List Styles */
 .nav-list {
   list-style: none;
   padding: 0;
-  margin: 15px 0 0 0;
+  margin: 8px 0 0 0;
   display: flex;
-  justify-content: center;
-  gap: 20px;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.nav-list::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-list li {
+  flex-shrink: 0;
 }
 
 .nav-list li a {
   text-decoration: none;
-  color: #3498db;
-  font-weight: bold;
-  transition: color 0.3s ease;
+  color: #94A3B8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  display: inline-block;
+  transition: all 0.2s ease;
 }
 
 .nav-list li a:hover {
-  color: #2980b9;
+  color: #FFFFFF;
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #3B82F6;
 }
-
 
 /* General Main Content Styling */
 .main-content {
-  padding: 20px 0;
+  padding: 0;
+  margin: 0;
 }
 
 /* Stock Dashboard Styles */
@@ -378,27 +361,27 @@ code {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 6px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .brand-logo-link {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: #2c3e50;
-  gap: 10px;
+  color: #F8FAFC;
+  gap: 8px;
 }
 
 .brand-icon {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
 }
 
 .brand-name {
-  font-size: 1.8rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #e74c3c, #e67e22);
+  font-size: 1.35rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #F87171, #FBBF24);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -411,49 +394,61 @@ code {
 .user-profile-badge {
   display: flex;
   align-items: center;
-  background: #f8f9fa;
-  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
   border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 8px;
+  color: #F8FAFC;
+  font-size: 0.85rem;
+}
+
+.user-avatar {
+  font-size: 0.95rem;
+}
+
+.user-greeting {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .user-role-tag {
-  background: #e74c3c;
-  color: white;
-  font-size: 0.75rem;
-  padding: 2px 6px;
+  background: rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  color: #FECACA;
+  font-size: 0.7rem;
+  padding: 1px 6px;
   border-radius: 10px;
-  margin-left: 6px;
   text-transform: uppercase;
 }
 
 .btn-logout {
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  color: #64748b;
-  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #CBD5E1;
+  padding: 3px 8px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   transition: all 0.2s;
 }
 
 .btn-logout:hover {
-  background: #fee2e2;
-  color: #ef4444;
-  border-color: #fca5a5;
+  background: rgba(239, 68, 68, 0.25);
+  color: #FCA5A5;
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .btn-login-header {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
   color: white;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 20px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
   transition: opacity 0.2s;
 }
 
@@ -462,7 +457,7 @@ code {
 }
 
 .nav-highlight {
-  color: #e74c3c !important;
+  color: #60A5FA !important;
   font-weight: bold;
 }
 

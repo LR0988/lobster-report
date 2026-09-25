@@ -202,6 +202,10 @@ function StockDashboard() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzingId, setAnalyzingId] = useState(null);
 
+  // 手機/桌面 顯示模式 ('card' 卡片模式 或 'table' 表格模式)
+  const [portfolioViewMode, setPortfolioViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 'card' : 'table'));
+  const [mlRecViewMode, setMlRecViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 'card' : 'table'));
+
   // Podcast 相關狀態
   const [podcastChannels, setPodcastChannels] = useState([]);
   const [podcastEpisodes, setPodcastEpisodes] = useState([]);
@@ -2065,7 +2069,7 @@ function StockDashboard() {
       </header>
 
       <div className="glass-panel">
-        <div className="tabs" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="tabs">
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'ml', label: '🤖 ML 波段飆股預測', badge: activeTasks.some(t => t.type === 'ml_train') ? '🏋️ 訓練中' : null },
@@ -2234,8 +2238,8 @@ function StockDashboard() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
-              <button className="btn" onClick={runScreener} disabled={loading}>
+            <div className="action-button-group" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
+              <button className="btn btn-main" onClick={runScreener} disabled={loading}>
                 {loading ? <span className="loader"></span> : '🚀 開始篩選'}
               </button>
               <button className="btn btn-save" onClick={saveSettings}>💾 儲存設定</button>
@@ -2655,7 +2659,7 @@ function StockDashboard() {
                 </div>
 
                 {/* 快捷操作按鈕列 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <div className="ml-train-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                   {trainSavedToast && (
                     <span style={{
                       background: 'rgba(16, 185, 129, 0.2)',
@@ -3068,8 +3072,129 @@ function StockDashboard() {
             </div>
 
             {mlPredictions && mlPredictions.length > 0 ? (
-              <div style={{ overflowX: 'auto' }}>
-                <table>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    📊 推薦清單共 <strong>{mlPredictions.length}</strong> 檔（依勝率與評等排序）
+                  </span>
+                  <div className="view-mode-toggle">
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${mlRecViewMode === 'card' ? 'active' : ''}`}
+                      onClick={() => setMlRecViewMode('card')}
+                    >
+                      📱 卡片檢視
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${mlRecViewMode === 'table' ? 'active' : ''}`}
+                      onClick={() => setMlRecViewMode('table')}
+                    >
+                      📊 表格檢視
+                    </button>
+                  </div>
+                </div>
+
+                {mlRecViewMode === 'card' ? (
+                  <div className="ml-rec-card-grid">
+                    {mlPredictions.map((row, idx) => (
+                      <div key={row.stock_id} className="ml-rec-card">
+                        <div className="ml-rec-card-header">
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', background: 'rgba(245, 158, 11, 0.15)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                              #{idx + 1}
+                            </span>
+                            <span style={{ fontSize: '1.15rem', fontWeight: '800', color: '#60A5FA' }}>{row.stock_id}</span>
+                            <span style={{ fontSize: '1rem', fontWeight: '700', color: '#F8FAFC' }}>{row.stock_name}</span>
+                          </div>
+                          <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#34D399' }}>
+                            ${row.latest_price} 元
+                          </div>
+                        </div>
+
+                        <div className="ml-rec-prob-row">
+                          <div className="ml-rec-prob-pill" style={{
+                            background: row.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.15)',
+                            border: row.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
+                            color: row.win_probability >= 35 ? '#FCA5A5' : '#FDE68A'
+                          }}>
+                            <span>🚀 突破勝率</span>
+                            <span>{row.win_probability}%</span>
+                          </div>
+                          <div className="ml-rec-prob-pill" style={{
+                            background: row.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : row.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                            border: row.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : row.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                            color: row.drop_probability >= 40 ? '#F87171' : row.drop_probability <= 25 ? '#34D399' : 'white'
+                          }}>
+                            <span>⚠️ 跌破風險</span>
+                            <span>{row.drop_probability}%</span>
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: '0.4rem 0.75rem',
+                          background: 'rgba(0, 0, 0, 0.22)',
+                          padding: '0.55rem 0.75rem',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>🛡️ AI 攻守</span>
+                            <span style={{ fontWeight: 'bold', color: row.risk_tag.includes('👑') ? '#FDE68A' : row.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD' }}>
+                              {row.risk_tag}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>大戶持股</span>
+                            <span style={{ fontWeight: 'bold' }}>
+                              {row.large_holder_ratio}% ({row.large_holder_change > 0 ? `▲${row.large_holder_change}%p` : row.large_holder_change < 0 ? `▼${Math.abs(row.large_holder_change)}%p` : '0%p'})
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>外資動向</span>
+                            <span style={{ fontWeight: 'bold' }}>{row.foreign_buy_days > 0 ? `連買 ${row.foreign_buy_days} 天` : '無連買'}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>投信動向</span>
+                            <span style={{ fontWeight: 'bold' }}>{row.trust_buy_days > 0 ? `連買 ${row.trust_buy_days} 天` : '無連買'}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', paddingTop: '0.25rem' }}>
+                          <button
+                            type="button"
+                            className="btn btn-save"
+                            style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                            onClick={() => handleAddWatchlistStockDirectly(row.stock_id)}
+                          >
+                            ➕ 加入自選
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                            onClick={() => handleCopyPrompt(row.stock_id)}
+                          >
+                            📋 複製指令
+                          </button>
+                          <a
+                            href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-secondary"
+                            style={{ padding: '0.4rem 0.65rem', fontSize: '0.82rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            🔍
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                    <table>
                   <thead>
                     <tr>
                       <th onClick={() => handleMlSort('win_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
@@ -3178,7 +3303,9 @@ function StockDashboard() {
                   </tbody>
                 </table>
               </div>
-            ) : (
+            )}
+          </div>
+        ) : (
               <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
                 <p style={{ margin: 0, fontSize: '1.05rem' }}>尚無機器學習預測資料。</p>
@@ -4238,8 +4365,144 @@ function StockDashboard() {
 
             {/* 持股表格 (凍結前 6 欄: 股票代號、名稱、自動分析、均價、最新價、預估損益) */}
             {portfolioList && portfolioList.length > 0 ? (
-              <div className="portfolio-table-container">
-                <table className="portfolio-sticky-table">
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    💼 追蹤持股共 <strong>{portfolioList.length}</strong> 檔
+                  </span>
+                  <div className="view-mode-toggle">
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${portfolioViewMode === 'card' ? 'active' : ''}`}
+                      onClick={() => setPortfolioViewMode('card')}
+                    >
+                      📱 卡片檢視
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${portfolioViewMode === 'table' ? 'active' : ''}`}
+                      onClick={() => setPortfolioViewMode('table')}
+                    >
+                      📊 表格檢視
+                    </button>
+                  </div>
+                </div>
+
+                {portfolioViewMode === 'card' ? (
+                  <div className="portfolio-card-grid">
+                    {portfolioList.map((item) => {
+                      const hasCost = item.buy_price !== null && item.buy_price > 0;
+                      const hasPrice = item.latest_price !== null;
+                      let roi = null;
+                      let roiText = '-';
+                      let roiClass = 'text-flat';
+
+                      if (hasCost && hasPrice) {
+                        roi = ((item.latest_price - item.buy_price) / item.buy_price) * 100;
+                        roiText = `${roi > 0 ? '+' : ''}${roi.toFixed(2)}%`;
+                        if (roi > 0.001) roiClass = 'text-up';
+                        else if (roi < -0.001) roiClass = 'text-down';
+                      }
+
+                      const pred = portfolioPredictions[item.stock_id] || {};
+                      const hasPred = pred.win_probability !== undefined && pred.win_probability > 0;
+
+                      return (
+                        <div key={item.stock_id} className="portfolio-stock-card">
+                          <div className="portfolio-card-header">
+                            <div className="portfolio-card-stock-info">
+                              <span className="portfolio-card-stock-id">{item.stock_id}</span>
+                              <span className="portfolio-card-stock-name">{item.stock_name}</span>
+                            </div>
+                            <div className={`portfolio-card-roi-badge ${roiClass}`} style={{
+                              background: roi > 0 ? 'rgba(239, 68, 68, 0.2)' : roi < 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.06)',
+                              border: roi > 0 ? '1px solid rgba(239, 68, 68, 0.4)' : roi < 0 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                            }}>
+                              {roiText}
+                            </div>
+                          </div>
+
+                          <div className="portfolio-card-body-grid">
+                            <div className="portfolio-card-item">
+                              <span className="portfolio-card-item-label">購入均價</span>
+                              <span className="portfolio-card-item-val">{hasCost ? `$${item.buy_price.toFixed(2)}` : '未提供'}</span>
+                            </div>
+                            <div className="portfolio-card-item">
+                              <span className="portfolio-card-item-label">最新股價</span>
+                              <span className="portfolio-card-item-val">{hasPrice ? `$${item.latest_price.toFixed(2)}` : '無最新價'}</span>
+                            </div>
+                            <div className="portfolio-card-item">
+                              <span className="portfolio-card-item-label">🚀 20天勝率</span>
+                              <span className="portfolio-card-item-val" style={{ color: pred.win_probability >= 35 ? '#FCA5A5' : '#FDE68A' }}>
+                                {hasPred ? `${pred.win_probability}%` : '—'}
+                              </span>
+                            </div>
+                            <div className="portfolio-card-item">
+                              <span className="portfolio-card-item-label">⚠️ 跌破風險</span>
+                              <span className="portfolio-card-item-val" style={{ color: pred.drop_probability >= 40 ? '#F87171' : '#34D399' }}>
+                                {hasPred ? `${pred.drop_probability}%` : '—'}
+                              </span>
+                            </div>
+                            {hasPred && pred.risk_tag && (
+                              <div className="portfolio-card-item" style={{ gridColumn: 'span 2' }}>
+                                <span className="portfolio-card-item-label">🛡️ AI 攻守</span>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{pred.risk_tag}</span>
+                              </div>
+                            )}
+                            {item.notes && (
+                              <div className="portfolio-card-item" style={{ gridColumn: 'span 2' }}>
+                                <span className="portfolio-card-item-label">備註</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.notes}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="portfolio-card-actions">
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={item.auto_analyze === 1}
+                                onChange={() => handleToggleAutoAnalyze(item.stock_id)}
+                                style={{ width: '16px', height: '16px' }}
+                              />
+                              自動分析
+                            </label>
+                            <div style={{ display: 'flex', gap: '0.45rem' }}>
+                              <button
+                                type="button"
+                                className="btn"
+                                style={{ padding: '0.3rem 0.65rem', fontSize: '0.8rem', background: 'linear-gradient(135deg, #4F46E5, #06B6D4)' }}
+                                onClick={() => handleAnalyzeStock(item.stock_id)}
+                                disabled={analyzingId !== null}
+                              >
+                                {analyzingId === item.stock_id ? '分析中...' : '🤖 AI健檢'}
+                              </button>
+                              <a
+                                href={`https://tw.stock.yahoo.com/quote/${item.stock_id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                              >
+                                🔍
+                              </a>
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem', color: '#F87171' }}
+                                onClick={() => handleDeletePortfolio(item.stock_id)}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="portfolio-table-container">
+                    <table className="portfolio-sticky-table">
                   <thead>
                     <tr>
                       <th className="portfolio-sticky-col-0">股票代號</th>
@@ -4453,7 +4716,9 @@ function StockDashboard() {
                   </tbody>
                 </table>
               </div>
-            ) : (
+            )}
+          </div>
+        ) : (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💼</div>
                 <p style={{ margin: 0, fontSize: '1rem' }}>目前尚未建立任何持股追蹤。</p>
