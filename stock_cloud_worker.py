@@ -48,53 +48,369 @@ if not os.path.exists(LOCAL_STOCK_DB):
     print(f"錯誤: 找不到本地台股資料庫: {LOCAL_STOCK_DB}")
     sys.exit(1)
 
-def execute_screener_job(config: dict) -> list:
-    """依照雲端傳來的篩選參數，在本地 4.9GB tw_stock.db 進行高速篩選"""
-    pe_min = float(config.get("pe_min", 0) or 0)
-    pe_max = float(config.get("pe_max", 9999) or 9999)
-    pb_min = float(config.get("pb_min", 0) or 0)
-    pb_max = float(config.get("pb_max", 999) or 999)
-    vol_min = int(config.get("vol_min", 0) or 0)
-    vol_max = int(config.get("vol_max", 9999999999) or 9999999999)
-    yield_min = float(config.get("yield_min", 0) or 0)
-    yield_max = float(config.get("yield_max", 100) or 100)
+_SCREENER_CACHE = {
+    "timestamp": 0,
+    "db_mtime": 0,
+    "stock_dict": {},
+    "inst_dict": {},
+    "holder_dict": {},
+    "history_dict": {},
+}
 
-    print(f"[*] 執行選股篩選: PE[{pe_min}~{pe_max}] PB[{pb_min}~{pb_max}] Vol[{vol_min}~{vol_max}]")
+def get_screener_cached_data():
+    """快取 tw_stock.db 最新 65 天交易與指標資料，避免每次篩選重複全表掃描"""
+    current_time = time.time()
+    db_mtime = os.path.getmtime(LOCAL_STOCK_DB) if os.path.exists(LOCAL_STOCK_DB) else 0
 
+    # 15 分鐘快取效期，且確認資料庫檔案無異動
+    if (
+        _SCREENER_CACHE["timestamp"] > 0
+        and (current_time - _SCREENER_CACHE["timestamp"] < 900)
+        and (_SCREENER_CACHE["db_mtime"] == db_mtime)
+        and _SCREENER_CACHE["stock_dict"]
+    ):
+        return (
+            _SCREENER_CACHE["stock_dict"],
+            _SCREENER_CACHE["inst_dict"],
+            _SCREENER_CACHE["holder_dict"],
+            _SCREENER_CACHE["history_dict"],
+        )
+
+    print("[*] 正在載入本地台股資料庫快取 (最新 65 天指標)...")
     conn = get_sqlite_conn()
     cursor = conn.cursor()
 
-    query = """
-        SELECT date, stock_id, stock_name, closing_price, trade_volume, pe_ratio, pb_ratio, yield_ratio
+    # 1. 取得最新 65 個交易日
+    cursor.execute("SELECT DISTINCT date FROM daily_stock ORDER BY date DESC LIMIT 65")
+    recent_dates = [r["date"] for r in cursor.fetchall()]
+    min_date = min(recent_dates) if recent_dates else "20000101"
+
+    # 2. 載入這 65 天的價量指標 (過濾掉 6 碼權證)
+    cursor.execute("""
+        SELECT date, stock_id, stock_name, closing_price, trade_volume, pe_ratio, pb_ratio, yield_ratio, opening_price, highest_price, lowest_price
         FROM daily_stock
-        WHERE date = (SELECT MAX(date) FROM daily_stock)
-          AND closing_price IS NOT NULL
-          AND pe_ratio >= ? AND pe_ratio <= ?
-          AND pb_ratio >= ? AND pb_ratio <= ?
-          AND trade_volume >= ? AND trade_volume <= ?
-          AND yield_ratio >= ? AND yield_ratio <= ?
-        ORDER BY trade_volume DESC
-        LIMIT 50
-    """
-    cursor.execute(query, (pe_min, pe_max, pb_min, pb_max, vol_min, vol_max, yield_min, yield_max))
+        WHERE date >= ? AND closing_price IS NOT NULL
+        ORDER BY stock_id ASC, date DESC
+    """, (min_date,))
     rows = cursor.fetchall()
 
-    results = []
+    stock_dict = {}
     for r in rows:
-        results.append({
-            "date": r["date"],
-            "stock_id": r["stock_id"],
-            "stock_name": r["stock_name"],
-            "closing_price": r["closing_price"],
-            "trade_volume": r["trade_volume"],
-            "pe_ratio": r["pe_ratio"],
-            "pb_ratio": r["pb_ratio"],
-            "yield_ratio": r["yield_ratio"],
-        })
+        sid = str(r["stock_id"]).strip()
+        # 排除 6 碼權證等非現股標的
+        if len(sid) > 5 and sid[-1].isdigit():
+            continue
+        if sid not in stock_dict:
+            stock_dict[sid] = {
+                "name": r["stock_name"],
+                "latest_date": r["date"],
+                "latest_close": r["closing_price"],
+                "latest_vol": r["trade_volume"],
+                "latest_pe": r["pe_ratio"],
+                "latest_pb": r["pb_ratio"],
+                "latest_yield": r["yield_ratio"],
+                "closes": [],
+                "vols": [],
+                "opens": [],
+                "highs": [],
+                "lows": []
+            }
+        if len(stock_dict[sid]["closes"]) < 65:
+            stock_dict[sid]["closes"].append(r["closing_price"])
+            stock_dict[sid]["vols"].append(r["trade_volume"])
+            stock_dict[sid]["opens"].append(r["opening_price"])
+            stock_dict[sid]["highs"].append(r["highest_price"])
+            stock_dict[sid]["lows"].append(r["lowest_price"])
+
+    # 3. 載入最新 AI 分析歷史
+    history_dict = {}
+    try:
+        cursor.execute("""
+            SELECT h.stock_id, h.fpe_2026, h.fpe_2027, h.fpe_2028, h.is_group_fight, h.date
+            FROM portfolio_analysis_history h
+            INNER JOIN (
+                SELECT stock_id, MAX(date) as max_date 
+                FROM portfolio_analysis_history 
+                GROUP BY stock_id
+            ) sub ON h.stock_id = sub.stock_id AND h.date = sub.max_date
+        """)
+        for h in cursor.fetchall():
+            history_dict[str(h["stock_id"]).strip()] = {
+                "fpe_2026": h["fpe_2026"],
+                "fpe_2027": h["fpe_2027"],
+                "fpe_2028": h["fpe_2028"],
+                "is_group_fight": h["is_group_fight"],
+                "latest_analysis_date": h["date"]
+            }
+    except Exception as e:
+        print(f"[!] 載入 portfolio_analysis_history 略過或異常: {e}")
+
+    # 4. 預讀取三大法人買賣超歷史 (最新 30 個交易日)
+    cursor.execute("SELECT DISTINCT date FROM institutional_trades ORDER BY date DESC LIMIT 30")
+    inst_dates = [r["date"] for r in cursor.fetchall()]
+    min_inst_date = min(inst_dates) if inst_dates else "20000101"
+    cursor.execute("""
+        SELECT stock_id, date, foreign_net, trust_net, dealer_net 
+        FROM institutional_trades 
+        WHERE date >= ?
+        ORDER BY stock_id ASC, date DESC
+    """, (min_inst_date,))
+    inst_rows = cursor.fetchall()
+    inst_dict = {}
+    for r in inst_rows:
+        sid = str(r["stock_id"]).strip()
+        if sid not in inst_dict:
+            inst_dict[sid] = []
+        if len(inst_dict[sid]) < 30:
+            f_net = r["foreign_net"] or 0
+            t_net = r["trust_net"] or 0
+            d_net = r["dealer_net"] or 0
+            inst_dict[sid].append({
+                "foreign_net": f_net,
+                "trust_net": t_net,
+                "dealer_net": d_net,
+                "total_net": f_net + t_net + d_net
+            })
+
+    # 5. 預讀取集保大戶持股比例 (1000張以上: level = 15, 最新 2 筆)
+    cursor.execute("""
+        SELECT TRIM(stock_id) as sid, date, proportion 
+        FROM shareholder_concentration 
+        WHERE level = 15 
+        ORDER BY TRIM(stock_id) ASC, date DESC
+    """)
+    holder_rows = cursor.fetchall()
+    holder_dict = {}
+    for r in holder_rows:
+        sid = r["sid"]
+        if sid not in holder_dict:
+            holder_dict[sid] = []
+        if len(holder_dict[sid]) < 2:
+            holder_dict[sid].append(r["proportion"] or 0.0)
 
     conn.close()
-    print(f"[+] 本地篩選完成，命中 {len(results)} 檔符合條件之個股！")
-    return results
+
+    _SCREENER_CACHE["timestamp"] = current_time
+    _SCREENER_CACHE["db_mtime"] = db_mtime
+    _SCREENER_CACHE["stock_dict"] = stock_dict
+    _SCREENER_CACHE["inst_dict"] = inst_dict
+    _SCREENER_CACHE["holder_dict"] = holder_dict
+    _SCREENER_CACHE["history_dict"] = history_dict
+
+    print(f"[+] 資料庫指標快取完成: {len(stock_dict)} 檔現股標的")
+    return stock_dict, inst_dict, holder_dict, history_dict
+
+def _calc_consec_days(records, key):
+    count = 0
+    for rec in records:
+        if rec.get(key, 0) > 0:
+            count += 1
+        else:
+            break
+    return count
+
+def execute_screener_job(config: dict) -> list:
+    """依照雲端傳來的篩選參數，在本地 tw_stock.db 快取指標進行完整多因子量化篩選"""
+    stock_dict, inst_dict, holder_dict, history_dict = get_screener_cached_data()
+
+    pe_min = float(config.get("pe_min", 0) or 0)
+    pe_max = float(config.get("pe_max", 1000) or 1000)
+    pb_min = float(config.get("pb_min", 0) or 0)
+    pb_max = float(config.get("pb_max", 100) or 100)
+    vol_min = int(config.get("vol_min", 0) or 0)
+    vol_max = int(config.get("vol_max", 2000000000) or 2000000000)
+    yield_min = float(config.get("yield_min", 0) or 0)
+    yield_max = float(config.get("yield_max", 100) or 100)
+
+    price_trend = int(config.get("price_trend", 0) or 0)
+    vol_trend = int(config.get("vol_trend", 0) or 0)
+    vol_surge = bool(config.get("vol_surge", False))
+    vol_surge_mult = float(config.get("vol_surge_mult", 1.0) or 1.0)
+
+    strat1 = bool(config.get("strat1", False))
+    strat2 = bool(config.get("strat2", False))
+
+    large_holder_min = float(config.get("large_holder_min", 0) or 0)
+    large_holder_max = float(config.get("large_holder_max", 100) or 100)
+    large_holder_inc = bool(config.get("large_holder_inc", False))
+
+    foreign_buy_days_min = int(config.get("foreign_buy_days_min", 0) or 0)
+    trust_buy_days_min = int(config.get("trust_buy_days_min", 0) or 0)
+    inst_buy_days_min = int(config.get("inst_buy_days_min", 0) or 0)
+
+    print(f"[*] 執行專業多因子選股: strat1={strat1}, strat2={strat2}, price_trend={price_trend}, vol_trend={vol_trend}, PE[{pe_min}~{pe_max}], PB[{pb_min}~{pb_max}], Vol[{vol_min}~{vol_max}], LH[{large_holder_min}~{large_holder_max}, inc={large_holder_inc}], Inst[F:{foreign_buy_days_min}, T:{trust_buy_days_min}, All:{inst_buy_days_min}]")
+
+    results = []
+
+    for sid, data in stock_dict.items():
+        closes = data["closes"]
+        vols = data["vols"]
+        opens = data["opens"]
+        highs = data["highs"]
+        lows = data["lows"]
+
+        if len(closes) < 20:
+            continue
+
+        close = data["latest_close"]
+        vol = data["latest_vol"]
+        pe = data["latest_pe"]
+        pb = data["latest_pb"]
+        yld = data["latest_yield"]
+        open_curr = opens[0]
+        high_curr = highs[0]
+        low_curr = lows[0]
+
+        # 專業策略判斷 (OR 邏輯：若有勾選，需至少符合一項)
+        if strat1 or strat2:
+            m1 = False
+            m2 = False
+            if strat1:
+                if len(closes) >= 61 and closes[1] is not None and open_curr is not None:
+                    ma60_curr = sum(closes[:60]) / 60
+                    ma60_prev = sum(closes[1:61]) / 60
+                    v_ma5_prev = sum(vols[1:6]) / 5 if len(vols) >= 6 else (sum(vols[:5]) / 5)
+                    cond_a = (close > ma60_curr) and (closes[1] <= ma60_prev)
+                    cond_b = (close > open_curr * 1.02)
+                    cond_c = (vol > v_ma5_prev * 2)
+                    change = (close / closes[1]) if closes[1] != 0 else 1
+                    cond_d = (1.035 < change < 1.099)
+                    if cond_a and cond_b and cond_c and cond_d:
+                        m1 = True
+
+            if strat2:
+                if len(closes) >= 21 and highs[0] is not None and lows[0] is not None and closes[1] is not None:
+                    ma5_c = sum(closes[:5]) / 5
+                    ma10_c = sum(closes[:10]) / 10
+                    ma20_c = sum(closes[:20]) / 20
+                    ma20_prev = sum(closes[1:21]) / 20
+                    ma20_v = sum(vols[:20]) / 20
+                    v_min5 = min(vols[:5])
+                    cond_a = (ma5_c > ma10_c > ma20_c)
+                    cond_b = (ma20_c > ma20_prev)
+                    cond_c = (close > ma20_c)
+                    cond_d = (vol < ma20_v * 0.5) and (vol == v_min5)
+                    cond_e = (high_curr - low_curr < closes[1] * 0.035)
+                    if cond_a and cond_b and cond_c and cond_d and cond_e:
+                        m2 = True
+
+            if not (m1 or m2):
+                continue
+
+        # 成交量激增 (近5日均量 > 前20日均量 * 倍數)
+        if vol_surge:
+            if len(vols) < 25:
+                continue
+            avg_v_5 = sum(vols[:5]) / 5
+            avg_v_20_prev = sum(vols[5:25]) / 20
+            if avg_v_5 <= (avg_v_20_prev * vol_surge_mult):
+                continue
+
+        # 基本面與量能過濾
+        if vol is None or not (vol_min <= vol <= vol_max):
+            continue
+        if pe is not None and not (pe_min <= pe <= pe_max):
+            continue
+        if pb is not None and not (pb_min <= pb <= pb_max):
+            continue
+        if yld is not None and not (yield_min <= yld <= yield_max):
+            continue
+
+        # 價格均線趨勢
+        ma5_c = sum(closes[:5]) / 5
+        ma20_c = sum(closes[:20]) / 20
+        if price_trend == 1 and close <= ma5_c:
+            continue
+        if price_trend == 2 and close <= ma20_c:
+            continue
+        if price_trend == 3 and (ma5_c <= ma20_c):
+            continue
+
+        # 成交量均線趨勢
+        ma5_v = sum(vols[:5]) / 5
+        ma20_v = sum(vols[:20]) / 20
+        if vol_trend == 1 and vol <= ma5_v:
+            continue
+        if vol_trend == 2 and vol <= ma20_v:
+            continue
+        if vol_trend == 3 and (ma5_v <= ma20_v):
+            continue
+
+        # 籌碼與三大法人連續買超計算
+        inst_records = inst_dict.get(sid, [])
+        foreign_buy_days = _calc_consec_days(inst_records, "foreign_net")
+        trust_buy_days = _calc_consec_days(inst_records, "trust_net")
+        inst_buy_days = _calc_consec_days(inst_records, "total_net")
+
+        # 集保大戶持股
+        holder_ratios = holder_dict.get(sid, [])
+        latest_holder_ratio = holder_ratios[0] if len(holder_ratios) > 0 else None
+        prev_holder_ratio = holder_ratios[1] if len(holder_ratios) > 1 else None
+        holder_change = round(latest_holder_ratio - prev_holder_ratio, 2) if (latest_holder_ratio is not None and prev_holder_ratio is not None) else 0.0
+
+        if large_holder_min > 0 or large_holder_max < 100:
+            if latest_holder_ratio is None or not (large_holder_min <= latest_holder_ratio <= large_holder_max):
+                continue
+
+        if large_holder_inc:
+            if latest_holder_ratio is None or prev_holder_ratio is None or latest_holder_ratio <= prev_holder_ratio:
+                continue
+
+        if foreign_buy_days_min > 0 and foreign_buy_days < foreign_buy_days_min:
+            continue
+        if trust_buy_days_min > 0 and trust_buy_days < trust_buy_days_min:
+            continue
+        if inst_buy_days_min > 0 and inst_buy_days < inst_buy_days_min:
+            continue
+
+        # 估值與成長歷史
+        h_data = history_dict.get(sid, {})
+        fpe26 = h_data.get("fpe_2026")
+        fpe27 = h_data.get("fpe_2027")
+        fpe28 = h_data.get("fpe_2028")
+        is_gf = h_data.get("is_group_fight")
+        peg27 = "N/A"
+        if fpe26 is not None and fpe27 is not None and fpe27 > 0:
+            try:
+                growth = (fpe26 / fpe27) - 1
+                if growth > 0:
+                    peg27 = round(fpe27 / (growth * 100), 2)
+            except Exception:
+                pass
+
+        # 格式化日期為 YYYY-MM-DD
+        d_str = str(data["latest_date"])
+        if len(d_str) == 8 and d_str.isdigit():
+            d_formatted = f"{d_str[:4]}-{d_str[4:6]}-{d_str[6:]}"
+        else:
+            d_formatted = d_str
+
+        results.append({
+            "date": d_formatted,
+            "stock_id": sid,
+            "stock_name": data["name"],
+            "closing_price": close,
+            "trade_volume": vol,
+            "pe_ratio": pe if pe is not None else "N/A",
+            "pb_ratio": pb if pb is not None else "N/A",
+            "yield_ratio": yld if yld is not None else 0,
+            "large_holder_ratio": round(latest_holder_ratio, 2) if latest_holder_ratio is not None else "N/A",
+            "large_holder_change": holder_change,
+            "foreign_buy_days": foreign_buy_days,
+            "trust_buy_days": trust_buy_days,
+            "inst_buy_days": inst_buy_days,
+            "2026_FPE": fpe26 if fpe26 is not None else "N/A",
+            "2027_FPE": fpe27 if fpe27 is not None else "N/A",
+            "2028_FPE": fpe28 if fpe28 is not None else "N/A",
+            "2027_PEG": peg27,
+            "是否是打群架": is_gf or "否"
+        })
+
+    # 排序：依成交量由大到小排序，取前 50 名
+    results.sort(key=lambda x: x["trade_volume"] if isinstance(x["trade_volume"], (int, float)) else 0, reverse=True)
+    top_results = results[:50]
+    print(f"[+] 本地篩選完成，命中 {len(results)} 檔（回傳前 {len(top_results)} 檔）！")
+    return top_results
 
 def execute_database_query(config: dict) -> dict:
     """即時查詢本地 SQLite 任意表格"""

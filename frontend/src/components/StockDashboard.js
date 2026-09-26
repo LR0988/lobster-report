@@ -117,11 +117,16 @@ const SCREENER_COLUMN_LABELS = {
   ma5: 'MA5',
   ma20: 'MA20',
   ma60: 'MA60',
-  large_holder_ratio: '大戶持股(%)',
+  large_holder_ratio: '千張大戶(%)',
   large_holder_change: '大戶週增減',
   foreign_buy_days: '外資連買',
   trust_buy_days: '投信連買',
-  inst_buy_days: '法人連買'
+  inst_buy_days: '法人連買',
+  '2026_FPE': '2026 FPE',
+  '2027_FPE': '2027 FPE',
+  '2028_FPE': '2028 FPE',
+  '2027_PEG': '2027 PEG',
+  '是否是打群架': '族群群攻'
 };
 
 const EXCLUDED_SCREENER_KEYS = new Set(['date', 'trading_date', 'stock_id', 'stock_name', 'id', 'ai_analysis']);
@@ -136,9 +141,18 @@ const formatScreenerCellValue = (key, val) => {
     const num = Number(val);
     return isNaN(num) ? val : num.toLocaleString();
   }
-  if (key === 'yield_ratio') {
+  if (key === 'yield_ratio' || key === 'large_holder_ratio') {
     const num = Number(val);
     return isNaN(num) ? `${val}%` : `${num}%`;
+  }
+  if (key === 'large_holder_change') {
+    const num = Number(val);
+    if (isNaN(num)) return val;
+    return num > 0 ? `+${num}%p` : `${num}%p`;
+  }
+  if (key === 'foreign_buy_days' || key === 'trust_buy_days' || key === 'inst_buy_days') {
+    const num = Number(val);
+    return isNaN(num) || num === 0 ? '-' : `${num}天`;
   }
   if (typeof val === 'number') {
     return val.toLocaleString();
