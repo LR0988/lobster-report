@@ -287,7 +287,10 @@ function StockDashboard() {
   const [activePresetId, setActivePresetId] = useState(null);
   const [showSavePresetModal, setShowSavePresetModal] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
-  const [showFilterGrid, setShowFilterGrid] = useState(true);
+  const [editingPreset, setEditingPreset] = useState(null);
+  const [editPresetName, setEditPresetName] = useState('');
+  const [editPresetConfig, setEditPresetConfig] = useState(null);
+  const [showFilterGrid, setShowFilterGrid] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? false : true));
 
   // Podcast 相關狀態
   const [podcastChannels, setPodcastChannels] = useState([]);
@@ -1973,6 +1976,7 @@ function StockDashboard() {
     setConfig(DEFAULT_CONFIG);
     setAiPrompt(DEFAULT_PROMPT);
     setSelectedStocks({});
+    setActivePresetId(null);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(PROMPT_KEY);
   };
@@ -2085,6 +2089,60 @@ function StockDashboard() {
     const updated = customPresets.filter(p => p.id !== id);
     persistCustomPresets(updated);
     if (activePresetId === id) setActivePresetId(null);
+  };
+
+  const activeCustomPreset = useMemo(() => {
+    return customPresets.find(p => p.id === activePresetId) || null;
+  }, [customPresets, activePresetId]);
+
+  const handleOpenEditPreset = (preset) => {
+    setEditingPreset(preset);
+    setEditPresetName(preset.name);
+    setEditPresetConfig({ ...preset.config });
+  };
+
+  const handleSaveEditedPreset = () => {
+    if (!editPresetName.trim()) {
+      alert('條件名稱不能為空！');
+      return;
+    }
+    const updated = customPresets.map(p => {
+      if (p.id === editingPreset.id) {
+        return {
+          ...p,
+          name: editPresetName.trim(),
+          config: { ...(editPresetConfig || p.config) },
+          updated_at: new Date().toISOString()
+        };
+      }
+      return p;
+    });
+    persistCustomPresets(updated);
+    if (activePresetId === editingPreset.id && editPresetConfig) {
+      setConfig({ ...editPresetConfig });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(editPresetConfig));
+    }
+    setEditingPreset(null);
+    setSavedToast(true);
+    setTimeout(() => setSavedToast(false), 2500);
+  };
+
+  const handleQuickUpdateActivePreset = () => {
+    if (!activeCustomPreset) return;
+    const updated = customPresets.map(p => {
+      if (p.id === activePresetId) {
+        return {
+          ...p,
+          config: { ...config },
+          updated_at: new Date().toISOString()
+        };
+      }
+      return p;
+    });
+    persistCustomPresets(updated);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    setSavedToast(true);
+    setTimeout(() => setSavedToast(false), 2500);
   };
 
   const handleApplyPresetAndRun = (preset) => {
@@ -2329,16 +2387,20 @@ function StockDashboard() {
                   <button
                     onClick={() => setShowFilterGrid(!showFilterGrid)}
                     style={{
-                      background: 'rgba(255,255,255,0.08)',
-                      border: '1px solid var(--border-color)',
-                      color: '#CBD5E1',
-                      padding: '0.35rem 0.65rem',
+                      background: showFilterGrid ? 'rgba(255,255,255,0.08)' : 'rgba(59, 130, 246, 0.2)',
+                      border: showFilterGrid ? '1px solid var(--border-color)' : '1px solid rgba(59, 130, 246, 0.5)',
+                      color: showFilterGrid ? '#CBD5E1' : '#93C5FD',
+                      padding: '0.35rem 0.75rem',
                       borderRadius: '6px',
-                      fontSize: '0.82rem',
-                      cursor: 'pointer'
+                      fontSize: '0.85rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem'
                     }}
                   >
-                    {showFilterGrid ? '收合篩選器 ▴' : '展開進階篩選器 ▾'}
+                    {showFilterGrid ? '收合篩選器 ▴' : '🔍 展開進階篩選與操作 ▾'}
                   </button>
                 </div>
               </div>
@@ -2391,7 +2453,7 @@ function StockDashboard() {
                         borderRadius: '20px',
                         border: isActive ? '1.5px solid #34D399' : '1px solid rgba(52, 211, 153, 0.3)',
                         background: isActive ? 'linear-gradient(135deg, rgba(5,150,105,0.6), rgba(6,78,59,0.7))' : 'rgba(6, 78, 59, 0.25)',
-                        padding: '0.2rem 0.5rem 0.2rem 0.85rem',
+                        padding: '0.2rem 0.45rem 0.2rem 0.85rem',
                         gap: '0.35rem',
                         whiteSpace: 'nowrap',
                         boxShadow: isActive ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none'
@@ -2411,6 +2473,29 @@ function StockDashboard() {
                         }}
                       >
                         ⭐ {preset.name}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditPreset(preset);
+                        }}
+                        style={{
+                          background: 'rgba(96, 165, 250, 0.2)',
+                          border: 'none',
+                          color: '#93C5FD',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          padding: 0
+                        }}
+                        title="編輯此條件名稱或篩選參數"
+                      >
+                        ✏️
                       </button>
                       <button
                         onClick={(e) => {
@@ -2507,10 +2592,146 @@ function StockDashboard() {
               </div>
             )}
 
+            {/* 編輯自訂選股條件彈跳視窗 */}
+            {editingPreset && (
+              <div className="modal-overlay" style={{ zIndex: 1000 }}>
+                <div className="modal-content" style={{ maxWidth: '480px', width: '92%' }}>
+                  <div className="analysis-header" style={{ marginBottom: '1rem' }}>
+                    <h3 className="analysis-title" style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>✏️ 編輯自訂選股條件</span>
+                    </h3>
+                    <button className="close-btn" onClick={() => setEditingPreset(null)}>×</button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                    {/* 條件名稱 */}
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.88rem', color: '#93C5FD', fontWeight: 'bold' }}>
+                        🏷️ 條件名稱：
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="請輸入條件名稱..."
+                        value={editPresetName}
+                        onChange={e => setEditPresetName(e.target.value)}
+                        autoFocus
+                        style={{
+                          width: '100%',
+                          padding: '0.6rem 0.75rem',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          fontSize: '0.95rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    {/* 條件參數目前設定與預覽 */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <label style={{ fontSize: '0.88rem', color: '#34D399', fontWeight: 'bold' }}>
+                          ⚙️ 此條件之篩選參數：
+                        </label>
+                      </div>
+                      <div style={{
+                        background: 'rgba(15, 23, 42, 0.65)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        padding: '0.75rem 0.9rem',
+                        borderRadius: '8px',
+                        fontSize: '0.82rem',
+                        color: '#CBD5E1',
+                        lineHeight: '1.6'
+                      }}>
+                        <div><strong>本益比 (PE)：</strong>{editPresetConfig?.pe_min || 0} ~ {editPresetConfig?.pe_max || 9999}</div>
+                        <div><strong>淨值比 (PB)：</strong>{editPresetConfig?.pb_min || 0} ~ {editPresetConfig?.pb_max || 999}</div>
+                        <div><strong>殖利率 (%)：</strong>≥ {editPresetConfig?.yield_min || 0}%</div>
+                        <div><strong>成交量 (股)：</strong>≥ {Number(editPresetConfig?.vol_min || 0).toLocaleString()} 股</div>
+                        <div><strong>均線趨勢：</strong>{editPresetConfig?.price_trend === 1 ? '站上 MA5' : editPresetConfig?.price_trend === 2 ? '站上 MA20' : editPresetConfig?.price_trend === 3 ? 'MA5 > MA20 多頭排列' : '不限'}</div>
+                        {editPresetConfig?.strat1 && <div><strong>專業策略：</strong>爆量突破季線</div>}
+                        {editPresetConfig?.strat2 && <div><strong>專業策略：</strong>均線多頭排列 + 凹洞量</div>}
+                        {editPresetConfig?.large_holder_inc && <div><strong>大戶籌碼：</strong>千張大戶近週連增 (▲)</div>}
+                        {(editPresetConfig?.inst_buy_days_min > 0 || editPresetConfig?.foreign_buy_days_min > 0 || editPresetConfig?.trust_buy_days_min > 0) && (
+                          <div><strong>法人連買：</strong>外資 {editPresetConfig?.foreign_buy_days_min || 0} 天 / 投信 {editPresetConfig?.trust_buy_days_min || 0} 天 / 合計 {editPresetConfig?.inst_buy_days_min || 0} 天</div>
+                        )}
+                      </div>
+
+                      {/* 覆蓋/更新按鈕 */}
+                      <button
+                        onClick={() => {
+                          setEditPresetConfig({ ...config });
+                          alert('已將目前主畫面調整之篩選參數載入！請點擊下方「確認儲存變更」以完成儲存。');
+                        }}
+                        style={{
+                          marginTop: '0.6rem',
+                          width: '100%',
+                          padding: '0.55rem',
+                          background: 'rgba(59, 130, 246, 0.15)',
+                          border: '1px dashed #60A5FA',
+                          borderRadius: '6px',
+                          color: '#93C5FD',
+                          fontSize: '0.84rem',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem'
+                        }}
+                      >
+                        <span>🔄 將條件參數更新為「畫面目前調整的數值」</span>
+                      </button>
+                    </div>
+
+                    {/* 底部按鈕 */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <button
+                        className="btn btn-delete"
+                        style={{ fontSize: '0.82rem', padding: '0.4rem 0.75rem' }}
+                        onClick={() => {
+                          if (confirm(`確定要刪除「${editingPreset.name}」自訂條件嗎？`)) {
+                            handleDeletePreset(editingPreset.id);
+                            setEditingPreset(null);
+                          }
+                        }}
+                      >
+                        🗑️ 刪除此條件
+                      </button>
+
+                      <div style={{ display: 'flex', gap: '0.6rem' }}>
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => setEditingPreset(null)}
+                        >
+                          取消
+                        </button>
+                        <button
+                          className="btn btn-save"
+                          onClick={handleSaveEditedPreset}
+                          style={{ fontWeight: 'bold' }}
+                        >
+                          💾 確認儲存變更
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 即時派工與計算狀態提示 (置頂常駐顯示，即時反饋) */}
+            {screeningStatus && (
+              <div style={{ width: '100%', marginTop: '0.8rem', marginBottom: '0.8rem', padding: '0.65rem 1.2rem', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '8px', color: '#93C5FD', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>{screeningStatus}</span>
+              </div>
+            )}
+
             {showFilterGrid && (
-              <div className="filter-grid">
-                <div className="filter-section">
-                  <h3>基本估值篩選</h3>
+              <div className="collapsible-screener-filter-box" style={{ marginTop: '0.5rem' }}>
+                <div className="filter-grid">
+                  <div className="filter-section">
+                    <h3>基本估值篩選</h3>
                 <RangeInput label="本益比 (PE)" minKey="pe_min" maxKey="pe_max" config={config} setConfig={setConfig} step={0.5} isFloat />
                 <RangeInput label="股價淨值比 (PB)" minKey="pb_min" maxKey="pb_max" config={config} setConfig={setConfig} step={0.1} isFloat />
                 <RangeInput label="殖利率 (%)" minKey="yield_min" maxKey="yield_max" config={config} setConfig={setConfig} step={0.1} isFloat />
@@ -2613,34 +2834,45 @@ function StockDashboard() {
                 </div>
               </div>
             </div>
-            )}
 
-            <div className="action-button-group" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
+            <div className="action-button-group" style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', alignItems: 'center', flexWrap: 'wrap', position: 'relative' }}>
               <button className="btn btn-main" onClick={runScreener} disabled={loading}>
                 {loading ? <span className="loader"></span> : '🚀 開始篩選'}
               </button>
-              <button className="btn btn-save" onClick={saveSettings}>💾 儲存設定</button>
+              {activeCustomPreset && (
+                <button
+                  className="btn btn-save"
+                  onClick={handleQuickUpdateActivePreset}
+                  title={`將目前調整的滑桿數值直接更新存入「${activeCustomPreset.name}」`}
+                  style={{ background: 'linear-gradient(135deg, #059669, #047857)', border: 'none' }}
+                >
+                  💾 更新條件至「{activeCustomPreset.name}」
+                </button>
+              )}
               <button className="btn btn-secondary" onClick={resetSettings}>↺ 重設預設</button>
               <button className="btn btn-secondary" onClick={() => setShowPromptEditor(!showPromptEditor)}>
-                ⚙️ AI 指令範本
+                ⚙️ AI 指令範本 {showPromptEditor ? '▴' : '▾'}
               </button>
               {savedToast && (
                 <span className="save-toast">✅ 設定已儲存！</span>
               )}
-              {data && <span style={{ color: 'var(--text-muted)', marginLeft: '1rem' }}>共 {data.length} 筆資料</span>}
+              {data && <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>共 {data.length} 筆資料</span>}
             </div>
 
-            {screeningStatus && (
-              <div style={{ width: '100%', marginTop: '0.8rem', padding: '0.65rem 1.2rem', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '8px', color: '#93C5FD', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>{screeningStatus}</span>
-              </div>
-            )}
-
             {showPromptEditor && (
-              <div className="api-key-block" style={{ marginTop: '1.5rem', flexDirection: 'column', alignItems: 'stretch', width: '100%', gap: '0.75rem' }}>
-                <label htmlFor="screener-prompt-input" style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#60A5FA' }}>
-                  📝 複製用 AI 指令範本 (可用於手動複製貼上至 AI 網頁)
-                </label>
+              <div className="api-key-block" style={{ marginTop: '1.25rem', flexDirection: 'column', alignItems: 'stretch', width: '100%', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label htmlFor="screener-prompt-input" style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#60A5FA' }}>
+                    📝 複製用 AI 指令範本 (可用於手動複製貼上至 AI 網頁)
+                  </label>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }}
+                    onClick={() => { setAiPrompt(DEFAULT_PROMPT); localStorage.setItem(PROMPT_KEY, DEFAULT_PROMPT); }}
+                  >
+                    ↺ 還原預設範本
+                  </button>
+                </div>
                 <textarea
                   id="screener-prompt-input"
                   value={aiPrompt}
@@ -2669,6 +2901,8 @@ function StockDashboard() {
             )}
           </div>
         )}
+      </div>
+    )}
 
         {/* ===== ML 波段飆股預測 ===== */}
         {activeTab === 'ml' && (
