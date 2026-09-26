@@ -166,6 +166,22 @@ const BUILTIN_ML_TRAIN_PRESETS = [
   }
 ];
 
+const ML_MODEL_OPTIONS = [
+  { val: 'lightgbm', label: '⚡ LightGBM (推薦/高勝率)' },
+  { val: 'xgboost', label: '🌲 XGBoost (經典量化)' },
+  { val: 'attention_bilstm_xgb', label: '🔥 Attention BiLSTM-XGB (深度混合)' },
+  { val: 'resnet50', label: '🧠 ResNet-50 (時序殘差網路)' },
+  { val: 'tft', label: '⏳ Temporal Fusion Transformer' },
+  { val: 'vsn_xlstm', label: '🧬 VSN-xLSTM (擴展記憶)' },
+  { val: 'cnn_hybrid', label: '🌊 CNN-Attention (特徵融合)' },
+  { val: 'patchtst', label: '🧩 PatchTST (分塊 Transformer)' },
+  { val: 'rf', label: '🌳 Random Forest (隨機森林)' },
+  { val: 'mlp', label: '🕸️ MLP Neural Net (多層感知)' },
+  { val: 'lr', label: '📏 Logistic Regression (線性基準)' }
+];
+
+const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
+
 const SCREENER_COLUMN_LABELS = {
   closing_price: '收盤價',
   trade_volume: '成交量',
