@@ -108,6 +108,64 @@ const BUILTIN_SCREENER_PRESETS = [
   }
 ];
 
+const BUILTIN_ML_TRAIN_PRESETS = [
+  {
+    id: 'default_180d',
+    name: '⚡ 推薦標準 (半年波段)',
+    desc: '訓練 180 天 / 測試 30 天 / 80% 訓練 / 排除 6 碼權證',
+    trainDays: 180,
+    testDays: 30,
+    trainRatio: 0.8,
+    exclude6Digit: true,
+    filterCapital: false,
+    minCapitalBillion: 10.0
+  },
+  {
+    id: 'short_swing_90d',
+    name: '🚀 短波動能 (近季飆股)',
+    desc: '訓練 90 天 / 測試 30 天 / 排除權證 / 捕捉近期強勢族群',
+    trainDays: 90,
+    testDays: 30,
+    trainRatio: 0.8,
+    exclude6Digit: true,
+    filterCapital: false,
+    minCapitalBillion: 10.0
+  },
+  {
+    id: 'large_cap_360d',
+    name: '🛡️ 主力大股本 (長波抗震)',
+    desc: '訓練 360 天 / 測試 60 天 / 股本 ≥ 10 億 / 排權證',
+    trainDays: 360,
+    testDays: 60,
+    trainRatio: 0.8,
+    exclude6Digit: true,
+    filterCapital: true,
+    minCapitalBillion: 10.0
+  },
+  {
+    id: 'mega_cap_20b',
+    name: '👑 權值藍籌 (股本 ≥ 20 億)',
+    desc: '訓練 360 天 / 測試 60 天 / 股本 ≥ 20 億 / 超高流動性',
+    trainDays: 360,
+    testDays: 60,
+    trainRatio: 0.8,
+    exclude6Digit: true,
+    filterCapital: true,
+    minCapitalBillion: 20.0
+  },
+  {
+    id: 'all_market_raw',
+    name: '🌐 全市場無限制',
+    desc: '訓練 180 天 / 不限股本 / 納入全部標的',
+    trainDays: 180,
+    testDays: 30,
+    trainRatio: 0.8,
+    exclude6Digit: false,
+    filterCapital: false,
+    minCapitalBillion: 10.0
+  }
+];
+
 const SCREENER_COLUMN_LABELS = {
   closing_price: '收盤價',
   trade_volume: '成交量',
@@ -381,6 +439,21 @@ function StockDashboard() {
       return cache[curType] || [];
     } catch { return []; }
   });
+  const [mlLatestDate, setMlLatestDate] = useState(() => {
+    try {
+      return localStorage.getItem('ml_latest_date') || '';
+    } catch { return ''; }
+  });
+
+  const formatMlDate = (d) => {
+    if (!d) return '';
+    const s = String(d).trim();
+    if (s.length === 8 && /^\d{8}$/.test(s)) {
+      return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+    }
+    return s;
+  };
+
   const [mlLoading, setMlLoading] = useState(false);
   const [mlRefreshing, setMlRefreshing] = useState(false);
   const [mlComputingStatus, setMlComputingStatus] = useState(''); // '' | 'computing' | 'training'
@@ -418,6 +491,20 @@ function StockDashboard() {
   // ML 子分頁視圖控制 ('predictions' | 'models' | 'backtest' | 'low_freq')
   const [mlSubTab, setMlSubTab] = useState(() => localStorage.getItem('ml_sub_tab') || 'predictions');
   const [trainSavedToast, setTrainSavedToast] = useState(false);
+
+  // ML 訓練設定收折與自訂條件狀態
+  const [showMlConfig, setShowMlConfig] = useState(false);
+  const [activeMlPreset, setActiveMlPreset] = useState(() => localStorage.getItem('active_ml_preset') || 'default_180d');
+  const [mlCustomPresets, setMlCustomPresets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ml_custom_train_presets');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+  const [showSaveMlPresetModal, setShowSaveMlPresetModal] = useState(false);
+  const [editingMlPreset, setEditingMlPreset] = useState(null);
+  const [newMlPresetName, setNewMlPresetName] = useState('');
+  const [editMlPresetName, setEditMlPresetName] = useState('');
 
   // ML 預測表格排序狀態
 
@@ -623,6 +710,23 @@ function StockDashboard() {
           setMinCapitalBillion(parseFloat(data.bt_min_capital_billion));
           localStorage.setItem('bt_min_capital_billion', data.bt_min_capital_billion);
         }
+        if (data.ml_model_type) {
+          setMlModelType(data.ml_model_type);
+          try { localStorage.setItem('ml_model_type', data.ml_model_type); } catch {}
+        }
+        if (data.active_ml_preset) {
+          setActiveMlPreset(data.active_ml_preset);
+          try { localStorage.setItem('active_ml_preset', data.active_ml_preset); } catch {}
+        }
+        if (data.ml_custom_train_presets) {
+          try {
+            const parsed = JSON.parse(data.ml_custom_train_presets);
+            if (Array.isArray(parsed)) {
+              setMlCustomPresets(parsed);
+              localStorage.setItem('ml_custom_train_presets', data.ml_custom_train_presets);
+            }
+          } catch {}
+        }
         return;
       }
       const fallbackRes = await stockFetch('/api/ml/backtest_settings');
@@ -644,7 +748,10 @@ function StockDashboard() {
         { key: 'bt_test_days', value: String(testDays) },
         { key: 'bt_exclude_6digit', value: String(exclude6Digit) },
         { key: 'bt_filter_capital', value: String(filterCapital) },
-        { key: 'bt_min_capital_billion', value: String(minCapitalBillion) }
+        { key: 'bt_min_capital_billion', value: String(minCapitalBillion) },
+        { key: 'ml_model_type', value: String(mlModelType) },
+        { key: 'active_ml_preset', value: String(activeMlPreset) },
+        { key: 'ml_custom_train_presets', value: JSON.stringify(mlCustomPresets) }
       ];
 
       localStorage.setItem('bt_train_ratio', trainRatio);
@@ -653,6 +760,9 @@ function StockDashboard() {
       localStorage.setItem('bt_exclude_6digit', exclude6Digit);
       localStorage.setItem('bt_filter_capital', filterCapital);
       localStorage.setItem('bt_min_capital_billion', minCapitalBillion);
+      localStorage.setItem('ml_model_type', mlModelType);
+      localStorage.setItem('active_ml_preset', activeMlPreset);
+      localStorage.setItem('ml_custom_train_presets', JSON.stringify(mlCustomPresets));
 
       await supabaseFetch('/stock_settings', {
         method: 'POST',
@@ -671,6 +781,121 @@ function StockDashboard() {
         setTimeout(() => setTrainSavedToast(false), 3500);
       }
     }
+  };
+
+  const handleApplyMlPreset = (preset) => {
+    setActiveMlPreset(preset.id);
+    setTrainDays(preset.trainDays);
+    setTestDays(preset.testDays);
+    setTrainRatio(preset.trainRatio);
+    setExclude6Digit(preset.exclude6Digit);
+    setFilterCapital(preset.filterCapital);
+    if (preset.minCapitalBillion !== undefined) {
+      setMinCapitalBillion(preset.minCapitalBillion);
+    }
+    localStorage.setItem('active_ml_preset', preset.id);
+    localStorage.setItem('bt_train_days', preset.trainDays);
+    localStorage.setItem('bt_test_days', preset.testDays);
+    localStorage.setItem('bt_train_ratio', preset.trainRatio);
+    localStorage.setItem('bt_exclude_6digit', preset.exclude6Digit);
+    localStorage.setItem('bt_filter_capital', preset.filterCapital);
+    if (preset.minCapitalBillion !== undefined) {
+      localStorage.setItem('bt_min_capital_billion', preset.minCapitalBillion);
+    }
+
+    supabaseFetch('/stock_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify([
+        { key: 'active_ml_preset', value: String(preset.id) },
+        { key: 'bt_train_days', value: String(preset.trainDays) },
+        { key: 'bt_test_days', value: String(preset.testDays) },
+        { key: 'bt_train_ratio', value: String(preset.trainRatio) },
+        { key: 'bt_exclude_6digit', value: String(preset.exclude6Digit) },
+        { key: 'bt_filter_capital', value: String(preset.filterCapital) },
+        { key: 'bt_min_capital_billion', value: String(preset.minCapitalBillion || 10) }
+      ])
+    }).catch(() => {});
+
+    setTrainSavedToast(true);
+    setTimeout(() => setTrainSavedToast(false), 2000);
+  };
+
+  const handleSaveCurrentAsMlPreset = () => {
+    const trimmed = (newMlPresetName || '').trim();
+    if (!trimmed) {
+      alert('請輸入自訂模式名稱！');
+      return;
+    }
+    const newPreset = {
+      id: `custom_ml_${Date.now()}`,
+      name: `⭐ ${trimmed}`,
+      desc: `自訂：${trainDays}天訓練 / ${testDays}天測試 / ${filterCapital ? `股本≥${minCapitalBillion}億` : '無股本限制'}`,
+      trainDays: parseInt(trainDays) || 180,
+      testDays: parseInt(testDays) || 30,
+      trainRatio: parseFloat(trainRatio) || 0.8,
+      exclude6Digit: Boolean(exclude6Digit),
+      filterCapital: Boolean(filterCapital),
+      minCapitalBillion: parseFloat(minCapitalBillion) || 10.0
+    };
+    const updated = [...mlCustomPresets, newPreset];
+    setMlCustomPresets(updated);
+    setActiveMlPreset(newPreset.id);
+    localStorage.setItem('ml_custom_train_presets', JSON.stringify(updated));
+    localStorage.setItem('active_ml_preset', newPreset.id);
+    supabaseFetch('/stock_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify([
+        { key: 'ml_custom_train_presets', value: JSON.stringify(updated) },
+        { key: 'active_ml_preset', value: newPreset.id }
+      ])
+    }).catch(() => {});
+    setShowSaveMlPresetModal(false);
+    setNewMlPresetName('');
+    setTrainSavedToast(true);
+    setTimeout(() => setTrainSavedToast(false), 3000);
+  };
+
+  const handleDeleteMlPreset = (id) => {
+    const updated = mlCustomPresets.filter(p => p.id !== id);
+    setMlCustomPresets(updated);
+    localStorage.setItem('ml_custom_train_presets', JSON.stringify(updated));
+    supabaseFetch('/stock_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify([{ key: 'ml_custom_train_presets', value: JSON.stringify(updated) }])
+    }).catch(() => {});
+    if (activeMlPreset === id) {
+      handleApplyMlPreset(BUILTIN_ML_TRAIN_PRESETS[0]);
+    }
+  };
+
+  const handleUpdateCurrentMlPresetFromUI = (presetId) => {
+    const updated = mlCustomPresets.map(p => {
+      if (p.id === presetId) {
+        return {
+          ...p,
+          trainDays: parseInt(trainDays) || 180,
+          testDays: parseInt(testDays) || 30,
+          trainRatio: parseFloat(trainRatio) || 0.8,
+          exclude6Digit: Boolean(exclude6Digit),
+          filterCapital: Boolean(filterCapital),
+          minCapitalBillion: parseFloat(minCapitalBillion) || 10.0,
+          desc: `自訂：${trainDays}天訓練 / ${testDays}天測試 / ${filterCapital ? `股本≥${minCapitalBillion}億` : '無股本限制'}`
+        };
+      }
+      return p;
+    });
+    setMlCustomPresets(updated);
+    localStorage.setItem('ml_custom_train_presets', JSON.stringify(updated));
+    supabaseFetch('/stock_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify([{ key: 'ml_custom_train_presets', value: JSON.stringify(updated) }])
+    }).catch(() => {});
+    setTrainSavedToast(true);
+    setTimeout(() => setTrainSavedToast(false), 3000);
   };
 
   const handleSaveBacktestSettings = async (showToast = true) => {
@@ -794,6 +1019,11 @@ function StockDashboard() {
   const handleSelectModel = (val) => {
     setMlModelType(val);
     try { localStorage.setItem('ml_model_type', val); } catch {}
+    supabaseFetch('/stock_settings', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify([{ key: 'ml_model_type', value: String(val) }])
+    }).catch(() => {});
     if (allModelsStatus && allModelsStatus[val]) {
       setMlStatus(allModelsStatus[val]);
     }
@@ -841,6 +1071,10 @@ function StockDashboard() {
           setAllModelsStatus(statuses);
           try { localStorage.setItem('ml_all_models_status', JSON.stringify(statuses)); } catch {}
           setMlStatus(statuses[targetType] || { status: 'ready', message: '已就緒' });
+          if (statuses[targetType]?.latest_date) {
+            setMlLatestDate(statuses[targetType].latest_date);
+            try { localStorage.setItem('ml_latest_date', statuses[targetType].latest_date); } catch {}
+          }
         }
       }
 
@@ -853,6 +1087,10 @@ function StockDashboard() {
             predList = predList.filter(s => !s.stock_id || s.stock_id.length <= 4);
           }
           setMlPredictions(predList);
+          if (jsonPred.latest_date) {
+            setMlLatestDate(jsonPred.latest_date);
+            try { localStorage.setItem('ml_latest_date', jsonPred.latest_date); } catch {}
+          }
           setMlPredictionsCache(prev => {
             const next = { ...prev, [targetType]: predList };
             try { localStorage.setItem('ml_predictions_cache', JSON.stringify(next)); } catch {}
@@ -874,11 +1112,19 @@ function StockDashboard() {
           const statuses = await fallbackStatus.json();
           setAllModelsStatus(statuses);
           setMlStatus(statuses[targetType] || { status: 'none', message: '尚未訓練' });
+          if (statuses[targetType]?.latest_date) {
+            setMlLatestDate(statuses[targetType].latest_date);
+            try { localStorage.setItem('ml_latest_date', statuses[targetType].latest_date); } catch {}
+          }
         }
         if (fallbackPred.ok) {
           const jsonPred = await fallbackPred.json();
           const predList = jsonPred.data || [];
           setMlPredictions(predList);
+          if (jsonPred.latest_date) {
+            setMlLatestDate(jsonPred.latest_date);
+            try { localStorage.setItem('ml_latest_date', jsonPred.latest_date); } catch {}
+          }
           setMlPredictionsCache(prev => ({ ...prev, [targetType]: predList }));
         }
       }
@@ -896,6 +1142,7 @@ function StockDashboard() {
     try {
       setMlLoading(true);
       setMlModelType(targetType);
+      handleSaveTrainSettings(false);
       const trainDaysVal = parseInt(trainDays) || 180;
       const testDaysVal = parseInt(testDays) || 30;
       const trainRatioVal = parseFloat(trainRatio) || 0.8;
@@ -1589,6 +1836,11 @@ function StockDashboard() {
     }
   };
 
+  const mlModelTypeRef = React.useRef(mlModelType);
+  React.useEffect(() => {
+    mlModelTypeRef.current = mlModelType;
+  }, [mlModelType]);
+
   React.useEffect(() => {
     fetchSettings();
     fetchScheduleSettings();
@@ -1631,7 +1883,7 @@ function StockDashboard() {
             try { localStorage.setItem('ml_all_models_status', JSON.stringify(statuses)); } catch {}
             return statuses;
           });
-          setMlStatus(prev => statuses[mlModelType] || prev);
+          setMlStatus(prev => statuses[mlModelTypeRef.current] || prev);
         }
       } catch (err) {}
     }, 3000);
@@ -1640,7 +1892,7 @@ function StockDashboard() {
       clearInterval(timerInterval);
       clearInterval(taskPollInterval);
     };
-  }, [mlModelType, filterCapital, minCapitalBillion, exclude6Digit]);
+  }, []);
 
   React.useEffect(() => {
     if (activeTab === 'portfolio') {
@@ -2921,655 +3173,754 @@ function StockDashboard() {
         {/* ===== ML 波段飆股預測 ===== */}
         {activeTab === 'ml' && (
           <div>
-            {/* 🏃 背景任務即時監控看板 (Live Task Monitor Dashboard) */}
-            {activeTasks.length > 0 ? (
+            {/* 🏃 背景執行任務即時條 (僅在有任務執行時顯示，簡約不佔位) */}
+            {activeTasks.length > 0 && (
               <div style={{
-                background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.9))',
-                border: '1px solid rgba(59, 130, 246, 0.6)',
-                boxShadow: '0 8px 24px rgba(37, 99, 235, 0.2)',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                marginBottom: '1.5rem',
-                transition: 'all 0.3s ease'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '1.2rem' }}>🏃</span>
-                      背景執行與訓練任務監控看板
-                    </h3>
-                    <span style={{
-                      background: 'rgba(16, 185, 129, 0.2)',
-                      border: '1px solid #10B981',
-                      color: '#6EE7B7',
-                      fontSize: '0.78rem',
-                      fontWeight: 'bold',
-                      padding: '0.2rem 0.6rem',
-                      borderRadius: '20px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem'
-                    }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block', boxShadow: '0 0 8px #10B981' }}></span>
-                      {activeTasks.length} 個任務正在執行中
-                    </span>
-                  </div>
-
-                  <button
-                    className="btn"
-                    style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid var(--border-color)', color: 'white' }}
-                    onClick={fetchActiveTasks}
-                    disabled={fetchingTasks}
-                  >
-                    {fetchingTasks ? <span className="loader" style={{ width: '12px', height: '12px' }}></span> : '🔄 重新整理看板'}
-                  </button>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1rem', marginTop: '0.75rem' }}>
-                  {activeTasks.map(task => {
-                    const currentElapsed = task.created_timestamp ? Math.max(0, Math.floor(Date.now() / 1000 - task.created_timestamp)) : task.elapsed_seconds;
-                    const durationStr = formatSecondsToDuration(currentElapsed);
-                    const isKilling = killingTaskPid === task.pid;
-
-                    return (
-                      <div
-                        key={task.id}
-                        style={{
-                          background: 'rgba(15, 23, 42, 0.85)',
-                          border: '1px solid rgba(59, 130, 246, 0.4)',
-                          borderRadius: '10px',
-                          padding: '1rem 1.15rem',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          gap: '0.75rem'
-                        }}
-                      >
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#F1F5F9', lineHeight: '1.4' }}>
-                              {task.name}
-                            </div>
-                            <span style={{
-                              fontSize: '0.72rem',
-                              padding: '0.15rem 0.5rem',
-                              borderRadius: '4px',
-                              background: task.type === 'ml_train' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(59, 130, 246, 0.25)',
-                              color: task.type === 'ml_train' ? '#D8B4FE' : '#93C5FD',
-                              border: task.type === 'ml_train' ? '1px solid rgba(168, 85, 247, 0.5)' : '1px solid rgba(59, 130, 246, 0.5)',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {task.type === 'ml_train' ? '🏋️ AI 訓練' : '🗄️ 數據回補'}
-                            </span>
-                          </div>
-
-                          <div style={{
-                            background: 'rgba(0, 0, 0, 0.35)',
-                            borderRadius: '8px',
-                            padding: '0.75rem',
-                            margin: '0.5rem 0',
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gap: '0.5rem',
-                            border: '1px solid rgba(255,255,255,0.05)'
-                          }}>
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>⏱️ 已執行時間</div>
-                              <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace', letterSpacing: '0.5px' }}>
-                                {durationStr}
-                              </div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>📅 啟動時間</div>
-                              <div style={{ fontSize: '0.82rem', color: '#CBD5E1', marginTop: '0.2rem' }}>
-                                {task.created_at?.split(' ')[1] || task.created_at}
-                              </div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>🆔 PID</div>
-                              <div style={{ fontSize: '0.82rem', color: '#93C5FD', fontFamily: 'monospace' }}>
-                                {task.pid}
-                              </div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>💾 記憶體佔用</div>
-                              <div style={{ fontSize: '0.82rem', color: '#6EE7B7' }}>
-                                {task.memory_mb} MB
-                              </div>
-                            </div>
-                          </div>
-
-                          <div style={{ fontSize: '0.78rem', color: '#94A3B8', wordBreak: 'break-all', background: 'rgba(255,255,255,0.03)', padding: '0.4rem 0.6rem', borderRadius: '4px' }}>
-                            <strong style={{ color: '#A5B4FC' }}>當前狀態: </strong>
-                            {task.details}
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.25rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                          <button
-                            className="btn"
-                            style={{
-                              padding: '0.35rem 0.9rem',
-                              fontSize: '0.8rem',
-                              background: 'rgba(239, 68, 68, 0.18)',
-                              border: '1px solid rgba(239, 68, 68, 0.45)',
-                              color: '#FCA5A5',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem',
-                              borderRadius: '6px'
-                            }}
-                            onClick={() => handleKillTask(task)}
-                            disabled={isKilling}
-                          >
-                            {isKilling ? (
-                              <>
-                                <span className="loader" style={{ width: '12px', height: '12px', borderColor: '#FCA5A5' }}></span>
-                                終止中...
-                              </>
-                            ) : (
-                              <>🛑 終止此任務</>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div style={{
+                background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.45), rgba(15, 23, 42, 0.95))',
+                border: '1px solid rgba(59, 130, 246, 0.55)',
+                borderRadius: '10px',
+                padding: '0.65rem 1rem',
+                marginBottom: '1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '0.6rem 1rem',
-                background: 'rgba(15, 23, 42, 0.45)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                marginBottom: '1.25rem',
-                fontSize: '0.84rem'
+                flexWrap: 'wrap',
+                gap: '0.6rem',
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.2)'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#94A3B8' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block', boxShadow: '0 0 6px #10B981' }}></span>
-                  <span>🟢 地端運算主機就緒 ｜ 目前無背景訓練任務</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span className="loader" style={{ width: '13px', height: '13px', borderColor: '#60A5FA', borderBottomColor: 'transparent' }}></span>
+                  <span style={{ fontWeight: 'bold', color: '#93C5FD', fontSize: '0.9rem' }}>
+                    🏃 背景運算中：{activeTasks[0].name}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#FDE68A', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                    ⏱️ {formatSecondsToDuration(activeTasks[0].created_timestamp ? Math.max(0, Math.floor(Date.now() / 1000 - activeTasks[0].created_timestamp)) : activeTasks[0].elapsed_seconds)}
+                  </span>
                 </div>
-                <button
-                  className="btn"
-                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem', background: 'rgba(255, 255, 255, 0.06)', border: '1px solid var(--border-color)', color: 'white' }}
-                  onClick={fetchActiveTasks}
-                  disabled={fetchingTasks}
-                >
-                  {fetchingTasks ? '檢查中...' : '🔄 檢查主機狀態'}
-                </button>
+                <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                  <button
+                    className="btn"
+                    style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.5)', color: '#FCA5A5', borderRadius: '6px' }}
+                    onClick={() => handleKillTask(activeTasks[0])}
+                    disabled={killingTaskPid === activeTasks[0].pid}
+                  >
+                    🛑 終止任務
+                  </button>
+                  <button
+                    className="btn"
+                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.78rem', background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '6px' }}
+                    onClick={fetchActiveTasks}
+                    disabled={fetchingTasks}
+                    title="重新整理任務進度"
+                  >
+                    🔄
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* ML 模型訓練與控制面板 */}
-            <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', background: 'rgba(15, 23, 42, 0.65)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                  <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#60A5FA' }}>
-                    🤖 機器學習「未來一個月 20% 波段飆股」預測模型
+            {/* 1. 簡約頂部控制列 (Title, Model Selector, Status Badge & Actions) */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
+              borderRadius: '12px',
+              padding: '0.85rem 1.15rem',
+              marginBottom: '1rem',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                  <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <span>🤖</span>
+                    <span>ML 波段飆股預測</span>
                   </h2>
-                  <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    融合全台股每日價量、三大法人買賣超與集保千張大戶歷史數據，透過 GBDT 擬合未來 20 個交易日漲幅突破 20% 的潛力標的。
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {mlRefreshing && (
-                    <span style={{ fontSize: '0.8rem', color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span className="loader" style={{ width: '12px', height: '12px' }}></span> 背景同步中...
+
+                  {/* 當前 AI 模型選擇 */}
+                  <select
+                    value={mlModelType}
+                    onChange={e => handleSelectModel(e.target.value)}
+                    style={{
+                      background: 'rgba(15, 23, 42, 0.95)',
+                      border: '1px solid #3B82F6',
+                      color: '#93C5FD',
+                      fontWeight: 'bold',
+                      padding: '0.3rem 0.6rem',
+                      borderRadius: '8px',
+                      fontSize: '0.86rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {[
+                      { val: 'lightgbm', label: '⚡ LightGBM (推薦/高勝率)' },
+                      { val: 'xgboost', label: '🌲 XGBoost (經典量化)' },
+                      { val: 'attention_bilstm_xgb', label: '🔥 Attention BiLSTM-XGB (深度混合)' },
+                      { val: 'resnet50', label: '🧠 ResNet-50 (時序殘差網路)' },
+                      { val: 'tft', label: '⏳ Temporal Fusion Transformer' },
+                      { val: 'vsn_xlstm', label: '🧬 VSN-xLSTM (擴展記憶)' },
+                      { val: 'cnn_hybrid', label: '🌊 CNN-Attention (特徵融合)' },
+                      { val: 'patchtst', label: '🧩 PatchTST (分塊 Transformer)' },
+                      { val: 'rf', label: '🌳 Random Forest (隨機森林)' },
+                      { val: 'mlp', label: '🕸️ MLP Neural Net (多層感知)' },
+                      { val: 'lr', label: '📏 Logistic Regression (線性基準)' }
+                    ].map(m => (
+                      <option key={m.val} value={m.val}>{m.label}</option>
+                    ))}
+                  </select>
+
+                  {/* 狀態徽章 */}
+                  {allModelsStatus[mlModelType]?.status === 'training' ? (
+                    <span style={{
+                      background: 'rgba(168, 85, 247, 0.2)',
+                      border: '1px solid #A855F7',
+                      color: '#D8B4FE',
+                      fontSize: '0.78rem',
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: '16px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}>
+                      <span className="loader" style={{ width: '10px', height: '10px', borderColor: '#A855F7' }}></span>
+                      訓練中...
+                    </span>
+                  ) : allModelsStatus[mlModelType]?.status === 'ready' ? (
+                    <span style={{
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      border: '1px solid #10B981',
+                      color: '#6EE7B7',
+                      fontSize: '0.78rem',
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: '16px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }}></span>
+                      就緒 {allModelsStatus[mlModelType]?.metrics?.auc ? `(AUC ${(allModelsStatus[mlModelType].metrics.auc * 100).toFixed(1)}%)` : ''}
+                    </span>
+                  ) : (
+                    <span style={{
+                      background: 'rgba(148, 163, 184, 0.15)',
+                      border: '1px solid rgba(148, 163, 184, 0.3)',
+                      color: '#94A3B8',
+                      fontSize: '0.78rem',
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: '16px'
+                    }}>
+                      未載入
                     </span>
                   )}
+                </div>
+
+                {/* 右側操作按鈕 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <button
+                    type="button"
                     className="btn"
-                    style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.4)', color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                    onClick={() => setShowMlConfig(!showMlConfig)}
+                    style={{
+                      padding: '0.35rem 0.8rem',
+                      fontSize: '0.84rem',
+                      background: showMlConfig ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)',
+                      border: showMlConfig ? '1px solid #3B82F6' : '1px solid var(--border-color)',
+                      color: showMlConfig ? '#93C5FD' : 'white',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      borderRadius: '8px'
+                    }}
+                  >
+                    ⚙️ 訓練條件設定 {showMlConfig ? '▴ 收合' : '▾ 展開'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn"
+                    style={{
+                      padding: '0.35rem 0.8rem',
+                      fontSize: '0.84rem',
+                      background: 'rgba(59, 130, 246, 0.18)',
+                      border: '1px solid rgba(59, 130, 246, 0.4)',
+                      color: '#93C5FD',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      borderRadius: '8px'
+                    }}
                     onClick={() => fetchMlStatusAndPredictions(mlModelType, true)}
                     disabled={mlLoading || mlRefreshing}
-                    title="強制重新計算今日最新市場推論"
+                    title="強制重新推論今日最新市場行情"
                   >
-                    🔄 重新推論最新數據
+                    {mlRefreshing ? <span className="loader" style={{ width: '12px', height: '12px' }}></span> : '🔄 重新推論'}
                   </button>
-                  <button
-                    className="btn"
-                    style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid var(--border-color)', color: 'white', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-                    onClick={() => fetchMlStatusAndPredictions(mlModelType, false)}
-                    disabled={mlLoading || mlRefreshing}
-                    title="重新整理所有模型指標與快取"
-                  >
-                    ⚡ 同步狀態
-                  </button>
-                </div>
-              </div>
-
-              {/* ⚡ AI 模型即時讀取與運算狀態列 (AI Model Status & Pipeline Bar) */}
-              <div style={{
-                background: mlComputingStatus ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.8))' :
-                            allModelsStatus[mlModelType]?.status === 'training' ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(15, 23, 42, 0.8))' :
-                            'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(15, 23, 42, 0.8))',
-                border: mlComputingStatus ? '1px solid rgba(245, 158, 11, 0.4)' :
-                        allModelsStatus[mlModelType]?.status === 'training' ? '1px solid rgba(168, 85, 247, 0.4)' :
-                        '1px solid rgba(16, 185, 129, 0.3)',
-                borderRadius: '10px',
-                padding: '1rem 1.25rem',
-                marginBottom: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>切換選用模型:</span>
-                    <select
-                      value={mlModelType}
-                      onChange={e => {
-                        const val = e.target.value;
-                        setMlModelType(val);
-                        localStorage.setItem('ml_model_type', val);
-                        fetchMlStatusAndPredictions(val);
-                      }}
-                      style={{
-                        background: 'rgba(15, 23, 42, 0.95)',
-                        border: '1px solid #3B82F6',
-                        color: '#93C5FD',
-                        fontWeight: 'bold',
-                        padding: '0.25rem 0.6rem',
-                        borderRadius: '6px',
-                        fontSize: '0.88rem',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {[
-                        { val: 'lightgbm', label: '⚡ LightGBM (推薦/高勝率)' },
-                        { val: 'xgboost', label: '🌲 XGBoost (經典量化)' },
-                        { val: 'attention_bilstm_xgb', label: '🔥 Attention BiLSTM-XGB (深度混合)' },
-                        { val: 'resnet50', label: '🧠 ResNet-50 (時序殘差網路)' },
-                        { val: 'tft', label: '⏳ Temporal Fusion Transformer' },
-                        { val: 'vsn_xlstm', label: '🧬 VSN-xLSTM (擴展記憶)' },
-                        { val: 'cnn_hybrid', label: '🌊 CNN-Attention (特徵融合)' },
-                        { val: 'patchtst', label: '🧩 PatchTST (分塊 Transformer)' },
-                        { val: 'rf', label: '🌳 Random Forest (隨機森林)' },
-                        { val: 'mlp', label: '🕸️ MLP Neural Net (多層感知)' },
-                        { val: 'lr', label: '📏 Logistic Regression (線性基準)' }
-                      ].map(m => (
-                        <option key={m.val} value={m.val}>{m.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>運算狀態:</span>
-                    {mlComputingStatus ? (
-                      <span style={{ color: '#FBBF24', fontWeight: 'bold', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span className="loader" style={{ width: '12px', height: '12px', borderColor: '#FBBF24', borderBottomColor: 'transparent' }}></span>
-                        {mlComputingStatus}
-                      </span>
-                    ) : allModelsStatus[mlModelType]?.status === 'training' ? (
-                      <span style={{ color: '#C084FC', fontWeight: 'bold', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span className="loader" style={{ width: '12px', height: '12px', borderColor: '#C084FC', borderBottomColor: 'transparent' }}></span>
-                        🏋️ 模型獨立背景進程訓練中...
-                      </span>
-                    ) : allModelsStatus[mlModelType]?.status === 'ready' ? (
-                      <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.85rem' }}>
-                        ✅ 模型與推論資料已就緒 ({allModelsStatus[mlModelType]?.trained_at || '就緒'})
-                      </span>
-                    ) : (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        ⭕ 尚未訓練或未載入
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontSize: '0.82rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                  {allModelsStatus[mlModelType]?.data_details?.train_range && (
-                    <span style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '6px' }}>
-                      🗓️ 訓練資料區間：<strong style={{ color: '#FDE68A' }}>{allModelsStatus[mlModelType].data_details.train_range}</strong>
-                      <span style={{ fontSize: '0.75rem', color: '#CBD5E1', marginLeft: '0.35rem' }}>
-                        ({allModelsStatus[mlModelType].data_details.train_days} 天 / {allModelsStatus[mlModelType].data_details.train_samples?.toLocaleString()} 樣本)
-                      </span>
-                    </span>
-                  )}
-                  {allModelsStatus[mlModelType]?.data_details?.filters && (
-                    <span style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '6px', color: '#93C5FD' }}>
-                      🎯 樣本過濾：<strong style={{ color: '#BFDBFE' }}>{allModelsStatus[mlModelType].data_details.filters}</strong>
-                    </span>
-                  )}
-                  {(allModelsStatus[mlModelType]?.train_settings || allModelsStatus[mlModelType]?.data_details?.train_settings) && (
-                    <span style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', padding: '0.2rem 0.5rem', borderRadius: '6px', color: '#D8B4FE' }}>
-                      ⚙️ 訓練配置：<strong>
-                        {allModelsStatus[mlModelType].train_settings?.train_days || allModelsStatus[mlModelType].data_details?.train_days}天訓練 / {allModelsStatus[mlModelType].train_settings?.test_days || allModelsStatus[mlModelType].data_details?.test_days}天測試
-                      </strong>
-                    </span>
-                  )}
-                  {mlPredictions.length > 0 && (
-                    <span>
-                      🎯 推薦標的：<strong style={{ color: '#60A5FA' }}>{mlPredictions.length}</strong> 檔
-                    </span>
-                  )}
-                  {mlPredictions[0]?.date && (
-                    <span>
-                      🗓️ 數據基準日：<strong style={{ color: '#A7F3D0' }}>{mlPredictions[0].date}</strong>
-                    </span>
-                  )}
-                  {allModelsStatus[mlModelType]?.metrics?.auc && (
-                    <span>
-                      📈 驗證 AUC：<strong style={{ color: '#FBBF24' }}>{(allModelsStatus[mlModelType].metrics.auc * 100).toFixed(1)}%</strong>
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
-            {/* ⚙️ 模型訓練條件與參數配置 (置頂空間 UPPER SPACE) */}
-            <div className="glass-panel" style={{
-              padding: '1.25rem 1.5rem',
-              marginBottom: '1.5rem',
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.9))',
-              border: '1px solid rgba(59, 130, 246, 0.35)',
-              borderRadius: '12px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '1.25rem' }}>⚙️</span>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#93C5FD', fontWeight: 'bold' }}>
-                    模型訓練條件與參數配置
-                  </h3>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', padding: '0.15rem 0.45rem', borderRadius: '4px' }}>
-                    條件隨時儲存並同步至雲端
-                  </span>
+            {/* 2. 可收折的「進階訓練配置與條件清單面板」 */}
+            {showMlConfig && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.9))',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                animation: 'fadeIn 0.2s ease-in-out'
+              }}>
+                {/* 快捷訓練模式 Chips 清單 */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span>⚡</span>
+                      <span>快捷訓練條件清單（點擊立即套用並儲存）：</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => setShowSaveMlPresetModal(true)}
+                      style={{
+                        padding: '0.2rem 0.65rem',
+                        fontSize: '0.78rem',
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        border: '1px solid rgba(16, 185, 129, 0.5)',
+                        color: '#6EE7B7',
+                        borderRadius: '6px'
+                      }}
+                    >
+                      ➕ 另存目前為自訂模式
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {/* 內建預設 Chips */}
+                    {BUILTIN_ML_TRAIN_PRESETS.map(preset => {
+                      const isActive = activeMlPreset === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => handleApplyMlPreset(preset)}
+                          title={preset.desc}
+                          style={{
+                            padding: '0.4rem 0.75rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            border: isActive ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                            background: isActive ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.4), rgba(59, 130, 246, 0.2))' : 'rgba(255, 255, 255, 0.04)',
+                            color: isActive ? '#93C5FD' : '#CBD5E1',
+                            fontWeight: isActive ? 'bold' : 'normal',
+                            boxShadow: isActive ? '0 0 10px rgba(59, 130, 246, 0.3)' : 'none'
+                          }}
+                        >
+                          {preset.name}
+                        </button>
+                      );
+                    })}
+
+                    {/* 自訂預設 Chips */}
+                    {mlCustomPresets.map(preset => {
+                      const isActive = activeMlPreset === preset.id;
+                      return (
+                        <div
+                          key={preset.id}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.2rem 0.5rem 0.2rem 0.75rem',
+                            borderRadius: '20px',
+                            border: isActive ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.15)',
+                            background: isActive ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.2))' : 'rgba(255, 255, 255, 0.06)',
+                            color: isActive ? '#6EE7B7' : '#E2E8F0',
+                            fontSize: '0.82rem'
+                          }}
+                        >
+                          <span
+                            onClick={() => handleApplyMlPreset(preset)}
+                            style={{ cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal' }}
+                            title={preset.desc}
+                          >
+                            {preset.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              setEditingMlPreset(preset);
+                              setEditMlPresetName(preset.name.replace('⭐ ', ''));
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#93C5FD', cursor: 'pointer', padding: '0 2px', fontSize: '0.75rem' }}
+                            title="編輯或更新此條件"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (confirm(`確定要刪除「${preset.name}」模式嗎？`)) {
+                                handleDeleteMlPreset(preset.id);
+                              }
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#F87171', cursor: 'pointer', padding: '0 2px', fontSize: '0.8rem' }}
+                            title="刪除"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* 快捷操作按鈕列 */}
-                <div className="ml-train-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                {/* 參數設定 Grid (2 欄) */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '1.25rem',
+                  background: 'rgba(0, 0, 0, 0.28)',
+                  padding: '1.1rem',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  marginBottom: '1.25rem'
+                }}>
+                  {/* 區塊 1: 數據長度配置 */}
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>📅</span> 數據長度配置
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.6rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+                          🏋️ 訓練天數 (交易日)
+                        </label>
+                        <input
+                          type="number"
+                          value={trainDays}
+                          onChange={e => {
+                            setTrainDays(e.target.value);
+                            localStorage.setItem('bt_train_days', e.target.value);
+                          }}
+                          style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.3rem' }}>
+                          {[90, 180, 360].map(d => (
+                            <button
+                              key={d}
+                              type="button"
+                              className="btn"
+                              style={{
+                                padding: '0.15rem 0.4rem',
+                                fontSize: '0.72rem',
+                                background: parseInt(trainDays) === d ? 'rgba(59, 130, 246, 0.35)' : 'rgba(255,255,255,0.05)',
+                                border: parseInt(trainDays) === d ? '1px solid #3B82F6' : '1px solid var(--border-color)',
+                                color: parseInt(trainDays) === d ? '#93C5FD' : 'var(--text-muted)'
+                              }}
+                              onClick={() => {
+                                setTrainDays(d);
+                                localStorage.setItem('bt_train_days', d);
+                              }}
+                            >
+                              {d}天
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+                          📊 測試/回測天數
+                        </label>
+                        <input
+                          type="number"
+                          value={testDays}
+                          onChange={e => {
+                            setTestDays(e.target.value);
+                            localStorage.setItem('bt_test_days', e.target.value);
+                          }}
+                          style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#A7F3D0', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.3rem' }}>
+                          {[30, 60, 90].map(d => (
+                            <button
+                              key={d}
+                              type="button"
+                              className="btn"
+                              style={{
+                                padding: '0.15rem 0.4rem',
+                                fontSize: '0.72rem',
+                                background: parseInt(testDays) === d ? 'rgba(16, 185, 129, 0.35)' : 'rgba(255,255,255,0.05)',
+                                border: parseInt(testDays) === d ? '1px solid #10B981' : '1px solid var(--border-color)',
+                                color: parseInt(testDays) === d ? '#A7F3D0' : 'var(--text-muted)'
+                              }}
+                              onClick={() => {
+                                setTestDays(d);
+                                localStorage.setItem('bt_test_days', d);
+                              }}
+                            >
+                              {d}天
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                        <span>訓練/測試分割比</span>
+                        <span style={{ color: '#93C5FD', fontWeight: 'bold' }}>{Math.round(trainRatio * 100)}% 訓練 / {Math.round((1 - trainRatio) * 100)}% 測試</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="0.9"
+                        step="0.05"
+                        value={trainRatio}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          setTrainRatio(val);
+                          localStorage.setItem('bt_train_ratio', val);
+                        }}
+                        style={{ width: '100%', accentColor: '#3B82F6' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 區塊 2: 標的過濾與排除條件 */}
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>🎯</span> 標的過濾與風控條件
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        padding: '0.55rem 0.75rem',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.08)'
+                      }}>
+                        <input
+                          type="checkbox"
+                          id="exclude-6digit-cb"
+                          checked={exclude6Digit}
+                          onChange={e => {
+                            setExclude6Digit(e.target.checked);
+                            localStorage.setItem('bt_exclude_6digit', e.target.checked);
+                          }}
+                          style={{ width: '17px', height: '17px', cursor: 'pointer', accentColor: '#3B82F6' }}
+                        />
+                        <label htmlFor="exclude-6digit-cb" style={{ fontSize: '0.82rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
+                          🚫 <strong>排除 6 碼股票（ETF、權證、特別股）</strong>
+                          <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            只訓練 4 碼現股標的，去除衍生品雜訊
+                          </span>
+                        </label>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.6rem',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        padding: '0.55rem 0.75rem',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.08)'
+                      }}>
+                        <input
+                          type="checkbox"
+                          id="filter-capital-cb"
+                          checked={filterCapital}
+                          onChange={e => {
+                            setFilterCapital(e.target.checked);
+                            localStorage.setItem('bt_filter_capital', e.target.checked);
+                          }}
+                          style={{ width: '17px', height: '17px', cursor: 'pointer', accentColor: '#10B981' }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                            <label htmlFor="filter-capital-cb" style={{ fontSize: '0.82rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
+                              🏢 <strong>濾除股本過小之股票</strong>
+                            </label>
+                            {filterCapital && (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>≥</span>
+                                <input
+                                  type="number"
+                                  min="0.1"
+                                  step="0.5"
+                                  value={minCapitalBillion}
+                                  onChange={e => {
+                                    setMinCapitalBillion(e.target.value);
+                                    localStorage.setItem('bt_min_capital_billion', e.target.value);
+                                  }}
+                                  style={{
+                                    width: '60px',
+                                    background: 'rgba(15,23,42,0.8)',
+                                    color: '#FDE68A',
+                                    border: '1px solid #F59E0B',
+                                    borderRadius: '4px',
+                                    padding: '0.15rem 0.35rem',
+                                    fontSize: '0.8rem',
+                                    textAlign: 'center'
+                                  }}
+                                />
+                                <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>億</span>
+                              </div>
+                            )}
+                          </div>
+                          <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            {filterCapital ? `僅納入總股本 ≥ ${minCapitalBillion} 億之主力標的` : '未啟用股本過濾（納入全部規模股票）'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 底部操作按鈕列 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn"
+                      style={{
+                        padding: '0.45rem 1.15rem',
+                        fontSize: '0.88rem',
+                        background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                        color: 'white',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.45rem',
+                        fontWeight: 'bold',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 10px rgba(37, 99, 235, 0.4)'
+                      }}
+                      onClick={() => handleTrainMLModel(false)}
+                      disabled={mlLoading || allModelsStatus[mlModelType]?.status === 'training'}
+                    >
+                      {allModelsStatus[mlModelType]?.status === 'training' ? (
+                        <>
+                          <span className="loader" style={{ width: '13px', height: '13px', borderColor: 'white', borderBottomColor: 'transparent' }}></span>
+                          訓練中...
+                        </>
+                      ) : (
+                        <>🏋️ 開始訓練 {mlModelType.toUpperCase()} 模型</>
+                      )}
+                    </button>
+
+                    <button
+                      className="btn"
+                      style={{
+                        padding: '0.45rem 0.85rem',
+                        fontSize: '0.85rem',
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid rgba(239, 68, 68, 0.45)',
+                        color: '#FCA5A5',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        borderRadius: '8px'
+                      }}
+                      onClick={() => handleTrainMLModel(true)}
+                      disabled={mlLoading || allModelsStatus[mlModelType]?.status === 'training'}
+                      title="略過快取，在地端重新訓練特徵權重"
+                    >
+                      🔄 強制重訓
+                    </button>
+
+                    <button
+                      className="btn"
+                      style={{
+                        padding: '0.45rem 0.85rem',
+                        fontSize: '0.85rem',
+                        background: 'rgba(59, 130, 246, 0.2)',
+                        border: '1px solid rgba(59, 130, 246, 0.5)',
+                        color: '#93C5FD',
+                        borderRadius: '8px'
+                      }}
+                      onClick={() => handleSaveTrainSettings(true)}
+                    >
+                      💾 儲存條件
+                    </button>
+
+                    <button
+                      className="btn"
+                      style={{
+                        padding: '0.45rem 0.85rem',
+                        fontSize: '0.85rem',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid var(--border-color)',
+                        color: 'white',
+                        borderRadius: '8px'
+                      }}
+                      onClick={() => handleApplyMlPreset(BUILTIN_ML_TRAIN_PRESETS[0])}
+                    >
+                      ↺ 還原預設
+                    </button>
+                  </div>
+
                   {trainSavedToast && (
                     <span style={{
                       background: 'rgba(16, 185, 129, 0.2)',
                       border: '1px solid #10B981',
                       color: '#6EE7B7',
                       fontSize: '0.82rem',
-                      padding: '0.35rem 0.75rem',
+                      padding: '0.3rem 0.75rem',
                       borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
                       fontWeight: 'bold'
                     }}>
-                      ✅ 訓練條件已成功儲存！
+                      ✅ 訓練條件已儲存！
                     </span>
                   )}
-                  <button
-                    className="btn"
-                    style={{
-                      padding: '0.4rem 0.9rem',
-                      fontSize: '0.85rem',
-                      background: 'rgba(59, 130, 246, 0.25)',
-                      border: '1px solid rgba(59, 130, 246, 0.6)',
-                      color: '#93C5FD',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      fontWeight: 'bold'
-                    }}
-                    onClick={() => handleSaveTrainSettings(true)}
-                  >
-                    💾 儲存訓練條件
-                  </button>
-                  <button
-                    className="btn"
-                    style={{
-                      padding: '0.4rem 1.1rem',
-                      fontSize: '0.85rem',
-                      background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
-                      color: 'white',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      fontWeight: 'bold',
-                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.4)'
-                    }}
-                    onClick={() => handleTrainMLModel(false)}
-                    disabled={mlLoading || allModelsStatus[mlModelType]?.status === 'training'}
-                  >
-                    {allModelsStatus[mlModelType]?.status === 'training' ? (
-                      <>
-                        <span className="loader" style={{ width: '12px', height: '12px', borderColor: 'white', borderBottomColor: 'transparent' }}></span>
-                        訓練中...
-                      </>
-                    ) : (
-                      <>🏋️ 訓練 {mlModelType.toUpperCase()} 模型</>
-                    )}
-                  </button>
-                  <button
-                    className="btn"
-                    style={{
-                      padding: '0.4rem 0.85rem',
-                      fontSize: '0.85rem',
-                      background: 'rgba(239, 68, 68, 0.2)',
-                      border: '1px solid rgba(239, 68, 68, 0.4)',
-                      color: '#FCA5A5',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.35rem'
-                    }}
-                    onClick={() => handleTrainMLModel(true)}
-                    disabled={mlLoading || allModelsStatus[mlModelType]?.status === 'training'}
-                    title="略過快取，強制在地端重新訓練特徵權重"
-                  >
-                    🔄 強制重訓
-                  </button>
                 </div>
               </div>
+            )}
 
-              {/* 條件參數 Grid 排版 */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '1.25rem',
-                background: 'rgba(0, 0, 0, 0.25)',
-                padding: '1.1rem',
-                borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,0.06)'
-              }}>
-                {/* 區塊 1: 訓練與測試時間區間 */}
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span>📅</span> 數據長度配置
+            {/* 儲存自訂訓練模式 Modal */}
+            {showSaveMlPresetModal && (
+              <div className="modal-overlay" style={{ zIndex: 1000 }}>
+                <div className="modal-content" style={{ maxWidth: '420px', width: '92%' }}>
+                  <div className="analysis-header" style={{ marginBottom: '1rem' }}>
+                    <h3 className="analysis-title" style={{ fontSize: '1.1rem' }}>💾 儲存目前訓練設定為自訂模式</h3>
+                    <button className="close-btn" onClick={() => setShowSaveMlPresetModal(false)}>×</button>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.6rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+                      將您目前的訓練天數、測試天數與標的過濾條件保存為獨立模式，隨時可一鍵切換。
+                    </p>
                     <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
-                        🏋️ 訓練天數 (交易日)
+                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.88rem', color: '#93C5FD' }}>
+                        模式名稱（例如：外資短期主力衝刺、中長線高股本）：
                       </label>
                       <input
-                        type="number"
-                        value={trainDays}
-                        onChange={e => {
-                          setTrainDays(e.target.value);
-                          localStorage.setItem('bt_train_days', e.target.value);
+                        type="text"
+                        placeholder="請輸入自訂模式名稱..."
+                        value={newMlPresetName}
+                        onChange={e => setNewMlPresetName(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') handleSaveCurrentAsMlPreset(); }}
+                        autoFocus
+                        style={{
+                          width: '100%',
+                          padding: '0.55rem 0.75rem',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          boxSizing: 'border-box'
                         }}
-                        style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
                       />
-                      <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.3rem' }}>
-                        {[90, 180, 360].map(d => (
-                          <button
-                            key={d}
-                            type="button"
-                            className="btn"
-                            style={{
-                              padding: '0.15rem 0.4rem',
-                              fontSize: '0.72rem',
-                              background: parseInt(trainDays) === d ? 'rgba(59, 130, 246, 0.35)' : 'rgba(255,255,255,0.05)',
-                              border: parseInt(trainDays) === d ? '1px solid #3B82F6' : '1px solid var(--border-color)',
-                              color: parseInt(trainDays) === d ? '#93C5FD' : 'var(--text-muted)'
-                            }}
-                            onClick={() => {
-                              setTrainDays(d);
-                              localStorage.setItem('bt_train_days', d);
-                            }}
-                          >
-                            {d}天
-                          </button>
-                        ))}
-                      </div>
                     </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
-                        📊 測試/回測天數
-                      </label>
-                      <input
-                        type="number"
-                        value={testDays}
-                        onChange={e => {
-                          setTestDays(e.target.value);
-                          localStorage.setItem('bt_test_days', e.target.value);
-                        }}
-                        style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#A7F3D0', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
-                      />
-                      <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.3rem' }}>
-                        {[30, 60, 90].map(d => (
-                          <button
-                            key={d}
-                            type="button"
-                            className="btn"
-                            style={{
-                              padding: '0.15rem 0.4rem',
-                              fontSize: '0.72rem',
-                              background: parseInt(testDays) === d ? 'rgba(16, 185, 129, 0.35)' : 'rgba(255,255,255,0.05)',
-                              border: parseInt(testDays) === d ? '1px solid #10B981' : '1px solid var(--border-color)',
-                              color: parseInt(testDays) === d ? '#A7F3D0' : 'var(--text-muted)'
-                            }}
-                            onClick={() => {
-                              setTestDays(d);
-                              localStorage.setItem('bt_test_days', d);
-                            }}
-                          >
-                            {d}天
-                          </button>
-                        ))}
-                      </div>
+                    <div style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      color: 'var(--text-muted)'
+                    }}>
+                      <div>訓練天數: {trainDays} 天 ｜ 測試天數: {testDays} 天</div>
+                      <div>排除6碼權證: {exclude6Digit ? '是' : '否'} ｜ 股本過濾: {filterCapital ? `≥ ${minCapitalBillion} 億` : '無限制'}</div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+                      <button className="btn btn-secondary" onClick={() => setShowSaveMlPresetModal(false)}>
+                        取消
+                      </button>
+                      <button className="btn btn-save" onClick={handleSaveCurrentAsMlPreset} style={{ fontWeight: 'bold' }}>
+                        確認儲存
+                      </button>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
 
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
-                      <span>分割比例</span>
-                      <span style={{ color: '#93C5FD', fontWeight: 'bold' }}>{Math.round(trainRatio * 100)}% 訓練 / {Math.round((1 - trainRatio) * 100)}% 測試</span>
+            {/* 編輯自訂訓練模式 Modal */}
+            {editingMlPreset && (
+              <div className="modal-overlay" style={{ zIndex: 1000 }}>
+                <div className="modal-content" style={{ maxWidth: '440px', width: '92%' }}>
+                  <div className="analysis-header" style={{ marginBottom: '1rem' }}>
+                    <h3 className="analysis-title" style={{ fontSize: '1.1rem' }}>✏️ 編輯自訂訓練模式</h3>
+                    <button className="close-btn" onClick={() => setEditingMlPreset(null)}>×</button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.88rem', color: '#93C5FD' }}>
+                        模式名稱：
+                      </label>
+                      <input
+                        type="text"
+                        value={editMlPresetName}
+                        onChange={e => setEditMlPresetName(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.55rem 0.75rem',
+                          background: 'rgba(0,0,0,0.3)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          boxSizing: 'border-box'
+                        }}
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="0.9"
-                      step="0.05"
-                      value={trainRatio}
-                      onChange={e => {
-                        const val = parseFloat(e.target.value);
-                        setTrainRatio(val);
-                        localStorage.setItem('bt_train_ratio', val);
+                    <div style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      color: 'var(--text-muted)'
+                    }}>
+                      <div>目前設定：{editingMlPreset.desc}</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        handleUpdateCurrentMlPresetFromUI(editingMlPreset.id);
+                        setEditingMlPreset(null);
                       }}
-                      style={{ width: '100%', accentColor: '#3B82F6' }}
-                    />
-                  </div>
-                </div>
-
-                {/* 區塊 2: 標的過濾與排除條件 */}
-                <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <span>🎯</span> 標的過濾與風控條件
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.6rem',
-                      background: 'rgba(255, 255, 255, 0.04)',
-                      padding: '0.55rem 0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.08)'
-                    }}>
-                      <input
-                        type="checkbox"
-                        id="exclude-6digit-cb"
-                        checked={exclude6Digit}
-                        onChange={e => {
-                          setExclude6Digit(e.target.checked);
-                          localStorage.setItem('bt_exclude_6digit', e.target.checked);
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        fontSize: '0.82rem',
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        border: '1px solid rgba(16, 185, 129, 0.5)',
+                        color: '#6EE7B7'
+                      }}
+                    >
+                      🔄 以畫面目前調整數值覆蓋此模式參數
+                    </button>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+                      <button className="btn btn-secondary" onClick={() => setEditingMlPreset(null)}>
+                        取消
+                      </button>
+                      <button
+                        className="btn btn-save"
+                        onClick={() => {
+                          const trimmed = (editMlPresetName || '').trim();
+                          if (trimmed) {
+                            const updated = mlCustomPresets.map(p => p.id === editingMlPreset.id ? { ...p, name: `⭐ ${trimmed}` } : p);
+                            setMlCustomPresets(updated);
+                            localStorage.setItem('ml_custom_train_presets', JSON.stringify(updated));
+                            supabaseFetch('/stock_settings', {
+                              method: 'POST',
+                              headers: { 'Prefer': 'resolution=merge-duplicates' },
+                              body: JSON.stringify([{ key: 'ml_custom_train_presets', value: JSON.stringify(updated) }])
+                            }).catch(() => {});
+                          }
+                          setEditingMlPreset(null);
                         }}
-                        style={{ width: '17px', height: '17px', cursor: 'pointer', accentColor: '#3B82F6' }}
-                      />
-                      <label htmlFor="exclude-6digit-cb" style={{ fontSize: '0.82rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
-                        🚫 <strong>排除 6 碼股票（ETF、權證、特別股）</strong>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          只訓練 4 碼純個股，避免指數與衍生品雜訊
-                        </span>
-                      </label>
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.6rem',
-                      background: 'rgba(255, 255, 255, 0.04)',
-                      padding: '0.55rem 0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255,255,255,0.08)'
-                    }}>
-                      <input
-                        type="checkbox"
-                        id="filter-capital-cb"
-                        checked={filterCapital}
-                        onChange={e => {
-                          setFilterCapital(e.target.checked);
-                          localStorage.setItem('bt_filter_capital', e.target.checked);
-                        }}
-                        style={{ width: '17px', height: '17px', cursor: 'pointer', accentColor: '#10B981' }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                          <label htmlFor="filter-capital-cb" style={{ fontSize: '0.82rem', color: '#F1F5F9', cursor: 'pointer', userSelect: 'none' }}>
-                            🏢 <strong>濾除股本過小之股票</strong>
-                          </label>
-                          {filterCapital && (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>≥</span>
-                              <input
-                                type="number"
-                                min="0.1"
-                                step="0.5"
-                                value={minCapitalBillion}
-                                onChange={e => {
-                                  setMinCapitalBillion(e.target.value);
-                                  localStorage.setItem('bt_min_capital_billion', e.target.value);
-                                }}
-                                style={{
-                                  width: '60px',
-                                  background: 'rgba(15,23,42,0.8)',
-                                  color: '#FDE68A',
-                                  border: '1px solid #F59E0B',
-                                  borderRadius: '4px',
-                                  padding: '0.15rem 0.35rem',
-                                  fontSize: '0.8rem',
-                                  textAlign: 'center'
-                                }}
-                              />
-                              <span style={{ fontSize: '0.75rem', color: '#FDE68A' }}>億</span>
-                            </div>
-                          )}
-                        </div>
-                        <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                          {filterCapital ? `僅納入總股本 ≥ ${minCapitalBillion} 億之高流動性主力標的` : '未啟用股本過濾（納入全部規模股票）'}
-                        </span>
-                      </div>
+                        style={{ fontWeight: 'bold' }}
+                      >
+                        確認修改
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* 4. 🗂️ ML 功能視圖子分頁切換列 (Segmented Sub-Tabs) */}
             <div style={{
@@ -3673,56 +4024,73 @@ function StockDashboard() {
             {/* 子視圖 1: 🎯 Top 30 飆股突破推薦 */}
             {mlSubTab === 'predictions' && (
               <div>
-                {/* 預測標的列表 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🚀 ML 預測「突破勝率與跌破風險雙向評估」推薦清單
-              </h3>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                {/* 預測標的列表頂部資訊列 */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.85rem',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              background: 'rgba(15, 23, 42, 0.5)',
+              padding: '0.65rem 0.85rem',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.06)'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span>🚀</span> Top 30 飆股突破推薦清單
+                  </h3>
+                  {mlPredictions && mlPredictions.length > 0 && (
+                    <span style={{ fontSize: '0.75rem', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.4)', color: '#93C5FD', padding: '0.1rem 0.45rem', borderRadius: '12px' }}>
+                      共 {mlPredictions.length} 檔
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span>🗓️ 數據基準日：<strong style={{ color: '#F8FAFC' }}>{formatMlDate(allModelsStatus[mlModelType]?.latest_date || mlLatestDate) || '最新交易日'}</strong></span>
+                  <span>•</span>
+                  <span>🤖 模型：<strong style={{ color: '#A7F3D0' }}>{ML_MODELS.find(m => m.id === mlModelType)?.name || mlModelType}</strong></span>
+                  {allModelsStatus[mlModelType]?.metrics?.auc && (
+                    <>
+                      <span>•</span>
+                      <span>📈 驗證 AUC：<strong style={{ color: '#FDE68A' }}>{(allModelsStatus[mlModelType].metrics.auc * 100).toFixed(1)}%</strong></span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 {mlRefreshing && (
-                  <span style={{ fontSize: '0.8rem', color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#93C5FD', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                     <span className="loader" style={{ width: '12px', height: '12px' }}></span> 背景同步中...
                   </span>
                 )}
-                <button
-                  className="btn btn-secondary"
-                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.85rem' }}
-                  onClick={() => fetchMlStatusAndPredictions(null, true)}
-                  disabled={mlLoading || mlRefreshing}
-                  title="強制重新執行全台股最新特徵推論並更新快取"
-                >
-                  🔄 強制重算預測
-                </button>
+                <div className="view-mode-toggle" style={{ margin: 0 }}>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${mlRecViewMode === 'card' ? 'active' : ''}`}
+                    onClick={() => setMlRecViewMode('card')}
+                  >
+                    📱 卡片
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${mlRecViewMode === 'table' ? 'active' : ''}`}
+                    onClick={() => setMlRecViewMode('table')}
+                  >
+                    📊 表格
+                  </button>
+                </div>
               </div>
             </div>
 
             {mlPredictions && mlPredictions.length > 0 ? (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    📊 推薦清單共 <strong>{mlPredictions.length}</strong> 檔（依勝率與評等排序）
-                  </span>
-                  <div className="view-mode-toggle">
-                    <button
-                      type="button"
-                      className={`view-mode-btn ${mlRecViewMode === 'card' ? 'active' : ''}`}
-                      onClick={() => setMlRecViewMode('card')}
-                    >
-                      📱 卡片檢視
-                    </button>
-                    <button
-                      type="button"
-                      className={`view-mode-btn ${mlRecViewMode === 'table' ? 'active' : ''}`}
-                      onClick={() => setMlRecViewMode('table')}
-                    >
-                      📊 表格檢視
-                    </button>
-                  </div>
-                </div>
-
                 {mlRecViewMode === 'card' ? (
                   <div className="ml-rec-card-grid">
-                    {mlPredictions.map((row, idx) => (
+                    {getSortedPredictions().map((row, idx) => (
                       <div key={row.stock_id} className="ml-rec-card">
                         <div className="ml-rec-card-header">
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
@@ -3800,7 +4168,7 @@ function StockDashboard() {
                             type="button"
                             className="btn btn-secondary"
                             style={{ flex: 1, padding: '0.4rem 0.5rem', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
-                            onClick={() => handleCopyPrompt(row.stock_id)}
+                            onClick={() => copyAiPrompt(row.stock_id)}
                           >
                             📋 複製指令
                           </button>
@@ -3831,122 +4199,145 @@ function StockDashboard() {
                 ) : (
                   <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                     <table>
-                  <thead>
-                    <tr>
-                      <th onClick={() => handleMlSort('win_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        🚀 突破勝率 (20%+) {mlSortField === 'win_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('drop_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        ⚠️ 跌破風險 (10%-) {mlSortField === 'drop_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('net_score')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        🛡️ 攻守評等 {mlSortField === 'net_score' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('stock_id')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        股票代號 {mlSortField === 'stock_id' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('stock_name')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        股票名稱 {mlSortField === 'stock_name' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('latest_price')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        最新收盤價 {mlSortField === 'latest_price' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('large_holder_ratio')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        千張大戶持股% {mlSortField === 'large_holder_ratio' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('large_holder_change')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        大戶週增減 {mlSortField === 'large_holder_change' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('foreign_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        外資連買 {mlSortField === 'foreign_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th onClick={() => handleMlSort('trust_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
-                        投信連買 {mlSortField === 'trust_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
-                      </th>
-                      <th>動作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getSortedPredictions().map((row, idx) => (
-                      <tr key={idx}>
-                        <td style={{ fontWeight: 'bold' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            background: row.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                            color: row.win_probability >= 35 ? '#FCA5A5' : '#FDE68A',
-                            border: row.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
-                            display: 'inline-block'
-                          }}>
-                            {row.win_probability}%
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 'bold' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            background: row.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : row.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                            color: row.drop_probability >= 40 ? '#F87171' : row.drop_probability <= 25 ? '#34D399' : 'white',
-                            border: row.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : row.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
-                            display: 'inline-block'
-                          }}>
-                            {row.drop_probability}%
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 'bold' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '4px',
-                            background: row.risk_tag.includes('👑') ? 'rgba(245, 158, 11, 0.25)' : row.risk_tag.includes('🔴') ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
-                            color: row.risk_tag.includes('👑') ? '#FDE68A' : row.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD',
-                            border: row.risk_tag.includes('👑') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)',
-                            display: 'inline-block'
-                          }}>
-                            {row.risk_tag}
-                          </span>
-                        </td>
-                        <td style={{ fontWeight: 'bold', color: '#60A5FA' }}>{row.stock_id}</td>
-                        <td style={{ fontWeight: 'bold' }}>{row.stock_name}</td>
-                        <td style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{row.latest_price} 元</td>
-                        <td>{row.large_holder_ratio}%</td>
-                        <td style={{ color: row.large_holder_change > 0 ? '#FCA5A5' : row.large_holder_change < 0 ? '#A7F3D0' : 'white' }}>
-                          {row.large_holder_change > 0 ? `▲${row.large_holder_change}%p` : row.large_holder_change < 0 ? `▼${Math.abs(row.large_holder_change)}%p` : '0%p'}
-                        </td>
-                        <td>{row.foreign_buy_days > 0 ? `連買 ${row.foreign_buy_days} 天` : '無'}</td>
-                        <td>{row.trust_buy_days > 0 ? `連買 ${row.trust_buy_days} 天` : '無'}</td>
-                        <td style={{ display: 'flex', gap: '0.5rem', whiteSpace: 'nowrap' }}>
-                          <button
-                            className="btn btn-save"
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                            onClick={() => handleAddWatchlistStockDirectly(row.stock_id)}
-                          >
-                            ➕ 加至追蹤
-                          </button>
-                          <button
-                            onClick={() => copyAiPrompt(row.stock_id)}
-                            style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
-                          >
-                            📋 複製AI指令
-                          </button>
-                          <a
-                            href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
-                            target="_blank" rel="noreferrer"
-                            style={{ color: '#60A5FA', textDecoration: 'none', fontSize: '0.85rem' }}
-                          >🔍 Yahoo</a>
-                          <a
-                            href={`https://finlab.finance/stocks/${row.stock_id}`}
-                            target="_blank" rel="noreferrer"
-                            style={{ color: '#FCD34D', textDecoration: 'none', fontSize: '0.85rem', marginLeft: '0.4rem' }}
-                          >📊 FinLab</a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      <thead>
+                        <tr>
+                          <th onClick={() => handleMlSort('stock_id')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            標的代號 / 名稱 {mlSortField === 'stock_id' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th style={{ width: '120px', textAlign: 'center' }}>快捷動作</th>
+                          <th onClick={() => handleMlSort('latest_price')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            最新收盤價 {mlSortField === 'latest_price' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('win_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            🚀 突破勝率 {mlSortField === 'win_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('drop_probability')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            ⚠️ 跌破風險 {mlSortField === 'drop_probability' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('net_score')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            🛡️ 攻守評等 {mlSortField === 'net_score' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('large_holder_ratio')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            大戶持股% {mlSortField === 'large_holder_ratio' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('large_holder_change')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            大戶週增減 {mlSortField === 'large_holder_change' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('foreign_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            外資連買 {mlSortField === 'foreign_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th onClick={() => handleMlSort('trust_buy_days')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                            投信連買 {mlSortField === 'trust_buy_days' ? (mlSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getSortedPredictions().map((row, idx) => (
+                          <tr key={row.stock_id || idx}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#FBBF24', background: 'rgba(245, 158, 11, 0.15)', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                                  #{idx + 1}
+                                </span>
+                                <span style={{ fontWeight: 'bold', color: '#60A5FA' }}>{row.stock_id}</span>
+                                <span style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{row.stock_name}</span>
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <button
+                                  type="button"
+                                  className="btn"
+                                  style={{ padding: '0.2rem 0.45rem', fontSize: '0.8rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: '#6EE7B7', borderRadius: '4px' }}
+                                  onClick={() => handleAddWatchlistStockDirectly(row.stock_id)}
+                                  title={`加 ${row.stock_name || row.stock_id} 至自選清單`}
+                                >
+                                  ➕
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn"
+                                  style={{ padding: '0.2rem 0.45rem', fontSize: '0.8rem', background: 'rgba(255, 255, 255, 0.08)', border: '1px solid var(--border-color)', color: '#CBD5E1', borderRadius: '4px' }}
+                                  onClick={() => copyAiPrompt(row.stock_id)}
+                                  title="複製 AI 提示詞"
+                                >
+                                  📋
+                                </button>
+                                <a
+                                  href={`https://tw.stock.yahoo.com/quote/${row.stock_id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn"
+                                  style={{ padding: '0.2rem 0.45rem', fontSize: '0.8rem', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', color: '#60A5FA', textDecoration: 'none', borderRadius: '4px', display: 'inline-flex' }}
+                                  title="Yahoo 股市"
+                                >
+                                  🔍
+                                </a>
+                                <a
+                                  href={`https://finlab.finance/stocks/${row.stock_id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn"
+                                  style={{ padding: '0.2rem 0.45rem', fontSize: '0.8rem', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#FCD34D', textDecoration: 'none', borderRadius: '4px', display: 'inline-flex' }}
+                                  title={`FinLab 量化分析 (${row.stock_id})`}
+                                >
+                                  📊
+                                </a>
+                              </div>
+                            </td>
+                            <td style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>
+                              ${row.latest_price} 元
+                            </td>
+                            <td style={{ fontWeight: 'bold' }}>
+                              <span style={{
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: '4px',
+                                background: row.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                color: row.win_probability >= 35 ? '#FCA5A5' : '#FDE68A',
+                                border: row.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
+                                display: 'inline-block'
+                              }}>
+                                {row.win_probability}%
+                              </span>
+                            </td>
+                            <td style={{ fontWeight: 'bold' }}>
+                              <span style={{
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: '4px',
+                                background: row.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : row.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                color: row.drop_probability >= 40 ? '#F87171' : row.drop_probability <= 25 ? '#34D399' : 'white',
+                                border: row.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : row.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                                display: 'inline-block'
+                              }}>
+                                {row.drop_probability}%
+                              </span>
+                            </td>
+                            <td style={{ fontWeight: 'bold' }}>
+                              <span style={{
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: '4px',
+                                background: row.risk_tag.includes('👑') ? 'rgba(245, 158, 11, 0.25)' : row.risk_tag.includes('🔴') ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
+                                color: row.risk_tag.includes('👑') ? '#FDE68A' : row.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD',
+                                border: row.risk_tag.includes('👑') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)',
+                                display: 'inline-block'
+                              }}>
+                                {row.risk_tag}
+                              </span>
+                            </td>
+                            <td>{row.large_holder_ratio}%</td>
+                            <td style={{ color: row.large_holder_change > 0 ? '#FCA5A5' : row.large_holder_change < 0 ? '#A7F3D0' : 'white' }}>
+                              {row.large_holder_change > 0 ? `▲${row.large_holder_change}%p` : row.large_holder_change < 0 ? `▼${Math.abs(row.large_holder_change)}%p` : '0%p'}
+                            </td>
+                            <td>{row.foreign_buy_days > 0 ? `連買 ${row.foreign_buy_days} 天` : '無'}</td>
+                            <td>{row.trust_buy_days > 0 ? `連買 ${row.trust_buy_days} 天` : '無'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ) : (
+            ) : (
               <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
                 <p style={{ margin: 0, fontSize: '1.05rem' }}>尚無機器學習預測資料。</p>
