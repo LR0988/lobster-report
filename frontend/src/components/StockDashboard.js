@@ -3810,8 +3810,19 @@ function StockDashboard() {
                             rel="noreferrer"
                             className="btn btn-secondary"
                             style={{ padding: '0.4rem 0.65rem', fontSize: '0.82rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                            title="Yahoo 股市"
                           >
                             🔍
+                          </a>
+                          <a
+                            href={`https://finlab.finance/stocks/${row.stock_id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-secondary"
+                            style={{ padding: '0.4rem 0.65rem', fontSize: '0.82rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', color: '#FCD34D' }}
+                            title={`FinLab 量化分析 (${row.stock_id})`}
+                          >
+                            📊
                           </a>
                         </div>
                       </div>
@@ -3922,6 +3933,11 @@ function StockDashboard() {
                             target="_blank" rel="noreferrer"
                             style={{ color: '#60A5FA', textDecoration: 'none', fontSize: '0.85rem' }}
                           >🔍 Yahoo</a>
+                          <a
+                            href={`https://finlab.finance/stocks/${row.stock_id}`}
+                            target="_blank" rel="noreferrer"
+                            style={{ color: '#FCD34D', textDecoration: 'none', fontSize: '0.85rem', marginLeft: '0.4rem' }}
+                          >📊 FinLab</a>
                         </td>
                       </tr>
                     ))}
@@ -5108,8 +5124,19 @@ function StockDashboard() {
                                 rel="noreferrer"
                                 className="btn btn-secondary"
                                 style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                                title="Yahoo 股市"
                               >
                                 🔍
+                              </a>
+                              <a
+                                href={`https://finlab.finance/stocks/${item.stock_id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', color: '#FCD34D' }}
+                                title={`FinLab 量化分析 (${item.stock_id})`}
+                              >
+                                📊
                               </a>
                               <button
                                 type="button"
@@ -5325,6 +5352,15 @@ function StockDashboard() {
                               style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                             >
                               🔍 Yahoo
+                            </a>
+                            <a
+                              href={`https://finlab.finance/stocks/${item.stock_id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn btn-secondary"
+                              style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', color: '#FCD34D' }}
+                            >
+                              📊 FinLab
                             </a>
                             <button
                               type="button"
@@ -6172,7 +6208,7 @@ function StockDashboard() {
                         {sortConfig.key === 'stock_id' ? (sortConfig.dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
                       </span>
                     </th>
-                    <th style={{ width: '96px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <th style={{ width: '130px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       快捷
                     </th>
                     {Object.keys(sortedData[0])
@@ -6241,6 +6277,27 @@ function StockDashboard() {
                                   }}
                                 >
                                   🔍
+                                </a>
+                                <a
+                                  href={`https://finlab.finance/stocks/${row.stock_id}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={`前往 FinLab 量化分析 (${row.stock_id})`}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    background: 'rgba(245, 158, 11, 0.18)',
+                                    border: '1px solid rgba(245, 158, 11, 0.45)',
+                                    color: '#FCD34D',
+                                    textDecoration: 'none',
+                                    fontSize: '0.85rem'
+                                  }}
+                                >
+                                  📊
                                 </a>
                                 <button
                                   onClick={() => copyAiPrompt(row.stock_id)}
@@ -6346,6 +6403,11 @@ function StockDashboard() {
                               target="_blank" rel="noreferrer"
                               style={{ color: '#60A5FA', textDecoration: 'none' }}
                             >🔍 Yahoo</a>
+                            <a
+                              href={`https://finlab.finance/stocks/${row.stock_id}`}
+                              target="_blank" rel="noreferrer"
+                              style={{ color: '#FCD34D', textDecoration: 'none' }}
+                            >📊 FinLab</a>
                             <button
                               onClick={() => copyAiPrompt(row.stock_id)}
                               style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '2px 6px', fontSize: '0.8rem' }}
