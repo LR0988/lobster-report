@@ -479,6 +479,14 @@ function StockDashboard() {
   const [portfolioPredictions, setPortfolioPredictions] = useState({});
   const [fetchingPortfolioMl, setFetchingPortfolioMl] = useState(false);
 
+  // 持股介面收折、搜尋、排序與快速編輯狀態
+  const [showAddPortfolioForm, setShowAddPortfolioForm] = useState(false);
+  const [showPortfolioAiConfig, setShowPortfolioAiConfig] = useState(false);
+  const [portfolioSearchTerm, setPortfolioSearchTerm] = useState('');
+  const [portfolioSortField, setPortfolioSortField] = useState('roi');
+  const [portfolioSortOrder, setPortfolioSortOrder] = useState('desc');
+  const [editingPortfolioStock, setEditingPortfolioStock] = useState(null);
+
   // ML 客製化訓練長度與回測長度 (交易日天數)
   const [trainRatio, setTrainRatio] = useState(() => {
     const saved = localStorage.getItem('bt_train_ratio');
@@ -654,6 +662,105 @@ function StockDashboard() {
           : valA.localeCompare(valB);
       }
       return mlSortOrder === 'desc' ? valB - valA : valA - valB;
+    });
+  };
+
+  // 持股總覽 KPI 彙總統計
+  const portfolioSummary = useMemo(() => {
+    if (!portfolioList || portfolioList.length === 0) {
+      return { total: 0, profitCount: 0, lossCount: 0, flatCount: 0, avgRoi: 0, totalProfit: 0, validRoiCount: 0 };
+    }
+    let profitCount = 0;
+    let lossCount = 0;
+    let flatCount = 0;
+    let validRoiSum = 0;
+    let validRoiCount = 0;
+    let totalProfit = 0;
+
+    portfolioList.forEach(item => {
+      const hasCost = item.buy_price !== null && item.buy_price > 0;
+      const hasPrice = item.latest_price !== null && item.latest_price > 0;
+      if (hasCost && hasPrice) {
+        const diff = item.latest_price - item.buy_price;
+        const roi = (diff / item.buy_price) * 100;
+        validRoiSum += roi;
+        validRoiCount += 1;
+        totalProfit += diff;
+        if (roi > 0.001) profitCount++;
+        else if (roi < -0.001) lossCount++;
+        else flatCount++;
+      } else {
+        flatCount++;
+      }
+    });
+
+    const avgRoi = validRoiCount > 0 ? (validRoiSum / validRoiCount) : 0;
+
+    return {
+      total: portfolioList.length,
+      profitCount,
+      lossCount,
+      flatCount,
+      avgRoi,
+      totalProfit,
+      validRoiCount
+    };
+  }, [portfolioList]);
+
+  // 持股排序與搜尋過濾
+  const handlePortfolioSort = (field) => {
+    if (portfolioSortField === field) {
+      setPortfolioSortOrder(prev => (prev === 'desc' ? 'asc' : 'desc'));
+    } else {
+      setPortfolioSortField(field);
+      setPortfolioSortOrder('desc');
+    }
+  };
+
+  const getSortedPortfolioList = () => {
+    if (!portfolioList) return [];
+    let list = [...portfolioList];
+
+    if (portfolioSearchTerm && portfolioSearchTerm.trim()) {
+      const term = portfolioSearchTerm.trim().toLowerCase();
+      list = list.filter(item => 
+        (item.stock_id && item.stock_id.toLowerCase().includes(term)) ||
+        (item.stock_name && item.stock_name.toLowerCase().includes(term)) ||
+        (item.notes && item.notes.toLowerCase().includes(term))
+      );
+    }
+
+    return list.sort((a, b) => {
+      let valA, valB;
+      const predA = portfolioPredictions[a.stock_id] || {};
+      const predB = portfolioPredictions[b.stock_id] || {};
+
+      if (portfolioSortField === 'roi') {
+        const roiA = (a.buy_price && a.latest_price) ? ((a.latest_price - a.buy_price) / a.buy_price) * 100 : -9999;
+        const roiB = (b.buy_price && b.latest_price) ? ((b.latest_price - b.buy_price) / b.buy_price) * 100 : -9999;
+        valA = roiA;
+        valB = roiB;
+      } else if (portfolioSortField === 'win_probability') {
+        valA = predA.win_probability !== undefined ? predA.win_probability : -1;
+        valB = predB.win_probability !== undefined ? predB.win_probability : -1;
+      } else if (portfolioSortField === 'drop_probability') {
+        valA = predA.drop_probability !== undefined ? predA.drop_probability : 999;
+        valB = predB.drop_probability !== undefined ? predB.drop_probability : 999;
+      } else if (portfolioSortField === 'latest_price') {
+        valA = a.latest_price || 0;
+        valB = b.latest_price || 0;
+      } else if (portfolioSortField === 'buy_price') {
+        valA = a.buy_price || 0;
+        valB = b.buy_price || 0;
+      } else {
+        valA = a.stock_id || '';
+        valB = b.stock_id || '';
+      }
+
+      if (typeof valA === 'string') {
+        return portfolioSortOrder === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB);
+      }
+      return portfolioSortOrder === 'desc' ? valB - valA : valA - valB;
     });
   };
 
@@ -2030,6 +2137,36 @@ function StockDashboard() {
       }
     } catch (err) {
       alert('刪除持股失敗');
+    }
+  };
+
+  const handleUpdatePortfolioStock = async (stockId, buyPrice, notes) => {
+    try {
+      const parsedPrice = (buyPrice !== '' && buyPrice !== null && !isNaN(buyPrice)) ? parseFloat(buyPrice) : null;
+      const cleanNotes = notes || '';
+      const payload = {
+        buy_price: parsedPrice,
+        notes: cleanNotes
+      };
+      const res = await supabaseFetch(`/stock_portfolio?stock_id=eq.${stockId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setPortfolioList(prev => prev.map(p => p.stock_id === stockId ? { ...p, ...payload } : p));
+      } else {
+        const fallbackRes = await stockFetch(`/api/portfolio`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stock_id: stockId, ...payload })
+        });
+        if (fallbackRes.ok) {
+          fetchPortfolio();
+        }
+      }
+      setEditingPortfolioStock(null);
+    } catch (err) {
+      alert('更新持股失敗: ' + err.message);
     }
   };
 
@@ -5244,209 +5381,465 @@ function StockDashboard() {
 
         {activeTab === 'portfolio' && (
           <div>
-            {/* API Key與伺服器設定控制列 */}
-            <div className="api-key-block" style={{ padding: '1rem 1.25rem', gap: '1rem' }}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* 1. 持股資產與損益 KPI 看板 */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '0.75rem',
+              marginBottom: '1rem'
+            }}>
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.75)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '12px',
+                padding: '0.85rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>💼 追蹤標的總數</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#60A5FA' }}>{portfolioSummary.totalStocks}</span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>檔持股</span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  📈 <strong style={{ color: '#EF4444' }}>{portfolioSummary.profitCount}</strong> 賺 · 📉 <strong style={{ color: '#10B981' }}>{portfolioSummary.lossCount}</strong> 賠 {portfolioSummary.flatCount > 0 ? `· ➖ ${portfolioSummary.flatCount} 平` : ''}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.75)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '12px',
+                padding: '0.85rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>📊 平均預估損益率</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <span style={{
+                    fontSize: '1.4rem',
+                    fontWeight: 800,
+                    color: portfolioSummary.avgRoi !== null
+                      ? (portfolioSummary.avgRoi > 0 ? '#EF4444' : portfolioSummary.avgRoi < 0 ? '#10B981' : '#F8FAFC')
+                      : 'var(--text-muted)'
+                  }}>
+                    {portfolioSummary.avgRoi !== null ? `${portfolioSummary.avgRoi > 0 ? '+' : ''}${portfolioSummary.avgRoi.toFixed(2)}%` : '—'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    ({portfolioSummary.validRoiCount} 檔有成本)
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: portfolioSummary.profitCount >= portfolioSummary.lossCount ? '#FCA5A5' : '#86EFAC' }}>
+                  {portfolioSummary.totalStocks === 0 ? '尚未加入持股' : portfolioSummary.profitCount >= portfolioSummary.lossCount ? '🚀 整體多方表現領先' : '⚠️ 需留意持股調節風險'}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.75)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '12px',
+                padding: '0.85rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🚀 AI 20天勝率亮點 (≥35%)</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FCD34D' }}>
+                    {portfolioList ? portfolioList.filter(s => (portfolioPredictions[s.stock_id]?.win_probability || 0) >= 35).length : 0}
+                  </span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>檔突破潛力</span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#93C5FD' }}>
+                  模型: {portfolioMlModel.toUpperCase()}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.75)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '12px',
+                padding: '0.85rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🤖 Gemini 健檢覆蓋率</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#A78BFA' }}>
+                    {portfolioList ? portfolioList.filter(s => s.sentiment_score !== null && s.sentiment_score !== undefined).length : 0}
+                    <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 500 }}> / {portfolioSummary.totalStocks}</span>
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  排程自動分析: {portfolioList ? portfolioList.filter(s => s.auto_analyze === 1).length : 0} 檔
+                </div>
+              </div>
+            </div>
+
+            {/* 2. 緊湊控制與搜尋工具列 */}
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '12px',
+              padding: '0.75rem 1rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              {/* 左側快捷切換按鈕群 */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   className="btn"
-                  style={{ background: 'linear-gradient(135deg, #4F46E5, #3730A3)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-                  onClick={() => { fetchSettings(); setShowSettingsModal(true); }}
+                  onClick={() => setShowAddPortfolioForm(prev => !prev)}
+                  style={{
+                    background: showAddPortfolioForm ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid rgba(59, 130, 246, 0.5)',
+                    color: '#93C5FD',
+                    padding: '0.4rem 0.85rem',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}
                 >
-                  ⚙️ Gemini 後端自動化設定
+                  {showAddPortfolioForm ? '▲ 收合新增' : '➕ 新增持股'}
                 </button>
+
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setShowPortfolioAiConfig(prev => !prev)}
+                  style={{
+                    background: showPortfolioAiConfig ? 'rgba(79, 70, 229, 0.4)' : 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-main)',
+                    padding: '0.4rem 0.85rem',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}
+                >
+                  ⚙️ AI 設定 {showPortfolioAiConfig ? '▲' : '▼'}
+                </button>
+
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
                   onClick={handleAnalyzeAll}
+                  style={{
+                    padding: '0.4rem 0.85rem',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}
+                  title="依序分析所有排程持股"
                 >
-                  🔄 一鍵背景分析已選持股
+                  🔄 批次健檢
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: '200px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ color: 'var(--text-main)', fontSize: '0.9rem' }}>🔑 臨時瀏覽器金鑰:</span>
+
+              {/* 右側搜尋、排序與視圖切換 */}
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* 搜尋框 */}
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
                   <input
-                    type="password"
-                    placeholder="優先使用此處金鑰 (選填)"
-                    value={geminiApiKey}
-                    onChange={e => {
-                      setGeminiApiKey(e.target.value);
-                      localStorage.setItem('gemini_api_key', e.target.value);
-                    }}
+                    type="text"
+                    placeholder="🔍 搜尋代號或股名..."
+                    value={portfolioSearchTerm}
+                    onChange={e => setPortfolioSearchTerm(e.target.value)}
                     style={{
                       background: 'rgba(0, 0, 0, 0.4)',
                       border: '1px solid var(--border-color)',
-                      borderRadius: '6px',
+                      borderRadius: '8px',
                       color: 'white',
-                      padding: '0.25rem 0.5rem',
-                      fontSize: '0.85rem',
-                      width: '180px'
+                      padding: '0.35rem 0.65rem',
+                      fontSize: '0.84rem',
+                      width: '145px'
                     }}
                   />
-                </div>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                  ※ 優先使用您填寫的臨時金鑰；若無則使用後端設定之金鑰。
-                </span>
-              </div>
-            </div>
-
-            {/* 新增持股表單 */}
-            <form onSubmit={handleAddPortfolio} className="portfolio-form-grid">
-              <div className="portfolio-form-field">
-                <label htmlFor="stock-id-input">股票代號</label>
-                <input
-                  id="stock-id-input"
-                  type="text"
-                  placeholder="例如：2330"
-                  required
-                  value={portfolioInput.stock_id}
-                  onChange={e => handleStockIdChange(e.target.value)}
-                />
-              </div>
-              <div className="portfolio-form-field">
-                <label htmlFor="buy-price-input">購入成本均價 (選填)</label>
-                <input
-                  id="buy-price-input"
-                  type="number"
-                  step="0.01"
-                  placeholder="例如：900"
-                  value={portfolioInput.buy_price || ''}
-                  onChange={e => setPortfolioInput(p => ({ ...p, buy_price: e.target.value }))}
-                />
-              </div>
-              <div className="portfolio-form-field">
-                <label htmlFor="notes-input">個人筆記 / 交易備註 (選填)</label>
-                <input
-                  id="notes-input"
-                  type="text"
-                  placeholder="例如：長期投資、跌破月線減碼"
-                  value={portfolioInput.notes || ''}
-                  onChange={e => setPortfolioInput(p => ({ ...p, notes: e.target.value }))}
-                />
-              </div>
-              <div className="portfolio-form-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', alignSelf: 'center', marginTop: '1.2rem' }}>
-                <input
-                  id="auto-analyze-checkbox"
-                  type="checkbox"
-                  checked={portfolioInput.auto_analyze}
-                  onChange={e => setPortfolioInput(p => ({ ...p, auto_analyze: e.target.checked }))}
-                  style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
-                />
-                <label htmlFor="auto-analyze-checkbox" style={{ margin: 0, cursor: 'pointer', userSelect: 'none', fontWeight: 'normal', fontSize: '0.9rem' }}>自動排程分析</label>
-              </div>
-              <button type="submit" className="btn btn-save" style={{ height: '38px', padding: '0 1.5rem' }}>
-                ➕ 新增/更新持股
-              </button>
-            </form>
-
-            {/* 🤖 AI 20天勝率預測模型選擇與控制工具列 */}
-            <div style={{
-              background: 'rgba(15, 23, 42, 0.7)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              borderRadius: '10px',
-              padding: '0.85rem 1.25rem',
-              marginBottom: '1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.75rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.9rem', color: '#93C5FD', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  🤖 AI 20天勝率預測模型:
-                </span>
-                <select
-                  value={portfolioMlModel}
-                  onChange={e => {
-                    const newModel = e.target.value;
-                    setPortfolioMlModel(newModel);
-                    try { localStorage.setItem('portfolio_ml_model', newModel); } catch {}
-                    fetchPortfolioMlPredictions(newModel);
-                  }}
-                  style={{
-                    background: 'rgba(0,0,0,0.5)',
-                    color: 'white',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '6px',
-                    padding: '0.4rem 0.75rem',
-                    fontSize: '0.86rem',
-                    minWidth: '280px'
-                  }}
-                >
-                  <option value="lightgbm">🌟 LightGBM (推薦 - 極速高精準度)</option>
-                  <option value="xgboost">🔥 XGBoost (強力正規化防過擬合)</option>
-                  <option value="attention_bilstm_xgb">🔥 Attention BiLSTM-XGBoost (注意力雙向 LSTM)</option>
-                  <option value="resnet50">🧬 ResNet-50 (1D 殘差卷積 50 層)</option>
-                  <option value="tft">🔮 TFT (時序融合 Transformer)</option>
-                  <option value="vsn_xlstm">🧬 VSN-xLSTM (多變數選擇 xLSTM)</option>
-                  <option value="patchtst">🧩 PatchTST (分塊時序 Transformer)</option>
-                  <option value="cnn_hybrid">⚡ CNN-Hybrid (圖形+籌碼混合)</option>
-                  <option value="mlp">🧠 Deep Neural Network (MLP 深度神經網路)</option>
-                  <option value="rf">🌲 Random Forest (隨機森林 - 穩健抗噪)</option>
-                  <option value="lr">📊 Logistic Regression (線性 Baseline)</option>
-                </select>
-                <button
-                  type="button"
-                  className="btn btn-save"
-                  style={{ padding: '0.4rem 0.9rem', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-                  onClick={() => fetchPortfolioMlPredictions(portfolioMlModel)}
-                  disabled={fetchingPortfolioMl}
-                >
-                  {fetchingPortfolioMl ? (
-                    <>
-                      <span className="loader" style={{ width: '12px', height: '12px' }}></span>
-                      <span>預測計算中...</span>
-                    </>
-                  ) : (
-                    <span>🚀 預測所有持股 20 天勝率</span>
-                  )}
-                </button>
-              </div>
-
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                💡 透過 <strong>{portfolioMlModel.toUpperCase()}</strong> 模型評估持股未來 20 交易日內漲幅突破 20% 之勝率與跌破風險
-              </div>
-            </div>
-
-            {/* 持股表格 (凍結前 6 欄: 股票代號、名稱、自動分析、均價、最新價、預估損益) */}
-            {portfolioList && portfolioList.length > 0 ? (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    💼 追蹤持股共 <strong>{portfolioList.length}</strong> 檔
-                  </span>
-                  <div className="view-mode-toggle">
+                  {portfolioSearchTerm && (
                     <button
                       type="button"
-                      className={`view-mode-btn ${portfolioViewMode === 'card' ? 'active' : ''}`}
-                      onClick={() => setPortfolioViewMode('card')}
+                      onClick={() => setPortfolioSearchTerm('')}
+                      style={{
+                        position: 'absolute',
+                        right: '6px',
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-muted)',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem'
+                      }}
                     >
-                      📱 卡片檢視
+                      ✕
                     </button>
+                  )}
+                </div>
+
+                {/* 排序選單 */}
+                <select
+                  value={portfolioSortField}
+                  onChange={e => handlePortfolioSort(e.target.value)}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.4)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '8px',
+                    color: 'white',
+                    padding: '0.35rem 0.65rem',
+                    fontSize: '0.84rem'
+                  }}
+                >
+                  <option value="default">預設排序</option>
+                  <option value="roi">預估損益率 (由高到低)</option>
+                  <option value="win_probability">20天勝率 (高到低)</option>
+                  <option value="drop_probability">20天跌破風險 (低到高)</option>
+                  <option value="latest_price">最新股價 (高到低)</option>
+                  <option value="stock_id">股票代號</option>
+                </select>
+
+                {/* 卡片 / 表格檢視切換 */}
+                <div className="view-mode-toggle">
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${portfolioViewMode === 'card' ? 'active' : ''}`}
+                    onClick={() => setPortfolioViewMode('card')}
+                  >
+                    📱 卡片
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${portfolioViewMode === 'table' ? 'active' : ''}`}
+                    onClick={() => setPortfolioViewMode('table')}
+                  >
+                    📊 表格
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. 可收折：新增持股表單 */}
+            {showAddPortfolioForm && (
+              <form onSubmit={handleAddPortfolio} className="portfolio-form-grid" style={{
+                background: 'rgba(30, 41, 59, 0.5)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '12px',
+                padding: '1rem',
+                marginBottom: '1rem'
+              }}>
+                <div className="portfolio-form-field">
+                  <label htmlFor="stock-id-input">股票代號</label>
+                  <input
+                    id="stock-id-input"
+                    type="text"
+                    placeholder="例如：2330"
+                    required
+                    value={portfolioInput.stock_id}
+                    onChange={e => handleStockIdChange(e.target.value)}
+                  />
+                </div>
+                <div className="portfolio-form-field">
+                  <label htmlFor="buy-price-input">購入成本均價 (選填)</label>
+                  <input
+                    id="buy-price-input"
+                    type="number"
+                    step="0.01"
+                    placeholder="例如：900"
+                    value={portfolioInput.buy_price || ''}
+                    onChange={e => setPortfolioInput(p => ({ ...p, buy_price: e.target.value }))}
+                  />
+                </div>
+                <div className="portfolio-form-field">
+                  <label htmlFor="notes-input">個人筆記 / 交易備註 (選填)</label>
+                  <input
+                    id="notes-input"
+                    type="text"
+                    placeholder="例如：長期波段、跌破月線減碼"
+                    value={portfolioInput.notes || ''}
+                    onChange={e => setPortfolioInput(p => ({ ...p, notes: e.target.value }))}
+                  />
+                </div>
+                <div className="portfolio-form-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', alignSelf: 'center', marginTop: '1.2rem' }}>
+                  <input
+                    id="auto-analyze-checkbox"
+                    type="checkbox"
+                    checked={portfolioInput.auto_analyze}
+                    onChange={e => setPortfolioInput(p => ({ ...p, auto_analyze: e.target.checked }))}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', margin: 0 }}
+                  />
+                  <label htmlFor="auto-analyze-checkbox" style={{ margin: 0, cursor: 'pointer', userSelect: 'none', fontWeight: 'normal', fontSize: '0.9rem' }}>自動排程分析</label>
+                </div>
+                <button type="submit" className="btn btn-save" style={{ height: '38px', padding: '0 1.5rem' }}>
+                  ➕ 新增/更新持股
+                </button>
+              </form>
+            )}
+
+            {/* 4. 可收折：AI 設定面板 (Gemini後端設定、臨時金鑰、20天勝率模型) */}
+            {showPortfolioAiConfig && (
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.9)',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: '12px',
+                padding: '1rem 1.25rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      className={`view-mode-btn ${portfolioViewMode === 'table' ? 'active' : ''}`}
-                      onClick={() => setPortfolioViewMode('table')}
+                      className="btn"
+                      style={{ background: 'linear-gradient(135deg, #4F46E5, #3730A3)', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+                      onClick={() => { fetchSettings(); setShowSettingsModal(true); }}
                     >
-                      📊 表格檢視
+                      ⚙️ Gemini 後端自動化設定
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: 'var(--text-main)', fontSize: '0.85rem' }}>🔑 臨時金鑰:</span>
+                      <input
+                        type="password"
+                        placeholder="瀏覽器臨時金鑰 (選填)"
+                        value={geminiApiKey}
+                        onChange={e => {
+                          setGeminiApiKey(e.target.value);
+                          localStorage.setItem('gemini_api_key', e.target.value);
+                        }}
+                        style={{
+                          background: 'rgba(0, 0, 0, 0.4)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '6px',
+                          color: 'white',
+                          padding: '0.3rem 0.5rem',
+                          fontSize: '0.82rem',
+                          width: '180px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                    ※ 填寫臨時金鑰優先使用；留空則使用後端已配置之 Gemini 金鑰
+                  </span>
+                </div>
+
+                <div style={{
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  paddingTop: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.88rem', color: '#93C5FD', fontWeight: 'bold' }}>
+                      🤖 AI 20天勝率模型:
+                    </span>
+                    <select
+                      value={portfolioMlModel}
+                      onChange={e => {
+                        const newModel = e.target.value;
+                        setPortfolioMlModel(newModel);
+                        try { localStorage.setItem('portfolio_ml_model', newModel); } catch {}
+                        fetchPortfolioMlPredictions(newModel);
+                      }}
+                      style={{
+                        background: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '6px',
+                        padding: '0.35rem 0.65rem',
+                        fontSize: '0.84rem',
+                        minWidth: '240px'
+                      }}
+                    >
+                      <option value="lightgbm">🌟 LightGBM (推薦 - 極速高精準度)</option>
+                      <option value="xgboost">🔥 XGBoost (強力正規化防過擬合)</option>
+                      <option value="attention_bilstm_xgb">🔥 Attention BiLSTM-XGBoost (注意力雙向 LSTM)</option>
+                      <option value="resnet50">🧬 ResNet-50 (1D 殘差卷積 50 層)</option>
+                      <option value="tft">🔮 TFT (時序融合 Transformer)</option>
+                      <option value="vsn_xlstm">🧬 VSN-xLSTM (多變數選擇 xLSTM)</option>
+                      <option value="patchtst">🧩 PatchTST (分塊時序 Transformer)</option>
+                      <option value="cnn_hybrid">⚡ CNN-Hybrid (圖形+籌碼混合)</option>
+                      <option value="mlp">🧠 Deep Neural Network (MLP 深度神經網路)</option>
+                      <option value="rf">🌲 Random Forest (隨機森林 - 穩健抗噪)</option>
+                      <option value="lr">📊 Logistic Regression (線性 Baseline)</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="btn btn-save"
+                      style={{ padding: '0.35rem 0.8rem', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                      onClick={() => fetchPortfolioMlPredictions(portfolioMlModel)}
+                      disabled={fetchingPortfolioMl}
+                    >
+                      {fetchingPortfolioMl ? (
+                        <>
+                          <span className="loader" style={{ width: '12px', height: '12px' }}></span>
+                          <span>預測中...</span>
+                        </>
+                      ) : (
+                        <span>🚀 立即預測持股勝率</span>
+                      )}
                     </button>
                   </div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    評估持股 20 交易日內漲幅突破 20% 之機率與跌破風險
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 5. 持股清單主區域 (卡片檢視 / 表格檢視) */}
+            {portfolioList && portfolioList.length > 0 ? (
+              <div>
+                {/* 搜尋與篩選提示列 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    💼 顯示 <strong>{getSortedPortfolioList().length}</strong> / <strong>{portfolioList.length}</strong> 檔持股
+                    {portfolioSearchTerm && (
+                      <span style={{ marginLeft: '0.5rem', color: '#60A5FA' }}>
+                        (搜尋: "{portfolioSearchTerm}")
+                      </span>
+                    )}
+                  </span>
                 </div>
 
-                {portfolioViewMode === 'card' ? (
+                {getSortedPortfolioList().length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔍</div>
+                    <p style={{ margin: 0, fontSize: '0.95rem' }}>查無符合「{portfolioSearchTerm}」的持股標的</p>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ marginTop: '0.75rem', padding: '0.35rem 0.8rem', fontSize: '0.82rem' }}
+                      onClick={() => setPortfolioSearchTerm('')}
+                    >
+                      清除搜尋條件
+                    </button>
+                  </div>
+                ) : portfolioViewMode === 'card' ? (
                   <div className="portfolio-card-grid">
-                    {portfolioList.map((item) => {
+                    {getSortedPortfolioList().map((item) => {
                       const hasCost = item.buy_price !== null && item.buy_price > 0;
                       const hasPrice = item.latest_price !== null;
                       let roi = null;
-                      let roiText = '-';
+                      let roiText = '—';
                       let roiClass = 'text-flat';
+                      let profitDiff = null;
 
                       if (hasCost && hasPrice) {
                         roi = ((item.latest_price - item.buy_price) / item.buy_price) * 100;
+                        profitDiff = item.latest_price - item.buy_price;
                         roiText = `${roi > 0 ? '+' : ''}${roi.toFixed(2)}%`;
                         if (roi > 0.001) roiClass = 'text-up';
                         else if (roi < -0.001) roiClass = 'text-down';
@@ -5456,51 +5849,82 @@ function StockDashboard() {
                       const hasPred = pred.win_probability !== undefined && pred.win_probability > 0;
 
                       return (
-                        <div key={item.stock_id} className="portfolio-stock-card">
+                        <div key={item.stock_id} className="portfolio-stock-card" style={{
+                          borderLeft: roi && roi > 0 ? '4px solid #EF4444' : roi && roi < 0 ? '4px solid #10B981' : '4px solid rgba(255,255,255,0.1)'
+                        }}>
                           <div className="portfolio-card-header">
                             <div className="portfolio-card-stock-info">
                               <span className="portfolio-card-stock-id">{item.stock_id}</span>
                               <span className="portfolio-card-stock-name">{item.stock_name}</span>
+                              {hasPrice && (
+                                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#F8FAFC', marginLeft: '0.3rem' }}>
+                                  ${item.latest_price.toFixed(2)}
+                                </span>
+                              )}
                             </div>
                             <div className={`portfolio-card-roi-badge ${roiClass}`} style={{
                               background: roi > 0 ? 'rgba(239, 68, 68, 0.2)' : roi < 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.06)',
                               border: roi > 0 ? '1px solid rgba(239, 68, 68, 0.4)' : roi < 0 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
                             }}>
                               {roiText}
+                              {profitDiff !== null && (
+                                <span style={{ fontSize: '0.72rem', marginLeft: '0.35rem', opacity: 0.9 }}>
+                                  ({profitDiff > 0 ? '+' : ''}${profitDiff.toFixed(2)})
+                                </span>
+                              )}
                             </div>
                           </div>
 
                           <div className="portfolio-card-body-grid">
                             <div className="portfolio-card-item">
-                              <span className="portfolio-card-item-label">購入均價</span>
-                              <span className="portfolio-card-item-val">{hasCost ? `$${item.buy_price.toFixed(2)}` : '未提供'}</span>
+                              <span className="portfolio-card-item-label">購入成本均價</span>
+                              <span className="portfolio-card-item-val">{hasCost ? `$${item.buy_price.toFixed(2)}` : '未設定'}</span>
                             </div>
                             <div className="portfolio-card-item">
-                              <span className="portfolio-card-item-label">最新股價</span>
+                              <span className="portfolio-card-item-label">最新收盤價</span>
                               <span className="portfolio-card-item-val">{hasPrice ? `$${item.latest_price.toFixed(2)}` : '無最新價'}</span>
                             </div>
                             <div className="portfolio-card-item">
-                              <span className="portfolio-card-item-label">🚀 20天勝率</span>
+                              <span className="portfolio-card-item-label">🚀 20天突破勝率</span>
                               <span className="portfolio-card-item-val" style={{ color: pred.win_probability >= 35 ? '#FCA5A5' : '#FDE68A' }}>
                                 {hasPred ? `${pred.win_probability}%` : '—'}
                               </span>
                             </div>
                             <div className="portfolio-card-item">
-                              <span className="portfolio-card-item-label">⚠️ 跌破風險</span>
+                              <span className="portfolio-card-item-label">⚠️ 20天跌破風險</span>
                               <span className="portfolio-card-item-val" style={{ color: pred.drop_probability >= 40 ? '#F87171' : '#34D399' }}>
                                 {hasPred ? `${pred.drop_probability}%` : '—'}
                               </span>
                             </div>
                             {hasPred && pred.risk_tag && (
                               <div className="portfolio-card-item" style={{ gridColumn: 'span 2' }}>
-                                <span className="portfolio-card-item-label">🛡️ AI 攻守</span>
-                                <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{pred.risk_tag}</span>
+                                <span className="portfolio-card-item-label">🛡️ AI 攻守評等</span>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 'bold' }}>{pred.risk_tag}</span>
+                              </div>
+                            )}
+                            {item.sentiment_direction && (
+                              <div className="portfolio-card-item" style={{ gridColumn: 'span 2' }}>
+                                <span className="portfolio-card-item-label">💬 網友氛圍</span>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <span style={{
+                                    fontSize: '0.78rem',
+                                    fontWeight: 'bold',
+                                    color: item.sentiment_direction === '看多' ? '#EF4444' : item.sentiment_direction === '看空' ? '#10B981' : '#9CA3AF'
+                                  }}>
+                                    {item.sentiment_direction} {item.sentiment_score !== null && item.sentiment_score !== undefined ? `(${item.sentiment_score}分)` : ''}
+                                  </span>
+                                  {item.has_rumor && item.has_rumor !== '無' && item.has_rumor !== 'none' && (
+                                    <span style={{ fontSize: '0.8rem', color: '#FBBF24' }} title={`小道消息: ${item.has_rumor}`}>
+                                      ⚠️ 小道消息
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             )}
                             {item.notes && (
                               <div className="portfolio-card-item" style={{ gridColumn: 'span 2' }}>
-                                <span className="portfolio-card-item-label">備註</span>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.notes}</span>
+                                <span className="portfolio-card-item-label">📝 備註</span>
+                                <span style={{ fontSize: '0.82rem', color: 'var(--text-main)', wordBreak: 'break-all' }}>{item.notes}</span>
                               </div>
                             )}
                           </div>
@@ -5513,17 +5937,45 @@ function StockDashboard() {
                                 onChange={() => handleToggleAutoAnalyze(item.stock_id)}
                                 style={{ width: '16px', height: '16px' }}
                               />
-                              自動分析
+                              自動排程
                             </label>
-                            <div style={{ display: 'flex', gap: '0.45rem' }}>
+                            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                               <button
                                 type="button"
                                 className="btn"
                                 style={{ padding: '0.3rem 0.65rem', fontSize: '0.8rem', background: 'linear-gradient(135deg, #4F46E5, #06B6D4)' }}
                                 onClick={() => handleAnalyzeStock(item.stock_id)}
                                 disabled={analyzingId !== null}
+                                title="Gemini 持股健檢"
                               >
-                                {analyzingId === item.stock_id ? '分析中...' : '🤖 AI健檢'}
+                                {analyzingId === item.stock_id ? '分析中...' : '🤖 診斷'}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem' }}
+                                onClick={() => setEditingPortfolioStock(item)}
+                                title="編輯成本與備註"
+                              >
+                                ✏️ 編輯
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem' }}
+                                onClick={() => copyAiPrompt(item.stock_id)}
+                                title="複製 AI 提示詞"
+                              >
+                                📋
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem' }}
+                                onClick={() => viewHistory(item.stock_id, item.stock_name)}
+                                title="查看歷史健檢紀錄"
+                              >
+                                📜
                               </button>
                               <a
                                 href={`https://tw.stock.yahoo.com/quote/${item.stock_id}`}
@@ -5550,6 +6002,7 @@ function StockDashboard() {
                                 className="btn btn-secondary"
                                 style={{ padding: '0.3rem 0.55rem', fontSize: '0.8rem', color: '#F87171' }}
                                 onClick={() => handleDeletePortfolio(item.stock_id)}
+                                title="刪除持股"
                               >
                                 🗑️
                               </button>
@@ -5562,235 +6015,330 @@ function StockDashboard() {
                 ) : (
                   <div className="portfolio-table-container">
                     <table className="portfolio-sticky-table">
-                  <thead>
-                    <tr>
-                      <th className="portfolio-sticky-col-0">股票代號</th>
-                      <th className="portfolio-sticky-col-1">股票名稱</th>
-                      <th className="portfolio-sticky-col-2" style={{ textAlign: 'center' }}>自動分析</th>
-                      <th className="portfolio-sticky-col-3">購入均價</th>
-                      <th className="portfolio-sticky-col-4">最新股價</th>
-                      <th className="portfolio-sticky-col-5">預估損益</th>
-                      <th>🚀 20天突破勝率 (≥20%)</th>
-                      <th>⚠️ 20天跌破風險 (≤-10%)</th>
-                      <th>🛡️ AI 攻守評等</th>
-                      <th>當日診斷</th>
-                      <th>熱度分數</th>
-                      <th>網友氛圍</th>
-                      <th>備註</th>
-                      <th style={{ textAlign: 'center' }}>操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {portfolioList.map((item) => {
-                      const hasCost = item.buy_price !== null && item.buy_price > 0;
-                      const hasPrice = item.latest_price !== null;
-                      let roi = null;
-                      let roiText = '-';
-                      let roiClass = 'text-flat';
-
-                      if (hasCost && hasPrice) {
-                        roi = ((item.latest_price - item.buy_price) / item.buy_price) * 100;
-                        roiText = `${roi > 0 ? '+' : ''}${roi.toFixed(2)}%`;
-                        if (roi > 0.001) roiClass = 'text-up'; // Red for up in Taiwan
-                        else if (roi < -0.001) roiClass = 'text-down'; // Green for down in Taiwan
-                      }
-
-                      const pred = portfolioPredictions[item.stock_id] || {};
-                      const hasPred = pred.win_probability !== undefined && pred.win_probability > 0;
-
-                      return (
-                        <tr key={item.stock_id}>
-                          <td className="portfolio-sticky-col-0"><strong>{item.stock_id}</strong></td>
-                          <td className="portfolio-sticky-col-1">{item.stock_name}</td>
-                          <td className="portfolio-sticky-col-2" style={{ textAlign: 'center' }}>
-                            <input 
-                              type="checkbox" 
-                              checked={item.auto_analyze === 1} 
-                              onChange={() => handleToggleAutoAnalyze(item.stock_id)} 
-                              style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                            />
-                          </td>
-                          <td className="portfolio-sticky-col-3">{hasCost ? `$${item.buy_price.toFixed(2)}` : '未提供'}</td>
-                          <td className="portfolio-sticky-col-4">{hasPrice ? `$${item.latest_price.toFixed(2)}` : '無最新價'}</td>
-                          <td className={`portfolio-sticky-col-5 ${roiClass}`}>{roiText}</td>
-                          {/* 🚀 AI 20天突破勝率 */}
-                          <td style={{ fontWeight: 'bold' }}>
-                            {hasPred ? (
-                              <span style={{
-                                padding: '0.2rem 0.55rem',
-                                borderRadius: '4px',
-                                background: pred.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                                color: pred.win_probability >= 35 ? '#FCA5A5' : '#FDE68A',
-                                border: pred.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
-                                display: 'inline-block',
-                                fontSize: '0.85rem'
-                              }}>
-                                🚀 {pred.win_probability}%
-                              </span>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
-                            )}
-                          </td>
-                          {/* ⚠️ AI 20天跌破風險 */}
-                          <td style={{ fontWeight: 'bold' }}>
-                            {hasPred ? (
-                              <span style={{
-                                padding: '0.2rem 0.55rem',
-                                borderRadius: '4px',
-                                background: pred.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : pred.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                                color: pred.drop_probability >= 40 ? '#F87171' : pred.drop_probability <= 25 ? '#34D399' : 'white',
-                                border: pred.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : pred.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
-                                display: 'inline-block',
-                                fontSize: '0.85rem'
-                              }}>
-                                ⚠️ {pred.drop_probability}%
-                              </span>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
-                            )}
-                          </td>
-                          {/* 🛡️ AI 攻守評等 */}
-                          <td style={{ fontWeight: 'bold' }}>
-                            {hasPred && pred.risk_tag ? (
-                              <span style={{
-                                padding: '0.2rem 0.55rem',
-                                borderRadius: '4px',
-                                background: pred.risk_tag.includes('👑') ? 'rgba(245, 158, 11, 0.25)' : pred.risk_tag.includes('🔴') ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
-                                color: pred.risk_tag.includes('👑') ? '#FDE68A' : pred.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD',
-                                border: pred.risk_tag.includes('👑') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)',
-                                display: 'inline-block',
-                                fontSize: '0.8rem'
-                              }}>
-                                {pred.risk_tag}
-                              </span>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>計算中</span>
-                            )}
-                          </td>
-                          <td>
-                            {item.sentiment_score !== null && item.sentiment_score !== undefined ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '95px' }}>
-                                <div style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '4px', height: '8px', overflow: 'hidden', position: 'relative' }}>
-                                  <div style={{ 
-                                    width: `${item.sentiment_score}%`, 
-                                    height: '100%', 
-                                    background: item.sentiment_score >= 80 ? 'linear-gradient(90deg, #F59E0B, #EF4444)' : item.sentiment_score >= 50 ? 'linear-gradient(90deg, #3B82F6, #10B981)' : 'linear-gradient(90deg, #6B7280, #3B82F6)',
-                                    boxShadow: item.sentiment_score >= 80 ? '0 0 8px rgba(239, 68, 68, 0.6)' : 'none'
-                                  }} />
-                                </div>
-                                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: item.sentiment_score >= 80 ? '#EF4444' : '#E5E7EB' }}>
-                                  {item.sentiment_score.toFixed(0)}%
-                                </span>
-                              </div>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
-                            )}
-                          </td>
-                          <td>
-                            {item.sentiment_direction ? (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                                <span className={`sentiment-badge`} style={{
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: '12px',
-                                  fontSize: '0.8rem',
-                                  fontWeight: '600',
-                                  backgroundColor: item.sentiment_direction === '看多' ? 'rgba(239, 68, 68, 0.2)' : item.sentiment_direction === '看空' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(107, 114, 128, 0.2)',
-                                  color: item.sentiment_direction === '看多' ? '#EF4444' : item.sentiment_direction === '看空' ? '#10B981' : '#9CA3AF',
-                                  border: `1px solid ${item.sentiment_direction === '看多' ? 'rgba(239, 68, 68, 0.4)' : item.sentiment_direction === '看空' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(107, 114, 128, 0.4)'}`
-                                }}>
-                                  {item.sentiment_direction}
-                                </span>
-                                {item.has_rumor && item.has_rumor !== '無' && item.has_rumor !== 'none' && (
-                                  <span 
-                                    className="rumor-alert-icon" 
-                                    style={{ cursor: 'help', animation: 'pulse-rumor 1.5s infinite', fontSize: '0.95rem' }} 
-                                    title={`⚠️ 小道消息：${item.has_rumor}`}
-                                  >
-                                    ⚠️
-                                  </span>
-                                )}
-                              </div>
-                            ) : (
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>-</span>
-                            )}
-                          </td>
-                          <td style={{ color: item.notes ? 'var(--text-main)' : 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.notes}>
-                            {item.notes || '無'}
-                          </td>
-                          <td style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
-                            <button
-                              type="button"
-                              className="btn"
-                              style={{
-                                padding: '0.4rem 0.6rem',
-                                fontSize: '0.85rem',
-                                background: 'linear-gradient(135deg, #4F46E5, #06B6D4)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                minWidth: '100px',
-                                justifyContent: 'center'
-                              }}
-                              onClick={() => handleAnalyzeStock(item.stock_id)}
-                              disabled={analyzingId !== null}
-                            >
-                              {analyzingId === item.stock_id ? (
-                                <>
-                                  <span className="loader" style={{ width: '12px', height: '12px', borderWidth: '2px' }}></span>
-                                  <span>分析中...</span>
-                                </>
-                              ) : (
-                                <span>🤖 診斷</span>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-secondary"
-                              style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                              onClick={() => viewHistory(item.stock_id, item.stock_name)}
-                            >
-                              📜 歷史
-                            </button>
-                            <a
-                              href={`https://tw.stock.yahoo.com/quote/${item.stock_id}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-secondary"
-                              style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
-                            >
-                              🔍 Yahoo
-                            </a>
-                            <a
-                              href={`https://finlab.finance/stocks/${item.stock_id}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-secondary"
-                              style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', color: '#FCD34D' }}
-                            >
-                              📊 FinLab
-                            </a>
-                            <button
-                              type="button"
-                              className="btn"
-                              style={{ padding: '0.4rem 0.6rem', fontSize: '0.85rem', background: '#EF4444' }}
-                              onClick={() => handleDeletePortfolio(item.stock_id)}
-                            >
-                              🗑️ 刪除
-                            </button>
-                          </td>
+                      <thead>
+                        <tr>
+                          <th className="portfolio-sticky-col-0" style={{ cursor: 'pointer' }} onClick={() => handlePortfolioSort('stock_id')}>
+                            代號 {portfolioSortField === 'stock_id' ? (portfolioSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th className="portfolio-sticky-col-1">股名</th>
+                          <th style={{ textAlign: 'center', minWidth: '150px' }}>快捷動作</th>
+                          <th style={{ textAlign: 'center', minWidth: '70px' }}>自動分析</th>
+                          <th style={{ cursor: 'pointer' }} onClick={() => handlePortfolioSort('buy_price')}>
+                            成本均價 {portfolioSortField === 'buy_price' ? (portfolioSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th style={{ cursor: 'pointer' }} onClick={() => handlePortfolioSort('latest_price')}>
+                            最新股價 {portfolioSortField === 'latest_price' ? (portfolioSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th style={{ cursor: 'pointer' }} onClick={() => handlePortfolioSort('roi')}>
+                            預估損益 {portfolioSortField === 'roi' ? (portfolioSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th style={{ cursor: 'pointer' }} onClick={() => handlePortfolioSort('win_probability')}>
+                            🚀 20天勝率 {portfolioSortField === 'win_probability' ? (portfolioSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th style={{ cursor: 'pointer' }} onClick={() => handlePortfolioSort('drop_probability')}>
+                            ⚠️ 20天風險 {portfolioSortField === 'drop_probability' ? (portfolioSortOrder === 'desc' ? '▼' : '▲') : ''}
+                          </th>
+                          <th>🛡️ 攻守評等</th>
+                          <th>網友氛圍</th>
+                          <th>備註</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {getSortedPortfolioList().map((item) => {
+                          const hasCost = item.buy_price !== null && item.buy_price > 0;
+                          const hasPrice = item.latest_price !== null;
+                          let roi = null;
+                          let roiText = '—';
+                          let roiClass = 'text-flat';
+
+                          if (hasCost && hasPrice) {
+                            roi = ((item.latest_price - item.buy_price) / item.buy_price) * 100;
+                            roiText = `${roi > 0 ? '+' : ''}${roi.toFixed(2)}%`;
+                            if (roi > 0.001) roiClass = 'text-up';
+                            else if (roi < -0.001) roiClass = 'text-down';
+                          }
+
+                          const pred = portfolioPredictions[item.stock_id] || {};
+                          const hasPred = pred.win_probability !== undefined && pred.win_probability > 0;
+
+                          return (
+                            <tr key={item.stock_id}>
+                              <td className="portfolio-sticky-col-0">
+                                <strong>{item.stock_id}</strong>
+                              </td>
+                              <td className="portfolio-sticky-col-1">
+                                <span style={{ fontWeight: 600 }}>{item.stock_name}</span>
+                              </td>
+                              {/* 快捷動作放到最前面，免去滑到最右側的困擾 */}
+                              <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                <div style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
+                                  <button
+                                    type="button"
+                                    className="btn"
+                                    style={{
+                                      padding: '0.25rem 0.5rem',
+                                      fontSize: '0.78rem',
+                                      background: 'linear-gradient(135deg, #4F46E5, #06B6D4)',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '0.2rem'
+                                    }}
+                                    onClick={() => handleAnalyzeStock(item.stock_id)}
+                                    disabled={analyzingId !== null}
+                                    title="Gemini 健檢"
+                                  >
+                                    {analyzingId === item.stock_id ? '...' : '🤖'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
+                                    onClick={() => setEditingPortfolioStock(item)}
+                                    title="編輯持股成本與備註"
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
+                                    onClick={() => copyAiPrompt(item.stock_id)}
+                                    title="複製 AI 提示詞"
+                                  >
+                                    📋
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
+                                    onClick={() => viewHistory(item.stock_id, item.stock_name)}
+                                    title="查看歷史健檢紀錄"
+                                  >
+                                    📜
+                                  </button>
+                                  <a
+                                    href={`https://tw.stock.yahoo.com/quote/${item.stock_id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem', textDecoration: 'none' }}
+                                    title="Yahoo 股市"
+                                  >
+                                    🔍
+                                  </a>
+                                  <a
+                                    href={`https://finlab.finance/stocks/${item.stock_id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem', textDecoration: 'none', color: '#FCD34D' }}
+                                    title="FinLab 量化"
+                                  >
+                                    📊
+                                  </a>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    style={{ padding: '0.25rem 0.45rem', fontSize: '0.78rem', color: '#F87171' }}
+                                    onClick={() => handleDeletePortfolio(item.stock_id)}
+                                    title="刪除"
+                                  >
+                                    🗑️
+                                  </button>
+                                </div>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={item.auto_analyze === 1}
+                                  onChange={() => handleToggleAutoAnalyze(item.stock_id)}
+                                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                                  title="切換每日自動排程健檢"
+                                />
+                              </td>
+                              <td>{hasCost ? `$${item.buy_price.toFixed(2)}` : '—'}</td>
+                              <td><strong>{hasPrice ? `$${item.latest_price.toFixed(2)}` : '無最新價'}</strong></td>
+                              <td className={roiClass} style={{ fontWeight: 700 }}>{roiText}</td>
+                              <td style={{ fontWeight: 'bold' }}>
+                                {hasPred ? (
+                                  <span style={{
+                                    padding: '0.2rem 0.5rem',
+                                    borderRadius: '4px',
+                                    background: pred.win_probability >= 35 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                    color: pred.win_probability >= 35 ? '#FCA5A5' : '#FDE68A',
+                                    border: pred.win_probability >= 35 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
+                                    display: 'inline-block',
+                                    fontSize: '0.82rem'
+                                  }}>
+                                    🚀 {pred.win_probability}%
+                                  </span>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+                                )}
+                              </td>
+                              <td style={{ fontWeight: 'bold' }}>
+                                {hasPred ? (
+                                  <span style={{
+                                    padding: '0.2rem 0.5rem',
+                                    borderRadius: '4px',
+                                    background: pred.drop_probability >= 40 ? 'rgba(239, 68, 68, 0.25)' : pred.drop_probability <= 25 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                                    color: pred.drop_probability >= 40 ? '#F87171' : pred.drop_probability <= 25 ? '#34D399' : 'white',
+                                    border: pred.drop_probability >= 40 ? '1px solid rgba(239, 68, 68, 0.4)' : pred.drop_probability <= 25 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-color)',
+                                    display: 'inline-block',
+                                    fontSize: '0.82rem'
+                                  }}>
+                                    ⚠️ {pred.drop_probability}%
+                                  </span>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+                                )}
+                              </td>
+                              <td style={{ fontWeight: 'bold' }}>
+                                {hasPred && pred.risk_tag ? (
+                                  <span style={{
+                                    padding: '0.2rem 0.5rem',
+                                    borderRadius: '4px',
+                                    background: pred.risk_tag.includes('👑') ? 'rgba(245, 158, 11, 0.25)' : pred.risk_tag.includes('🔴') ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
+                                    color: pred.risk_tag.includes('👑') ? '#FDE68A' : pred.risk_tag.includes('🔴') ? '#FCA5A5' : '#93C5FD',
+                                    border: pred.risk_tag.includes('👑') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)',
+                                    display: 'inline-block',
+                                    fontSize: '0.8rem'
+                                  }}>
+                                    {pred.risk_tag}
+                                  </span>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+                                )}
+                              </td>
+                              <td>
+                                {item.sentiment_direction ? (
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                    <span style={{
+                                      padding: '0.15rem 0.45rem',
+                                      borderRadius: '12px',
+                                      fontSize: '0.78rem',
+                                      fontWeight: '600',
+                                      backgroundColor: item.sentiment_direction === '看多' ? 'rgba(239, 68, 68, 0.2)' : item.sentiment_direction === '看空' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(107, 114, 128, 0.2)',
+                                      color: item.sentiment_direction === '看多' ? '#EF4444' : item.sentiment_direction === '看空' ? '#10B981' : '#9CA3AF',
+                                      border: `1px solid ${item.sentiment_direction === '看多' ? 'rgba(239, 68, 68, 0.4)' : item.sentiment_direction === '看空' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(107, 114, 128, 0.4)'}`
+                                    }}>
+                                      {item.sentiment_direction}
+                                    </span>
+                                    {item.has_rumor && item.has_rumor !== '無' && item.has_rumor !== 'none' && (
+                                      <span
+                                        className="rumor-alert-icon"
+                                        style={{ cursor: 'help', animation: 'pulse-rumor 1.5s infinite', fontSize: '0.9rem' }}
+                                        title={`⚠️ 小道消息：${item.has_rumor}`}
+                                      >
+                                        ⚠️
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+                                )}
+                              </td>
+                              <td style={{ color: item.notes ? 'var(--text-main)' : 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.notes}>
+                                {item.notes || '—'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ) : (
+            ) : (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💼</div>
                 <p style={{ margin: 0, fontSize: '1rem' }}>目前尚未建立任何持股追蹤。</p>
-                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>請在上方輸入股票代號（如 2330），即可開始追蹤其股價與 Gemini 智能診斷分析！</p>
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>請點擊上方「➕ 新增持股」輸入股票代號（如 2330），即可開始追蹤其股價與 Gemini 智能診斷分析！</p>
+              </div>
+            )}
+
+            {/* 6. 持股快速編輯 Modal */}
+            {editingPortfolioStock && (
+              <div className="modal-backdrop" onClick={() => setEditingPortfolioStock(null)}>
+                <div className="modal-content" style={{ maxWidth: '440px' }} onClick={e => e.stopPropagation()}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#60A5FA' }}>
+                      ✏️ 編輯持股：{editingPortfolioStock.stock_id} {editingPortfolioStock.stock_name}
+                    </h3>
+                    <button
+                      className="close-btn"
+                      onClick={() => setEditingPortfolioStock(null)}
+                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '1.25rem', cursor: 'pointer' }}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <form onSubmit={e => {
+                    e.preventDefault();
+                    handleUpdatePortfolioStock(editingPortfolioStock.stock_id, editingPortfolioStock.buy_price, editingPortfolioStock.notes);
+                  }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                        購入成本均價 (元)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="例如：850.5"
+                        value={editingPortfolioStock.buy_price !== null && editingPortfolioStock.buy_price !== undefined ? editingPortfolioStock.buy_price : ''}
+                        onChange={e => setEditingPortfolioStock(prev => ({ ...prev, buy_price: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '8px',
+                          color: 'white',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '1.25rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                        個人筆記 / 交易備註
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="例如：預計跌破季線停損、分批進場..."
+                        value={editingPortfolioStock.notes || ''}
+                        onChange={e => setEditingPortfolioStock(prev => ({ ...prev, notes: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '8px',
+                          color: 'white',
+                          boxSizing: 'border-box',
+                          resize: 'vertical'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setEditingPortfolioStock(null)}
+                      >
+                        取消
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-save"
+                      >
+                        💾 儲存修改
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
 
