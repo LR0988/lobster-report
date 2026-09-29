@@ -1508,8 +1508,9 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
             'alpha': round(float(s_c - m_c), 2)
         })
         
-    # 資金曲線取樣 (最多 60 點)
-    step = max(1, n // 50)
+    # 資金曲線取樣 (確保長短週期皆有細膩點位，長週期約 90 點，短週期約 40 點)
+    target_pts = 90 if n > 1000 else (60 if n > 400 else 40)
+    step = max(1, n // target_pts)
     sample_indices = list(range(0, n, step))
     if sample_indices[-1] != n - 1:
         sample_indices.append(n - 1)
@@ -1517,6 +1518,7 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
     for idx in sample_indices:
         curve.append({
             'date': str(dates[idx]),
+            'year': str(dates[idx])[:4],
             'strategy_equity': round(float(equity[idx]), 0),
             'benchmark_equity': round(float(bench_equity[idx]), 0),
             'drawdown_pct': round(float(dd[idx]), 2),
@@ -1543,7 +1545,7 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
         'profit_factor': round(float(profit_factor), 2),
         'market_exposure_pct': round(float(np.mean(positions != 0) * 100), 1),
         'yearly': yearly,
-        'trades': trades[-10:],
+        'trades': trades[-20:],
         'curve': curve
     }
 
@@ -1551,9 +1553,13 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
     """
     執行大盤多因子 ML 策略歷史回測模擬 (含手續費與滑價)
     - 支援 Out-of-Sample (OOS 測試集未見數據) 與 全期 10 年歷史雙重視角
+    - 支援自選區間與年份（1年、2年盲測、3年、5年、10年，以及 2018/2020/2022/2024 等特殊金融情境與各單一年份）
     - 支援 Long-Only (做多+現金避險) 與 Long-Short (多空雙向)
-    - 輸出完整量化指標、資金曲線 (Equity Curve)、回撤分佈 (Drawdown) 與逐年歸因矩陣
+    - 輸出完整量化指標、資金曲線 (Equity Curve)、回撤分佈 (Drawdown) 與各模型排行榜
     """
+    import warnings
+    warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
+    
     if df is None:
         df = build_features()
     if models_bundle is None:
@@ -1568,64 +1574,72 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
 
     valid_df = df.dropna(subset=['target_up_20d', 'target_down_20d']).copy().reset_index(drop=True)
     n_total = len(valid_df)
-    split_idx = int(n_total * 0.8)
-    test_df = valid_df.iloc[split_idx:].copy().reset_index(drop=True)
+    v_dates = valid_df['date'].astype(str)
+    v_years = v_dates.str.slice(0, 4)
     
     target_id = selected_model_id if selected_model_id in pipelines else list(pipelines.keys())[0]
-    
-    # 1. 針對選定模型執行 Long-Short 與 Long-Only 回測
     pipe_target = pipelines[target_id]
-    target_ls = simulate_single_model_backtest(test_df, pipe_target, feature_cols, mode='long_short')
-    target_lo = simulate_single_model_backtest(test_df, pipe_target, feature_cols, mode='long_only')
+
+    # 定義所有可供前端切換的區間與歷史事件
+    period_defs = [
+        ('oos_2y', '🔥 2年盲測期 (2024~2026 OOS)', valid_df.iloc[int(n_total * 0.8):]),
+        ('1y', '⚡ 近 1 年 (2025~2026)', valid_df[v_dates >= '20250901']),
+        ('3y', '📈 近 3 年 (2023~2026)', valid_df[v_dates >= '20230901']),
+        ('5y', '🏛️ 近 5 年 (2021~2026)', valid_df[v_dates >= '20210901']),
+        ('10y', '👑 10 年全歷史 (2016~2026)', valid_df),
+        ('2018', '🛡️ 2018 中美貿易戰暴跌', valid_df[v_years == '2018']),
+        ('2020', '🦠 2020 COVID-19 疫情急跌強彈', valid_df[v_years == '2020']),
+        ('2022', '🔥 2022 Fed 狂暴升息熊市', valid_df[v_years == '2022']),
+        ('2024', '🚀 2024 AI 多頭主升段', valid_df[v_years == '2024']),
+        ('2025', '💎 2025 全球半導體擴張', valid_df[v_years == '2025']),
+        ('2026', '📊 2026 至今最新盤勢', valid_df[v_years == '2026']),
+        ('2016', '📅 2016 年歷史區間', valid_df[v_years == '2016']),
+        ('2017', '📅 2017 年歷史區間', valid_df[v_years == '2017']),
+        ('2019', '📅 2019 年歷史區間', valid_df[v_years == '2019']),
+        ('2021', '📅 2021 年歷史區間', valid_df[v_years == '2021']),
+        ('2023', '📅 2023 年歷史區間', valid_df[v_years == '2023']),
+    ]
+
+    periods_data = {}
+    periods_meta = []
     
-    # 2. 針對所有模型跑 Long-Short 與 Long-Only 評比排行榜
-    comparison_ls = []
-    comparison_lo = []
-    for mid, pipe in pipelines.items():
-        cat = MODEL_CATALOG.get(mid, {'name': mid, 'short_name': mid})
-        res_ls = simulate_single_model_backtest(test_df, pipe, feature_cols, mode='long_short')
-        res_lo = simulate_single_model_backtest(test_df, pipe, feature_cols, mode='long_only')
-        comparison_ls.append({
-            'model_id': mid,
-            'name': cat['name'],
-            'short_name': cat['short_name'],
-            'total_return_pct': res_ls['total_return_pct'],
-            'cagr_pct': res_ls['cagr_pct'],
-            'alpha_pct': res_ls['alpha_pct'],
-            'max_drawdown_pct': res_ls['max_drawdown_pct'],
-            'sharpe_ratio': res_ls['sharpe_ratio'],
-            'sortino_ratio': res_ls['sortino_ratio'],
-            'win_rate_pct': res_ls['win_rate_pct'],
-            'profit_factor': res_ls['profit_factor'],
-            'total_trades': res_ls['total_trades'],
-            'market_exposure_pct': res_ls['market_exposure_pct']
-        })
-        comparison_lo.append({
-            'model_id': mid,
-            'name': cat['name'],
-            'short_name': cat['short_name'],
-            'total_return_pct': res_lo['total_return_pct'],
-            'cagr_pct': res_lo['cagr_pct'],
-            'alpha_pct': res_lo['alpha_pct'],
-            'max_drawdown_pct': res_lo['max_drawdown_pct'],
-            'sharpe_ratio': res_lo['sharpe_ratio'],
-            'sortino_ratio': res_lo['sortino_ratio'],
-            'win_rate_pct': res_lo['win_rate_pct'],
-            'profit_factor': res_lo['profit_factor'],
-            'total_trades': res_lo['total_trades'],
-            'market_exposure_pct': res_lo['market_exposure_pct']
-        })
+    for p_key, p_name, sub_df in period_defs:
+        if len(sub_df) < 5:
+            continue
+        sub_df = sub_df.copy().reset_index(drop=True)
+        target_ls = simulate_single_model_backtest(sub_df, pipe_target, feature_cols, mode='long_short')
+        target_lo = simulate_single_model_backtest(sub_df, pipe_target, feature_cols, mode='long_only')
         
-    # 3. 針對選定模型執行 10 年長期歷史回測 (2016-2026)
-    full_10y_ls = simulate_single_model_backtest(valid_df, pipe_target, feature_cols, mode='long_short')
-    
-    return {
-        'selected_model_id': target_id,
-        'model_name': MODEL_CATALOG.get(target_id, {}).get('name', target_id),
-        'test_period': {
-            'start_date': str(test_df.iloc[0]['date']),
-            'end_date': str(test_df.iloc[-1]['date']),
-            'trading_days': len(test_df),
+        # 評比全模型在該區間之排行榜
+        comp_ls = []
+        comp_lo = []
+        for mid, pipe in pipelines.items():
+            cat = MODEL_CATALOG.get(mid, {'name': mid, 'short_name': mid})
+            m_ls = simulate_single_model_backtest(sub_df, pipe, feature_cols, mode='long_short')
+            m_lo = simulate_single_model_backtest(sub_df, pipe, feature_cols, mode='long_only')
+            comp_ls.append({
+                'model_id': mid, 'name': cat['name'], 'short_name': cat['short_name'],
+                'total_return_pct': m_ls['total_return_pct'], 'cagr_pct': m_ls['cagr_pct'],
+                'alpha_pct': m_ls['alpha_pct'], 'max_drawdown_pct': m_ls['max_drawdown_pct'],
+                'sharpe_ratio': m_ls['sharpe_ratio'], 'sortino_ratio': m_ls['sortino_ratio'],
+                'win_rate_pct': m_ls['win_rate_pct'], 'profit_factor': m_ls['profit_factor'],
+                'total_trades': m_ls['total_trades'], 'market_exposure_pct': m_ls['market_exposure_pct']
+            })
+            comp_lo.append({
+                'model_id': mid, 'name': cat['name'], 'short_name': cat['short_name'],
+                'total_return_pct': m_lo['total_return_pct'], 'cagr_pct': m_lo['cagr_pct'],
+                'alpha_pct': m_lo['alpha_pct'], 'max_drawdown_pct': m_lo['max_drawdown_pct'],
+                'sharpe_ratio': m_lo['sharpe_ratio'], 'sortino_ratio': m_lo['sortino_ratio'],
+                'win_rate_pct': m_lo['win_rate_pct'], 'profit_factor': m_lo['profit_factor'],
+                'total_trades': m_lo['total_trades'], 'market_exposure_pct': m_lo['market_exposure_pct']
+            })
+            
+        p_obj = {
+            'key': p_key,
+            'name': p_name,
+            'start_date': str(sub_df.iloc[0]['date']),
+            'end_date': str(sub_df.iloc[-1]['date']),
+            'trading_days': len(sub_df),
             'benchmark': {
                 'total_return_pct': target_ls['benchmark_total_return_pct'],
                 'cagr_pct': target_ls['benchmark_cagr_pct'],
@@ -1634,31 +1648,36 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             },
             'long_short': target_ls,
             'long_only': target_lo,
-            'comparison_long_short': comparison_ls,
-            'comparison_long_only': comparison_lo
-        },
+            'comparison_long_short': comp_ls,
+            'comparison_long_only': comp_lo
+        }
+        periods_data[p_key] = p_obj
+        periods_meta.append({
+            'key': p_key,
+            'name': p_name,
+            'start_date': str(sub_df.iloc[0]['date']),
+            'end_date': str(sub_df.iloc[-1]['date']),
+            'trading_days': len(sub_df)
+        })
+
+    oos_data = periods_data.get('oos_2y', {})
+    history_10y_data = periods_data.get('10y', {})
+    
+    return {
+        'selected_model_id': target_id,
+        'model_name': MODEL_CATALOG.get(target_id, {}).get('name', target_id),
+        'default_period_key': 'oos_2y',
+        'available_periods': periods_meta,
+        'available_years': sorted(list(set(v_years.unique()))),
+        'periods': periods_data,
+        'test_period': oos_data,
         'full_history_10y': {
             'start_date': str(valid_df.iloc[0]['date']),
             'end_date': str(valid_df.iloc[-1]['date']),
             'trading_days': len(valid_df),
-            'benchmark': {
-                'total_return_pct': full_10y_ls['benchmark_total_return_pct'],
-                'cagr_pct': full_10y_ls['benchmark_cagr_pct'],
-                'max_drawdown_pct': full_10y_ls['benchmark_max_drawdown_pct'],
-                'sharpe_ratio': full_10y_ls['benchmark_sharpe']
-            },
-            'summary': {
-                'total_return_pct': full_10y_ls['total_return_pct'],
-                'cagr_pct': full_10y_ls['cagr_pct'],
-                'alpha_pct': full_10y_ls['alpha_pct'],
-                'max_drawdown_pct': full_10y_ls['max_drawdown_pct'],
-                'sharpe_ratio': full_10y_ls['sharpe_ratio'],
-                'sortino_ratio': full_10y_ls['sortino_ratio'],
-                'calmar_ratio': full_10y_ls['calmar_ratio'],
-                'win_rate_pct': full_10y_ls['win_rate_pct'],
-                'profit_factor': full_10y_ls['profit_factor']
-            },
-            'yearly': full_10y_ls['yearly']
+            'benchmark': history_10y_data.get('benchmark', {}),
+            'summary': history_10y_data.get('long_short', {}),
+            'yearly': history_10y_data.get('long_short', {}).get('yearly', [])
         }
     }
 
