@@ -526,30 +526,38 @@ if res.get('status') == 'ok':
     return {"status": "ok", "message": f"{model_type.upper()} 模型訓練完成並已同步至雲端快取！"}
 
 def execute_market_ml_job(config: dict) -> dict:
-    """執行大盤最新日K同步、國際宏觀指標爬取與多因子 ML 推論"""
+    """執行大盤最新日K同步、國際宏觀指標爬取與多因子 ML 推論及波段回測模擬"""
     print("[*] 正在同步最新大盤加權指數日K與國際宏觀指標...")
+    import importlib
     import sync_market_index
+    importlib.reload(sync_market_index)
     sync_market_index.sync_taiex_to_sqlite()
     import sync_macro_indicators
+    importlib.reload(sync_macro_indicators)
     sync_macro_indicators.check_and_auto_backfill()
     
-    print("[*] 正在執行大盤 ML 多因子推論...")
+    print("[*] 正在執行大盤 ML 多因子推論與波段模擬回測...")
     import market_ml_engine
+    importlib.reload(market_ml_engine)
     selected_model = config.get("model_type")
     result = market_ml_engine.generate_prediction_report(selected_model_id=selected_model)
-    return {"status": "ok", "message": "大盤預測已更新並同步至雲端！", "data": result}
+    return {"status": "ok", "message": "大盤預測與回測模擬已更新並同步至雲端！", "data": result}
 
 def execute_market_ml_train_job(config: dict) -> dict:
-    """重新訓練大盤多因子模型並產出最新推論"""
+    """重新訓練大盤多因子模型並產出最新推論與波段回測"""
     print(f"[*] 正在同步最新大盤日K、國際宏觀指標並重新訓練大盤 ML 模型 (config={config})...")
+    import importlib
     import sync_market_index
+    importlib.reload(sync_market_index)
     sync_market_index.sync_taiex_to_sqlite()
     import sync_macro_indicators
+    importlib.reload(sync_macro_indicators)
     sync_macro_indicators.check_and_auto_backfill()
     
     import market_ml_engine
+    importlib.reload(market_ml_engine)
     result = market_ml_engine.train_and_evaluate_models(config=config)
-    return {"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論！", "data": result}
+    return {"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論與回測！", "data": result}
 
 def execute_ml_backtest_job(config: dict) -> dict:
     """執行本機 ML 策略歷史回測並回傳績效指標"""
@@ -654,7 +662,7 @@ def process_pending_jobs():
             results = execute_ml_train_job(config)
         elif job_type == "ml_backtest":
             results = execute_ml_backtest_job(config)
-        elif job_type == "market_ml_predict":
+        elif job_type in ["market_ml_predict", "market_ml_backtest"]:
             results = execute_market_ml_job(config)
         elif job_type == "market_ml_train":
             results = execute_market_ml_train_job(config)

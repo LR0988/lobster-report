@@ -2059,9 +2059,13 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'hurst_60d': round(float(latest_row.get('hurst_60d', 0.5)), 3) if 'hurst_60d' in latest_row else 0.5,
             'breadth_ad_ratio_5d': round(float(latest_row.get('breadth_ad_ratio_5d', 1.0)), 2) if 'breadth_ad_ratio_5d' in latest_row else 1.0,
             'breadth_ad_diff_5d': int(latest_row.get('breadth_ad_diff_5d', 0)) if 'breadth_ad_diff_5d' in latest_row else 0
-        },
-        'backtest_simulation': simulate_market_backtest(df, models_bundle, selected_id)
+        }
     }
+    try:
+        report['backtest_simulation'] = simulate_market_backtest(df, models_bundle, selected_id)
+    except Exception as e:
+        print(f"[!] 警告：波段回測模擬計算失敗: {e}")
+        report['backtest_simulation'] = {}
     report = sanitize_for_json(report)
     with open(PREDICTION_JSON_PATH, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)

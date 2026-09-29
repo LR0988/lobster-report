@@ -1681,11 +1681,17 @@ function StockDashboard() {
                 const current = checkData[0];
                 if (current.status === 'completed') {
                   if (current.results?.data) {
-                    setMarketMlData(current.results.data);
-                  } else {
-                    await fetchMarketMlData();
+                    setMarketMlData(prev => {
+                      const incoming = current.results.data;
+                      const merged = { ...prev, ...incoming };
+                      if (!incoming.backtest_simulation && prev?.backtest_simulation) {
+                        merged.backtest_simulation = prev.backtest_simulation;
+                      }
+                      return merged;
+                    });
                   }
-                  alert(jobType === 'market_ml_train' ? '🎉 大盤 ML 模型訓練與指標評估完成！' : '🚀 大盤最新推論更新完成！');
+                  await fetchMarketMlData();
+                  alert(jobType === 'market_ml_train' ? '🎉 大盤 ML 模型訓練與指標評估完成！' : '🚀 大盤最新推論與波段回測模擬已完成！');
                   return;
                 } else if (current.status === 'error') {
                   throw new Error(current.error_message || '大盤任務執行發生錯誤');
@@ -5463,19 +5469,31 @@ function StockDashboard() {
                 {/* ── 子視圖 3: 📊 歷年波段模擬回測績效 (Backtest) ── */}
                 {marketMlSubTab === 'backtest' && (() => {
                   const bt = marketMlData?.backtest_simulation;
-                  if (!bt) {
+                  if (!bt || !bt.test_period) {
                     return (
-                      <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
+                      <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
                         <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📊</div>
-                        <p style={{ margin: 0, fontSize: '1rem' }}>尚未執行大盤波段模擬回測。</p>
+                        <p style={{ margin: 0, fontSize: '1rem', color: '#93C5FD' }}>
+                          {triggeringMarketMl ? '正在連線本機背景運算波段模擬回測中，請稍候...' : '尚未產生大盤波段模擬回測數據。'}
+                        </p>
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                          點擊下方按鈕即可立即驅動全模型盲測與 10 年跨牛熊交易回測。
+                        </p>
                         <button
                           type="button"
                           className="btn btn-save"
-                          style={{ marginTop: '1rem' }}
+                          style={{ marginTop: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.55rem 1.25rem' }}
                           onClick={() => handleTriggerMarketMlJob('market_ml_predict')}
                           disabled={triggeringMarketMl}
                         >
-                          🚀 立即計算波段模擬回測
+                          {triggeringMarketMl ? (
+                            <>
+                              <span className="loader" style={{ width: '13px', height: '13px', borderColor: 'white', borderBottomColor: 'transparent' }}></span>
+                              <span>模擬回測運算中...</span>
+                            </>
+                          ) : (
+                            <>🚀 立即計算波段模擬回測</>
+                          )}
                         </button>
                       </div>
                     );
