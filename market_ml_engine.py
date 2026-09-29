@@ -38,7 +38,7 @@ try:
 except ImportError:
     xgb = None
 
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier, ExtraTreesClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
@@ -97,7 +97,19 @@ FEATURE_NAMES_ZH = {
     'total_cash_net_5d': '三大法人現貨 5 日合計 (億元)',
     'tsmc_ret_5d': '台積電 (2330) 5 日漲跌幅 (%)',
     'tsmc_ret_20d': '台積電 (2330) 20 日漲跌幅 (%)',
-    'tsmc_ma20_bias': '台積電月線乖離率 (%)'
+    'tsmc_ma20_bias': '台積電月線乖離率 (%)',
+    'dist_to_r1_pct': '距近端壓力點數距離 (%)',
+    'dist_to_s1_pct': '距近端支撐點數距離 (%)',
+    'sr_channel_position': '支撐壓力通道相對位置 (0~1)',
+    'tsmc_rel_strength_5d': '台積電 5日相對大盤超額強弱 (%)',
+    'tsmc_rel_strength_20d': '台積電 20日相對大盤超額強弱 (%)',
+    'ma20_slope_5d': '月線 5 日趨勢斜率速度 (%)',
+    'ma60_slope_5d': '季線 5 日趨勢斜率速度 (%)',
+    'close_to_high20_pct': '距 20 日波段最高點乖離 (%)',
+    'close_to_low20_pct': '距 20 日波段最低點反彈 (%)',
+    'bb_width_20d': '布林通道帶寬擠壓度 (%)',
+    'bb_pct_b': '布林通道價格位置 (%B)',
+    'pv_divergence_20d': '高檔量價背離頂部警示 (0/1)'
 }
 
 MODEL_CATALOG = {
@@ -434,7 +446,33 @@ def build_features() -> pd.DataFrame:
             'target_down_5d': target_down_5d
         })
         
-    return pd.DataFrame(rows)
+    res_df = pd.DataFrame(rows)
+    
+    # ── 擴充高階量化衍生與支撐壓力特徵 (Advanced Quant & S/R Features) ──
+    h20 = res_df['close'].rolling(20).max()
+    l20 = res_df['close'].rolling(20).min()
+    ma20 = res_df['close'].rolling(20).mean()
+    ma60 = res_df['close'].rolling(60).mean()
+    r1 = np.maximum(h20, res_df['close'] * 1.005)
+    s1 = np.minimum(ma20, res_df['close'] * 0.995)
+    
+    res_df['dist_to_r1_pct'] = (r1 - res_df['close']) / res_df['close'] * 100
+    res_df['dist_to_s1_pct'] = (res_df['close'] - s1) / res_df['close'] * 100
+    res_df['sr_channel_position'] = res_df['dist_to_s1_pct'] / (res_df['dist_to_r1_pct'] + res_df['dist_to_s1_pct'] + 1e-5)
+    res_df['tsmc_rel_strength_5d'] = res_df['tsmc_ret_5d'] - res_df['ret_5d']
+    res_df['tsmc_rel_strength_20d'] = res_df['tsmc_ret_20d'] - res_df['ret_20d']
+    res_df['ma20_slope_5d'] = (ma20 - ma20.shift(5)) / (ma20.shift(5) + 1e-5) * 100
+    res_df['ma60_slope_5d'] = (ma60 - ma60.shift(5)) / (ma60.shift(5) + 1e-5) * 100
+    res_df['close_to_high20_pct'] = (res_df['close'] - h20) / (h20 + 1e-5) * 100
+    res_df['close_to_low20_pct'] = (res_df['close'] - l20) / (l20 + 1e-5) * 100
+    std20 = res_df['close'].rolling(20).std()
+    upper_bb = ma20 + 2 * std20
+    lower_bb = ma20 - 2 * std20
+    res_df['bb_width_20d'] = (upper_bb - lower_bb) / (ma20 + 1e-5) * 100
+    res_df['bb_pct_b'] = (res_df['close'] - lower_bb) / (upper_bb - lower_bb + 1e-5)
+    res_df['pv_divergence_20d'] = np.where((res_df['close'] >= h20 * 0.99) & (res_df['turnover_ratio_5d'] < 1.0), 1.0, 0.0)
+    
+    return res_df
 
 
 def compute_market_regimes(df: pd.DataFrame) -> np.ndarray:
@@ -526,8 +564,8 @@ class RegimeMoEClassifier:
         self.expert_bull = make_pipeline(SimpleImputer(strategy='median'), clf_b)
         self.expert_bull.fit(X, y, **({f"{self.expert_bull.steps[-1][0]}__sample_weight": w_bull}))
         
-        # 專家 2: 熊市防禦專家 (Random Forest)
-        clf_d = RandomForestClassifier(
+        # 專家 2: 熊市防禦專家 (ExtraTrees 極限隨機樹 - 高方差縮減與極端空頭平滑能力)
+        clf_d = ExtraTreesClassifier(
             n_estimators=int(self.params.get('bear_n_estimators', 120)),
             max_depth=int(self.params.get('bear_depth', 5)),
             min_samples_split=6, min_samples_leaf=3,
@@ -615,6 +653,169 @@ class TwoStageMetaFilter:
         confidences = self.meta_clf.predict_proba(meta_X_scaled)[:, 1]
         is_filtered = confidences < self.confidence_threshold
         return confidences, is_filtered
+
+
+def calculate_market_support_resistance(df_idx: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
+    """
+    量化多階壓力支撐階梯精算引擎 (Multi-Tier Quantitative Support & Resistance Ladder)
+    1. 籌碼成交量密集區 (Volume Profile / VPVR 120d): POC (最大密集換手峰), VAH (價值區頂部壓力), VAL (價值區底部支撐)
+    2. 多階壓力階梯: R1 (近端初級短壓), R2 (波段主要壓力), R3 (極限延伸強壓)
+    3. 多階支撐階梯: S1 (近端月線防守), S2 (籌碼密集支撐), S3 (多空生命線強支撐)
+    4. 關鍵均線多空防線: MA5, MA10, MA20, MA60, MA120, MA240 及與現價乖離
+    5. 斐波那契波段回撤與延伸位階: 0.236, 0.382, 0.500, 0.618, 1.236
+    """
+    try:
+        if df_idx is None or 'high' not in df_idx.columns:
+            conn = get_db_connection()
+            df_idx = pd.read_sql("SELECT date, open, high, low, close, volume, turnover FROM daily_index ORDER BY date ASC", conn)
+            conn.close()
+            
+        curr_close = round(float(df_idx.iloc[-1]['close']), 2)
+        
+        # 1. 關鍵移動平均線
+        ma5 = round(float(df_idx['close'].tail(5).mean()), 2)
+        ma10 = round(float(df_idx['close'].tail(10).mean()), 2)
+        ma20 = round(float(df_idx['close'].tail(20).mean()), 2)
+        ma60 = round(float(df_idx['close'].tail(60).mean()), 2)
+        ma120 = round(float(df_idx['close'].tail(120).mean()), 2)
+        ma240 = round(float(df_idx['close'].tail(240).mean()), 2) if len(df_idx) >= 240 else ma120
+        
+        # 2. 波段高低點 (Fractal Highs & Lows)
+        h5 = round(float(df_idx['high'].tail(5).max()), 2)
+        h20 = round(float(df_idx['high'].tail(20).max()), 2)
+        l20 = round(float(df_idx['low'].tail(20).min()), 2)
+        h60 = round(float(df_idx['high'].tail(60).max()), 2)
+        l60 = round(float(df_idx['low'].tail(60).min()), 2)
+        h120 = round(float(df_idx['high'].tail(120).max()), 2)
+        l120 = round(float(df_idx['low'].tail(120).min()), 2)
+        
+        # 3. 半年籌碼分佈 (Volume Profile / VPVR 120d)
+        recent_120 = df_idx.tail(120)
+        counts, bin_edges = np.histogram(recent_120['close'], bins=40, weights=recent_120['turnover'])
+        poc_idx = int(np.argmax(counts))
+        poc_price = round(float((bin_edges[poc_idx] + bin_edges[poc_idx+1]) / 2), 2)
+        
+        total_vol = counts.sum()
+        target_vol = total_vol * 0.70
+        sorted_indices = np.argsort(counts)[::-1]
+        cum_vol = 0
+        va_indices = []
+        for idx in sorted_indices:
+            cum_vol += counts[idx]
+            va_indices.append(idx)
+            if cum_vol >= target_vol:
+                break
+        val_price = round(float(bin_edges[min(va_indices)]), 2)
+        vah_price = round(float(bin_edges[max(va_indices)+1]), 2)
+        
+        # 4. 斐波那契回撤矩陣 (Fibonacci Retracement Grid)
+        fib_diff = h120 - l120
+        fib_236 = round(float(h120 - 0.236 * fib_diff), 2)
+        fib_382 = round(float(h120 - 0.382 * fib_diff), 2)
+        fib_500 = round(float(h120 - 0.500 * fib_diff), 2)
+        fib_618 = round(float(h120 - 0.618 * fib_diff), 2)
+        fib_ext_1236 = round(float(h120 + 0.236 * fib_diff), 2)
+        
+        # 5. 構建三階壓力階梯 (Resistances)
+        r1_candidates = [p for p in [ma5, h5, vah_price] if p > curr_close]
+        r1_price = float(min(r1_candidates)) if r1_candidates else round(curr_close * 1.008, 2)
+        if r1_price == ma5:
+            r1_desc = 'MA5 短線均線反壓'
+        elif r1_price == h5:
+            r1_desc = '近 5 日震盪高點'
+        else:
+            r1_desc = '籌碼價值區上沿 (VAH)'
+            
+        r2_candidates = [p for p in [h20, round(float(np.ceil(curr_close / 500.0) * 500.0), 2)] if p > r1_price]
+        r2_price = float(min(r2_candidates)) if r2_candidates else float(h20)
+        r2_desc = '近 20 日波段最高點紀錄' if r2_price == h20 else f'{int(r2_price):,} 點整數心理防線'
+        
+        r3_candidates = [p for p in [h60, fib_ext_1236, round(float(np.ceil(h20 / 1000.0) * 1000.0), 2)] if p > r2_price]
+        r3_price = float(min(r3_candidates)) if r3_candidates else round(r2_price * 1.03, 2)
+        r3_desc = f'{int(r3_price):,} 點歷史波段目標 / 斐波那契延伸'
+        
+        # 6. 構建三階支撐階梯 (Supports)
+        s1_candidates = [p for p in [ma20, l20] if p < curr_close]
+        s1_price = float(max(s1_candidates)) if s1_candidates else float(ma20)
+        s1_desc = 'MA20 月線防線 (多頭第一道生命線)'
+        
+        s2_candidates = [p for p in [poc_price, val_price, fib_236] if p < s1_price]
+        s2_price = float(max(s2_candidates)) if s2_candidates else round(s1_price * 0.98, 2)
+        s2_desc = '半年最大成交量密集換手峰 (POC)' if s2_price == poc_price else '斐波那契 0.236 防線'
+        
+        s3_candidates = [p for p in [ma60, l20, fib_382] if p < s2_price]
+        s3_price = float(max(s3_candidates)) if s3_candidates else float(ma60)
+        s3_desc = 'MA60 季線生命線 / 20日波段前低'
+        
+        return {
+            'current_close': curr_close,
+            'r3': {
+                'price': r3_price,
+                'diff': round(float(r3_price - curr_close), 2),
+                'diff_pct': round(float((r3_price - curr_close) / curr_close * 100), 2),
+                'name': '極限延伸強壓 R3',
+                'desc': r3_desc
+            },
+            'r2': {
+                'price': r2_price,
+                'diff': round(float(r2_price - curr_close), 2),
+                'diff_pct': round(float((r2_price - curr_close) / curr_close * 100), 2),
+                'name': '波段主要壓力 R2',
+                'desc': r2_desc
+            },
+            'r1': {
+                'price': r1_price,
+                'diff': round(float(r1_price - curr_close), 2),
+                'diff_pct': round(float((r1_price - curr_close) / curr_close * 100), 2),
+                'name': '近端初級壓力 R1',
+                'desc': r1_desc
+            },
+            's1': {
+                'price': s1_price,
+                'diff': round(float(s1_price - curr_close), 2),
+                'diff_pct': round(float((s1_price - curr_close) / curr_close * 100), 2),
+                'name': '近端月線支撐 S1',
+                'desc': s1_desc
+            },
+            's2': {
+                'price': s2_price,
+                'diff': round(float(s2_price - curr_close), 2),
+                'diff_pct': round(float((s2_price - curr_close) / curr_close * 100), 2),
+                'name': '籌碼密集支撐 S2',
+                'desc': s2_desc
+            },
+            's3': {
+                'price': s3_price,
+                'diff': round(float(s3_price - curr_close), 2),
+                'diff_pct': round(float((s3_price - curr_close) / curr_close * 100), 2),
+                'name': '多空生命線強支撐 S3',
+                'desc': s3_desc
+            },
+            'moving_averages': {
+                'ma5': {'price': ma5, 'diff': round(float(curr_close - ma5), 2), 'bias_pct': round(float((curr_close - ma5) / ma5 * 100), 2)},
+                'ma10': {'price': ma10, 'diff': round(float(curr_close - ma10), 2), 'bias_pct': round(float((curr_close - ma10) / ma10 * 100), 2)},
+                'ma20': {'price': ma20, 'diff': round(float(curr_close - ma20), 2), 'bias_pct': round(float((curr_close - ma20) / ma20 * 100), 2)},
+                'ma60': {'price': ma60, 'diff': round(float(curr_close - ma60), 2), 'bias_pct': round(float((curr_close - ma60) / ma60 * 100), 2)},
+                'ma120': {'price': ma120, 'diff': round(float(curr_close - ma120), 2), 'bias_pct': round(float((curr_close - ma120) / ma120 * 100), 2)},
+                'ma240': {'price': ma240, 'diff': round(float(curr_close - ma240), 2), 'bias_pct': round(float((curr_close - ma240) / ma240 * 100), 2)}
+            },
+            'volume_profile': {
+                'poc': poc_price,
+                'vah': vah_price,
+                'val': val_price
+            },
+            'fibonacci': {
+                'h120': h120,
+                'l120': l120,
+                'fib_236': fib_236,
+                'fib_382': fib_382,
+                'fib_500': fib_500,
+                'fib_618': fib_618
+            }
+        }
+    except Exception as e:
+        print(f"[!] 計算支撐壓力失敗: {e}")
+        return {}
 
 
 def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None):
@@ -1091,10 +1292,10 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         feat_rank.sort(key=lambda x: x['importance_pct'], reverse=True)
         top_features = feat_rank[:8]
         
-        # 支撐壓力位計算
-        vol_pts = curr_close * (latest_row['volatility_20d'] / 100.0) * np.sqrt(20/250)
-        resistance_pts = round(curr_close + vol_pts * (0.8 if p_up_20 > 50 else 0.6), 0)
-        support_pts = round(curr_close - vol_pts * (0.8 if p_down_20 > 40 else 0.6), 0)
+        # 支撐壓力位計算 (真實多階量化梯隊)
+        sr_ladder = calculate_market_support_resistance()
+        resistance_pts = sr_ladder.get('r1', {}).get('price', round(curr_close * 1.008, 0))
+        support_pts = sr_ladder.get('s1', {}).get('price', round(curr_close * 0.985, 0))
         w_bull, w_bear, w_range = 33.3, 33.3, 33.4
         if m_id == 'regime_moe':
             gw = clf_up.predict_gating_weights(x_latest)[0]
@@ -1133,6 +1334,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
             'train_days': len(valid_df),
             'features_preset': features_preset,
             'regime_info': regime_info,
+            'support_resistance': sr_ladder,
             'optimization': {
                 'is_auto_tuned': auto_tune,
                 'engine': 'Optuna TPE (Tree-structured Parzen Estimator)' if auto_tune else 'Heuristic Defaults',
@@ -1286,7 +1488,8 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
         'prediction': active_model.get('prediction', {}),
         'top_features': active_model.get('top_features', []),
         'optimization': active_model.get('optimization', {}),
-        'regime_info': active_model.get('regime_info', {})
+        'regime_info': active_model.get('regime_info', {}),
+        'support_resistance': calculate_market_support_resistance(df)
     }
     report = sanitize_for_json(report)
     with open(PREDICTION_JSON_PATH, 'w', encoding='utf-8') as f:

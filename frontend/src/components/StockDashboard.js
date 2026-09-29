@@ -4362,6 +4362,163 @@ function StockDashboard() {
                       </div>
                     </div>
 
+                    {/* 📐 大盤關鍵支撐壓力多階量化梯隊 (Support & Resistance Ladder) */}
+                    {marketMlData?.support_resistance && (
+                      <div style={{
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.8))',
+                        border: '1px solid rgba(59, 130, 246, 0.35)',
+                        borderRadius: '14px',
+                        padding: '1.25rem 1.5rem',
+                        marginBottom: '1.25rem',
+                        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div>
+                            <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              <span>📐</span>
+                              <span>大盤關鍵支撐壓力多階量化梯隊 (Support & Resistance Ladder)</span>
+                            </h3>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                              基於歷史 2,400+ 天價格分佈、半年籌碼成交量密集峰 (VPVR POC) 與黃金分割多維度動態精算
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.75rem', background: 'rgba(59, 130, 246, 0.15)', color: '#93C5FD', padding: '0.2rem 0.55rem', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+                              📍 籌碼重心 POC: {marketMlData.support_resistance.volume_profile?.poc?.toLocaleString()} 點
+                            </span>
+                            <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: '#86EFAC', padding: '0.2rem 0.55rem', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                              🛡️ 月線防線 MA20: {marketMlData.support_resistance.moving_averages?.ma20?.price?.toLocaleString()} 點
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 六階梯隊縱向視覺化看板 */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                          gap: '0.85rem',
+                          marginBottom: '1rem'
+                        }}>
+                          {/* 🔴 壓力梯隊卡片 (R3, R2, R1) */}
+                          <div style={{
+                            background: 'rgba(239, 68, 68, 0.05)',
+                            border: '1px solid rgba(239, 68, 68, 0.25)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FCA5A5', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>🛑 多方上攻壓力防線 (Resistance)</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                              {/* R3 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '0.45rem 0.75rem', borderRadius: '6px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.75rem', color: '#F87171', fontWeight: 800 }}>{marketMlData.support_resistance.r3?.name}</span>
+                                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{marketMlData.support_resistance.r3?.desc}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FCA5A5' }}>{marketMlData.support_resistance.r3?.price?.toLocaleString()}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#EF4444' }}>+{marketMlData.support_resistance.r3?.diff} 點 (+{marketMlData.support_resistance.r3?.diff_pct}%)</div>
+                                </div>
+                              </div>
+                              {/* R2 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.14)', padding: '0.45rem 0.75rem', borderRadius: '6px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.75rem', color: '#F87171', fontWeight: 800 }}>{marketMlData.support_resistance.r2?.name}</span>
+                                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{marketMlData.support_resistance.r2?.desc}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#EF4444' }}>{marketMlData.support_resistance.r2?.price?.toLocaleString()}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#EF4444' }}>+{marketMlData.support_resistance.r2?.diff} 點 (+{marketMlData.support_resistance.r2?.diff_pct}%)</div>
+                                </div>
+                              </div>
+                              {/* R1 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)', padding: '0.45rem 0.75rem', borderRadius: '6px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.75rem', color: '#FCA5A5', fontWeight: 900 }}>{marketMlData.support_resistance.r1?.name}</span>
+                                  <div style={{ fontSize: '0.72rem', color: '#FCA5A5' }}>{marketMlData.support_resistance.r1?.desc}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#F87171' }}>{marketMlData.support_resistance.r1?.price?.toLocaleString()}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#FCA5A5' }}>+{marketMlData.support_resistance.r1?.diff} 點 (+{marketMlData.support_resistance.r1?.diff_pct}%)</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 🟢 支撐梯隊卡片 (S1, S2, S3) */}
+                          <div style={{
+                            background: 'rgba(16, 185, 129, 0.05)',
+                            border: '1px solid rgba(16, 185, 129, 0.25)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#86EFAC', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>🛡️ 空方回踩支撐防線 (Support)</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                              {/* S1 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '0.45rem 0.75rem', borderRadius: '6px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.75rem', color: '#86EFAC', fontWeight: 900 }}>{marketMlData.support_resistance.s1?.name}</span>
+                                  <div style={{ fontSize: '0.72rem', color: '#86EFAC' }}>{marketMlData.support_resistance.s1?.desc}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#34D399' }}>{marketMlData.support_resistance.s1?.price?.toLocaleString()}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#86EFAC' }}>{marketMlData.support_resistance.s1?.diff} 點 ({marketMlData.support_resistance.s1?.diff_pct}%)</div>
+                                </div>
+                              </div>
+                              {/* S2 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.14)', padding: '0.45rem 0.75rem', borderRadius: '6px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.75rem', color: '#6EE7B7', fontWeight: 800 }}>{marketMlData.support_resistance.s2?.name}</span>
+                                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{marketMlData.support_resistance.s2?.desc}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#10B981' }}>{marketMlData.support_resistance.s2?.price?.toLocaleString()}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#10B981' }}>{marketMlData.support_resistance.s2?.diff} 點 ({marketMlData.support_resistance.s2?.diff_pct}%)</div>
+                                </div>
+                              </div>
+                              {/* S3 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.1)', padding: '0.45rem 0.75rem', borderRadius: '6px' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.75rem', color: '#6EE7B7', fontWeight: 800 }}>{marketMlData.support_resistance.s3?.name}</span>
+                                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{marketMlData.support_resistance.s3?.desc}</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#6EE7B7' }}>{marketMlData.support_resistance.s3?.price?.toLocaleString()}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#059669' }}>{marketMlData.support_resistance.s3?.diff} 點 ({marketMlData.support_resistance.s3?.diff_pct}%)</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 關鍵均線排列與乖離概況 */}
+                        {marketMlData.support_resistance.moving_averages && (
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                            gap: '0.5rem',
+                            padding: '0.65rem 0.85rem',
+                            background: 'rgba(0,0,0,0.25)',
+                            borderRadius: '8px',
+                            fontSize: '0.76rem'
+                          }}>
+                            {Object.entries(marketMlData.support_resistance.moving_averages).map(([k, v]) => (
+                              <div key={k} style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase' }}>{k} ({k === 'ma5' ? '週線' : k === 'ma20' ? '月線' : k === 'ma60' ? '季線' : k === 'ma120' ? '半年線' : '年線'}):</span>
+                                <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{v.price?.toLocaleString()}</strong>
+                                <span style={{ fontSize: '0.7rem', color: v.bias_pct >= 0 ? '#F87171' : '#34D399' }}>
+                                  {v.bias_pct >= 0 ? '+' : ''}{v.bias_pct}%
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* 3. 三大法人期現貨籌碼戰情看板 (Institutional Cockpit) */}
                     <div style={{ marginBottom: '1.25rem' }}>
                       <h3 style={{ fontSize: '1rem', color: '#93C5FD', marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
