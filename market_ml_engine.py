@@ -101,6 +101,13 @@ FEATURE_NAMES_ZH = {
 }
 
 MODEL_CATALOG = {
+    'regime_moe': {
+        'id': 'regime_moe',
+        'name': '🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)',
+        'short_name': '🏛️ 狀態 MoE',
+        'tag': '👑 前沿旗艦',
+        'desc': '依牛市擴張、熊市防禦與箱型震盪切成三段專家獨立訓練，結合時間衰減與二階段元標籤置信度過濾',
+    },
     'ensemble': {
         'id': 'ensemble',
         'name': '👑 多模型融合集成 (Ensemble)',
@@ -429,10 +436,194 @@ def build_features() -> pd.DataFrame:
         
     return pd.DataFrame(rows)
 
+
+def compute_market_regimes(df: pd.DataFrame) -> np.ndarray:
+    """
+    依據宏觀趨勢、波動度與外資期貨留倉，將歷史切分為三大結構性市場狀態：
+    0: bull (多頭擴張主升段)
+    1: bear (空頭破線防禦段)
+    2: range (箱型震盪整理段)
+    """
+    n = len(df)
+    regimes = np.full(n, 2, dtype=int)
+    
+    ma20_b = df['ma20_bias'].values
+    ma60_b = df['ma60_bias'].values
+    vol = df['volatility_20d'].values
+    f_fut = df['foreign_futures_net'].values
+    vol_high = np.nanpercentile(vol, 75)
+    
+    for i in range(n):
+        if ma60_b[i] < -1.5 or (vol[i] > vol_high and ma20_b[i] < -1.0) or (f_fut[i] < -35000 and ma20_b[i] < 0):
+            regimes[i] = 1 # bear
+        elif ma60_b[i] > 1.0 and ma20_b[i] > -0.5 and f_fut[i] > -30000:
+            regimes[i] = 0 # bull
+        else:
+            regimes[i] = 2 # range
+            
+    return regimes
+
+def compute_sample_weights(n_samples: int, half_life_days: int = 750) -> np.ndarray:
+    """
+    計算時間指數衰減樣本權重 (半衰期約 3 年 / 750 個交易日)
+    越靠近當前的樣本賦予越高權重，讓模型更敏銳捕捉當代市場結構變遷
+    """
+    t = np.arange(n_samples)
+    decay_rate = np.log(2.0) / float(half_life_days)
+    weights = np.exp(decay_rate * (t - (n_samples - 1)))
+    weights = weights / np.mean(weights)
+    return weights
+
+class RegimeMoEClassifier:
+    """
+    市場狀態多段專家混合模型 (Market Regime Mixture of Experts)
+    - 專家 1 (Bull Expert): 牛市主升動能專家 (LightGBM)
+    - 專家 2 (Bear Expert): 熊市修正防禦專家 (Random Forest)
+    - 專家 3 (Range Expert): 箱型震盪均值回歸專家 (Logistic Regression)
+    - 門控路由器 (Gating Router): 動態估計當前各狀態歸屬機率 [w_bull, w_bear, w_range]
+    """
+    def __init__(self, params: Optional[Dict[str, Any]] = None, random_state: int = 42):
+        self.params = params or {}
+        self.random_state = random_state
+        self.gating_router = None
+        self.expert_bull = None
+        self.expert_bear = None
+        self.expert_range = None
+        self.gating_weights_latest = np.array([0.33, 0.33, 0.34])
+        
+    def fit(self, X: np.ndarray, y: np.ndarray, regimes: Optional[np.ndarray] = None, sample_weight: Optional[np.ndarray] = None):
+        n = len(X)
+        if regimes is None:
+            regimes = np.full(n, 2, dtype=int)
+            
+        sw = sample_weight if sample_weight is not None else np.ones(n)
+        
+        # 1. 訓練門控網絡 (Gating Router)
+        if len(np.unique(regimes)) >= 2:
+            self.gating_router = make_pipeline(
+                SimpleImputer(strategy='median'),
+                StandardScaler(),
+                LogisticRegression(C=0.5, max_iter=1000, random_state=self.random_state)
+            )
+            self.gating_router.fit(X, regimes)
+        else:
+            self.gating_router = None
+        
+        # 2. 狀態加權樣本賦值 (Soft Partitioning with Weight Boosting)
+        w_bull = sw * np.where(regimes == 0, 3.0, 0.4)
+        w_bear = sw * np.where(regimes == 1, 3.0, 0.4)
+        w_range = sw * np.where(regimes == 2, 3.0, 0.4)
+        
+        # 專家 1: 牛市主升專家 (LightGBM)
+        clf_b = lgb.LGBMClassifier(
+            n_estimators=int(self.params.get('bull_n_estimators', 100)),
+            learning_rate=float(self.params.get('bull_lr', 0.035)),
+            max_depth=int(self.params.get('bull_depth', 5)),
+            num_leaves=int(self.params.get('bull_leaves', 24)),
+            subsample=0.85, colsample_bytree=0.8,
+            random_state=self.random_state, verbose=-1
+        ) if lgb else RandomForestClassifier(n_estimators=100, max_depth=6, random_state=self.random_state)
+        self.expert_bull = make_pipeline(SimpleImputer(strategy='median'), clf_b)
+        self.expert_bull.fit(X, y, **({f"{self.expert_bull.steps[-1][0]}__sample_weight": w_bull}))
+        
+        # 專家 2: 熊市防禦專家 (Random Forest)
+        clf_d = RandomForestClassifier(
+            n_estimators=int(self.params.get('bear_n_estimators', 120)),
+            max_depth=int(self.params.get('bear_depth', 5)),
+            min_samples_split=6, min_samples_leaf=3,
+            random_state=self.random_state
+        )
+        self.expert_bear = make_pipeline(SimpleImputer(strategy='median'), clf_d)
+        self.expert_bear.fit(X, y, **({f"{self.expert_bear.steps[-1][0]}__sample_weight": w_bear}))
+        
+        # 專家 3: 箱型震盪專家 (L2 Logistic Regression)
+        clf_r = LogisticRegression(
+            C=float(self.params.get('range_C', 0.1)),
+            max_iter=1000, random_state=self.random_state
+        )
+        self.expert_range = make_pipeline(SimpleImputer(strategy='median'), StandardScaler(), clf_r)
+        self.expert_range.fit(X, y, **({f"{self.expert_range.steps[-1][0]}__sample_weight": w_range}))
+        
+        return self
+
+    def predict_gating_weights(self, X: np.ndarray) -> np.ndarray:
+        if self.gating_router is None:
+            weights = np.full((len(X), 3), 1.0 / 3.0)
+            self.gating_weights_latest = weights[-1]
+            return weights
+        classes = list(getattr(self.gating_router, 'classes_', self.gating_router.named_steps['logisticregression'].classes_))
+        raw_probs = self.gating_router.predict_proba(X)
+        weights = np.zeros((len(X), 3))
+        for idx, c in enumerate(classes):
+            if c in [0, 1, 2]:
+                weights[:, c] = raw_probs[:, idx]
+        row_sums = weights.sum(axis=1, keepdims=True)
+        norm_weights = weights / np.where(row_sums == 0, 1.0, row_sums)
+        self.gating_weights_latest = norm_weights[-1]
+        return norm_weights
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        weights = self.predict_gating_weights(X)
+        p_bull = self.expert_bull.predict_proba(X)
+        p_bear = self.expert_bear.predict_proba(X)
+        p_range = self.expert_range.predict_proba(X)
+        
+        blended = (
+            weights[:, [0]] * p_bull +
+            weights[:, [1]] * p_bear +
+            weights[:, [2]] * p_range
+        )
+        return blended
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        return np.argmax(self.predict_proba(X), axis=1)
+
+class TwoStageMetaFilter:
+    """
+    Marcos López de Prado: 二階段元標籤置信度過濾器 (Meta-Labeling)
+    """
+    def __init__(self, confidence_threshold: float = 0.52, random_state: int = 42):
+        self.confidence_threshold = confidence_threshold
+        self.meta_clf = LogisticRegression(C=0.2, max_iter=500, random_state=random_state)
+        self.scaler = StandardScaler()
+        self.is_fitted = False
+        
+    def _extract_meta_features(self, X: np.ndarray, probs: np.ndarray) -> np.ndarray:
+        p_up = probs[:, 1] if probs.ndim == 2 else probs
+        margin = np.abs(p_up - 0.5) * 2.0
+        n_feats = min(4, X.shape[1])
+        meta_feats = np.column_stack([p_up, margin, X[:, :n_feats]])
+        return meta_feats
+
+    def fit(self, X: np.ndarray, y_true: np.ndarray, probs: np.ndarray):
+        p_up = probs[:, 1] if probs.ndim == 2 else probs
+        meta_X = self._extract_meta_features(X, p_up)
+        preds = (p_up >= 0.5).astype(int)
+        y_meta = (preds == y_true).astype(int)
+        
+        if len(np.unique(y_meta)) > 1:
+            meta_X_scaled = self.scaler.fit_transform(SimpleImputer().fit_transform(meta_X))
+            self.meta_clf.fit(meta_X_scaled, y_meta)
+            self.is_fitted = True
+        return self
+
+    def predict_confidence(self, X: np.ndarray, probs: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        if not self.is_fitted:
+            return np.full(len(X), 0.6), np.full(len(X), False)
+        meta_X = self._extract_meta_features(X, probs)
+        meta_X_scaled = self.scaler.transform(SimpleImputer().fit_transform(meta_X))
+        confidences = self.meta_clf.predict_proba(meta_X_scaled)[:, 1]
+        is_filtered = confidences < self.confidence_threshold
+        return confidences, is_filtered
+
+
 def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None):
     """依據模型 ID 與傳入超參數建立包含防缺漏值與正規化之前處理 Pipeline"""
     p = params or {}
-    if model_id == 'lightgbm':
+    if model_id == 'regime_moe':
+        return RegimeMoEClassifier(params=p)
+        
+    elif model_id == 'lightgbm':
         clf = lgb.LGBMClassifier(
             n_estimators=int(p.get('n_estimators', 100)),
             learning_rate=float(p.get('learning_rate', 0.03)),
@@ -529,7 +720,7 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
     else:
         raise ValueError(f"不支援的模型 ID: {model_id}")
 
-def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.ndarray, n_trials: int = 20) -> Tuple[Dict[str, Any], float, List[Dict[str, Any]]]:
+def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.ndarray, regimes: Optional[np.ndarray] = None, sample_weights: Optional[np.ndarray] = None, n_trials: int = 20) -> Tuple[Dict[str, Any], float, List[Dict[str, Any]]]:
     """
     使用 Optuna TPE (Tree-structured Parzen Estimator) 貝氏最佳化演算法
     在滾動時間序列交叉驗證 (Purged Walk-Forward TimeSeriesSplit) 下，尋找損失函數之全域極小值 (Global Minima)。
@@ -544,7 +735,16 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
     
     def objective(trial):
         trial_params = {}
-        if model_id == 'lightgbm':
+        if model_id == 'regime_moe':
+            trial_params = {
+                'bull_lr': trial.suggest_float('bull_lr', 0.015, 0.08, log=True),
+                'bull_depth': trial.suggest_int('bull_depth', 3, 6),
+                'bull_leaves': trial.suggest_int('bull_leaves', 15, 45),
+                'bear_depth': trial.suggest_int('bear_depth', 3, 6),
+                'bear_n_estimators': trial.suggest_int('bear_n_estimators', 60, 150),
+                'range_C': trial.suggest_float('range_C', 0.01, 3.0, log=True)
+            }
+        elif model_id == 'lightgbm':
             trial_params = {
                 'learning_rate': trial.suggest_float('learning_rate', 0.008, 0.15, log=True),
                 'num_leaves': trial.suggest_int('num_leaves', 15, 63),
@@ -614,7 +814,12 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
                 continue
                 
             pipe = create_model_pipeline(model_id, trial_params)
-            pipe.fit(X_tr, y_tr)
+            if model_id == 'regime_moe':
+                reg_fold = regimes[tr_idx] if regimes is not None else None
+                sw_fold = sample_weights[tr_idx] if sample_weights is not None else None
+                pipe.fit(X_tr, y_tr, regimes=reg_fold, sample_weight=sw_fold)
+            else:
+                pipe.fit(X_tr, y_tr)
             probs = pipe.predict_proba(X_val)[:, 1]
             probs_clipped = np.clip(probs, 1e-5, 1.0 - 1e-5)
             
@@ -647,7 +852,20 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
 def extract_feature_importance(pipeline, feature_cols: List[str], model_id: str) -> List[float]:
     """提取不同模型的特徵重要性權重"""
     try:
-        if model_id == 'lightgbm':
+        if model_id == 'regime_moe':
+            w_b = pipeline.gating_weights_latest[0]
+            w_d = pipeline.gating_weights_latest[1]
+            w_r = pipeline.gating_weights_latest[2]
+            imp_b = pipeline.expert_bull.named_steps[pipeline.expert_bull.steps[-1][0]].feature_importances_
+            imp_d = pipeline.expert_bear.named_steps[pipeline.expert_bear.steps[-1][0]].feature_importances_
+            imp_r = np.abs(pipeline.expert_range.named_steps[pipeline.expert_range.steps[-1][0]].coef_[0])
+            weights = (
+                w_b * (imp_b / (np.sum(imp_b) + 1e-9)) +
+                w_d * (imp_d / (np.sum(imp_d) + 1e-9)) +
+                w_r * (imp_r / (np.sum(imp_r) + 1e-9))
+            )
+            return list(weights)
+        elif model_id == 'lightgbm':
             return list(pipeline.named_steps['lgbmclassifier'].feature_importances_)
         elif model_id == 'xgboost':
             return list(pipeline.named_steps['xgbclassifier'].feature_importances_)
@@ -674,11 +892,14 @@ def extract_feature_importance(pipeline, feature_cols: List[str], model_id: str)
     except Exception:
         return [1.0 / len(feature_cols)] * len(feature_cols)
 
-def calculate_simulation_metrics(probs_up: np.ndarray, probs_down: np.ndarray, fut_rets: np.ndarray) -> Tuple[float, float]:
-    """計算模擬交易信號的年化夏普值與多空勝率"""
+def calculate_simulation_metrics(probs_up: np.ndarray, probs_down: np.ndarray, fut_rets: np.ndarray, meta_confidences: Optional[np.ndarray] = None) -> Tuple[float, float]:
+    """計算模擬交易信號的年化夏普值與多空勝率 (支援 Meta-Labeling 二階段置信度過濾)"""
     try:
-        # 當 prob_up > 0.45 視為作多信號(+1)，prob_down > 0.45 視為放空或避險(-1)，其餘空手(0)
         signals = np.where(probs_up > 0.45, 1.0, np.where(probs_down > 0.45, -1.0, 0.0))
+        if meta_confidences is not None:
+            # 二階段 Meta-Labeling: 若信心度低於 51.5% 則過濾為觀望 (0)，過濾假突破
+            signals = np.where(meta_confidences < 0.515, 0.0, signals)
+            
         strat_returns = signals * (fut_rets / 100.0)
         active_returns = strat_returns[signals != 0]
         
@@ -747,6 +968,11 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     Y_tr_u5, Y_te_u5 = Y_up_5[:split_idx], Y_up_5[split_idx:]
     fut_rets_test = fut_ret_20[split_idx:]
     
+    # 計算宏觀市場結構狀態 (Regimes) 與時間指數衰減權重 (Sample Weights)
+    regimes_all = compute_market_regimes(valid_df)
+    reg_tr, reg_te = regimes_all[:split_idx], regimes_all[split_idx:]
+    sw_tr = compute_sample_weights(len(X_train), half_life_days=750)
+    
     train_range = f"{valid_df.iloc[0]['date']} ~ {valid_df.iloc[split_idx-1]['date']}"
     test_range = f"{valid_df.iloc[split_idx]['date']} ~ {valid_df.iloc[-1]['date']}"
     
@@ -784,12 +1010,17 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
                 model_id=m_id,
                 X_train=X_train,
                 y_train=Y_tr_u20,
+                regimes=reg_tr if m_id == 'regime_moe' else None,
+                sample_weights=sw_tr if m_id == 'regime_moe' else None,
                 n_trials=tune_trials
             )
             
         # 訓練 20 天突破多方
         clf_up = create_model_pipeline(m_id, best_params)
-        clf_up.fit(X_train, Y_tr_u20)
+        if m_id == 'regime_moe':
+            clf_up.fit(X_train, Y_tr_u20, regimes=reg_tr, sample_weight=sw_tr)
+        else:
+            clf_up.fit(X_train, Y_tr_u20)
         probs_up = clf_up.predict_proba(X_test)[:, 1]
         preds_up = clf_up.predict(X_test)
         auc_up = round(float(roc_auc_score(Y_te_u20, probs_up) * 100), 1)
@@ -797,17 +1028,28 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         
         # 訓練 20 天跌破空方
         clf_down = create_model_pipeline(m_id, best_params)
-        clf_down.fit(X_train, Y_tr_d20)
+        if m_id == 'regime_moe':
+            clf_down.fit(X_train, Y_tr_d20, regimes=reg_tr, sample_weight=sw_tr)
+        else:
+            clf_down.fit(X_train, Y_tr_d20)
         probs_down = clf_down.predict_proba(X_test)[:, 1]
         auc_down = round(float(roc_auc_score(Y_te_d20, probs_down) * 100), 1)
         
         # 訓練 5 天短期多方
         clf_5d = create_model_pipeline(m_id, best_params)
-        clf_5d.fit(X_train, Y_tr_u5)
+        if m_id == 'regime_moe':
+            clf_5d.fit(X_train, Y_tr_u5, regimes=reg_tr, sample_weight=sw_tr)
+        else:
+            clf_5d.fit(X_train, Y_tr_u5)
         probs_5d = clf_5d.predict_proba(X_test)[:, 1]
         
-        # 計算模擬交易夏普率與多空勝率
-        sharpe, win_rate = calculate_simulation_metrics(probs_up, probs_down, fut_rets_test)
+        # 二階段 Meta-Labeling 置信度過濾訓練
+        meta_filter = TwoStageMetaFilter(confidence_threshold=0.52)
+        meta_filter.fit(X_train, Y_tr_u20, clf_up.predict_proba(X_train))
+        meta_conf_test, _ = meta_filter.predict_confidence(X_test, probs_up)
+        
+        # 計算模擬交易夏普率與多空勝率 (整合 Meta 置信度過濾)
+        sharpe, win_rate = calculate_simulation_metrics(probs_up, probs_down, fut_rets_test, meta_confidences=meta_conf_test)
         
         # 即時最新推論
         p_up_20 = round(float(clf_up.predict_proba(x_latest)[0, 1]) * 100, 1)
@@ -853,6 +1095,27 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         vol_pts = curr_close * (latest_row['volatility_20d'] / 100.0) * np.sqrt(20/250)
         resistance_pts = round(curr_close + vol_pts * (0.8 if p_up_20 > 50 else 0.6), 0)
         support_pts = round(curr_close - vol_pts * (0.8 if p_down_20 > 40 else 0.6), 0)
+        w_bull, w_bear, w_range = 33.3, 33.3, 33.4
+        if m_id == 'regime_moe':
+            gw = clf_up.predict_gating_weights(x_latest)[0]
+            w_bull = round(float(gw[0]) * 100, 1)
+            w_bear = round(float(gw[1]) * 100, 1)
+            w_range = round(float(gw[2]) * 100, 1)
+            
+        latest_conf, is_filt = meta_filter.predict_confidence(x_latest, clf_up.predict_proba(x_latest))
+        latest_conf_pct = round(float(latest_conf[0]) * 100, 1)
+        
+        regime_info = {
+            'active_regime': 'bull' if w_bull >= max(w_bear, w_range) else ('bear' if w_bear >= w_range else 'range'),
+            'active_regime_label': '🐂 多頭強勢主升段' if w_bull >= max(w_bear, w_range) else ('🐻 空頭修正防禦段' if w_bear >= w_range else '⚖️ 箱型高檔震盪段'),
+            'weights': {
+                'bull_pct': w_bull,
+                'bear_pct': w_bear,
+                'range_pct': w_range
+            },
+            'meta_confidence_pct': latest_conf_pct,
+            'meta_verdict': '🟢 高置信度放行 (High Conviction)' if latest_conf_pct >= 52.0 else '🟡 震盪雜訊過濾 (Filtered Risk)'
+        }
         
         # 儲存單一模型結果
         models_status[m_id] = {
@@ -869,6 +1132,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
             'test_range': test_range,
             'train_days': len(valid_df),
             'features_preset': features_preset,
+            'regime_info': regime_info,
             'optimization': {
                 'is_auto_tuned': auto_tune,
                 'engine': 'Optuna TPE (Tree-structured Parzen Estimator)' if auto_tune else 'Heuristic Defaults',
@@ -919,7 +1183,9 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     
     # 尋找綜合評分最高之模型 (Best Model)
     best_model_id = max(models_status.keys(), key=lambda k: models_status[k]['metrics'].get('composite_score', 0))
-    if 'ensemble' in models_status and models_status['ensemble']['metrics'].get('auc_up', 0) >= 65.0:
+    if 'regime_moe' in models_status and models_status['regime_moe']['metrics'].get('auc_up', 0) >= 62.0:
+        best_model_id = 'regime_moe'
+    elif 'ensemble' in models_status and models_status['ensemble']['metrics'].get('auc_up', 0) >= 65.0:
         best_model_id = 'ensemble'
     models_bundle['best_model_id'] = best_model_id
     
@@ -1019,7 +1285,8 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
         'metrics': active_model.get('metrics', {}),
         'prediction': active_model.get('prediction', {}),
         'top_features': active_model.get('top_features', []),
-        'optimization': active_model.get('optimization', {})
+        'optimization': active_model.get('optimization', {}),
+        'regime_info': active_model.get('regime_info', {})
     }
     report = sanitize_for_json(report)
     with open(PREDICTION_JSON_PATH, 'w', encoding='utf-8') as f:

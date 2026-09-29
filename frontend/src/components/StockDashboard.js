@@ -183,6 +183,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
+  { val: 'regime_moe', label: '🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)', short: '🏛️ 狀態 MoE', tag: '👑 前沿旗艦', desc: '依牛市擴張、熊市防禦與箱型震盪切成三段專家獨立訓練，結合時間衰減與二階段元標籤置信度過濾' },
   { val: 'ensemble', label: '👑 多模型融合集成 (Ensemble)', short: '👑 集成模型', tag: '🥇 綜合推薦首選', desc: '軟投票融合 LightGBM、隨機森林與高泛化羅吉斯迴歸，AUC 表現最佳' },
   { val: 'lightgbm', label: '⚡ LightGBM (梯度提升)', short: '⚡ LightGBM', tag: '⚡ 靈敏動能', desc: '微軟開源高效梯度提升決策樹，擅長捕捉籌碼與技術面非線性轉折' },
   { val: 'lr', label: '📏 Logistic Regression (線性基準)', short: '📏 羅吉斯迴歸', tag: '🎯 泛化穩定', desc: '宏觀全因子 L2 正則化羅吉斯迴歸，方向預測穩定度高、抗過擬合' },
@@ -4231,6 +4232,67 @@ function StockDashboard() {
                           </div>
                         </div>
 
+                        {/* 市場結構狀態與二階段元標籤 (Regime MoE + Meta-Labeling Filter) */}
+                        {activeModelInfo?.regime_info && (
+                          <div style={{
+                            marginTop: '0.75rem',
+                            padding: '0.75rem 0.95rem',
+                            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.9))',
+                            border: '1px solid rgba(59, 130, 246, 0.35)',
+                            borderRadius: '8px'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.55rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#93C5FD' }}>
+                                  🏛️ 當前宏觀結構狀態:
+                                </span>
+                                <span style={{
+                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  padding: '0.2rem 0.6rem',
+                                  borderRadius: '6px',
+                                  background: activeModelInfo.regime_info.active_regime === 'bull' ? 'rgba(239, 68, 68, 0.25)' : activeModelInfo.regime_info.active_regime === 'bear' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
+                                  color: activeModelInfo.regime_info.active_regime === 'bull' ? '#FCA5A5' : activeModelInfo.regime_info.active_regime === 'bear' ? '#86EFAC' : '#FDE68A',
+                                  border: '1px solid currentColor'
+                                }}>
+                                  {activeModelInfo.regime_info.active_regime_label}
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Meta-Filter:</span>
+                                <span style={{
+                                  fontSize: '0.78rem',
+                                  fontWeight: 'bold',
+                                  padding: '0.15rem 0.55rem',
+                                  borderRadius: '6px',
+                                  background: activeModelInfo.regime_info.meta_confidence_pct >= 52 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                                  color: activeModelInfo.regime_info.meta_confidence_pct >= 52 ? '#86EFAC' : '#FDE68A',
+                                  border: activeModelInfo.regime_info.meta_confidence_pct >= 52 ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)'
+                                }}>
+                                  {activeModelInfo.regime_info.meta_verdict} ({activeModelInfo.regime_info.meta_confidence_pct}%)
+                                </span>
+                              </div>
+                            </div>
+
+                            {activeModelInfo.regime_info.weights && (
+                              <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94A3B8', marginBottom: '0.3rem' }}>
+                                  <span>門控路由權重 (Gating Distribution):</span>
+                                  <span>
+                                    🐂 牛市主升 {activeModelInfo.regime_info.weights.bull_pct}% · 🐻 熊市防禦 {activeModelInfo.regime_info.weights.bear_pct}% · ⚖️ 箱型震盪 {activeModelInfo.regime_info.weights.range_pct}%
+                                  </span>
+                                </div>
+                                <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', display: 'flex', overflow: 'hidden' }}>
+                                  <div style={{ width: `${activeModelInfo.regime_info.weights.bull_pct}%`, height: '100%', background: '#EF4444' }} title={`牛市: ${activeModelInfo.regime_info.weights.bull_pct}%`}></div>
+                                  <div style={{ width: `${activeModelInfo.regime_info.weights.bear_pct}%`, height: '100%', background: '#10B981' }} title={`熊市: ${activeModelInfo.regime_info.weights.bear_pct}%`}></div>
+                                  <div style={{ width: `${activeModelInfo.regime_info.weights.range_pct}%`, height: '100%', background: '#F59E0B' }} title={`箱型震盪: ${activeModelInfo.regime_info.weights.range_pct}%`}></div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {/* AutoML 全域最佳化超參數展示條 */}
                         {activeModelInfo?.optimization?.is_auto_tuned && (
                           <div style={{
@@ -4606,6 +4668,23 @@ function StockDashboard() {
                                           gap: '0.25rem'
                                         }} title={JSON.stringify(s.optimization.best_params, null, 2)}>
                                           ✨ 全域尋優 (Loss: {s.optimization.best_loss} | {s.optimization.n_trials || 10}代)
+                                        </span>
+                                      </div>
+                                    )}
+                                    {s.regime_info && (
+                                      <div style={{ marginTop: '0.25rem' }}>
+                                        <span style={{
+                                          fontSize: '0.7rem',
+                                          padding: '0.1rem 0.45rem',
+                                          borderRadius: '4px',
+                                          background: 'rgba(59, 130, 246, 0.2)',
+                                          border: '1px solid rgba(59, 130, 246, 0.4)',
+                                          color: '#93C5FD',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '0.25rem'
+                                        }}>
+                                          🏛️ {s.regime_info.active_regime_label} · Meta置信: {s.regime_info.meta_confidence_pct}%
                                         </span>
                                       </div>
                                     )}
