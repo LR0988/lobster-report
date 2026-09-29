@@ -54,3 +54,4 @@ Thumbs.db
 # 臨時檔案
 *.tmp
 temp/
+market_ml_prediction.json
