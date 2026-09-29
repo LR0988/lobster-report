@@ -73,6 +73,22 @@ def sync_ml_cache(sb_conn):
     """, ("status_all", json.dumps(status_all)))
     print("  ✓ 匯總模型狀態 status_all 同步完成")
 
+    # 上傳大盤 ML 預測 (taiex_macro)
+    market_pred_file = os.path.join(LOCAL_DIR, "market_ml_prediction.json")
+    if os.path.exists(market_pred_file):
+        try:
+            with open(market_pred_file, "r", encoding="utf-8") as fp:
+                market_data = json.load(fp)
+            cur.execute("""
+                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (model_type) DO UPDATE
+                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+            """, ("taiex_macro", json.dumps(market_data)))
+            print("  ✓ 大盤 ML 預測 (taiex_macro) 同步完成")
+        except Exception as e:
+            print(f"  ✗ 同步大盤 ML 失敗: {e}")
+
     # 上傳 low_freq_result.json 低頻量化資料
     low_freq_path = os.path.join(LOCAL_DIR, "low_freq_result.json")
     if os.path.exists(low_freq_path):

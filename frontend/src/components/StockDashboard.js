@@ -532,6 +532,11 @@ function StockDashboard() {
 
   // ML 預測表格排序狀態
 
+  // ── 大盤 ML 多空波段預測狀態 ──
+  const [marketMlData, setMarketMlData] = useState(null);
+  const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
+  const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
+
   // ── 低頻量化交易 (Low-Frequency Quant) 狀態 ──
   const [lowFreqRollingMonths, setLowFreqRollingMonths] = useState(24);
   const [lowFreqTopN, setLowFreqTopN] = useState(30);
@@ -1499,6 +1504,75 @@ function StockDashboard() {
     }
   };
 
+  const fetchMarketMlData = async () => {
+    try {
+      setFetchingMarketMl(true);
+      const res = await supabaseFetch('/stock_ml_cache?model_type=eq.taiex_macro&select=payload,updated_at');
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          setMarketMlData(rows[0].payload);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('讀取大盤 ML 預測失敗', err);
+    } finally {
+      setFetchingMarketMl(false);
+    }
+  };
+
+  const handleTriggerMarketMlJob = async (jobType = 'market_ml_predict') => {
+    try {
+      setTriggeringMarketMl(true);
+      const createRes = await supabaseFetch('/stock_screener_jobs', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          username: user?.username || 'hotpotlu',
+          status: 'pending',
+          config: { job_type: jobType }
+        })
+      });
+
+      if (createRes.ok) {
+        const jobList = await createRes.json();
+        const jobId = jobList[0]?.id;
+        if (jobId) {
+          let attempts = 0;
+          const maxAttempts = 50;
+          while (attempts < maxAttempts) {
+            await new Promise(r => setTimeout(r, 1500));
+            attempts++;
+            const checkRes = await supabaseFetch(`/stock_screener_jobs?id=eq.${jobId}`);
+            if (checkRes.ok) {
+              const checkData = await checkRes.json();
+              if (checkData && checkData.length > 0) {
+                const current = checkData[0];
+                if (current.status === 'completed') {
+                  if (current.results?.data) {
+                    setMarketMlData(current.results.data);
+                  } else {
+                    fetchMarketMlData();
+                  }
+                  alert(jobType === 'market_ml_train' ? '🎉 大盤 ML 模型重新訓練完成！' : '🚀 大盤最新推論更新完成！');
+                  return;
+                } else if (current.status === 'error') {
+                  throw new Error(current.error_message || '大盤任務執行發生錯誤');
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      alert('大盤運算任務失敗: ' + err.message);
+    } finally {
+      setTriggeringMarketMl(false);
+      fetchMarketMlData();
+    }
+  };
+
   const fetchWatchlist = async () => {
     try {
       // 優先從 Supabase stock_watchlist 讀取
@@ -2032,6 +2106,8 @@ function StockDashboard() {
       fetchWatchlistAlerts();
     } else if (activeTab === 'low_freq') {
       fetchLowFreqStatus();
+    } else if (activeTab === 'market_ml') {
+      fetchMarketMlData();
     }
   }, [activeTab, mlModelType]);
 
@@ -2697,6 +2773,7 @@ function StockDashboard() {
         <div className="tabs">
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
+            { id: 'market_ml', label: '📈 大盤多空預測' },
             { id: 'ml', label: '🤖 ML 波段飆股預測', badge: activeTasks.some(t => t.type === 'ml_train') ? '🏋️ 訓練中' : null },
             { id: 'low_freq', label: '📉 低頻量化交易' },
             { id: 'portfolio', label: '💼 我的持股' },
@@ -3322,6 +3399,435 @@ function StockDashboard() {
         )}
       </div>
     )}
+
+        {/* ===== 📈 大盤 ML 多空波段預測 ===== */}
+        {activeTab === 'market_ml' && (
+          <div>
+            {/* 1. 頂部控制與模型狀態列 */}
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.75)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '12px',
+              padding: '0.85rem 1.25rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  📈 台股加權指數 (TAIEX) 宏觀多因子 ML 波段預測
+                </span>
+                {marketMlData && (
+                  <span style={{
+                    fontSize: '0.78rem',
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                    color: '#93C5FD',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '12px'
+                  }}>
+                    🗓️ 基準日：{marketMlData.latest_date}
+                  </span>
+                )}
+                {marketMlData?.metrics && (
+                  <span style={{
+                    fontSize: '0.78rem',
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    color: '#86EFAC',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '12px'
+                  }}>
+                    📈 20天驗證 AUC：{marketMlData.metrics.auc_up}%
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-save"
+                  onClick={() => handleTriggerMarketMlJob('market_ml_predict')}
+                  disabled={triggeringMarketMl || fetchingMarketMl}
+                  style={{
+                    padding: '0.4rem 0.9rem',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                  }}
+                >
+                  {triggeringMarketMl ? (
+                    <>
+                      <span className="loader" style={{ width: '12px', height: '12px' }}></span>
+                      <span>推論計算中...</span>
+                    </>
+                  ) : (
+                    <span>🔄 立即重新推論</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => handleTriggerMarketMlJob('market_ml_train')}
+                  disabled={triggeringMarketMl || fetchingMarketMl}
+                  style={{
+                    padding: '0.4rem 0.85rem',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                  }}
+                  title="重新計算全歷史 30+ 因子特徵並重新訓練 LightGBM 模型"
+                >
+                  🏋️ 重新訓練大盤模型
+                </button>
+              </div>
+            </div>
+
+            {fetchingMarketMl && !marketMlData ? (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+                <div className="loader" style={{ margin: '0 auto 1rem auto' }}></div>
+                <p style={{ color: 'var(--text-muted)' }}>正在載入大盤 ML 宏觀預測與籌碼數據...</p>
+              </div>
+            ) : marketMlData ? (
+              <div>
+                {/* 2. 核心大盤預測 Hero 看板 */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
+                  border: '1px solid rgba(59, 130, 246, 0.35)',
+                  borderRadius: '14px',
+                  padding: '1.25rem 1.5rem',
+                  marginBottom: '1rem',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                        加權指數最新點位 (TAIEX)
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '2.2rem', fontWeight: 900, color: '#F8FAFC', letterSpacing: '-0.5px' }}>
+                          {marketMlData.current_market?.close?.toLocaleString()}
+                        </span>
+                        <span style={{ fontSize: '0.9rem', color: '#93C5FD' }}>
+                          點 (20日年化波動度: {marketMlData.current_market?.volatility_20d}%)
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        display: 'inline-block',
+                        padding: '0.45rem 1rem',
+                        borderRadius: '20px',
+                        fontSize: '1.05rem',
+                        fontWeight: 800,
+                        background: marketMlData.prediction?.signal === 'bullish' ? 'rgba(239, 68, 68, 0.25)' : marketMlData.prediction?.signal === 'bearish' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
+                        color: marketMlData.prediction?.signal === 'bullish' ? '#FCA5A5' : marketMlData.prediction?.signal === 'bearish' ? '#86EFAC' : '#FDE68A',
+                        border: marketMlData.prediction?.signal === 'bullish' ? '1px solid rgba(239, 68, 68, 0.5)' : marketMlData.prediction?.signal === 'bearish' ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(245, 158, 11, 0.5)',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                      }}>
+                        {marketMlData.prediction?.signal_badge}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                        {marketMlData.prediction?.signal_desc}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 多空波段預測機率卡片網格 */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: '0.75rem',
+                    background: 'rgba(0, 0, 0, 0.25)',
+                    padding: '1rem',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.05)'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🚀 20天突破勝率 (≥+2.5%)</span>
+                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#EF4444' }}>
+                        {marketMlData.prediction?.prob_up_20d}%
+                      </span>
+                      <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${marketMlData.prediction?.prob_up_20d}%`, height: '100%', background: '#EF4444' }}></div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⚠️ 20天跌破風險 (≤-2.5%)</span>
+                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10B981' }}>
+                        {marketMlData.prediction?.prob_down_20d}%
+                      </span>
+                      <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${marketMlData.prediction?.prob_down_20d}%`, height: '100%', background: '#10B981' }}></div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏸️ 20天區間整理機率</span>
+                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#FCD34D' }}>
+                        {marketMlData.prediction?.prob_neutral_20d}%
+                      </span>
+                      <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${marketMlData.prediction?.prob_neutral_20d}%`, height: '100%', background: '#FCD34D' }}></div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⚡ 5天短期多空比</span>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FCA5A5' }}>多 {marketMlData.prediction?.prob_up_5d}%</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/</span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#86EFAC' }}>空 {marketMlData.prediction?.prob_down_5d}%</span>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>短線節奏參考</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🛡️ 20天關鍵攻防區間</span>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#93C5FD' }}>
+                        {marketMlData.prediction?.support_pts?.toLocaleString()} ~ {marketMlData.prediction?.resistance_pts?.toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>支撐點位 ~ 壓力點位</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. 三大法人期現貨籌碼戰情看板 (Institutional Cockpit) */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <h3 style={{ fontSize: '1rem', color: '#93C5FD', marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    📊 三大法人期現貨籌碼戰情看板 (Market Institutional Cockpit)
+                  </h3>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: '0.75rem'
+                  }}>
+                    {/* 外資期貨淨留倉卡片 */}
+                    <div style={{
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '12px',
+                      padding: '0.85rem 1rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>外資台指期未平倉 (Net OI)</span>
+                        <span style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '8px',
+                          background: marketMlData.institutional_cockpit?.foreign_futures_net < -35000 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
+                          color: marketMlData.institutional_cockpit?.foreign_futures_net < -35000 ? '#F87171' : '#93C5FD',
+                          border: '1px solid rgba(255,255,255,0.08)'
+                        }}>
+                          {marketMlData.institutional_cockpit?.foreign_futures_risk}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 900, color: marketMlData.institutional_cockpit?.foreign_futures_net < 0 ? '#10B981' : '#EF4444' }}>
+                        {marketMlData.institutional_cockpit?.foreign_futures_net?.toLocaleString()} 口
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        3日變動: <strong style={{ color: marketMlData.institutional_cockpit?.foreign_futures_change_3d > 0 ? '#EF4444' : '#10B981' }}>
+                          {marketMlData.institutional_cockpit?.foreign_futures_change_3d > 0 ? '+' : ''}{marketMlData.institutional_cockpit?.foreign_futures_change_3d?.toLocaleString()} 口
+                        </strong>
+                        <span style={{ margin: '0 0.35rem' }}>·</span>
+                        5日: <strong style={{ color: marketMlData.institutional_cockpit?.foreign_futures_change_5d > 0 ? '#EF4444' : '#10B981' }}>
+                          {marketMlData.institutional_cockpit?.foreign_futures_change_5d > 0 ? '+' : ''}{marketMlData.institutional_cockpit?.foreign_futures_change_5d?.toLocaleString()} 口
+                        </strong>
+                      </div>
+                    </div>
+
+                    {/* 投信與自營商期貨卡片 */}
+                    <div style={{
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '12px',
+                      padding: '0.85rem 1rem'
+                    }}>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                        投信與自營商期貨部位
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>投信淨多單</div>
+                          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#EF4444' }}>
+                            +{marketMlData.institutional_cockpit?.trust_futures_net?.toLocaleString()} 口
+                          </div>
+                        </div>
+                        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '0.75rem' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>自營商避險</div>
+                          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: marketMlData.institutional_cockpit?.dealer_futures_net < 0 ? '#10B981' : '#EF4444' }}>
+                            {marketMlData.institutional_cockpit?.dealer_futures_net?.toLocaleString()} 口
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                        投信多單主要用於 ETF 避險及現貨配對交易
+                      </div>
+                    </div>
+
+                    {/* 三大法人現貨買賣超卡片 */}
+                    <div style={{
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '12px',
+                      padding: '0.85rem 1rem'
+                    }}>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                        三大法人現貨買賣超 (億元)
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                        <span style={{
+                          fontSize: '1.45rem',
+                          fontWeight: 900,
+                          color: marketMlData.institutional_cockpit?.total_cash_net_1d >= 0 ? '#EF4444' : '#10B981'
+                        }}>
+                          {marketMlData.institutional_cockpit?.total_cash_net_1d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.total_cash_net_1d} 億
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(今日合計)</span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        近 5 日合計: <strong style={{ color: marketMlData.institutional_cockpit?.total_cash_net_5d >= 0 ? '#EF4444' : '#10B981' }}>
+                          {marketMlData.institutional_cockpit?.total_cash_net_5d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.total_cash_net_5d} 億
+                        </strong>
+                        <span style={{ marginLeft: '0.4rem' }}>
+                          (外資: {marketMlData.institutional_cockpit?.foreign_cash_net_5d} 億)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 台積電權值錨定卡片 */}
+                    <div style={{
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '12px',
+                      padding: '0.85rem 1rem'
+                    }}>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                        台積電 (2330) 權值錨定動能
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                        <span style={{
+                          fontSize: '1.45rem',
+                          fontWeight: 900,
+                          color: marketMlData.institutional_cockpit?.tsmc_ret_5d >= 0 ? '#EF4444' : '#10B981'
+                        }}>
+                          {marketMlData.institutional_cockpit?.tsmc_ret_5d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.tsmc_ret_5d?.toFixed(2)}%
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(近 5 日漲幅)</span>
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                        月線乖離: <strong style={{ color: marketMlData.institutional_cockpit?.tsmc_ma20_bias >= 0 ? '#EF4444' : '#10B981' }}>
+                          {marketMlData.institutional_cockpit?.tsmc_ma20_bias >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.tsmc_ma20_bias?.toFixed(2)}%
+                        </strong>
+                        <span style={{ marginLeft: '0.4rem', color: '#93C5FD' }}>權重佔比 &gt; 35%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. 下半部：大盤技術體檢與 Top 8 AI 核心驅動特徵 */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                  gap: '1rem'
+                }}>
+                  {/* 大盤技術均線體檢卡片 */}
+                  <div style={{
+                    background: 'rgba(15, 23, 42, 0.75)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '12px',
+                    padding: '1.1rem 1.25rem'
+                  }}>
+                    <h3 style={{ fontSize: '0.95rem', color: '#93C5FD', marginBottom: '0.85rem' }}>
+                      📐 大盤技術均線與動能指標
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>5 日均線 (MA5)</span>
+                        <span style={{ fontWeight: 700 }}>{marketMlData.current_market?.ma5?.toLocaleString()} 點</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>20 日月線 (MA20)</span>
+                        <span style={{ fontWeight: 700, color: '#60A5FA' }}>{marketMlData.current_market?.ma20?.toLocaleString()} 點</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>60 日季線 (MA60)</span>
+                        <span style={{ fontWeight: 700, color: '#A78BFA' }}>{marketMlData.current_market?.ma60?.toLocaleString()} 點</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>14 日 RSI 相對強弱指標</span>
+                        <span style={{ fontWeight: 700, color: marketMlData.current_market?.rsi_14 > 70 ? '#EF4444' : marketMlData.current_market?.rsi_14 < 30 ? '#10B981' : 'white' }}>
+                          {marketMlData.current_market?.rsi_14}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>5日均量能相對倍數</span>
+                        <span style={{ fontWeight: 700 }}>{marketMlData.current_market?.turnover_ratio_5d}x (量能持平)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Top 8 AI 核心特徵貢獻排行 (Explainable AI) */}
+                  <div style={{
+                    background: 'rgba(15, 23, 42, 0.75)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    borderRadius: '12px',
+                    padding: '1.1rem 1.25rem'
+                  }}>
+                    <h3 style={{ fontSize: '0.95rem', color: '#93C5FD', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>🧠 AI 判斷多空之關鍵特徵貢獻 (Top 8 XAI)</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>Gain 增益權重</span>
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                      {marketMlData.top_features?.map((item, idx) => (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ color: '#E2E8F0' }}>
+                              #{idx + 1} {item.name}
+                            </span>
+                            <span style={{ fontWeight: 'bold', color: '#60A5FA' }}>
+                              {item.importance_pct}%
+                            </span>
+                          </div>
+                          <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                            <div style={{
+                              width: `${Math.min(100, item.importance_pct * 3.5)}%`,
+                              height: '100%',
+                              background: 'linear-gradient(90deg, #3B82F6, #60A5FA)'
+                            }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📈</div>
+                <p style={{ margin: 0, fontSize: '1rem' }}>尚未產出大盤 ML 預測報告。</p>
+                <button
+                  type="button"
+                  className="btn btn-save"
+                  style={{ marginTop: '1rem' }}
+                  onClick={() => handleTriggerMarketMlJob('market_ml_predict')}
+                  disabled={triggeringMarketMl}
+                >
+                  🚀 立即執行大盤推論
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ===== ML 波段飆股預測 ===== */}
         {activeTab === 'ml' && (

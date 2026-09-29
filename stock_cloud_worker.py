@@ -525,6 +525,28 @@ if res.get('status') == 'ok':
 
     return {"status": "ok", "message": f"{model_type.upper()} 模型訓練完成並已同步至雲端快取！"}
 
+def execute_market_ml_job(config: dict) -> dict:
+    """執行大盤最新日K同步與宏觀多因子 ML 推論"""
+    print("[*] 正在同步最新大盤加權指數日K...")
+    import sync_market_index
+    sync_market_index.sync_taiex_to_sqlite()
+    
+    print("[*] 正在執行大盤 ML 多因子推論...")
+    import market_ml_engine
+    result = market_ml_engine.generate_prediction_report()
+    return {"status": "ok", "message": "大盤預測已更新並同步至雲端！", "data": result}
+
+def execute_market_ml_train_job(config: dict) -> dict:
+    """重新訓練大盤多因子模型並產出最新推論"""
+    print("[*] 正在同步最新大盤日K並重新訓練大盤 ML 模型...")
+    import sync_market_index
+    sync_market_index.sync_taiex_to_sqlite()
+    
+    import market_ml_engine
+    market_ml_engine.train_and_evaluate_model()
+    result = market_ml_engine.generate_prediction_report()
+    return {"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論！", "data": result}
+
 def execute_ml_backtest_job(config: dict) -> dict:
     """執行本機 ML 策略歷史回測並回傳績效指標"""
     model_type = config.get("model_type", "lightgbm")
@@ -628,6 +650,10 @@ def process_pending_jobs():
             results = execute_ml_train_job(config)
         elif job_type == "ml_backtest":
             results = execute_ml_backtest_job(config)
+        elif job_type == "market_ml_predict":
+            results = execute_market_ml_job(config)
+        elif job_type == "market_ml_train":
+            results = execute_market_ml_train_job(config)
         else:
             results = execute_screener_job(config)
 
