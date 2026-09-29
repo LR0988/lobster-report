@@ -14,6 +14,7 @@ from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
 load_dotenv()
+load_dotenv("/Users/huanggin-chen/openclaw_test/.env")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_DIR = "/Users/huanggin-chen/gemini-stock-analysis"

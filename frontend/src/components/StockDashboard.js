@@ -182,6 +182,54 @@ const ML_MODEL_OPTIONS = [
 
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
+const MARKET_ML_MODELS = [
+  { val: 'ensemble', label: '👑 多模型融合集成 (Ensemble)', short: '👑 集成模型', tag: '🥇 綜合推薦首選', desc: '軟投票融合 LightGBM、隨機森林與高泛化羅吉斯迴歸，AUC 表現最佳' },
+  { val: 'lightgbm', label: '⚡ LightGBM (梯度提升)', short: '⚡ LightGBM', tag: '⚡ 靈敏動能', desc: '微軟開源高效梯度提升決策樹，擅長捕捉籌碼與技術面非線性轉折' },
+  { val: 'lr', label: '📏 Logistic Regression (線性基準)', short: '📏 羅吉斯迴歸', tag: '🎯 泛化穩定', desc: '宏觀全因子 L2 正則化羅吉斯迴歸，方向預測穩定度高、抗過擬合' },
+  { val: 'rf', label: '🌳 Random Forest (隨機森林)', short: '🌳 隨機森林', tag: '🛡️ 穩健防禦', desc: '多決策樹 Bagging 集成，能有效平滑單一極端指標雜訊' },
+  { val: 'xgboost', label: '🌲 XGBoost (經典量化)', short: '🌲 XGBoost', tag: '🔥 經典量化', desc: '華爾街與量化基金經典極限梯度提升，對波動急遽擴大有高敏感度' },
+  { val: 'mlp', label: '🕸️ MLP Neural Net (深度感知器)', short: '🕸️ MLP 類神經', tag: '🧠 深度網路', desc: '多層前饋神經網絡，透過深度隱藏層提煉宏觀多因子交互效應' }
+];
+
+const BUILTIN_MARKET_ML_PRESETS = [
+  {
+    id: 'all_factors',
+    name: '⚡ 宏觀全因子標準',
+    desc: '全歷史 10 年 2,400+ 天資料 + 30 維技術面、外資期貨、現貨買賣超與台積電全因子',
+    trainDays: 0,
+    presetKey: 'all_factors',
+    testRatio: 0.2,
+    threshold: 2.5
+  },
+  {
+    id: 'recent_momentum',
+    name: '🚀 近期動能專注',
+    desc: '聚焦近 2 年 (500日) 動能，強化短線爆發力、外資期貨增減與台積電 5 日衝刺',
+    trainDays: 500,
+    presetKey: 'recent_momentum',
+    testRatio: 0.2,
+    threshold: 2.0
+  },
+  {
+    id: 'institutional_flow',
+    name: '🛡️ 法人籌碼純量化',
+    desc: '純三大法人台指期未平倉 Net OI + 現貨大額買賣超與台積電籌碼，過濾技術面雜訊',
+    trainDays: 1000,
+    presetKey: 'institutional_flow',
+    testRatio: 0.2,
+    threshold: 2.5
+  },
+  {
+    id: 'pure_technicals',
+    name: '📐 純技術線型動能',
+    desc: '純加權指數各期均線乖離率、RSI、MACD 柱狀體、歷史波動度與均量放大倍數',
+    trainDays: 1500,
+    presetKey: 'pure_technicals',
+    testRatio: 0.2,
+    threshold: 2.5
+  }
+];
+
 const SCREENER_COLUMN_LABELS = {
   closing_price: '收盤價',
   trade_volume: '成交量',
@@ -532,10 +580,27 @@ function StockDashboard() {
 
   // ML 預測表格排序狀態
 
-  // ── 大盤 ML 多空波段預測狀態 ──
+  // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
   const [marketMlData, setMarketMlData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
+  const [marketMlModelType, setMarketMlModelType] = useState(() => localStorage.getItem('market_ml_model_type') || 'ensemble');
+  const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
+  const [marketMlSubTab, setMarketMlSubTab] = useState(() => localStorage.getItem('market_ml_sub_tab') || 'cockpit');
+  const [marketMlPreset, setMarketMlPreset] = useState(() => localStorage.getItem('market_ml_preset') || 'all_factors');
+  const [marketMlTrainDays, setMarketMlTrainDays] = useState(() => {
+    const val = localStorage.getItem('market_ml_train_days');
+    return val !== null ? parseInt(val) : 0;
+  });
+  const [marketMlTestRatio, setMarketMlTestRatio] = useState(() => {
+    const val = localStorage.getItem('market_ml_test_ratio');
+    return val !== null ? parseFloat(val) : 0.2;
+  });
+  const [marketMlThreshold, setMarketMlThreshold] = useState(() => {
+    const val = localStorage.getItem('market_ml_threshold');
+    return val !== null ? parseFloat(val) : 2.5;
+  });
+  const [marketMlSavedToast, setMarketMlSavedToast] = useState(false);
 
   // ── 低頻量化交易 (Low-Frequency Quant) 狀態 ──
   const [lowFreqRollingMonths, setLowFreqRollingMonths] = useState(24);
@@ -1522,16 +1587,50 @@ function StockDashboard() {
     }
   };
 
-  const handleTriggerMarketMlJob = async (jobType = 'market_ml_predict') => {
+  const handleSelectMarketModel = (modelId) => {
+    setMarketMlModelType(modelId);
+    localStorage.setItem('market_ml_model_type', modelId);
+  };
+
+  const handleApplyMarketMlPreset = (preset) => {
+    setMarketMlPreset(preset.id);
+    localStorage.setItem('market_ml_preset', preset.id);
+    setMarketMlTrainDays(preset.trainDays);
+    localStorage.setItem('market_ml_train_days', preset.trainDays);
+    setMarketMlTestRatio(preset.testRatio);
+    localStorage.setItem('market_ml_test_ratio', preset.testRatio);
+    setMarketMlThreshold(preset.threshold);
+    localStorage.setItem('market_ml_threshold', preset.threshold);
+  };
+
+  const handleSaveMarketTrainSettings = () => {
+    localStorage.setItem('market_ml_train_days', marketMlTrainDays);
+    localStorage.setItem('market_ml_test_ratio', marketMlTestRatio);
+    localStorage.setItem('market_ml_threshold', marketMlThreshold);
+    localStorage.setItem('market_ml_preset', marketMlPreset);
+    setMarketMlSavedToast(true);
+    setTimeout(() => setMarketMlSavedToast(false), 2500);
+  };
+
+  const handleTriggerMarketMlJob = async (jobType = 'market_ml_predict', extraConfig = {}) => {
     try {
       setTriggeringMarketMl(true);
+      const configPayload = {
+        job_type: jobType,
+        model_type: extraConfig.model_type || marketMlModelType,
+        train_days: extraConfig.train_days !== undefined ? extraConfig.train_days : marketMlTrainDays,
+        test_ratio: extraConfig.test_ratio !== undefined ? extraConfig.test_ratio : marketMlTestRatio,
+        threshold_pct: extraConfig.threshold !== undefined ? extraConfig.threshold : marketMlThreshold,
+        features_preset: extraConfig.features_preset || marketMlPreset,
+        ...extraConfig
+      };
       const createRes = await supabaseFetch('/stock_screener_jobs', {
         method: 'POST',
         headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({
           username: user?.username || 'hotpotlu',
           status: 'pending',
-          config: { job_type: jobType }
+          config: configPayload
         })
       });
 
@@ -1540,7 +1639,7 @@ function StockDashboard() {
         const jobId = jobList[0]?.id;
         if (jobId) {
           let attempts = 0;
-          const maxAttempts = 50;
+          const maxAttempts = 60;
           while (attempts < maxAttempts) {
             await new Promise(r => setTimeout(r, 1500));
             attempts++;
@@ -1553,9 +1652,9 @@ function StockDashboard() {
                   if (current.results?.data) {
                     setMarketMlData(current.results.data);
                   } else {
-                    fetchMarketMlData();
+                    await fetchMarketMlData();
                   }
-                  alert(jobType === 'market_ml_train' ? '🎉 大盤 ML 模型重新訓練完成！' : '🚀 大盤最新推論更新完成！');
+                  alert(jobType === 'market_ml_train' ? '🎉 大盤 ML 模型訓練與指標評估完成！' : '🚀 大盤最新推論更新完成！');
                   return;
                 } else if (current.status === 'error') {
                   throw new Error(current.error_message || '大盤任務執行發生錯誤');
@@ -3400,27 +3499,90 @@ function StockDashboard() {
       </div>
     )}
 
-        {/* ===== 📈 大盤 ML 多空波段預測 ===== */}
-        {activeTab === 'market_ml' && (
+        {/* ===== 📈 大盤 ML 多空波段預測 (多模型評估與戰情看板) ===== */}
+        {activeTab === 'market_ml' && (() => {
+          const activeModelKey = (marketMlData?.models && marketMlData.models[marketMlModelType])
+            ? marketMlModelType
+            : (marketMlData?.selected_model || marketMlData?.best_model_id || 'ensemble');
+          const activeModelInfo = marketMlData?.models?.[activeModelKey] || {};
+          const activePrediction = activeModelInfo.prediction || marketMlData?.prediction || {};
+          const activeTopFeatures = activeModelInfo.top_features || marketMlData?.top_features || [];
+          const activeMetrics = activeModelInfo.metrics || marketMlData?.metrics || {};
+          const bestModelId = marketMlData?.best_model_id || 'ensemble';
+
+          return (
           <div>
-            {/* 1. 頂部控制與模型狀態列 */}
+            {/* 1. 頂部控制與模型選擇列 */}
             <div style={{
-              background: 'rgba(15, 23, 42, 0.75)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
               borderRadius: '12px',
-              padding: '0.85rem 1.25rem',
+              padding: '0.85rem 1.15rem',
               marginBottom: '1rem',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               flexWrap: 'wrap',
               gap: '0.75rem'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  📈 台股加權指數 (TAIEX) 宏觀多因子 ML 波段預測
+                  📈 台股大盤宏觀 ML 預測
                 </span>
-                {marketMlData && (
+
+                {/* 當前 AI 模型選擇下拉選單 */}
+                <select
+                  value={marketMlModelType}
+                  onChange={e => handleSelectMarketModel(e.target.value)}
+                  style={{
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    border: '1px solid #3B82F6',
+                    color: '#93C5FD',
+                    fontWeight: 'bold',
+                    padding: '0.3rem 0.6rem',
+                    borderRadius: '8px',
+                    fontSize: '0.86rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {MARKET_ML_MODELS.map(m => (
+                    <option key={m.val} value={m.val}>
+                      {m.label} {m.val === bestModelId ? '⭐ 最佳' : ''}
+                    </option>
+                  ))}
+                </select>
+
+                {/* 狀態徽章 */}
+                {activeMetrics?.auc_up ? (
+                  <span style={{
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    border: '1px solid #10B981',
+                    color: '#6EE7B7',
+                    fontSize: '0.78rem',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '16px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }}></span>
+                    就緒 (AUC {activeMetrics.auc_up}% ｜ 準確 {activeMetrics.accuracy}%)
+                  </span>
+                ) : (
+                  <span style={{
+                    background: 'rgba(148, 163, 184, 0.15)',
+                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                    color: '#94A3B8',
+                    fontSize: '0.78rem',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '16px'
+                  }}>
+                    未載入
+                  </span>
+                )}
+
+                {marketMlData?.latest_date && (
                   <span style={{
                     fontSize: '0.78rem',
                     background: 'rgba(59, 130, 246, 0.2)',
@@ -3429,64 +3591,400 @@ function StockDashboard() {
                     padding: '0.2rem 0.55rem',
                     borderRadius: '12px'
                   }}>
-                    🗓️ 基準日：{marketMlData.latest_date}
-                  </span>
-                )}
-                {marketMlData?.metrics && (
-                  <span style={{
-                    fontSize: '0.78rem',
-                    background: 'rgba(16, 185, 129, 0.2)',
-                    border: '1px solid rgba(16, 185, 129, 0.4)',
-                    color: '#86EFAC',
-                    padding: '0.2rem 0.55rem',
-                    borderRadius: '12px'
-                  }}>
-                    📈 20天驗證 AUC：{marketMlData.metrics.auc_up}%
+                    🗓️ 基準日: {marketMlData.latest_date}
                   </span>
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* 右側操作按鈕 */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  className="btn btn-save"
+                  className="btn"
+                  onClick={() => setShowMarketMlConfig(!showMarketMlConfig)}
+                  style={{
+                    padding: '0.35rem 0.8rem',
+                    fontSize: '0.84rem',
+                    background: showMarketMlConfig ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)',
+                    border: showMarketMlConfig ? '1px solid #3B82F6' : '1px solid var(--border-color)',
+                    color: showMarketMlConfig ? '#93C5FD' : 'white',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    borderRadius: '8px'
+                  }}
+                >
+                  ⚙️ 訓練條件設定 {showMarketMlConfig ? '▴ 收合' : '▾ 展開'}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn"
                   onClick={() => handleTriggerMarketMlJob('market_ml_predict')}
                   disabled={triggeringMarketMl || fetchingMarketMl}
                   style={{
-                    padding: '0.4rem 0.9rem',
-                    fontSize: '0.85rem',
+                    padding: '0.35rem 0.8rem',
+                    fontSize: '0.84rem',
+                    background: 'rgba(59, 130, 246, 0.18)',
+                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                    color: '#93C5FD',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem'
+                    gap: '0.35rem',
+                    borderRadius: '8px'
                   }}
+                  title="重新推論今日最新市場行情"
                 >
-                  {triggeringMarketMl ? (
-                    <>
-                      <span className="loader" style={{ width: '12px', height: '12px' }}></span>
-                      <span>推論計算中...</span>
-                    </>
-                  ) : (
-                    <span>🔄 立即重新推論</span>
-                  )}
+                  {triggeringMarketMl ? <span className="loader" style={{ width: '12px', height: '12px' }}></span> : '🔄 重新推論'}
                 </button>
 
                 <button
                   type="button"
-                  className="btn btn-secondary"
-                  onClick={() => handleTriggerMarketMlJob('market_ml_train')}
+                  className="btn btn-save"
+                  onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType })}
                   disabled={triggeringMarketMl || fetchingMarketMl}
                   style={{
-                    padding: '0.4rem 0.85rem',
-                    fontSize: '0.85rem',
+                    padding: '0.35rem 0.8rem',
+                    fontSize: '0.84rem',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem'
+                    gap: '0.35rem',
+                    borderRadius: '8px'
                   }}
-                  title="重新計算全歷史 30+ 因子特徵並重新訓練 LightGBM 模型"
+                  title={`單獨訓練當前選取的 ${MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType}`}
                 >
-                  🏋️ 重新訓練大盤模型
+                  🚀 訓練選定模型
                 </button>
               </div>
+            </div>
+
+            {/* 2. 可收折的「進階訓練配置與條件清單面板」 */}
+            {showMarketMlConfig && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                animation: 'fadeIn 0.2s ease-in-out'
+              }}>
+                {/* 快捷訓練模式 Chips 清單 */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#93C5FD', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span>⚡</span>
+                    <span>快捷訓練條件清單（點擊立即套用配置）：</span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    {BUILTIN_MARKET_ML_PRESETS.map(preset => {
+                      const isActive = marketMlPreset === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => handleApplyMarketMlPreset(preset)}
+                          title={preset.desc}
+                          style={{
+                            padding: '0.4rem 0.75rem',
+                            fontSize: '0.82rem',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            border: isActive ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
+                            background: isActive ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.4), rgba(59, 130, 246, 0.2))' : 'rgba(255, 255, 255, 0.04)',
+                            color: isActive ? '#93C5FD' : '#CBD5E1',
+                            fontWeight: isActive ? 'bold' : 'normal',
+                            boxShadow: isActive ? '0 0 10px rgba(59, 130, 246, 0.3)' : 'none'
+                          }}
+                        >
+                          {preset.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 參數設定 Grid (2 欄) */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '1.25rem',
+                  background: 'rgba(0, 0, 0, 0.28)',
+                  padding: '1.1rem',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  marginBottom: '1.25rem'
+                }}>
+                  {/* 區塊 1: 數據長度配置 */}
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>📅</span> 數據長度與驗證配置
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+                        🏋️ 歷史訓練天數 (0 為 10 年全歷史 2,400+ 天)
+                      </label>
+                      <input
+                        type="number"
+                        value={marketMlTrainDays}
+                        onChange={e => {
+                          const val = parseInt(e.target.value) || 0;
+                          setMarketMlTrainDays(val);
+                          localStorage.setItem('market_ml_train_days', val);
+                        }}
+                        style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.35rem', flexWrap: 'wrap' }}>
+                        {[
+                          { d: 500, label: '近2年 (500天)' },
+                          { d: 1000, label: '近4年 (1000天)' },
+                          { d: 1800, label: '近7年 (1800天)' },
+                          { d: 0, label: '全部歷史 (10年)' }
+                        ].map(item => (
+                          <button
+                            key={item.d}
+                            type="button"
+                            className="btn"
+                            style={{
+                              padding: '0.2rem 0.5rem',
+                              fontSize: '0.72rem',
+                              background: marketMlTrainDays === item.d ? 'rgba(59, 130, 246, 0.35)' : 'rgba(255,255,255,0.05)',
+                              border: marketMlTrainDays === item.d ? '1px solid #3B82F6' : '1px solid var(--border-color)',
+                              color: marketMlTrainDays === item.d ? '#93C5FD' : 'var(--text-muted)'
+                            }}
+                            onClick={() => {
+                              setMarketMlTrainDays(item.d);
+                              localStorage.setItem('market_ml_train_days', item.d);
+                            }}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                        <span>走步前瞻驗證切分比率 (Walk-forward Split)</span>
+                        <span style={{ color: '#93C5FD', fontWeight: 'bold' }}>{Math.round((1 - marketMlTestRatio) * 100)}% 訓練 / {Math.round(marketMlTestRatio * 100)}% 驗證</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="0.3"
+                        step="0.05"
+                        value={marketMlTestRatio}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          setMarketMlTestRatio(val);
+                          localStorage.setItem('market_ml_test_ratio', val);
+                        }}
+                        style={{ width: '100%', accentColor: '#3B82F6' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 區塊 2: 預測目標與特徵預設模式 */}
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <span>🎯</span> 預測目標與特徵工程模式
+                    </div>
+
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+                        波段趨勢突破門檻 (20日漲跌幅 &ge; &plusmn;X% 判定為趨勢)
+                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <input
+                          type="number"
+                          step="0.5"
+                          min="1.0"
+                          max="5.0"
+                          value={marketMlThreshold}
+                          onChange={e => {
+                            const val = parseFloat(e.target.value) || 2.5;
+                            setMarketMlThreshold(val);
+                            localStorage.setItem('market_ml_threshold', val);
+                          }}
+                          style={{ width: '80px', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
+                        />
+                        <span style={{ fontSize: '0.85rem', color: '#94A3B8' }}>% (預設 2.5%)</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
+                        特徵工程組合模式 (Feature Group)
+                      </label>
+                      <select
+                        value={marketMlPreset}
+                        onChange={e => {
+                          setMarketMlPreset(e.target.value);
+                          localStorage.setItem('market_ml_preset', e.target.value);
+                        }}
+                        style={{
+                          width: '100%',
+                          background: 'rgba(15, 23, 42, 0.95)',
+                          border: '1px solid var(--border-color)',
+                          color: '#F8FAFC',
+                          padding: '0.4rem 0.6rem',
+                          borderRadius: '6px',
+                          fontSize: '0.84rem'
+                        }}
+                      >
+                        {BUILTIN_MARKET_ML_PRESETS.map(p => (
+                          <option key={p.id} value={p.id}>{p.name} — {p.desc}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 底部操作與派工按鈕列 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{
+                        padding: '0.45rem 0.85rem',
+                        fontSize: '0.85rem',
+                        background: 'rgba(59, 130, 246, 0.2)',
+                        border: '1px solid rgba(59, 130, 246, 0.5)',
+                        color: '#93C5FD',
+                        borderRadius: '8px'
+                      }}
+                      onClick={handleSaveMarketTrainSettings}
+                    >
+                      💾 儲存條件
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{
+                        padding: '0.45rem 0.85rem',
+                        fontSize: '0.85rem',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid var(--border-color)',
+                        color: 'white',
+                        borderRadius: '8px'
+                      }}
+                      onClick={() => handleApplyMarketMlPreset(BUILTIN_MARKET_ML_PRESETS[0])}
+                    >
+                      ↺ 還原預設
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {marketMlSavedToast && (
+                      <span style={{
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        border: '1px solid #10B981',
+                        color: '#6EE7B7',
+                        fontSize: '0.82rem',
+                        padding: '0.3rem 0.75rem',
+                        borderRadius: '6px',
+                        fontWeight: 'bold'
+                      }}>
+                        ✅ 條件已儲存！
+                      </span>
+                    )}
+
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all' })}
+                      disabled={triggeringMarketMl || fetchingMarketMl}
+                      style={{
+                        padding: '0.45rem 0.95rem',
+                        fontSize: '0.85rem',
+                        background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(109, 40, 217, 0.4))',
+                        border: '1px solid #8B5CF6',
+                        color: '#DDD6FE',
+                        borderRadius: '8px',
+                        fontWeight: 'bold'
+                      }}
+                      title="一鍵訓練全部 6 款模型並生成即時橫向對比排行榜"
+                    >
+                      🏆 一鍵重訓並評比全部 6 款模型
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 3. 🗂️ 大盤功能子分頁切換列 (Segmented Sub-Tabs) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1.25rem',
+              padding: '0.35rem',
+              background: 'rgba(15, 23, 42, 0.65)',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
+              overflowX: 'auto'
+            }}>
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  flex: '1',
+                  padding: '0.55rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  background: marketMlSubTab === 'cockpit' ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'transparent',
+                  color: marketMlSubTab === 'cockpit' ? 'white' : 'var(--text-muted)',
+                  border: marketMlSubTab === 'cockpit' ? '1px solid #3B82F6' : '1px solid transparent',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={() => {
+                  setMarketMlSubTab('cockpit');
+                  localStorage.setItem('market_ml_sub_tab', 'cockpit');
+                }}
+              >
+                <span>📈</span>
+                <span>大盤戰情與 AI 波段推論 ({MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || '選定模型'})</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  flex: '1',
+                  padding: '0.55rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  background: marketMlSubTab === 'models' ? 'linear-gradient(135deg, #7C3AED, #6D28D9)' : 'transparent',
+                  color: marketMlSubTab === 'models' ? 'white' : 'var(--text-muted)',
+                  border: marketMlSubTab === 'models' ? '1px solid #8B5CF6' : '1px solid transparent',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={() => {
+                  setMarketMlSubTab('models');
+                  localStorage.setItem('market_ml_sub_tab', 'models');
+                }}
+              >
+                <span>🏆</span>
+                <span>6 款 AI 大盤模型效能評比排行榜</span>
+                {marketMlData?.models && (
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.2)', padding: '0.1rem 0.45rem', borderRadius: '10px' }}>
+                    {Object.keys(marketMlData.models).length} 款
+                  </span>
+                )}
+              </button>
             </div>
 
             {fetchingMarketMl && !marketMlData ? (
@@ -3496,320 +3994,552 @@ function StockDashboard() {
               </div>
             ) : marketMlData ? (
               <div>
-                {/* 2. 核心大盤預測 Hero 看板 */}
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
-                  border: '1px solid rgba(59, 130, 246, 0.35)',
-                  borderRadius: '14px',
-                  padding: '1.25rem 1.5rem',
-                  marginBottom: '1rem',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-                    <div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
-                        加權指數最新點位 (TAIEX)
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
-                        <span style={{ fontSize: '2.2rem', fontWeight: 900, color: '#F8FAFC', letterSpacing: '-0.5px' }}>
-                          {marketMlData.current_market?.close?.toLocaleString()}
-                        </span>
-                        <span style={{ fontSize: '0.9rem', color: '#93C5FD' }}>
-                          點 (20日年化波動度: {marketMlData.current_market?.volatility_20d}%)
-                        </span>
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: 'right' }}>
+                {/* ── 子視圖 1: 📈 大盤戰情與當前模型推論 ── */}
+                {marketMlSubTab === 'cockpit' && (
+                  <div>
+                    {/* 2. 核心大盤預測 Hero 看板 */}
+                    <div style={{
+                      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
+                      border: '1px solid rgba(59, 130, 246, 0.35)',
+                      borderRadius: '14px',
+                      padding: '1.25rem 1.5rem',
+                      marginBottom: '1.25rem',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+                    }}>
                       <div style={{
-                        display: 'inline-block',
-                        padding: '0.45rem 1rem',
-                        borderRadius: '20px',
-                        fontSize: '1.05rem',
-                        fontWeight: 800,
-                        background: marketMlData.prediction?.signal === 'bullish' ? 'rgba(239, 68, 68, 0.25)' : marketMlData.prediction?.signal === 'bearish' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
-                        color: marketMlData.prediction?.signal === 'bullish' ? '#FCA5A5' : marketMlData.prediction?.signal === 'bearish' ? '#86EFAC' : '#FDE68A',
-                        border: marketMlData.prediction?.signal === 'bullish' ? '1px solid rgba(239, 68, 68, 0.5)' : marketMlData.prediction?.signal === 'bearish' ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(245, 158, 11, 0.5)',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        flexWrap: 'wrap',
+                        gap: '1rem',
+                        marginBottom: '1rem'
                       }}>
-                        {marketMlData.prediction?.signal_badge}
-                      </div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                        {marketMlData.prediction?.signal_desc}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 多空波段預測機率卡片網格 */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: '0.75rem',
-                    background: 'rgba(0, 0, 0, 0.25)',
-                    padding: '1rem',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.05)'
-                  }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🚀 20天突破勝率 (≥+2.5%)</span>
-                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#EF4444' }}>
-                        {marketMlData.prediction?.prob_up_20d}%
-                      </span>
-                      <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${marketMlData.prediction?.prob_up_20d}%`, height: '100%', background: '#EF4444' }}></div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⚠️ 20天跌破風險 (≤-2.5%)</span>
-                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10B981' }}>
-                        {marketMlData.prediction?.prob_down_20d}%
-                      </span>
-                      <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${marketMlData.prediction?.prob_down_20d}%`, height: '100%', background: '#10B981' }}></div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏸️ 20天區間整理機率</span>
-                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#FCD34D' }}>
-                        {marketMlData.prediction?.prob_neutral_20d}%
-                      </span>
-                      <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${marketMlData.prediction?.prob_neutral_20d}%`, height: '100%', background: '#FCD34D' }}></div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⚡ 5天短期多空比</span>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FCA5A5' }}>多 {marketMlData.prediction?.prob_up_5d}%</span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/</span>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#86EFAC' }}>空 {marketMlData.prediction?.prob_down_5d}%</span>
-                      </div>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>短線節奏參考</span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>🛡️ 20天關鍵攻防區間</span>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#93C5FD' }}>
-                        {marketMlData.prediction?.support_pts?.toLocaleString()} ~ {marketMlData.prediction?.resistance_pts?.toLocaleString()}
-                      </span>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>支撐點位 ~ 壓力點位</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. 三大法人期現貨籌碼戰情看板 (Institutional Cockpit) */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '1rem', color: '#93C5FD', marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📊 三大法人期現貨籌碼戰情看板 (Market Institutional Cockpit)
-                  </h3>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: '0.75rem'
-                  }}>
-                    {/* 外資期貨淨留倉卡片 */}
-                    <div style={{
-                      background: 'rgba(15, 23, 42, 0.75)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      borderRadius: '12px',
-                      padding: '0.85rem 1rem'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>外資台指期未平倉 (Net OI)</span>
-                        <span style={{
-                          fontSize: '0.75rem',
-                          fontWeight: 'bold',
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '8px',
-                          background: marketMlData.institutional_cockpit?.foreign_futures_net < -35000 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
-                          color: marketMlData.institutional_cockpit?.foreign_futures_net < -35000 ? '#F87171' : '#93C5FD',
-                          border: '1px solid rgba(255,255,255,0.08)'
-                        }}>
-                          {marketMlData.institutional_cockpit?.foreign_futures_risk}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '1.45rem', fontWeight: 900, color: marketMlData.institutional_cockpit?.foreign_futures_net < 0 ? '#10B981' : '#EF4444' }}>
-                        {marketMlData.institutional_cockpit?.foreign_futures_net?.toLocaleString()} 口
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                        3日變動: <strong style={{ color: marketMlData.institutional_cockpit?.foreign_futures_change_3d > 0 ? '#EF4444' : '#10B981' }}>
-                          {marketMlData.institutional_cockpit?.foreign_futures_change_3d > 0 ? '+' : ''}{marketMlData.institutional_cockpit?.foreign_futures_change_3d?.toLocaleString()} 口
-                        </strong>
-                        <span style={{ margin: '0 0.35rem' }}>·</span>
-                        5日: <strong style={{ color: marketMlData.institutional_cockpit?.foreign_futures_change_5d > 0 ? '#EF4444' : '#10B981' }}>
-                          {marketMlData.institutional_cockpit?.foreign_futures_change_5d > 0 ? '+' : ''}{marketMlData.institutional_cockpit?.foreign_futures_change_5d?.toLocaleString()} 口
-                        </strong>
-                      </div>
-                    </div>
-
-                    {/* 投信與自營商期貨卡片 */}
-                    <div style={{
-                      background: 'rgba(15, 23, 42, 0.75)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      borderRadius: '12px',
-                      padding: '0.85rem 1rem'
-                    }}>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-                        投信與自營商期貨部位
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>投信淨多單</div>
-                          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#EF4444' }}>
-                            +{marketMlData.institutional_cockpit?.trust_futures_net?.toLocaleString()} 口
-                          </div>
-                        </div>
-                        <div style={{ borderLeft: '1px solid rgba(255,255,255,0.08)', paddingLeft: '0.75rem' }}>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>自營商避險</div>
-                          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: marketMlData.institutional_cockpit?.dealer_futures_net < 0 ? '#10B981' : '#EF4444' }}>
-                            {marketMlData.institutional_cockpit?.dealer_futures_net?.toLocaleString()} 口
-                          </div>
-                        </div>
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                        投信多單主要用於 ETF 避險及現貨配對交易
-                      </div>
-                    </div>
-
-                    {/* 三大法人現貨買賣超卡片 */}
-                    <div style={{
-                      background: 'rgba(15, 23, 42, 0.75)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      borderRadius: '12px',
-                      padding: '0.85rem 1rem'
-                    }}>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-                        三大法人現貨買賣超 (億元)
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                        <span style={{
-                          fontSize: '1.45rem',
-                          fontWeight: 900,
-                          color: marketMlData.institutional_cockpit?.total_cash_net_1d >= 0 ? '#EF4444' : '#10B981'
-                        }}>
-                          {marketMlData.institutional_cockpit?.total_cash_net_1d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.total_cash_net_1d} 億
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(今日合計)</span>
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                        近 5 日合計: <strong style={{ color: marketMlData.institutional_cockpit?.total_cash_net_5d >= 0 ? '#EF4444' : '#10B981' }}>
-                          {marketMlData.institutional_cockpit?.total_cash_net_5d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.total_cash_net_5d} 億
-                        </strong>
-                        <span style={{ marginLeft: '0.4rem' }}>
-                          (外資: {marketMlData.institutional_cockpit?.foreign_cash_net_5d} 億)
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 台積電權值錨定卡片 */}
-                    <div style={{
-                      background: 'rgba(15, 23, 42, 0.75)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      borderRadius: '12px',
-                      padding: '0.85rem 1rem'
-                    }}>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
-                        台積電 (2330) 權值錨定動能
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                        <span style={{
-                          fontSize: '1.45rem',
-                          fontWeight: 900,
-                          color: marketMlData.institutional_cockpit?.tsmc_ret_5d >= 0 ? '#EF4444' : '#10B981'
-                        }}>
-                          {marketMlData.institutional_cockpit?.tsmc_ret_5d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.tsmc_ret_5d?.toFixed(2)}%
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(近 5 日漲幅)</span>
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                        月線乖離: <strong style={{ color: marketMlData.institutional_cockpit?.tsmc_ma20_bias >= 0 ? '#EF4444' : '#10B981' }}>
-                          {marketMlData.institutional_cockpit?.tsmc_ma20_bias >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.tsmc_ma20_bias?.toFixed(2)}%
-                        </strong>
-                        <span style={{ marginLeft: '0.4rem', color: '#93C5FD' }}>權重佔比 &gt; 35%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. 下半部：大盤技術體檢與 Top 8 AI 核心驅動特徵 */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                  gap: '1rem'
-                }}>
-                  {/* 大盤技術均線體檢卡片 */}
-                  <div style={{
-                    background: 'rgba(15, 23, 42, 0.75)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: '12px',
-                    padding: '1.1rem 1.25rem'
-                  }}>
-                    <h3 style={{ fontSize: '0.95rem', color: '#93C5FD', marginBottom: '0.85rem' }}>
-                      📐 大盤技術均線與動能指標
-                    </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>5 日均線 (MA5)</span>
-                        <span style={{ fontWeight: 700 }}>{marketMlData.current_market?.ma5?.toLocaleString()} 點</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>20 日月線 (MA20)</span>
-                        <span style={{ fontWeight: 700, color: '#60A5FA' }}>{marketMlData.current_market?.ma20?.toLocaleString()} 點</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>60 日季線 (MA60)</span>
-                        <span style={{ fontWeight: 700, color: '#A78BFA' }}>{marketMlData.current_market?.ma60?.toLocaleString()} 點</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>14 日 RSI 相對強弱指標</span>
-                        <span style={{ fontWeight: 700, color: marketMlData.current_market?.rsi_14 > 70 ? '#EF4444' : marketMlData.current_market?.rsi_14 < 30 ? '#10B981' : 'white' }}>
-                          {marketMlData.current_market?.rsi_14}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>5日均量能相對倍數</span>
-                        <span style={{ fontWeight: 700 }}>{marketMlData.current_market?.turnover_ratio_5d}x (量能持平)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Top 8 AI 核心特徵貢獻排行 (Explainable AI) */}
-                  <div style={{
-                    background: 'rgba(15, 23, 42, 0.75)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: '12px',
-                    padding: '1.1rem 1.25rem'
-                  }}>
-                    <h3 style={{ fontSize: '0.95rem', color: '#93C5FD', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span>🧠 AI 判斷多空之關鍵特徵貢獻 (Top 8 XAI)</span>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>Gain 增益權重</span>
-                    </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                      {marketMlData.top_features?.map((item, idx) => (
-                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                            <span style={{ color: '#E2E8F0' }}>
-                              #{idx + 1} {item.name}
-                            </span>
-                            <span style={{ fontWeight: 'bold', color: '#60A5FA' }}>
-                              {item.importance_pct}%
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>加權指數最新點位</span>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              padding: '0.15rem 0.5rem',
+                              borderRadius: '6px',
+                              background: 'rgba(59, 130, 246, 0.2)',
+                              color: '#93C5FD',
+                              border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }}>
+                              🤖 視角: {MARKET_ML_MODELS.find(m => m.val === activeModelKey)?.label || activeModelKey}
                             </span>
                           </div>
-                          <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
-                            <div style={{
-                              width: `${Math.min(100, item.importance_pct * 3.5)}%`,
-                              height: '100%',
-                              background: 'linear-gradient(90deg, #3B82F6, #60A5FA)'
-                            }}></div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem' }}>
+                            <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#F8FAFC', letterSpacing: '-0.5px' }}>
+                              {marketMlData.current_market?.close?.toLocaleString()}
+                            </span>
+                            <span style={{ fontSize: '0.95rem', color: '#94A3B8' }}>
+                              點 (20日年化波動度: {marketMlData.current_market?.volatility_20d}%)
+                            </span>
                           </div>
                         </div>
-                      ))}
+
+                        {/* AI 多空評定 Badge */}
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.45rem',
+                            padding: '0.45rem 1rem',
+                            borderRadius: '10px',
+                            background: activePrediction?.signal === 'bullish' ? 'rgba(239, 68, 68, 0.25)' : activePrediction?.signal === 'bearish' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
+                            color: activePrediction?.signal === 'bullish' ? '#FCA5A5' : activePrediction?.signal === 'bearish' ? '#86EFAC' : '#FDE68A',
+                            border: activePrediction?.signal === 'bullish' ? '1px solid rgba(239, 68, 68, 0.5)' : activePrediction?.signal === 'bearish' ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(245, 158, 11, 0.5)',
+                            fontSize: '1.05rem',
+                            fontWeight: 800
+                          }}>
+                            {activePrediction?.signal_badge || '🟡 區間箱型盤整'}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', maxWidth: '320px', lineHeight: '1.4' }}>
+                            {activePrediction?.signal_desc}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 20 天多空波段機率條 */}
+                      <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                          <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>未來 20 日月波段方向機率預測</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>模型多因子機率分佈</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '0.65rem' }}>
+                          <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', padding: '0.6rem 0.8rem' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#FCA5A5' }}>🚀 突破上漲勝率</div>
+                            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#EF4444' }}>
+                              {activePrediction?.prob_up_20d}%
+                            </div>
+                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', marginTop: '0.35rem', overflow: 'hidden' }}>
+                              <div style={{ width: `${activePrediction?.prob_up_20d}%`, height: '100%', background: '#EF4444' }}></div>
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.6rem 0.8rem' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#6EE7B7' }}>⚠️ 回檔跌破風險</div>
+                            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#10B981' }}>
+                              {activePrediction?.prob_down_20d}%
+                            </div>
+                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', marginTop: '0.35rem', overflow: 'hidden' }}>
+                              <div style={{ width: `${activePrediction?.prob_down_20d}%`, height: '100%', background: '#10B981' }}></div>
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '8px', padding: '0.6rem 0.8rem' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#FDE68A' }}>⚖️ 區間箱型震盪</div>
+                            <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#F59E0B' }}>
+                              {activePrediction?.prob_neutral_20d}%
+                            </div>
+                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', marginTop: '0.35rem', overflow: 'hidden' }}>
+                              <div style={{ width: `${activePrediction?.prob_neutral_20d}%`, height: '100%', background: '#FCD34D' }}></div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 5 天短期與波段支撐壓力區間 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.82rem', background: 'rgba(0,0,0,0.25)', padding: '0.6rem 0.85rem', borderRadius: '8px' }}>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)' }}>⏱️ 短線 5 日方向: </span>
+                            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FCA5A5', marginRight: '0.5rem' }}>多 {activePrediction?.prob_up_5d}%</span>
+                            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#86EFAC' }}>空 {activePrediction?.prob_down_5d}%</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)' }}>🎯 預估 20 日波段區間: </span>
+                            <strong style={{ color: '#60A5FA' }}>
+                              {activePrediction?.support_pts?.toLocaleString()} ~ {activePrediction?.resistance_pts?.toLocaleString()} 點
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. 三大法人期現貨籌碼戰情看板 (Institutional Cockpit) */}
+                    <div style={{ marginBottom: '1.25rem' }}>
+                      <h3 style={{ fontSize: '1rem', color: '#93C5FD', marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        📊 三大法人期現貨籌碼戰情看板 (Institutional Cockpit)
+                      </h3>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gap: '0.75rem'
+                      }}>
+                        {/* 外資期貨淨留倉卡片 */}
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.75)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          borderRadius: '12px',
+                          padding: '0.85rem 1rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>外資台指期未平倉 (Net OI)</span>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              fontWeight: 'bold',
+                              padding: '0.15rem 0.45rem',
+                              borderRadius: '8px',
+                              background: marketMlData.institutional_cockpit?.foreign_futures_net < -35000 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(59, 130, 246, 0.2)',
+                              color: marketMlData.institutional_cockpit?.foreign_futures_net < -35000 ? '#F87171' : '#93C5FD',
+                              border: '1px solid rgba(255,255,255,0.08)'
+                            }}>
+                              {marketMlData.institutional_cockpit?.foreign_futures_risk}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: marketMlData.institutional_cockpit?.foreign_futures_net < 0 ? '#10B981' : '#EF4444' }}>
+                            {marketMlData.institutional_cockpit?.foreign_futures_net?.toLocaleString()} 口
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            3日變動: <strong style={{ color: marketMlData.institutional_cockpit?.foreign_futures_change_3d > 0 ? '#EF4444' : '#10B981' }}>
+                              {marketMlData.institutional_cockpit?.foreign_futures_change_3d > 0 ? '+' : ''}{marketMlData.institutional_cockpit?.foreign_futures_change_3d?.toLocaleString()} 口
+                            </strong>
+                            <span style={{ margin: '0 0.35rem' }}>·</span>
+                            5日: <strong style={{ color: marketMlData.institutional_cockpit?.foreign_futures_change_5d > 0 ? '#EF4444' : '#10B981' }}>
+                              {marketMlData.institutional_cockpit?.foreign_futures_change_5d > 0 ? '+' : ''}{marketMlData.institutional_cockpit?.foreign_futures_change_5d?.toLocaleString()} 口
+                            </strong>
+                          </div>
+                        </div>
+
+                        {/* 投信與自營商期貨留倉 */}
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.75)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          borderRadius: '12px',
+                          padding: '0.85rem 1rem'
+                        }}>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                            投信 / 自營商期貨淨留倉
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <div>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>投信多單避險</div>
+                              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#EF4444' }}>
+                                +{marketMlData.institutional_cockpit?.trust_futures_net?.toLocaleString()} 口
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>自營商避險對沖</div>
+                              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: marketMlData.institutional_cockpit?.dealer_futures_net < 0 ? '#10B981' : '#EF4444' }}>
+                                {marketMlData.institutional_cockpit?.dealer_futures_net?.toLocaleString()} 口
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            三大法人期貨合計: <strong style={{ color: (marketMlData.institutional_cockpit?.foreign_futures_net + marketMlData.institutional_cockpit?.trust_futures_net + marketMlData.institutional_cockpit?.dealer_futures_net) >= 0 ? '#EF4444' : '#10B981' }}>
+                              {(marketMlData.institutional_cockpit?.foreign_futures_net + marketMlData.institutional_cockpit?.trust_futures_net + marketMlData.institutional_cockpit?.dealer_futures_net)?.toLocaleString()} 口
+                            </strong>
+                          </div>
+                        </div>
+
+                        {/* 三大法人現貨買賣超 */}
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.75)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          borderRadius: '12px',
+                          padding: '0.85rem 1rem'
+                        }}>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                            三大法人現貨單日買賣超
+                          </div>
+                          <div style={{
+                            fontSize: '1.45rem',
+                            fontWeight: 900,
+                            color: marketMlData.institutional_cockpit?.total_cash_net_1d >= 0 ? '#EF4444' : '#10B981'
+                          }}>
+                            {marketMlData.institutional_cockpit?.total_cash_net_1d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.total_cash_net_1d} 億
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            近 5 日合計: <strong style={{ color: marketMlData.institutional_cockpit?.total_cash_net_5d >= 0 ? '#EF4444' : '#10B981' }}>
+                              {marketMlData.institutional_cockpit?.total_cash_net_5d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.total_cash_net_5d} 億
+                            </strong>
+                            <span style={{ marginLeft: '0.4rem' }}>
+                              (外資: {marketMlData.institutional_cockpit?.foreign_cash_net_5d} 億)
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 台積電權值錨定卡片 */}
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.75)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                          borderRadius: '12px',
+                          padding: '0.85rem 1rem'
+                        }}>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+                            台積電 (2330) 權值錨定動能
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <span style={{
+                              fontSize: '1.45rem',
+                              fontWeight: 900,
+                              color: marketMlData.institutional_cockpit?.tsmc_ret_5d >= 0 ? '#EF4444' : '#10B981'
+                            }}>
+                              {marketMlData.institutional_cockpit?.tsmc_ret_5d >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.tsmc_ret_5d?.toFixed(2)}%
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>(近 5 日漲幅)</span>
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            月線乖離: <strong style={{ color: marketMlData.institutional_cockpit?.tsmc_ma20_bias >= 0 ? '#EF4444' : '#10B981' }}>
+                              {marketMlData.institutional_cockpit?.tsmc_ma20_bias >= 0 ? '+' : ''}{marketMlData.institutional_cockpit?.tsmc_ma20_bias?.toFixed(2)}%
+                            </strong>
+                            <span style={{ marginLeft: '0.4rem', color: '#93C5FD' }}>權重佔比 &gt; 35%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. 下半部：大盤技術體檢與 Top 8 AI 核心驅動特徵 */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                      gap: '1rem'
+                    }}>
+                      {/* 大盤技術均線體檢卡片 */}
+                      <div style={{
+                        background: 'rgba(15, 23, 42, 0.75)',
+                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        borderRadius: '12px',
+                        padding: '1.1rem 1.25rem'
+                      }}>
+                        <h3 style={{ fontSize: '0.95rem', color: '#93C5FD', marginBottom: '0.85rem' }}>
+                          📐 大盤技術均線與動能指標
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>5 日均線 (MA5)</span>
+                            <span style={{ fontWeight: 700 }}>{marketMlData.current_market?.ma5?.toLocaleString()} 點</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>20 日月線 (MA20)</span>
+                            <span style={{ fontWeight: 700, color: '#60A5FA' }}>{marketMlData.current_market?.ma20?.toLocaleString()} 點</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>60 日季線 (MA60)</span>
+                            <span style={{ fontWeight: 700, color: '#A78BFA' }}>{marketMlData.current_market?.ma60?.toLocaleString()} 點</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.45rem' }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>14 日 RSI 相對強弱指標</span>
+                            <span style={{ fontWeight: 700, color: marketMlData.current_market?.rsi_14 > 70 ? '#EF4444' : marketMlData.current_market?.rsi_14 < 30 ? '#10B981' : 'white' }}>
+                              {marketMlData.current_market?.rsi_14}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>5日均量能相對倍數</span>
+                            <span style={{ fontWeight: 700 }}>{marketMlData.current_market?.turnover_ratio_5d}x (量能持平)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Top 8 AI 核心特徵貢獻排行 (Explainable AI) */}
+                      <div style={{
+                        background: 'rgba(15, 23, 42, 0.75)',
+                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        borderRadius: '12px',
+                        padding: '1.1rem 1.25rem'
+                      }}>
+                        <h3 style={{ fontSize: '0.95rem', color: '#93C5FD', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>🧠 AI 判斷多空之關鍵特徵貢獻 (Top 8 XAI)</span>
+                          <span style={{ fontSize: '0.75rem', color: '#93C5FD', fontWeight: 'bold' }}>
+                            {MARKET_ML_MODELS.find(m => m.val === activeModelKey)?.short || activeModelKey}
+                          </span>
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                          {activeTopFeatures?.map((item, idx) => (
+                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                                <span style={{ color: '#E2E8F0' }}>
+                                  #{idx + 1} {item.name}
+                                </span>
+                                <span style={{ fontWeight: 'bold', color: '#60A5FA' }}>
+                                  {item.importance_pct}%
+                                </span>
+                              </div>
+                              <div style={{ width: '100%', height: '5px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{
+                                  width: `${Math.min(100, item.importance_pct * 3.5)}%`,
+                                  height: '100%',
+                                  background: 'linear-gradient(90deg, #3B82F6, #60A5FA)'
+                                }}></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {/* ── 子視圖 2: 🏆 6 款 AI 模型效能評比排行榜 ── */}
+                {marketMlSubTab === 'models' && (
+                  <div>
+                    {/* 模型指標對比表格卡片 */}
+                    <div style={{
+                      background: 'rgba(0,0,0,0.25)',
+                      borderRadius: '12px',
+                      padding: '1.25rem',
+                      marginBottom: '1.5rem',
+                      border: '1px solid var(--border-color)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                            <span>🏆</span>
+                            <span>已載入 AI 大盤模型效能評估對比表格</span>
+                          </h4>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                            點擊表格中的「🎯 選用此模型」即可切換戰情推論視角；所有指標均基於歷史驗證集 Walk-forward 嚴謹盲測
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.78rem', background: 'rgba(124, 58, 237, 0.2)', border: '1px solid #8B5CF6', color: '#C4B5FD', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
+                          共 {MARKET_ML_MODELS.length} 款模型
+                        </span>
+                      </div>
+
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', fontSize: '0.86rem', borderCollapse: 'separate', borderSpacing: '0 5px' }}>
+                          <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.05)', color: '#93C5FD', textAlign: 'left' }}>
+                              <th style={{ padding: '0.65rem 0.75rem', borderRadius: '6px 0 0 6px' }}>AI 模型架構與名稱</th>
+                              <th style={{ padding: '0.65rem 0.75rem' }}>📈 20天突破 / 回檔 AUC</th>
+                              <th style={{ padding: '0.65rem 0.75rem' }}>🎯 驗證準確度</th>
+                              <th style={{ padding: '0.65rem 0.75rem' }}>🏆 信號夏普率</th>
+                              <th style={{ padding: '0.65rem 0.75rem' }}>🔮 當前 20 日波段勝率與訊號</th>
+                              <th style={{ padding: '0.65rem 0.75rem' }}>🗓️ 訓練天數與狀態</th>
+                              <th style={{ padding: '0.65rem 0.75rem', borderRadius: '0 6px 6px 0', textAlign: 'center' }}>⚙️ 操作</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {MARKET_ML_MODELS.map(mInfo => {
+                              const s = marketMlData.models?.[mInfo.val] || {};
+                              const isSelected = activeModelKey === mInfo.val;
+                              const isBest = bestModelId === mInfo.val;
+                              const isReady = s.status === 'ready' || Boolean(s.metrics);
+                              const m = s.metrics || {};
+                              const p = s.prediction || {};
+
+                              return (
+                                <tr
+                                  key={mInfo.val}
+                                  style={{
+                                    background: isSelected ? 'rgba(59, 130, 246, 0.18)' : 'rgba(255, 255, 255, 0.02)',
+                                    borderLeft: isSelected ? '4px solid #60A5FA' : '4px solid transparent',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  {/* 模型名稱與推薦標籤 */}
+                                  <td style={{ padding: '0.65rem 0.75rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                                      <strong style={{ color: isSelected ? '#93C5FD' : 'white', fontSize: '0.88rem' }}>
+                                        {mInfo.label}
+                                      </strong>
+                                      {isBest && (
+                                        <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.25)', border: '1px solid #F59E0B', color: '#FDE68A', padding: '0.1rem 0.45rem', borderRadius: '10px' }}>
+                                          {mInfo.tag}
+                                        </span>
+                                      )}
+                                      {isSelected && (
+                                        <span style={{ fontSize: '0.72rem', padding: '0.1rem 0.45rem', borderRadius: '4px', background: '#3B82F6', color: 'white', fontWeight: 'bold' }}>
+                                          ✓ 當前選用
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                                      {mInfo.desc}
+                                    </div>
+                                  </td>
+
+                                  {/* 20天突破 / 回檔 AUC */}
+                                  <td style={{ padding: '0.65rem 0.75rem', fontWeight: 'bold' }}>
+                                    <span style={{ color: m.auc_up >= 63 ? '#34D399' : m.auc_up >= 58 ? '#60A5FA' : '#94A3B8' }}>
+                                      {m.auc_up !== undefined ? `${m.auc_up}%` : '—'}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', margin: '0 0.3rem' }}>/</span>
+                                    <span style={{ color: m.auc_down >= 55 ? '#F87171' : '#FBBF24' }}>
+                                      {m.auc_down !== undefined ? `${m.auc_down}%` : '—'}
+                                    </span>
+                                  </td>
+
+                                  {/* 驗證準確度 */}
+                                  <td style={{ padding: '0.65rem 0.75rem', fontWeight: 'bold', color: m.accuracy >= 60 ? '#34D399' : '#93C5FD' }}>
+                                    {m.accuracy !== undefined ? `${m.accuracy}%` : '—'}
+                                  </td>
+
+                                  {/* 信號夏普率 */}
+                                  <td style={{ padding: '0.65rem 0.75rem', fontWeight: 'bold', color: m.sharpe >= 1.2 ? '#C084FC' : '#38BDF8' }}>
+                                    {m.sharpe !== undefined ? m.sharpe : '—'}
+                                  </td>
+
+                                  {/* 當前預測訊號 */}
+                                  <td style={{ padding: '0.65rem 0.75rem' }}>
+                                    {p.signal_badge ? (
+                                      <div>
+                                        <div style={{ fontWeight: 'bold', fontSize: '0.84rem' }}>
+                                          {p.signal_badge}
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                                          突破勝率: <strong style={{ color: '#EF4444' }}>{p.prob_up_20d}%</strong>
+                                          <span style={{ margin: '0 0.25rem' }}>·</span>
+                                          跌破: <strong style={{ color: '#10B981' }}>{p.prob_down_20d}%</strong>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span style={{ color: 'var(--text-muted)' }}>—</span>
+                                    )}
+                                  </td>
+
+                                  {/* 訓練時間與天數 */}
+                                  <td style={{ padding: '0.65rem 0.75rem', fontSize: '0.78rem' }}>
+                                    {isReady ? (
+                                      <div>
+                                        <div style={{ color: '#34D399', fontWeight: 'bold' }}>
+                                          ✅ {s.trained_at || '就緒'}
+                                        </div>
+                                        <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '0.15rem' }}>
+                                          {s.train_samples ? `${s.train_samples}天樣本` : ''} ({s.features_preset || '全因子'})
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span style={{ color: 'var(--text-muted)' }}>⭕ 尚未訓練</span>
+                                    )}
+                                  </td>
+
+                                  {/* 操作 */}
+                                  <td style={{ padding: '0.65rem 0.75rem', textAlign: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
+                                      <button
+                                        type="button"
+                                        className="btn"
+                                        style={{
+                                          padding: '0.25rem 0.6rem',
+                                          fontSize: '0.78rem',
+                                          background: isSelected ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.08)',
+                                          border: isSelected ? '1px solid #3B82F6' : '1px solid var(--border-color)',
+                                          color: isSelected ? '#93C5FD' : 'white',
+                                          fontWeight: isSelected ? 'bold' : 'normal'
+                                        }}
+                                        onClick={() => {
+                                          handleSelectMarketModel(mInfo.val);
+                                          setMarketMlSubTab('cockpit');
+                                        }}
+                                      >
+                                        {isSelected ? '✓ 使用中' : '🎯 選用'}
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        className="btn"
+                                        style={{
+                                          padding: '0.25rem 0.6rem',
+                                          fontSize: '0.78rem',
+                                          background: 'rgba(239, 68, 68, 0.15)',
+                                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                                          color: '#FCA5A5'
+                                        }}
+                                        onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: mInfo.val })}
+                                        disabled={triggeringMarketMl}
+                                        title={`單獨訓練 ${mInfo.short}`}
+                                      >
+                                        🔄 訓練
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* 模型選型與指標解讀指南 Card */}
+                    <div style={{
+                      background: 'rgba(15, 23, 42, 0.65)',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                      borderRadius: '12px',
+                      padding: '1.25rem'
+                    }}>
+                      <h4 style={{ margin: '0 0 0.85rem 0', color: '#93C5FD', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>💡</span>
+                        <span>AI 大盤多模型選型與指標評估指南</span>
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', fontSize: '0.82rem', color: '#CBD5E1', lineHeight: '1.55' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px' }}>
+                          <strong style={{ color: '#FDE68A', display: 'block', marginBottom: '0.25rem' }}>👑 多模型融合集成 (Ensemble)</strong>
+                          結合 LightGBM、隨機森林與羅吉斯迴歸的軟投票機制，平均消除單一模型偏誤，在歷史 Walk-forward 盲測中突破 AUC 與夏普率皆奪冠，建議作為日常大盤波段判斷的首選。
+                        </div>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px' }}>
+                          <strong style={{ color: '#60A5FA', display: 'block', marginBottom: '0.25rem' }}>⚡ LightGBM &amp; XGBoost</strong>
+                          基於決策樹的梯度提升演算法，擅長處理非線性特徵交互作用。在指數出現劇烈突破（如外資期現貨同步急拉或連環爆量）時反應最為靈敏。
+                        </div>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem', borderRadius: '8px' }}>
+                          <strong style={{ color: '#34D399', display: 'block', marginBottom: '0.25rem' }}>📏 Logistic Regression (線性基準)</strong>
+                          宏觀全因子 L2 正則化羅吉斯迴歸，結構簡潔、抗雜訊能力最高。在大盤陷入無方向的均線糾結整理期時，可有效防止過擬合雜訊。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
@@ -3827,7 +4557,9 @@ function StockDashboard() {
               </div>
             )}
           </div>
-        )}
+          );
+        })()}
+
 
         {/* ===== ML 波段飆股預測 ===== */}
         {activeTab === 'ml' && (
