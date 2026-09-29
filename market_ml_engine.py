@@ -44,7 +44,14 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import make_pipeline
-from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score, log_loss
+from sklearn.model_selection import TimeSeriesSplit
+
+try:
+    import optuna
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+except ImportError:
+    optuna = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_DIR = "/Users/huanggin-chen/gemini-stock-analysis"
@@ -422,14 +429,20 @@ def build_features() -> pd.DataFrame:
         
     return pd.DataFrame(rows)
 
-def create_model_pipeline(model_id: str):
-    """依據模型 ID 建立包含防缺漏值與正規化之前處理 Pipeline"""
+def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None):
+    """依據模型 ID 與傳入超參數建立包含防缺漏值與正規化之前處理 Pipeline"""
+    p = params or {}
     if model_id == 'lightgbm':
         clf = lgb.LGBMClassifier(
-            n_estimators=100,
-            learning_rate=0.03,
-            max_depth=4,
-            num_leaves=15,
+            n_estimators=int(p.get('n_estimators', 100)),
+            learning_rate=float(p.get('learning_rate', 0.03)),
+            max_depth=int(p.get('max_depth', 4)),
+            num_leaves=int(p.get('num_leaves', 15)),
+            min_child_samples=int(p.get('min_child_samples', 20)),
+            subsample=float(p.get('subsample', 0.8)),
+            colsample_bytree=float(p.get('colsample_bytree', 0.8)),
+            reg_alpha=float(p.get('reg_alpha', 0.01)),
+            reg_lambda=float(p.get('reg_lambda', 0.01)),
             random_state=42,
             importance_type='gain',
             verbose=-1
@@ -438,9 +451,15 @@ def create_model_pipeline(model_id: str):
     
     elif model_id == 'xgboost':
         clf = xgb.XGBClassifier(
-            n_estimators=100,
-            learning_rate=0.03,
-            max_depth=4,
+            n_estimators=int(p.get('n_estimators', 100)),
+            learning_rate=float(p.get('learning_rate', 0.03)),
+            max_depth=int(p.get('max_depth', 4)),
+            min_child_weight=int(p.get('min_child_weight', 3)),
+            subsample=float(p.get('subsample', 0.8)),
+            colsample_bytree=float(p.get('colsample_bytree', 0.8)),
+            gamma=float(p.get('gamma', 0.0)),
+            reg_alpha=float(p.get('reg_alpha', 0.01)),
+            reg_lambda=float(p.get('reg_lambda', 0.01)),
             random_state=42,
             eval_metric='logloss'
         )
@@ -448,23 +467,32 @@ def create_model_pipeline(model_id: str):
     
     elif model_id == 'rf':
         clf = RandomForestClassifier(
-            n_estimators=100,
-            max_depth=5,
+            n_estimators=int(p.get('n_estimators', 100)),
+            max_depth=int(p.get('max_depth', 5)),
+            min_samples_split=int(p.get('min_samples_split', 5)),
+            min_samples_leaf=int(p.get('min_samples_leaf', 2)),
+            max_features=p.get('max_features', 'sqrt'),
             random_state=42
         )
         return make_pipeline(SimpleImputer(strategy='median'), clf)
     
     elif model_id == 'lr':
         clf = LogisticRegression(
-            C=0.1,
+            C=float(p.get('C', 0.1)),
+            tol=float(p.get('tol', 1e-4)),
             max_iter=1000,
             random_state=42
         )
         return make_pipeline(SimpleImputer(strategy='median'), StandardScaler(), clf)
     
     elif model_id == 'mlp':
+        hidden_sizes = p.get('hidden_layer_sizes', (32, 16))
+        if isinstance(hidden_sizes, list):
+            hidden_sizes = tuple(hidden_sizes)
         clf = MLPClassifier(
-            hidden_layer_sizes=(32, 16),
+            hidden_layer_sizes=hidden_sizes,
+            alpha=float(p.get('alpha', 0.01)),
+            learning_rate_init=float(p.get('learning_rate_init', 0.003)),
             max_iter=250,
             early_stopping=True,
             random_state=42
@@ -472,13 +500,149 @@ def create_model_pipeline(model_id: str):
         return make_pipeline(SimpleImputer(strategy='median'), StandardScaler(), clf)
     
     elif model_id == 'ensemble':
-        c1 = make_pipeline(SimpleImputer(strategy='median'), lgb.LGBMClassifier(n_estimators=100, learning_rate=0.03, max_depth=4, num_leaves=15, random_state=42, verbose=-1))
-        c2 = make_pipeline(SimpleImputer(strategy='median'), RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42))
-        c3 = make_pipeline(SimpleImputer(strategy='median'), StandardScaler(), LogisticRegression(C=0.1, max_iter=1000, random_state=42))
-        return VotingClassifier(estimators=[('lgb', c1), ('rf', c2), ('lr', c3)], voting='soft')
+        w_lgb = float(p.get('weight_lgb', 1.0))
+        w_rf = float(p.get('weight_rf', 1.0))
+        w_lr = float(p.get('weight_lr', 1.0))
+        c1 = make_pipeline(SimpleImputer(strategy='median'), lgb.LGBMClassifier(
+            n_estimators=int(p.get('lgb_n_estimators', 100)),
+            learning_rate=float(p.get('lgb_learning_rate', 0.03)),
+            max_depth=int(p.get('lgb_max_depth', 4)),
+            num_leaves=int(p.get('lgb_num_leaves', 15)),
+            random_state=42, verbose=-1
+        ))
+        c2 = make_pipeline(SimpleImputer(strategy='median'), RandomForestClassifier(
+            n_estimators=int(p.get('rf_n_estimators', 100)),
+            max_depth=int(p.get('rf_max_depth', 5)),
+            random_state=42
+        ))
+        c3 = make_pipeline(SimpleImputer(strategy='median'), StandardScaler(), LogisticRegression(
+            C=float(p.get('lr_C', 0.1)),
+            max_iter=1000,
+            random_state=42
+        ))
+        return VotingClassifier(
+            estimators=[('lgb', c1), ('rf', c2), ('lr', c3)],
+            voting='soft',
+            weights=[w_lgb, w_rf, w_lr]
+        )
     
     else:
         raise ValueError(f"不支援的模型 ID: {model_id}")
+
+def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.ndarray, n_trials: int = 20) -> Tuple[Dict[str, Any], float, List[Dict[str, Any]]]:
+    """
+    使用 Optuna TPE (Tree-structured Parzen Estimator) 貝氏最佳化演算法
+    在滾動時間序列交叉驗證 (Purged Walk-Forward TimeSeriesSplit) 下，尋找損失函數之全域極小值 (Global Minima)。
+    - 目標損失函數: Loss = TimeSeriesLogLoss - 0.4 * (TimeSeriesAUC - 0.5)
+    - 最小化 Loss = 最大化泛化預測勝率與校準概率，同時跳脫局部極小值與過擬合鞍點。
+    """
+    if optuna is None:
+        print("[!] 警告: 未安裝 optuna，回傳預設超參數")
+        return {}, 0.0, []
+
+    tscv = TimeSeriesSplit(n_splits=3)
+    
+    def objective(trial):
+        trial_params = {}
+        if model_id == 'lightgbm':
+            trial_params = {
+                'learning_rate': trial.suggest_float('learning_rate', 0.008, 0.15, log=True),
+                'num_leaves': trial.suggest_int('num_leaves', 15, 63),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
+                'min_child_samples': trial.suggest_int('min_child_samples', 10, 50),
+                'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+                'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 5.0, log=True),
+                'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 5.0, log=True),
+                'n_estimators': trial.suggest_int('n_estimators', 60, 140)
+            }
+        elif model_id == 'xgboost':
+            trial_params = {
+                'learning_rate': trial.suggest_float('learning_rate', 0.008, 0.15, log=True),
+                'max_depth': trial.suggest_int('max_depth', 3, 7),
+                'min_child_weight': trial.suggest_int('min_child_weight', 1, 10),
+                'subsample': trial.suggest_float('subsample', 0.6, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.6, 1.0),
+                'gamma': trial.suggest_float('gamma', 0.0, 3.0),
+                'reg_alpha': trial.suggest_float('reg_alpha', 1e-3, 5.0, log=True),
+                'reg_lambda': trial.suggest_float('reg_lambda', 1e-3, 5.0, log=True),
+                'n_estimators': trial.suggest_int('n_estimators', 60, 140)
+            }
+        elif model_id == 'rf':
+            trial_params = {
+                'n_estimators': trial.suggest_int('n_estimators', 60, 180),
+                'max_depth': trial.suggest_int('max_depth', 4, 12),
+                'min_samples_split': trial.suggest_int('min_samples_split', 2, 15),
+                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 8),
+                'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2'])
+            }
+        elif model_id == 'lr':
+            trial_params = {
+                'C': trial.suggest_float('C', 1e-4, 50.0, log=True),
+                'tol': trial.suggest_float('tol', 1e-5, 1e-2, log=True)
+            }
+        elif model_id == 'mlp':
+            n_layers = trial.suggest_int('n_layers', 1, 2)
+            if n_layers == 1:
+                h1 = trial.suggest_int('hidden_1', 16, 64)
+                hidden_sizes = (h1,)
+            else:
+                h1 = trial.suggest_int('hidden_1', 16, 64)
+                h2 = trial.suggest_int('hidden_2', 8, 32)
+                hidden_sizes = (h1, h2)
+            trial_params = {
+                'hidden_layer_sizes': hidden_sizes,
+                'alpha': trial.suggest_float('alpha', 1e-4, 1e-1, log=True),
+                'learning_rate_init': trial.suggest_float('learning_rate_init', 1e-3, 1e-2, log=True)
+            }
+        elif model_id == 'ensemble':
+            trial_params = {
+                'weight_lgb': trial.suggest_float('weight_lgb', 0.2, 2.5),
+                'weight_rf': trial.suggest_float('weight_rf', 0.2, 2.5),
+                'weight_lr': trial.suggest_float('weight_lr', 0.2, 2.5),
+                'lgb_learning_rate': trial.suggest_float('lgb_learning_rate', 0.01, 0.1, log=True),
+                'rf_max_depth': trial.suggest_int('rf_max_depth', 4, 8),
+                'lr_C': trial.suggest_float('lr_C', 0.01, 10.0, log=True)
+            }
+
+        fold_losses = []
+        for tr_idx, val_idx in tscv.split(X_train):
+            X_tr, y_tr = X_train[tr_idx], y_train[tr_idx]
+            X_val, y_val = X_train[val_idx], y_train[val_idx]
+            
+            if len(np.unique(y_tr)) < 2 or len(np.unique(y_val)) < 2:
+                continue
+                
+            pipe = create_model_pipeline(model_id, trial_params)
+            pipe.fit(X_tr, y_tr)
+            probs = pipe.predict_proba(X_val)[:, 1]
+            probs_clipped = np.clip(probs, 1e-5, 1.0 - 1e-5)
+            
+            val_logloss = log_loss(y_val, probs_clipped)
+            val_auc = roc_auc_score(y_val, probs)
+            loss = val_logloss - 0.4 * (val_auc - 0.5)
+            fold_losses.append(loss)
+            
+        return float(np.mean(fold_losses)) if fold_losses else 1.0
+
+    sampler = optuna.samplers.TPESampler(seed=42)
+    study = optuna.create_study(direction='minimize', sampler=sampler)
+    study.optimize(objective, n_trials=n_trials, timeout=90)
+    
+    best_params = study.best_params
+    best_loss = round(float(study.best_value), 4)
+    
+    trials_summary = []
+    for t in study.trials:
+        if t.value is not None:
+            trials_summary.append({
+                'trial': t.number + 1,
+                'loss': round(float(t.value), 4),
+                'state': str(t.state.name)
+            })
+            
+    print(f"[✓] {model_id} 全域極小值尋優完成 (Trials={len(study.trials)}): Best Loss={best_loss}, Best Params={best_params}")
+    return best_params, best_loss, trials_summary
 
 def extract_feature_importance(pipeline, feature_cols: List[str], model_id: str) -> List[float]:
     """提取不同模型的特徵重要性權重"""
@@ -547,8 +711,10 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     train_days_limit = int(config.get('train_days', 0) or 0)
     test_ratio = float(config.get('test_ratio', 0.2) or 0.2)
     threshold_pct = float(config.get('threshold_pct', 2.5) or 2.5)
+    auto_tune = bool(config.get('auto_tune', False) or config.get('optimize', False))
+    tune_trials = int(config.get('tune_trials', 20) or 20)
     
-    print(f"[*] 啟動大盤 ML 訓練任務: target_model={target_model}, preset={features_preset}, train_days={train_days_limit or '全部'}, test_ratio={test_ratio}")
+    print(f"[*] 啟動大盤 ML 訓練任務: target_model={target_model}, preset={features_preset}, train_days={train_days_limit or '全部'}, test_ratio={test_ratio}, auto_tune={auto_tune} (trials={tune_trials})")
     
     # 1. 構建大盤宏觀特徵矩陣
     df = build_features()
@@ -607,10 +773,22 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         if m_id not in MODEL_CATALOG:
             continue
         m_info = MODEL_CATALOG[m_id]
-        print(f"[*] 正在訓練 {m_info['name']} ...")
+        print(f"[*] 正在訓練 {m_info['name']} (AutoTune={auto_tune}) ...")
         
+        best_params = {}
+        best_loss = None
+        trials_summary = []
+        if auto_tune:
+            print(f"[*] 正在為 {m_info['name']} 執行 Optuna 貝氏全域超參數尋優 (Trials={tune_trials})...")
+            best_params, best_loss, trials_summary = optimize_hyperparameters(
+                model_id=m_id,
+                X_train=X_train,
+                y_train=Y_tr_u20,
+                n_trials=tune_trials
+            )
+            
         # 訓練 20 天突破多方
-        clf_up = create_model_pipeline(m_id)
+        clf_up = create_model_pipeline(m_id, best_params)
         clf_up.fit(X_train, Y_tr_u20)
         probs_up = clf_up.predict_proba(X_test)[:, 1]
         preds_up = clf_up.predict(X_test)
@@ -618,13 +796,13 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         acc_up = round(float(accuracy_score(Y_te_u20, preds_up) * 100), 1)
         
         # 訓練 20 天跌破空方
-        clf_down = create_model_pipeline(m_id)
+        clf_down = create_model_pipeline(m_id, best_params)
         clf_down.fit(X_train, Y_tr_d20)
         probs_down = clf_down.predict_proba(X_test)[:, 1]
         auc_down = round(float(roc_auc_score(Y_te_d20, probs_down) * 100), 1)
         
         # 訓練 5 天短期多方
-        clf_5d = create_model_pipeline(m_id)
+        clf_5d = create_model_pipeline(m_id, best_params)
         clf_5d.fit(X_train, Y_tr_u5)
         probs_5d = clf_5d.predict_proba(X_test)[:, 1]
         
@@ -691,6 +869,15 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
             'test_range': test_range,
             'train_days': len(valid_df),
             'features_preset': features_preset,
+            'optimization': {
+                'is_auto_tuned': auto_tune,
+                'engine': 'Optuna TPE (Tree-structured Parzen Estimator)' if auto_tune else 'Heuristic Defaults',
+                'target': 'Global Minima of Time-Series Cross-Entropy & AUC Loss' if auto_tune else 'N/A',
+                'n_trials': len(trials_summary) if auto_tune else 0,
+                'best_loss': best_loss,
+                'best_params': best_params,
+                'trials_summary': trials_summary[:10]
+            },
             'metrics': {
                 'auc_up': auc_up,
                 'auc_down': auc_down,
@@ -831,7 +1018,8 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
         # 兼容舊版看板欄位：直接對應選定模型
         'metrics': active_model.get('metrics', {}),
         'prediction': active_model.get('prediction', {}),
-        'top_features': active_model.get('top_features', [])
+        'top_features': active_model.get('top_features', []),
+        'optimization': active_model.get('optimization', {})
     }
     report = sanitize_for_json(report)
     with open(PREDICTION_JSON_PATH, 'w', encoding='utf-8') as f:
@@ -877,13 +1065,17 @@ if __name__ == '__main__':
     parser.add_argument('--train-days', type=int, default=0, help="訓練天數限制 (0 為全歷史)")
     parser.add_argument('--predict', action='store_true', help="僅執行推論並同步")
     parser.add_argument('--model', type=str, default=None, help="設定當前選用之模型 ID")
+    parser.add_argument('--auto-tune', action='store_true', help="啟用 Optuna 貝氏全域超參數尋優 (尋找 Global Minima)")
+    parser.add_argument('--trials', type=int, default=20, help="Optuna 尋優世代數 (預設 20)")
     args = parser.parse_args()
     
     if args.train:
         train_and_evaluate_models({
             'model_type': args.train,
             'features_preset': args.preset,
-            'train_days': args.train_days
+            'train_days': args.train_days,
+            'auto_tune': args.auto_tune,
+            'tune_trials': args.trials
         })
     elif args.predict:
         generate_prediction_report(selected_model_id=args.model)

@@ -600,6 +600,12 @@ function StockDashboard() {
     const val = localStorage.getItem('market_ml_threshold');
     return val !== null ? parseFloat(val) : 2.5;
   });
+  const [marketMlAutoTune, setMarketMlAutoTune] = useState(() => localStorage.getItem('market_ml_auto_tune') === 'true');
+  const [marketMlTuneTrials, setMarketMlTuneTrials] = useState(() => {
+    const val = localStorage.getItem('market_ml_tune_trials');
+    return val !== null ? parseInt(val) : 20;
+  });
+  const [showMarketMlParamsDetail, setShowMarketMlParamsDetail] = useState(false);
   const [marketMlSavedToast, setMarketMlSavedToast] = useState(false);
 
   // ── 低頻量化交易 (Low-Frequency Quant) 狀態 ──
@@ -1608,6 +1614,8 @@ function StockDashboard() {
     localStorage.setItem('market_ml_test_ratio', marketMlTestRatio);
     localStorage.setItem('market_ml_threshold', marketMlThreshold);
     localStorage.setItem('market_ml_preset', marketMlPreset);
+    localStorage.setItem('market_ml_auto_tune', marketMlAutoTune);
+    localStorage.setItem('market_ml_tune_trials', marketMlTuneTrials);
     setMarketMlSavedToast(true);
     setTimeout(() => setMarketMlSavedToast(false), 2500);
   };
@@ -1622,6 +1630,8 @@ function StockDashboard() {
         test_ratio: extraConfig.test_ratio !== undefined ? extraConfig.test_ratio : marketMlTestRatio,
         threshold_pct: extraConfig.threshold !== undefined ? extraConfig.threshold : marketMlThreshold,
         features_preset: extraConfig.features_preset || marketMlPreset,
+        auto_tune: extraConfig.auto_tune !== undefined ? extraConfig.auto_tune : marketMlAutoTune,
+        tune_trials: extraConfig.tune_trials !== undefined ? extraConfig.tune_trials : marketMlTuneTrials,
         ...extraConfig
       };
       const createRes = await supabaseFetch('/stock_screener_jobs', {
@@ -1639,7 +1649,7 @@ function StockDashboard() {
         const jobId = jobList[0]?.id;
         if (jobId) {
           let attempts = 0;
-          const maxAttempts = 60;
+          const maxAttempts = 120;
           while (attempts < maxAttempts) {
             await new Promise(r => setTimeout(r, 1500));
             attempts++;
@@ -3839,6 +3849,91 @@ function StockDashboard() {
                       </select>
                     </div>
                   </div>
+
+                  {/* 區塊 3: 🧪 AI 貝氏超參數全域尋優 (AutoML Global Minima Search) */}
+                  <div style={{
+                    gridColumn: '1 / -1',
+                    background: 'linear-gradient(135deg, rgba(88, 28, 135, 0.25), rgba(30, 27, 75, 0.4))',
+                    border: '1px solid rgba(168, 85, 247, 0.35)',
+                    borderRadius: '10px',
+                    padding: '1rem 1.15rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.6rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.1rem' }}>🧪</span>
+                        <div>
+                          <strong style={{ color: '#E9D5FF', fontSize: '0.9rem' }}>
+                            Optuna 貝氏全域超參數尋優 (AutoML Global Minima Search)
+                          </strong>
+                          <span style={{ fontSize: '0.75rem', color: '#C4B5FD', display: 'block', marginTop: '0.15rem' }}>
+                            以 TPE (Tree-structured Parzen Estimator) 尋找時間序列交叉熵與勝率損失函數之全域極小值，跳脫局部鞍點
+                          </span>
+                        </div>
+                      </div>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: '0.45rem' }}>
+                        <input
+                          type="checkbox"
+                          checked={marketMlAutoTune}
+                          onChange={e => {
+                            setMarketMlAutoTune(e.target.checked);
+                            localStorage.setItem('market_ml_auto_tune', e.target.checked);
+                          }}
+                          style={{ width: '18px', height: '18px', accentColor: '#A855F7', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.86rem', color: marketMlAutoTune ? '#D8B4FE' : '#94A3B8', fontWeight: marketMlAutoTune ? 'bold' : 'normal' }}>
+                          {marketMlAutoTune ? '已啟用全域尋優模式' : '停用 (使用標準預設參數)'}
+                        </span>
+                      </label>
+                    </div>
+
+                    {marketMlAutoTune && (
+                      <div style={{
+                        marginTop: '0.75rem',
+                        paddingTop: '0.75rem',
+                        borderTop: '1px solid rgba(168, 85, 247, 0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '0.75rem'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.78rem', color: '#DDD6FE' }}>
+                            🔬 尋優世代試驗次數 (Trials):
+                          </span>
+                          {[
+                            { n: 10, label: '10次 (快速探索 ~5s)' },
+                            { n: 20, label: '20次 (平衡推薦 ~15s)' },
+                            { n: 40, label: '40次 (深度全域搜尋 ~35s)' }
+                          ].map(t => (
+                            <button
+                              key={t.n}
+                              type="button"
+                              className="btn"
+                              style={{
+                                padding: '0.25rem 0.6rem',
+                                fontSize: '0.75rem',
+                                borderRadius: '6px',
+                                background: marketMlTuneTrials === t.n ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.05)',
+                                border: marketMlTuneTrials === t.n ? '1px solid #A855F7' : '1px solid rgba(255, 255, 255, 0.1)',
+                                color: marketMlTuneTrials === t.n ? '#F3E8FF' : '#CBD5E1',
+                                fontWeight: marketMlTuneTrials === t.n ? 'bold' : 'normal'
+                              }}
+                              onClick={() => {
+                                setMarketMlTuneTrials(t.n);
+                                localStorage.setItem('market_ml_tune_trials', t.n);
+                              }}
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                        <span style={{ fontSize: '0.74rem', color: '#A78BFA', background: 'rgba(124, 58, 237, 0.2)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(124, 58, 237, 0.3)' }}>
+                          目標: 3-Fold 滾動前瞻時間序列交叉驗證極小損失 (Min Loss)
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 底部操作與派工按鈕列 */}
@@ -3894,21 +3989,44 @@ function StockDashboard() {
 
                     <button
                       type="button"
+                      className="btn"
+                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType, auto_tune: true, tune_trials: marketMlTuneTrials })}
+                      disabled={triggeringMarketMl || fetchingMarketMl}
+                      style={{
+                        padding: '0.45rem 1rem',
+                        fontSize: '0.85rem',
+                        background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.35), rgba(79, 70, 229, 0.45))',
+                        border: '1px solid #A855F7',
+                        color: '#F3E8FF',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        boxShadow: '0 0 12px rgba(168, 85, 247, 0.3)'
+                      }}
+                      title="對當前選取之模型執行 Optuna 貝氏全域超參數尋優"
+                    >
+                      🧬 執行全域參數尋優訓練
+                    </button>
+
+                    <button
+                      type="button"
                       className="btn btn-secondary"
-                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all' })}
+                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all', auto_tune: false })}
                       disabled={triggeringMarketMl || fetchingMarketMl}
                       style={{
                         padding: '0.45rem 0.95rem',
                         fontSize: '0.85rem',
-                        background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(109, 40, 217, 0.4))',
-                        border: '1px solid #8B5CF6',
-                        color: '#DDD6FE',
+                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.35))',
+                        border: '1px solid #3B82F6',
+                        color: '#93C5FD',
                         borderRadius: '8px',
                         fontWeight: 'bold'
                       }}
                       title="一鍵訓練全部 6 款模型並生成即時橫向對比排行榜"
                     >
-                      🏆 一鍵重訓並評比全部 6 款模型
+                      🏆 一鍵重訓全部 6 款模型
                     </button>
                   </div>
                 </div>
@@ -4112,6 +4230,73 @@ function StockDashboard() {
                             </strong>
                           </div>
                         </div>
+
+                        {/* AutoML 全域最佳化超參數展示條 */}
+                        {activeModelInfo?.optimization?.is_auto_tuned && (
+                          <div style={{
+                            marginTop: '0.75rem',
+                            padding: '0.55rem 0.85rem',
+                            background: 'linear-gradient(135deg, rgba(88, 28, 135, 0.25), rgba(30, 27, 75, 0.35))',
+                            border: '1px solid rgba(168, 85, 247, 0.35)',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.82rem', color: '#D8B4FE', fontWeight: 'bold' }}>
+                                ✨ 已套用 Optuna 貝氏全域尋優最佳參數 (Global Minima)
+                              </span>
+                              {activeModelInfo.optimization.best_loss !== undefined && (
+                                <span style={{ fontSize: '0.75rem', background: 'rgba(168, 85, 247, 0.25)', color: '#F3E8FF', padding: '0.1rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                                  極小損失 (Loss): {activeModelInfo.optimization.best_loss} · {activeModelInfo.optimization.n_trials || 10}代試驗
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className="btn"
+                              style={{
+                                fontSize: '0.75rem',
+                                padding: '0.2rem 0.6rem',
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                border: '1px solid rgba(168, 85, 247, 0.4)',
+                                color: '#E9D5FF',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => setShowMarketMlParamsDetail(!showMarketMlParamsDetail)}
+                            >
+                              {showMarketMlParamsDetail ? '▴ 隱藏超參數配置' : '▾ 檢視最適超參數 (Global Minima Params)'}
+                            </button>
+                          </div>
+                        )}
+
+                        {activeModelInfo?.optimization?.is_auto_tuned && showMarketMlParamsDetail && activeModelInfo.optimization.best_params && (
+                          <div style={{
+                            marginTop: '0.5rem',
+                            padding: '0.75rem 0.95rem',
+                            background: 'rgba(15, 23, 42, 0.92)',
+                            border: '1px solid rgba(168, 85, 247, 0.3)',
+                            borderRadius: '8px',
+                            fontSize: '0.78rem',
+                            color: '#E2E8F0',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                            gap: '0.45rem'
+                          }}>
+                            {Object.entries(activeModelInfo.optimization.best_params).map(([k, v]) => (
+                              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.25rem' }}>
+                                <span style={{ color: '#C084FC', fontFamily: 'monospace' }}>{k}:</span>
+                                <span style={{ fontWeight: 'bold', color: '#F8FAFC', fontFamily: 'monospace' }}>
+                                  {typeof v === 'number' ? (v < 0.01 && v > 0 ? v.toExponential(3) : Number.isInteger(v) ? v : v.toFixed(4)) : String(v)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -4407,6 +4592,23 @@ function StockDashboard() {
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                                       {mInfo.desc}
                                     </div>
+                                    {s.optimization?.is_auto_tuned && (
+                                      <div style={{ marginTop: '0.25rem' }}>
+                                        <span style={{
+                                          fontSize: '0.7rem',
+                                          padding: '0.1rem 0.45rem',
+                                          borderRadius: '4px',
+                                          background: 'rgba(147, 51, 234, 0.2)',
+                                          border: '1px solid rgba(168, 85, 247, 0.45)',
+                                          color: '#D8B4FE',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '0.25rem'
+                                        }} title={JSON.stringify(s.optimization.best_params, null, 2)}>
+                                          ✨ 全域尋優 (Loss: {s.optimization.best_loss} | {s.optimization.n_trials || 10}代)
+                                        </span>
+                                      </div>
+                                    )}
                                   </td>
 
                                   {/* 20天突破 / 回檔 AUC */}
@@ -4466,12 +4668,12 @@ function StockDashboard() {
 
                                   {/* 操作 */}
                                   <td style={{ padding: '0.65rem 0.75rem', textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                                       <button
                                         type="button"
                                         className="btn"
                                         style={{
-                                          padding: '0.25rem 0.6rem',
+                                          padding: '0.25rem 0.55rem',
                                           fontSize: '0.78rem',
                                           background: isSelected ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.08)',
                                           border: isSelected ? '1px solid #3B82F6' : '1px solid var(--border-color)',
@@ -4490,15 +4692,33 @@ function StockDashboard() {
                                         type="button"
                                         className="btn"
                                         style={{
-                                          padding: '0.25rem 0.6rem',
+                                          padding: '0.25rem 0.55rem',
+                                          fontSize: '0.78rem',
+                                          background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(79, 70, 229, 0.25))',
+                                          border: '1px solid rgba(168, 85, 247, 0.45)',
+                                          color: '#DDD6FE',
+                                          fontWeight: 'bold'
+                                        }}
+                                        onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: mInfo.val, auto_tune: true, tune_trials: marketMlTuneTrials })}
+                                        disabled={triggeringMarketMl}
+                                        title={`對 ${mInfo.short} 啟動 Optuna 貝氏全域超參數尋優 (尋找 Global Minima)`}
+                                      >
+                                        🧬 尋優
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        className="btn"
+                                        style={{
+                                          padding: '0.25rem 0.55rem',
                                           fontSize: '0.78rem',
                                           background: 'rgba(239, 68, 68, 0.15)',
                                           border: '1px solid rgba(239, 68, 68, 0.3)',
                                           color: '#FCA5A5'
                                         }}
-                                        onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: mInfo.val })}
+                                        onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: mInfo.val, auto_tune: false })}
                                         disabled={triggeringMarketMl}
-                                        title={`單獨訓練 ${mInfo.short}`}
+                                        title={`以標準預設參數訓練 ${mInfo.short}`}
                                       >
                                         🔄 訓練
                                       </button>
