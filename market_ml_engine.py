@@ -1394,6 +1394,274 @@ def calculate_simulation_metrics(probs_up: np.ndarray, probs_down: np.ndarray, f
     except Exception:
         return 1.0, 50.0
 
+def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_cols: List[str], mode: str = 'long_short', cost_bps: float = 5.0) -> Dict[str, Any]:
+    """執行單一模型的歷史波段模擬回測 (包含手續費、滑價與精準資產曲線)"""
+    X = df_slice[feature_cols].copy()
+    closes = df_slice['close'].values
+    dates = df_slice['date'].values
+    n = len(df_slice)
+    
+    mkt_rets = np.zeros(n)
+    mkt_rets[1:] = (closes[1:] / closes[:-1] - 1)
+    
+    p_up = pipe['clf_up'].predict_proba(X)[:, 1]
+    p_down = pipe['clf_down'].predict_proba(X)[:, 1]
+    
+    positions = np.zeros(n)
+    for i in range(n):
+        if p_up[i] >= 0.45 and p_down[i] < 0.35:
+            positions[i] = 1.0
+        elif p_down[i] >= 0.40:
+            positions[i] = -1.0 if mode == 'long_short' else 0.0
+        else:
+            positions[i] = 0.0
+            
+    strat_rets = np.zeros(n)
+    fee = cost_bps / 10000.0
+    for i in range(1, n):
+        cost = abs(positions[i-1] - (positions[i-2] if i >= 2 else 0.0)) * fee
+        strat_rets[i] = positions[i-1] * mkt_rets[i] - cost
+        
+    equity = np.cumprod(1 + strat_rets) * 1000000.0
+    bench_equity = np.cumprod(1 + mkt_rets) * 1000000.0
+    
+    peak = np.maximum.accumulate(equity)
+    dd = (equity - peak) / peak * 100.0
+    mdd = float(np.min(dd))
+    
+    b_peak = np.maximum.accumulate(bench_equity)
+    b_dd = (bench_equity - b_peak) / b_peak * 100.0
+    b_mdd = float(np.min(b_dd))
+    
+    years = n / 250.0
+    tot_ret = (equity[-1] / equity[0] - 1) * 100.0
+    cagr = ((equity[-1] / equity[0]) ** (1.0 / years) - 1) * 100.0
+    b_tot_ret = (bench_equity[-1] / bench_equity[0] - 1) * 100.0
+    b_cagr = ((bench_equity[-1] / bench_equity[0]) ** (1.0 / years) - 1) * 100.0
+    
+    sharpe = float((np.mean(strat_rets) * 250.0 - 0.015) / (np.std(strat_rets) * np.sqrt(250.0) + 1e-9))
+    b_sharpe = float((np.mean(mkt_rets) * 250.0 - 0.015) / (np.std(mkt_rets) * np.sqrt(250.0) + 1e-9))
+    
+    downside_returns = strat_rets[strat_rets < 0]
+    downside_std = np.std(downside_returns) * np.sqrt(250) if len(downside_returns) > 0 else 1e-5
+    sortino = float((cagr / 100.0 - 0.015) / downside_std) if downside_std > 0 else 0.0
+    calmar = float(cagr / abs(mdd)) if mdd != 0 else 0.0
+    
+    # 逐筆交易紀錄抽取
+    trades = []
+    curr_t = None
+    for i in range(1, n):
+        pos = positions[i-1]
+        prev_pos = positions[i-2] if i >= 2 else 0.0
+        
+        if pos != prev_pos:
+            if curr_t is not None:
+                curr_t['exit_date'] = str(dates[i-1])
+                curr_t['exit_price'] = round(float(closes[i-1]), 1)
+                curr_t['return_pct'] = round(float((curr_t['cum_ret'] - 1) * 100), 2)
+                curr_t['profit_amount'] = round(float(curr_t['start_equity'] * (curr_t['cum_ret'] - 1)), 0)
+                del curr_t['cum_ret']
+                del curr_t['start_equity']
+                trades.append(curr_t)
+                curr_t = None
+                
+            if pos != 0:
+                curr_t = {
+                    'entry_date': str(dates[i-1]),
+                    'entry_price': round(float(closes[i-1]), 1),
+                    'direction': '多方 (Long)' if pos > 0 else '空方 (Short)',
+                    'holding_days': 0,
+                    'cum_ret': 1.0,
+                    'start_equity': equity[i-1]
+                }
+                
+        if curr_t is not None:
+            curr_t['holding_days'] += 1
+            curr_t['cum_ret'] *= (1 + strat_rets[i])
+            
+    if curr_t is not None:
+        curr_t['exit_date'] = str(dates[-1])
+        curr_t['exit_price'] = round(float(closes[-1]), 1)
+        curr_t['return_pct'] = round(float((curr_t['cum_ret'] - 1) * 100), 2)
+        curr_t['profit_amount'] = round(float(curr_t['start_equity'] * (curr_t['cum_ret'] - 1)), 0)
+        del curr_t['cum_ret']
+        del curr_t['start_equity']
+        trades.append(curr_t)
+        
+    wins = [t for t in trades if t['return_pct'] > 0]
+    losses = [t for t in trades if t['return_pct'] <= 0]
+    win_rate = len(wins) / len(trades) * 100.0 if trades else 0.0
+    tot_win_amt = sum(t['profit_amount'] for t in wins) if wins else 0
+    tot_loss_amt = abs(sum(t['profit_amount'] for t in losses)) if losses else 1
+    profit_factor = tot_win_amt / tot_loss_amt if tot_loss_amt > 0 else 1.0
+    
+    # 歷年報酬歸因
+    df_res = pd.DataFrame({'year': [str(d)[:4] for d in dates], 's': strat_rets, 'm': mkt_rets})
+    yearly = []
+    for yr, g in df_res.groupby('year'):
+        s_c = (np.prod(1 + g['s']) - 1) * 100
+        m_c = (np.prod(1 + g['m']) - 1) * 100
+        yearly.append({
+            'year': str(yr),
+            'strategy_return': round(float(s_c), 2),
+            'benchmark_return': round(float(m_c), 2),
+            'alpha': round(float(s_c - m_c), 2)
+        })
+        
+    # 資金曲線取樣 (最多 60 點)
+    step = max(1, n // 50)
+    sample_indices = list(range(0, n, step))
+    if sample_indices[-1] != n - 1:
+        sample_indices.append(n - 1)
+    curve = []
+    for idx in sample_indices:
+        curve.append({
+            'date': str(dates[idx]),
+            'strategy_equity': round(float(equity[idx]), 0),
+            'benchmark_equity': round(float(bench_equity[idx]), 0),
+            'drawdown_pct': round(float(dd[idx]), 2),
+            'position': float(positions[idx])
+        })
+        
+    return {
+        'total_return_pct': round(float(tot_ret), 2),
+        'cagr_pct': round(float(cagr), 2),
+        'benchmark_total_return_pct': round(float(b_tot_ret), 2),
+        'benchmark_cagr_pct': round(float(b_cagr), 2),
+        'alpha_pct': round(float(tot_ret - b_tot_ret), 2),
+        'max_drawdown_pct': round(float(mdd), 2),
+        'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
+        'sharpe_ratio': round(float(sharpe), 2),
+        'benchmark_sharpe': round(float(b_sharpe), 2),
+        'sortino_ratio': round(float(sortino), 2),
+        'calmar_ratio': round(float(calmar), 2),
+        'annual_volatility_pct': round(float(np.std(strat_rets) * np.sqrt(250) * 100), 2),
+        'total_trades': len(trades),
+        'win_trades': len(wins),
+        'loss_trades': len(losses),
+        'win_rate_pct': round(float(win_rate), 1),
+        'profit_factor': round(float(profit_factor), 2),
+        'market_exposure_pct': round(float(np.mean(positions != 0) * 100), 1),
+        'yearly': yearly,
+        'trades': trades[-10:],
+        'curve': curve
+    }
+
+def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: Optional[Dict] = None, selected_model_id: str = 'regime_moe') -> Dict[str, Any]:
+    """
+    執行大盤多因子 ML 策略歷史回測模擬 (含手續費與滑價)
+    - 支援 Out-of-Sample (OOS 測試集未見數據) 與 全期 10 年歷史雙重視角
+    - 支援 Long-Only (做多+現金避險) 與 Long-Short (多空雙向)
+    - 輸出完整量化指標、資金曲線 (Equity Curve)、回撤分佈 (Drawdown) 與逐年歸因矩陣
+    """
+    if df is None:
+        df = build_features()
+    if models_bundle is None:
+        if not os.path.exists(MODELS_BUNDLE_PATH):
+            return {}
+        models_bundle = joblib.load(MODELS_BUNDLE_PATH)
+        
+    pipelines = models_bundle.get('pipelines', {})
+    feature_cols = models_bundle.get('feature_cols', [])
+    if not pipelines or not feature_cols:
+        return {}
+
+    valid_df = df.dropna(subset=['target_up_20d', 'target_down_20d']).copy().reset_index(drop=True)
+    n_total = len(valid_df)
+    split_idx = int(n_total * 0.8)
+    test_df = valid_df.iloc[split_idx:].copy().reset_index(drop=True)
+    
+    target_id = selected_model_id if selected_model_id in pipelines else list(pipelines.keys())[0]
+    
+    # 1. 針對選定模型執行 Long-Short 與 Long-Only 回測
+    pipe_target = pipelines[target_id]
+    target_ls = simulate_single_model_backtest(test_df, pipe_target, feature_cols, mode='long_short')
+    target_lo = simulate_single_model_backtest(test_df, pipe_target, feature_cols, mode='long_only')
+    
+    # 2. 針對所有模型跑 Long-Short 與 Long-Only 評比排行榜
+    comparison_ls = []
+    comparison_lo = []
+    for mid, pipe in pipelines.items():
+        cat = MODEL_CATALOG.get(mid, {'name': mid, 'short_name': mid})
+        res_ls = simulate_single_model_backtest(test_df, pipe, feature_cols, mode='long_short')
+        res_lo = simulate_single_model_backtest(test_df, pipe, feature_cols, mode='long_only')
+        comparison_ls.append({
+            'model_id': mid,
+            'name': cat['name'],
+            'short_name': cat['short_name'],
+            'total_return_pct': res_ls['total_return_pct'],
+            'cagr_pct': res_ls['cagr_pct'],
+            'alpha_pct': res_ls['alpha_pct'],
+            'max_drawdown_pct': res_ls['max_drawdown_pct'],
+            'sharpe_ratio': res_ls['sharpe_ratio'],
+            'sortino_ratio': res_ls['sortino_ratio'],
+            'win_rate_pct': res_ls['win_rate_pct'],
+            'profit_factor': res_ls['profit_factor'],
+            'total_trades': res_ls['total_trades'],
+            'market_exposure_pct': res_ls['market_exposure_pct']
+        })
+        comparison_lo.append({
+            'model_id': mid,
+            'name': cat['name'],
+            'short_name': cat['short_name'],
+            'total_return_pct': res_lo['total_return_pct'],
+            'cagr_pct': res_lo['cagr_pct'],
+            'alpha_pct': res_lo['alpha_pct'],
+            'max_drawdown_pct': res_lo['max_drawdown_pct'],
+            'sharpe_ratio': res_lo['sharpe_ratio'],
+            'sortino_ratio': res_lo['sortino_ratio'],
+            'win_rate_pct': res_lo['win_rate_pct'],
+            'profit_factor': res_lo['profit_factor'],
+            'total_trades': res_lo['total_trades'],
+            'market_exposure_pct': res_lo['market_exposure_pct']
+        })
+        
+    # 3. 針對選定模型執行 10 年長期歷史回測 (2016-2026)
+    full_10y_ls = simulate_single_model_backtest(valid_df, pipe_target, feature_cols, mode='long_short')
+    
+    return {
+        'selected_model_id': target_id,
+        'model_name': MODEL_CATALOG.get(target_id, {}).get('name', target_id),
+        'test_period': {
+            'start_date': str(test_df.iloc[0]['date']),
+            'end_date': str(test_df.iloc[-1]['date']),
+            'trading_days': len(test_df),
+            'benchmark': {
+                'total_return_pct': target_ls['benchmark_total_return_pct'],
+                'cagr_pct': target_ls['benchmark_cagr_pct'],
+                'max_drawdown_pct': target_ls['benchmark_max_drawdown_pct'],
+                'sharpe_ratio': target_ls['benchmark_sharpe']
+            },
+            'long_short': target_ls,
+            'long_only': target_lo,
+            'comparison_long_short': comparison_ls,
+            'comparison_long_only': comparison_lo
+        },
+        'full_history_10y': {
+            'start_date': str(valid_df.iloc[0]['date']),
+            'end_date': str(valid_df.iloc[-1]['date']),
+            'trading_days': len(valid_df),
+            'benchmark': {
+                'total_return_pct': full_10y_ls['benchmark_total_return_pct'],
+                'cagr_pct': full_10y_ls['benchmark_cagr_pct'],
+                'max_drawdown_pct': full_10y_ls['benchmark_max_drawdown_pct'],
+                'sharpe_ratio': full_10y_ls['benchmark_sharpe']
+            },
+            'summary': {
+                'total_return_pct': full_10y_ls['total_return_pct'],
+                'cagr_pct': full_10y_ls['cagr_pct'],
+                'alpha_pct': full_10y_ls['alpha_pct'],
+                'max_drawdown_pct': full_10y_ls['max_drawdown_pct'],
+                'sharpe_ratio': full_10y_ls['sharpe_ratio'],
+                'sortino_ratio': full_10y_ls['sortino_ratio'],
+                'calmar_ratio': full_10y_ls['calmar_ratio'],
+                'win_rate_pct': full_10y_ls['win_rate_pct'],
+                'profit_factor': full_10y_ls['profit_factor']
+            },
+            'yearly': full_10y_ls['yearly']
+        }
+    }
+
 def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     全功能多模型訓練與評估引擎
@@ -1791,7 +2059,8 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'hurst_60d': round(float(latest_row.get('hurst_60d', 0.5)), 3) if 'hurst_60d' in latest_row else 0.5,
             'breadth_ad_ratio_5d': round(float(latest_row.get('breadth_ad_ratio_5d', 1.0)), 2) if 'breadth_ad_ratio_5d' in latest_row else 1.0,
             'breadth_ad_diff_5d': int(latest_row.get('breadth_ad_diff_5d', 0)) if 'breadth_ad_diff_5d' in latest_row else 0
-        }
+        },
+        'backtest_simulation': simulate_market_backtest(df, models_bundle, selected_id)
     }
     report = sanitize_for_json(report)
     with open(PREDICTION_JSON_PATH, 'w', encoding='utf-8') as f:

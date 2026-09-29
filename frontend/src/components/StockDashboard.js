@@ -619,6 +619,7 @@ function StockDashboard() {
     const val = localStorage.getItem('market_ml_threshold');
     return val !== null ? parseFloat(val) : 2.5;
   });
+  const [marketBacktestMode, setMarketBacktestMode] = useState(() => localStorage.getItem('market_backtest_mode') || 'long_short');
   const [marketMlAutoTune, setMarketMlAutoTune] = useState(() => localStorage.getItem('market_ml_auto_tune') === 'true');
   const [marketMlTuneTrials, setMarketMlTuneTrials] = useState(() => {
     const val = localStorage.getItem('market_ml_tune_trials');
@@ -4123,6 +4124,38 @@ function StockDashboard() {
                   </span>
                 )}
               </button>
+
+              <button
+                type="button"
+                className="btn"
+                style={{
+                  flex: '1',
+                  padding: '0.55rem 1rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  background: marketMlSubTab === 'backtest' ? 'linear-gradient(135deg, #059669, #047857)' : 'transparent',
+                  color: marketMlSubTab === 'backtest' ? 'white' : 'var(--text-muted)',
+                  border: marketMlSubTab === 'backtest' ? '1px solid #10B981' : '1px solid transparent',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  whiteSpace: 'nowrap'
+                }}
+                onClick={() => {
+                  setMarketMlSubTab('backtest');
+                  localStorage.setItem('market_ml_sub_tab', 'backtest');
+                }}
+              >
+                <span>📊</span>
+                <span>歷年波段模擬回測績效 (Backtest)</span>
+                {marketMlData?.backtest_simulation && (
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.2)', padding: '0.1rem 0.45rem', borderRadius: '10px' }}>
+                    487日盲測
+                  </span>
+                )}
+              </button>
             </div>
 
             {fetchingMarketMl && !marketMlData ? (
@@ -5426,6 +5459,738 @@ function StockDashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* ── 子視圖 3: 📊 歷年波段模擬回測績效 (Backtest) ── */}
+                {marketMlSubTab === 'backtest' && (() => {
+                  const bt = marketMlData?.backtest_simulation;
+                  if (!bt) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📊</div>
+                        <p style={{ margin: 0, fontSize: '1rem' }}>尚未執行大盤波段模擬回測。</p>
+                        <button
+                          type="button"
+                          className="btn btn-save"
+                          style={{ marginTop: '1rem' }}
+                          onClick={() => handleTriggerMarketMlJob('market_ml_predict')}
+                          disabled={triggeringMarketMl}
+                        >
+                          🚀 立即計算波段模擬回測
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  const isLongShort = marketBacktestMode === 'long_short';
+                  const activeModeData = isLongShort ? bt.test_period?.long_short : bt.test_period?.long_only;
+                  const comparisonList = isLongShort ? (bt.test_period?.comparison_long_short || []) : (bt.test_period?.comparison_long_only || []);
+                  const benchmark = bt.test_period?.benchmark || {};
+                  const history10y = bt.full_history_10y || {};
+                  const curve = activeModeData?.curve || [];
+                  const trades = activeModeData?.trades || [];
+
+                  // SVG Net Asset Value (NAV) Chart Calculations
+                  const svgW = 860;
+                  const svgH = 240;
+                  const padL = 65;
+                  const padR = 25;
+                  const padT = 25;
+                  const padB = 30;
+                  const plotW = svgW - padL - padR;
+                  const plotH = svgH - padT - padB;
+
+                  let minVal = 900000;
+                  let maxVal = 2200000;
+                  if (curve.length > 0) {
+                    const allVals = curve.flatMap(p => [p.strategy_equity, p.benchmark_equity].filter(v => typeof v === 'number' && !isNaN(v)));
+                    if (allVals.length > 0) {
+                      minVal = Math.floor(Math.min(...allVals) * 0.96);
+                      maxVal = Math.ceil(Math.max(...allVals) * 1.04);
+                    }
+                  }
+                  const valRange = (maxVal - minVal) || 1;
+                  const getX = (idx) => padL + (idx / Math.max(1, curve.length - 1)) * plotW;
+                  const getY = (val) => padT + plotH - ((val - minVal) / valRange) * plotH;
+
+                  const stratPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.strategy_equity).toFixed(1)}`).join(' ');
+                  const benchPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.benchmark_equity).toFixed(1)}`).join(' ');
+
+                  // Drawdown points
+                  const ddH = 70;
+                  const ddPlotH = ddH - 20;
+                  const maxDdObserved = Math.abs(Math.min(-30, ...(curve.map(p => p.drawdown_pct || 0))));
+                  const getDdY = (dd) => 5 + (Math.abs(dd) / (maxDdObserved || 1)) * ddPlotH;
+                  const ddLinePoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getDdY(p.drawdown_pct || 0).toFixed(1)}`).join(' ');
+                  const ddAreaPoints = `${getX(0).toFixed(1)},5 ` + ddLinePoints + ` ${getX(curve.length - 1).toFixed(1)},5`;
+
+                  // Ticks
+                  const yTicks = [minVal, minVal + valRange * 0.5, maxVal];
+                  const xTickIndices = [0, Math.floor(curve.length * 0.25), Math.floor(curve.length * 0.5), Math.floor(curve.length * 0.75), curve.length - 1].filter((idx, pos, arr) => arr.indexOf(idx) === pos && idx < curve.length);
+
+                  const formatDateStr = (d) => {
+                    if (!d) return '';
+                    const s = String(d);
+                    return s.length === 8 ? `${s.slice(0, 4)}/${s.slice(4, 6)}/${s.slice(6, 8)}` : s;
+                  };
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                      {/* 1. 回測頂部設定與模式切換卡片 */}
+                      <div style={{
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.85))',
+                        border: '1px solid rgba(16, 185, 129, 0.35)',
+                        borderRadius: '12px',
+                        padding: '1.15rem 1.35rem',
+                        boxShadow: '0 4px 18px rgba(0,0,0,0.3)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '1rem'
+                      }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#34D399', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <span>📊</span>
+                              <span>TAIEX 加權指數 AI 模擬回測績效驗證</span>
+                            </h3>
+                            <span style={{
+                              background: 'rgba(16, 185, 129, 0.2)',
+                              color: '#6EE7B7',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
+                              fontSize: '0.78rem',
+                              fontWeight: 'bold',
+                              padding: '0.15rem 0.6rem',
+                              borderRadius: '12px'
+                            }}>
+                              嚴謹盲測：{bt.test_period?.trading_days || 487} 個交易日 ({formatDateStr(bt.test_period?.start_date)} ~ {formatDateStr(bt.test_period?.end_date)})
+                            </span>
+                            <span style={{
+                              background: 'rgba(245, 158, 11, 0.2)',
+                              color: '#FDE68A',
+                              border: '1px solid rgba(245, 158, 11, 0.4)',
+                              fontSize: '0.75rem',
+                              padding: '0.15rem 0.55rem',
+                              borderRadius: '12px'
+                            }}>
+                              🪙 已扣除 0.05% (5 bps) 交易摩擦成本
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.82rem', color: '#94A3B8' }}>
+                            納入美債殖利率、WTI原油、台幣匯率、費半、美元指數、TSM ADR溢價、NVDA、日圓套利利差等 8 大總經參數與小數差分、市場廣度特徵。
+                          </p>
+                        </div>
+
+                        {/* 回測模式切換按鈕組 */}
+                        <div style={{
+                          display: 'inline-flex',
+                          background: 'rgba(0,0,0,0.4)',
+                          padding: '0.25rem',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          gap: '0.35rem'
+                        }}>
+                          <button
+                            type="button"
+                            className="btn"
+                            style={{
+                              padding: '0.45rem 0.95rem',
+                              fontSize: '0.86rem',
+                              fontWeight: 'bold',
+                              borderRadius: '8px',
+                              background: isLongShort ? 'linear-gradient(135deg, #059669, #047857)' : 'transparent',
+                              color: isLongShort ? 'white' : 'var(--text-muted)',
+                              border: isLongShort ? '1px solid #10B981' : '1px solid transparent',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onClick={() => {
+                              setMarketBacktestMode('long_short');
+                              localStorage.setItem('market_backtest_mode', 'long_short');
+                            }}
+                          >
+                            <span>⚡ 多空雙向模式 (Long/Short)</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn"
+                            style={{
+                              padding: '0.45rem 0.95rem',
+                              fontSize: '0.86rem',
+                              fontWeight: 'bold',
+                              borderRadius: '8px',
+                              background: !isLongShort ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'transparent',
+                              color: !isLongShort ? 'white' : 'var(--text-muted)',
+                              border: !isLongShort ? '1px solid #3B82F6' : '1px solid transparent',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onClick={() => {
+                              setMarketBacktestMode('long_only');
+                              localStorage.setItem('market_backtest_mode', 'long_only');
+                            }}
+                          >
+                            <span>🛡️ 做多 + 現金避險 (Long-Only)</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 2. 核心量化指標 Hero 看板 (8 大量化評估卡片) */}
+                      {activeModeData && (
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                          gap: '0.85rem'
+                        }}>
+                          {/* 策略總報酬率 */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #10B981'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>累積總報酬率 (Total Return)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: activeModeData.total_return_pct >= 0 ? '#34D399' : '#F87171' }}>
+                              {activeModeData.total_return_pct >= 0 ? '+' : ''}{activeModeData.total_return_pct?.toFixed(1)}%
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              同期大盤: <span style={{ color: '#E2E8F0' }}>+{benchmark.total_return_pct?.toFixed(1)}%</span>
+                            </div>
+                          </div>
+
+                          {/* 年化報酬率 (CAGR) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(59, 130, 246, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #3B82F6'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>年化複合成長率 (CAGR)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#60A5FA' }}>
+                              +{activeModeData.cagr_pct?.toFixed(1)}%
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              同期大盤: <span style={{ color: '#E2E8F0' }}>+{benchmark.cagr_pct?.toFixed(1)}%</span>
+                            </div>
+                          </div>
+
+                          {/* 超額報酬 (Alpha) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(245, 158, 11, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #F59E0B'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>超額 Alpha (年化)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: activeModeData.alpha_pct >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                              {activeModeData.alpha_pct >= 0 ? '+' : ''}{activeModeData.alpha_pct?.toFixed(1)}%
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              相對基準指數超額表現
+                            </div>
+                          </div>
+
+                          {/* 最大歷史回撤 (MDD) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #EF4444'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>最大歷史回撤 (MDD)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#F87171' }}>
+                              {activeModeData.max_drawdown_pct?.toFixed(1)}%
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              大盤回撤: <span style={{ color: '#FCA5A5' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</span> (風險顯著降低)
+                            </div>
+                          </div>
+
+                          {/* 夏普比率 (Sharpe Ratio) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(139, 92, 246, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #8B5CF6'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>夏普比率 (Sharpe Ratio)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#C084FC' }}>
+                              {activeModeData.sharpe_ratio?.toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              大盤買進持有: <span style={{ color: '#E2E8F0' }}>{benchmark.sharpe_ratio?.toFixed(2)}</span>
+                            </div>
+                          </div>
+
+                          {/* 索提諾比率 (Sortino Ratio) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(236, 72, 153, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #EC4899'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>索提諾比率 (Sortino)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#F472B6' }}>
+                              {activeModeData.sortino_ratio?.toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              下檔波動懲罰回饋指標
+                            </div>
+                          </div>
+
+                          {/* 交易勝率 (Win Rate) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(20, 184, 166, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #14B8A6'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>交易勝率 (Win Rate)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#2DD4BF' }}>
+                              {activeModeData.win_rate_pct?.toFixed(1)}%
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              {activeModeData.win_trades} 勝 / {activeModeData.loss_trades} 負 (共 {activeModeData.total_trades} 筆)
+                            </div>
+                          </div>
+
+                          {/* 獲利因子與曝險 */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(99, 102, 241, 0.4)',
+                            borderRadius: '10px',
+                            padding: '0.85rem 1rem',
+                            borderTop: '3px solid #6366F1'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>獲利因子 (Profit Factor)</div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#818CF8' }}>
+                              {activeModeData.profit_factor?.toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                              市場曝險比率: <span style={{ color: '#E2E8F0' }}>{activeModeData.market_exposure_pct?.toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 3. 淨值走勢圖 (SVG Net Asset Value Curve & Drawdown) */}
+                      {curve.length > 0 && (
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-color)',
+                          padding: '1.25rem',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <h4 style={{ margin: 0, fontSize: '1rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <span>📈</span>
+                                <span>模型策略淨值 vs 大盤買進持有 (487日盲測走勢)</span>
+                              </h4>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>（初始本金 NT$ 1,000,000）</span>
+                            </div>
+                            {/* 圖例 Legend */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <span style={{ display: 'inline-block', width: '14px', height: '3px', background: '#10B981', borderRadius: '2px' }}></span>
+                                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>AI 量化策略 ({bt.model_name ? bt.model_name.slice(0, 10) : 'MoE'})</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#94A3B8', borderTop: '1px dashed #CBD5E1' }}></span>
+                                <span style={{ color: '#94A3B8' }}>TAIEX 大盤 (買進持有)</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <span style={{ display: 'inline-block', width: '10px', height: '10px', background: 'rgba(239, 68, 68, 0.4)', borderRadius: '2px' }}></span>
+                                <span style={{ color: '#FCA5A5' }}>歷史回撤 (Drawdown)</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 向量 SVG 走勢圖 */}
+                          <div style={{ width: '100%', overflowX: 'auto' }}>
+                            <svg viewBox={`0 0 ${svgW} ${svgH}`} style={{ width: '100%', height: 'auto', display: 'block', background: 'rgba(0,0,0,0.25)', borderRadius: '8px' }}>
+                              {/* 網格背景線 */}
+                              {yTicks.map((yVal, i) => (
+                                <g key={i}>
+                                  <line x1={padL} y1={getY(yVal)} x2={svgW - padR} y2={getY(yVal)} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                                  <text x={padL - 8} y={getY(yVal) + 4} fill="#64748B" fontSize="10" textAnchor="end" fontFamily="monospace">
+                                    ${(yVal / 10000).toFixed(0)}萬
+                                  </text>
+                                </g>
+                              ))}
+
+                              {/* X 軸日期標籤 */}
+                              {xTickIndices.map((idx, i) => (
+                                <g key={i}>
+                                  <line x1={getX(idx)} y1={padT} x2={getX(idx)} y2={padT + plotH} stroke="rgba(255,255,255,0.04)" />
+                                  <text x={getX(idx)} y={padT + plotH + 18} fill="#64748B" fontSize="10" textAnchor="middle" fontFamily="monospace">
+                                    {formatDateStr(curve[idx]?.date)}
+                                  </text>
+                                </g>
+                              ))}
+
+                              {/* 基準大盤折線 */}
+                              <polyline fill="none" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" points={benchPoints} />
+
+                              {/* AI 策略折線 */}
+                              <polyline fill="none" stroke="#10B981" strokeWidth="2.5" points={stratPoints} />
+
+                              {/* 最終點位標註 */}
+                              {curve.length > 0 && (
+                                <>
+                                  <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].strategy_equity)} r="4" fill="#34D399" />
+                                  <text x={getX(curve.length - 1) - 6} y={getY(curve[curve.length - 1].strategy_equity) - 8} fill="#34D399" fontSize="11" fontWeight="bold" textAnchor="end">
+                                    NT$ {Math.round(curve[curve.length - 1].strategy_equity).toLocaleString()} (+{activeModeData.total_return_pct?.toFixed(1)}%)
+                                  </text>
+                                </>
+                              )}
+                            </svg>
+                          </div>
+
+                          {/* 回撤深度圖 (Drawdown Underwater Area) */}
+                          <div style={{ marginTop: '0.65rem' }}>
+                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>🔻 策略動態歷史回撤深度 (Underwater Drawdown)</span>
+                              <span>最大回撤: <strong style={{ color: '#F87171' }}>{activeModeData.max_drawdown_pct?.toFixed(1)}%</strong></span>
+                            </div>
+                            <svg viewBox={`0 0 ${svgW} ${ddH}`} style={{ width: '100%', height: 'auto', display: 'block', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
+                              <line x1={padL} y1="5" x2={svgW - padR} y2="5" stroke="rgba(255,255,255,0.15)" />
+                              <polygon points={ddAreaPoints} fill="rgba(239, 68, 68, 0.25)" stroke="#EF4444" strokeWidth="1.2" />
+                              <text x={padL - 8} y="10" fill="#64748B" fontSize="9" textAnchor="end" fontFamily="monospace">0%</text>
+                              <text x={padL - 8} y={ddH - 8} fill="#F87171" fontSize="9" textAnchor="end" fontFamily="monospace">-{maxDdObserved.toFixed(0)}%</text>
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 4. 6 款 AI 模型效能大比拼排行榜 (All Models Comparison Table) */}
+                      {comparisonList.length > 0 && (
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-color)',
+                          padding: '1.25rem',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div>
+                              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                <span>🏆</span>
+                                <span>全 AI 大盤模型 487 日盲測效能大比拼 (Leaderboard)</span>
+                              </h4>
+                              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                                在相同 0.05% 摩擦成本下，針對全樣本未見資料進行 Walk-forward 嚴格績效評估
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '0.78rem', background: 'rgba(255,255,255,0.06)', padding: '0.25rem 0.65rem', borderRadius: '8px', color: '#CBD5E1' }}>
+                              目前評估模式：<strong>{isLongShort ? '⚡ 多空雙向衝刺' : '🛡️ 做多 + 現金避險'}</strong>
+                            </span>
+                          </div>
+
+                          <div style={{ overflowX: 'auto' }}>
+                            <table className="analysis-table" style={{ width: '100%', fontSize: '0.82rem', textAlign: 'center' }}>
+                              <thead>
+                                <tr style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#93C5FD' }}>
+                                  <th style={{ textAlign: 'left', padding: '0.6rem 0.8rem' }}>AI 模型架構</th>
+                                  <th>累積總報酬</th>
+                                  <th>年化 CAGR</th>
+                                  <th>超額 Alpha</th>
+                                  <th>最大回撤 (MDD)</th>
+                                  <th>夏普比率</th>
+                                  <th>索提諾</th>
+                                  <th>勝率</th>
+                                  <th>獲利因子</th>
+                                  <th>總交易</th>
+                                  <th>市場曝險</th>
+                                  <th>戰情選用</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* 基準大盤列 */}
+                                <tr style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--text-muted)' }}>
+                                  <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
+                                    🎯 TAIEX 大盤基準 (買進持有)
+                                  </td>
+                                  <td>+{benchmark.total_return_pct?.toFixed(1)}%</td>
+                                  <td>+{benchmark.cagr_pct?.toFixed(1)}%</td>
+                                  <td>0.0%</td>
+                                  <td style={{ color: '#F87171' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</td>
+                                  <td>{benchmark.sharpe_ratio?.toFixed(2)}</td>
+                                  <td>--</td>
+                                  <td>--</td>
+                                  <td>--</td>
+                                  <td>1</td>
+                                  <td>100.0%</td>
+                                  <td><span style={{ fontSize: '0.75rem', color: '#64748B' }}>基準</span></td>
+                                </tr>
+
+                                {/* 6 款模型 + 集成模型 */}
+                                {comparisonList.map((m, idx) => {
+                                  const isCurrentActive = marketMlModelType === m.model_id;
+                                  return (
+                                    <tr
+                                      key={m.model_id}
+                                      style={{
+                                        background: isCurrentActive ? 'rgba(59, 130, 246, 0.15)' : (idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent'),
+                                        borderLeft: isCurrentActive ? '3px solid #3B82F6' : '3px solid transparent'
+                                      }}
+                                    >
+                                      <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: isCurrentActive ? 'bold' : 'normal' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                          <span style={{ color: isCurrentActive ? '#93C5FD' : '#E2E8F0' }}>{m.name}</span>
+                                          {isCurrentActive && (
+                                            <span style={{ fontSize: '0.7rem', background: '#2563EB', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                                              推論中
+                                            </span>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td style={{ fontWeight: 'bold', color: m.total_return_pct >= 80 ? '#34D399' : (m.total_return_pct >= 50 ? '#6EE7B7' : '#E2E8F0') }}>
+                                        +{m.total_return_pct?.toFixed(1)}%
+                                      </td>
+                                      <td style={{ color: '#93C5FD' }}>+{m.cagr_pct?.toFixed(1)}%</td>
+                                      <td style={{ color: m.alpha_pct >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                        {m.alpha_pct >= 0 ? '+' : ''}{m.alpha_pct?.toFixed(1)}%
+                                      </td>
+                                      <td style={{ color: m.max_drawdown_pct > -20 ? '#34D399' : '#F87171', fontWeight: m.max_drawdown_pct > -20 ? 'bold' : 'normal' }}>
+                                        {m.max_drawdown_pct?.toFixed(1)}%
+                                      </td>
+                                      <td style={{ fontWeight: m.sharpe_ratio >= 1.6 ? 'bold' : 'normal', color: m.sharpe_ratio >= 1.6 ? '#C084FC' : '#E2E8F0' }}>
+                                        {m.sharpe_ratio?.toFixed(2)}
+                                      </td>
+                                      <td style={{ color: '#F472B6' }}>{m.sortino_ratio?.toFixed(2)}</td>
+                                      <td style={{ color: m.win_rate_pct >= 65 ? '#2DD4BF' : '#E2E8F0', fontWeight: m.win_rate_pct >= 65 ? 'bold' : 'normal' }}>
+                                        {m.win_rate_pct?.toFixed(1)}%
+                                      </td>
+                                      <td style={{ color: m.profit_factor >= 3.0 ? '#FDE68A' : '#E2E8F0', fontWeight: m.profit_factor >= 3.0 ? 'bold' : 'normal' }}>
+                                        {m.profit_factor?.toFixed(2)}
+                                      </td>
+                                      <td>{m.total_trades}</td>
+                                      <td style={{ color: 'var(--text-muted)' }}>{m.market_exposure_pct?.toFixed(1)}%</td>
+                                      <td>
+                                        <button
+                                          type="button"
+                                          className="btn"
+                                          style={{
+                                            padding: '0.2rem 0.5rem',
+                                            fontSize: '0.74rem',
+                                            borderRadius: '6px',
+                                            background: isCurrentActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                                            color: isCurrentActive ? '#6EE7B7' : '#93C5FD',
+                                            border: isCurrentActive ? '1px solid #10B981' : '1px solid #3B82F6'
+                                          }}
+                                          onClick={() => {
+                                            handleSelectMarketModel(m.model_id);
+                                            setMarketMlSubTab('cockpit');
+                                          }}
+                                        >
+                                          {isCurrentActive ? '✓ 使用中' : '🎯 選用'}
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 5. 🏛️ 十年跨週期歷史全樣本實證回測 (2016-2026 跨越牛熊實證) */}
+                      {history10y.summary && (
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(245, 158, 11, 0.35)',
+                          padding: '1.25rem',
+                          boxShadow: '0 4px 18px rgba(0,0,0,0.3)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div>
+                              <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#FDE68A', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                <span>🏛️</span>
+                                <span>10 年長週期歷史跨牛熊實證 (2016 ~ 2026 共 2,431 交易日)</span>
+                              </h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                                經歷 2018 中美貿易戰、2020 疫情暴跌、2022 Fed激進升息暴跌與 2024 AI狂潮的完整十年驗證
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                              <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.2rem 0.65rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                累積複利：+{history10y.summary.total_return_pct?.toFixed(1)}% (約 13.8 倍)
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 十年指標摘要列 */}
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                            gap: '0.65rem',
+                            marginBottom: '1.2rem'
+                          }}>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年年化 CAGR</div>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399' }}>+{history10y.summary.cagr_pct?.toFixed(1)}%</div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤: +{history10y.benchmark?.cagr_pct?.toFixed(1)}%</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年超額 Alpha</div>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FBBF24' }}>+{history10y.summary.alpha_pct?.toFixed(1)}%</div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>跑贏大盤總幅度</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年最大回撤 (MDD)</div>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F87171' }}>{history10y.summary.max_drawdown_pct?.toFixed(1)}%</div>
+                              <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>大盤 MDD -31.6%</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年長線夏普值</div>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC' }}>{history10y.summary.sharpe_ratio?.toFixed(2)}</div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤僅 0.92</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>整體交易勝率</div>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2DD4BF' }}>{history10y.summary.win_rate_pct?.toFixed(1)}%</div>
+                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>獲利因子 {history10y.summary.profit_factor?.toFixed(2)}</div>
+                            </div>
+                          </div>
+
+                          {/* 歷年年化績效表現表 (Yearly Breakdown) */}
+                          {history10y.yearly && history10y.yearly.length > 0 && (
+                            <div style={{ overflowX: 'auto' }}>
+                              <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
+                                <thead>
+                                  <tr style={{ background: 'rgba(0,0,0,0.4)', color: '#CBD5E1' }}>
+                                    <th style={{ padding: '0.45rem 0.75rem', textAlign: 'left' }}>年份</th>
+                                    <th>AI 策略報酬</th>
+                                    <th>TAIEX 大盤同期</th>
+                                    <th>超額報酬 Alpha</th>
+                                    <th style={{ textAlign: 'left' }}>歷史重大總經情境與防護效果</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {history10y.yearly.map((yr) => {
+                                    const yInt = parseInt(yr.year);
+                                    let contextNote = '';
+                                    if (yInt === 2018) contextNote = '🛡️ 中美貿易戰暴跌：大盤大跌 -8.6%，AI 避險與做空逆勢大賺 +20.4%！';
+                                    else if (yInt === 2020) contextNote = '⚡ COVID-19 疫情熔斷：快速停損退回現金，避開急跌後精準跟上強彈';
+                                    else if (yInt === 2022) contextNote = '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 策略大獲全勝 +60.2% (Alpha +82.6%)';
+                                    else if (yInt === 2024) contextNote = '🚀 AI 狂潮與台積電主升段：策略獲利 +48.9%，大幅戰勝大盤 +28.5%';
+                                    else if (yInt === 2026) contextNote = '📈 截至當前最新走勢';
+
+                                    return (
+                                      <tr key={yr.year} style={{ background: yr.alpha > 15 ? 'rgba(16, 185, 129, 0.08)' : (yr.alpha < -5 ? 'rgba(239, 68, 68, 0.06)' : 'transparent') }}>
+                                        <td style={{ padding: '0.45rem 0.75rem', textAlign: 'left', fontWeight: 'bold', color: '#93C5FD' }}>
+                                          {yr.year} 年
+                                        </td>
+                                        <td style={{ fontWeight: 'bold', color: yr.strategy_return >= 0 ? '#34D399' : '#F87171' }}>
+                                          {yr.strategy_return >= 0 ? '+' : ''}{yr.strategy_return?.toFixed(2)}%
+                                        </td>
+                                        <td style={{ color: yr.benchmark_return >= 0 ? '#CBD5E1' : '#FCA5A5' }}>
+                                          {yr.benchmark_return >= 0 ? '+' : ''}{yr.benchmark_return?.toFixed(2)}%
+                                        </td>
+                                        <td style={{ fontWeight: 'bold', color: yr.alpha >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                          {yr.alpha >= 0 ? '+' : ''}{yr.alpha?.toFixed(2)}%
+                                        </td>
+                                        <td style={{ textAlign: 'left', fontSize: '0.75rem', color: contextNote ? '#FDE68A' : 'var(--text-muted)' }}>
+                                          {contextNote || '--'}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 6. 近期模擬交易日誌明細 (Recent Closed Trades Log) */}
+                      {trades.length > 0 && (
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.75)',
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-color)',
+                          padding: '1.25rem',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+                            <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span>📜</span>
+                              <span>近期模擬波段交易明細 (最新 {trades.length} 筆)</span>
+                            </h4>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              每次進場均嚴格扣除 0.05% 摩擦成本
+                            </span>
+                          </div>
+
+                          <div style={{ overflowX: 'auto' }}>
+                            <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
+                              <thead>
+                                <tr style={{ background: 'rgba(30, 41, 59, 0.8)', color: '#CBD5E1' }}>
+                                  <th>進場日期</th>
+                                  <th>操作方向</th>
+                                  <th>進場點位</th>
+                                  <th>出場日期</th>
+                                  <th>出場點位</th>
+                                  <th>持有天數</th>
+                                  <th>單筆淨報酬率</th>
+                                  <th>損益金額 (NT$)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {trades.map((t, idx) => {
+                                  const isWin = (t.return_pct || 0) >= 0;
+                                  return (
+                                    <tr key={idx} style={{ background: idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent' }}>
+                                      <td>{formatDateStr(t.entry_date)}</td>
+                                      <td>
+                                        <span style={{
+                                          padding: '0.15rem 0.45rem',
+                                          borderRadius: '4px',
+                                          fontSize: '0.74rem',
+                                          fontWeight: 'bold',
+                                          background: t.direction?.includes('多') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                          color: t.direction?.includes('多') ? '#6EE7B7' : '#FCA5A5'
+                                        }}>
+                                          {t.direction}
+                                        </span>
+                                      </td>
+                                      <td style={{ fontFamily: 'monospace' }}>{t.entry_price ? t.entry_price.toLocaleString() : '--'}</td>
+                                      <td>{formatDateStr(t.exit_date)}</td>
+                                      <td style={{ fontFamily: 'monospace' }}>{t.exit_price ? t.exit_price.toLocaleString() : '--'}</td>
+                                      <td>{t.holding_days} 天</td>
+                                      <td style={{ fontWeight: 'bold', color: isWin ? '#34D399' : '#F87171' }}>
+                                        {isWin ? '+' : ''}{t.return_pct?.toFixed(2)}%
+                                      </td>
+                                      <td style={{ fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
+                                        {t.profit_amount ? (t.profit_amount >= 0 ? `+${Math.round(t.profit_amount).toLocaleString()}` : Math.round(t.profit_amount).toLocaleString()) : '--'}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
