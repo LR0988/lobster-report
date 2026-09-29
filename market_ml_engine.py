@@ -691,22 +691,60 @@ def calculate_market_support_resistance(df_idx: Optional[pd.DataFrame] = None) -
         
         # 3. 半年籌碼分佈 (Volume Profile / VPVR 120d)
         recent_120 = df_idx.tail(120)
-        counts, bin_edges = np.histogram(recent_120['close'], bins=40, weights=recent_120['turnover'])
+        n_bins = 20
+        counts, bin_edges = np.histogram(recent_120['close'], bins=n_bins, weights=recent_120['turnover'])
         poc_idx = int(np.argmax(counts))
         poc_price = round(float((bin_edges[poc_idx] + bin_edges[poc_idx+1]) / 2), 2)
         
-        total_vol = counts.sum()
+        total_vol = float(counts.sum()) if counts.sum() > 0 else 1.0
         target_vol = total_vol * 0.70
         sorted_indices = np.argsort(counts)[::-1]
         cum_vol = 0
-        va_indices = []
+        va_indices = set()
         for idx in sorted_indices:
             cum_vol += counts[idx]
-            va_indices.append(idx)
+            va_indices.add(int(idx))
             if cum_vol >= target_vol:
                 break
-        val_price = round(float(bin_edges[min(va_indices)]), 2)
-        vah_price = round(float(bin_edges[max(va_indices)+1]), 2)
+        val_price = round(float(bin_edges[min(va_indices)]), 2) if va_indices else curr_close
+        vah_price = round(float(bin_edges[max(va_indices)+1]), 2) if va_indices else curr_close
+        
+        # 決定當前指數所在之價格區間 (唯一鎖定)
+        curr_bin = None
+        for i in range(len(counts)):
+            if bin_edges[i] <= curr_close < bin_edges[i+1]:
+                curr_bin = i
+                break
+        if curr_bin is None:
+            curr_bin = (len(counts) - 1) if curr_close >= bin_edges[-1] else 0
+
+        max_count = float(np.max(counts)) if len(counts) > 0 else 1.0
+        
+        # 構建由高價至低價排序之 20 階籌碼直方圖 (Descending by price: 價格高在上方，符合 K 線垂直座標)
+        volume_histogram = []
+        for i in reversed(range(len(counts))):
+            p_low = round(float(bin_edges[i]), 1)
+            p_high = round(float(bin_edges[i+1]), 1)
+            p_mid = round(float((p_low + p_high) / 2), 1)
+            t_yi = round(float(counts[i] / 1e8), 1)
+            t_pct = round(float((counts[i] / total_vol) * 100), 1)
+            bar_p = round(float((counts[i] / max_count) * 100), 1) if max_count > 0 else 0.0
+            is_p = bool(i == poc_idx)
+            is_v = bool(i in va_indices)
+            is_c = bool(i == curr_bin)
+            
+            volume_histogram.append({
+                'bin_index': i,
+                'price_low': p_low,
+                'price_high': p_high,
+                'price_mid': p_mid,
+                'turnover_yi': t_yi,
+                'turnover_pct': t_pct,
+                'bar_pct': bar_p,
+                'is_poc': is_p,
+                'is_value_area': is_v,
+                'is_current': is_c
+            })
         
         # 4. 斐波那契回撤矩陣 (Fibonacci Retracement Grid)
         fib_diff = h120 - l120
@@ -802,7 +840,11 @@ def calculate_market_support_resistance(df_idx: Optional[pd.DataFrame] = None) -
             'volume_profile': {
                 'poc': poc_price,
                 'vah': vah_price,
-                'val': val_price
+                'val': val_price,
+                'total_turnover_yi': round(float(total_vol / 1e8), 1),
+                'poc_turnover_yi': round(float(counts[poc_idx] / 1e8), 1),
+                'poc_share_pct': round(float((counts[poc_idx] / total_vol) * 100), 1),
+                'histogram': volume_histogram
             },
             'fibonacci': {
                 'h120': h120,
@@ -921,12 +963,13 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
     else:
         raise ValueError(f"不支援的模型 ID: {model_id}")
 
-def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.ndarray, regimes: Optional[np.ndarray] = None, sample_weights: Optional[np.ndarray] = None, n_trials: int = 20) -> Tuple[Dict[str, Any], float, List[Dict[str, Any]]]:
+def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.ndarray, regimes: Optional[np.ndarray] = None, sample_weights: Optional[np.ndarray] = None, fut_rets: Optional[np.ndarray] = None, n_trials: int = 20) -> Tuple[Dict[str, Any], float, List[Dict[str, Any]]]:
     """
-    使用 Optuna TPE (Tree-structured Parzen Estimator) 貝氏最佳化演算法
-    在滾動時間序列交叉驗證 (Purged Walk-Forward TimeSeriesSplit) 下，尋找損失函數之全域極小值 (Global Minima)。
-    - 目標損失函數: Loss = TimeSeriesLogLoss - 0.4 * (TimeSeriesAUC - 0.5)
-    - 最小化 Loss = 最大化泛化預測勝率與校準概率，同時跳脫局部極小值與過擬合鞍點。
+    使用 Optuna 多元常態高斯混合 TPE (Multivariate Tree-structured Parzen Estimator) 貝氏尋優演算法
+    在去除標籤前瞻洩漏的 Purged & Embargoed Walk-Forward 時間序列切分下，尋找損失函數之全域極小值 (Global Minima)。
+    - 解決自相關洩漏: 訓練集末端施加 20 日 Embargo 隔離窗，切斷波段報酬率重疊
+    - 交易回饋損失函數: Loss = TimeSeriesLogLoss - 0.35 * (AUC - 0.5) - 0.08 * 模擬夏普率
+    - 最小化 Loss = 同時追求機率校準度、多空排序鑑別力與交易損益夏普比之 Pareto 近似全域最佳解
     """
     if optuna is None:
         print("[!] 警告: 未安裝 optuna，回傳預設超參數")
@@ -1008,7 +1051,14 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
 
         fold_losses = []
         for tr_idx, val_idx in tscv.split(X_train):
-            X_tr, y_tr = X_train[tr_idx], y_train[tr_idx]
+            # 引入金融計量 Purged & Embargoed 切分 (排除 20 天滾動收益標籤洩漏)
+            embargo = 20
+            if len(tr_idx) > embargo + 30:
+                tr_idx_purged = tr_idx[:-embargo]
+            else:
+                tr_idx_purged = tr_idx
+                
+            X_tr, y_tr = X_train[tr_idx_purged], y_train[tr_idx_purged]
             X_val, y_val = X_train[val_idx], y_train[val_idx]
             
             if len(np.unique(y_tr)) < 2 or len(np.unique(y_val)) < 2:
@@ -1016,8 +1066,8 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
                 
             pipe = create_model_pipeline(model_id, trial_params)
             if model_id == 'regime_moe':
-                reg_fold = regimes[tr_idx] if regimes is not None else None
-                sw_fold = sample_weights[tr_idx] if sample_weights is not None else None
+                reg_fold = regimes[tr_idx_purged] if regimes is not None else None
+                sw_fold = sample_weights[tr_idx_purged] if sample_weights is not None else None
                 pipe.fit(X_tr, y_tr, regimes=reg_fold, sample_weight=sw_fold)
             else:
                 pipe.fit(X_tr, y_tr)
@@ -1026,12 +1076,26 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
             
             val_logloss = log_loss(y_val, probs_clipped)
             val_auc = roc_auc_score(y_val, probs)
-            loss = val_logloss - 0.4 * (val_auc - 0.5)
+            
+            # 滾動模擬夏普率加權 (Sharpe-augmented loss)
+            sharpe_bonus = 0.0
+            if fut_rets is not None and len(fut_rets) == len(X_train):
+                val_rets = fut_rets[val_idx]
+                signal = np.where(probs >= 0.5, 1.0, -0.5)
+                strat_rets = (val_rets / 20.0) * signal
+                s_std = np.std(strat_rets)
+                if s_std > 1e-6:
+                    raw_sharpe = (np.mean(strat_rets) / s_std) * np.sqrt(252)
+                    sharpe_bonus = float(np.clip(raw_sharpe, -1.0, 2.5))
+            
+            # 綜合損失函數：降低交叉熵、提升 AUC、擴大夏普收益比
+            loss = val_logloss - 0.35 * (val_auc - 0.5) - 0.08 * sharpe_bonus
             fold_losses.append(loss)
             
         return float(np.mean(fold_losses)) if fold_losses else 1.0
 
-    sampler = optuna.samplers.TPESampler(seed=42)
+    # 啟用 Multivariate TPE 捕捉超參數間高維非線性相關性
+    sampler = optuna.samplers.TPESampler(multivariate=True, seed=42, n_startup_trials=min(5, max(3, n_trials // 4)))
     study = optuna.create_study(direction='minimize', sampler=sampler)
     study.optimize(objective, n_trials=n_trials, timeout=90)
     
@@ -1213,6 +1277,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
                 y_train=Y_tr_u20,
                 regimes=reg_tr if m_id == 'regime_moe' else None,
                 sample_weights=sw_tr if m_id == 'regime_moe' else None,
+                fut_rets=fut_ret_20[:split_idx],
                 n_trials=tune_trials
             )
             
@@ -1293,7 +1358,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         top_features = feat_rank[:8]
         
         # 支撐壓力位計算 (真實多階量化梯隊)
-        sr_ladder = calculate_market_support_resistance()
+        sr_ladder = calculate_market_support_resistance(df)
         resistance_pts = sr_ladder.get('r1', {}).get('price', round(curr_close * 1.008, 0))
         support_pts = sr_ladder.get('s1', {}).get('price', round(curr_close * 0.985, 0))
         w_bull, w_bear, w_range = 33.3, 33.3, 33.4

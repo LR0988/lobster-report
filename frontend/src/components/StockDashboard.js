@@ -607,6 +607,7 @@ function StockDashboard() {
     return val !== null ? parseInt(val) : 20;
   });
   const [showMarketMlParamsDetail, setShowMarketMlParamsDetail] = useState(false);
+  const [showFullVolumeHistogram, setShowFullVolumeHistogram] = useState(false);
   const [marketMlSavedToast, setMarketMlSavedToast] = useState(false);
 
   // ── 低頻量化交易 (Low-Frequency Quant) 狀態 ──
@@ -4493,6 +4494,199 @@ function StockDashboard() {
                             </div>
                           </div>
                         </div>
+
+                        {/* 📊 大盤籌碼成交量分佈直方圖 (Volume Profile / VPVR 120d) */}
+                        {marketMlData.support_resistance.volume_profile?.histogram && marketMlData.support_resistance.volume_profile.histogram.length > 0 && (
+                          <div style={{
+                            background: 'rgba(0, 0, 0, 0.35)',
+                            border: '1px solid rgba(59, 130, 246, 0.25)',
+                            borderRadius: '10px',
+                            padding: '0.9rem 1.1rem',
+                            marginBottom: '1rem'
+                          }}>
+                            {/* 標題與圖例欄 */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#93C5FD' }}>
+                                    📊 大盤籌碼成交量分佈直方圖 (Volume-at-Price Profile)
+                                  </span>
+                                  <span style={{ fontSize: '0.72rem', color: '#6EE7B7', background: 'rgba(16, 185, 129, 0.15)', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                    近半年 120 交易日
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                                  橫向柱狀長度代表各價位區間之實際換手總成交金額 (億元)，柱狀越長代表該價位量能換手越密集、具強大支撐/壓力效力
+                                </div>
+                              </div>
+
+                              {/* 圖例說明 */}
+                              <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap', fontSize: '0.72rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#FCD34D' }}>
+                                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#F59E0B', display: 'inline-block' }}></span>
+                                  ★ POC 籌碼最大密集峰
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#93C5FD' }}>
+                                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#3B82F6', display: 'inline-block' }}></span>
+                                  價值區 (Value Area 70%)
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#FDA4AF' }}>
+                                  <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#E11D48', display: 'inline-block' }}></span>
+                                  📍 當前指數所在階
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* POC 重心精確導航分析 */}
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '0.5rem',
+                              background: 'rgba(245, 158, 11, 0.08)',
+                              border: '1px dashed rgba(245, 158, 11, 0.35)',
+                              borderRadius: '8px',
+                              padding: '0.5rem 0.8rem',
+                              marginBottom: '0.75rem',
+                              fontSize: '0.78rem'
+                            }}>
+                              <div style={{ color: '#FDE68A' }}>
+                                <strong>★ 核心量價重心 (POC):</strong> {marketMlData.support_resistance.volume_profile.poc?.toLocaleString()} 點 
+                                {marketMlData.support_resistance.volume_profile.poc_turnover_yi && (
+                                  <span style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                                    (單階換手量達 <strong>{marketMlData.support_resistance.volume_profile.poc_turnover_yi?.toLocaleString()}</strong> 億，佔近半年總量 <strong>{marketMlData.support_resistance.volume_profile.poc_share_pct}%</strong>)
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ color: marketMlData.support_resistance.current_close >= marketMlData.support_resistance.volume_profile.poc ? '#86EFAC' : '#FCA5A5', fontWeight: 700 }}>
+                                {marketMlData.support_resistance.current_close >= marketMlData.support_resistance.volume_profile.poc
+                                  ? `▲ 現價站於 POC 上方 +${(marketMlData.support_resistance.current_close - marketMlData.support_resistance.volume_profile.poc).toFixed(0)} 點，回踩享強勁量能托盤支撐`
+                                  : `▼ 現價位於 POC 下方 ${(marketMlData.support_resistance.current_close - marketMlData.support_resistance.volume_profile.poc).toFixed(0)} 點，反彈面臨龐大換手反壓`}
+                              </div>
+                            </div>
+
+                            {/* 直方圖主體列表 (由高價到低價) */}
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '3px',
+                              maxHeight: showFullVolumeHistogram ? 'none' : '440px',
+                              overflowY: 'auto',
+                              paddingRight: '4px'
+                            }}>
+                              {marketMlData.support_resistance.volume_profile.histogram.map((bin) => {
+                                const isPoc = Boolean(bin.is_poc);
+                                const isCurrent = Boolean(bin.is_current);
+                                const isVa = Boolean(bin.is_value_area);
+
+                                let barBg = 'linear-gradient(90deg, rgba(71, 85, 105, 0.35), rgba(100, 116, 139, 0.45))';
+                                let barBorder = '1px solid rgba(100, 116, 139, 0.2)';
+                                let textColor = '#CBD5E1';
+                                let rowBg = 'transparent';
+
+                                if (isPoc) {
+                                  barBg = 'linear-gradient(90deg, #F59E0B, #FBBF24)';
+                                  barBorder = '1px solid #FCD34D';
+                                  textColor = '#FEF08A';
+                                  rowBg = 'rgba(245, 158, 11, 0.12)';
+                                } else if (isCurrent) {
+                                  barBg = 'linear-gradient(90deg, #E11D48, #F43F5E)';
+                                  barBorder = '1px solid #FDA4AF';
+                                  textColor = '#FECDD3';
+                                  rowBg = 'rgba(244, 63, 94, 0.12)';
+                                } else if (isVa) {
+                                  barBg = 'linear-gradient(90deg, rgba(37, 99, 235, 0.6), rgba(59, 130, 246, 0.75))';
+                                  barBorder = '1px solid rgba(59, 130, 246, 0.4)';
+                                  textColor = '#BFDBFE';
+                                }
+
+                                return (
+                                  <div
+                                    key={bin.bin_index}
+                                    style={{
+                                      display: 'grid',
+                                      gridTemplateColumns: '135px 1fr 140px',
+                                      alignItems: 'center',
+                                      gap: '0.6rem',
+                                      padding: '0.22rem 0.5rem',
+                                      borderRadius: '5px',
+                                      background: rowBg,
+                                      fontSize: '0.74rem',
+                                      borderLeft: isPoc ? '3px solid #F59E0B' : isCurrent ? '3px solid #F43F5E' : '3px solid transparent'
+                                    }}
+                                  >
+                                    {/* 價位區間 */}
+                                    <div style={{
+                                      fontFamily: 'monospace',
+                                      fontWeight: (isPoc || isCurrent) ? 800 : 500,
+                                      color: textColor,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '0.3rem'
+                                    }}>
+                                      <span>{Math.round(bin.price_low).toLocaleString()} ~ {Math.round(bin.price_high).toLocaleString()}</span>
+                                    </div>
+
+                                    {/* 水平成交量直方條 */}
+                                    <div style={{ position: 'relative', width: '100%', height: '18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '4px', overflow: 'hidden' }}>
+                                      <div
+                                        style={{
+                                          width: `${Math.max(2, bin.bar_pct)}%`,
+                                          height: '100%',
+                                          background: barBg,
+                                          border: barBorder,
+                                          borderRadius: '3px',
+                                          transition: 'width 0.4s ease-out'
+                                        }}
+                                      />
+                                      {/* 條內標籤提示 */}
+                                      {isPoc && (
+                                        <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.68rem', fontWeight: 800, color: '#1E293B', textShadow: '0 0 2px rgba(255,255,255,0.8)' }}>
+                                          ★ POC 最大換手峰 ({bin.turnover_pct}%)
+                                        </span>
+                                      )}
+                                      {isCurrent && !isPoc && (
+                                        <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.68rem', fontWeight: 800, color: '#FFF', textShadow: '0 0 4px rgba(0,0,0,0.8)' }}>
+                                          📍 當前指數位置 ({marketMlData.support_resistance.current_close?.toLocaleString()})
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* 成交額與佔比 */}
+                                    <div style={{ textAlign: 'right', fontFamily: 'monospace', color: textColor, fontWeight: (isPoc || isCurrent) ? 800 : 500 }}>
+                                      <span>{bin.turnover_yi?.toLocaleString()} 億</span>
+                                      <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem', fontSize: '0.7rem' }}>
+                                        ({bin.turnover_pct}%)
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* 展開/收合控制列 */}
+                            {marketMlData.support_resistance.volume_profile.histogram.length > 10 && (
+                              <div style={{ textAlign: 'center', marginTop: '0.6rem' }}>
+                                <button
+                                  onClick={() => setShowFullVolumeHistogram(!showFullVolumeHistogram)}
+                                  style={{
+                                    background: 'rgba(59, 130, 246, 0.1)',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    borderRadius: '6px',
+                                    color: '#93C5FD',
+                                    padding: '0.25rem 0.75rem',
+                                    fontSize: '0.72rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  {showFullVolumeHistogram ? '▲ 收合直方圖顯示' : '▼ 展開完整 20 階直方圖'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* 關鍵均線排列與乖離概況 */}
                         {marketMlData.support_resistance.moving_averages && (
