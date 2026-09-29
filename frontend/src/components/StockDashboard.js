@@ -196,16 +196,25 @@ const BUILTIN_MARKET_ML_PRESETS = [
   {
     id: 'all_factors',
     name: '⚡ 宏觀全因子標準',
-    desc: '全歷史 10 年 2,400+ 天資料 + 30 維技術面、外資期貨、現貨買賣超與台積電全因子',
+    desc: '全歷史 10 年 2,400+ 天資料 + 50+ 維技術面、外資期貨、三大法人現貨、美債、費半、台積電 ADR 與學術因子',
     trainDays: 0,
     presetKey: 'all_factors',
     testRatio: 0.2,
     threshold: 2.5
   },
   {
+    id: 'quant_literature',
+    name: '📚 頂級量化文獻學術因子',
+    desc: '納入 López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、TSM ADR 溢價與日圓 Carry Trade',
+    trainDays: 1500,
+    presetKey: 'quant_literature',
+    testRatio: 0.2,
+    threshold: 2.5
+  },
+  {
     id: 'macro_intermarket',
     name: '🌐 宏觀跨市場多因子',
-    desc: '聚焦美債 10Y 殖利率變動、費半半導體連動、WTI 原油、台幣匯率與外資台指期主力留倉',
+    desc: '聚焦美債 10Y、費半半導體、台積電 ADR 溢價、輝達 NVDA、日圓 Carry Trade 與外資台指期主力留倉',
     trainDays: 0,
     presetKey: 'macro_intermarket',
     testRatio: 0.2,
@@ -4775,20 +4784,67 @@ function StockDashboard() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                               <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>費城半導體指數 (SOX)</span>
                               <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#86EFAC', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
-                                台積電先行指針
+                                半導體先行指針
                               </span>
                             </div>
                             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38BDF8' }}>
                               {marketMlData.macro_snapshot.sox?.toLocaleString()}
                             </div>
                             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                              20日波段動能: <strong style={{ color: marketMlData.macro_snapshot.sox_ret_20d >= 0 ? '#F87171' : '#34D399' }}>
+                              20日波段動能: <strong style={{ color: marketMlData.macro_snapshot.sox_ret_20d >= 0 ? '#34D399' : '#F87171' }}>
                                 {marketMlData.macro_snapshot.sox_ret_20d >= 0 ? '+' : ''}{marketMlData.macro_snapshot.sox_ret_20d?.toFixed(2)}%
                               </strong>
                             </div>
                           </div>
 
-                          {/* 3. WTI 紐約輕原油 */}
+                          {/* 3. 台積電 ADR 溢價折算率 */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>台積電 ADR 溢價率 (TSM)</span>
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(59, 130, 246, 0.15)', color: '#93C5FD', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                外資超額溢價
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: (marketMlData.macro_snapshot.tsm_adr_premium || 0) >= 0 ? '#34D399' : '#F87171' }}>
+                              {(marketMlData.macro_snapshot.tsm_adr_premium || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.tsm_adr_premium?.toFixed(2)}%
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                              ADR: <strong style={{ color: '#F8FAFC' }}>${marketMlData.macro_snapshot.tsm_adr?.toFixed(2)}</strong>
+                              <span style={{ marginLeft: '0.35rem', fontSize: '0.72rem', color: (marketMlData.macro_snapshot.tsm_adr_ret_20d || 0) >= 0 ? '#34D399' : '#F87171' }}>
+                                (20日: {(marketMlData.macro_snapshot.tsm_adr_ret_20d || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.tsm_adr_ret_20d?.toFixed(1)}%)
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 4. 輝達 (NVDA) 全球 AI 舵手 */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>輝達 (NVDA)</span>
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#86EFAC', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                全球 AI 總舵手
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38BDF8' }}>
+                              ${marketMlData.macro_snapshot.nvda?.toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                              20日波段動能: <strong style={{ color: (marketMlData.macro_snapshot.nvda_ret_20d || 0) >= 0 ? '#34D399' : '#F87171' }}>
+                                {(marketMlData.macro_snapshot.nvda_ret_20d || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.nvda_ret_20d?.toFixed(2)}%
+                              </strong>
+                            </div>
+                          </div>
+
+                          {/* 5. WTI 紐約輕原油 */}
                           <div style={{
                             background: 'rgba(15, 23, 42, 0.75)',
                             border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -4811,7 +4867,7 @@ function StockDashboard() {
                             </div>
                           </div>
 
-                          {/* 4. 美元兌新台幣即期匯率 */}
+                          {/* 6. 美元兌新台幣即期匯率 */}
                           <div style={{
                             background: 'rgba(15, 23, 42, 0.75)',
                             border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -4834,6 +4890,59 @@ function StockDashboard() {
                               <span style={{ marginLeft: '0.35rem', fontSize: '0.72rem' }}>
                                 {marketMlData.macro_snapshot.usdtwd_ret_20d < 0 ? '(熱錢匯入)' : '(熱錢匯出)'}
                               </span>
+                            </div>
+                          </div>
+
+                          {/* 7. 美元兌日圓 Carry Trade 利差交易 */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>美元兌日圓 (USD/JPY)</span>
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(239, 68, 68, 0.15)', color: '#FCA5A5', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                利差平倉警戒
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#F8FAFC' }}>
+                              ¥{marketMlData.macro_snapshot.usdjpy?.toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                              20日變動: <strong style={{ color: (marketMlData.macro_snapshot.usdjpy_ret_20d || 0) <= -2.0 ? '#EF4444' : '#34D399' }}>
+                                {(marketMlData.macro_snapshot.usdjpy_ret_20d || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.usdjpy_ret_20d?.toFixed(2)}%
+                              </strong>
+                              <span style={{ marginLeft: '0.35rem', fontSize: '0.72rem' }}>
+                                {(marketMlData.macro_snapshot.usdjpy_ret_20d || 0) <= -2.0 ? '(日圓急升平倉)' : '(流動性穩定)'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* 8. 頂級量化學術指針 (Hurst / FracDiff / Amihud / Breadth) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(168, 85, 247, 0.4)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: '#DDD6FE' }}>量化學術指針 (Quant Insights)</span>
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(168, 85, 247, 0.2)', color: '#D8B4FE', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                文獻數學特徵
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                              <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#C084FC' }}>
+                                Hurst: {marketMlData.macro_snapshot.hurst_60d?.toFixed(3) || '0.500'}
+                              </div>
+                              <span style={{ fontSize: '0.72rem', color: (marketMlData.macro_snapshot.hurst_60d || 0.5) > 0.52 ? '#34D399' : '#FCD34D' }}>
+                                {(marketMlData.macro_snapshot.hurst_60d || 0.5) > 0.52 ? '趨勢持續型 (Trending)' : '均值回歸型 (Mean-Rev)'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>分數微分(d=0.45): <strong style={{ color: '#E2E8F0' }}>{marketMlData.macro_snapshot.frac_diff_045?.toFixed(3) || '0.95'}</strong></span>
+                              <span>5日漲跌比: <strong style={{ color: (marketMlData.macro_snapshot.breadth_ad_ratio_5d || 1) >= 1 ? '#34D399' : '#F87171' }}>{marketMlData.macro_snapshot.breadth_ad_ratio_5d?.toFixed(2) || '1.00'}</strong></span>
                             </div>
                           </div>
                         </div>

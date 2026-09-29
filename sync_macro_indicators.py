@@ -31,10 +31,13 @@ USER_AGENT = "Mozilla/5.0"
 
 MACRO_TICKERS = {
     'us10y': '^TNX',       # 美債 10 年期殖利率 (%)
-    'oil_wti': 'CL=F',      # WTI 紐約輕原油 (USD/桶)
+    'oil_wti': 'CL=F',     # WTI 紐約輕原油 (USD/桶)
     'usdtwd': 'USDTWD=X',  # 美元兌新台幣匯率
     'sox': '^SOX',         # 費城半導體指數
-    'dxy': 'DX-Y.NYB'      # 美元指數
+    'dxy': 'DX-Y.NYB',     # 美元指數
+    'tsm_adr': 'TSM',      # 台積電 ADR (USD)
+    'nvda': 'NVDA',        # 輝達 (USD)
+    'usdjpy': 'JPY=X',     # 美元兌日圓 (JPY)
 }
 
 def get_db_connection():
@@ -56,9 +59,17 @@ def init_macro_table():
             usdtwd REAL,
             sox REAL,
             dxy REAL,
+            tsm_adr REAL,
+            nvda REAL,
+            usdjpy REAL,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    for col in ['tsm_adr', 'nvda', 'usdjpy']:
+        try:
+            cur.execute(f"ALTER TABLE macro_indicators ADD COLUMN {col} REAL")
+        except sqlite3.OperationalError:
+            pass
     cur.execute("CREATE INDEX IF NOT EXISTS idx_macro_date ON macro_indicators(date)")
     conn.commit()
     conn.close()
@@ -153,18 +164,24 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
         twd = row.get("usdtwd") if pd.notnull(row.get("usdtwd")) else None
         sox = row.get("sox") if pd.notnull(row.get("sox")) else None
         dxy = row.get("dxy") if pd.notnull(row.get("dxy")) else None
+        tsm = row.get("tsm_adr") if pd.notnull(row.get("tsm_adr")) else None
+        nvda = row.get("nvda") if pd.notnull(row.get("nvda")) else None
+        jpy = row.get("usdjpy") if pd.notnull(row.get("usdjpy")) else None
         
         cur.execute("""
-            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(date) DO UPDATE SET
                 us10y = COALESCE(excluded.us10y, macro_indicators.us10y),
                 oil_wti = COALESCE(excluded.oil_wti, macro_indicators.oil_wti),
                 usdtwd = COALESCE(excluded.usdtwd, macro_indicators.usdtwd),
                 sox = COALESCE(excluded.sox, macro_indicators.sox),
                 dxy = COALESCE(excluded.dxy, macro_indicators.dxy),
+                tsm_adr = COALESCE(excluded.tsm_adr, macro_indicators.tsm_adr),
+                nvda = COALESCE(excluded.nvda, macro_indicators.nvda),
+                usdjpy = COALESCE(excluded.usdjpy, macro_indicators.usdjpy),
                 updated_at = excluded.updated_at
-        """, (date_str, u10, oil, twd, sox, dxy, now_str))
+        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, now_str))
         upsert_count += 1
         
     conn.commit()

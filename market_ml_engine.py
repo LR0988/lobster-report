@@ -113,7 +113,17 @@ FEATURE_NAMES_ZH = {
     'us10y_change_20d': '美債 10 年期殖利率 20 日變動量 (bp)',
     'sox_ret_20d': '費城半導體 20 日波段漲跌幅 (%)',
     'oil_ret_20d': 'WTI 紐約輕原油 20 日波段漲跌 (%)',
-    'usdtwd_ret_20d': '美元兌台幣 20 日變動率 (%)'
+    'usdtwd_ret_20d': '美元兌台幣 20 日變動率 (%)',
+    'tsm_adr_premium': '台積電 ADR 溢價折算率 (%)',
+    'tsm_adr_ret_20d': '台積電 ADR 20 日波段漲跌 (%)',
+    'nvda_ret_20d': '輝達 (NVDA) 20 日波段漲跌 (%)',
+    'usdjpy_ret_20d': '美元兌日圓 (JPY) 20 日變動率 (%)',
+    'dxy_ret_20d': '美元指數 (DXY) 20 日波段變動 (%)',
+    'frac_diff_045': 'López de Prado 分數階微分序列 (d=0.45)',
+    'amihud_illiq_20d': 'Amihud (2002) 20 日流動性衝擊指數',
+    'hurst_60d': '60 日赫斯特指數 (趨勢持續 vs 均值回歸)',
+    'breadth_ad_ratio_5d': '市場廣度 5 日均漲跌家數比',
+    'breadth_ad_diff_5d': '市場廣度 5 日累計淨上漲家數 (家)'
 }
 
 MODEL_CATALOG = {
@@ -172,16 +182,28 @@ FEATURE_PRESETS = {
     'all_factors': {
         'id': 'all_factors',
         'name': '⚡ 宏觀全因子標準',
-        'desc': '包含技術指標、外資期貨、三大法人現貨、美債與費半等 45+ 項全特徵',
+        'desc': '包含技術指標、外資期貨、三大法人現貨、美債、費半、台積電 ADR、日圓與學術量化等 50+ 項全特徵',
         'features': list(FEATURE_NAMES_ZH.keys())
+    },
+    'quant_literature': {
+        'id': 'quant_literature',
+        'name': '📚 頂級量化文獻學術因子',
+        'desc': '納入 López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、TSM ADR 溢價與日圓 Carry Trade',
+        'features': [
+            'ret_5d', 'ret_20d', 'ma20_bias', 'volatility_20d',
+            'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
+            'frac_diff_045', 'amihud_illiq_20d', 'hurst_60d', 'breadth_ad_ratio_5d',
+            'foreign_futures_net', 'foreign_cash_net_5d'
+        ]
     },
     'macro_intermarket': {
         'id': 'macro_intermarket',
         'name': '🌐 宏觀跨市場多因子',
-        'desc': '聚焦美債 10Y 殖利率、費半半導體、原油、美元匯率與法人主力留倉',
+        'desc': '聚焦美債 10Y 殖利率、費半半導體、輝達、原油、美元日圓匯率與法人主力留倉',
         'features': [
             'ret_5d', 'ret_20d', 'ma20_bias', 'ma60_bias', 'volatility_20d',
             'us10y_change_20d', 'sox_ret_20d', 'oil_ret_20d', 'usdtwd_ret_20d',
+            'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
             'foreign_futures_net', 'foreign_cash_net_5d', 'tsmc_ret_20d'
         ]
     },
@@ -220,7 +242,7 @@ FEATURE_PRESETS = {
     }
 }
 
-def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict]:
+def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
     conn = get_db_connection()
     
     # 1. 載入大盤加權指數 (daily_index)
@@ -279,11 +301,11 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict]:
     """, conn)
     tsmc_dict = {str(r['date']): float(r['close'] or 0) for _, r in df_tsmc.iterrows()}
     
-    # 5. 載入國際宏觀指標 (macro_indicators: 美債10Y, 原油, 匯率, 費半)
+    # 5. 載入國際宏觀指標 (macro_indicators: 美債10Y, 原油, 匯率, 費半, 台積電ADR, 輝達, 日圓)
     macro_dict = {}
     try:
         df_macro = pd.read_sql_query("""
-            SELECT date, us10y, oil_wti, usdtwd, sox, dxy
+            SELECT date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy
             FROM macro_indicators
             ORDER BY date ASC
         """, conn)
@@ -294,16 +316,73 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict]:
                 'oil_wti': float(r['oil_wti']) if pd.notnull(r['oil_wti']) else None,
                 'usdtwd': float(r['usdtwd']) if pd.notnull(r['usdtwd']) else None,
                 'sox': float(r['sox']) if pd.notnull(r['sox']) else None,
-                'dxy': float(r['dxy']) if pd.notnull(r['dxy']) else None
+                'dxy': float(r['dxy']) if pd.notnull(r['dxy']) else None,
+                'tsm_adr': float(r['tsm_adr']) if pd.notnull(r['tsm_adr']) else None,
+                'nvda': float(r['nvda']) if pd.notnull(r['nvda']) else None,
+                'usdjpy': float(r['usdjpy']) if pd.notnull(r['usdjpy']) else None,
             }
     except Exception as e:
         print(f"[!] 載入 macro_indicators 失敗或數據表未建立: {e}")
 
+    # 6. 載入市場廣度指標 (market_breadth: 漲跌家數、券資比)
+    breadth_dict = {}
+    try:
+        df_breadth = pd.read_sql_query("""
+            SELECT date, total_stocks, adv_count, dec_count, ad_ratio, ad_diff, margin_total, short_total
+            FROM market_breadth
+            ORDER BY date ASC
+        """, conn)
+        for _, r in df_breadth.iterrows():
+            d = str(r['date'])
+            breadth_dict[d] = {
+                'adv_count': int(r['adv_count'] or 0),
+                'dec_count': int(r['dec_count'] or 0),
+                'ad_ratio': float(r['ad_ratio'] or 1.0),
+                'ad_diff': int(r['ad_diff'] or 0),
+                'margin_total': int(r['margin_total'] or 0),
+                'short_total': int(r['short_total'] or 0)
+            }
+    except Exception as e:
+        print(f"[!] 載入 market_breadth 失敗: {e}")
+
     conn.close()
-    return df_index, fut_dict, cash_dict, tsmc_dict, macro_dict
+    return df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict
+
+def get_weights_ffd(d: float = 0.45, thres: float = 1e-4, max_lags: int = 80) -> np.ndarray:
+    """
+    Marcos López de Prado (2018) Fixed-width Window Fractional Differentiation (FFD)
+    依據二項式級數展開生成長記憶性權重 w_k，保留 80%~90% 原序列記憶並消除單位根 (Stationarity)
+    """
+    w = [1.0]
+    for k in range(1, max_lags):
+        w_k = -w[-1] / k * (d - k + 1)
+        if abs(w_k) < thres:
+            break
+        w.append(w_k)
+    return np.array(w[::-1])
+
+def compute_hurst_rs(series: np.ndarray) -> float:
+    """
+    Mandelbrot 重標極差分析 (R/S Analysis) 計算滾動赫斯特指數 (Hurst Exponent)
+    H > 0.5: 趨勢持續性 (Persistent Trending Regime)
+    H = 0.5: 幾何布朗運動 (Random Walk)
+    H < 0.5: 均值回歸反持續性 (Mean-Reverting Regime)
+    """
+    n = len(series)
+    if n < 20:
+        return 0.5
+    mean = np.mean(series)
+    z = np.cumsum(series - mean)
+    r = np.max(z) - np.min(z)
+    s = np.std(series)
+    if s < 1e-6 or r < 1e-6:
+        return 0.5
+    rs = r / s
+    h = np.log(rs) / np.log(n)
+    return float(np.clip(h, 0.0, 1.0))
 
 def build_features() -> pd.DataFrame:
-    df_index, fut_dict, cash_dict, tsmc_dict, macro_dict = load_raw_data()
+    df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict = load_raw_data()
     n = len(df_index)
     
     dates = df_index['date'].astype(str).tolist()
@@ -342,11 +421,33 @@ def build_features() -> pd.DataFrame:
     ma_turnover_5 = pd.Series(turnovers).rolling(5).mean().values
     turnover_ratio = np.divide(turnovers, ma_turnover_5, out=np.ones_like(turnovers, dtype=float), where=(ma_turnover_5 > 0))
     
+    # ── Marcos López de Prado (2018) 分數階微分序列 (d=0.45, 記憶保留率 > 80%, 滿足平穩性) ──
+    log_close = np.log(np.maximum(closes, 1.0))
+    w_ffd = get_weights_ffd(0.45, 1e-4, 80)
+    fd_vals = np.convolve(log_close, w_ffd, mode='valid')
+    pad_len = len(log_close) - len(fd_vals)
+    frac_diff_series = np.pad(fd_vals, (pad_len, 0), mode='edge')
+
+    # ── Amihud (2002) 20日流動性衝擊指數 (|Ret| / (Turnover / 10^10)) ──
+    ret_abs = np.abs(pd.Series(closes).pct_change().fillna(0).values)
+    turnover_scaled = np.array(turnovers) / 1e10
+    daily_illiq = np.divide(ret_abs, turnover_scaled, out=np.zeros_like(ret_abs), where=(turnover_scaled > 0))
+    amihud_20d = pd.Series(daily_illiq).rolling(20).mean().fillna(0.0).values
+
+    # ── 60日滾動赫斯特指數 (Hurst Exponent R/S 分析) ──
+    pct_rets = pd.Series(closes).pct_change().fillna(0).values
+    hurst_series = np.full(n, 0.5)
+    for idx in range(59, n):
+        hurst_series[idx] = compute_hurst_rs(pct_rets[idx-59:idx+1])
+
     rows = []
     last_fut_info = {'外資': 0, '投信': 0, '自營商': 0}
     last_cash_info = {'foreign': 0, 'trust': 0, 'dealer': 0, 'total': 0}
     last_tsmc_c = 0.0
-    last_macro_info = {'us10y': 4.0, 'oil_wti': 75.0, 'usdtwd': 31.0, 'sox': 4000.0, 'dxy': 100.0}
+    last_macro_info = {
+        'us10y': 4.0, 'oil_wti': 75.0, 'usdtwd': 31.0, 'sox': 4000.0, 'dxy': 100.0,
+        'tsm_adr': 400.0, 'nvda': 200.0, 'usdjpy': 150.0
+    }
 
     for i in range(n):
         d = dates[i]
@@ -449,6 +550,33 @@ def build_features() -> pd.DataFrame:
         usdtwd_prev20 = m_prev20.get('usdtwd', usdtwd_val) if m_prev20.get('usdtwd') is not None else usdtwd_val
         usdtwd_ret20 = round(float((usdtwd_val / usdtwd_prev20 - 1) * 100), 2) if usdtwd_prev20 else 0.0
 
+        tsm_adr_val = m_info.get('tsm_adr', 400.0)
+        tsm_adr_prev20 = m_prev20.get('tsm_adr', tsm_adr_val) if m_prev20.get('tsm_adr') is not None else tsm_adr_val
+        tsm_adr_ret20 = round(float((tsm_adr_val / tsm_adr_prev20 - 1) * 100), 2) if tsm_adr_prev20 else 0.0
+
+        nvda_val = m_info.get('nvda', 200.0)
+        nvda_prev20 = m_prev20.get('nvda', nvda_val) if m_prev20.get('nvda') is not None else nvda_val
+        nvda_ret20 = round(float((nvda_val / nvda_prev20 - 1) * 100), 2) if nvda_prev20 else 0.0
+
+        usdjpy_val = m_info.get('usdjpy', 150.0)
+        usdjpy_prev20 = m_prev20.get('usdjpy', usdjpy_val) if m_prev20.get('usdjpy') is not None else usdjpy_val
+        usdjpy_ret20 = round(float((usdjpy_val / usdjpy_prev20 - 1) * 100), 2) if usdjpy_prev20 else 0.0
+
+        dxy_val = m_info.get('dxy', 100.0)
+        dxy_prev20 = m_prev20.get('dxy', dxy_val) if m_prev20.get('dxy') is not None else dxy_val
+        dxy_ret20 = round(float((dxy_val / dxy_prev20 - 1) * 100), 2) if dxy_prev20 else 0.0
+
+        # 台積電 ADR 溢價率計算 (1 ADR = 5 股普通股)
+        adr_twd = (tsm_adr_val * usdtwd_val) / 5.0
+        tsm_adr_prem = round(float((adr_twd / tsmc_c - 1) * 100), 2) if (tsmc_c and tsmc_c > 0) else 0.0
+
+        # 市場廣度 (Market Breadth: 5日均漲跌家數比與5日累計淨上漲家數)
+        b_5_slice = [breadth_dict.get(dates[j], {}).get('ad_ratio', 1.0) for j in range(max(0, i-4), i+1)]
+        b_ad_ratio_5d = round(float(sum(b_5_slice) / len(b_5_slice)), 4) if b_5_slice else 1.0
+
+        b_diff_slice = [breadth_dict.get(dates[j], {}).get('ad_diff', 0) for j in range(max(0, i-4), i+1)]
+        b_ad_diff_5d = int(sum(b_diff_slice))
+
         # 未來目標標籤 (Targets)
         fut_ret_5d = (closes[i+5] / c - 1) * 100 if i + 5 < n else None
         fut_ret_10d = (closes[i+10] / c - 1) * 100 if i + 10 < n else None
@@ -501,10 +629,25 @@ def build_features() -> pd.DataFrame:
             'sox_ret_20d': sox_ret20,
             'oil_ret_20d': oil_ret20,
             'usdtwd_ret_20d': usdtwd_ret20,
+            'tsm_adr_premium': tsm_adr_prem,
+            'tsm_adr_ret_20d': tsm_adr_ret20,
+            'nvda_ret_20d': nvda_ret20,
+            'usdjpy_ret_20d': usdjpy_ret20,
+            'dxy_ret_20d': dxy_ret20,
+            'frac_diff_045': round(float(frac_diff_series[i]), 4),
+            'amihud_illiq_20d': round(float(amihud_20d[i]), 6),
+            'hurst_60d': round(float(hurst_series[i]), 3),
+            'breadth_ad_ratio_5d': b_ad_ratio_5d,
+            'breadth_ad_diff_5d': b_ad_diff_5d,
+            # Snapshot raw references
             'us10y': us10y_val,
             'oil_wti': oil_val,
             'usdtwd': usdtwd_val,
             'sox': sox_val,
+            'tsm_adr': tsm_adr_val,
+            'nvda': nvda_val,
+            'usdjpy': usdjpy_val,
+            'dxy': dxy_val,
             # Targets
             'fut_ret_5d': fut_ret_5d,
             'fut_ret_10d': fut_ret_10d,
@@ -546,7 +689,7 @@ def build_features() -> pd.DataFrame:
 
 def compute_market_regimes(df: pd.DataFrame) -> np.ndarray:
     """
-    依據宏觀趨勢、波動度與外資期貨留倉，將歷史切分為三大結構性市場狀態：
+    依據宏觀趨勢、波動度、赫斯特指數與外資期貨留倉，將歷史切分為三大結構性市場狀態：
     0: bull (多頭擴張主升段)
     1: bear (空頭破線防禦段)
     2: range (箱型震盪整理段)
@@ -558,6 +701,7 @@ def compute_market_regimes(df: pd.DataFrame) -> np.ndarray:
     ma60_b = df['ma60_bias'].values
     vol = df['volatility_20d'].values
     f_fut = df['foreign_futures_net'].values
+    hurst = df['hurst_60d'].values if 'hurst_60d' in df.columns else np.full(n, 0.5)
     vol_high = np.nanpercentile(vol, 75)
     
     for i in range(n):
@@ -1632,7 +1776,21 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'usdtwd': round(float(latest_row.get('usdtwd', 31.83)), 2) if 'usdtwd' in latest_row else 31.83,
             'usdtwd_ret_20d': round(float(latest_row.get('usdtwd_ret_20d', 0)), 2),
             'sox': round(float(latest_row.get('sox', 12692)), 1) if 'sox' in latest_row else 12692.0,
-            'sox_ret_20d': round(float(latest_row.get('sox_ret_20d', 0)), 2)
+            'sox_ret_20d': round(float(latest_row.get('sox_ret_20d', 0)), 2),
+            'tsm_adr': round(float(latest_row.get('tsm_adr', 457.4)), 2) if 'tsm_adr' in latest_row else 457.4,
+            'tsm_adr_premium': round(float(latest_row.get('tsm_adr_premium', 17.6)), 2) if 'tsm_adr_premium' in latest_row else 17.6,
+            'tsm_adr_ret_20d': round(float(latest_row.get('tsm_adr_ret_20d', 0)), 2),
+            'nvda': round(float(latest_row.get('nvda', 230.7)), 2) if 'nvda' in latest_row else 230.7,
+            'nvda_ret_20d': round(float(latest_row.get('nvda_ret_20d', 0)), 2),
+            'usdjpy': round(float(latest_row.get('usdjpy', 157.5)), 2) if 'usdjpy' in latest_row else 157.5,
+            'usdjpy_ret_20d': round(float(latest_row.get('usdjpy_ret_20d', 0)), 2),
+            'dxy': round(float(latest_row.get('dxy', 101.5)), 2) if 'dxy' in latest_row else 101.5,
+            'dxy_ret_20d': round(float(latest_row.get('dxy_ret_20d', 0)), 2),
+            'frac_diff_045': round(float(latest_row.get('frac_diff_045', 0)), 4) if 'frac_diff_045' in latest_row else 0.0,
+            'amihud_illiq_20d': round(float(latest_row.get('amihud_illiq_20d', 0)), 6) if 'amihud_illiq_20d' in latest_row else 0.0,
+            'hurst_60d': round(float(latest_row.get('hurst_60d', 0.5)), 3) if 'hurst_60d' in latest_row else 0.5,
+            'breadth_ad_ratio_5d': round(float(latest_row.get('breadth_ad_ratio_5d', 1.0)), 2) if 'breadth_ad_ratio_5d' in latest_row else 1.0,
+            'breadth_ad_diff_5d': int(latest_row.get('breadth_ad_diff_5d', 0)) if 'breadth_ad_diff_5d' in latest_row else 0
         }
     }
     report = sanitize_for_json(report)

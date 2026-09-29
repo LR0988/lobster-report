@@ -197,16 +197,72 @@ def sync_taiex_to_sqlite():
         
     conn.commit()
     conn.close()
-    print(f"[✓] 大盤加權指數 (TAIEX) 成功同步至 daily_index 表，共寫入/更新 {count} 筆交易日！")
-    
-    # 同步國際宏觀指標 (美債10Y, 原油, 匯率, 費半)
+    # 同步市場廣度指標 (漲跌家數、券資比)
     try:
-        import sync_macro_indicators
-        sync_macro_indicators.check_and_auto_backfill()
+        sync_market_breadth(recent_days=30)
+        print("[✓] 市場廣度指標 (market_breadth) 同步完成！")
     except Exception as e:
-        print(f"[!] 自動同步宏觀指標失敗: {e}")
+        print(f"[!] 同步市場廣度指標失敗: {e}")
         
     return count
+
+def sync_market_breadth(recent_days: int = 30):
+    """同步市場廣度指標 (漲跌家數、券資比) 至 market_breadth 表"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS market_breadth (
+            date TEXT PRIMARY KEY,
+            total_stocks INTEGER,
+            adv_count INTEGER,
+            dec_count INTEGER,
+            ad_ratio REAL,
+            ad_diff INTEGER,
+            margin_total INTEGER,
+            short_total INTEGER,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_breadth_date ON market_breadth(date)")
+    
+    date_filter = ""
+    params = ()
+    if recent_days > 0:
+        cur.execute("SELECT DISTINCT date FROM daily_stock WHERE stock_id != 'HOLIDAY' ORDER BY date DESC LIMIT ?", (recent_days,))
+        target_dates = [r[0] for r in cur.fetchall()]
+        if target_dates:
+            placeholders = ",".join(["?"] * len(target_dates))
+            date_filter = f"AND date IN ({placeholders})"
+            params = tuple(target_dates)
+
+    sql = f"""
+        INSERT INTO market_breadth (date, total_stocks, adv_count, dec_count, ad_ratio, ad_diff, margin_total, short_total)
+        SELECT date,
+               COUNT(*) as tot,
+               SUM(CASE WHEN change_sign = '+' THEN 1 ELSE 0 END) as adv,
+               SUM(CASE WHEN change_sign = '-' THEN 1 ELSE 0 END) as dec,
+               ROUND(CAST(SUM(CASE WHEN change_sign = '+' THEN 1 ELSE 0 END) AS REAL) / 
+                     (SUM(CASE WHEN change_sign = '-' THEN 1 ELSE 0 END) + 1), 4) as ad_ratio,
+               (SUM(CASE WHEN change_sign = '+' THEN 1 ELSE 0 END) - 
+                SUM(CASE WHEN change_sign = '-' THEN 1 ELSE 0 END)) as ad_diff,
+               SUM(COALESCE(margin_balance, 0)) as margin_tot,
+               SUM(COALESCE(short_balance, 0)) as short_tot
+        FROM daily_stock
+        WHERE stock_id != 'HOLIDAY' {date_filter}
+        GROUP BY date
+        ON CONFLICT(date) DO UPDATE SET
+            total_stocks = excluded.total_stocks,
+            adv_count = excluded.adv_count,
+            dec_count = excluded.dec_count,
+            ad_ratio = excluded.ad_ratio,
+            ad_diff = excluded.ad_diff,
+            margin_total = excluded.margin_total,
+            short_total = excluded.short_total,
+            updated_at = CURRENT_TIMESTAMP
+    """
+    cur.execute(sql, params)
+    conn.commit()
+    conn.close()
 
 if __name__ == "__main__":
     sync_taiex_to_sqlite()
