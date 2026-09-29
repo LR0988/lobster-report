@@ -13,6 +13,7 @@ Lobster Report - 雲地混合股票選股與運算 Worker (stock_cloud_worker.py
 import os
 import sys
 import time
+import datetime
 import json
 import sqlite3
 import subprocess
@@ -706,6 +707,7 @@ def run_worker_loop():
     print("=" * 60)
 
     last_sync_time = time.time()
+    last_market_sync_date = None
 
     while True:
         try:
@@ -727,6 +729,29 @@ def run_worker_loop():
                     s_conn.close()
                 except Exception as e:
                     print(f"[!] 背景定時同步異常: {e}")
+
+            # 盤後自動化排程：每小時檢查若為交易日且時間已過 15:30，自動抓取最新加權指數、8大宏觀指標並刷新大盤ML模型推論
+            now_dt = datetime.datetime.now()
+            today_str = now_dt.strftime("%Y%m%d")
+            if now_dt.weekday() < 5 and (now_dt.hour > 15 or (now_dt.hour == 15 and now_dt.minute >= 30)) and last_market_sync_date != today_str:
+                last_market_sync_date = today_str
+                try:
+                    print(f"\n[🕒 自動化定時排程] 觸發 {today_str} 盤後自動更新工作流...")
+                    import sync_market_index
+                    import importlib
+                    importlib.reload(sync_market_index)
+                    sync_market_index.sync_taiex_to_sqlite()
+                    
+                    import sync_macro_indicators
+                    importlib.reload(sync_macro_indicators)
+                    sync_macro_indicators.sync_macro_to_sqlite(range_param="1mo")
+                    
+                    import market_ml_engine
+                    importlib.reload(market_ml_engine)
+                    market_ml_engine.generate_prediction_report()
+                    print(f"[✓ 自動化定時排程] {today_str} 大盤加權指數、宏觀指標與 ML 預測已全自動更新並同步雲端！")
+                except Exception as e:
+                    print(f"[!] 自動化盤後同步異常: {e}")
 
         except KeyboardInterrupt:
             print("\nWorker 已停止")

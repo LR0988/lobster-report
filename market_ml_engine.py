@@ -2092,24 +2092,31 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     fut_ret_5 = valid_df['fut_ret_5d'].values
     Y_up_5 = np.where(fut_ret_5 >= (threshold_pct * 0.5), 1, 0)
     
-    # Walk-forward 測試集切分
+    # Walk-forward 測試集切分 (嚴格時間序列切分，禁止隨機洗牌)
     n_samples = len(X)
     split_idx = int(n_samples * (1.0 - test_ratio))
-    X_train, X_test = X[:split_idx], X[split_idx:]
-    Y_tr_u20, Y_te_u20 = Y_up_20[:split_idx], Y_up_20[split_idx:]
-    Y_tr_d20, Y_te_d20 = Y_down_20[:split_idx], Y_down_20[split_idx:]
-    Y_tr_u5, Y_te_u5 = Y_up_5[:split_idx], Y_up_5[split_idx:]
+    
+    # ── Marcos López de Prado (2018) Purging & Embargoing (消除標籤重疊洩漏) ──
+    # 目標標籤為未來 20 日報酬 (fut_ret_20d)，故訓練集末端必須切除 20 個交易日之 Purge 隔離期，
+    # 徹底防止訓練集標籤跨越至測試集區間 (Zero Look-ahead Bias)
+    purge_days = 20
+    train_end_idx = max(0, split_idx - purge_days)
+    
+    X_train, X_test = X[:train_end_idx], X[split_idx:]
+    Y_tr_u20, Y_te_u20 = Y_up_20[:train_end_idx], Y_up_20[split_idx:]
+    Y_tr_d20, Y_te_d20 = Y_down_20[:train_end_idx], Y_down_20[split_idx:]
+    Y_tr_u5, Y_te_u5 = Y_up_5[:train_end_idx], Y_up_5[split_idx:]
     fut_rets_test = fut_ret_20[split_idx:]
     
     # 計算宏觀市場結構狀態 (Regimes) 與時間指數衰減權重 (Sample Weights)
     regimes_all = compute_market_regimes(valid_df)
-    reg_tr, reg_te = regimes_all[:split_idx], regimes_all[split_idx:]
+    reg_tr, reg_te = regimes_all[:train_end_idx], regimes_all[split_idx:]
     sw_tr = compute_sample_weights(len(X_train), half_life_days=750)
     
-    train_range = f"{valid_df.iloc[0]['date']} ~ {valid_df.iloc[split_idx-1]['date']}"
+    train_range = f"{valid_df.iloc[0]['date']} ~ {valid_df.iloc[train_end_idx-1]['date']}"
     test_range = f"{valid_df.iloc[split_idx]['date']} ~ {valid_df.iloc[-1]['date']}"
     
-    print(f"[*] 訓練樣本: {len(X_train)} 天 ({train_range}), 驗證樣本: {len(X_test)} 天 ({test_range})")
+    print(f"[*] 嚴格防偷看架構生效：執行 {purge_days} 日 Purge 隔離！訓練樣本: {len(X_train)} 天 ({train_range}), 驗證樣本: {len(X_test)} 天 ({test_range})")
     
     # 載入現有模型 bundle (若只訓練單一模型可保留其他模型)
     models_bundle = {}
