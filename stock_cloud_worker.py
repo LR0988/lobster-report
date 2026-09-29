@@ -526,10 +526,12 @@ if res.get('status') == 'ok':
     return {"status": "ok", "message": f"{model_type.upper()} 模型訓練完成並已同步至雲端快取！"}
 
 def execute_market_ml_job(config: dict) -> dict:
-    """執行大盤最新日K同步與宏觀多因子 ML 推論"""
-    print("[*] 正在同步最新大盤加權指數日K...")
+    """執行大盤最新日K同步、國際宏觀指標爬取與多因子 ML 推論"""
+    print("[*] 正在同步最新大盤加權指數日K與國際宏觀指標...")
     import sync_market_index
     sync_market_index.sync_taiex_to_sqlite()
+    import sync_macro_indicators
+    sync_macro_indicators.check_and_auto_backfill()
     
     print("[*] 正在執行大盤 ML 多因子推論...")
     import market_ml_engine
@@ -539,9 +541,11 @@ def execute_market_ml_job(config: dict) -> dict:
 
 def execute_market_ml_train_job(config: dict) -> dict:
     """重新訓練大盤多因子模型並產出最新推論"""
-    print(f"[*] 正在同步最新大盤日K並重新訓練大盤 ML 模型 (config={config})...")
+    print(f"[*] 正在同步最新大盤日K、國際宏觀指標並重新訓練大盤 ML 模型 (config={config})...")
     import sync_market_index
     sync_market_index.sync_taiex_to_sqlite()
+    import sync_macro_indicators
+    sync_macro_indicators.check_and_auto_backfill()
     
     import market_ml_engine
     result = market_ml_engine.train_and_evaluate_models(config=config)

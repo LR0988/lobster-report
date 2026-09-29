@@ -198,6 +198,14 @@ def sync_taiex_to_sqlite():
     conn.commit()
     conn.close()
     print(f"[✓] 大盤加權指數 (TAIEX) 成功同步至 daily_index 表，共寫入/更新 {count} 筆交易日！")
+    
+    # 同步國際宏觀指標 (美債10Y, 原油, 匯率, 費半)
+    try:
+        import sync_macro_indicators
+        sync_macro_indicators.check_and_auto_backfill()
+    except Exception as e:
+        print(f"[!] 自動同步宏觀指標失敗: {e}")
+        
     return count
 
 if __name__ == "__main__":

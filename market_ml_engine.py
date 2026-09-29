@@ -109,7 +109,11 @@ FEATURE_NAMES_ZH = {
     'close_to_low20_pct': '距 20 日波段最低點反彈 (%)',
     'bb_width_20d': '布林通道帶寬擠壓度 (%)',
     'bb_pct_b': '布林通道價格位置 (%B)',
-    'pv_divergence_20d': '高檔量價背離頂部警示 (0/1)'
+    'pv_divergence_20d': '高檔量價背離頂部警示 (0/1)',
+    'us10y_change_20d': '美債 10 年期殖利率 20 日變動量 (bp)',
+    'sox_ret_20d': '費城半導體 20 日波段漲跌幅 (%)',
+    'oil_ret_20d': 'WTI 紐約輕原油 20 日波段漲跌 (%)',
+    'usdtwd_ret_20d': '美元兌台幣 20 日變動率 (%)'
 }
 
 MODEL_CATALOG = {
@@ -168,8 +172,18 @@ FEATURE_PRESETS = {
     'all_factors': {
         'id': 'all_factors',
         'name': '⚡ 宏觀全因子標準',
-        'desc': '包含技術指標、外資期貨、三大法人現貨與台積電等 30+ 項全特徵',
+        'desc': '包含技術指標、外資期貨、三大法人現貨、美債與費半等 45+ 項全特徵',
         'features': list(FEATURE_NAMES_ZH.keys())
+    },
+    'macro_intermarket': {
+        'id': 'macro_intermarket',
+        'name': '🌐 宏觀跨市場多因子',
+        'desc': '聚焦美債 10Y 殖利率、費半半導體、原油、美元匯率與法人主力留倉',
+        'features': [
+            'ret_5d', 'ret_20d', 'ma20_bias', 'ma60_bias', 'volatility_20d',
+            'us10y_change_20d', 'sox_ret_20d', 'oil_ret_20d', 'usdtwd_ret_20d',
+            'foreign_futures_net', 'foreign_cash_net_5d', 'tsmc_ret_20d'
+        ]
     },
     'recent_momentum': {
         'id': 'recent_momentum',
@@ -265,11 +279,31 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict]:
     """, conn)
     tsmc_dict = {str(r['date']): float(r['close'] or 0) for _, r in df_tsmc.iterrows()}
     
+    # 5. 載入國際宏觀指標 (macro_indicators: 美債10Y, 原油, 匯率, 費半)
+    macro_dict = {}
+    try:
+        df_macro = pd.read_sql_query("""
+            SELECT date, us10y, oil_wti, usdtwd, sox, dxy
+            FROM macro_indicators
+            ORDER BY date ASC
+        """, conn)
+        for _, r in df_macro.iterrows():
+            d = str(r['date'])
+            macro_dict[d] = {
+                'us10y': float(r['us10y']) if pd.notnull(r['us10y']) else None,
+                'oil_wti': float(r['oil_wti']) if pd.notnull(r['oil_wti']) else None,
+                'usdtwd': float(r['usdtwd']) if pd.notnull(r['usdtwd']) else None,
+                'sox': float(r['sox']) if pd.notnull(r['sox']) else None,
+                'dxy': float(r['dxy']) if pd.notnull(r['dxy']) else None
+            }
+    except Exception as e:
+        print(f"[!] 載入 macro_indicators 失敗或數據表未建立: {e}")
+
     conn.close()
-    return df_index, fut_dict, cash_dict, tsmc_dict
+    return df_index, fut_dict, cash_dict, tsmc_dict, macro_dict
 
 def build_features() -> pd.DataFrame:
-    df_index, fut_dict, cash_dict, tsmc_dict = load_raw_data()
+    df_index, fut_dict, cash_dict, tsmc_dict, macro_dict = load_raw_data()
     n = len(df_index)
     
     dates = df_index['date'].astype(str).tolist()
@@ -312,6 +346,7 @@ def build_features() -> pd.DataFrame:
     last_fut_info = {'外資': 0, '投信': 0, '自營商': 0}
     last_cash_info = {'foreign': 0, 'trust': 0, 'dealer': 0, 'total': 0}
     last_tsmc_c = 0.0
+    last_macro_info = {'us10y': 4.0, 'oil_wti': 75.0, 'usdtwd': 31.0, 'sox': 4000.0, 'dxy': 100.0}
 
     for i in range(n):
         d = dates[i]
@@ -388,6 +423,32 @@ def build_features() -> pd.DataFrame:
             tsmc_ma20 = sum(valid_tsmc) / len(valid_tsmc) if valid_tsmc else tsmc_c
             tsmc_ma20_bias = ((tsmc_c / tsmc_ma20 - 1) * 100) if tsmc_ma20 else 0.0
             
+        # 宏觀指標 (Forward-fill 避開美台時差休市)
+        if d in macro_dict:
+            for k, val in macro_dict[d].items():
+                if val is not None:
+                    last_macro_info[k] = val
+        m_info = last_macro_info.copy()
+        
+        d_prev20 = dates[i-20] if i >= 20 else d
+        m_prev20 = macro_dict.get(d_prev20, m_info) if i >= 20 else m_info
+        
+        us10y_val = m_info.get('us10y', 4.0)
+        us10y_prev20 = m_prev20.get('us10y', us10y_val) if m_prev20.get('us10y') is not None else us10y_val
+        us10y_chg20 = round(float(us10y_val - us10y_prev20), 3)
+        
+        oil_val = m_info.get('oil_wti', 75.0)
+        oil_prev20 = m_prev20.get('oil_wti', oil_val) if m_prev20.get('oil_wti') is not None else oil_val
+        oil_ret20 = round(float((oil_val / oil_prev20 - 1) * 100), 2) if oil_prev20 else 0.0
+        
+        sox_val = m_info.get('sox', 4000.0)
+        sox_prev20 = m_prev20.get('sox', sox_val) if m_prev20.get('sox') is not None else sox_val
+        sox_ret20 = round(float((sox_val / sox_prev20 - 1) * 100), 2) if sox_prev20 else 0.0
+        
+        usdtwd_val = m_info.get('usdtwd', 31.0)
+        usdtwd_prev20 = m_prev20.get('usdtwd', usdtwd_val) if m_prev20.get('usdtwd') is not None else usdtwd_val
+        usdtwd_ret20 = round(float((usdtwd_val / usdtwd_prev20 - 1) * 100), 2) if usdtwd_prev20 else 0.0
+
         # 未來目標標籤 (Targets)
         fut_ret_5d = (closes[i+5] / c - 1) * 100 if i + 5 < n else None
         fut_ret_10d = (closes[i+10] / c - 1) * 100 if i + 10 < n else None
@@ -436,6 +497,14 @@ def build_features() -> pd.DataFrame:
             'tsmc_ret_5d': tsmc_ret5,
             'tsmc_ret_20d': tsmc_ret20,
             'tsmc_ma20_bias': tsmc_ma20_bias,
+            'us10y_change_20d': us10y_chg20,
+            'sox_ret_20d': sox_ret20,
+            'oil_ret_20d': oil_ret20,
+            'usdtwd_ret_20d': usdtwd_ret20,
+            'us10y': us10y_val,
+            'oil_wti': oil_val,
+            'usdtwd': usdtwd_val,
+            'sox': sox_val,
             # Targets
             'fut_ret_5d': fut_ret_5d,
             'fut_ret_10d': fut_ret_10d,
@@ -1554,7 +1623,17 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
         'top_features': active_model.get('top_features', []),
         'optimization': active_model.get('optimization', {}),
         'regime_info': active_model.get('regime_info', {}),
-        'support_resistance': calculate_market_support_resistance(df)
+        'support_resistance': calculate_market_support_resistance(df),
+        'macro_snapshot': {
+            'us10y': round(float(latest_row.get('us10y', 5.28)), 2) if 'us10y' in latest_row else 5.28,
+            'us10y_change_20d': round(float(latest_row.get('us10y_change_20d', 0)), 2),
+            'oil_wti': round(float(latest_row.get('oil_wti', 91.5)), 2) if 'oil_wti' in latest_row else 91.5,
+            'oil_ret_20d': round(float(latest_row.get('oil_ret_20d', 0)), 2),
+            'usdtwd': round(float(latest_row.get('usdtwd', 31.83)), 2) if 'usdtwd' in latest_row else 31.83,
+            'usdtwd_ret_20d': round(float(latest_row.get('usdtwd_ret_20d', 0)), 2),
+            'sox': round(float(latest_row.get('sox', 12692)), 1) if 'sox' in latest_row else 12692.0,
+            'sox_ret_20d': round(float(latest_row.get('sox_ret_20d', 0)), 2)
+        }
     }
     report = sanitize_for_json(report)
     with open(PREDICTION_JSON_PATH, 'w', encoding='utf-8') as f:
