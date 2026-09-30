@@ -5036,6 +5036,256 @@ function StockDashboard() {
                       </div>
                     </div>
 
+                    {/* 🌊 艾略特波浪實戰定位與斐波那契階梯 (Algorithmic Elliott Wave Matrix) */}
+                    {marketMlData?.elliott_wave && marketMlData.elliott_wave.status === 'success' && (
+                      <div style={{
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.85))',
+                        border: '1px solid rgba(139, 92, 246, 0.4)',
+                        borderRadius: '14px',
+                        padding: '1.25rem 1.5rem',
+                        marginBottom: '1.25rem',
+                        boxShadow: '0 8px 24px rgba(139, 92, 246, 0.15)'
+                      }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div>
+                            <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#C084FC', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                              <span>🌊</span>
+                              <span>艾略特波浪客觀量化定位與斐波那契階梯 (Elliott Wave & Fibonacci Matrix)</span>
+                            </h3>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                              基於動態雙向極值識別 (Dynamic ZigZag)、三大不可違背鐵律約束檢驗與黃金分割擴展預測
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              background: 'rgba(168, 85, 247, 0.15)',
+                              color: '#D8B4FE',
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(168, 85, 247, 0.35)',
+                              fontWeight: 600
+                            }}>
+                              {marketMlData.elliott_wave.degree || '日線中級推動浪'}
+                            </span>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              background: 'rgba(34, 197, 94, 0.15)',
+                              color: '#86EFAC',
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(34, 197, 94, 0.35)',
+                              fontWeight: 600
+                            }}>
+                              結構信心度：{marketMlData.elliott_wave.confidence_pct}%
+                            </span>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              background: 'rgba(59, 130, 246, 0.15)',
+                              color: '#93C5FD',
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }}>
+                              標的：加權指數 ({marketMlData.elliott_wave.current_close?.toLocaleString()} 點)
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Wave Stepper / Visual Progress (W1 -> W2 -> W3 -> W4 -> W5) */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                          gap: '0.75rem',
+                          marginBottom: '1rem',
+                          background: 'rgba(0, 0, 0, 0.25)',
+                          padding: '0.75rem',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(255, 255, 255, 0.05)'
+                        }}>
+                          {[
+                            { step: 1, name: 'W1 初升試盤', desc: '築底初發動', color: '#60A5FA' },
+                            { step: 2, name: 'W2 回踩洗盤', desc: '不破起點低', color: '#F59E0B' },
+                            { step: 3, name: 'W3 主升爆發', desc: '非最短且最強', color: '#EC4899' },
+                            { step: 4, name: 'W4 收斂震盪', desc: '不破W1高點', color: '#A855F7' },
+                            { step: 5, name: 'W5 末升衝刺', desc: '高檔背離警戒', color: '#EF4444' },
+                          ].map((w) => {
+                            const isActive = (marketMlData.elliott_wave.active_step || 5) === w.step;
+                            const isPassed = (marketMlData.elliott_wave.active_step || 5) > w.step;
+                            return (
+                              <div key={w.step} style={{
+                                padding: '0.6rem 0.75rem',
+                                borderRadius: '8px',
+                                background: isActive ? 'rgba(168, 85, 247, 0.25)' : isPassed ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                                border: isActive ? '1.5px solid #C084FC' : isPassed ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)',
+                                boxShadow: isActive ? '0 0 12px rgba(192, 132, 252, 0.3)' : 'none',
+                                position: 'relative',
+                                transition: 'all 0.2s ease'
+                              }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                                  <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: isActive ? '#F3E8FF' : isPassed ? '#86EFAC' : 'var(--text-muted)' }}>
+                                    {isPassed ? '✓ ' : ''}{w.name}
+                                  </span>
+                                  {isActive && (
+                                    <span style={{ fontSize: '0.65rem', background: '#9333EA', color: '#fff', padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                      當前進行
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{ fontSize: '0.68rem', color: isActive ? '#E9D5FF' : 'var(--text-muted)' }}>
+                                  {w.desc}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* 4 Core Quantitative KPIs */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                          gap: '0.75rem',
+                          marginBottom: '1rem'
+                        }}>
+                          <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.07)', borderRadius: '10px', padding: '0.75rem 1rem' }}>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>當前浪型定位</div>
+                            <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#E9D5FF' }}>
+                              {marketMlData.elliott_wave.wave_code || 'W5'} ({marketMlData.elliott_wave.wave_name ? marketMlData.elliott_wave.wave_name.split(' ')[1] : '衝刺段'})
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: '#A78BFA', marginTop: '0.2rem' }}>
+                              {marketMlData.elliott_wave.stage_desc}
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'rgba(34, 197, 94, 0.06)', border: '1px solid rgba(34, 197, 94, 0.25)', borderRadius: '10px', padding: '0.75rem 1rem' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#86EFAC', marginBottom: '0.25rem' }}>🎯 斐波 1.618x 目標</div>
+                            <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#4ADE80', fontFamily: 'monospace' }}>
+                              {marketMlData.elliott_wave.targets?.fib_1618?.toLocaleString()} 點
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: '#86EFAC', marginTop: '0.2rem' }}>
+                              距現價潛在空間：+{marketMlData.elliott_wave.upside_potential_pct}%
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', padding: '0.75rem 1rem' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#FCA5A5', marginBottom: '0.25rem' }}>🛡️ 結構失效防守價 (Stop)</div>
+                            <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#F87171', fontFamily: 'monospace' }}>
+                              {marketMlData.elliott_wave.invalidation_level?.toLocaleString()} 點
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: '#FCA5A5', marginTop: '0.2rem' }}>
+                              最大防守緩衝：{marketMlData.elliott_wave.invalidation_buffer_pct}%
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'rgba(245, 158, 11, 0.06)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '10px', padding: '0.75rem 1rem' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#FDE68A', marginBottom: '0.25rem' }}>⚖️ 波段風益比 (R/R)</div>
+                            <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#FBBF24', fontFamily: 'monospace' }}>
+                              1 : {marketMlData.elliott_wave.risk_reward_ratio}
+                            </div>
+                            <div style={{ fontSize: '0.68rem', color: '#FDE68A', marginTop: '0.2rem' }}>
+                              斐波 2.618 極限：{marketMlData.elliott_wave.targets?.fib_2618?.toLocaleString()} 點
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Rules & Pivots 2-Column Section */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem', marginBottom: '0.9rem' }}>
+                          {/* 3 Cardinal Rules */}
+                          <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#DDD6FE', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>⚖️</span>
+                              <span>艾略特三大不可違背鐵律驗證</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                              {(marketMlData.elliott_wave.cardinal_rules || []).map((r, idx) => (
+                                <div key={idx} style={{
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: '0.5rem',
+                                  fontSize: '0.75rem',
+                                  background: 'rgba(255, 255, 255, 0.02)',
+                                  padding: '0.4rem 0.6rem',
+                                  borderRadius: '6px'
+                                }}>
+                                  <span style={{ fontSize: '0.85rem' }}>{r.icon}</span>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <strong style={{ color: '#F1F5F9' }}>{r.title}</strong>
+                                      <span style={{
+                                        fontSize: '0.65rem',
+                                        color: r.status === 'PASS' ? '#86EFAC' : '#FCA5A5',
+                                        background: r.status === 'PASS' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                        padding: '0.1rem 0.35rem',
+                                        borderRadius: '4px'
+                                      }}>
+                                        {r.status}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                                      {r.detail} <span style={{ color: '#94A3B8', fontFamily: 'monospace' }}>({r.formula})</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Extrema Pivots Table */}
+                          <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#DDD6FE', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>📍</span>
+                              <span>波段極值拐點坐標軌跡 (ZigZag Extrema)</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                              {(marketMlData.elliott_wave.key_pivots || []).map((p, idx) => (
+                                <div key={idx} style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  fontSize: '0.73rem',
+                                  padding: '0.25rem 0.4rem',
+                                  borderBottom: idx === (marketMlData.elliott_wave.key_pivots.length - 1) ? 'none' : '1px solid rgba(255, 255, 255, 0.04)'
+                                }}>
+                                  <span style={{ fontWeight: 600, color: p.label && p.label.startsWith('現價') ? '#F43F5E' : '#C4B5FD' }}>
+                                    {p.label}
+                                  </span>
+                                  <span style={{ color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.68rem' }}>
+                                    {formatMlDate(p.date) || p.date}
+                                  </span>
+                                  <span style={{ fontWeight: 'bold', color: '#F8FAFC', fontFamily: 'monospace' }}>
+                                    {p.price?.toLocaleString()} 點
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Strategy Directive Callout */}
+                        {marketMlData.elliott_wave.strategy_directive && (
+                          <div style={{
+                            background: 'rgba(168, 85, 247, 0.08)',
+                            border: '1px solid rgba(168, 85, 247, 0.25)',
+                            borderRadius: '8px',
+                            padding: '0.65rem 0.9rem',
+                            fontSize: '0.76rem',
+                            lineHeight: 1.5,
+                            color: '#E9D5FF',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '0.5rem'
+                          }}>
+                            <span style={{ fontSize: '1rem', lineHeight: 1 }}>💡</span>
+                            <div>
+                              <strong style={{ color: '#F3E8FF' }}>波浪理論量化操盤戰略指引：</strong>
+                              <span style={{ marginLeft: '0.25rem' }}>{marketMlData.elliott_wave.strategy_directive}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* 📐 大盤關鍵支撐壓力多階量化梯隊 (Support & Resistance Ladder) */}
                     {marketMlData?.support_resistance && (
                       <div style={{
