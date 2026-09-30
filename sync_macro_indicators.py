@@ -38,6 +38,7 @@ MACRO_TICKERS = {
     'tsm_adr': 'TSM',      # 台積電 ADR (USD)
     'nvda': 'NVDA',        # 輝達 (USD)
     'usdjpy': 'JPY=X',     # 美元兌日圓 (JPY)
+    'etf_0050': '0050.TW', # 元大台灣50 ETF (台幣，自動除權息還原)
 }
 
 def get_db_connection():
@@ -65,7 +66,7 @@ def init_macro_table():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    for col in ['tsm_adr', 'nvda', 'usdjpy']:
+    for col in ['tsm_adr', 'nvda', 'usdjpy', 'etf_0050']:
         try:
             cur.execute(f"ALTER TABLE macro_indicators ADD COLUMN {col} REAL")
         except sqlite3.OperationalError:
@@ -167,10 +168,11 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
         tsm = row.get("tsm_adr") if pd.notnull(row.get("tsm_adr")) else None
         nvda = row.get("nvda") if pd.notnull(row.get("nvda")) else None
         jpy = row.get("usdjpy") if pd.notnull(row.get("usdjpy")) else None
+        etf0050 = row.get("etf_0050") if pd.notnull(row.get("etf_0050")) else None
         
         cur.execute("""
-            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(date) DO UPDATE SET
                 us10y = COALESCE(excluded.us10y, macro_indicators.us10y),
                 oil_wti = COALESCE(excluded.oil_wti, macro_indicators.oil_wti),
@@ -180,8 +182,9 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
                 tsm_adr = COALESCE(excluded.tsm_adr, macro_indicators.tsm_adr),
                 nvda = COALESCE(excluded.nvda, macro_indicators.nvda),
                 usdjpy = COALESCE(excluded.usdjpy, macro_indicators.usdjpy),
+                etf_0050 = COALESCE(excluded.etf_0050, macro_indicators.etf_0050),
                 updated_at = excluded.updated_at
-        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, now_str))
+        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, etf0050, now_str))
         upsert_count += 1
         
     conn.commit()

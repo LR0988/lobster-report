@@ -305,7 +305,7 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
     macro_dict = {}
     try:
         df_macro = pd.read_sql_query("""
-            SELECT date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy
+            SELECT date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050
             FROM macro_indicators
             ORDER BY date ASC
         """, conn)
@@ -320,6 +320,7 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
                 'tsm_adr': float(r['tsm_adr']) if pd.notnull(r['tsm_adr']) else None,
                 'nvda': float(r['nvda']) if pd.notnull(r['nvda']) else None,
                 'usdjpy': float(r['usdjpy']) if pd.notnull(r['usdjpy']) else None,
+                'etf_0050': float(r['etf_0050']) if pd.notnull(r['etf_0050']) else None,
             }
     except Exception as e:
         print(f"[!] 載入 macro_indicators 失敗或數據表未建立: {e}")
@@ -446,7 +447,7 @@ def build_features() -> pd.DataFrame:
     last_tsmc_c = 0.0
     last_macro_info = {
         'us10y': 4.0, 'oil_wti': 75.0, 'usdtwd': 31.0, 'sox': 4000.0, 'dxy': 100.0,
-        'tsm_adr': 400.0, 'nvda': 200.0, 'usdjpy': 150.0
+        'tsm_adr': 400.0, 'nvda': 200.0, 'usdjpy': 150.0, 'etf_0050': 100.0
     }
 
     for i in range(n):
@@ -648,6 +649,7 @@ def build_features() -> pd.DataFrame:
             'nvda': nvda_val,
             'usdjpy': usdjpy_val,
             'dxy': dxy_val,
+            'etf0050_close': m_info.get('etf_0050', 100.0),
             # Targets
             'fut_ret_5d': fut_ret_5d,
             'fut_ret_10d': fut_ret_10d,
@@ -1399,10 +1401,19 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
     X = df_slice[feature_cols].copy()
     closes = df_slice['close'].values
     dates = df_slice['date'].values
+    etf0050_closes = df_slice['etf0050_close'].values if 'etf0050_close' in df_slice.columns else closes
     n = len(df_slice)
     
     mkt_rets = np.zeros(n)
     mkt_rets[1:] = (closes[1:] / closes[:-1] - 1)
+
+    # 元大台灣 50 (0050) 買進持有報酬率 (已除權息與拆分割還原)
+    etf0050_rets = np.zeros(n)
+    for i in range(1, n):
+        if etf0050_closes[i-1] > 0 and etf0050_closes[i] > 0:
+            etf0050_rets[i] = (etf0050_closes[i] / etf0050_closes[i-1] - 1)
+        else:
+            etf0050_rets[i] = mkt_rets[i]
     
     p_up = pipe['clf_up'].predict_proba(X)[:, 1]
     p_down = pipe['clf_down'].predict_proba(X)[:, 1]
@@ -1424,6 +1435,7 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
         
     equity = np.cumprod(1 + strat_rets) * 1000000.0
     bench_equity = np.cumprod(1 + mkt_rets) * 1000000.0
+    etf0050_equity = np.cumprod(1 + etf0050_rets) * 1000000.0
     
     peak = np.maximum.accumulate(equity)
     dd = (equity - peak) / peak * 100.0
@@ -1432,15 +1444,56 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
     b_peak = np.maximum.accumulate(bench_equity)
     b_dd = (bench_equity - b_peak) / b_peak * 100.0
     b_mdd = float(np.min(b_dd))
+
+    e_peak = np.maximum.accumulate(etf0050_equity)
+    e_dd = (etf0050_equity - e_peak) / e_peak * 100.0
+    e_mdd = float(np.min(e_dd))
     
     years = n / 250.0
     tot_ret = (equity[-1] / equity[0] - 1) * 100.0
-    cagr = ((equity[-1] / equity[0]) ** (1.0 / years) - 1) * 100.0
+    cagr = ((equity[-1] / equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
     b_tot_ret = (bench_equity[-1] / bench_equity[0] - 1) * 100.0
-    b_cagr = ((bench_equity[-1] / bench_equity[0]) ** (1.0 / years) - 1) * 100.0
+    b_cagr = ((bench_equity[-1] / bench_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
+    e_tot_ret = (etf0050_equity[-1] / etf0050_equity[0] - 1) * 100.0
+    e_cagr = ((etf0050_equity[-1] / etf0050_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
     
     sharpe = float((np.mean(strat_rets) * 250.0 - 0.015) / (np.std(strat_rets) * np.sqrt(250.0) + 1e-9))
     b_sharpe = float((np.mean(mkt_rets) * 250.0 - 0.015) / (np.std(mkt_rets) * np.sqrt(250.0) + 1e-9))
+    e_sharpe = float((np.mean(etf0050_rets) * 250.0 - 0.015) / (np.std(etf0050_rets) * np.sqrt(250.0) + 1e-9))
+
+    # 抽取標註加碼與放空的時間點 (Action Markers)
+    action_markers = []
+    for i in range(1, n):
+        pos = positions[i-1]
+        prev_pos = positions[i-2] if i >= 2 else 0.0
+        if pos != prev_pos:
+            if pos == 1.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'BUY',
+                    'label': '🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多加碼',
+                    'direction': '多方 (Long)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0)
+                })
+            elif pos == -1.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'SHORT',
+                    'label': '🔴 融券放空' if prev_pos == 0.0 else '🔴 翻空做空',
+                    'direction': '空方 (Short)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0)
+                })
+            elif pos == 0.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'EXIT',
+                    'label': '🛡️ 平倉觀望',
+                    'direction': '空手 (Cash)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0)
+                })
     
     downside_returns = strat_rets[strat_rets < 0]
     downside_std = np.std(downside_returns) * np.sqrt(250) if len(downside_returns) > 0 else 1e-5
@@ -1521,6 +1574,7 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
             'year': str(dates[idx])[:4],
             'strategy_equity': round(float(equity[idx]), 0),
             'benchmark_equity': round(float(bench_equity[idx]), 0),
+            'etf0050_equity': round(float(etf0050_equity[idx]), 0),
             'drawdown_pct': round(float(dd[idx]), 2),
             'position': float(positions[idx])
         })
@@ -1546,7 +1600,15 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
         'market_exposure_pct': round(float(np.mean(positions != 0) * 100), 1),
         'yearly': yearly,
         'trades': trades[-20:],
-        'curve': curve
+        'curve': curve,
+        'etf0050': {
+            'total_return_pct': round(float(e_tot_ret), 2),
+            'cagr_pct': round(float(e_cagr), 2),
+            'max_drawdown_pct': round(float(e_mdd), 2),
+            'sharpe_ratio': round(float(e_sharpe), 2),
+            'alpha_pct': round(float(tot_ret - e_tot_ret), 2)
+        },
+        'action_markers': action_markers
     }
 
 def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: Optional[Dict] = None, selected_model_id: str = 'regime_moe') -> Dict[str, Any]:
@@ -1646,6 +1708,8 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
                 'max_drawdown_pct': target_ls['benchmark_max_drawdown_pct'],
                 'sharpe_ratio': target_ls['benchmark_sharpe']
             },
+            'etf0050': target_ls.get('etf0050', {}),
+            'action_markers': target_ls.get('action_markers', []),
             'long_short': target_ls,
             'long_only': target_lo,
             'comparison_long_short': comp_ls,
@@ -1676,6 +1740,7 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'end_date': str(valid_df.iloc[-1]['date']),
             'trading_days': len(valid_df),
             'benchmark': history_10y_data.get('benchmark', {}),
+            'etf0050': history_10y_data.get('etf0050', {}),
             'summary': history_10y_data.get('long_short', {}),
             'yearly': history_10y_data.get('long_short', {}).get('yearly', [])
         }
@@ -1726,10 +1791,19 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
     X = df_slice[feature_cols].copy()
     closes = df_slice['close'].values
     dates = df_slice['date'].values
+    etf0050_closes = df_slice['etf0050_close'].values if 'etf0050_close' in df_slice.columns else closes
     n = len(df_slice)
     
     mkt_rets = np.zeros(n)
     mkt_rets[1:] = (closes[1:] / closes[:-1] - 1)
+
+    # 元大台灣 50 (0050) 買進持有報酬率 (已除權息與拆分割還原)
+    etf0050_rets = np.zeros(n)
+    for i in range(1, n):
+        if etf0050_closes[i-1] > 0 and etf0050_closes[i] > 0:
+            etf0050_rets[i] = (etf0050_closes[i] / etf0050_closes[i-1] - 1)
+        else:
+            etf0050_rets[i] = mkt_rets[i]
     
     p_up = pipe['clf_up'].predict_proba(X)[:, 1]
     p_down = pipe['clf_down'].predict_proba(X)[:, 1]
@@ -1751,6 +1825,7 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         
     equity = np.cumprod(1 + strat_rets) * 1000000.0
     bench_equity = np.cumprod(1 + mkt_rets) * 1000000.0
+    etf0050_equity = np.cumprod(1 + etf0050_rets) * 1000000.0
     
     peak = np.maximum.accumulate(equity)
     dd = (equity - peak) / peak * 100.0
@@ -1759,12 +1834,56 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
     b_peak = np.maximum.accumulate(bench_equity)
     b_dd = (bench_equity - b_peak) / b_peak * 100.0
     b_mdd = float(np.min(b_dd))
+
+    e_peak = np.maximum.accumulate(etf0050_equity)
+    e_dd = (etf0050_equity - e_peak) / e_peak * 100.0
+    e_mdd = float(np.min(e_dd))
     
     tot_ret = (equity[-1] / equity[0] - 1) * 100.0
     b_tot_ret = (bench_equity[-1] / bench_equity[0] - 1) * 100.0
+    e_tot_ret = (etf0050_equity[-1] / etf0050_equity[0] - 1) * 100.0
     
+    years = n / 250.0
+    cagr = ((equity[-1] / equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
+    e_cagr = ((etf0050_equity[-1] / etf0050_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
+
     sharpe = float((np.mean(strat_rets) * 250.0 - 0.015) / (np.std(strat_rets) * np.sqrt(250.0) + 1e-9))
     b_sharpe = float((np.mean(mkt_rets) * 250.0 - 0.015) / (np.std(mkt_rets) * np.sqrt(250.0) + 1e-9))
+    e_sharpe = float((np.mean(etf0050_rets) * 250.0 - 0.015) / (np.std(etf0050_rets) * np.sqrt(250.0) + 1e-9))
+
+    # 抽取標註加碼與放空的時間點 (Action Markers)
+    action_markers = []
+    for i in range(1, n):
+        pos = positions[i-1]
+        prev_pos = positions[i-2] if i >= 2 else 0.0
+        if pos != prev_pos:
+            if pos == 1.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'BUY',
+                    'label': '🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多加碼',
+                    'direction': '多方 (Long)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0)
+                })
+            elif pos == -1.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'SHORT',
+                    'label': '🔴 融券放空' if prev_pos == 0.0 else '🔴 翻空做空',
+                    'direction': '空方 (Short)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0)
+                })
+            elif pos == 0.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'EXIT',
+                    'label': '🛡️ 平倉觀望',
+                    'direction': '空手 (Cash)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0)
+                })
     
     trades = []
     curr_t = None
@@ -1927,6 +2046,7 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
             'date': str(dates[idx]),
             'strategy_equity': round(float(equity[idx]), 0),
             'benchmark_equity': round(float(bench_equity[idx]), 0),
+            'etf0050_equity': round(float(etf0050_equity[idx]), 0),
             'drawdown_pct': round(float(dd[idx]), 2),
             'position': float(positions[idx])
         })
@@ -1947,7 +2067,15 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         'market_exposure_pct': round(float(np.mean(positions != 0) * 100), 1),
         'current_status': current_status,
         'trades': trades,
-        'curve': curve
+        'curve': curve,
+        'etf0050': {
+            'total_return_pct': round(float(e_tot_ret), 2),
+            'cagr_pct': round(float(e_cagr), 2),
+            'max_drawdown_pct': round(float(e_mdd), 2),
+            'sharpe_ratio': round(float(e_sharpe), 2),
+            'alpha_pct': round(float(tot_ret - e_tot_ret), 2)
+        },
+        'action_markers': action_markers
     }
 
 def build_operations_6m(df: Optional[pd.DataFrame] = None, models_bundle: Optional[Dict] = None, selected_model_id: str = 'regime_moe') -> Dict[str, Any]:

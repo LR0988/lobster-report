@@ -634,6 +634,7 @@ function StockDashboard() {
   });
   const [showMarketMlParamsDetail, setShowMarketMlParamsDetail] = useState(false);
   const [showFullVolumeHistogram, setShowFullVolumeHistogram] = useState(false);
+  const [showActionMarkers, setShowActionMarkers] = useState(() => localStorage.getItem('market_show_action_markers') !== 'false');
   const [marketMlSavedToast, setMarketMlSavedToast] = useState(false);
 
   // ── 低頻量化交易 (Low-Frequency Quant) 狀態 ──
@@ -5540,6 +5541,10 @@ function StockDashboard() {
                       if (pt.benchmark_equity < minVal) minVal = pt.benchmark_equity;
                       if (pt.benchmark_equity > maxVal) maxVal = pt.benchmark_equity;
                     }
+                    if (pt.etf0050_equity !== undefined) {
+                      if (pt.etf0050_equity < minVal) minVal = pt.etf0050_equity;
+                      if (pt.etf0050_equity > maxVal) maxVal = pt.etf0050_equity;
+                    }
                   });
 
                   if (minVal === Infinity) {
@@ -5556,6 +5561,13 @@ function StockDashboard() {
 
                   const stratPoints = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.strategy_equity).toFixed(1)}`).join(' ');
                   const benchPoints = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.benchmark_equity).toFixed(1)}`).join(' ');
+                  const etfPoints = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.etf0050_equity || pt.benchmark_equity).toFixed(1)}`).join(' ');
+
+                  const opActionMarkers = modeData?.action_markers || [];
+                  const curveDateMap = {};
+                  curve.forEach((pt, i) => {
+                    curveDateMap[String(pt.date)] = i;
+                  });
 
                   const yTicks = [
                     minVal,
@@ -5916,8 +5928,13 @@ function StockDashboard() {
                             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: (modeData.total_return_pct || 0) >= 0 ? '#34D399' : '#F87171' }}>
                               {(modeData.total_return_pct || 0) >= 0 ? '+' : ''}{modeData.total_return_pct?.toFixed(1)}%
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                              同期大盤: +{modeData.benchmark_total_return_pct?.toFixed(1)}%
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div>同期大盤: +{modeData.benchmark_total_return_pct?.toFixed(1)}%</div>
+                              {modeData.etf0050 && (
+                                <div style={{ color: '#C4B5FD' }}>
+                                  同期 0050: <span style={{ fontWeight: 'bold' }}>+{modeData.etf0050.total_return_pct?.toFixed(1)}%</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -5960,8 +5977,13 @@ function StockDashboard() {
                             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#F87171' }}>
                               {modeData.max_drawdown_pct?.toFixed(1)}%
                             </div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                              大盤回撤: {modeData.benchmark_max_drawdown_pct?.toFixed(1)}%
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div>大盤回撤: {modeData.benchmark_max_drawdown_pct?.toFixed(1)}%</div>
+                              {modeData.etf0050 && (
+                                <div style={{ color: '#C4B5FD' }}>
+                                  0050回撤: {modeData.etf0050.max_drawdown_pct?.toFixed(1)}%
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -5991,11 +6013,11 @@ function StockDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <h4 style={{ margin: 0, fontSize: '0.98rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <span>📈</span>
-                                <span>近半年模型策略淨值 vs 大盤加權指數走勢（初始 NT$ 1,000,000）</span>
+                                <span>近半年模型策略淨值 vs 大盤加權指數 vs 0050 走勢（初始 NT$ 1,000,000）</span>
                               </h4>
                             </div>
-                            {/* 圖例 */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8rem' }}>
+                            {/* 圖例與標注切換 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.8rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '14px', height: '3px', background: '#10B981', borderRadius: '2px' }}></span>
                                 <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>AI 策略 ({modelData?.short_name || '策略'})</span>
@@ -6004,6 +6026,36 @@ function StockDashboard() {
                                 <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#94A3B8', borderTop: '1px dashed #CBD5E1' }}></span>
                                 <span style={{ color: '#94A3B8' }}>TAIEX 大盤 (買進持有)</span>
                               </div>
+                              {modeData.etf0050 && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#8B5CF6', borderTop: '1px dashed #C4B5FD' }}></span>
+                                  <span style={{ color: '#C4B5FD' }}>0050 ETF (+{modeData.etf0050.total_return_pct?.toFixed(1)}%)</span>
+                                </div>
+                              )}
+                              <button
+                                type="button"
+                                className="btn"
+                                style={{
+                                  padding: '0.2rem 0.6rem',
+                                  fontSize: '0.74rem',
+                                  borderRadius: '6px',
+                                  background: showActionMarkers ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255,255,255,0.06)',
+                                  color: showActionMarkers ? '#6EE7B7' : '#94A3B8',
+                                  border: showActionMarkers ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255,255,255,0.15)',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem'
+                                }}
+                                onClick={() => {
+                                  const nextVal = !showActionMarkers;
+                                  setShowActionMarkers(nextVal);
+                                  localStorage.setItem('market_show_action_markers', String(nextVal));
+                                }}
+                              >
+                                <span>{showActionMarkers ? '✓' : '○'}</span>
+                                <span>標注加碼/放空 ({opActionMarkers.length})</span>
+                              </button>
                             </div>
                           </div>
 
@@ -6033,10 +6085,53 @@ function StockDashboard() {
                               {/* 基準大盤虛線 */}
                               <polyline fill="none" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" points={benchPoints} />
 
+                              {/* 0050 ETF 基準虛線 */}
+                              {curve.some(pt => pt.etf0050_equity !== undefined) && (
+                                <polyline fill="none" stroke="#8B5CF6" strokeWidth="1.8" strokeDasharray="3 3" points={etfPoints} />
+                              )}
+
                               {/* AI 策略折線 */}
                               <polyline fill="none" stroke="#10B981" strokeWidth="2.5" points={stratPoints} />
 
-                              {/* 終點標籤 */}
+                              {/* 買進加碼與放空標注點位 */}
+                              {showActionMarkers && opActionMarkers.map((m, mIdx) => {
+                                const idx = curveDateMap[String(m.date)];
+                                if (idx === undefined) return null;
+                                const pt = curve[idx];
+                                const x = getX(idx);
+                                const y = getY(pt.strategy_equity);
+                                const isBuy = m.action === 'BUY';
+                                const isShort = m.action === 'SHORT';
+                                const color = isBuy ? '#10B981' : isShort ? '#EF4444' : '#F59E0B';
+                                const triColor = isBuy ? '#34D399' : isShort ? '#F87171' : '#FBBF24';
+
+                                return (
+                                  <g key={`op-marker-${mIdx}`} style={{ cursor: 'pointer' }}>
+                                    <title>{`${formatOpDate(m.date)} ${m.label || (isBuy ? '買進加碼' : isShort ? '融券放空' : '平倉')} @ ${m.price?.toLocaleString()} 點 (策略淨值: $${Math.round(m.equity || pt.strategy_equity).toLocaleString()})`}</title>
+                                    <line x1={x} y1={y} x2={x} y2={padT + plotH} stroke={isBuy ? 'rgba(16, 185, 129, 0.25)' : isShort ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.2)'} strokeDasharray="2 2" />
+                                    <circle cx={x} cy={y} r="4.5" fill={color} stroke="#0F172A" strokeWidth="1.5" />
+                                    {isBuy ? (
+                                      <polygon points={`${x},${y - 11} ${x - 4.5},${y - 4} ${x + 4.5},${y - 4}`} fill={triColor} />
+                                    ) : isShort ? (
+                                      <polygon points={`${x},${y + 11} ${x - 4.5},${y + 4} ${x + 4.5},${y + 4}`} fill={triColor} />
+                                    ) : (
+                                      <rect x={x - 2.5} y={y - 2.5} width="5" height="5" fill={triColor} />
+                                    )}
+                                  </g>
+                                );
+                              })}
+
+                              {/* 0050 終點標籤 */}
+                              {curve.length > 0 && curve[curve.length - 1].etf0050_equity && (
+                                <>
+                                  <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].etf0050_equity)} r="3.5" fill="#8B5CF6" />
+                                  <text x={getX(curve.length - 1) - 6} y={getY(curve[curve.length - 1].etf0050_equity) - 6} fill="#C4B5FD" fontSize="10" textAnchor="end">
+                                    0050: NT$ {Math.round(curve[curve.length - 1].etf0050_equity).toLocaleString()}
+                                  </text>
+                                </>
+                              )}
+
+                              {/* AI 策略終點標籤 */}
                               {curve.length > 0 && (
                                 <>
                                   <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].strategy_equity)} r="4" fill="#34D399" />
@@ -6610,15 +6705,19 @@ function StockDashboard() {
                       if (filteredCurve.length >= 2) {
                         const initStrat = filteredCurve[0].strategy_equity || 1;
                         const initBench = filteredCurve[0].benchmark_equity || 1;
+                        const initEtf = filteredCurve[0].etf0050_equity || initBench;
 
                         let peak = 1000000;
                         let maxDd = 0;
                         let benchPeak = 1000000;
                         let benchMaxDd = 0;
+                        let etfPeak = 1000000;
+                        let etfMaxDd = 0;
 
                         const rebasedCurve = filteredCurve.map(p => {
                           const stratEq = (p.strategy_equity / initStrat) * 1000000;
                           const benchEq = (p.benchmark_equity / initBench) * 1000000;
+                          const etfEq = p.etf0050_equity ? (p.etf0050_equity / initEtf) * 1000000 : benchEq;
 
                           if (stratEq > peak) peak = stratEq;
                           const dd = ((stratEq - peak) / peak) * 100;
@@ -6628,22 +6727,30 @@ function StockDashboard() {
                           const bDd = ((benchEq - benchPeak) / benchPeak) * 100;
                           if (bDd < benchMaxDd) benchMaxDd = bDd;
 
+                          if (etfEq > etfPeak) etfPeak = etfEq;
+                          const eDd = ((etfEq - etfPeak) / etfPeak) * 100;
+                          if (eDd < etfMaxDd) etfMaxDd = eDd;
+
                           return {
                             ...p,
                             strategy_equity: Math.round(stratEq),
                             benchmark_equity: Math.round(benchEq),
+                            etf0050_equity: Math.round(etfEq),
                             drawdown_pct: dd
                           };
                         });
 
                         const finalStrat = rebasedCurve[rebasedCurve.length - 1].strategy_equity;
                         const finalBench = rebasedCurve[rebasedCurve.length - 1].benchmark_equity;
+                        const finalEtf = rebasedCurve[rebasedCurve.length - 1].etf0050_equity;
                         const totalRet = ((finalStrat - 1000000) / 1000000) * 100;
                         const benchTotalRet = ((finalBench - 1000000) / 1000000) * 100;
+                        const etfTotalRet = ((finalEtf - 1000000) / 1000000) * 100;
 
                         const yearsElapsed = Math.max(0.2, (maxYr - minYr + 1));
                         const cagr = (Math.pow(Math.max(0.01, finalStrat / 1000000), 1 / yearsElapsed) - 1) * 100;
                         const benchCagr = (Math.pow(Math.max(0.01, finalBench / 1000000), 1 / yearsElapsed) - 1) * 100;
+                        const etfCagr = (Math.pow(Math.max(0.01, finalEtf / 1000000), 1 / yearsElapsed) - 1) * 100;
 
                         const allTrades = baseMode?.trades || [];
                         const slicedTrades = allTrades.filter(t => {
@@ -6651,9 +6758,23 @@ function StockDashboard() {
                           return yr >= minYr && yr <= maxYr;
                         });
 
+                        const allMarkers = baseMode?.action_markers || basePeriod?.action_markers || [];
+                        const slicedMarkers = allMarkers.filter(m => {
+                          const yr = parseInt(String(m.date).slice(0, 4));
+                          return yr >= minYr && yr <= maxYr;
+                        });
+
                         const winTrades = slicedTrades.filter(t => (t.return_pct || 0) >= 0);
                         const lossTrades = slicedTrades.filter(t => (t.return_pct || 0) < 0);
                         const winRate = slicedTrades.length > 0 ? (winTrades.length / slicedTrades.length) * 100 : (baseMode?.win_rate_pct || 60);
+
+                        const customEtf0050 = {
+                          total_return_pct: etfTotalRet,
+                          cagr_pct: etfCagr,
+                          max_drawdown_pct: etfMaxDd,
+                          sharpe_ratio: basePeriod?.etf0050?.sharpe_ratio || 1.4,
+                          alpha_pct: totalRet - etfTotalRet
+                        };
 
                         const customModeData = {
                           total_return_pct: totalRet,
@@ -6669,7 +6790,9 @@ function StockDashboard() {
                           profit_factor: baseMode?.profit_factor || 3.0,
                           market_exposure_pct: baseMode?.market_exposure_pct || 75.0,
                           curve: rebasedCurve,
-                          trades: slicedTrades
+                          trades: slicedTrades,
+                          action_markers: slicedMarkers,
+                          etf0050: customEtf0050
                         };
 
                         activePeriodData = {
@@ -6684,6 +6807,8 @@ function StockDashboard() {
                             max_drawdown_pct: benchMaxDd,
                             sharpe_ratio: basePeriod?.benchmark?.sharpe_ratio || 0.95
                           },
+                          etf0050: customEtf0050,
+                          action_markers: slicedMarkers,
                           long_short: isLongShort ? customModeData : basePeriod?.long_short,
                           long_only: !isLongShort ? customModeData : basePeriod?.long_only,
                           comparison_long_short: (basePeriod?.comparison_long_short || []).map(m => ({
@@ -6705,8 +6830,14 @@ function StockDashboard() {
                   const activeModeData = isLongShort ? activePeriodData?.long_short : activePeriodData?.long_only;
                   const comparisonList = isLongShort ? (activePeriodData?.comparison_long_short || []) : (activePeriodData?.comparison_long_only || []);
                   const benchmark = activePeriodData?.benchmark || {};
+                  const etf0050 = activePeriodData?.etf0050 || activeModeData?.etf0050 || null;
                   const curve = activeModeData?.curve || [];
                   const trades = activeModeData?.trades || [];
+                  const actionMarkers = activeModeData?.action_markers || activePeriodData?.action_markers || [];
+                  const curveDateMap = {};
+                  curve.forEach((p, idx) => {
+                    curveDateMap[String(p.date)] = idx;
+                  });
 
                   // SVG Net Asset Value (NAV) Chart Calculations
                   const svgW = 860;
@@ -6721,7 +6852,7 @@ function StockDashboard() {
                   let minVal = 900000;
                   let maxVal = 2200000;
                   if (curve.length > 0) {
-                    const allVals = curve.flatMap(p => [p.strategy_equity, p.benchmark_equity].filter(v => typeof v === 'number' && !isNaN(v)));
+                    const allVals = curve.flatMap(p => [p.strategy_equity, p.benchmark_equity, p.etf0050_equity].filter(v => typeof v === 'number' && !isNaN(v)));
                     if (allVals.length > 0) {
                       minVal = Math.floor(Math.min(...allVals) * 0.96);
                       maxVal = Math.ceil(Math.max(...allVals) * 1.04);
@@ -6733,6 +6864,7 @@ function StockDashboard() {
 
                   const stratPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.strategy_equity).toFixed(1)}`).join(' ');
                   const benchPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.benchmark_equity).toFixed(1)}`).join(' ');
+                  const etfPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.etf0050_equity || p.benchmark_equity).toFixed(1)}`).join(' ');
 
                   // Drawdown points
                   const ddH = 70;
@@ -7091,8 +7223,13 @@ function StockDashboard() {
                             <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: activeModeData.total_return_pct >= 0 ? '#34D399' : '#F87171' }}>
                               {activeModeData.total_return_pct >= 0 ? '+' : ''}{activeModeData.total_return_pct?.toFixed(1)}%
                             </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              同期大盤: <span style={{ color: (benchmark.total_return_pct || 0) >= 0 ? '#E2E8F0' : '#FCA5A5' }}>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</span>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div>同期大盤: <span style={{ color: (benchmark.total_return_pct || 0) >= 0 ? '#E2E8F0' : '#FCA5A5' }}>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</span></div>
+                              {etf0050 && (
+                                <div style={{ color: '#C4B5FD' }}>
+                                  同期 0050: <span style={{ fontWeight: 'bold' }}>+{(etf0050.total_return_pct || 0).toFixed(1)}%</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -7108,8 +7245,13 @@ function StockDashboard() {
                             <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#60A5FA' }}>
                               +{activeModeData.cagr_pct?.toFixed(1)}%
                             </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              同期大盤: <span style={{ color: (benchmark.cagr_pct || 0) >= 0 ? '#E2E8F0' : '#FCA5A5' }}>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</span>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div>同期大盤: <span style={{ color: (benchmark.cagr_pct || 0) >= 0 ? '#E2E8F0' : '#FCA5A5' }}>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</span></div>
+                              {etf0050 && (
+                                <div style={{ color: '#C4B5FD' }}>
+                                  0050 CAGR: <span style={{ fontWeight: 'bold' }}>+{(etf0050.cagr_pct || 0).toFixed(1)}%</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -7142,8 +7284,13 @@ function StockDashboard() {
                             <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#F87171' }}>
                               {activeModeData.max_drawdown_pct?.toFixed(1)}%
                             </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              大盤回撤: <span style={{ color: '#FCA5A5' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</span> (風險顯著降低)
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div>大盤回撤: <span style={{ color: '#FCA5A5' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</span> (風險顯著降低)</div>
+                              {etf0050 && (
+                                <div style={{ color: '#C4B5FD' }}>
+                                  0050回撤: <span style={{ color: '#FCA5A5' }}>{(etf0050.max_drawdown_pct || 0).toFixed(1)}%</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -7230,12 +7377,12 @@ function StockDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <h4 style={{ margin: 0, fontSize: '1rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <span>📈</span>
-                                <span>模型策略淨值 vs 大盤買進持有【{activePeriodData?.name || '選定區間'}】走勢</span>
+                                <span>模型策略淨值 vs 大盤買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
                               </h4>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>（初始本金 NT$ 1,000,000）</span>
                             </div>
-                            {/* 圖例 Legend */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8rem' }}>
+                            {/* 圖例 Legend & 操作點位切換 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.8rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '14px', height: '3px', background: '#10B981', borderRadius: '2px' }}></span>
                                 <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>AI 量化策略 ({bt.model_name ? bt.model_name.slice(0, 10) : 'MoE'})</span>
@@ -7244,10 +7391,41 @@ function StockDashboard() {
                                 <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#94A3B8', borderTop: '1px dashed #CBD5E1' }}></span>
                                 <span style={{ color: '#94A3B8' }}>TAIEX 大盤 (買進持有)</span>
                               </div>
+                              {etf0050 && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#8B5CF6', borderTop: '1px dashed #C4B5FD' }}></span>
+                                  <span style={{ color: '#C4B5FD' }}>0050 ETF (+{(etf0050.total_return_pct || 0).toFixed(1)}%)</span>
+                                </div>
+                              )}
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '10px', height: '10px', background: 'rgba(239, 68, 68, 0.4)', borderRadius: '2px' }}></span>
                                 <span style={{ color: '#FCA5A5' }}>歷史回撤 (Drawdown)</span>
                               </div>
+                              {/* 標注開關 */}
+                              <button
+                                type="button"
+                                className="btn"
+                                style={{
+                                  padding: '0.2rem 0.6rem',
+                                  fontSize: '0.74rem',
+                                  borderRadius: '6px',
+                                  background: showActionMarkers ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255,255,255,0.06)',
+                                  color: showActionMarkers ? '#6EE7B7' : '#94A3B8',
+                                  border: showActionMarkers ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255,255,255,0.15)',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem'
+                                }}
+                                onClick={() => {
+                                  const nextVal = !showActionMarkers;
+                                  setShowActionMarkers(nextVal);
+                                  localStorage.setItem('market_show_action_markers', String(nextVal));
+                                }}
+                              >
+                                <span>{showActionMarkers ? '✓' : '○'}</span>
+                                <span>標注加碼/放空 ({actionMarkers.length})</span>
+                              </button>
                             </div>
                           </div>
 
@@ -7277,10 +7455,53 @@ function StockDashboard() {
                               {/* 基準大盤折線 */}
                               <polyline fill="none" stroke="#64748B" strokeWidth="1.8" strokeDasharray="4 3" points={benchPoints} />
 
+                              {/* 0050 ETF 基準折線 */}
+                              {curve.some(p => p.etf0050_equity !== undefined) && (
+                                <polyline fill="none" stroke="#8B5CF6" strokeWidth="1.8" strokeDasharray="3 3" points={etfPoints} />
+                              )}
+
                               {/* AI 策略折線 */}
                               <polyline fill="none" stroke="#10B981" strokeWidth="2.5" points={stratPoints} />
 
-                              {/* 最終點位標註 */}
+                              {/* 買進加碼與放空標注點位 */}
+                              {showActionMarkers && actionMarkers.map((m, mIdx) => {
+                                const idx = curveDateMap[String(m.date)];
+                                if (idx === undefined) return null;
+                                const pt = curve[idx];
+                                const x = getX(idx);
+                                const y = getY(pt.strategy_equity);
+                                const isBuy = m.action === 'BUY';
+                                const isShort = m.action === 'SHORT';
+                                const color = isBuy ? '#10B981' : isShort ? '#EF4444' : '#F59E0B';
+                                const triColor = isBuy ? '#34D399' : isShort ? '#F87171' : '#FBBF24';
+
+                                return (
+                                  <g key={`bt-marker-${mIdx}`} style={{ cursor: 'pointer' }}>
+                                    <title>{`${formatDateStr(m.date)} ${m.label || (isBuy ? '買進加碼' : isShort ? '融券放空' : '平倉')} @ ${m.price?.toLocaleString()} 點 (策略淨值: $${Math.round(m.equity || pt.strategy_equity).toLocaleString()})`}</title>
+                                    <line x1={x} y1={y} x2={x} y2={padT + plotH} stroke={isBuy ? 'rgba(16, 185, 129, 0.25)' : isShort ? 'rgba(239, 68, 68, 0.25)' : 'rgba(245, 158, 11, 0.2)'} strokeDasharray="2 2" />
+                                    <circle cx={x} cy={y} r="4.5" fill={color} stroke="#0F172A" strokeWidth="1.5" />
+                                    {isBuy ? (
+                                      <polygon points={`${x},${y - 11} ${x - 4.5},${y - 4} ${x + 4.5},${y - 4}`} fill={triColor} />
+                                    ) : isShort ? (
+                                      <polygon points={`${x},${y + 11} ${x - 4.5},${y + 4} ${x + 4.5},${y + 4}`} fill={triColor} />
+                                    ) : (
+                                      <rect x={x - 2.5} y={y - 2.5} width="5" height="5" fill={triColor} />
+                                    )}
+                                  </g>
+                                );
+                              })}
+
+                              {/* 0050 終點標籤 */}
+                              {curve.length > 0 && curve[curve.length - 1].etf0050_equity && (
+                                <>
+                                  <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].etf0050_equity)} r="3.5" fill="#8B5CF6" />
+                                  <text x={getX(curve.length - 1) - 6} y={getY(curve[curve.length - 1].etf0050_equity) - 6} fill="#C4B5FD" fontSize="10" textAnchor="end">
+                                    0050: NT$ {Math.round(curve[curve.length - 1].etf0050_equity).toLocaleString()}
+                                  </text>
+                                </>
+                              )}
+
+                              {/* AI 策略終點標註 */}
                               {curve.length > 0 && (
                                 <>
                                   <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].strategy_equity)} r="4" fill="#34D399" />
@@ -7368,6 +7589,32 @@ function StockDashboard() {
                                   <td>100.0%</td>
                                   <td><span style={{ fontSize: '0.75rem', color: '#64748B' }}>基準</span></td>
                                 </tr>
+
+                                {/* 0050 ETF 對照列 */}
+                                {etf0050 && (
+                                  <tr style={{ background: 'rgba(139, 92, 246, 0.08)', color: '#DDD6FE' }}>
+                                    <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
+                                      🟣 0050 ETF (元大台灣50 買進持有)
+                                    </td>
+                                    <td style={{ fontWeight: 'bold', color: '#C4B5FD' }}>
+                                      {(etf0050.total_return_pct || 0) >= 0 ? '+' : ''}{etf0050.total_return_pct?.toFixed(1)}%
+                                    </td>
+                                    <td style={{ color: '#DDD6FE' }}>
+                                      {(etf0050.cagr_pct || 0) >= 0 ? '+' : ''}{etf0050.cagr_pct?.toFixed(1)}%
+                                    </td>
+                                    <td style={{ color: (etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                      {((etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '+' : '')}{(etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))).toFixed(1)}%
+                                    </td>
+                                    <td style={{ color: '#F87171' }}>{etf0050.max_drawdown_pct?.toFixed(1)}%</td>
+                                    <td>{etf0050.sharpe_ratio?.toFixed(2)}</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>1</td>
+                                    <td>100.0%</td>
+                                    <td><span style={{ fontSize: '0.75rem', color: '#A78BFA' }}>對照</span></td>
+                                  </tr>
+                                )}
 
                                 {/* 6 款模型 + 集成模型 */}
                                 {comparisonList.map((m, idx) => {
