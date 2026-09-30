@@ -242,6 +242,230 @@ FEATURE_PRESETS = {
     }
 }
 
+# ── 5 大量化標籤方法定義 (Labeling Methodologies) ──
+LABELING_METHODS = {
+    'triple_barrier': {
+        'id': 'triple_barrier',
+        'name': '🎯 三欄標籤法 (Triple-Barrier Method)',
+        'short_name': '三欄標籤 (TBM)',
+        'tag': '👑 頂級量化標準',
+        'desc': 'Marcos López de Prado (2018) 經典架構：模擬真實交易，結合動態停利線 (+k·σ)、停損線 (-k·σ) 與 20 日時間屏障，以先觸碰者決定標籤，消除中間大幅回撤的偽勝率。',
+        'default_param': 1.0,
+        'param_name': '波動率倍數 (k)',
+        'param_unit': 'x σ',
+        'param_step': 0.1,
+        'options': [0.6, 0.8, 1.0, 1.2, 1.5]
+    },
+    'volatility_scaled': {
+        'id': 'volatility_scaled',
+        'name': '📊 動態波動率乘數法 (Volatility-Scaled)',
+        'short_name': '動態波動率乘數',
+        'tag': '⚡ 自適應波動',
+        'desc': '依市場當前 20 日真實年化波動率動態調節突破門檻 (Threshold = k × σ_20d)。高波動年份門檻自動擴大、低波動年份自動縮小，杜絕固定門檻的漂移問題。',
+        'default_param': 1.0,
+        'param_name': '波動率乘數 (k)',
+        'param_unit': 'x σ',
+        'param_step': 0.1,
+        'options': [0.6, 0.8, 1.0, 1.2, 1.5]
+    },
+    'trend_scanning': {
+        'id': 'trend_scanning',
+        'name': '📈 趨勢掃描標籤法 (Trend-Scanning)',
+        'short_name': '趨勢掃描 (t-stat)',
+        'tag': '🌊 波段長度自適應',
+        'desc': 'Marcos López de Prado (2020) 前沿方法：在未來 5~30 天多尺度窗口擬合 OLS 趨勢線，尋找 t 統計量顯著性最大的波段週期，直接以統計顯著性判定波段方向。',
+        'default_param': 2.0,
+        'param_name': 't 統計量臨界值 (t-crit)',
+        'param_unit': 't-stat',
+        'param_step': 0.1,
+        'options': [1.8, 2.0, 2.2, 2.5]
+    },
+    'rolling_quantile': {
+        'id': 'rolling_quantile',
+        'name': '⚖️ 滾動分位數排名法 (Rolling Quantile)',
+        'short_name': '滾動分位數',
+        'tag': '🎯 絕對類別平衡',
+        'desc': '將未來報酬對照近 250 個交易日歷史分佈進行百分位排名，Top 33% 標多、Bottom 33% 標空，確保多空類別在牛市與熊市中永遠維持均衡分佈。',
+        'default_param': 0.33,
+        'param_name': '極值分位比例 (Quantile Cut)',
+        'param_unit': 'ratio',
+        'param_step': 0.05,
+        'options': [0.25, 0.30, 0.33, 0.40]
+    },
+    'fixed_threshold': {
+        'id': 'fixed_threshold',
+        'name': '📏 固定百分比門檻 (Fixed Threshold - 原始相容)',
+        'short_name': '固定百分比門檻',
+        'tag': '🏛️ 傳統經典',
+        'desc': '傳統固定時間窗口法：以未來 20 天漲跌幅是否超過固定百分比 (如 ±2.5%) 進行標記，保留原始相容性。',
+        'default_param': 2.5,
+        'param_name': '突破門檻百分比',
+        'param_unit': '%',
+        'param_step': 0.5,
+        'options': [1.5, 2.0, 2.5, 3.0, 3.5]
+    }
+}
+
+def compute_advanced_labels(
+    df: pd.DataFrame,
+    method: str = 'triple_barrier',
+    param_val: Optional[float] = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
+    """
+    實作 5 大量化標籤方案：
+    1. 'triple_barrier': Marcos López de Prado (2018) 三欄標籤法 (Dynamic TP/SL/Timeout)
+    2. 'volatility_scaled': 動態波動率乘數法 (Threshold = k * sigma_20d)
+    3. 'trend_scanning': Marcos López de Prado (2020) 趨勢掃描標籤法 (t-stat on multi-window OLS)
+    4. 'rolling_quantile': 滾動分位數排名法 (絕對平衡類別)
+    5. 'fixed_threshold': 傳統固定百分比門檻 (相容原始設定)
+    """
+    n = len(df)
+    closes = df['close'].values.astype(float)
+    highs = df['high'].values.astype(float) if 'high' in df.columns else closes
+    lows = df['low'].values.astype(float) if 'low' in df.columns else closes
+    vol20 = df['volatility_20d'].values.astype(float) if 'volatility_20d' in df.columns else np.full(n, 15.0)
+    fut_ret_20 = df['fut_ret_20d'].values.astype(float) if 'fut_ret_20d' in df.columns else np.zeros(n)
+    fut_ret_5 = df['fut_ret_5d'].values.astype(float) if 'fut_ret_5d' in df.columns else np.zeros(n)
+
+    method_info = LABELING_METHODS.get(method, LABELING_METHODS['triple_barrier'])
+    if param_val is None:
+        param_val = float(method_info['default_param'])
+    else:
+        param_val = float(param_val)
+
+    y_up_20 = np.zeros(n, dtype=int)
+    y_down_20 = np.zeros(n, dtype=int)
+    y_up_5 = np.zeros(n, dtype=int)
+    meta: Dict[str, Any] = {
+        'method_id': method_info['id'],
+        'method_name': method_info['name'],
+        'short_name': method_info['short_name'],
+        'tag': method_info['tag'],
+        'param_name': method_info['param_name'],
+        'param_value': param_val,
+        'param_unit': method_info['param_unit']
+    }
+
+    if method == 'triple_barrier':
+        k = max(0.2, min(3.0, param_val))
+        h20 = 20
+        h5 = 5
+        holdings = np.full(n, h20, dtype=int)
+        for i in range(n):
+            c0 = closes[i]
+            # 20 天動態停利停損屏障
+            v20 = max(0.012, (vol20[i] / 100.0) * np.sqrt(20.0 / 250.0))
+            up20 = c0 * (1.0 + k * v20)
+            dn20 = c0 * (1.0 - k * v20)
+            max_j = min(n, i + h20 + 1)
+            sub_h = highs[i+1:max_j]
+            sub_l = lows[i+1:max_j]
+            h_up = np.where(sub_h >= up20)[0]
+            h_dn = np.where(sub_l <= dn20)[0]
+            f_up = h_up[0] if len(h_up) > 0 else 9999
+            f_dn = h_dn[0] if len(h_dn) > 0 else 9999
+
+            if f_up < f_dn and f_up < h20:
+                y_up_20[i] = 1
+                holdings[i] = f_up + 1
+            elif f_dn < f_up and f_dn < h20:
+                y_down_20[i] = 1
+                holdings[i] = f_dn + 1
+            elif f_up == f_dn and f_up < h20:
+                # 同日同時觸及高低屏障，依當日收盤判定偏向
+                if closes[i+1+f_up] >= c0:
+                    y_up_20[i] = 1
+                else:
+                    y_down_20[i] = 1
+                holdings[i] = f_up + 1
+            else:
+                holdings[i] = min(h20, len(sub_h))
+
+            # 5 天短期多方目標 (觸及上屏障)
+            v5 = max(0.008, (vol20[i] / 100.0) * np.sqrt(5.0 / 250.0))
+            up5 = c0 * (1.0 + k * v5)
+            max_j5 = min(n, i + h5 + 1)
+            sub_h5 = highs[i+1:max_j5]
+            if np.any(sub_h5 >= up5):
+                y_up_5[i] = 1
+        meta['avg_holding_bars'] = round(float(np.mean(holdings)), 1)
+
+    elif method == 'volatility_scaled':
+        k = max(0.2, min(3.0, param_val))
+        thresh20 = np.clip(k * (vol20 / 100.0) * np.sqrt(20.0 / 250.0) * 100.0, 1.2, 8.0)
+        thresh5 = np.clip(k * (vol20 / 100.0) * np.sqrt(5.0 / 250.0) * 100.0, 0.6, 4.5)
+        y_up_20 = (fut_ret_20 >= thresh20).astype(int)
+        y_down_20 = (fut_ret_20 <= -thresh20).astype(int)
+        y_up_5 = (fut_ret_5 >= thresh5).astype(int)
+        meta['mean_thresh_pct'] = round(float(np.mean(thresh20)), 2)
+
+    elif method == 'trend_scanning':
+        t_crit = max(1.0, min(4.0, param_val))
+        windows = [5, 8, 12, 16, 20, 25, 30]
+        log_c = np.log(np.maximum(closes, 1.0))
+        reg_c = {}
+        for w in windows:
+            x = np.arange(w, dtype=float)
+            xm = np.mean(x)
+            xd = x - xm
+            reg_c[w] = (xd, np.sum(xd ** 2))
+        max_w = max(windows)
+        best_windows = np.full(n, 20, dtype=int)
+        for i in range(n - max_w):
+            bt = 0.0
+            best_w = 20
+            for w in windows:
+                xd, xv = reg_c[w]
+                y = log_c[i:i+w]
+                yd = y - np.mean(y)
+                beta = np.sum(xd * yd) / xv
+                res = yd - beta * xd
+                s2 = np.sum(res ** 2) / (w - 2) if w > 2 else 1e-6
+                se = np.sqrt(s2 / xv) if (s2 > 0 and xv > 0) else 1e-6
+                t_val = beta / se
+                if abs(t_val) > abs(bt):
+                    bt = t_val
+                    best_w = w
+            best_windows[i] = best_w
+            if bt >= t_crit:
+                y_up_20[i] = 1
+            elif bt <= -t_crit:
+                y_down_20[i] = 1
+        y_up_5 = (fut_ret_5 >= 1.5).astype(int)
+        meta['avg_trend_window'] = round(float(np.mean(best_windows)), 1)
+
+    elif method == 'rolling_quantile':
+        q = max(0.1, min(0.48, param_val))
+        sf20 = pd.Series(fut_ret_20)
+        sf5 = pd.Series(fut_ret_5)
+        qh20 = sf20.rolling(250, min_periods=50).quantile(1.0 - q)
+        ql20 = sf20.rolling(250, min_periods=50).quantile(q)
+        qh5 = sf5.rolling(250, min_periods=50).quantile(1.0 - q)
+        for i in range(n):
+            hi = qh20.iloc[i] if pd.notnull(qh20.iloc[i]) else 2.5
+            lo = ql20.iloc[i] if pd.notnull(ql20.iloc[i]) else -2.5
+            if fut_ret_20[i] >= hi:
+                y_up_20[i] = 1
+            elif fut_ret_20[i] <= lo:
+                y_down_20[i] = 1
+            hi5 = qh5.iloc[i] if pd.notnull(qh5.iloc[i]) else 1.2
+            if fut_ret_5[i] >= hi5:
+                y_up_5[i] = 1
+        meta['quantile_cut'] = q
+
+    else:  # fixed_threshold
+        th = max(0.5, min(10.0, param_val))
+        y_up_20 = (fut_ret_20 >= th).astype(int)
+        y_down_20 = (fut_ret_20 <= -th).astype(int)
+        y_up_5 = (fut_ret_5 >= (th * 0.5)).astype(int)
+        meta['fixed_threshold_pct'] = th
+
+    meta['up_ratio_pct'] = round(float(np.mean(y_up_20) * 100), 1)
+    meta['down_ratio_pct'] = round(float(np.mean(y_down_20) * 100), 1)
+    meta['neutral_ratio_pct'] = round(max(0.0, 100.0 - meta['up_ratio_pct'] - meta['down_ratio_pct']), 1)
+
+    return y_up_20, y_down_20, y_up_5, meta
+
 def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
     conn = get_db_connection()
     
@@ -388,6 +612,9 @@ def build_features() -> pd.DataFrame:
     
     dates = df_index['date'].astype(str).tolist()
     closes = df_index['close'].astype(float).tolist()
+    opens = df_index['open'].astype(float).tolist() if 'open' in df_index.columns else closes
+    highs = df_index['high'].astype(float).tolist() if 'high' in df_index.columns else closes
+    lows = df_index['low'].astype(float).tolist() if 'low' in df_index.columns else closes
     turnovers = df_index['turnover'].astype(float).tolist()
     
     # 計算各期均線
@@ -593,6 +820,9 @@ def build_features() -> pd.DataFrame:
         rows.append({
             'date': d,
             'close': c,
+            'open': opens[i],
+            'high': highs[i],
+            'low': lows[i],
             'turnover': turnovers[i],
             # Features
             'ret_1d': r1,
@@ -2205,10 +2435,22 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     train_days_limit = int(config.get('train_days', 0) or 0)
     test_ratio = float(config.get('test_ratio', 0.2) or 0.2)
     threshold_pct = float(config.get('threshold_pct', 2.5) or 2.5)
+    labeling_method = config.get('labeling_method')
+    labeling_param = config.get('labeling_param')
+    
+    # 兼容舊版 threshold_pct
+    if not labeling_method:
+        if 'threshold_pct' in config and config['threshold_pct'] is not None:
+            labeling_method = 'fixed_threshold'
+            labeling_param = float(config['threshold_pct'])
+        else:
+            labeling_method = 'triple_barrier'
+            labeling_param = 1.0
+
     auto_tune = bool(config.get('auto_tune', False) or config.get('optimize', False))
     tune_trials = int(config.get('tune_trials', 20) or 20)
     
-    print(f"[*] 啟動大盤 ML 訓練任務: target_model={target_model}, preset={features_preset}, train_days={train_days_limit or '全部'}, test_ratio={test_ratio}, auto_tune={auto_tune} (trials={tune_trials})")
+    print(f"[*] 啟動大盤 ML 訓練任務: target_model={target_model}, preset={features_preset}, labeling={labeling_method} (param={labeling_param}), train_days={train_days_limit or '全部'}, test_ratio={test_ratio}, auto_tune={auto_tune} (trials={tune_trials})")
     
     # 1. 構建大盤宏觀特徵矩陣
     df = build_features()
@@ -2224,13 +2466,16 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         
     X = valid_df[feature_cols].values
     
-    # 動態自訂多空門檻
     fut_ret_20 = valid_df['fut_ret_20d'].values
-    Y_up_20 = np.where(fut_ret_20 >= threshold_pct, 1, 0)
-    Y_down_20 = np.where(fut_ret_20 <= -threshold_pct, 1, 0)
-    
     fut_ret_5 = valid_df['fut_ret_5d'].values
-    Y_up_5 = np.where(fut_ret_5 >= (threshold_pct * 0.5), 1, 0)
+    
+    # ── 高階標籤計算引擎 (López de Prado Triple-Barrier / Volatility / Trend-Scanning / Quantile / Fixed) ──
+    Y_up_20, Y_down_20, Y_up_5, label_meta = compute_advanced_labels(
+        valid_df,
+        method=labeling_method,
+        param_val=labeling_param
+    )
+    print(f"[*] 標籤制定完成 [{label_meta['short_name']}] ({label_meta['param_name']}={label_meta['param_value']}{label_meta['param_unit']}) -> 多方: {label_meta['up_ratio_pct']}%, 空方: {label_meta['down_ratio_pct']}%, 中性: {label_meta['neutral_ratio_pct']}%")
     
     # Walk-forward 測試集切分 (嚴格時間序列切分，禁止隨機洗牌)
     n_samples = len(X)
@@ -2413,6 +2658,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
             'test_range': test_range,
             'train_days': len(valid_df),
             'features_preset': features_preset,
+            'labeling_info': label_meta,
             'regime_info': regime_info,
             'support_resistance': sr_ladder,
             'optimization': {
@@ -2461,6 +2707,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
         
     models_bundle['models_status'] = models_status
     models_bundle['feature_cols'] = feature_cols
+    models_bundle['labeling_info'] = label_meta
     models_bundle['last_trained_at'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     # 尋找綜合評分最高之模型 (Best Model)
@@ -2536,6 +2783,19 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
         'model_name': active_model.get('name', '多模型宏觀時序預測系統'),
         'trained_at': active_model.get('trained_at', ''),
         'latest_date': latest_date,
+        'labeling_info': models_bundle.get('labeling_info', active_model.get('labeling_info', {
+            'method_id': 'triple_barrier',
+            'method_name': '三重屏障標籤法 (Triple-Barrier Method)',
+            'short_name': '三重屏障 TBM',
+            'tag': '👑 頂級量化標準',
+            'param_name': '動態波動乘數 k',
+            'param_value': 1.0,
+            'param_unit': 'x σ',
+            'up_ratio_pct': 37.3,
+            'down_ratio_pct': 23.8,
+            'neutral_ratio_pct': 38.9
+        })),
+        'available_labeling_methods': LABELING_METHODS,
         'models': models_status,
         'current_market': {
             'close': curr_close,

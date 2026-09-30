@@ -249,6 +249,117 @@ const BUILTIN_MARKET_ML_PRESETS = [
   }
 ];
 
+const MARKET_ML_LABELING_METHODS = [
+  {
+    id: 'triple_barrier',
+    name: '🎯 三重屏障標籤法 (Triple-Barrier Method)',
+    short: '三重屏障 TBM',
+    tag: '👑 頂級量化標準',
+    author: 'Marcos López de Prado (2018)',
+    citation: 'Advances in Financial Machine Learning, Ch. 3',
+    desc: '依動態波動度在未來20日內設動態停利上屏障、停損下屏障與時間水平屏障。以「首次觸及 (First Touch)」決定勝負，徹底解決先被停損洗出場或先拉出暴利但結算時拉回的「路徑依賴」致命漏洞。',
+    paramName: '波動率乘數 (k)',
+    paramUnit: 'x σ',
+    defaultParam: 1.0,
+    min: 0.2,
+    max: 3.0,
+    step: 0.1,
+    presets: [
+      { val: 0.6, label: '0.6x σ (高敏感短波)' },
+      { val: 0.8, label: '0.8x σ (穩健波段)' },
+      { val: 1.0, label: '1.0x σ (標準推薦)' },
+      { val: 1.2, label: '1.2x σ (寬幅停利)' },
+      { val: 1.5, label: '1.5x σ (大波段獵殺)' }
+    ]
+  },
+  {
+    id: 'volatility_scaled',
+    name: '⚡ 自適應波動率動態倍數法 (Volatility Multiplier)',
+    short: '動態波動倍數',
+    tag: '⚡ 自適應波動',
+    author: 'Robert F. Engle (1982) / Dynamic Volatility Scaling',
+    citation: 'Econometrica (ARCH Theory Applied to Thresholds)',
+    desc: '動態突破門檻隨 20 日滾動歷史年化波動度 (k × σ) 自適應伸縮。解決低波動盤整期固定 2.5% 太死板難以突破、高波動崩盤期 2.5% 門檻太低充滿假突破噪音之痛點。',
+    paramName: '波動倍數 (k)',
+    paramUnit: 'x σ',
+    defaultParam: 1.0,
+    min: 0.2,
+    max: 3.0,
+    step: 0.1,
+    presets: [
+      { val: 0.5, label: '0.5x σ (敏感追價)' },
+      { val: 0.8, label: '0.8x σ (適中波段)' },
+      { val: 1.0, label: '1.0x σ (標準推薦)' },
+      { val: 1.3, label: '1.3x σ (防洗盤防假突破)' },
+      { val: 1.6, label: '1.6x σ (極強趨勢)' }
+    ]
+  },
+  {
+    id: 'trend_scanning',
+    name: '🌊 趨勢掃描動態回歸法 (Trend-Scanning Method)',
+    short: '趨勢掃描',
+    tag: '🌊 波段自適應',
+    author: 'Marcos López de Prado (2020)',
+    citation: 'Machine Learning for Asset Managers, Ch. 5',
+    desc: '不再死板綁定固定 20 天！在未來 5~30 天多尺度視窗中，掃描對數價格時間序列 OLS 迴歸斜率與 t 統計量，自適應鎖定統計顯著性最高的真實波段週期，並依 t 分數正負制定多空。',
+    paramName: 't 統計量顯著門檻',
+    paramUnit: 't-stat',
+    defaultParam: 2.0,
+    min: 1.0,
+    max: 4.0,
+    step: 0.1,
+    presets: [
+      { val: 1.5, label: 't ≥ 1.5 (寬鬆波段捕捉)' },
+      { val: 2.0, label: 't ≥ 2.0 (推薦 95%顯著)' },
+      { val: 2.5, label: 't ≥ 2.5 (嚴格 99%顯著)' },
+      { val: 3.0, label: 't ≥ 3.0 (極強單邊主升段)' }
+    ]
+  },
+  {
+    id: 'rolling_quantile',
+    name: '🎯 滾動歷史分位數平衡標籤 (Rolling Quantile / Rank)',
+    short: '滾動分位數',
+    tag: '🎯 絕對平衡',
+    author: 'Gu, Kelly & Xiu (2020)',
+    citation: 'Empirical Asset Pricing via Machine Learning, RFS',
+    desc: '計算過去 250 天報酬率之前後 q 分位數作為動態多空門檻。徹底消除台股 10 年大多頭導致正樣本過多 (Class Imbalance) 的結構性偏差，使機器學習分類器永遠保持客觀對稱。',
+    paramName: '尾端分位數 (q)',
+    paramUnit: '分位',
+    defaultParam: 0.33,
+    min: 0.1,
+    max: 0.48,
+    step: 0.01,
+    presets: [
+      { val: 0.20, label: 'Top/Bottom 20% (極端前後五分之一)' },
+      { val: 0.25, label: 'Top/Bottom 25% (四分位標籤)' },
+      { val: 0.33, label: 'Top/Bottom 33% (三分位推薦)' },
+      { val: 0.40, label: 'Top/Bottom 40% (高頻切換)' }
+    ]
+  },
+  {
+    id: 'fixed_threshold',
+    name: '🏛️ 傳統固定百分比門檻 (Classic Fixed Threshold)',
+    short: '固定門檻',
+    tag: '🏛️ 傳統經典',
+    author: '傳統技術分析經驗法則',
+    citation: '傳統固定比例門檻 (Baseline Comparison)',
+    desc: '直接以未來 20 天漲跌幅是否超過固定百分比 (例如 ±2.5%) 進行劃分。雖然直觀，但在高低波動體系轉換時容易產生假突破或漏失信號，保留以供對照基準。',
+    paramName: '突破漲跌幅門檻',
+    paramUnit: '%',
+    defaultParam: 2.5,
+    min: 0.5,
+    max: 10.0,
+    step: 0.5,
+    presets: [
+      { val: 1.5, label: '±1.5%' },
+      { val: 2.0, label: '±2.0%' },
+      { val: 2.5, label: '±2.5% (經典)' },
+      { val: 3.0, label: '±3.0%' },
+      { val: 4.0, label: '±4.0%' }
+    ]
+  }
+];
+
 const SCREENER_COLUMN_LABELS = {
   closing_price: '收盤價',
   trade_volume: '成交量',
@@ -618,6 +729,11 @@ function StockDashboard() {
   const [marketMlThreshold, setMarketMlThreshold] = useState(() => {
     const val = localStorage.getItem('market_ml_threshold');
     return val !== null ? parseFloat(val) : 2.5;
+  });
+  const [marketMlLabelingMethod, setMarketMlLabelingMethod] = useState(() => localStorage.getItem('market_ml_labeling_method') || 'triple_barrier');
+  const [marketMlLabelingParam, setMarketMlLabelingParam] = useState(() => {
+    const val = localStorage.getItem('market_ml_labeling_param');
+    return val !== null ? parseFloat(val) : 1.0;
   });
   const [marketBacktestMode, setMarketBacktestMode] = useState(() => localStorage.getItem('market_backtest_mode') || 'long_short');
   const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period') || 'oos_2y');
@@ -1646,6 +1762,8 @@ function StockDashboard() {
     localStorage.setItem('market_ml_preset', marketMlPreset);
     localStorage.setItem('market_ml_auto_tune', marketMlAutoTune);
     localStorage.setItem('market_ml_tune_trials', marketMlTuneTrials);
+    localStorage.setItem('market_ml_labeling_method', marketMlLabelingMethod);
+    localStorage.setItem('market_ml_labeling_param', marketMlLabelingParam);
     setMarketMlSavedToast(true);
     setTimeout(() => setMarketMlSavedToast(false), 2500);
   };
@@ -1662,6 +1780,8 @@ function StockDashboard() {
         features_preset: extraConfig.features_preset || marketMlPreset,
         auto_tune: extraConfig.auto_tune !== undefined ? extraConfig.auto_tune : marketMlAutoTune,
         tune_trials: extraConfig.tune_trials !== undefined ? extraConfig.tune_trials : marketMlTuneTrials,
+        labeling_method: extraConfig.labeling_method || marketMlLabelingMethod,
+        labeling_param: extraConfig.labeling_param !== undefined ? extraConfig.labeling_param : marketMlLabelingParam,
         ...extraConfig
       };
       const createRes = await supabaseFetch('/stock_screener_jobs', {
@@ -3864,37 +3984,15 @@ function StockDashboard() {
                     </div>
                   </div>
 
-                  {/* 區塊 2: 預測目標與特徵預設模式 */}
+                  {/* 區塊 2: 特徵工程模式 */}
                   <div>
                     <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <span>🎯</span> 預測目標與特徵工程模式
+                      <span>🧬</span> 特徵工程組合模式 (Feature Group)
                     </div>
 
                     <div style={{ marginBottom: '0.75rem' }}>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
-                        波段趨勢突破門檻 (20日漲跌幅 &ge; &plusmn;X% 判定為趨勢)
-                      </label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <input
-                          type="number"
-                          step="0.5"
-                          min="1.0"
-                          max="5.0"
-                          value={marketMlThreshold}
-                          onChange={e => {
-                            const val = parseFloat(e.target.value) || 2.5;
-                            setMarketMlThreshold(val);
-                            localStorage.setItem('market_ml_threshold', val);
-                          }}
-                          style={{ width: '80px', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
-                        />
-                        <span style={{ fontSize: '0.85rem', color: '#94A3B8' }}>% (預設 2.5%)</span>
-                      </div>
-                    </div>
-
-                    <div>
                       <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                        特徵工程組合模式 (Feature Group)
+                        特徵預設集 (多因子維度)
                       </label>
                       <select
                         value={marketMlPreset}
@@ -3907,7 +4005,7 @@ function StockDashboard() {
                           background: 'rgba(15, 23, 42, 0.95)',
                           border: '1px solid var(--border-color)',
                           color: '#F8FAFC',
-                          padding: '0.4rem 0.6rem',
+                          padding: '0.45rem 0.6rem',
                           borderRadius: '6px',
                           fontSize: '0.84rem'
                         }}
@@ -3917,7 +4015,198 @@ function StockDashboard() {
                         ))}
                       </select>
                     </div>
+
+                    <div style={{ fontSize: '0.76rem', color: '#94A3B8', lineHeight: 1.5, background: 'rgba(255,255,255,0.03)', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      💡 包含台指期未平倉、外資投信現貨、美債10Y、費半、台積電ADR溢價、分數階微分 (FFD)、Amihud 流動性衝擊、赫斯特指數與多階支撐壓力階梯。
+                    </div>
                   </div>
+
+                  {/* 區塊 3: 🎯 波段標籤制定方法 (Quantitative Labeling Methodology) */}
+                  {(() => {
+                    const curMethod = MARKET_ML_LABELING_METHODS.find(m => m.id === marketMlLabelingMethod) || MARKET_ML_LABELING_METHODS[0];
+                    return (
+                      <div style={{
+                        gridColumn: '1 / -1',
+                        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.75))',
+                        border: '1px solid rgba(59, 130, 246, 0.35)',
+                        borderRadius: '10px',
+                        padding: '1rem 1.15rem'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.85rem' }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '1.15rem' }}>🎯</span>
+                              <strong style={{ color: '#F8FAFC', fontSize: '0.92rem' }}>
+                                波段標籤制定方法 (Quantitative Labeling Methodology)
+                              </strong>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '4px',
+                                background: 'rgba(59, 130, 246, 0.2)',
+                                color: '#93C5FD',
+                                border: '1px solid rgba(59, 130, 246, 0.4)'
+                              }}>
+                                5 大頂級量化演算法
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '0.76rem', color: '#94A3B8', display: 'block', marginTop: '0.25rem', lineHeight: 1.5 }}>
+                              固定突破門檻 (如 ±2.5%) 在低波動期難以觸發、在高波動期充斥假突破，且忽略持有期間暴跌觸及停損洗盤之路徑依賴 (Path-dependency)。
+                              本系統完整實作頂級量化文獻 5 大標籤演算法，可自由切換訓練：
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 5 大方法卡片群 (Grid Selector) */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                          gap: '0.65rem',
+                          marginBottom: '1rem'
+                        }}>
+                          {MARKET_ML_LABELING_METHODS.map(m => {
+                            const isSelected = marketMlLabelingMethod === m.id;
+                            return (
+                              <div
+                                key={m.id}
+                                onClick={() => {
+                                  setMarketMlLabelingMethod(m.id);
+                                  setMarketMlLabelingParam(m.defaultParam);
+                                  localStorage.setItem('market_ml_labeling_method', m.id);
+                                  localStorage.setItem('market_ml_labeling_param', m.defaultParam);
+                                }}
+                                style={{
+                                  background: isSelected
+                                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(30, 58, 138, 0.45))'
+                                    : 'rgba(255, 255, 255, 0.03)',
+                                  border: isSelected ? '1.5px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.08)',
+                                  borderRadius: '8px',
+                                  padding: '0.75rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: isSelected ? '0 0 14px rgba(59, 130, 246, 0.3)' : 'none'
+                                }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                                  <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.1)', color: '#CBD5E1', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                                    {m.tag}
+                                  </span>
+                                  {isSelected && <span style={{ color: '#60A5FA', fontSize: '0.8rem', fontWeight: 900 }}>✓ 選定中</span>}
+                                </div>
+                                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: isSelected ? '#93C5FD' : '#F1F5F9', marginBottom: '0.2rem' }}>
+                                  {m.short}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: isSelected ? '#BFDBFE' : '#94A3B8', lineHeight: 1.35 }}>
+                                  {m.author}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* 所選方法之深度說明與超參數微調面板 */}
+                        <div style={{
+                          background: 'rgba(0, 0, 0, 0.35)',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          padding: '0.85rem 1rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.65rem' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#FCD34D' }}>
+                                  {curMethod.name}
+                                </span>
+                                <span style={{ fontSize: '0.74rem', color: '#93C5FD', background: 'rgba(59, 130, 246, 0.15)', padding: '0.1rem 0.45rem', borderRadius: '4px' }}>
+                                  {curMethod.citation}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#CBD5E1', marginTop: '0.3rem', lineHeight: 1.5 }}>
+                                💡 <strong>機制原理：</strong>{curMethod.desc}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 參數微調與預設 Pills */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '0.75rem',
+                            marginTop: '0.75rem',
+                            paddingTop: '0.75rem',
+                            borderTop: '1px dashed rgba(255, 255, 255, 0.1)'
+                          }}>
+                            {/* 數值輸入與單位 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                              <label style={{ fontSize: '0.78rem', color: '#E2E8F0', fontWeight: 'bold' }}>
+                                ⚙️ {curMethod.paramName}:
+                              </label>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <input
+                                  type="number"
+                                  step={curMethod.step}
+                                  min={curMethod.min}
+                                  max={curMethod.max}
+                                  value={marketMlLabelingParam}
+                                  onChange={e => {
+                                    const val = parseFloat(e.target.value) || curMethod.defaultParam;
+                                    setMarketMlLabelingParam(val);
+                                    localStorage.setItem('market_ml_labeling_param', val);
+                                  }}
+                                  style={{
+                                    width: '85px',
+                                    background: 'rgba(15,23,42,0.9)',
+                                    color: '#FDE68A',
+                                    border: '1px solid #3B82F6',
+                                    borderRadius: '6px',
+                                    padding: '0.35rem 0.5rem',
+                                    fontSize: '0.88rem',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center'
+                                  }}
+                                />
+                                <span style={{ fontSize: '0.82rem', color: '#93C5FD', fontWeight: 'bold' }}>
+                                  {curMethod.paramUnit}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* 快速預設值 Pills */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>快速配置:</span>
+                              {curMethod.presets.map(p => {
+                                const isCurVal = Math.abs(marketMlLabelingParam - p.val) < 0.001;
+                                return (
+                                  <button
+                                    key={p.val}
+                                    type="button"
+                                    className="btn"
+                                    onClick={() => {
+                                      setMarketMlLabelingParam(p.val);
+                                      localStorage.setItem('market_ml_labeling_param', p.val);
+                                    }}
+                                    style={{
+                                      padding: '0.2rem 0.55rem',
+                                      fontSize: '0.74rem',
+                                      borderRadius: '6px',
+                                      background: isCurVal ? 'rgba(59, 130, 246, 0.45)' : 'rgba(255, 255, 255, 0.06)',
+                                      border: isCurVal ? '1px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.1)',
+                                      color: isCurVal ? '#EFF6FF' : '#CBD5E1',
+                                      fontWeight: isCurVal ? 'bold' : 'normal'
+                                    }}
+                                  >
+                                    {p.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* 區塊 3: 🧪 AI 貝氏超參數全域尋優 (AutoML Global Minima Search) */}
                   <div style={{
@@ -4511,6 +4800,26 @@ function StockDashboard() {
                             }}>
                               🤖 視角: {MARKET_ML_MODELS.find(m => m.val === activeModelKey)?.label || activeModelKey}
                             </span>
+                            {marketMlData.labeling_info && (
+                              <span style={{
+                                fontSize: '0.75rem',
+                                padding: '0.15rem 0.55rem',
+                                borderRadius: '6px',
+                                background: 'rgba(234, 179, 8, 0.15)',
+                                color: '#FDE047',
+                                border: '1px solid rgba(234, 179, 8, 0.35)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                cursor: 'help'
+                              }} title={`標籤演算法: ${marketMlData.labeling_info.method_name} (${marketMlData.labeling_info.param_name} = ${marketMlData.labeling_info.param_value}${marketMlData.labeling_info.param_unit})\n多方比例: ${marketMlData.labeling_info.up_ratio_pct}% | 空方比例: ${marketMlData.labeling_info.down_ratio_pct}% | 震盪中性: ${marketMlData.labeling_info.neutral_ratio_pct}%`}>
+                                <span>🎯</span>
+                                <span>標籤: {marketMlData.labeling_info.short_name || '標籤法'} ({marketMlData.labeling_info.param_value}{marketMlData.labeling_info.param_unit})</span>
+                                {marketMlData.labeling_info.avg_holding_bars && (
+                                  <span style={{ color: '#FEF08A', fontSize: '0.7rem' }}>• 均持倉 {marketMlData.labeling_info.avg_holding_bars}天</span>
+                                )}
+                              </span>
+                            )}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.2rem' }}>
                             <span style={{ fontSize: '2.1rem', fontWeight: 900, color: '#F8FAFC', letterSpacing: '-0.5px' }}>
