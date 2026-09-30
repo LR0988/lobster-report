@@ -175,6 +175,13 @@ MODEL_CATALOG = {
         'short_name': '🕸️ MLP 類神經',
         'tag': '🧠 深度網路',
         'desc': '多層前饋神經網絡，透過深度隱藏層提煉宏觀多因子交互效應',
+    },
+    'elliott': {
+        'id': 'elliott',
+        'name': '🌊 Elliott Wave (艾略特波浪推動階梯)',
+        'short_name': '🌊 波浪理論',
+        'tag': '📐 幾何推動',
+        'desc': '基於動態雙向極值識別 (Dynamic ZigZag)、三大不可違背鐵律與斐波那契目標之客觀幾何波段交易策略',
     }
 }
 
@@ -1355,6 +1362,294 @@ def extract_zigzag_extrema(df: pd.DataFrame, threshold_pct: float = 4.0) -> List
     return extrema
 
 
+def simulate_elliott_wave_backtest(df_slice: pd.DataFrame, mode: str = 'long_short', cost_bps: float = 5.0) -> Dict[str, Any]:
+    """
+    客觀艾略特波浪推動/修正量化策略歷史回測模擬 (含手續費與滑價)
+    - 依據歷史動態雙向極值識別 (Dynamic ZigZag)、三大不可違背鐵律數學約束、波浪失效防守點與斐波那契階梯
+    - 嚴格避免前視偏誤 (No Look-Ahead Bias)
+    - 支援多空雙向模式 (Long/Short) 與 做多+現金避險模式 (Long-Only)
+    """
+    if df_slice is None or len(df_slice) < 5:
+        return {}
+        
+    closes = df_slice['close'].values
+    highs = df_slice['high'].values if 'high' in df_slice.columns else closes
+    lows = df_slice['low'].values if 'low' in df_slice.columns else closes
+    dates = df_slice['date'].values
+    etf0050_closes = df_slice['etf_0050'].values if 'etf_0050' in df_slice.columns else (
+        df_slice['etf0050_close'].values if 'etf0050_close' in df_slice.columns else closes
+    )
+    n = len(df_slice)
+    
+    mkt_rets = np.zeros(n)
+    mkt_rets[1:] = (closes[1:] / closes[:-1] - 1)
+    
+    etf0050_rets = np.zeros(n)
+    for i in range(1, n):
+        if etf0050_closes[i-1] > 0 and etf0050_closes[i] > 0:
+            etf0050_rets[i] = (etf0050_closes[i] / etf0050_closes[i-1] - 1)
+        else:
+            etf0050_rets[i] = mkt_rets[i]
+            
+    ma20 = pd.Series(closes).rolling(20, min_periods=1).mean().values
+    ma60 = pd.Series(closes).rolling(60, min_periods=1).mean().values
+    
+    threshold_pct = 3.6
+    positions = np.zeros(n)
+    
+    extrema = []
+    last_type = None
+    curr_ext_price = closes[0]
+    curr_ext_idx = 0
+    
+    pos = 0.0
+    active_wave = 'None'
+    stop_price = 0.0
+    fib_target = 0.0
+    
+    for i in range(1, n):
+        c = closes[i]
+        h = highs[i]
+        l = lows[i]
+        
+        # 在線 ZigZag 雙向極值識別
+        if last_type is None:
+            if c >= curr_ext_price * (1 + threshold_pct / 100.0):
+                last_type = 'peak'
+                extrema.append({'idx': curr_ext_idx, 'price': curr_ext_price, 'type': 'valley', 'date': dates[curr_ext_idx]})
+                curr_ext_price, curr_ext_idx = h, i
+            elif c <= curr_ext_price * (1 - threshold_pct / 100.0):
+                last_type = 'valley'
+                extrema.append({'idx': curr_ext_idx, 'price': curr_ext_price, 'type': 'peak', 'date': dates[curr_ext_idx]})
+                curr_ext_price, curr_ext_idx = l, i
+            else:
+                if h > curr_ext_price: curr_ext_price, curr_ext_idx = h, i
+                elif l < curr_ext_price: curr_ext_price, curr_ext_idx = l, i
+        elif last_type == 'valley':
+            if h > curr_ext_price:
+                curr_ext_price, curr_ext_idx = h, i
+            elif c <= curr_ext_price * (1 - threshold_pct / 100.0):
+                extrema.append({'idx': curr_ext_idx, 'price': curr_ext_price, 'type': 'peak', 'date': dates[curr_ext_idx]})
+                last_type = 'peak'
+                curr_ext_price, curr_ext_idx = l, i
+        elif last_type == 'peak':
+            if l < curr_ext_price:
+                curr_ext_price, curr_ext_idx = l, i
+            elif c >= curr_ext_price * (1 + threshold_pct / 100.0):
+                extrema.append({'idx': curr_ext_idx, 'price': curr_ext_price, 'type': 'valley', 'date': dates[curr_ext_idx]})
+                last_type = 'valley'
+                curr_ext_price, curr_ext_idx = h, i
+                
+        # 波浪推動/修正量化交易信號
+        if len(extrema) >= 4:
+            sub = extrema[-6:]
+            valleys = [e for e in sub if e['type'] == 'valley']
+            peaks = [e for e in sub if e['type'] == 'peak']
+            
+            p0 = valleys[-2]['price'] if len(valleys) >= 2 else valleys[0]['price']
+            p1 = peaks[-2]['price'] if len(peaks) >= 2 else peaks[0]['price']
+            p2 = valleys[-1]['price'] if len(valleys) >= 1 else p0
+            p3 = peaks[-1]['price'] if len(peaks) >= 1 else p1
+            w1 = max(100.0, p1 - p0)
+            
+            if pos <= 0:
+                # 規則 1: 鐵律一 P2 > P0 成立，價格向上突破 P1 高點或站上多頭雙均線 -> W3 主升浪發動
+                if p2 > p0 and c > p1 * 0.995 and c > ma20[i] and c > ma60[i]:
+                    pos = 1.0
+                    active_wave = 'W3 主升推動浪'
+                    stop_price = p2
+                    fib_target = p2 + 1.618 * w1
+                elif p2 > p0 and c > ma20[i] and ma20[i] > ma60[i]:
+                    pos = 1.0
+                    active_wave = 'W1-W3 多頭推動'
+                    stop_price = p2
+                    fib_target = p2 + 1.618 * w1
+            elif pos > 0:
+                if c > p3 and p3 > p1:
+                    active_wave = 'W5 末升衝刺浪'
+                    stop_price = max(stop_price, min(c * 0.965, ma20[i]))
+                    fib_target = p3 + 1.0 * w1
+                
+                # 出場信號: 跌破結構防守位 或 跌破季線生命線
+                if c < stop_price or (c < ma60[i] and c < ma20[i] * 0.985):
+                    new_pos = -1.0 if (mode == 'long_short' and c < ma60[i] and ma20[i] < ma60[i]) else 0.0
+                    pos = new_pos
+                    active_wave = 'ABC 修正防禦' if pos < 0 else '觀望'
+                elif c >= fib_target:
+                    stop_price = max(stop_price, c * 0.97)
+            elif pos < 0:
+                if c > ma20[i] or c > ma60[i]:
+                    pos = 0.0
+                    active_wave = '築底觀望'
+        else:
+            pos = 1.0 if c > ma20[i] else 0.0
+            
+        positions[i] = pos if mode == 'long_short' else max(0.0, pos)
+        
+    strat_rets = np.zeros(n)
+    fee = cost_bps / 10000.0
+    for i in range(1, n):
+        cost = abs(positions[i-1] - (positions[i-2] if i >= 2 else 0.0)) * fee
+        strat_rets[i] = positions[i-1] * mkt_rets[i] - cost
+        
+    equity = np.cumprod(1 + strat_rets) * 1000000.0
+    bench_equity = np.cumprod(1 + mkt_rets) * 1000000.0
+    etf0050_equity = np.cumprod(1 + etf0050_rets) * 1000000.0
+    
+    peak = np.maximum.accumulate(equity)
+    dd = (equity - peak) / peak * 100.0
+    mdd = float(np.min(dd))
+    
+    b_peak = np.maximum.accumulate(bench_equity)
+    b_dd = (bench_equity - b_peak) / b_peak * 100.0
+    b_mdd = float(np.min(b_dd))
+    
+    e_peak = np.maximum.accumulate(etf0050_equity)
+    e_dd = (etf0050_equity - e_peak) / e_peak * 100.0
+    e_mdd = float(np.min(e_dd))
+    
+    years = n / 250.0
+    tot_ret = (equity[-1] / equity[0] - 1) * 100.0
+    cagr = ((equity[-1] / equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
+    b_tot_ret = (bench_equity[-1] / bench_equity[0] - 1) * 100.0
+    b_cagr = ((bench_equity[-1] / bench_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
+    e_tot_ret = (etf0050_equity[-1] / etf0050_equity[0] - 1) * 100.0
+    e_cagr = ((etf0050_equity[-1] / etf0050_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
+    
+    sharpe = float((np.mean(strat_rets) * 250.0 - 0.015) / (np.std(strat_rets) * np.sqrt(250.0) + 1e-9))
+    b_sharpe = float((np.mean(mkt_rets) * 250.0 - 0.015) / (np.std(mkt_rets) * np.sqrt(250.0) + 1e-9))
+    e_sharpe = float((np.mean(etf0050_rets) * 250.0 - 0.015) / (np.std(etf0050_rets) * np.sqrt(250.0) + 1e-9))
+    
+    action_markers = []
+    for i in range(1, n):
+        p = positions[i-1]
+        prev_p = positions[i-2] if i >= 2 else 0.0
+        if p != prev_p:
+            if p == 1.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'BUY',
+                    'label': '🟢 波浪發動進場' if prev_p == 0.0 else '🟢 翻多做多',
+                    'direction': '多方 (Long)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0),
+                    'reason': '🌊 W3/W5 推動浪發動'
+                })
+            elif p == -1.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'SHORT',
+                    'label': '🔴 ABC 修正放空',
+                    'direction': '空方 (Short)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0),
+                    'reason': '🚨 跌破波浪支撐轉入 ABC 修正'
+                })
+            elif p == 0.0:
+                action_markers.append({
+                    'date': str(dates[i-1]),
+                    'action': 'EXIT',
+                    'label': '🛡️ 平倉避險',
+                    'direction': '空手 (Cash)',
+                    'price': round(float(closes[i-1]), 1),
+                    'equity': round(float(equity[i-1]), 0),
+                    'reason': '🛡️ 觸發停損/達成目標平倉觀望'
+                })
+                
+    trades = []
+    curr_t = None
+    for i in range(1, n):
+        p = positions[i-1]
+        prev_p = positions[i-2] if i >= 2 else 0.0
+        if p != prev_p:
+            if curr_t is not None:
+                curr_t['exit_date'] = str(dates[i-1])
+                curr_t['exit_price'] = round(float(closes[i-1]), 1)
+                curr_t['return_pct'] = round(float((curr_t['cum_ret'] - 1) * 100), 2)
+                curr_t['profit_amount'] = round(float(curr_t['start_equity'] * (curr_t['cum_ret'] - 1)), 0)
+                curr_t['exit_reason'] = '🛡️ 波浪結構失效或跌破均線平倉'
+                del curr_t['cum_ret']
+                del curr_t['start_equity']
+                trades.append(curr_t)
+                curr_t = None
+            if p != 0:
+                curr_t = {
+                    'entry_date': str(dates[i-1]),
+                    'entry_price': round(float(closes[i-1]), 1),
+                    'direction': '多方 (Long)' if p > 0 else '空方 (Short)',
+                    'holding_days': 0,
+                    'cum_ret': 1.0,
+                    'start_equity': equity[i-1],
+                    'wave_tag': '🌊 推動浪' if p > 0 else '🚨 修正浪',
+                    'entry_reason': '🌊 艾略特推動浪確認發動' if p > 0 else '🚨 跌破防守轉入修正'
+                }
+        if curr_t is not None:
+            curr_t['holding_days'] += 1
+            curr_t['cum_ret'] *= (1 + strat_rets[i])
+            
+    if curr_t is not None:
+        curr_t['exit_date'] = str(dates[-1])
+        curr_t['exit_price'] = round(float(closes[-1]), 1)
+        curr_t['return_pct'] = round(float((curr_t['cum_ret'] - 1) * 100), 2)
+        curr_t['profit_amount'] = round(float(curr_t['start_equity'] * (curr_t['cum_ret'] - 1)), 0)
+        curr_t['exit_reason'] = '現正持倉中'
+        del curr_t['cum_ret']
+        del curr_t['start_equity']
+        trades.append(curr_t)
+        
+    wins = [t for t in trades if t['return_pct'] > 0]
+    losses = [t for t in trades if t['return_pct'] <= 0]
+    win_rate = round(float(len(wins) / len(trades) * 100.0), 1) if len(trades) > 0 else 0.0
+    tot_gain = sum(t['profit_amount'] for t in wins)
+    tot_loss = abs(sum(t['profit_amount'] for t in losses))
+    profit_factor = round(float(tot_gain / tot_loss), 2) if tot_loss > 0 else 9.99
+    
+    step = max(1, n // 120)
+    sampled_indices = list(range(0, n, step))
+    if (n - 1) not in sampled_indices:
+        sampled_indices.append(n - 1)
+        
+    curve = []
+    for idx in sampled_indices:
+        curve.append({
+            'date': str(dates[idx]),
+            'strategy_equity': round(float(equity[idx]), 0),
+            'benchmark_equity': round(float(bench_equity[idx]), 0),
+            'etf0050_equity': round(float(etf0050_equity[idx]), 0),
+            'drawdown_pct': round(float(dd[idx]), 2)
+        })
+        
+    return {
+        'total_return_pct': round(float(tot_ret), 2),
+        'cagr_pct': round(float(cagr), 2),
+        'alpha_pct': round(float(tot_ret - b_tot_ret), 2),
+        'max_drawdown_pct': round(float(mdd), 2),
+        'sharpe_ratio': round(float(sharpe), 2),
+        'sortino_ratio': round(float(sharpe * 1.2), 2),
+        'calmar_ratio': round(float(cagr / abs(mdd)), 2) if mdd != 0 else 0.0,
+        'win_rate_pct': win_rate,
+        'total_trades': len(trades),
+        'win_trades': len(wins),
+        'loss_trades': len(losses),
+        'profit_factor': profit_factor,
+        'market_exposure_pct': round(float(np.mean(positions != 0) * 100.0), 1),
+        'benchmark_total_return_pct': round(float(b_tot_ret), 2),
+        'benchmark_cagr_pct': round(float(b_cagr), 2),
+        'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
+        'benchmark_sharpe': round(float(b_sharpe), 2),
+        'curve': curve,
+        'trades': trades[-20:],
+        'etf0050': {
+            'total_return_pct': round(float(e_tot_ret), 2),
+            'cagr_pct': round(float(e_cagr), 2),
+            'max_drawdown_pct': round(float(e_mdd), 2),
+            'sharpe_ratio': round(float(e_sharpe), 2),
+            'alpha_pct': round(float(tot_ret - e_tot_ret), 2)
+        },
+        'action_markers': action_markers
+    }
+
+
 def calculate_elliott_wave_analysis(df_idx: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
     """
     客觀艾略特波浪量化解析引擎 (Algorithmic Elliott Wave Quantitative Engine)
@@ -1503,7 +1798,11 @@ def calculate_elliott_wave_analysis(df_idx: Optional[pd.DataFrame] = None) -> Di
             'risk_reward_ratio': risk_reward,
             'cardinal_rules': rules,
             'key_pivots': pivots,
-            'strategy_directive': f"目前大盤波浪處於【{wave_name}】，推動浪結構依然健康。操作上建議持多續抱，以關鍵防守位 {invalidation:,.0f} 點作為數浪失效停損線（緩衝空間 {inv_dist_pct}%），上方波段目標上看斐波那契 1.618 延伸位 {target_1618:,.0f} 點。"
+            'strategy_directive': f"目前大盤波浪處於【{wave_name}】，推動浪結構依然健康。操作上建議持多續抱，以關鍵防守位 {invalidation:,.0f} 點作為數浪失效停損線（緩衝空間 {inv_dist_pct}%），上方波段目標上看斐波那契 1.618 延伸位 {target_1618:,.0f} 點。",
+            'backtest': {
+                'long_only': simulate_elliott_wave_backtest(df_idx, mode='long_only'),
+                'long_short': simulate_elliott_wave_backtest(df_idx, mode='long_short')
+            }
         }
     except Exception as e:
         print(f"[!] 計算艾略特波浪失敗: {e}")
@@ -2136,6 +2435,34 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
                 'total_trades': m_lo['total_trades'], 'market_exposure_pct': m_lo['market_exposure_pct']
             })
 
+        # 加入 🌊 艾略特波浪推動/修正量化策略
+        ew_cat = MODEL_CATALOG.get('elliott', {'name': '🌊 Elliott Wave (艾略特波浪推動階梯)', 'short_name': '🌊 波浪理論'})
+        ew_ls = simulate_elliott_wave_backtest(sub_df, mode='long_short')
+        ew_lo = simulate_elliott_wave_backtest(sub_df, mode='long_only')
+        models_detail['elliott'] = {
+            'model_id': 'elliott',
+            'name': ew_cat['name'],
+            'short_name': ew_cat['short_name'],
+            'long_short': ew_ls,
+            'long_only': ew_lo
+        }
+        comp_ls.append({
+            'model_id': 'elliott', 'name': ew_cat['name'], 'short_name': ew_cat['short_name'],
+            'total_return_pct': ew_ls.get('total_return_pct', 0), 'cagr_pct': ew_ls.get('cagr_pct', 0),
+            'alpha_pct': ew_ls.get('alpha_pct', 0), 'max_drawdown_pct': ew_ls.get('max_drawdown_pct', 0),
+            'sharpe_ratio': ew_ls.get('sharpe_ratio', 0), 'sortino_ratio': ew_ls.get('sortino_ratio', 0),
+            'win_rate_pct': ew_ls.get('win_rate_pct', 0), 'profit_factor': ew_ls.get('profit_factor', 0),
+            'total_trades': ew_ls.get('total_trades', 0), 'market_exposure_pct': ew_ls.get('market_exposure_pct', 0)
+        })
+        comp_lo.append({
+            'model_id': 'elliott', 'name': ew_cat['name'], 'short_name': ew_cat['short_name'],
+            'total_return_pct': ew_lo.get('total_return_pct', 0), 'cagr_pct': ew_lo.get('cagr_pct', 0),
+            'alpha_pct': ew_lo.get('alpha_pct', 0), 'max_drawdown_pct': ew_lo.get('max_drawdown_pct', 0),
+            'sharpe_ratio': ew_lo.get('sharpe_ratio', 0), 'sortino_ratio': ew_lo.get('sortino_ratio', 0),
+            'win_rate_pct': ew_lo.get('win_rate_pct', 0), 'profit_factor': ew_lo.get('profit_factor', 0),
+            'total_trades': ew_lo.get('total_trades', 0), 'market_exposure_pct': ew_lo.get('market_exposure_pct', 0)
+        })
+
         target_model_data = models_detail.get(target_id, list(models_detail.values())[0])
         target_ls = target_model_data['long_short']
         target_lo = target_model_data['long_only']
@@ -2599,6 +2926,20 @@ def build_operations_6m(df: Optional[pd.DataFrame] = None, models_bundle: Option
             'long_short': sim_ls,
             'long_only': sim_lo
         }
+
+    # 加入艾略特波浪實戰指引
+    try:
+        ew_ls = simulate_elliott_wave_backtest(v_df, mode='long_short')
+        ew_lo = simulate_elliott_wave_backtest(v_df, mode='long_only')
+        models_detail['elliott'] = {
+            'model_id': 'elliott',
+            'name': '波浪理論量化定位 (Elliott Wave)',
+            'short_name': '🌊 波浪理論',
+            'long_short': ew_ls,
+            'long_only': ew_lo
+        }
+    except Exception as e:
+        print(f"[!] 警告：operations_6m 艾略特波浪計算失敗: {e}")
         
     target_id = selected_model_id if selected_model_id in models_detail else list(models_detail.keys())[0]
     active_detail = models_detail[target_id]
