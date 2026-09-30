@@ -623,6 +623,7 @@ function StockDashboard() {
   const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period') || 'oos_2y');
   const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2016');
   const [marketBtEndYear, setMarketBtEndYear] = useState(() => localStorage.getItem('market_bt_end_year') || '2026');
+  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model') || 'regime_moe');
   const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model') || 'regime_moe');
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode') || 'long_short');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
@@ -6680,6 +6681,17 @@ function StockDashboard() {
                   const isLongShort = marketBacktestMode === 'long_short';
                   const activePeriodKey = marketBacktestPeriod || 'oos_2y';
                   const history10y = bt.full_history_10y || {};
+                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'regime_moe';
+
+                  const BACKTEST_MODELS = [
+                    { id: 'regime_moe', name: 'Regime MoE', icon: '🏛️', tag: '動態體制專家 (前沿首選)' },
+                    { id: 'ensemble', name: 'Ensemble 集成', icon: '👑', tag: '多模型加權集成' },
+                    { id: 'lightgbm', name: 'LightGBM', icon: '⚡', tag: '梯度提升決策樹' },
+                    { id: 'xgboost', name: 'XGBoost', icon: '🌲', tag: '極限梯度提升' },
+                    { id: 'rf', name: 'Random Forest', icon: '🌳', tag: '隨機森林' },
+                    { id: 'mlp', name: 'MLP 類神經', icon: '🕸️', tag: '多層深度感知器' },
+                    { id: 'lr', name: 'Logistic Reg', icon: '📏', tag: '線性迴歸基準' },
+                  ];
 
                   // 動態計算所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
                   let activePeriodData = null;
@@ -6694,7 +6706,10 @@ function StockDashboard() {
                       activePeriodData = bt.periods[String(minYr)];
                     } else {
                       const basePeriod = bt.periods?.['10y'] || bt.test_period;
-                      const baseMode = isLongShort ? basePeriod?.long_short : basePeriod?.long_only;
+                      const baseModelObj = basePeriod?.models_detail?.[activeModelKey];
+                      const baseMode = isLongShort
+                        ? (baseModelObj?.long_short || basePeriod?.long_short)
+                        : (baseModelObj?.long_only || basePeriod?.long_only);
                       const fullCurve = baseMode?.curve || [];
 
                       const filteredCurve = fullCurve.filter(p => {
@@ -6827,7 +6842,18 @@ function StockDashboard() {
                     activePeriodData = bt.periods?.[activePeriodKey] || bt.periods?.['oos_2y'] || bt.test_period || {};
                   }
 
-                  const activeModeData = isLongShort ? activePeriodData?.long_short : activePeriodData?.long_only;
+                  const selectedModelDetail = activePeriodData?.models_detail?.[activeModelKey];
+                  const activeModeData = selectedModelDetail
+                    ? (isLongShort ? selectedModelDetail.long_short : selectedModelDetail.long_only)
+                    : (isLongShort ? activePeriodData?.long_short : activePeriodData?.long_only);
+
+                  const activeModelMeta = BACKTEST_MODELS.find(m => m.id === activeModelKey) || {
+                    id: activeModelKey,
+                    name: selectedModelDetail?.name || activeModelKey,
+                    icon: '🤖',
+                    tag: 'AI 演算法模型'
+                  };
+
                   const comparisonList = isLongShort ? (activePeriodData?.comparison_long_short || []) : (activePeriodData?.comparison_long_only || []);
                   const benchmark = activePeriodData?.benchmark || {};
                   const etf0050 = activePeriodData?.etf0050 || activeModeData?.etf0050 || null;
@@ -7204,6 +7230,136 @@ function StockDashboard() {
                         </div>
                       </div>
 
+                      {/* 2.5 🤖 回測 AI 模型架構切換選單 (Model Selector) */}
+                      <div style={{
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.82))',
+                        border: '1px solid rgba(16, 185, 129, 0.4)',
+                        borderRadius: '12px',
+                        padding: '1rem 1.25rem',
+                        boxShadow: '0 4px 18px rgba(0,0,0,0.3)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '1.15rem' }}>🤖</span>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.96rem', color: '#6EE7B7' }}>回測 AI 模型切換</span>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>（點選任意模型即可「即時更新」下方所有回測曲線、核心指標、加碼放空標注與交易紀錄）</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem' }}>
+                            <span style={{ color: '#94A3B8' }}>目前回測模型：</span>
+                            <span style={{
+                              background: 'rgba(16, 185, 129, 0.25)',
+                              color: '#34D399',
+                              border: '1px solid rgba(16, 185, 129, 0.55)',
+                              padding: '0.2rem 0.65rem',
+                              borderRadius: '6px',
+                              fontWeight: 'bold',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}>
+                              <span>{activeModelMeta.icon}</span>
+                              <span>{activeModelMeta.name}</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 7 款 AI 模型切換卡片群組 */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                          gap: '0.65rem'
+                        }}>
+                          {BACKTEST_MODELS.map(m => {
+                            const isSelected = activeModelKey === m.id;
+                            const mPerf = comparisonList.find(c => c.model_id === m.id);
+                            const retVal = mPerf ? mPerf.total_return_pct : null;
+                            const mddVal = mPerf ? mPerf.max_drawdown_pct : null;
+
+                            return (
+                              <button
+                                key={m.id}
+                                type="button"
+                                className="btn"
+                                style={{
+                                  padding: '0.65rem 0.75rem',
+                                  borderRadius: '10px',
+                                  background: isSelected
+                                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.35))'
+                                    : 'rgba(255, 255, 255, 0.04)',
+                                  border: isSelected ? '1.5px solid #10B981' : '1px solid rgba(255, 255, 255, 0.09)',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  gap: '0.2rem',
+                                  cursor: 'pointer',
+                                  textAlign: 'center',
+                                  boxShadow: isSelected ? '0 0 14px rgba(16, 185, 129, 0.35)' : 'none',
+                                  transform: isSelected ? 'translateY(-1px)' : 'none',
+                                  transition: 'all 0.15s ease'
+                                }}
+                                onClick={() => {
+                                  setMarketBacktestModel(m.id);
+                                  localStorage.setItem('market_backtest_model', m.id);
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                  <span style={{ fontSize: '0.95rem' }}>{m.icon}</span>
+                                  <span style={{ fontWeight: isSelected ? 'bold' : '600', fontSize: '0.82rem', color: isSelected ? '#34D399' : '#E2E8F0' }}>
+                                    {m.name}
+                                  </span>
+                                </div>
+                                <span style={{ fontSize: '0.68rem', color: isSelected ? '#A7F3D0' : '#94A3B8' }}>
+                                  {m.tag}
+                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.74rem', marginTop: '0.15rem' }}>
+                                  {retVal !== null && retVal !== undefined ? (
+                                    <span style={{
+                                      color: retVal >= 0 ? '#34D399' : '#F87171',
+                                      fontWeight: 'bold',
+                                      fontFamily: 'monospace'
+                                    }}>
+                                      {retVal >= 0 ? '+' : ''}{retVal.toFixed(1)}%
+                                    </span>
+                                  ) : (
+                                    <span style={{ color: 'var(--text-muted)' }}>--</span>
+                                  )}
+                                  {mddVal !== null && mddVal !== undefined && (
+                                    <span style={{ color: '#94A3B8', fontSize: '0.68rem' }}>
+                                      ({mddVal.toFixed(0)}%)
+                                    </span>
+                                  )}
+                                </div>
+                                {isSelected ? (
+                                  <span style={{
+                                    fontSize: '0.66rem',
+                                    background: '#10B981',
+                                    color: '#0F172A',
+                                    fontWeight: 'bold',
+                                    padding: '0.08rem 0.45rem',
+                                    borderRadius: '4px',
+                                    marginTop: '0.2rem'
+                                  }}>
+                                    ✓ 檢視中
+                                  </span>
+                                ) : (
+                                  <span style={{
+                                    fontSize: '0.66rem',
+                                    color: 'var(--text-muted)',
+                                    padding: '0.08rem 0.45rem',
+                                    marginTop: '0.2rem'
+                                  }}>
+                                    點擊切換
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                       {/* 3. 核心量化指標 Hero 看板 (8 大量化評估卡片) */}
                       {activeModeData && (
                         <div style={{
@@ -7366,7 +7522,7 @@ function StockDashboard() {
 
                       {/* 3. 淨值走勢圖 (SVG Net Asset Value Curve & Drawdown) */}
                       {curve.length > 0 && (
-                        <div style={{
+                        <div id="market-backtest-chart-card" style={{
                           background: 'rgba(15, 23, 42, 0.85)',
                           borderRadius: '12px',
                           border: '1px solid var(--border-color)',
@@ -7377,7 +7533,7 @@ function StockDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <h4 style={{ margin: 0, fontSize: '1rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <span>📈</span>
-                                <span>模型策略淨值 vs 大盤買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
+                                <span>{activeModelMeta?.name || 'AI 模型'} 策略淨值 vs 大盤買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
                               </h4>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>（初始本金 NT$ 1,000,000）</span>
                             </div>
@@ -7385,7 +7541,7 @@ function StockDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.8rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '14px', height: '3px', background: '#10B981', borderRadius: '2px' }}></span>
-                                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>AI 量化策略 ({bt.model_name ? bt.model_name.slice(0, 10) : 'MoE'})</span>
+                                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>{activeModelMeta?.icon} {activeModelMeta?.name || 'AI 策略'}</span>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#94A3B8', borderTop: '1px dashed #CBD5E1' }}></span>
@@ -7619,19 +7775,27 @@ function StockDashboard() {
                                 {/* 6 款模型 + 集成模型 */}
                                 {comparisonList.map((m, idx) => {
                                   const isCurrentActive = marketMlModelType === m.model_id;
+                                  const isBtViewing = activeModelKey === m.model_id;
                                   return (
                                     <tr
                                       key={m.model_id}
                                       style={{
-                                        background: isCurrentActive ? 'rgba(59, 130, 246, 0.15)' : (idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent'),
-                                        borderLeft: isCurrentActive ? '3px solid #3B82F6' : '3px solid transparent'
+                                        background: isBtViewing
+                                          ? 'rgba(16, 185, 129, 0.14)'
+                                          : (isCurrentActive ? 'rgba(59, 130, 246, 0.12)' : (idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent')),
+                                        borderLeft: isBtViewing ? '3px solid #10B981' : (isCurrentActive ? '3px solid #3B82F6' : '3px solid transparent')
                                       }}
                                     >
-                                      <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: isCurrentActive ? 'bold' : 'normal' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                          <span style={{ color: isCurrentActive ? '#93C5FD' : '#E2E8F0' }}>{m.name}</span>
+                                      <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: (isCurrentActive || isBtViewing) ? 'bold' : 'normal' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                          <span style={{ color: isBtViewing ? '#6EE7B7' : (isCurrentActive ? '#93C5FD' : '#E2E8F0') }}>{m.name}</span>
+                                          {isBtViewing && (
+                                            <span style={{ fontSize: '0.68rem', background: '#10B981', color: '#0F172A', padding: '0.08rem 0.35rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                              回測中
+                                            </span>
+                                          )}
                                           {isCurrentActive && (
-                                            <span style={{ fontSize: '0.7rem', background: '#2563EB', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                                            <span style={{ fontSize: '0.68rem', background: '#2563EB', color: 'white', padding: '0.08rem 0.35rem', borderRadius: '4px' }}>
                                               推論中
                                             </span>
                                           )}
@@ -7660,24 +7824,52 @@ function StockDashboard() {
                                       <td>{m.total_trades}</td>
                                       <td style={{ color: 'var(--text-muted)' }}>{m.market_exposure_pct?.toFixed(1)}%</td>
                                       <td>
-                                        <button
-                                          type="button"
-                                          className="btn"
-                                          style={{
-                                            padding: '0.2rem 0.5rem',
-                                            fontSize: '0.74rem',
-                                            borderRadius: '6px',
-                                            background: isCurrentActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                                            color: isCurrentActive ? '#6EE7B7' : '#93C5FD',
-                                            border: isCurrentActive ? '1px solid #10B981' : '1px solid #3B82F6'
-                                          }}
-                                          onClick={() => {
-                                            handleSelectMarketModel(m.model_id);
-                                            setMarketMlSubTab('cockpit');
-                                          }}
-                                        >
-                                          {isCurrentActive ? '✓ 使用中' : '🎯 選用'}
-                                        </button>
+                                        <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
+                                          <button
+                                            type="button"
+                                            className="btn"
+                                            title="更新上方回測走勢與各項指標"
+                                            style={{
+                                              padding: '0.2rem 0.5rem',
+                                              fontSize: '0.74rem',
+                                              borderRadius: '6px',
+                                              background: isBtViewing ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(255,255,255,0.08)',
+                                              color: isBtViewing ? '#FFFFFF' : '#CBD5E1',
+                                              border: isBtViewing ? '1px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
+                                              cursor: 'pointer',
+                                              whiteSpace: 'nowrap'
+                                            }}
+                                            onClick={() => {
+                                              setMarketBacktestModel(m.model_id);
+                                              localStorage.setItem('market_backtest_model', m.model_id);
+                                              const chartElem = document.getElementById('market-backtest-chart-card');
+                                              if (chartElem) chartElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            }}
+                                          >
+                                            {isBtViewing ? '✓ 檢視中' : '📊 檢視回測'}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="btn"
+                                            title="選用為戰情室主力模型"
+                                            style={{
+                                              padding: '0.2rem 0.45rem',
+                                              fontSize: '0.74rem',
+                                              borderRadius: '6px',
+                                              background: isCurrentActive ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)',
+                                              color: isCurrentActive ? '#93C5FD' : '#94A3B8',
+                                              border: isCurrentActive ? '1px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
+                                              cursor: 'pointer',
+                                              whiteSpace: 'nowrap'
+                                            }}
+                                            onClick={() => {
+                                              handleSelectMarketModel(m.model_id);
+                                              setMarketMlSubTab('cockpit');
+                                            }}
+                                          >
+                                            {isCurrentActive ? '實時中' : '🎯 主力'}
+                                          </button>
+                                        </div>
                                       </td>
                                     </tr>
                                   );

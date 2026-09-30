@@ -1669,16 +1669,21 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
         if len(sub_df) < 5:
             continue
         sub_df = sub_df.copy().reset_index(drop=True)
-        target_ls = simulate_single_model_backtest(sub_df, pipe_target, feature_cols, mode='long_short')
-        target_lo = simulate_single_model_backtest(sub_df, pipe_target, feature_cols, mode='long_only')
-        
-        # 評比全模型在該區間之排行榜
+        # 評比與儲存全模型在該區間之完整回測與排行榜
+        models_detail = {}
         comp_ls = []
         comp_lo = []
         for mid, pipe in pipelines.items():
             cat = MODEL_CATALOG.get(mid, {'name': mid, 'short_name': mid})
             m_ls = simulate_single_model_backtest(sub_df, pipe, feature_cols, mode='long_short')
             m_lo = simulate_single_model_backtest(sub_df, pipe, feature_cols, mode='long_only')
+            models_detail[mid] = {
+                'model_id': mid,
+                'name': cat['name'],
+                'short_name': cat['short_name'],
+                'long_short': m_ls,
+                'long_only': m_lo
+            }
             comp_ls.append({
                 'model_id': mid, 'name': cat['name'], 'short_name': cat['short_name'],
                 'total_return_pct': m_ls['total_return_pct'], 'cagr_pct': m_ls['cagr_pct'],
@@ -1695,6 +1700,10 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
                 'win_rate_pct': m_lo['win_rate_pct'], 'profit_factor': m_lo['profit_factor'],
                 'total_trades': m_lo['total_trades'], 'market_exposure_pct': m_lo['market_exposure_pct']
             })
+
+        target_model_data = models_detail.get(target_id, list(models_detail.values())[0])
+        target_ls = target_model_data['long_short']
+        target_lo = target_model_data['long_only']
             
         p_obj = {
             'key': p_key,
@@ -1712,6 +1721,7 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'action_markers': target_ls.get('action_markers', []),
             'long_short': target_ls,
             'long_only': target_lo,
+            'models_detail': models_detail,
             'comparison_long_short': comp_ls,
             'comparison_long_only': comp_lo
         }
@@ -1742,8 +1752,10 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'benchmark': history_10y_data.get('benchmark', {}),
             'etf0050': history_10y_data.get('etf0050', {}),
             'summary': history_10y_data.get('long_short', {}),
-            'yearly': history_10y_data.get('long_short', {}).get('yearly', [])
-        }
+            'yearly': history_10y_data.get('long_short', {}).get('yearly', []),
+            'models_detail': history_10y_data.get('models_detail', {})
+        },
+        'models_detail': oos_data.get('models_detail', {})
     }
 
 def generate_trade_rationale(direction: str, entry_price: float, exit_price: float, ret_pct: float, holding_days: int, entry_row: pd.Series, exit_row: pd.Series) -> Tuple[str, str]:
