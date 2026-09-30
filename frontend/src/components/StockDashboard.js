@@ -628,7 +628,7 @@ function StockDashboard() {
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode') || 'long_short');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
   const [operationsSortOrder, setOperationsSortOrder] = useState('desc');
-  const [marketMlAutoTune, setMarketMlAutoTune] = useState(() => localStorage.getItem('market_ml_auto_tune') === 'true');
+  const [marketMlAutoTune, setMarketMlAutoTune] = useState(() => localStorage.getItem('market_ml_auto_tune') !== 'false');
   const [marketMlTuneTrials, setMarketMlTuneTrials] = useState(() => {
     const val = localStorage.getItem('market_ml_tune_trials');
     return val !== null ? parseInt(val) : 20;
@@ -1700,7 +1700,15 @@ function StockDashboard() {
                     });
                   }
                   await fetchMarketMlData();
-                  alert(jobType === 'market_ml_train' ? '🎉 大盤 ML 模型訓練與指標評估完成！' : '🚀 大盤最新推論與波段回測模擬已完成！');
+                  const isAutoTuned = extraConfig.auto_tune || (extraConfig.auto_tune === undefined && marketMlAutoTune);
+                  if (jobType === 'market_ml_train') {
+                    alert(isAutoTuned
+                      ? '🎉 大盤 ML 模型「全域參數尋優＋重訓」完成！已成功鎖定 Global Minima 最適超參數並更新至雲端戰情室！'
+                      : '🎉 大盤 ML 模型訓練與指標評估完成！'
+                    );
+                  } else {
+                    alert('🚀 大盤最新推論與波段回測模擬已完成！');
+                  }
                   return;
                 } else if (current.status === 'error') {
                   throw new Error(current.error_message || '大盤任務執行發生錯誤');
@@ -3684,10 +3692,35 @@ function StockDashboard() {
                   {triggeringMarketMl ? <span className="loader" style={{ width: '12px', height: '12px' }}></span> : '🔄 重新推論'}
                 </button>
 
+                {/* 一鍵重訓＋全域尋優 (全模型) */}
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all', auto_tune: true, tune_trials: marketMlTuneTrials })}
+                  disabled={triggeringMarketMl || fetchingMarketMl}
+                  style={{
+                    padding: '0.35rem 0.85rem',
+                    fontSize: '0.84rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                    border: '1px solid #A855F7',
+                    color: '#FFFFFF',
+                    fontWeight: 'bold',
+                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.4)',
+                    cursor: 'pointer'
+                  }}
+                  title="一鍵重訓全部 7 款 AI 模型並直接搭配 Optuna 貝氏全域超參數尋優 (尋找 Global Minima)"
+                >
+                  {triggeringMarketMl ? <span className="loader" style={{ width: '12px', height: '12px', borderColor: 'white', borderBottomColor: 'transparent' }}></span> : '🧬 一鍵重訓＋尋優 (全模型)'}
+                </button>
+
                 <button
                   type="button"
                   className="btn btn-save"
-                  onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType })}
+                  onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType, auto_tune: marketMlAutoTune, tune_trials: marketMlTuneTrials })}
                   disabled={triggeringMarketMl || fetchingMarketMl}
                   style={{
                     padding: '0.35rem 0.8rem',
@@ -3697,9 +3730,9 @@ function StockDashboard() {
                     gap: '0.35rem',
                     borderRadius: '8px'
                   }}
-                  title={`單獨訓練當前選取的 ${MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType}`}
+                  title={`單獨訓練當前選取的 ${MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType} (自動套用尋優)`}
                 >
-                  🚀 訓練選定模型
+                  🚀 訓練選定模型 {marketMlAutoTune ? '(含尋優)' : ''}
                 </button>
               </div>
             </div>
@@ -4026,24 +4059,48 @@ function StockDashboard() {
                     <button
                       type="button"
                       className="btn"
+                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all', auto_tune: true, tune_trials: marketMlTuneTrials })}
+                      disabled={triggeringMarketMl || fetchingMarketMl}
+                      style={{
+                        padding: '0.5rem 1.15rem',
+                        fontSize: '0.88rem',
+                        background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+                        border: '1.5px solid #C084FC',
+                        color: '#FFFFFF',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        boxShadow: '0 0 16px rgba(168, 85, 247, 0.45)',
+                        cursor: 'pointer'
+                      }}
+                      title="一鍵對全體 7 款模型啟動 Optuna 貝氏尋優尋找各模型 Global Minima 最適參數與超額夏普，並重新訓練產生最新回測排行榜"
+                    >
+                      {triggeringMarketMl ? <span className="loader" style={{ width: '13px', height: '13px', borderColor: 'white', borderBottomColor: 'transparent' }}></span> : '🧬 🏆 一鍵重訓全部 7 款模型 (直接搭配全域尋優)'}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn"
                       onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType, auto_tune: true, tune_trials: marketMlTuneTrials })}
                       disabled={triggeringMarketMl || fetchingMarketMl}
                       style={{
                         padding: '0.45rem 1rem',
                         fontSize: '0.85rem',
-                        background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.35), rgba(79, 70, 229, 0.45))',
-                        border: '1px solid #A855F7',
-                        color: '#F3E8FF',
+                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35))',
+                        border: '1px solid #10B981',
+                        color: '#6EE7B7',
                         borderRadius: '8px',
                         fontWeight: 'bold',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '0.35rem',
-                        boxShadow: '0 0 12px rgba(168, 85, 247, 0.3)'
+                        cursor: 'pointer'
                       }}
-                      title="對當前選取之模型執行 Optuna 貝氏全域超參數尋優"
+                      title={`對當前選定之 ${MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType} 執行貝氏尋優訓練`}
                     >
-                      🧬 執行全域參數尋優訓練
+                      🎯 尋優重訓選定模型 ({MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType})
                     </button>
 
                     <button
@@ -4054,15 +4111,16 @@ function StockDashboard() {
                       style={{
                         padding: '0.45rem 0.95rem',
                         fontSize: '0.85rem',
-                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.35))',
-                        border: '1px solid #3B82F6',
-                        color: '#93C5FD',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#94A3B8',
                         borderRadius: '8px',
-                        fontWeight: 'bold'
+                        fontWeight: 'normal',
+                        cursor: 'pointer'
                       }}
-                      title="一鍵訓練全部 6 款模型並生成即時橫向對比排行榜"
+                      title="略過 Optuna 尋優，以標準既定參數快速重新訓練全體模型（節省時間）"
                     >
-                      🏆 一鍵重訓全部 6 款模型
+                      ⚡ 快速重訓 (不尋優)
                     </button>
                   </div>
                 </div>
@@ -6585,9 +6643,9 @@ function StockDashboard() {
                                         }}
                                         onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: mInfo.val, auto_tune: true, tune_trials: marketMlTuneTrials })}
                                         disabled={triggeringMarketMl}
-                                        title={`對 ${mInfo.short} 啟動 Optuna 貝氏全域超參數尋優 (尋找 Global Minima)`}
+                                        title={`對 ${mInfo.short} 啟動 Optuna 貝氏全域超參數尋優並重訓 (尋找 Global Minima)`}
                                       >
-                                        🧬 尋優
+                                        🧬 尋優重訓
                                       </button>
 
                                       <button
@@ -6596,15 +6654,15 @@ function StockDashboard() {
                                         style={{
                                           padding: '0.25rem 0.55rem',
                                           fontSize: '0.78rem',
-                                          background: 'rgba(239, 68, 68, 0.15)',
-                                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                                          color: '#FCA5A5'
+                                          background: 'rgba(255, 255, 255, 0.06)',
+                                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                                          color: '#94A3B8'
                                         }}
                                         onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: mInfo.val, auto_tune: false })}
                                         disabled={triggeringMarketMl}
-                                        title={`以標準預設參數訓練 ${mInfo.short}`}
+                                        title={`以標準預設參數快速訓練 ${mInfo.short} (不尋優)`}
                                       >
-                                        🔄 訓練
+                                        ⚡ 快速訓練
                                       </button>
                                     </div>
                                   </td>
