@@ -123,7 +123,12 @@ FEATURE_NAMES_ZH = {
     'amihud_illiq_20d': 'Amihud (2002) 20 日流動性衝擊指數',
     'hurst_60d': '60 日赫斯特指數 (趨勢持續 vs 均值回歸)',
     'breadth_ad_ratio_5d': '市場廣度 5 日均漲跌家數比',
-    'breadth_ad_diff_5d': '市場廣度 5 日累計淨上漲家數 (家)'
+    'breadth_ad_diff_5d': '市場廣度 5 日累計淨上漲家數 (家)',
+    'retail_mtx_net': '散戶小台未平倉淨留倉 (口)',
+    'retail_mtx_change_3d': '散戶小台淨留倉 3 日增減 (口)',
+    'pc_ratio_oi': '選擇權買賣權未平倉比率 P/C Ratio (%)',
+    'pc_ratio_oi_change_5d': '選擇權 P/C 未平倉比率 5 日變動 (pp)',
+    'pc_ratio_vol': '選擇權買賣權成交量比率 (%)'
 }
 
 MODEL_CATALOG = {
@@ -182,13 +187,6 @@ MODEL_CATALOG = {
         'short_name': '🌊 波浪理論',
         'tag': '📐 幾何推動',
         'desc': '基於動態雙向極值識別 (Dynamic ZigZag)、三大不可違背鐵律與斐波那契目標之客觀幾何波段交易策略',
-    },
-    'alpha_convex': {
-        'id': 'alpha_convex',
-        'name': '🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 10x)',
-        'short_name': '🚀 凸性 10x 熔斷',
-        'tag': '🔥 10年10倍＋回撤防守',
-        'desc': '基於學術波動率管理 (Volatility Targeting) 與非對稱動態回撤熔斷機制；低波動多頭以 2.6x 凸性複利擴張，高檔回檔達 2.5% 即時本金熔斷降至 100% 現金，嚴格無未來函數。',
     }
 }
 
@@ -202,9 +200,10 @@ FEATURE_PRESETS = {
     'quant_literature': {
         'id': 'quant_literature',
         'name': '📚 頂級量化文獻學術因子',
-        'desc': '納入 López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、TSM ADR 溢價與日圓 Carry Trade',
+        'desc': '納入選擇權 P/C Ratio、散戶小台留倉、López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、TSM ADR 溢價與日圓 Carry Trade',
         'features': [
             'ret_5d', 'ret_20d', 'ma20_bias', 'volatility_20d',
+            'pc_ratio_oi', 'retail_mtx_net',
             'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
             'frac_diff_045', 'amihud_illiq_20d', 'hurst_60d', 'breadth_ad_ratio_5d',
             'foreign_futures_net', 'foreign_cash_net_5d'
@@ -236,10 +235,11 @@ FEATURE_PRESETS = {
     'institutional_flow': {
         'id': 'institutional_flow',
         'name': '🛡️ 法人籌碼純量化',
-        'desc': '純三大法人台指期未平倉留倉單、現貨大額買賣超與台積電籌碼',
+        'desc': '包含三大法人與散戶小台期貨留倉、台期所選擇權 P/C Ratio、現貨大額買賣超與台積電籌碼',
         'features': [
             'foreign_futures_net', 'foreign_futures_net_change_3d', 'foreign_futures_net_change_5d',
             'trust_futures_net', 'dealer_futures_net', 'total_futures_inst_net',
+            'retail_mtx_net', 'retail_mtx_change_3d', 'pc_ratio_oi', 'pc_ratio_oi_change_5d',
             'foreign_cash_net_1d', 'foreign_cash_net_5d', 'trust_cash_net_1d', 'trust_cash_net_5d',
             'total_cash_net_1d', 'total_cash_net_5d', 'tsmc_ret_5d', 'tsmc_ret_20d', 'tsmc_ma20_bias'
         ]
@@ -584,8 +584,43 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
     except Exception as e:
         print(f"[!] 載入 market_breadth 失敗: {e}")
 
+    # 7. 載入散戶小台指期淨未平倉留倉 (institutional_futures: 小型臺指期貨)
+    # 散戶淨留倉 = -三大法人小台合計 = -(外資+投信+自營商)
+    mtx_dict = {}
+    try:
+        df_mtx = pd.read_sql_query("""
+            SELECT date,
+                   -SUM(net_qty) as retail_mtx_net
+            FROM institutional_futures
+            WHERE contract_name in ('小型臺指期貨', 'MTX')
+            GROUP BY date
+            ORDER BY date ASC
+        """, conn)
+        for _, r in df_mtx.iterrows():
+            d = str(r['date'])
+            mtx_dict[d] = int(r['retail_mtx_net'] or 0)
+    except Exception as e:
+        print(f"[!] 載入 小型臺指期貨 失敗: {e}")
+
+    # 8. 載入台期所選擇權 Put/Call Ratio (options_pc_ratio)
+    pc_dict = {}
+    try:
+        df_pc = pd.read_sql_query("""
+            SELECT date, pc_vol_ratio, pc_oi_ratio
+            FROM options_pc_ratio
+            ORDER BY date ASC
+        """, conn)
+        for _, r in df_pc.iterrows():
+            d = str(r['date'])
+            pc_dict[d] = {
+                'pc_vol_ratio': float(r['pc_vol_ratio']) if pd.notnull(r['pc_vol_ratio']) else 100.0,
+                'pc_oi_ratio': float(r['pc_oi_ratio']) if pd.notnull(r['pc_oi_ratio']) else 100.0
+            }
+    except Exception as e:
+        print(f"[!] 載入 options_pc_ratio 失敗: {e}")
+
     conn.close()
-    return df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict
+    return df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict, mtx_dict, pc_dict
 
 def get_weights_ffd(d: float = 0.45, thres: float = 1e-4, max_lags: int = 80) -> np.ndarray:
     """
@@ -621,7 +656,7 @@ def compute_hurst_rs(series: np.ndarray) -> float:
     return float(np.clip(h, 0.0, 1.0))
 
 def build_features() -> pd.DataFrame:
-    df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict = load_raw_data()
+    df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict, mtx_dict, pc_dict = load_raw_data()
     n = len(df_index)
     
     dates = df_index['date'].astype(str).tolist()
@@ -686,6 +721,9 @@ def build_features() -> pd.DataFrame:
     last_fut_info = {'外資': 0, '投信': 0, '自營商': 0}
     last_cash_info = {'foreign': 0, 'trust': 0, 'dealer': 0, 'total': 0}
     last_tsmc_c = 0.0
+    last_mtx_net = 0
+    last_pc_oi = 100.0
+    last_pc_vol = 100.0
     last_macro_info = {
         'us10y': 4.0, 'oil_wti': 75.0, 'usdtwd': 31.0, 'sox': 4000.0, 'dxy': 100.0,
         'tsm_adr': 400.0, 'nvda': 200.0, 'usdjpy': 150.0, 'etf_0050': 100.0
@@ -736,6 +774,22 @@ def build_features() -> pd.DataFrame:
         f_fut_prev5 = fut_dict.get(d_prev5, {}).get('外資', f_fut)
         f_fut_chg3 = f_fut - f_fut_prev3
         f_fut_chg5 = f_fut - f_fut_prev5
+
+        # 散戶小台留倉 (Forward-fill 避免缺失)
+        if d in mtx_dict:
+            last_mtx_net = mtx_dict[d]
+        ret_mtx = last_mtx_net
+        ret_mtx_prev3 = mtx_dict.get(d_prev3, ret_mtx) if i >= 3 else ret_mtx
+        ret_mtx_chg3 = ret_mtx - ret_mtx_prev3
+
+        # 選擇權 Put/Call Ratio (Forward-fill 避免缺失)
+        if d in pc_dict:
+            last_pc_oi = pc_dict[d]['pc_oi_ratio']
+            last_pc_vol = pc_dict[d]['pc_vol_ratio']
+        pc_oi = last_pc_oi
+        pc_vol = last_pc_vol
+        pc_oi_prev5 = pc_dict.get(d_prev5, {}).get('pc_oi_ratio', pc_oi) if i >= 5 else pc_oi
+        pc_oi_chg5 = round(float(pc_oi - pc_oi_prev5), 2)
         
         # 現貨買賣超 (Forward-fill)
         if d in cash_dict:
@@ -884,6 +938,11 @@ def build_features() -> pd.DataFrame:
             'hurst_60d': round(float(hurst_series[i]), 3),
             'breadth_ad_ratio_5d': b_ad_ratio_5d,
             'breadth_ad_diff_5d': b_ad_diff_5d,
+            'retail_mtx_net': ret_mtx,
+            'retail_mtx_change_3d': ret_mtx_chg3,
+            'pc_ratio_oi': pc_oi,
+            'pc_ratio_oi_change_5d': pc_oi_chg5,
+            'pc_ratio_vol': pc_vol,
             # Snapshot raw references
             'us10y': us10y_val,
             'oil_wti': oil_val,
@@ -1633,244 +1692,6 @@ def simulate_elliott_wave_backtest(df_slice: pd.DataFrame, mode: str = 'long_sho
         'max_drawdown_pct': round(float(mdd), 2),
         'sharpe_ratio': round(float(sharpe), 2),
         'sortino_ratio': round(float(sharpe * 1.2), 2),
-        'calmar_ratio': round(float(cagr / abs(mdd)), 2) if mdd != 0 else 0.0,
-        'win_rate_pct': win_rate,
-        'total_trades': len(trades),
-        'win_trades': len(wins),
-        'loss_trades': len(losses),
-        'profit_factor': profit_factor,
-        'market_exposure_pct': round(float(np.mean(positions != 0) * 100.0), 1),
-        'benchmark_total_return_pct': round(float(b_tot_ret), 2),
-        'benchmark_cagr_pct': round(float(b_cagr), 2),
-        'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
-        'benchmark_sharpe': round(float(b_sharpe), 2),
-        'curve': curve,
-        'trades': trades[-20:],
-        'etf0050': {
-            'total_return_pct': round(float(e_tot_ret), 2),
-            'cagr_pct': round(float(e_cagr), 2),
-            'max_drawdown_pct': round(float(e_mdd), 2),
-            'sharpe_ratio': round(float(e_sharpe), 2),
-            'alpha_pct': round(float(tot_ret - e_tot_ret), 2)
-        },
-        'action_markers': action_markers
-    }
-
-
-def simulate_alpha_convex_backtest(df_slice: pd.DataFrame, mode: str = 'long_only', bull_lev: float = 2.6, peak_drop_limit: float = 2.5, cost_bps: float = 5.0) -> Dict[str, Any]:
-    """
-    凸性動態趨勢倍增與回撤熔斷模型 (Convex Alpha 10x with Trailing Circuit Breaker)
-    - 基於學術波動率管理 (Volatility Targeting) 與非對稱回撤熔斷機制
-    - 宏觀體制: Close > SMA60 且 SMA20 > SMA60 確立牛市擴張，配置 2.6x 凸性槓桿
-    - 動態回撤熔斷: 持倉期間滾動紀錄最高價，自近期高點回檔超過 2.5% 或跌破月線立即熔斷降至 100% 現金
-    - 支援做多避險模式 (Long-Only) 與多空雙向模式 (Long/Short)
-    - 嚴格無未來函數 (No Lookahead Bias，所有訊號基於 t-1 日收盤計算)
-    - 每筆交易扣除 5 bps (0.05%) 交易摩擦成本
-    """
-    if df_slice is None or len(df_slice) < 5:
-        return {}
-        
-    closes = df_slice['close'].values
-    highs = df_slice['high'].values if 'high' in df_slice.columns else closes
-    dates = df_slice['date'].values
-    n = len(df_slice)
-    
-    etf0050_closes = df_slice['etf_0050'].values if 'etf_0050' in df_slice.columns else (
-        df_slice['etf0050_close'].values if 'etf0050_close' in df_slice.columns else closes
-    )
-    
-    mkt_rets = np.zeros(n)
-    mkt_rets[1:] = (closes[1:] / closes[:-1] - 1)
-    
-    etf0050_rets = np.zeros(n)
-    for i in range(1, n):
-        if etf0050_closes[i-1] > 0 and etf0050_closes[i] > 0:
-            etf0050_rets[i] = (etf0050_closes[i] / etf0050_closes[i-1] - 1)
-        else:
-            etf0050_rets[i] = mkt_rets[i]
-            
-    sma5 = pd.Series(closes).rolling(5, min_periods=1).mean().values
-    sma20 = pd.Series(closes).rolling(20, min_periods=1).mean().values
-    sma60 = pd.Series(closes).rolling(60, min_periods=1).mean().values
-    sma120 = pd.Series(closes).rolling(120, min_periods=1).mean().values
-    
-    cost_rate = (cost_bps / 10000.0)
-    positions = np.zeros(n)
-    pos = 0.0
-    rolling_peak = 0.0
-    
-    for i in range(1, n):
-        c = closes[i-1]
-        s5 = sma5[i-1]
-        s20 = sma20[i-1]
-        s60 = sma60[i-1]
-        s120 = sma120[i-1]
-        
-        is_bull_regime = (c > s60) and (s20 > s60)
-        is_bear_regime = (c < s60) and (c < s120) and (c < s20)
-        
-        if pos > 0:
-            rolling_peak = max(rolling_peak, c)
-            dd_peak = (c - rolling_peak) / rolling_peak * 100.0
-            if dd_peak < -peak_drop_limit or c < s20:
-                pos = 0.0
-            else:
-                pos = bull_lev
-        elif pos < 0:
-            if c > s20:
-                pos = 0.0
-            else:
-                pos = -0.5 if mode == 'long_short' else 0.0
-        else:
-            if is_bull_regime and c > s20 and c > s5:
-                pos = bull_lev
-                rolling_peak = c
-            elif is_bear_regime and mode == 'long_short':
-                pos = -0.5
-                
-        positions[i] = pos
-        
-    strat_rets = np.zeros(n)
-    for i in range(1, n):
-        p = positions[i]
-        prev_p = positions[i-1]
-        cost = abs(p - prev_p) * cost_rate
-        strat_rets[i] = p * mkt_rets[i] - cost
-        
-    equity = np.cumprod(1 + strat_rets) * 1000000.0
-    bench_equity = np.cumprod(1 + mkt_rets) * 1000000.0
-    etf0050_equity = np.cumprod(1 + etf0050_rets) * 1000000.0
-    
-    peak = np.maximum.accumulate(equity)
-    dd = (equity - peak) / peak * 100.0
-    mdd = float(np.min(dd))
-    
-    b_peak = np.maximum.accumulate(bench_equity)
-    b_dd = (bench_equity - b_peak) / b_peak * 100.0
-    b_mdd = float(np.min(b_dd))
-    
-    e_peak = np.maximum.accumulate(etf0050_equity)
-    e_dd = (etf0050_equity - e_peak) / e_peak * 100.0
-    e_mdd = float(np.min(e_dd))
-    
-    years = n / 250.0
-    tot_ret = (equity[-1] / equity[0] - 1) * 100.0
-    cagr = ((equity[-1] / equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
-    b_tot_ret = (bench_equity[-1] / bench_equity[0] - 1) * 100.0
-    b_cagr = ((bench_equity[-1] / bench_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
-    e_tot_ret = (etf0050_equity[-1] / etf0050_equity[0] - 1) * 100.0
-    e_cagr = ((etf0050_equity[-1] / etf0050_equity[0]) ** (1.0 / years) - 1) * 100.0 if years > 0 else 0.0
-    
-    sharpe = float((np.mean(strat_rets) * 250.0 - 0.015) / (np.std(strat_rets) * np.sqrt(250.0) + 1e-9))
-    b_sharpe = float((np.mean(mkt_rets) * 250.0 - 0.015) / (np.std(mkt_rets) * np.sqrt(250.0) + 1e-9))
-    e_sharpe = float((np.mean(etf0050_rets) * 250.0 - 0.015) / (np.std(etf0050_rets) * np.sqrt(250.0) + 1e-9))
-    
-    action_markers = []
-    for i in range(1, n):
-        p = positions[i-1]
-        prev_p = positions[i-2] if i >= 2 else 0.0
-        if p != prev_p:
-            if p > 0:
-                action_markers.append({
-                    'date': str(dates[i-1]),
-                    'action': 'BUY',
-                    'label': f'🚀 凸性多頭槓桿進場 ({p:.1f}x)' if prev_p <= 0 else f'⚡ 調整槓桿 ({p:.1f}x)',
-                    'direction': '多方 (Long)',
-                    'price': round(float(closes[i-1]), 1),
-                    'equity': round(float(equity[i-1]), 0),
-                    'reason': '🚀 季線月線金叉確立，動能向上突破'
-                })
-            elif p < 0:
-                action_markers.append({
-                    'date': str(dates[i-1]),
-                    'action': 'SHORT',
-                    'label': '🔴 空頭避險對沖 (-0.5x)',
-                    'direction': '空方 (Short)',
-                    'price': round(float(closes[i-1]), 1),
-                    'equity': round(float(equity[i-1]), 0),
-                    'reason': '🚨 跌破季線與半年線，建立避險對沖'
-                })
-            elif p == 0.0:
-                action_markers.append({
-                    'date': str(dates[i-1]),
-                    'action': 'EXIT',
-                    'label': '🛡️ 回撤熔斷轉現金避險',
-                    'direction': '空手 (Cash)',
-                    'price': round(float(closes[i-1]), 1),
-                    'equity': round(float(equity[i-1]), 0),
-                    'reason': '🛡️ 自高點回檔達 2.5% 或跌破月線，啟動本金保護熔斷'
-                })
-                
-    trades = []
-    curr_t = None
-    for i in range(1, n):
-        p = positions[i-1]
-        prev_p = positions[i-2] if i >= 2 else 0.0
-        if p != prev_p:
-            if curr_t is not None:
-                curr_t['exit_date'] = str(dates[i-1])
-                curr_t['exit_price'] = round(float(closes[i-1]), 1)
-                curr_t['return_pct'] = round(float((curr_t['cum_ret'] - 1) * 100), 2)
-                curr_t['profit_amount'] = round(float(curr_t['start_equity'] * (curr_t['cum_ret'] - 1)), 0)
-                curr_t['exit_reason'] = '🛡️ 自高點回撤達 2.5% 觸發熔斷或跌破月線平倉'
-                del curr_t['cum_ret']
-                del curr_t['start_equity']
-                trades.append(curr_t)
-                curr_t = None
-            if p != 0:
-                curr_t = {
-                    'entry_date': str(dates[i-1]),
-                    'entry_price': round(float(closes[i-1]), 1),
-                    'direction': '多方 (Long)' if p > 0 else '空方 (Short)',
-                    'holding_days': 0,
-                    'cum_ret': 1.0,
-                    'start_equity': equity[i-1],
-                    'wave_tag': '🚀 凸性 10x 趨勢' if p > 0 else '🔴 避險對沖',
-                    'entry_reason': f'🚀 多頭體制突破進場 ({p:.1f}x)' if p > 0 else '🚨 空頭弱勢建立對沖'
-                }
-        if curr_t is not None:
-            curr_t['holding_days'] += 1
-            curr_t['cum_ret'] *= (1 + strat_rets[i])
-            
-    if curr_t is not None:
-        curr_t['exit_date'] = str(dates[-1])
-        curr_t['exit_price'] = round(float(closes[-1]), 1)
-        curr_t['return_pct'] = round(float((curr_t['cum_ret'] - 1) * 100), 2)
-        curr_t['profit_amount'] = round(float(curr_t['start_equity'] * (curr_t['cum_ret'] - 1)), 0)
-        curr_t['exit_reason'] = '現正持倉中'
-        del curr_t['cum_ret']
-        del curr_t['start_equity']
-        trades.append(curr_t)
-        
-    wins = [t for t in trades if t['return_pct'] > 0]
-    losses = [t for t in trades if t['return_pct'] <= 0]
-    win_rate = round(float(len(wins) / len(trades) * 100.0), 1) if len(trades) > 0 else 0.0
-    tot_gain = sum(t['profit_amount'] for t in wins)
-    tot_loss = abs(sum(t['profit_amount'] for t in losses))
-    profit_factor = round(float(tot_gain / tot_loss), 2) if tot_loss > 0 else 9.99
-    
-    step = max(1, n // 120)
-    sampled_indices = list(range(0, n, step))
-    if (n - 1) not in sampled_indices:
-        sampled_indices.append(n - 1)
-        
-    curve = []
-    for idx in sampled_indices:
-        curve.append({
-            'date': str(dates[idx]),
-            'strategy_equity': round(float(equity[idx]), 0),
-            'benchmark_equity': round(float(bench_equity[idx]), 0),
-            'etf0050_equity': round(float(etf0050_equity[idx]), 0),
-            'drawdown_pct': round(float(dd[idx]), 2)
-        })
-        
-    return {
-        'total_return_pct': round(float(tot_ret), 2),
-        'cagr_pct': round(float(cagr), 2),
-        'alpha_pct': round(float(tot_ret - b_tot_ret), 2),
-        'max_drawdown_pct': round(float(mdd), 2),
-        'sharpe_ratio': round(float(sharpe), 2),
-        'sortino_ratio': round(float(sharpe * 1.15), 2),
         'calmar_ratio': round(float(cagr / abs(mdd)), 2) if mdd != 0 else 0.0,
         'win_rate_pct': win_rate,
         'total_trades': len(trades),
@@ -2708,34 +2529,6 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'total_trades': ew_lo.get('total_trades', 0), 'market_exposure_pct': ew_lo.get('market_exposure_pct', 0)
         })
 
-        # 加入 🚀 凸性動態趨勢與回撤熔斷模型 (Convex Alpha 10x)
-        ac_cat = MODEL_CATALOG.get('alpha_convex', {'name': '🚀 凸性動態趨勢與回撤熔斷 (Convex Alpha 10x)', 'short_name': '🚀 凸性 10x 熔斷'})
-        ac_ls = simulate_alpha_convex_backtest(sub_df, mode='long_short')
-        ac_lo = simulate_alpha_convex_backtest(sub_df, mode='long_only')
-        models_detail['alpha_convex'] = {
-            'model_id': 'alpha_convex',
-            'name': ac_cat['name'],
-            'short_name': ac_cat['short_name'],
-            'long_short': ac_ls,
-            'long_only': ac_lo
-        }
-        comp_ls.append({
-            'model_id': 'alpha_convex', 'name': ac_cat['name'], 'short_name': ac_cat['short_name'],
-            'total_return_pct': ac_ls.get('total_return_pct', 0), 'cagr_pct': ac_ls.get('cagr_pct', 0),
-            'alpha_pct': ac_ls.get('alpha_pct', 0), 'max_drawdown_pct': ac_ls.get('max_drawdown_pct', 0),
-            'sharpe_ratio': ac_ls.get('sharpe_ratio', 0), 'sortino_ratio': ac_ls.get('sortino_ratio', 0),
-            'win_rate_pct': ac_ls.get('win_rate_pct', 0), 'profit_factor': ac_ls.get('profit_factor', 0),
-            'total_trades': ac_ls.get('total_trades', 0), 'market_exposure_pct': ac_ls.get('market_exposure_pct', 0)
-        })
-        comp_lo.append({
-            'model_id': 'alpha_convex', 'name': ac_cat['name'], 'short_name': ac_cat['short_name'],
-            'total_return_pct': ac_lo.get('total_return_pct', 0), 'cagr_pct': ac_lo.get('cagr_pct', 0),
-            'alpha_pct': ac_lo.get('alpha_pct', 0), 'max_drawdown_pct': ac_lo.get('max_drawdown_pct', 0),
-            'sharpe_ratio': ac_lo.get('sharpe_ratio', 0), 'sortino_ratio': ac_lo.get('sortino_ratio', 0),
-            'win_rate_pct': ac_lo.get('win_rate_pct', 0), 'profit_factor': ac_lo.get('profit_factor', 0),
-            'total_trades': ac_lo.get('total_trades', 0), 'market_exposure_pct': ac_lo.get('market_exposure_pct', 0)
-        })
-
         target_model_data = models_detail.get(target_id, list(models_detail.values())[0])
         target_ls = target_model_data['long_short']
         target_lo = target_model_data['long_only']
@@ -3214,20 +3007,6 @@ def build_operations_6m(df: Optional[pd.DataFrame] = None, models_bundle: Option
     except Exception as e:
         print(f"[!] 警告：operations_6m 艾略特波浪計算失敗: {e}")
 
-    # 加入 🚀 凸性動態趨勢與回撤熔斷實戰指引
-    try:
-        ac_ls = simulate_alpha_convex_backtest(v_df, mode='long_short')
-        ac_lo = simulate_alpha_convex_backtest(v_df, mode='long_only')
-        models_detail['alpha_convex'] = {
-            'model_id': 'alpha_convex',
-            'name': '凸性動態趨勢與回撤熔斷 (Convex Alpha 10x)',
-            'short_name': '🚀 凸性 10x 熔斷',
-            'long_short': ac_ls,
-            'long_only': ac_lo
-        }
-    except Exception as e:
-        print(f"[!] 警告：operations_6m 凸性動態趨勢計算失敗: {e}")
-        
     target_id = selected_model_id if selected_model_id in models_detail else list(models_detail.keys())[0]
     active_detail = models_detail[target_id]
     curr_status = active_detail['long_short'].get('current_status', {})
@@ -3654,7 +3433,12 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'total_cash_net_1d': float(latest_row['total_cash_net_1d']),
             'total_cash_net_5d': float(latest_row['total_cash_net_5d']),
             'tsmc_ret_5d': float(latest_row['tsmc_ret_5d']),
-            'tsmc_ma20_bias': float(latest_row['tsmc_ma20_bias'])
+            'tsmc_ma20_bias': float(latest_row['tsmc_ma20_bias']),
+            'retail_mtx_net': int(latest_row.get('retail_mtx_net', 0)),
+            'retail_mtx_change_3d': int(latest_row.get('retail_mtx_change_3d', 0)),
+            'pc_ratio_oi': round(float(latest_row.get('pc_ratio_oi', 100.0)), 2),
+            'pc_ratio_oi_change_5d': round(float(latest_row.get('pc_ratio_oi_change_5d', 0.0)), 2),
+            'pc_ratio_vol': round(float(latest_row.get('pc_ratio_vol', 100.0)), 2)
         },
         # 兼容舊版看板欄位：直接對應選定模型
         'metrics': active_model.get('metrics', {}),

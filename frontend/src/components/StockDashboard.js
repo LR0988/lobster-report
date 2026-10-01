@@ -8154,8 +8154,7 @@ function StockDashboard() {
                     { id: 'rf', name: 'Random Forest', icon: '🌳', tag: '隨機森林' },
                     { id: 'mlp', name: 'MLP 類神經', icon: '🕸️', tag: '多層深度感知器' },
                     { id: 'lr', name: 'Logistic Reg', icon: '📏', tag: '線性迴歸基準' },
-                    { id: 'elliott', name: '波浪理論策略', icon: '🌊', tag: '幾何推動與斐波階梯' },
-                    { id: 'alpha_convex', name: '凸性 10x 熔斷', icon: '🚀', tag: '10年10倍＋極致回撤防守' },
+                    { id: 'elliott', name: '波浪理論策略', icon: '🌊', tag: '幾何推動與斐波階梯' }
                   ];
 
                   // 動態計算所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
