@@ -183,6 +183,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
+  { val: 'walk_forward', label: '🔄 漸進走步動態學習 (Walk-Forward Continual Learning)', short: '🔄 漸進動態', tag: '🛡️ 純樣本外實盤金標', desc: '每 40 日納入最新數據滾動重訓，結合時間指數衰減加權與體制門控，全程 100% 純樣本外 (OOS) 模擬真實基金實盤動態學習' },
   { val: 'regime_moe', label: '🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)', short: '🏛️ 狀態 MoE', tag: '👑 前沿旗艦', desc: '依牛市擴張、熊市防禦與箱型震盪切成三段專家獨立訓練，結合時間衰減與二階段元標籤置信度過濾' },
   { val: 'ensemble', label: '👑 多模型融合集成 (Ensemble)', short: '👑 集成模型', tag: '🥇 綜合推薦首選', desc: '軟投票融合 LightGBM、隨機森林與高泛化羅吉斯迴歸，AUC 表現最佳' },
   { val: 'lightgbm', label: '⚡ LightGBM (梯度提升)', short: '⚡ LightGBM', tag: '⚡ 靈敏動能', desc: '微軟開源高效梯度提升決策樹，擅長捕捉籌碼與技術面非線性轉折' },
@@ -8147,6 +8148,7 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'regime_moe';
 
                   const BACKTEST_MODELS = [
+                    { id: 'walk_forward', name: '漸進動態學習', icon: '🔄', tag: '純樣本外實盤金標 (動態重訓)' },
                     { id: 'regime_moe', name: 'Regime MoE', icon: '🏛️', tag: '動態體制專家 (前沿首選)' },
                     { id: 'ensemble', name: 'Ensemble 集成', icon: '👑', tag: '多模型加權集成' },
                     { id: 'lightgbm', name: 'LightGBM', icon: '⚡', tag: '梯度提升決策樹' },

@@ -55,3 +55,4 @@ Thumbs.db
 *.tmp
 temp/
 market_ml_prediction.json
+*.joblib
