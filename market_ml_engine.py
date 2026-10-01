@@ -128,7 +128,15 @@ FEATURE_NAMES_ZH = {
     'retail_mtx_change_3d': '散戶小台淨留倉 3 日增減 (口)',
     'pc_ratio_oi': '選擇權買賣權未平倉比率 P/C Ratio (%)',
     'pc_ratio_oi_change_5d': '選擇權 P/C 未平倉比率 5 日變動 (pp)',
-    'pc_ratio_vol': '選擇權買賣權成交量比率 (%)'
+    'pc_ratio_vol': '選擇權買賣權成交量比率 (%)',
+    'kama_er_20d': 'Kaufman 20 日市場效率比率 (ER, 0~1)',
+    'kama_bias_20d': 'Kaufman 自適應均線 (KAMA) 乖離率 (%)',
+    'supertrend_direction': 'ATR SuperTrend 趨勢方向 (+1 多 / -1 空)',
+    'supertrend_dist_pct': 'ATR SuperTrend 超級趨勢軌道距離 (%)',
+    'ehlers_supersmoother_bias': 'Ehlers 零延遲雙極平滑濾波乖離 (%)',
+    'chop_index_14d': 'Choppiness 混沌/趨勢成熟度指數 (0~100)',
+    'yang_zhang_vol_20d': 'Yang-Zhang 極值隔夜跳空真實波動度 (%)',
+    'vwap_bias_60d': '60 日成交量加權平均價 (VWAP) 乖離率 (%)'
 }
 
 MODEL_CATALOG = {
@@ -207,9 +215,10 @@ FEATURE_PRESETS = {
     'quant_literature': {
         'id': 'quant_literature',
         'name': '📚 頂級量化文獻學術因子',
-        'desc': '納入選擇權 P/C Ratio、散戶小台留倉、López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、TSM ADR 溢價與日圓 Carry Trade',
+        'desc': '納入選擇權 P/C Ratio、散戶小台留倉、López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、KAMA 效率比率、Yang-Zhang 波動度與日圓 Carry Trade',
         'features': [
             'ret_5d', 'ret_20d', 'ma20_bias', 'volatility_20d',
+            'kama_er_20d', 'yang_zhang_vol_20d', 'chop_index_14d',
             'pc_ratio_oi', 'retail_mtx_net',
             'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
             'frac_diff_045', 'amihud_illiq_20d', 'hurst_60d', 'breadth_ad_ratio_5d',
@@ -254,10 +263,12 @@ FEATURE_PRESETS = {
     'pure_technicals': {
         'id': 'pure_technicals',
         'name': '📐 純技術線型動能',
-        'desc': '純加權指數各期均線、乖離率、RSI、MACD、波動度與成交量能倍數',
+        'desc': '純加權指數各期均線、KAMA 自適應均線、SuperTrend、Ehlers 濾波、CHOP、VWAP、乖離率、RSI、MACD 與波動度',
         'features': [
             'ret_1d', 'ret_3d', 'ret_5d', 'ret_10d', 'ret_20d', 'ret_60d',
             'ma5_bias', 'ma10_bias', 'ma20_bias', 'ma60_bias', 'ma120_bias',
+            'kama_er_20d', 'kama_bias_20d', 'supertrend_direction', 'supertrend_dist_pct',
+            'ehlers_supersmoother_bias', 'chop_index_14d', 'yang_zhang_vol_20d', 'vwap_bias_60d',
             'ma_alignment', 'rsi_14', 'macd_hist', 'volatility_20d', 'turnover_ratio_5d'
         ]
     }
@@ -724,6 +735,97 @@ def build_features() -> pd.DataFrame:
     for idx in range(59, n):
         hurst_series[idx] = compute_hurst_rs(pct_rets[idx-59:idx+1])
 
+    # ── 1. Kaufman 自適應均線 (KAMA) 與 20日市場效率比率 (ER) ──
+    c_arr = np.array(closes, dtype=float)
+    o_arr = np.array(opens, dtype=float)
+    h_arr = np.array(highs, dtype=float)
+    l_arr = np.array(lows, dtype=float)
+    v_arr = np.array(turnovers, dtype=float)
+
+    er_arr = np.zeros(n)
+    kama_arr = np.copy(c_arr)
+    change_20 = np.abs(c_arr[20:] - c_arr[:-20])
+    diff_1 = np.abs(np.diff(c_arr))
+    rolling_path_20 = pd.Series(diff_1).rolling(20).sum().values[19:]
+    er_arr[20:] = np.divide(change_20, rolling_path_20, out=np.zeros_like(change_20, dtype=float), where=(rolling_path_20 > 0))
+    fast_sc = 2.0 / (2.0 + 1.0)
+    slow_sc = 2.0 / (30.0 + 1.0)
+    for idx_k in range(20, n):
+        sc = (er_arr[idx_k] * (fast_sc - slow_sc) + slow_sc) ** 2
+        kama_arr[idx_k] = kama_arr[idx_k-1] + sc * (c_arr[idx_k] - kama_arr[idx_k-1])
+    kama_bias_arr = np.divide(c_arr - kama_arr, kama_arr, out=np.zeros_like(c_arr, dtype=float), where=(kama_arr > 0)) * 100.0
+
+    # ── 2. ATR SuperTrend (超級趨勢軌道: 14日, 乘數 3.0) ──
+    tr_arr = np.zeros(n)
+    tr_arr[0] = h_arr[0] - l_arr[0]
+    for idx_t in range(1, n):
+        tr_arr[idx_t] = max(h_arr[idx_t] - l_arr[idx_t], abs(h_arr[idx_t] - c_arr[idx_t-1]), abs(l_arr[idx_t] - c_arr[idx_t-1]))
+    atr14_arr = pd.Series(tr_arr).rolling(14, min_periods=1).mean().values
+    hl2_arr = (h_arr + l_arr) / 2.0
+    basic_upper_arr = hl2_arr + (3.0 * atr14_arr)
+    basic_lower_arr = hl2_arr - (3.0 * atr14_arr)
+    upper_band_arr = np.copy(basic_upper_arr)
+    lower_band_arr = np.copy(basic_lower_arr)
+    st_direction_arr = np.ones(n)
+    st_band_arr = np.zeros(n)
+    for idx_s in range(1, n):
+        if basic_lower_arr[idx_s] > lower_band_arr[idx_s-1] or c_arr[idx_s-1] < lower_band_arr[idx_s-1]:
+            lower_band_arr[idx_s] = basic_lower_arr[idx_s]
+        else:
+            lower_band_arr[idx_s] = lower_band_arr[idx_s-1]
+        if basic_upper_arr[idx_s] < upper_band_arr[idx_s-1] or c_arr[idx_s-1] > upper_band_arr[idx_s-1]:
+            upper_band_arr[idx_s] = basic_upper_arr[idx_s]
+        else:
+            upper_band_arr[idx_s] = upper_band_arr[idx_s-1]
+        if st_direction_arr[idx_s-1] == 1.0:
+            st_direction_arr[idx_s] = -1.0 if c_arr[idx_s] < lower_band_arr[idx_s] else 1.0
+        else:
+            st_direction_arr[idx_s] = 1.0 if c_arr[idx_s] > upper_band_arr[idx_s] else -1.0
+        st_band_arr[idx_s] = lower_band_arr[idx_s] if st_direction_arr[idx_s] == 1.0 else upper_band_arr[idx_s]
+    st_dist_arr = np.divide(c_arr - st_band_arr, st_band_arr, out=np.zeros_like(c_arr, dtype=float), where=(st_band_arr > 0)) * 100.0
+
+    # ── 3. Ehlers 零延遲雙極平滑濾波器 (SuperSmoother: 2-pole, Period=15) ──
+    ehlers_period = 15.0
+    a1_eh = np.exp(-np.sqrt(2.0) * np.pi / ehlers_period)
+    b1_eh = 2.0 * a1_eh * np.cos(np.sqrt(2.0) * np.pi / ehlers_period)
+    c2_eh = b1_eh
+    c3_eh = - (a1_eh ** 2)
+    c1_eh = 1.0 - c2_eh - c3_eh
+    ehlers_arr = np.copy(c_arr)
+    for idx_e in range(2, n):
+        ehlers_arr[idx_e] = c1_eh * (c_arr[idx_e] + c_arr[idx_e-1]) / 2.0 + c2_eh * ehlers_arr[idx_e-1] + c3_eh * ehlers_arr[idx_e-2]
+    ehlers_bias_arr = np.divide(c_arr - ehlers_arr, ehlers_arr, out=np.zeros_like(c_arr, dtype=float), where=(ehlers_arr > 0)) * 100.0
+
+    # ── 4. Choppiness Index (CHOP 14日混沌/趨勢成熟度指數) ──
+    sum_tr_14 = pd.Series(tr_arr).rolling(14, min_periods=1).sum().values
+    max_hi_14 = pd.Series(h_arr).rolling(14, min_periods=1).max().values
+    min_lo_14 = pd.Series(l_arr).rolling(14, min_periods=1).min().values
+    range_hl_14 = np.maximum(max_hi_14 - min_lo_14, 1e-4)
+    chop_14d_arr = 100.0 * np.log10(np.maximum(sum_tr_14, 1e-4) / range_hl_14) / np.log10(14.0)
+    chop_14d_arr = np.nan_to_num(np.clip(chop_14d_arr, 0.0, 100.0), nan=50.0)
+
+    # ── 5. Yang-Zhang 極值隔夜跳空真實波動度 (20日) ──
+    n_yz = 20
+    k_yz = 0.34 / (1.34 + (n_yz + 1.0) / (n_yz - 1.0))
+    log_oc = np.zeros(n)
+    log_oc[1:] = np.log(np.maximum(o_arr[1:] / c_arr[:-1], 1e-6))
+    log_co = np.log(np.maximum(c_arr / o_arr, 1e-6))
+    log_ho = np.log(np.maximum(h_arr / o_arr, 1e-6))
+    log_hc = np.log(np.maximum(h_arr / c_arr, 1e-6))
+    log_lo = np.log(np.maximum(l_arr / o_arr, 1e-6))
+    log_lc = np.log(np.maximum(l_arr / c_arr, 1e-6))
+    rs_term = log_hc * log_ho + log_lc * log_lo
+    var_o = pd.Series(log_oc).rolling(n_yz, min_periods=2).var().fillna(0.0).values
+    var_c = pd.Series(log_co).rolling(n_yz, min_periods=2).var().fillna(0.0).values
+    var_rs = pd.Series(rs_term).rolling(n_yz, min_periods=1).mean().fillna(0.0).values
+    yz_vol_arr = np.sqrt(np.maximum(var_o + k_yz * var_c + (1.0 - k_yz) * var_rs, 0.0)) * np.sqrt(250.0) * 100.0
+
+    # ── 6. 60日成交量加權平均價 (VWAP) 乖離率 ──
+    cum_pv_60 = pd.Series(c_arr * v_arr).rolling(60, min_periods=1).sum().values
+    cum_v_60 = pd.Series(v_arr).rolling(60, min_periods=1).sum().values
+    vwap_60_arr = np.divide(cum_pv_60, cum_v_60, out=np.copy(c_arr), where=(cum_v_60 > 0))
+    vwap_bias_arr = np.divide(c_arr - vwap_60_arr, vwap_60_arr, out=np.zeros_like(c_arr, dtype=float), where=(vwap_60_arr > 0)) * 100.0
+
     rows = []
     last_fut_info = {'外資': 0, '投信': 0, '自營商': 0}
     last_cash_info = {'foreign': 0, 'trust': 0, 'dealer': 0, 'total': 0}
@@ -950,6 +1052,14 @@ def build_features() -> pd.DataFrame:
             'pc_ratio_oi': pc_oi,
             'pc_ratio_oi_change_5d': pc_oi_chg5,
             'pc_ratio_vol': pc_vol,
+            'kama_er_20d': round(float(er_arr[i]), 4),
+            'kama_bias_20d': round(float(kama_bias_arr[i]), 2),
+            'supertrend_direction': float(st_direction_arr[i]),
+            'supertrend_dist_pct': round(float(st_dist_arr[i]), 2),
+            'ehlers_supersmoother_bias': round(float(ehlers_bias_arr[i]), 2),
+            'chop_index_14d': round(float(chop_14d_arr[i]), 2),
+            'yang_zhang_vol_20d': round(float(yz_vol_arr[i]), 2),
+            'vwap_bias_60d': round(float(vwap_bias_arr[i]), 2),
             # Snapshot raw references
             'us10y': us10y_val,
             'oil_wti': oil_val,
@@ -1810,6 +1920,7 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
             etf0050_rets[i] = mkt_rets[i]
             
     ma60 = pd.Series(closes).rolling(60, min_periods=1).mean().values
+    ma20 = pd.Series(closes).rolling(20, min_periods=1).mean().values
     
     positions = np.zeros(n)
     cost_rate = (cost_bps / 10000.0)
@@ -1818,6 +1929,7 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         d_curr = str(dates[i])
         c = closes[i]
         m60 = ma60[i]
+        m20 = ma20[i]
         is_bull = c >= m60
         
         info = wf_dict.get(d_curr, {'p_up': 0.40, 'p_down': 0.20})
@@ -1829,7 +1941,13 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         sell_thresh = 0.42 if is_bull else 0.35
         
         if pu >= buy_thresh and pd_ < 0.35:
-            positions[i] = 1.0
+            # 前沿動態趨勢槓桿 (Dynamic Trend Sizing):
+            # 當大盤處於季線多頭 (is_bull) 且站上月線 (c >= m20)，且 AI 純樣本外多頭信心高企 (pu >= 0.48)
+            # 動態擴張曝險至 1.45x，徹底彌補牛市漂移；否則維持 1.0x 基準多單
+            if is_bull and c >= m20 and pu >= 0.48:
+                positions[i] = 1.45
+            else:
+                positions[i] = 1.0
         elif pd_ >= sell_thresh or (not is_bull and c < m60 * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
@@ -1874,14 +1992,15 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         prev_p = positions[i-1]
         if p != prev_p:
             if p > 0:
+                is_lev = p > 1.0
                 action_markers.append({
                     'date': str(dates[i]),
                     'action': 'BUY',
-                    'label': '🔄 漸進學習多頭建立 (1.0x)',
+                    'label': f'🔄 漸進趨勢加碼 ({p:.2f}x)' if is_lev else '🔄 漸進學習多頭建立 (1.0x)',
                     'direction': '多方 (Long)',
                     'price': round(float(closes[i]), 1),
                     'equity': round(float(equity[i]), 0),
-                    'reason': '🔄 滾動重訓模型辨識多頭動能優勢確立，進場持有'
+                    'reason': '🚀 站上季線月線且 AI 信心高企，啟動 1.45x 動態趨勢加碼' if is_lev else '🔄 滾動重訓模型辨識多頭動能優勢確立，進場持有'
                 })
             elif p < 0:
                 action_markers.append({
@@ -1981,8 +2100,8 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         
     latest_p = positions[-1]
     curr_stance = '多方偏多 (Long)' if latest_p > 0 else ('空方避險 (Short)' if latest_p < 0 else '空手防禦 (Cash)')
-    curr_badge = '🟢 漸進多頭進場' if latest_p > 0 else ('🔴 漸進空頭對沖' if latest_p < 0 else '🛡️ 漸進防禦現金')
-    curr_desc = '🔄 漸進動態模型判定最新多頭動能確立' if latest_p > 0 else ('🚨 漸進動態模型偵測回檔風險，啟動對沖' if latest_p < 0 else '🛡️ 處於震盪防守期，維持現金')
+    curr_badge = f'🟢 漸進趨勢加碼 ({latest_p:.2f}x)' if latest_p > 1.0 else ('🟢 漸進多頭進場' if latest_p > 0 else ('🔴 漸進空頭對沖' if latest_p < 0 else '🛡️ 漸進防禦現金'))
+    curr_desc = '🚀 漸進動態模型判定強勢主升段共振，維持 1.45x 動態多單擴張' if latest_p > 1.0 else ('🔄 漸進動態模型判定最新多頭動能確立' if latest_p > 0 else ('🚨 漸進動態模型偵測回檔風險，啟動對沖' if latest_p < 0 else '🛡️ 處於震盪防守期，維持現金'))
     
     return {
         'total_return_pct': round(float(tot_ret), 2),
@@ -2017,7 +2136,8 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
             'stance': curr_stance,
             'signal_badge': curr_badge,
             'signal_desc': curr_desc,
-            'position_size_pct': 100 if latest_p != 0 else 0,
+            'position_size_pct': round(float(latest_p * 100)) if latest_p != 0 else 0,
+            'leverage_ratio': round(float(latest_p), 2) if latest_p > 0 else 0.0,
             'latest_price': float(closes[-1]),
             'confidence_pct': 68.5
         }
@@ -2577,11 +2697,18 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
     p_up = pipe['clf_up'].predict_proba(X)[:, 1]
     p_down = pipe['clf_down'].predict_proba(X)[:, 1]
     
+    ma60 = pd.Series(closes).rolling(60, min_periods=1).mean().values
+    ma20 = pd.Series(closes).rolling(20, min_periods=1).mean().values
+    
     positions = np.zeros(n)
     for i in range(n):
+        is_bull = closes[i] >= ma60[i]
         if p_up[i] >= 0.45 and p_down[i] < 0.35:
-            positions[i] = 1.0
-        elif p_down[i] >= 0.40:
+            if is_bull and closes[i] >= ma20[i] and p_up[i] >= 0.50:
+                positions[i] = 1.45
+            else:
+                positions[i] = 1.0
+        elif p_down[i] >= 0.40 or (not is_bull and closes[i] < ma60[i] * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
             positions[i] = 0.0
@@ -2626,11 +2753,12 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
         pos = positions[i-1]
         prev_pos = positions[i-2] if i >= 2 else 0.0
         if pos != prev_pos:
-            if pos == 1.0:
+            if pos > 0:
+                is_lev = pos > 1.0
                 action_markers.append({
                     'date': str(dates[i-1]),
                     'action': 'BUY',
-                    'label': '🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多加碼',
+                    'label': f'🟢 趨勢加碼 ({pos:.2f}x)' if is_lev else ('🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多持倉'),
                     'direction': '多方 (Long)',
                     'price': round(float(closes[i-1]), 1),
                     'equity': round(float(equity[i-1]), 0)
@@ -3045,11 +3173,18 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
     p_up = pipe['clf_up'].predict_proba(X)[:, 1]
     p_down = pipe['clf_down'].predict_proba(X)[:, 1]
     
+    ma60 = pd.Series(closes).rolling(60, min_periods=1).mean().values
+    ma20 = pd.Series(closes).rolling(20, min_periods=1).mean().values
+    
     positions = np.zeros(n)
     for i in range(n):
+        is_bull = closes[i] >= ma60[i]
         if p_up[i] >= 0.45 and p_down[i] < 0.35:
-            positions[i] = 1.0
-        elif p_down[i] >= 0.40:
+            if is_bull and closes[i] >= ma20[i] and p_up[i] >= 0.50:
+                positions[i] = 1.45
+            else:
+                positions[i] = 1.0
+        elif p_down[i] >= 0.40 or (not is_bull and closes[i] < ma60[i] * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
             positions[i] = 0.0
@@ -3094,11 +3229,12 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         pos = positions[i-1]
         prev_pos = positions[i-2] if i >= 2 else 0.0
         if pos != prev_pos:
-            if pos == 1.0:
+            if pos > 0:
+                is_lev = pos > 1.0
                 action_markers.append({
                     'date': str(dates[i-1]),
                     'action': 'BUY',
-                    'label': '🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多加碼',
+                    'label': f'🟢 趨勢加碼 ({pos:.2f}x)' if is_lev else ('🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多加碼'),
                     'direction': '多方 (Long)',
                     'price': round(float(closes[i-1]), 1),
                     'equity': round(float(equity[i-1]), 0)
@@ -3189,12 +3325,14 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         holding_d = n - 1 - start_idx
         unrealized_pct = round(float((latest_close / entry_p - 1) * 100), 2)
         
+        is_lev = last_pos > 1.0
         current_status = {
             'action_code': 'HOLD_LONG',
-            'action_title': '🟢 建議操作：多單續抱（持有多方部位）',
-            'action_badge': '🟢 多方持倉中 (Long 100%)',
-            'action_summary': f"演算法於 {entry_d[:4]}/{entry_d[4:6]}/{entry_d[6:8]} 指數 {entry_p:,.0f} 點建立多單，目前已持有 {holding_d} 個交易日，未實現損益 {unrealized_pct:+.2f}%。目前大盤仍位於月線之上，建議 100% 多單部位續抱。",
-            'position_size_pct': 100,
+            'action_title': f'🟢 建議操作：多單續抱（{"1.45x 趨勢加碼部位" if is_lev else "基準多方部位"}）',
+            'action_badge': f'🟢 多方持倉中 (Long {round(last_pos*100)}%)',
+            'action_summary': f"演算法於 {entry_d[:4]}/{entry_d[4:6]}/{entry_d[6:8]} 指數 {entry_p:,.0f} 點建立多單，目前已持有 {holding_d} 個交易日，未實現損益 {unrealized_pct:+.2f}%。目前大盤處於均線多頭且 AI 信心顯著，建議 {round(last_pos*100)}% 多單部位續抱。",
+            'position_size_pct': round(last_pos * 100),
+            'leverage_ratio': round(float(last_pos), 2),
             'direction': '多方 (Long)',
             'entry_date': entry_d,
             'entry_price': entry_p,
