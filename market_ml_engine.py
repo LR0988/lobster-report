@@ -2424,12 +2424,12 @@ def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.nda
                 continue
                 
             pipe = create_model_pipeline(model_id, trial_params)
+            sw_fold = sample_weights[tr_idx_purged] if sample_weights is not None else None
             if model_id == 'regime_moe':
                 reg_fold = regimes[tr_idx_purged] if regimes is not None else None
-                sw_fold = sample_weights[tr_idx_purged] if sample_weights is not None else None
                 pipe.fit(X_tr, y_tr, regimes=reg_fold, sample_weight=sw_fold)
             else:
-                pipe.fit(X_tr, y_tr)
+                fit_model_with_weights(pipe, X_tr, y_tr, sample_weight=sw_fold)
             probs = pipe.predict_proba(X_val)[:, 1]
             probs_clipped = np.clip(probs, 1e-5, 1.0 - 1e-5)
             
@@ -3572,7 +3572,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
                 X_train=X_train,
                 y_train=Y_tr_u20,
                 regimes=reg_tr if m_id == 'regime_moe' else None,
-                sample_weights=sw_tr if m_id == 'regime_moe' else None,
+                sample_weights=sw_tr,
                 fut_rets=fut_ret_20[:split_idx],
                 n_trials=tune_trials
             )
