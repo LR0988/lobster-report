@@ -1809,34 +1809,36 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         else:
             etf0050_rets[i] = mkt_rets[i]
             
-    sma20 = pd.Series(closes).rolling(20, min_periods=1).mean().values
+    ma60 = pd.Series(closes).rolling(60, min_periods=1).mean().values
     
     positions = np.zeros(n)
     cost_rate = (cost_bps / 10000.0)
     
-    for i in range(1, n):
-        d_prev = str(dates[i-1])
-        c = closes[i-1]
-        s20 = sma20[i-1]
+    for i in range(n):
+        d_curr = str(dates[i])
+        c = closes[i]
+        m60 = ma60[i]
+        is_bull = c >= m60
         
-        info = wf_dict.get(d_prev, {'p_up': 0.40, 'p_down': 0.20})
+        info = wf_dict.get(d_curr, {'p_up': 0.40, 'p_down': 0.20})
         pu = info['p_up']
         pd_ = info['p_down']
         
-        # 體制門控自適應：多方動能優勢且價格站穩月線附屬支撐
-        if pu >= 0.36 and pu > pd_ and c >= s20 * 0.985:
+        # 體制趨勢自適應雙門檻：牛市放寬進場避免被洗，熊市嚴格風控迅速退出
+        buy_thresh = 0.40 if is_bull else 0.50
+        sell_thresh = 0.42 if is_bull else 0.35
+        
+        if pu >= buy_thresh and pd_ < 0.35:
             positions[i] = 1.0
-        elif pd_ >= 0.40 or c < s20 * 0.97:
+        elif pd_ >= sell_thresh or (not is_bull and c < m60 * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
-            positions[i] = 0.0
+            positions[i] = positions[i-1] if i > 0 else 0.0
             
     strat_rets = np.zeros(n)
     for i in range(1, n):
-        p = positions[i]
-        prev_p = positions[i-1]
-        cost = abs(p - prev_p) * cost_rate
-        strat_rets[i] = p * mkt_rets[i] - cost
+        cost = abs(positions[i] - positions[i-1]) * cost_rate
+        strat_rets[i] = positions[i-1] * mkt_rets[i] - cost
         
     equity = np.cumprod(1 + strat_rets) * 1000000.0
     bench_equity = np.cumprod(1 + mkt_rets) * 1000000.0
@@ -1965,6 +1967,18 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
             'drawdown_pct': round(float(dd[idx]), 2)
         })
         
+    yearly = []
+    df_y = pd.DataFrame({'year': [str(d)[:4] for d in dates], 's': strat_rets, 'm': mkt_rets})
+    for yr, g in df_y.groupby('year'):
+        s_c = (np.prod(1 + g['s']) - 1) * 100
+        m_c = (np.prod(1 + g['m']) - 1) * 100
+        yearly.append({
+            'year': str(yr),
+            'strategy_return': round(float(s_c), 2),
+            'benchmark_return': round(float(m_c), 2),
+            'alpha': round(float(s_c - m_c), 2)
+        })
+        
     latest_p = positions[-1]
     curr_stance = '多方偏多 (Long)' if latest_p > 0 else ('空方避險 (Short)' if latest_p < 0 else '空手防禦 (Cash)')
     curr_badge = '🟢 漸進多頭進場' if latest_p > 0 else ('🔴 漸進空頭對沖' if latest_p < 0 else '🛡️ 漸進防禦現金')
@@ -1978,6 +1992,7 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         'sharpe_ratio': round(float(sharpe), 2),
         'sortino_ratio': round(float(sharpe * 1.15), 2),
         'calmar_ratio': round(float(cagr / abs(mdd)), 2) if mdd != 0 else 0.0,
+        'yearly': yearly,
         'win_rate_pct': win_rate,
         'total_trades': len(trades),
         'win_trades': len(wins),
