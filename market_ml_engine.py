@@ -1127,16 +1127,16 @@ def compute_market_regimes(df: pd.DataFrame) -> np.ndarray:
     vol_high = np.nanpercentile(vol, 75)
     
     for i in range(n):
-        if ma60_b[i] < -1.5 or (vol[i] > vol_high and ma20_b[i] < -1.0) or (f_fut[i] < -35000 and ma20_b[i] < 0):
-            regimes[i] = 1 # bear
-        elif ma60_b[i] > 1.0 and ma20_b[i] > -0.5 and f_fut[i] > -30000:
-            regimes[i] = 0 # bull
+        if ma60_b[i] < -1.5 or (vol[i] > vol_high and ma20_b[i] < -1.5):
+            regimes[i] = 1 # bear (空頭破線防禦段)
+        elif ma60_b[i] > 0.5 and ma20_b[i] > -0.5:
+            regimes[i] = 0 # bull (多頭擴張主升段)
         else:
-            regimes[i] = 2 # range
+            regimes[i] = 2 # range (箱型震盪整理段)
             
     return regimes
 
-def compute_sample_weights(n_samples: int, half_life_days: int = 750) -> np.ndarray:
+def compute_sample_weights(n_samples: int, half_life_days: int = 500) -> np.ndarray:
     """
     計算時間指數衰減樣本權重 (半衰期約 3 年 / 750 個交易日)
     越靠近當前的樣本賦予越高權重，讓模型更敏銳捕捉當代市場結構變遷
