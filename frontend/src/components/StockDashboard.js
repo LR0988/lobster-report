@@ -736,13 +736,13 @@ function StockDashboard() {
     const val = localStorage.getItem('market_ml_labeling_param');
     return val !== null ? parseFloat(val) : 1.0;
   });
-  const [marketBacktestMode, setMarketBacktestMode] = useState(() => localStorage.getItem('market_backtest_mode') || 'long_short');
-  const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period') || 'oos_2y');
+  const [marketBacktestMode, setMarketBacktestMode] = useState(() => localStorage.getItem('market_backtest_mode_v2') || 'long_only');
+  const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period_v2') || '10y');
   const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2016');
   const [marketBtEndYear, setMarketBtEndYear] = useState(() => localStorage.getItem('market_bt_end_year') || '2026');
-  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model') || 'regime_moe');
-  const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model') || 'regime_moe');
-  const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode') || 'long_short');
+  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model_v2') || 'rf');
+  const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model_v2') || 'rf');
+  const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode_v2') || 'long_only');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
   const [operationsSortOrder, setOperationsSortOrder] = useState('desc');
   const [elliottBtMode, setElliottBtMode] = useState(() => localStorage.getItem('elliott_bt_mode') || 'long_only');
@@ -8143,9 +8143,9 @@ function StockDashboard() {
                   }
 
                   const isLongShort = marketBacktestMode === 'long_short';
-                  const activePeriodKey = marketBacktestPeriod || 'oos_2y';
+                  const activePeriodKey = marketBacktestPeriod || bt.default_period_key || '10y';
                   const history10y = bt.full_history_10y || {};
-                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'regime_moe';
+                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'rf';
 
                   const BACKTEST_MODELS = [
                     { id: 'walk_forward', name: '漸進動態學習', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
@@ -8500,6 +8500,7 @@ function StockDashboard() {
                             }}
                             onClick={() => {
                               setMarketBacktestMode('long_short');
+                              localStorage.setItem('market_backtest_mode_v2', 'long_short');
                               localStorage.setItem('market_backtest_mode', 'long_short');
                             }}
                           >
@@ -8524,6 +8525,7 @@ function StockDashboard() {
                             }}
                             onClick={() => {
                               setMarketBacktestMode('long_only');
+                              localStorage.setItem('market_backtest_mode_v2', 'long_only');
                               localStorage.setItem('market_backtest_mode', 'long_only');
                             }}
                           >
@@ -8598,6 +8600,7 @@ function StockDashboard() {
                                   }}
                                   onClick={() => {
                                     setMarketBacktestPeriod(p.key);
+                                    localStorage.setItem('market_bt_period_v2', p.key);
                                     localStorage.setItem('market_bt_period', p.key);
                                   }}
                                 >
@@ -8634,6 +8637,7 @@ function StockDashboard() {
                                   }}
                                   onClick={() => {
                                     setMarketBacktestPeriod(p.key);
+                                    localStorage.setItem('market_bt_period_v2', p.key);
                                     localStorage.setItem('market_bt_period', p.key);
                                   }}
                                 >
@@ -8663,6 +8667,7 @@ function StockDashboard() {
                                 onChange={(e) => {
                                   if (e.target.value) {
                                     setMarketBacktestPeriod(e.target.value);
+                                    localStorage.setItem('market_bt_period_v2', e.target.value);
                                     localStorage.setItem('market_bt_period', e.target.value);
                                   }
                                 }}
@@ -8735,6 +8740,7 @@ function StockDashboard() {
                                 }}
                                 onClick={() => {
                                   setMarketBacktestPeriod('custom');
+                                  localStorage.setItem('market_bt_period_v2', 'custom');
                                   localStorage.setItem('market_bt_period', 'custom');
                                 }}
                               >
@@ -8817,6 +8823,7 @@ function StockDashboard() {
                                 }}
                                 onClick={() => {
                                   setMarketBacktestModel(m.id);
+                                  localStorage.setItem('market_backtest_model_v2', m.id);
                                   localStorage.setItem('market_backtest_model', m.id);
                                 }}
                               >
@@ -9356,6 +9363,7 @@ function StockDashboard() {
                                             }}
                                             onClick={() => {
                                               setMarketBacktestModel(m.model_id);
+                                              localStorage.setItem('market_backtest_model_v2', m.model_id);
                                               localStorage.setItem('market_backtest_model', m.model_id);
                                               const chartElem = document.getElementById('market-backtest-chart-card');
                                               if (chartElem) chartElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -9396,114 +9404,129 @@ function StockDashboard() {
                       )}
 
                       {/* 5. 🏛️ 十年跨週期歷史全樣本實證回測 (2016-2026 跨越牛熊實證) */}
-                      {history10y.summary && (
-                        <div style={{
-                          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(245, 158, 11, 0.35)',
-                          padding: '1.25rem',
-                          boxShadow: '0 4px 18px rgba(0,0,0,0.3)'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <div>
-                              <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#FDE68A', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                                <span>🏛️</span>
-                                <span>10 年長週期歷史跨牛熊實證 (2016 ~ 2026 共 2,431 交易日)</span>
-                              </h4>
-                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
-                                經歷 2018 中美貿易戰、2020 疫情暴跌、2022 Fed激進升息暴跌與 2024 AI狂潮的完整十年驗證
-                              </span>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-                              <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.2rem 0.65rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                累積複利：+{history10y.summary.total_return_pct?.toFixed(1)}% (約 13.8 倍)
-                              </span>
-                            </div>
-                          </div>
+                      {(() => {
+                        const active10yModelDetail = bt.periods?.['10y']?.models_detail?.[activeModelKey] || history10y.models_detail?.[activeModelKey] || bt.periods?.['10y']?.models_detail?.[bt.selected_model_id];
+                        const active10yModeData = active10yModelDetail
+                          ? (isLongShort ? active10yModelDetail.long_short : active10yModelDetail.long_only)
+                          : (isLongShort ? (history10y.long_short || history10y.summary) : (history10y.long_only || history10y.summary));
 
-                          {/* 十年指標摘要列 */}
+                        const active10ySummary = active10yModeData || history10y.summary;
+                        if (!active10ySummary) return null;
+
+                        const active10yYearly = active10yModeData?.yearly || history10y.yearly || [];
+                        const multiplier10y = (((active10ySummary.total_return_pct || 0) / 100) + 1).toFixed(1);
+
+                        return (
                           <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                            gap: '0.65rem',
-                            marginBottom: '1.2rem'
+                            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(245, 158, 11, 0.35)',
+                            padding: '1.25rem',
+                            boxShadow: '0 4px 18px rgba(0,0,0,0.3)'
                           }}>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年年化 CAGR</div>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399' }}>+{history10y.summary.cagr_pct?.toFixed(1)}%</div>
-                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤: +{history10y.benchmark?.cagr_pct?.toFixed(1)}%</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                              <div>
+                                <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#FDE68A', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                  <span>🏛️</span>
+                                  <span>【{activeModelMeta.name}】10 年長週期歷史跨牛熊實證 (2016 ~ 2026 共 2,431 交易日)</span>
+                                </h4>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                                  評估模式：<strong>{isLongShort ? '⚡ 多空雙向衝刺 (Long/Short)' : '🛡️ 做多 + 現金避險 (Long-Only)'}</strong>，經歷 2018 中美貿易戰、2020 疫情暴跌、2022 Fed激進升息與 2024 AI狂潮的完整十年驗證
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                                <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.2rem 0.65rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                  累積複利：+{active10ySummary.total_return_pct?.toFixed(1)}% (約 {multiplier10y} 倍)
+                                </span>
+                              </div>
                             </div>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年超額 Alpha</div>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FBBF24' }}>+{history10y.summary.alpha_pct?.toFixed(1)}%</div>
-                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>跑贏大盤總幅度</div>
+
+                            {/* 十年指標摘要列 */}
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                              gap: '0.65rem',
+                              marginBottom: '1.2rem'
+                            }}>
+                              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年年化 CAGR</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399' }}>+{active10ySummary.cagr_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤: +{history10y.benchmark?.cagr_pct?.toFixed(1)}%</div>
+                              </div>
+                              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年超額 Alpha</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FBBF24' }}>
+                                  {(active10ySummary.alpha_pct || 0) >= 0 ? '+' : ''}{active10ySummary.alpha_pct?.toFixed(1)}%
+                                </div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>跑贏大盤總幅度</div>
+                              </div>
+                              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年最大回撤 (MDD)</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F87171' }}>{active10ySummary.max_drawdown_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>大盤 MDD -31.6%</div>
+                              </div>
+                              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年長線夏普值</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC' }}>{active10ySummary.sharpe_ratio?.toFixed(2)}</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤僅 0.92</div>
+                              </div>
+                              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>整體交易勝率</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2DD4BF' }}>{active10ySummary.win_rate_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>獲利因子 {active10ySummary.profit_factor?.toFixed(2)}</div>
+                              </div>
                             </div>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年最大回撤 (MDD)</div>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F87171' }}>{history10y.summary.max_drawdown_pct?.toFixed(1)}%</div>
-                              <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>大盤 MDD -31.6%</div>
-                            </div>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年長線夏普值</div>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC' }}>{history10y.summary.sharpe_ratio?.toFixed(2)}</div>
-                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤僅 0.92</div>
-                            </div>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>整體交易勝率</div>
-                              <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2DD4BF' }}>{history10y.summary.win_rate_pct?.toFixed(1)}%</div>
-                              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>獲利因子 {history10y.summary.profit_factor?.toFixed(2)}</div>
-                            </div>
+
+                            {/* 歷年年化績效表現表 (Yearly Breakdown) */}
+                            {active10yYearly && active10yYearly.length > 0 && (
+                              <div style={{ overflowX: 'auto' }}>
+                                <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
+                                  <thead>
+                                    <tr style={{ background: 'rgba(0,0,0,0.4)', color: '#CBD5E1' }}>
+                                      <th style={{ padding: '0.45rem 0.75rem', textAlign: 'left' }}>年份</th>
+                                      <th>AI 策略報酬</th>
+                                      <th>TAIEX 大盤同期</th>
+                                      <th>超額報酬 Alpha</th>
+                                      <th style={{ textAlign: 'left' }}>歷史重大總經情境與防護效果</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {active10yYearly.map((yr) => {
+                                      const yInt = parseInt(yr.year);
+                                      let contextNote = '';
+                                      if (yInt === 2018) contextNote = isLongShort ? '🛡️ 中美貿易戰暴跌：大盤大跌 -8.6%，AI 避險與放空逆勢獲利！' : '🛡️ 中美貿易戰暴跌：及時出清持股轉入 100% 現金，成功避開大盤回檔';
+                                      else if (yInt === 2020) contextNote = '⚡ COVID-19 疫情熔斷：快速停損退回現金，避開急跌後精準跟上強彈';
+                                      else if (yInt === 2022) contextNote = isLongShort ? '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 策略空方大獲全勝' : '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 全程現金防守避開熊市殺戮';
+                                      else if (yInt === 2024) contextNote = '🚀 AI 狂潮與台積電主升段：滿球進場緊抓大波段多頭主升浪';
+                                      else if (yInt === 2026) contextNote = '📈 截至當前最新走勢';
+
+                                      return (
+                                        <tr key={yr.year} style={{ background: yr.alpha > 15 ? 'rgba(16, 185, 129, 0.08)' : (yr.alpha < -5 ? 'rgba(239, 68, 68, 0.06)' : 'transparent') }}>
+                                          <td style={{ padding: '0.45rem 0.75rem', textAlign: 'left', fontWeight: 'bold', color: '#93C5FD' }}>
+                                            {yr.year} 年
+                                          </td>
+                                          <td style={{ fontWeight: 'bold', color: yr.strategy_return >= 0 ? '#34D399' : '#F87171' }}>
+                                            {yr.strategy_return >= 0 ? '+' : ''}{yr.strategy_return?.toFixed(2)}%
+                                          </td>
+                                          <td style={{ color: yr.benchmark_return >= 0 ? '#CBD5E1' : '#FCA5A5' }}>
+                                            {yr.benchmark_return >= 0 ? '+' : ''}{yr.benchmark_return?.toFixed(2)}%
+                                          </td>
+                                          <td style={{ fontWeight: 'bold', color: yr.alpha >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                            {yr.alpha >= 0 ? '+' : ''}{yr.alpha?.toFixed(2)}%
+                                          </td>
+                                          <td style={{ textAlign: 'left', fontSize: '0.75rem', color: contextNote ? '#FDE68A' : 'var(--text-muted)' }}>
+                                            {contextNote || '--'}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
                           </div>
-
-                          {/* 歷年年化績效表現表 (Yearly Breakdown) */}
-                          {history10y.yearly && history10y.yearly.length > 0 && (
-                            <div style={{ overflowX: 'auto' }}>
-                              <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
-                                <thead>
-                                  <tr style={{ background: 'rgba(0,0,0,0.4)', color: '#CBD5E1' }}>
-                                    <th style={{ padding: '0.45rem 0.75rem', textAlign: 'left' }}>年份</th>
-                                    <th>AI 策略報酬</th>
-                                    <th>TAIEX 大盤同期</th>
-                                    <th>超額報酬 Alpha</th>
-                                    <th style={{ textAlign: 'left' }}>歷史重大總經情境與防護效果</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {history10y.yearly.map((yr) => {
-                                    const yInt = parseInt(yr.year);
-                                    let contextNote = '';
-                                    if (yInt === 2018) contextNote = '🛡️ 中美貿易戰暴跌：大盤大跌 -8.6%，AI 避險與做空逆勢大賺 +20.4%！';
-                                    else if (yInt === 2020) contextNote = '⚡ COVID-19 疫情熔斷：快速停損退回現金，避開急跌後精準跟上強彈';
-                                    else if (yInt === 2022) contextNote = '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 策略大獲全勝 +60.2% (Alpha +82.6%)';
-                                    else if (yInt === 2024) contextNote = '🚀 AI 狂潮與台積電主升段：策略獲利 +48.9%，大幅戰勝大盤 +28.5%';
-                                    else if (yInt === 2026) contextNote = '📈 截至當前最新走勢';
-
-                                    return (
-                                      <tr key={yr.year} style={{ background: yr.alpha > 15 ? 'rgba(16, 185, 129, 0.08)' : (yr.alpha < -5 ? 'rgba(239, 68, 68, 0.06)' : 'transparent') }}>
-                                        <td style={{ padding: '0.45rem 0.75rem', textAlign: 'left', fontWeight: 'bold', color: '#93C5FD' }}>
-                                          {yr.year} 年
-                                        </td>
-                                        <td style={{ fontWeight: 'bold', color: yr.strategy_return >= 0 ? '#34D399' : '#F87171' }}>
-                                          {yr.strategy_return >= 0 ? '+' : ''}{yr.strategy_return?.toFixed(2)}%
-                                        </td>
-                                        <td style={{ color: yr.benchmark_return >= 0 ? '#CBD5E1' : '#FCA5A5' }}>
-                                          {yr.benchmark_return >= 0 ? '+' : ''}{yr.benchmark_return?.toFixed(2)}%
-                                        </td>
-                                        <td style={{ fontWeight: 'bold', color: yr.alpha >= 0 ? '#FBBF24' : '#94A3B8' }}>
-                                          {yr.alpha >= 0 ? '+' : ''}{yr.alpha?.toFixed(2)}%
-                                        </td>
-                                        <td style={{ textAlign: 'left', fontSize: '0.75rem', color: contextNote ? '#FDE68A' : 'var(--text-muted)' }}>
-                                          {contextNote || '--'}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        );
+                      })()}
 
                       {/* 6. 模擬交易日誌明細 (Recent Closed Trades Log) */}
                       <div style={{

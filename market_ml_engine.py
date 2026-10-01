@@ -1954,6 +1954,19 @@ def simulate_elliott_wave_backtest(df_slice: pd.DataFrame, mode: str = 'long_sho
             'drawdown_pct': round(float(dd[idx]), 2)
         })
         
+    # 歷年報酬歸因
+    df_res = pd.DataFrame({'year': [str(d)[:4] for d in dates], 's': strat_rets, 'm': mkt_rets})
+    yearly = []
+    for yr, g in df_res.groupby('year'):
+        s_c = (np.prod(1 + g['s']) - 1) * 100
+        m_c = (np.prod(1 + g['m']) - 1) * 100
+        yearly.append({
+            'year': str(yr),
+            'strategy_return': round(float(s_c), 2),
+            'benchmark_return': round(float(m_c), 2),
+            'alpha': round(float(s_c - m_c), 2)
+        })
+
     return {
         'total_return_pct': round(float(tot_ret), 2),
         'cagr_pct': round(float(cagr), 2),
@@ -1972,6 +1985,7 @@ def simulate_elliott_wave_backtest(df_slice: pd.DataFrame, mode: str = 'long_sho
         'benchmark_cagr_pct': round(float(b_cagr), 2),
         'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
         'benchmark_sharpe': round(float(b_sharpe), 2),
+        'yearly': yearly,
         'curve': curve,
         'trades': trades[-20:],
         'etf0050': {
@@ -3231,7 +3245,7 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
     return {
         'selected_model_id': target_id,
         'model_name': MODEL_CATALOG.get(target_id, {}).get('name', target_id),
-        'default_period_key': 'oos_2y',
+        'default_period_key': '10y',
         'available_periods': periods_meta,
         'available_years': sorted(list(set(v_years.unique()))),
         'periods': periods_data,
@@ -3242,8 +3256,10 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'trading_days': len(valid_df),
             'benchmark': history_10y_data.get('benchmark', {}),
             'etf0050': history_10y_data.get('etf0050', {}),
-            'summary': history_10y_data.get('long_short', {}),
-            'yearly': history_10y_data.get('long_short', {}).get('yearly', []),
+            'summary': history_10y_data.get('long_only', {}),
+            'yearly': history_10y_data.get('long_only', {}).get('yearly', []),
+            'long_only': history_10y_data.get('long_only', {}),
+            'long_short': history_10y_data.get('long_short', {}),
             'models_detail': history_10y_data.get('models_detail', {})
         },
         'models_detail': oos_data.get('models_detail', {})
