@@ -44,12 +44,15 @@ def init_index_table():
     conn.commit()
     conn.close()
 
-def fetch_yahoo_taiex_history(range_param="10y"):
+def fetch_yahoo_taiex_history(range_param="20y"):
     """
     透過 Yahoo Finance API 抓取加權指數 (^TWII) 歷史日K線 (開、高、低、收)
     使用 curl 確保避開 Python requests 在 macOS 上的潛在 SSL/TLS 阻塞
     """
-    url = f"https://query2.finance.yahoo.com/v8/finance/chart/%5ETWII?range={range_param}&interval=1d"
+    if range_param in ("20y", "max", "2005"):
+        url = "https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?period1=1104537600&period2=1798761600&interval=1d"
+    else:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?range={range_param}&interval=1d"
     cmd = [
         "curl", "-s",
         url,
@@ -158,10 +161,10 @@ def fetch_twse_recent_turnover(months=6):
             pass
     return turnover_map
 
-def sync_taiex_to_sqlite():
+def sync_taiex_to_sqlite(range_param="20y"):
     """主同步函式：整合 Yahoo 歷史與證交所成交額，寫入 SQLite daily_index"""
     init_index_table()
-    records = fetch_yahoo_taiex_history(range_param="10y")
+    records = fetch_yahoo_taiex_history(range_param=range_param)
     if not records:
         print("[!] 無法取得大盤日K，跳過寫入")
         return 0
@@ -179,6 +182,8 @@ def sync_taiex_to_sqlite():
         amt = r["turnover"]
         if d in turnover_map:
             vol, amt = turnover_map[d]
+        elif amt == 0 and vol > 0 and r["close"] > 0:
+            amt = round(vol * r["close"], 2)
         
         cur.execute("""
             INSERT INTO daily_index (date, open, high, low, close, change_points, change_percent, volume, turnover)
@@ -191,7 +196,7 @@ def sync_taiex_to_sqlite():
                 change_points=excluded.change_points,
                 change_percent=excluded.change_percent,
                 volume=excluded.volume,
-                turnover=excluded.turnover
+                turnover=CASE WHEN daily_index.turnover > 0 THEN daily_index.turnover ELSE excluded.turnover END
         """, (d, r["open"], r["high"], r["low"], r["close"], r["change_points"], r["change_percent"], vol, amt))
         count += 1
         

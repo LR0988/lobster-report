@@ -3139,11 +3139,21 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
 
     # 預先取得或計算全歷史 Walk-Forward 滾動走步動態預測字典 (純樣本外 OOS，嚴格 purge=25 零偷看未來)
     wf_models_dict = models_bundle.get('walk_forward_models_predictions', {})
+    recompute_wf = False
     if not wf_models_dict:
+        recompute_wf = True
+    else:
+        sample_wf = wf_models_dict.get('walk_forward', {})
+        if len(sample_wf) < len(valid_df) - 100:
+            recompute_wf = True
+
+    if recompute_wf:
         try:
+            print(f"[*] 全歷史 Walk-Forward 預測重算中 (樣本數: {len(valid_df)} 天，自 2005 年至今)...")
             wf_models_dict = compute_multi_model_walk_forward_predictions(valid_df, feature_cols, purge=25)
             models_bundle['walk_forward_models_predictions'] = wf_models_dict
             models_bundle['walk_forward_predictions'] = wf_models_dict.get('walk_forward', {})
+            joblib.dump(models_bundle, MODELS_BUNDLE_PATH)
         except Exception as e:
             print(f"[!] 警告：計算 Walk-Forward 預測失敗: {e}")
             wf_models_dict = {'walk_forward': models_bundle.get('walk_forward_predictions', {})}
@@ -3151,23 +3161,26 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
 
     # 定義所有可供前端切換的區間與歷史事件
     period_defs = [
+        ('20y', '🏛️ 20 年超長全歷史 (2005~2026)', valid_df),
+        ('10y', '👑 近 10 年歷史 (2016~2026)', valid_df[v_dates >= '20160101']),
         ('oos_2y', '🔥 2年盲測期 (2024~2026 OOS)', valid_df.iloc[int(n_total * 0.8):]),
         ('1y', '⚡ 近 1 年 (2025~2026)', valid_df[v_dates >= '20250901']),
         ('3y', '📈 近 3 年 (2023~2026)', valid_df[v_dates >= '20230901']),
         ('5y', '🏛️ 近 5 年 (2021~2026)', valid_df[v_dates >= '20210901']),
-        ('10y', '👑 10 年全歷史 (2016~2026)', valid_df),
+        ('2008', '📉 2008 全球金融海嘯', valid_df[v_years == '2008']),
+        ('2011', '🇪🇺 2011 歐債危機暴跌', valid_df[v_years == '2011']),
+        ('2015', '🇨🇳 2015 中國股災與匯改', valid_df[v_years == '2015']),
         ('2018', '🛡️ 2018 中美貿易戰暴跌', valid_df[v_years == '2018']),
         ('2020', '🦠 2020 COVID-19 疫情急跌強彈', valid_df[v_years == '2020']),
         ('2022', '🔥 2022 Fed 狂暴升息熊市', valid_df[v_years == '2022']),
         ('2024', '🚀 2024 AI 多頭主升段', valid_df[v_years == '2024']),
         ('2025', '💎 2025 全球半導體擴張', valid_df[v_years == '2025']),
         ('2026', '📊 2026 至今最新盤勢', valid_df[v_years == '2026']),
-        ('2016', '📅 2016 年歷史區間', valid_df[v_years == '2016']),
-        ('2017', '📅 2017 年歷史區間', valid_df[v_years == '2017']),
-        ('2019', '📅 2019 年歷史區間', valid_df[v_years == '2019']),
-        ('2021', '📅 2021 年歷史區間', valid_df[v_years == '2021']),
-        ('2023', '📅 2023 年歷史區間', valid_df[v_years == '2023']),
     ]
+    existing_keys = {p[0] for p in period_defs}
+    for yr_str in sorted(list(set(v_years.unique())), reverse=True):
+        if yr_str not in existing_keys:
+            period_defs.append((yr_str, f'📅 {yr_str} 年歷史區間', valid_df[v_years == yr_str]))
 
     periods_data = {}
     periods_meta = []
@@ -3303,6 +3316,8 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
 
     oos_data = periods_data.get('oos_2y', {})
     history_10y_data = periods_data.get('10y', {})
+    history_20y_data = periods_data.get('20y', history_10y_data)
+    df_10y = valid_df[v_dates >= '20160101'] if len(valid_df[v_dates >= '20160101']) > 0 else valid_df
     
     return {
         'selected_model_id': target_id,
@@ -3313,9 +3328,9 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
         'periods': periods_data,
         'test_period': oos_data,
         'full_history_10y': {
-            'start_date': str(valid_df.iloc[0]['date']),
-            'end_date': str(valid_df.iloc[-1]['date']),
-            'trading_days': len(valid_df),
+            'start_date': str(df_10y.iloc[0]['date']),
+            'end_date': str(df_10y.iloc[-1]['date']),
+            'trading_days': len(df_10y),
             'benchmark': history_10y_data.get('benchmark', {}),
             'etf0050': history_10y_data.get('etf0050', {}),
             'summary': history_10y_data.get('long_only', {}),
@@ -3323,6 +3338,18 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'long_only': history_10y_data.get('long_only', {}),
             'long_short': history_10y_data.get('long_short', {}),
             'models_detail': history_10y_data.get('models_detail', {})
+        },
+        'full_history_20y': {
+            'start_date': str(valid_df.iloc[0]['date']),
+            'end_date': str(valid_df.iloc[-1]['date']),
+            'trading_days': len(valid_df),
+            'benchmark': history_20y_data.get('benchmark', {}),
+            'etf0050': history_20y_data.get('etf0050', {}),
+            'summary': history_20y_data.get('long_only', {}),
+            'yearly': history_20y_data.get('long_only', {}).get('yearly', []),
+            'long_only': history_20y_data.get('long_only', {}),
+            'long_short': history_20y_data.get('long_short', {}),
+            'models_detail': history_20y_data.get('models_detail', {})
         },
         'models_detail': oos_data.get('models_detail', {})
     }
@@ -3867,7 +3894,7 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     feature_cols = [c for c in preset_info['features'] if c in FEATURE_NAMES_ZH]
     
     # 篩選有效樣本
-    valid_df = df[df['fut_ret_20d'].notnull() & (df['date'] >= '20170101')].copy()
+    valid_df = df[df['fut_ret_20d'].notnull() & (df['date'] >= '20050101')].copy()
     if train_days_limit > 0 and len(valid_df) > train_days_limit:
         valid_df = valid_df.iloc[-train_days_limit:].copy()
         

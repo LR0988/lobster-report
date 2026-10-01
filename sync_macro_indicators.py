@@ -82,7 +82,10 @@ def fetch_yahoo_series(ticker: str, range_param: str = "10y") -> List[Dict[str, 
     """
     import urllib.parse
     safe_ticker = urllib.parse.quote(ticker)
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{safe_ticker}?range={range_param}&interval=1d"
+    if range_param in ("20y", "max", "2005", "10y"):
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{safe_ticker}?period1=1104537600&period2=1798761600&interval=1d"
+    else:
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{safe_ticker}?range={range_param}&interval=1d"
     headers = {"User-Agent": USER_AGENT}
     
     data = None

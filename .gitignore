@@ -56,3 +56,5 @@ Thumbs.db
 temp/
 market_ml_prediction.json
 *.joblib
+.vercel
+.env*.local

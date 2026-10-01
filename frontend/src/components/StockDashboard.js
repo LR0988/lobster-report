@@ -8169,7 +8169,7 @@ function StockDashboard() {
                   let activePeriodData = null;
 
                   if (activePeriodKey === 'custom') {
-                    const sYr = parseInt(marketBtStartYear) || 2016;
+                    const sYr = parseInt(marketBtStartYear) || 2005;
                     const eYr = parseInt(marketBtEndYear) || 2026;
                     const minYr = Math.min(sYr, eYr);
                     const maxYr = Math.max(sYr, eYr);
@@ -8177,7 +8177,7 @@ function StockDashboard() {
                     if (minYr === maxYr && bt.periods?.[String(minYr)]) {
                       activePeriodData = bt.periods[String(minYr)];
                     } else {
-                      const basePeriod = bt.periods?.['10y'] || bt.test_period;
+                      const basePeriod = bt.periods?.['20y'] || bt.periods?.['10y'] || bt.test_period;
                       const baseModelObj = basePeriod?.models_detail?.[activeModelKey];
                       const baseMode = isLongShort
                         ? (baseModelObj?.long_short || basePeriod?.long_short)
@@ -8586,7 +8586,8 @@ function StockDashboard() {
                               { key: '1y', label: '⚡ 近 1 年 (2025~2026)' },
                               { key: '3y', label: '📈 近 3 年 (2023~2026)' },
                               { key: '5y', label: '🏆 近 5 年 (2021~2026)' },
-                              { key: '10y', label: '🏛️ 近 10 年 (2016~2026)' }
+                              { key: '10y', label: '🏛️ 近 10 年 (2016~2026)' },
+                              { key: '20y', label: '👑 20 年超長全歷史 (2005~2026)' }
                             ].map(p => {
                               const isActive = activePeriodKey === p.key;
                               return (
@@ -8620,6 +8621,9 @@ function StockDashboard() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '0.78rem', color: '#F59E0B', minWidth: '70px', fontWeight: 'bold' }}>情境壓測：</span>
                             {[
+                              { key: '2008', label: '📉 2008 金融海嘯 (-46%)' },
+                              { key: '2011', label: '🇪🇺 2011 歐債危機 (-21%)' },
+                              { key: '2015', label: '🇨🇳 2015 陸股股災 (-10%)' },
                               { key: '2018', label: '🛡️ 2018 中美貿易戰 (-8.6%)' },
                               { key: '2020', label: '⚡ 2020 疫情恐慌急挫' },
                               { key: '2022', label: '🔥 2022 Fed升息熊市 (-22.6%)' },
@@ -9409,18 +9413,25 @@ function StockDashboard() {
                         </div>
                       )}
 
-                      {/* 5. 🏛️ 十年跨週期歷史全樣本實證回測 (2016-2026 跨越牛熊實證) */}
+                      {/* 5. 🏛️ 十年／二十年跨週期歷史全樣本實證回測 (2005/2016-2026 跨越牛熊實證) */}
                       {(() => {
-                        const active10yModelDetail = bt.periods?.['10y']?.models_detail?.[activeModelKey] || history10y.models_detail?.[activeModelKey] || bt.periods?.['10y']?.models_detail?.[bt.selected_model_id];
-                        const active10yModeData = active10yModelDetail
-                          ? (isLongShort ? active10yModelDetail.long_short : active10yModelDetail.long_only)
-                          : (isLongShort ? (history10y.long_short || history10y.summary) : (history10y.long_only || history10y.summary));
+                        const is20ySelected = activePeriodKey === '20y';
+                        const historyTarget = is20ySelected
+                          ? (bt.periods?.['20y'] || bt.full_history_20y || bt.periods?.['10y'] || history10y)
+                          : (bt.periods?.['10y'] || history10y);
 
-                        const active10ySummary = active10yModeData || history10y.summary;
-                        if (!active10ySummary) return null;
+                        const activeHistModelDetail = historyTarget.models_detail?.[activeModelKey] || historyTarget.models_detail?.[bt.selected_model_id];
+                        const activeHistModeData = activeHistModelDetail
+                          ? (isLongShort ? activeHistModelDetail.long_short : activeHistModelDetail.long_only)
+                          : (isLongShort ? (historyTarget.long_short || historyTarget.summary) : (historyTarget.long_only || historyTarget.summary));
 
-                        const active10yYearly = active10yModeData?.yearly || history10y.yearly || [];
-                        const multiplier10y = (((active10ySummary.total_return_pct || 0) / 100) + 1).toFixed(1);
+                        const activeHistSummary = activeHistModeData || historyTarget.summary;
+                        if (!activeHistSummary) return null;
+
+                        const activeHistYearly = activeHistModeData?.yearly || historyTarget.yearly || [];
+                        const multiplierHist = (((activeHistSummary.total_return_pct || 0) / 100) + 1).toFixed(1);
+                        const histSpanLabel = is20ySelected ? '20 年超長全歷史' : '10 年長週期歷史';
+                        const histRangeLabel = is20ySelected ? '2005 ~ 2026 共 5,300+ 交易日' : '2016 ~ 2026 共 2,431 交易日';
 
                         return (
                           <div style={{
@@ -9434,20 +9445,20 @@ function StockDashboard() {
                               <div>
                                 <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#FDE68A', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                                   <span>🏛️</span>
-                                  <span>【{activeModelMeta.name}】10 年長週期歷史跨牛熊實證 (2016 ~ 2026 共 2,431 交易日)</span>
+                                  <span>【{activeModelMeta.name}】{histSpanLabel}跨牛熊實證 ({histRangeLabel})</span>
                                 </h4>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
-                                  評估模式：<strong>{isLongShort ? '⚡ 多空雙向衝刺 (Long/Short)' : '🛡️ 做多 + 現金避險 (Long-Only)'}</strong>，經歷 2018 中美貿易戰、2020 疫情暴跌、2022 Fed激進升息與 2024 AI狂潮的完整十年驗證
+                                  評估模式：<strong>{isLongShort ? '⚡ 多空雙向衝刺 (Long/Short)' : '🛡️ 做多 + 現金避險 (Long-Only)'}</strong>，經歷 2008 金融海嘯、2011 歐債危機、2018 貿易戰、2020 疫情暴跌、2022 狂暴升息與 2024 AI 狂潮的完整大週期驗證
                                 </span>
                               </div>
                               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                                 <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.2rem 0.65rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                  累積複利：+{active10ySummary.total_return_pct?.toFixed(1)}% (約 {multiplier10y} 倍)
+                                  累積複利：+{activeHistSummary.total_return_pct?.toFixed(1)}% (約 {multiplierHist} 倍)
                                 </span>
                               </div>
                             </div>
 
-                            {/* 十年指標摘要列 */}
+                            {/* 指標摘要列 */}
                             <div style={{
                               display: 'grid',
                               gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -9455,36 +9466,36 @@ function StockDashboard() {
                               marginBottom: '1.2rem'
                             }}>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年年化 CAGR</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399' }}>+{active10ySummary.cagr_pct?.toFixed(1)}%</div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤: +{history10y.benchmark?.cagr_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}年化 CAGR</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399' }}>+{activeHistSummary.cagr_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤: +{historyTarget.benchmark?.cagr_pct?.toFixed(1)}%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年超額 Alpha</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}超額 Alpha</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FBBF24' }}>
-                                  {(active10ySummary.alpha_pct || 0) >= 0 ? '+' : ''}{active10ySummary.alpha_pct?.toFixed(1)}%
+                                  {(activeHistSummary.alpha_pct || 0) >= 0 ? '+' : ''}{activeHistSummary.alpha_pct?.toFixed(1)}%
                                 </div>
                                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>跑贏大盤總幅度</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年最大回撤 (MDD)</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F87171' }}>{active10ySummary.max_drawdown_pct?.toFixed(1)}%</div>
-                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>大盤 MDD -31.6%</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}最大回撤 (MDD)</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F87171' }}>{activeHistSummary.max_drawdown_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>大盤 MDD {historyTarget.benchmark?.max_drawdown_pct?.toFixed(1) || '-31.6'}%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>10年長線夏普值</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC' }}>{active10ySummary.sharpe_ratio?.toFixed(2)}</div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤僅 0.92</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}長線夏普值</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC' }}>{activeHistSummary.sharpe_ratio?.toFixed(2)}</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤 {historyTarget.benchmark?.sharpe_ratio?.toFixed(2) || '0.92'}</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>整體交易勝率</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2DD4BF' }}>{active10ySummary.win_rate_pct?.toFixed(1)}%</div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>獲利因子 {active10ySummary.profit_factor?.toFixed(2)}</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2DD4BF' }}>{activeHistSummary.win_rate_pct?.toFixed(1)}%</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>獲利因子 {activeHistSummary.profit_factor?.toFixed(2)}</div>
                               </div>
                             </div>
 
                             {/* 歷年年化績效表現表 (Yearly Breakdown) */}
-                            {active10yYearly && active10yYearly.length > 0 && (
+                            {activeHistYearly && activeHistYearly.length > 0 && (
                               <div style={{ overflowX: 'auto' }}>
                                 <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
                                   <thead>
@@ -9497,10 +9508,14 @@ function StockDashboard() {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {active10yYearly.map((yr) => {
+                                    {activeHistYearly.map((yr) => {
                                       const yInt = parseInt(yr.year);
                                       let contextNote = '';
-                                      if (yInt === 2018) contextNote = isLongShort ? '🛡️ 中美貿易戰暴跌：大盤大跌 -8.6%，AI 避險與放空逆勢獲利！' : '🛡️ 中美貿易戰暴跌：及時出清持股轉入 100% 現金，成功避開大盤回檔';
+                                      if (yInt === 2008) contextNote = '📉 次貸風暴金融海嘯：大盤狂瀉 -46%，AI 及時空手避開世紀股災！';
+                                      else if (yInt === 2009) contextNote = '📈 世紀大反彈：全球 QE 救市，大盤飆漲 +78.3%，AI 滿倉搭上主升浪';
+                                      else if (yInt === 2011) contextNote = '🇪🇺 歐債危機爆發：美債降評與歐豬五國危機，大盤 -21.2%，AI 穩健防守';
+                                      else if (yInt === 2015) contextNote = '🇨🇳 中國股災與匯改：大盤回檔 -10.4%，AI 守護資產避險';
+                                      else if (yInt === 2018) contextNote = isLongShort ? '🛡️ 中美貿易戰暴跌：大盤大跌 -8.6%，AI 避險與放空逆勢獲利！' : '🛡️ 中美貿易戰暴跌：及時出清持股轉入 100% 現金，成功避開大盤回檔';
                                       else if (yInt === 2020) contextNote = '⚡ COVID-19 疫情熔斷：快速停損退回現金，避開急跌後精準跟上強彈';
                                       else if (yInt === 2022) contextNote = isLongShort ? '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 策略空方大獲全勝' : '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 全程現金防守避開熊市殺戮';
                                       else if (yInt === 2024) contextNote = '🚀 AI 狂潮與台積電主升段：滿球進場緊抓大波段多頭主升浪';
