@@ -8148,7 +8148,7 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'regime_moe';
 
                   const BACKTEST_MODELS = [
-                    { id: 'walk_forward', name: '漸進動態學習', icon: '🔄', tag: '純樣本外金標 (動態趨勢擴張 1.45x)' },
+                    { id: 'walk_forward', name: '漸進動態學習', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'regime_moe', name: 'Regime MoE', icon: '🏛️', tag: '動態體制專家 (前沿首選)' },
                     { id: 'ensemble', name: 'Ensemble 集成', icon: '👑', tag: '多模型加權集成' },
                     { id: 'lightgbm', name: 'LightGBM', icon: '⚡', tag: '梯度提升決策樹' },
@@ -8469,7 +8469,7 @@ function StockDashboard() {
                             </span>
                           </div>
                           <p style={{ margin: 0, fontSize: '0.82rem', color: '#94A3B8' }}>
-                            全面升級：納入 KAMA 效率比率、ATR SuperTrend 超級趨勢軌道、Ehlers 零延遲濾波、CHOP 混沌指數、Yang-Zhang 跳空真實波動度、60日 VWAP 與宏觀跨市場因子，支援強勢多頭動態趨勢擴張 (1.45x) 與空頭避險。
+                            全面升級：納入 KAMA 效率比率、ATR SuperTrend 超級趨勢軌道、Ehlers 零延遲濾波、CHOP 混沌指數、Yang-Zhang 跳空真實波動度、60日 VWAP 與宏觀跨市場因子，嚴格執行純 100% 多方進場／0% 現金防禦，零槓桿無擴張。
                           </p>
                         </div>
 

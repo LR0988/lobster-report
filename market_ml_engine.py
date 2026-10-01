@@ -1941,13 +1941,7 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         sell_thresh = 0.42 if is_bull else 0.35
         
         if pu >= buy_thresh and pd_ < 0.35:
-            # 前沿動態趨勢槓桿 (Dynamic Trend Sizing):
-            # 當大盤處於季線多頭 (is_bull) 且站上月線 (c >= m20)，且 AI 純樣本外多頭信心高企 (pu >= 0.48)
-            # 動態擴張曝險至 1.45x，徹底彌補牛市漂移；否則維持 1.0x 基準多單
-            if is_bull and c >= m20 and pu >= 0.48:
-                positions[i] = 1.45
-            else:
-                positions[i] = 1.0
+            positions[i] = 1.0
         elif pd_ >= sell_thresh or (not is_bull and c < m60 * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
@@ -1992,15 +1986,14 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         prev_p = positions[i-1]
         if p != prev_p:
             if p > 0:
-                is_lev = p > 1.0
                 action_markers.append({
                     'date': str(dates[i]),
                     'action': 'BUY',
-                    'label': f'🔄 漸進趨勢加碼 ({p:.2f}x)' if is_lev else '🔄 漸進學習多頭建立 (1.0x)',
+                    'label': '🟢 漸進多頭建立 (100%)' if prev_p == 0.0 else '🟢 翻多持倉 (100%)',
                     'direction': '多方 (Long)',
                     'price': round(float(closes[i]), 1),
                     'equity': round(float(equity[i]), 0),
-                    'reason': '🚀 站上季線月線且 AI 信心高企，啟動 1.45x 動態趨勢加碼' if is_lev else '🔄 滾動重訓模型辨識多頭動能優勢確立，進場持有'
+                    'reason': '🔄 滾動重訓模型辨識多頭動能優勢確立，進場持有 100% 滿倉多單'
                 })
             elif p < 0:
                 action_markers.append({
@@ -2100,8 +2093,8 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         
     latest_p = positions[-1]
     curr_stance = '多方偏多 (Long)' if latest_p > 0 else ('空方避險 (Short)' if latest_p < 0 else '空手防禦 (Cash)')
-    curr_badge = f'🟢 漸進趨勢加碼 ({latest_p:.2f}x)' if latest_p > 1.0 else ('🟢 漸進多頭進場' if latest_p > 0 else ('🔴 漸進空頭對沖' if latest_p < 0 else '🛡️ 漸進防禦現金'))
-    curr_desc = '🚀 漸進動態模型判定強勢主升段共振，維持 1.45x 動態多單擴張' if latest_p > 1.0 else ('🔄 漸進動態模型判定最新多頭動能確立' if latest_p > 0 else ('🚨 漸進動態模型偵測回檔風險，啟動對沖' if latest_p < 0 else '🛡️ 處於震盪防守期，維持現金'))
+    curr_badge = '🟢 漸進多頭進場 (100% 倉位)' if latest_p > 0 else ('🔴 漸進空頭對沖 (-100%)' if latest_p < 0 else '🛡️ 漸進防禦現金 (0%)')
+    curr_desc = '🔄 漸進動態模型判定多頭動能確立，維持 100% 多單持倉' if latest_p > 0 else ('🚨 漸進動態模型偵測回檔風險，啟動對沖' if latest_p < 0 else '🛡️ 處於震盪防守期，維持 100% 現金觀望')
     
     return {
         'total_return_pct': round(float(tot_ret), 2),
@@ -2703,15 +2696,12 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
     positions = np.zeros(n)
     for i in range(n):
         is_bull = closes[i] >= ma60[i]
-        if p_up[i] >= 0.45 and p_down[i] < 0.35:
-            if is_bull and closes[i] >= ma20[i] and p_up[i] >= 0.50:
-                positions[i] = 1.45
-            else:
-                positions[i] = 1.0
-        elif p_down[i] >= 0.40 or (not is_bull and closes[i] < ma60[i] * 0.96):
+        if p_up[i] >= 0.42 and p_down[i] < 0.35:
+            positions[i] = 1.0
+        elif p_down[i] >= 0.45 or (not is_bull and closes[i] < ma60[i] * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
-            positions[i] = 0.0
+            positions[i] = positions[i-1] if i > 0 else 0.0
             
     strat_rets = np.zeros(n)
     fee = cost_bps / 10000.0
@@ -2754,11 +2744,10 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
         prev_pos = positions[i-2] if i >= 2 else 0.0
         if pos != prev_pos:
             if pos > 0:
-                is_lev = pos > 1.0
                 action_markers.append({
                     'date': str(dates[i-1]),
                     'action': 'BUY',
-                    'label': f'🟢 趨勢加碼 ({pos:.2f}x)' if is_lev else ('🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多持倉'),
+                    'label': '🟢 多方進場 (100%)' if prev_pos == 0.0 else '🟢 翻多持倉 (100%)',
                     'direction': '多方 (Long)',
                     'price': round(float(closes[i-1]), 1),
                     'equity': round(float(equity[i-1]), 0)
@@ -3179,15 +3168,12 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
     positions = np.zeros(n)
     for i in range(n):
         is_bull = closes[i] >= ma60[i]
-        if p_up[i] >= 0.45 and p_down[i] < 0.35:
-            if is_bull and closes[i] >= ma20[i] and p_up[i] >= 0.50:
-                positions[i] = 1.45
-            else:
-                positions[i] = 1.0
-        elif p_down[i] >= 0.40 or (not is_bull and closes[i] < ma60[i] * 0.96):
+        if p_up[i] >= 0.42 and p_down[i] < 0.35:
+            positions[i] = 1.0
+        elif p_down[i] >= 0.45 or (not is_bull and closes[i] < ma60[i] * 0.96):
             positions[i] = -1.0 if mode == 'long_short' else 0.0
         else:
-            positions[i] = 0.0
+            positions[i] = positions[i-1] if i > 0 else 0.0
             
     strat_rets = np.zeros(n)
     fee = cost_bps / 10000.0
@@ -3230,11 +3216,10 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         prev_pos = positions[i-2] if i >= 2 else 0.0
         if pos != prev_pos:
             if pos > 0:
-                is_lev = pos > 1.0
                 action_markers.append({
                     'date': str(dates[i-1]),
                     'action': 'BUY',
-                    'label': f'🟢 趨勢加碼 ({pos:.2f}x)' if is_lev else ('🟢 多方進場' if prev_pos == 0.0 else '🟢 翻多加碼'),
+                    'label': '🟢 多方進場 (100%)' if prev_pos == 0.0 else '🟢 翻多持倉 (100%)',
                     'direction': '多方 (Long)',
                     'price': round(float(closes[i-1]), 1),
                     'equity': round(float(equity[i-1]), 0)
@@ -3325,14 +3310,13 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         holding_d = n - 1 - start_idx
         unrealized_pct = round(float((latest_close / entry_p - 1) * 100), 2)
         
-        is_lev = last_pos > 1.0
         current_status = {
             'action_code': 'HOLD_LONG',
-            'action_title': f'🟢 建議操作：多單續抱（{"1.45x 趨勢加碼部位" if is_lev else "基準多方部位"}）',
+            'action_title': '🟢 建議操作：多單續抱（100% 滿倉多單）',
             'action_badge': f'🟢 多方持倉中 (Long {round(last_pos*100)}%)',
             'action_summary': f"演算法於 {entry_d[:4]}/{entry_d[4:6]}/{entry_d[6:8]} 指數 {entry_p:,.0f} 點建立多單，目前已持有 {holding_d} 個交易日，未實現損益 {unrealized_pct:+.2f}%。目前大盤處於均線多頭且 AI 信心顯著，建議 {round(last_pos*100)}% 多單部位續抱。",
             'position_size_pct': round(last_pos * 100),
-            'leverage_ratio': round(float(last_pos), 2),
+            'leverage_ratio': 1.0,
             'direction': '多方 (Long)',
             'entry_date': entry_d,
             'entry_price': entry_p,
