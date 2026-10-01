@@ -136,7 +136,14 @@ FEATURE_NAMES_ZH = {
     'ehlers_supersmoother_bias': 'Ehlers 零延遲雙極平滑濾波乖離 (%)',
     'chop_index_14d': 'Choppiness 混沌/趨勢成熟度指數 (0~100)',
     'yang_zhang_vol_20d': 'Yang-Zhang 極值隔夜跳空真實波動度 (%)',
-    'vwap_bias_60d': '60 日成交量加權平均價 (VWAP) 乖離率 (%)'
+    'vwap_bias_60d': '60 日成交量加權平均價 (VWAP) 乖離率 (%)',
+    'adx_14d': 'ADX 14 日平均趨勢力道指數 (0~100)',
+    'di_spread_14d': 'DMI 多空方向擴張淨差 (+DI - -DI)',
+    'cmf_20d': 'Chaikin 蔡金 20 日資金流量指標 (-1~+1)',
+    'foreign_futures_zscore_60d': '外資期貨淨留倉 60 日滾動標準化 Z-Score',
+    'donchian_pos_20d': '唐奇安 20 日通道相對位置 (0~1)',
+    'donchian_width_20d': '唐奇安 20 日通道帶寬震幅比率 (%)',
+    'obv_bias_20d': 'OBV 能量潮 20 日均線乖離率 (%)'
 }
 
 MODEL_CATALOG = {
@@ -215,9 +222,10 @@ FEATURE_PRESETS = {
     'quant_literature': {
         'id': 'quant_literature',
         'name': '📚 頂級量化文獻學術因子',
-        'desc': '納入選擇權 P/C Ratio、散戶小台留倉、López de Prado 分數階微分、Amihud 流動性衝擊、赫斯特指數、KAMA 效率比率、Yang-Zhang 波動度與日圓 Carry Trade',
+        'desc': '納入選擇權 P/C Ratio、散戶小台留倉、López de Prado 分數階微分、Amihud 流動性、ADX趨勢力道、CMF資金流、外資期貨Z-Score與日圓 Carry Trade',
         'features': [
             'ret_5d', 'ret_20d', 'ma20_bias', 'volatility_20d',
+            'adx_14d', 'di_spread_14d', 'cmf_20d', 'foreign_futures_zscore_60d', 'donchian_pos_20d',
             'kama_er_20d', 'yang_zhang_vol_20d', 'chop_index_14d',
             'pc_ratio_oi', 'retail_mtx_net',
             'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
@@ -1105,6 +1113,47 @@ def build_features() -> pd.DataFrame:
     res_df['bb_width_20d'] = (upper_bb - lower_bb) / (ma20 + 1e-5) * 100
     res_df['bb_pct_b'] = (res_df['close'] - lower_bb) / (upper_bb - lower_bb + 1e-5)
     res_df['pv_divergence_20d'] = np.where((res_df['close'] >= h20 * 0.99) & (res_df['turnover_ratio_5d'] < 1.0), 1.0, 0.0)
+    
+    # ── 7 大前沿量化趨勢與資金流向特徵 (ADX, CMF, Donchian, Futures Z-Score, OBV) ──
+    h_arr = res_df['high'].values
+    l_arr = res_df['low'].values
+    c_arr = res_df['close'].values
+    v_arr = res_df['turnover'].values
+    
+    # 1. ADX 14d & DI Spread 14d (Wilder 趨勢力道與方向差值)
+    tr_arr = np.maximum(h_arr[1:] - l_arr[1:], np.maximum(abs(h_arr[1:] - c_arr[:-1]), abs(l_arr[1:] - c_arr[:-1])))
+    tr_arr = np.insert(tr_arr, 0, h_arr[0] - l_arr[0])
+    up_m = np.insert(np.maximum(h_arr[1:] - h_arr[:-1], 0.0), 0, 0.0)
+    dn_m = np.insert(np.maximum(l_arr[:-1] - l_arr[1:], 0.0), 0, 0.0)
+    plus_dm = np.where(up_m > dn_m, up_m, 0.0)
+    minus_dm = np.where(dn_m > up_m, dn_m, 0.0)
+    s_tr = pd.Series(tr_arr).rolling(14, min_periods=1).mean().values + 1e-9
+    plus_di = 100.0 * (pd.Series(plus_dm).rolling(14, min_periods=1).mean().values / s_tr)
+    minus_di = 100.0 * (pd.Series(minus_dm).rolling(14, min_periods=1).mean().values / s_tr)
+    dx = 100.0 * (abs(plus_di - minus_di) / (plus_di + minus_di + 1e-9))
+    res_df['adx_14d'] = pd.Series(dx).rolling(14, min_periods=1).mean().values
+    res_df['di_spread_14d'] = plus_di - minus_di
+    
+    # 2. CMF 20d (Chaikin Money Flow 蔡金主力資金流向)
+    hl_r = np.where(h_arr - l_arr == 0, 1e-5, h_arr - l_arr)
+    clv = ((c_arr - l_arr) - (h_arr - c_arr)) / hl_r
+    res_df['cmf_20d'] = (pd.Series(clv * v_arr).rolling(20, min_periods=1).sum() / (pd.Series(v_arr).rolling(20, min_periods=1).sum() + 1e-9)).values
+    
+    # 3. 外資期貨淨留倉 60 日滾動標準化 Z-Score (消除指數膨脹尺度失真)
+    f_fut_series = pd.Series(res_df['foreign_futures_net'])
+    res_df['foreign_futures_zscore_60d'] = ((f_fut_series - f_fut_series.rolling(60, min_periods=10).mean()) / (f_fut_series.rolling(60, min_periods=10).std() + 1e-5)).fillna(0.0).values
+    
+    # 4. 唐奇安 20 日通道相對位置與帶寬 (海龜波段突破法則)
+    dc_h = pd.Series(h_arr).rolling(20, min_periods=1).max()
+    dc_l = pd.Series(l_arr).rolling(20, min_periods=1).min()
+    dc_rng = dc_h - dc_l + 1e-5
+    res_df['donchian_pos_20d'] = ((c_arr - dc_l) / dc_rng).fillna(0.5).values
+    res_df['donchian_width_20d'] = (dc_rng / c_arr * 100.0).values
+    
+    # 5. OBV 能量潮 20 日均線乖離率 (量價背離指標)
+    obv_val = np.cumsum(np.sign(np.diff(c_arr, prepend=c_arr[0])) * v_arr)
+    obv_m = pd.Series(obv_val).rolling(20, min_periods=1).mean()
+    res_df['obv_bias_20d'] = np.clip(((obv_val - obv_m) / (np.abs(obv_m) + 1e-5) * 100.0).fillna(0.0).values, -100.0, 100.0)
     
     return res_df
 
