@@ -183,7 +183,10 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'walk_forward', label: '🔄 漸進走步動態學習 (Walk-Forward Continual Learning)', short: '🔄 漸進動態', tag: '🛡️ 純樣本外實盤金標', desc: '每 40 日納入最新數據滾動重訓，結合時間指數衰減加權與體制門控，全程 100% 純樣本外 (OOS) 模擬真實基金實盤動態學習' },
+  { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🛡️ 純樣本外金標', desc: '每 40 日納入最新數據滾動重訓，嚴格 25 日隔離零偷看未來，時間衰減加權與體制門控，100% 純樣本外 (OOS)' },
+  { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '🛡️ 純樣本外金標', desc: 'LightGBM 滾動增量訓練，結合嚴格 25 日 Embargo 隔離，捕捉最新籌碼結構與技術非線性特徵' },
+  { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
+  { val: 'wf_rf', label: '🌳 漸進隨機森林 (WF-RandomForest)', short: '🌳 漸進森林', tag: '🛡️ 純樣本外金標', desc: '隨機森林滾動重訓，嚴格 25 日隔離，平滑極端噪聲並持續吸收最新宏觀格局' },
   { val: 'regime_moe', label: '🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)', short: '🏛️ 狀態 MoE', tag: '👑 前沿旗艦', desc: '依牛市擴張、熊市防禦與箱型震盪切成三段專家獨立訓練，結合時間衰減與二階段元標籤置信度過濾' },
   { val: 'ensemble', label: '👑 多模型融合集成 (Ensemble)', short: '👑 集成模型', tag: '🥇 綜合推薦首選', desc: '軟投票融合 LightGBM、隨機森林與高泛化羅吉斯迴歸，AUC 表現最佳' },
   { val: 'lightgbm', label: '⚡ LightGBM (梯度提升)', short: '⚡ LightGBM', tag: '⚡ 靈敏動能', desc: '微軟開源高效梯度提升決策樹，擅長捕捉籌碼與技術面非線性轉折' },
@@ -8148,7 +8151,10 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'rf';
 
                   const BACKTEST_MODELS = [
-                    { id: 'walk_forward', name: '漸進動態學習', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
+                    { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
+                    { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
+                    { id: 'wf_xgboost', name: '漸進 XGBoost', icon: '🌲', tag: '滾動學習 OOS 金標 (零偷看未來)' },
+                    { id: 'wf_rf', name: '漸進 隨機森林', icon: '🌳', tag: '滾動學習 OOS 金標 (零偷看未來)' },
                     { id: 'regime_moe', name: 'Regime MoE', icon: '🏛️', tag: '動態體制專家 (前沿首選)' },
                     { id: 'ensemble', name: 'Ensemble 集成', icon: '👑', tag: '多模型加權集成' },
                     { id: 'lightgbm', name: 'LightGBM', icon: '⚡', tag: '梯度提升決策樹' },
