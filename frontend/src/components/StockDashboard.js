@@ -15,7 +15,7 @@ const supabaseFetch = async (path, options = {}) => {
     ...(options.headers || {})
   };
   const url = `${SUPABASE_URL}/rest/v1${path}`;
-  return window.fetch(url, { ...options, headers });
+  return window.fetch(url, { ...options, headers, cache: 'no-store' });
 };
 
 const stockFetch = (url, opts) => {
@@ -1730,7 +1730,7 @@ function StockDashboard() {
   const fetchMarketMlData = async () => {
     try {
       setFetchingMarketMl(true);
-      const res = await supabaseFetch('/stock_ml_cache?model_type=eq.taiex_macro&select=payload,updated_at');
+      const res = await supabaseFetch(`/stock_ml_cache?model_type=eq.taiex_macro&select=payload,updated_at&_t=${Date.now()}`);
       if (res.ok) {
         const rows = await res.json();
         if (rows && rows.length > 0 && rows[0].payload) {
@@ -4955,7 +4955,7 @@ function StockDashboard() {
                 }}
               >
                 <span>🏆</span>
-                <span>6 款 AI 模型效能評比</span>
+                <span>AI 大盤模型效能評比</span>
                 {marketMlData?.models && (
                   <span style={{ fontSize: '0.74rem', background: 'rgba(255,255,255,0.2)', padding: '0.1rem 0.45rem', borderRadius: '10px' }}>
                     {Object.keys(marketMlData.models).length} 款
@@ -5137,16 +5137,16 @@ function StockDashboard() {
                           }}>
                             {/* 全模型今日多空共識比例 */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#94A3B8', fontWeight: 'bold' }}>7 款模型今日共識：</span>
+                              <span style={{ fontSize: '0.78rem', color: '#94A3B8', fontWeight: 'bold' }}>{consensus.total_models || MARKET_ML_MODELS.length} 款模型今日共識：</span>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem' }}>
                                 <span style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.15rem 0.5rem', borderRadius: '6px' }}>
-                                  做多 {consensus.long_count || 4} 款 ({Math.round(((consensus.long_count || 4)/7)*100)}%)
+                                  做多 {consensus.long_count || 0} 款 ({Math.round(((consensus.long_count || 0) / (consensus.total_models || MARKET_ML_MODELS.length || 1)) * 100)}%)
                                 </span>
                                 <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#93C5FD', padding: '0.15rem 0.5rem', borderRadius: '6px' }}>
-                                  觀望 {consensus.cash_count || 2} 款 ({Math.round(((consensus.cash_count || 2)/7)*100)}%)
+                                  觀望 {consensus.cash_count || 0} 款 ({Math.round(((consensus.cash_count || 0) / (consensus.total_models || MARKET_ML_MODELS.length || 1)) * 100)}%)
                                 </span>
                                 <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#FCA5A5', padding: '0.15rem 0.5rem', borderRadius: '6px' }}>
-                                  放空 {consensus.short_count || 1} 款 ({Math.round(((consensus.short_count || 1)/7)*100)}%)
+                                  放空 {consensus.short_count || 0} 款 ({Math.round(((consensus.short_count || 0) / (consensus.total_models || MARKET_ML_MODELS.length || 1)) * 100)}%)
                                 </span>
                               </div>
                             </div>
@@ -7089,7 +7089,7 @@ function StockDashboard() {
                             </span>
                           </div>
                           <p style={{ margin: '0.45rem 0 0 0', fontSize: '0.84rem', color: '#94A3B8', lineHeight: 1.5 }}>
-                            完整透明記錄 7 款 AI 量化模型近半年的逐筆進出場價位、持倉天數、損益趴數與 AI 決策依據。
+                            完整透明記錄各 AI 量化模型 (共 {MARKET_ML_MODELS.length} 款) 近半年的逐筆進出場價位、持倉天數、損益趴數與 AI 決策依據。
                             嚴格依據大盤 5MA/月線量價、宏觀特徵與 2.5% 風控停損紀律實盤模擬。
                           </p>
                         </div>
