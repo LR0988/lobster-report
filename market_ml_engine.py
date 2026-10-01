@@ -143,7 +143,16 @@ FEATURE_NAMES_ZH = {
     'foreign_futures_zscore_60d': '外資期貨淨留倉 60 日滾動標準化 Z-Score',
     'donchian_pos_20d': '唐奇安 20 日通道相對位置 (0~1)',
     'donchian_width_20d': '唐奇安 20 日通道帶寬震幅比率 (%)',
-    'obv_bias_20d': 'OBV 能量潮 20 日均線乖離率 (%)'
+    'obv_bias_20d': 'OBV 能量潮 20 日均線乖離率 (%)',
+    'margin_ret_5d': '全市場融資餘額 5 日變動率 (%)',
+    'short_margin_ratio': '全市場券資比率 (%)',
+    'margin_bias_60d': '融資餘額 60 日季線乖離率 (%)',
+    'margin_price_divergence_20d': '大盤與融資 20 日價量背離度 (%)',
+    'top3_weight_ret_5d': '權值三雄 (台積/鴻海/發哥) 5 日市值加權動能 (%)',
+    'top3_ma20_resonance': '權值三雄站上月線共振度 (0~1)',
+    'sox_rel_strength_20d': '費半相對大盤 20 日超額強弱 (%)',
+    'pc_ratio_oi_zscore_60d': '選擇權 P/C 未平倉 60 日滾動 Z-Score',
+    'vol_term_ratio_5d_20d': '波動率期限結構比率 (5d/20d)'
 }
 
 MODEL_CATALOG = {
@@ -216,15 +225,17 @@ FEATURE_PRESETS = {
     'all_factors': {
         'id': 'all_factors',
         'name': '⚡ 宏觀全因子標準',
-        'desc': '包含技術指標、外資期貨、三大法人現貨、美債、費半、台積電 ADR、日圓與學術量化等 50+ 項全特徵',
+        'desc': '包含技術指標、外資期貨、三大法人現貨、融資融券籌碼、權值三雄、費半超額、選擇權 Z-Score 等 80+ 項全特徵',
         'features': list(FEATURE_NAMES_ZH.keys())
     },
     'quant_literature': {
         'id': 'quant_literature',
         'name': '📚 頂級量化文獻學術因子',
-        'desc': '納入選擇權 P/C Ratio、散戶小台留倉、López de Prado 分數階微分、Amihud 流動性、ADX趨勢力道、CMF資金流、外資期貨Z-Score與日圓 Carry Trade',
+        'desc': '納入選擇權 P/C Z-Score、費半超額強弱、融資季線乖離、權值三雄動能、散戶小台留倉、López de Prado 分數階微分、ADX趨勢力道與 CMF資金流',
         'features': [
             'ret_5d', 'ret_20d', 'ma20_bias', 'volatility_20d',
+            'sox_rel_strength_20d', 'margin_bias_60d', 'margin_price_divergence_20d',
+            'top3_weight_ret_5d', 'top3_ma20_resonance', 'pc_ratio_oi_zscore_60d', 'vol_term_ratio_5d_20d',
             'adx_14d', 'di_spread_14d', 'cmf_20d', 'foreign_futures_zscore_60d', 'donchian_pos_20d',
             'kama_er_20d', 'yang_zhang_vol_20d', 'chop_index_14d',
             'pc_ratio_oi', 'retail_mtx_net',
@@ -236,9 +247,10 @@ FEATURE_PRESETS = {
     'macro_intermarket': {
         'id': 'macro_intermarket',
         'name': '🌐 宏觀跨市場多因子',
-        'desc': '聚焦美債 10Y 殖利率、費半半導體、輝達、原油、美元日圓匯率與法人主力留倉',
+        'desc': '聚焦費半相對台股超額強弱、美債 10Y 殖利率、權值三雄動能、原油、美元日圓匯率與法人主力留倉',
         'features': [
             'ret_5d', 'ret_20d', 'ma20_bias', 'ma60_bias', 'volatility_20d',
+            'sox_rel_strength_20d', 'top3_weight_ret_5d', 'top3_ma20_resonance',
             'us10y_change_20d', 'sox_ret_20d', 'oil_ret_20d', 'usdtwd_ret_20d',
             'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
             'foreign_futures_net', 'foreign_cash_net_5d', 'tsmc_ret_20d'
@@ -247,9 +259,10 @@ FEATURE_PRESETS = {
     'recent_momentum': {
         'id': 'recent_momentum',
         'name': '🚀 近期動能專注',
-        'desc': '偏重短天期動能 (1d~10d)、外資期貨增減與台積電 5 日衝刺',
+        'desc': '偏重短天期動能 (1d~10d)、權值三雄加權動能、外資期貨增減與台積電衝刺',
         'features': [
             'ret_1d', 'ret_3d', 'ret_5d', 'ret_10d', 'ma5_bias', 'ma10_bias',
+            'top3_weight_ret_5d', 'top3_ma20_resonance', 'margin_ret_5d',
             'rsi_14', 'macd_hist', 'volatility_20d', 'turnover_ratio_5d',
             'foreign_futures_net', 'foreign_futures_net_change_3d', 'foreign_futures_net_change_5d',
             'total_futures_inst_net', 'foreign_cash_net_1d', 'foreign_cash_net_5d',
@@ -259,8 +272,10 @@ FEATURE_PRESETS = {
     'institutional_flow': {
         'id': 'institutional_flow',
         'name': '🛡️ 法人籌碼純量化',
-        'desc': '包含三大法人與散戶小台期貨留倉、台期所選擇權 P/C Ratio、現貨大額買賣超與台積電籌碼',
+        'desc': '包含全市場融資融券、券資比、資券價量背離、選擇權 Z-Score、三大法人與散戶小台留倉',
         'features': [
+            'margin_ret_5d', 'short_margin_ratio', 'margin_bias_60d', 'margin_price_divergence_20d',
+            'pc_ratio_oi_zscore_60d', 'top3_weight_ret_5d',
             'foreign_futures_net', 'foreign_futures_net_change_3d', 'foreign_futures_net_change_5d',
             'trust_futures_net', 'dealer_futures_net', 'total_futures_inst_net',
             'retail_mtx_net', 'retail_mtx_change_3d', 'pc_ratio_oi', 'pc_ratio_oi_change_5d',
@@ -271,10 +286,11 @@ FEATURE_PRESETS = {
     'pure_technicals': {
         'id': 'pure_technicals',
         'name': '📐 純技術線型動能',
-        'desc': '純加權指數各期均線、KAMA 自適應均線、SuperTrend、Ehlers 濾波、CHOP、VWAP、乖離率、RSI、MACD 與波動度',
+        'desc': '純加權指數各期均線、波動率期限結構、KAMA 自適應均線、SuperTrend、Ehlers 濾波、CHOP、VWAP、乖離率、RSI、MACD 與波動度',
         'features': [
             'ret_1d', 'ret_3d', 'ret_5d', 'ret_10d', 'ret_20d', 'ret_60d',
             'ma5_bias', 'ma10_bias', 'ma20_bias', 'ma60_bias', 'ma120_bias',
+            'vol_term_ratio_5d_20d',
             'kama_er_20d', 'kama_bias_20d', 'supertrend_direction', 'supertrend_dist_pct',
             'ehlers_supersmoother_bias', 'chop_index_14d', 'yang_zhang_vol_20d', 'vwap_bias_60d',
             'ma_alignment', 'rsi_14', 'macd_hist', 'volatility_20d', 'turnover_ratio_5d'
@@ -556,14 +572,26 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
             'total': round((f_shares + t_shares + d_shares) * 100 / 1e8, 2)
         }
         
-    # 4. 載入台積電 (2330) 股價
-    df_tsmc = pd.read_sql_query("""
-        SELECT date, closing_price as close
+    # 4. 載入權值三雄 (台積電 2330, 鴻海 2317, 聯發科 2454) 股價
+    df_top3 = pd.read_sql_query("""
+        SELECT date, stock_id, closing_price as close
         FROM daily_stock
-        WHERE stock_id = '2330'
+        WHERE stock_id in ('2330', '2317', '2454')
         ORDER BY date ASC
     """, conn)
-    tsmc_dict = {str(r['date']): float(r['close'] or 0) for _, r in df_tsmc.iterrows()}
+    tsmc_dict = {}
+    foxconn_dict = {}
+    mediatek_dict = {}
+    for _, r in df_top3.iterrows():
+        d = str(r['date'])
+        c = float(r['close'] or 0)
+        sid = str(r['stock_id'])
+        if sid == '2330':
+            tsmc_dict[d] = c
+        elif sid == '2317':
+            foxconn_dict[d] = c
+        elif sid == '2454':
+            mediatek_dict[d] = c
     
     # 5. 載入國際宏觀指標 (macro_indicators: 美債10Y, 原油, 匯率, 費半, 台積電ADR, 輝達, 日圓)
     macro_dict = {}
@@ -646,7 +674,7 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
         print(f"[!] 載入 options_pc_ratio 失敗: {e}")
 
     conn.close()
-    return df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict, mtx_dict, pc_dict
+    return df_index, fut_dict, cash_dict, tsmc_dict, foxconn_dict, mediatek_dict, macro_dict, breadth_dict, mtx_dict, pc_dict
 
 def get_weights_ffd(d: float = 0.45, thres: float = 1e-4, max_lags: int = 80) -> np.ndarray:
     """
@@ -682,7 +710,7 @@ def compute_hurst_rs(series: np.ndarray) -> float:
     return float(np.clip(h, 0.0, 1.0))
 
 def build_features() -> pd.DataFrame:
-    df_index, fut_dict, cash_dict, tsmc_dict, macro_dict, breadth_dict, mtx_dict, pc_dict = load_raw_data()
+    df_index, fut_dict, cash_dict, tsmc_dict, foxconn_dict, mediatek_dict, macro_dict, breadth_dict, mtx_dict, pc_dict = load_raw_data()
     n = len(df_index)
     
     dates = df_index['date'].astype(str).tolist()
@@ -838,6 +866,10 @@ def build_features() -> pd.DataFrame:
     last_fut_info = {'外資': 0, '投信': 0, '自營商': 0}
     last_cash_info = {'foreign': 0, 'trust': 0, 'dealer': 0, 'total': 0}
     last_tsmc_c = 0.0
+    last_foxconn_c = 0.0
+    last_mediatek_c = 0.0
+    last_margin_tot = 0
+    last_short_tot = 0
     last_mtx_net = 0
     last_pc_oi = 100.0
     last_pc_vol = 100.0
@@ -920,10 +952,18 @@ def build_features() -> pd.DataFrame:
         t_cash_5d = sum([cash_dict.get(dates[j], {}).get('trust', 0) for j in range(max(0, i-4), i+1)])
         tot_cash_5d = sum([cash_dict.get(dates[j], {}).get('total', 0) for j in range(max(0, i-4), i+1)])
         
-        # 台積電連動 (Forward-fill)
+        # 權值三雄 (台積電 2330, 鴻海 2317, 聯發科 2454) 連動 (Forward-fill)
         if d in tsmc_dict and tsmc_dict[d] > 0:
             last_tsmc_c = tsmc_dict[d]
         tsmc_c = last_tsmc_c
+
+        if d in foxconn_dict and foxconn_dict[d] > 0:
+            last_foxconn_c = foxconn_dict[d]
+        foxconn_c = last_foxconn_c
+
+        if d in mediatek_dict and mediatek_dict[d] > 0:
+            last_mediatek_c = mediatek_dict[d]
+        mediatek_c = last_mediatek_c
         
         tsmc_c_prev5 = tsmc_dict.get(d_prev5, tsmc_c) if i >= 5 else tsmc_c
         tsmc_ret5 = ((tsmc_c / tsmc_c_prev5 - 1) * 100) if (tsmc_c and tsmc_c_prev5) else 0.0
@@ -989,6 +1029,14 @@ def build_features() -> pd.DataFrame:
 
         b_diff_slice = [breadth_dict.get(dates[j], {}).get('ad_diff', 0) for j in range(max(0, i-4), i+1)]
         b_ad_diff_5d = int(sum(b_diff_slice))
+
+        # 全市場融資融券 (Forward-fill 避開缺漏)
+        if d in breadth_dict:
+            b_item = breadth_dict[d]
+            if b_item.get('margin_total', 0) > 0:
+                last_margin_tot = b_item['margin_total']
+            if b_item.get('short_total', 0) > 0:
+                last_short_tot = b_item['short_total']
 
         # 未來目標標籤 (Targets)
         fut_ret_5d = (closes[i+5] / c - 1) * 100 if i + 5 < n else None
@@ -1078,6 +1126,11 @@ def build_features() -> pd.DataFrame:
             'usdjpy': usdjpy_val,
             'dxy': dxy_val,
             'etf0050_close': m_info.get('etf_0050', 100.0),
+            'tsmc_close': tsmc_c,
+            'foxconn_close': foxconn_c,
+            'mediatek_close': mediatek_c,
+            'margin_total': last_margin_tot,
+            'short_total': last_short_tot,
             # Targets
             'fut_ret_5d': fut_ret_5d,
             'fut_ret_10d': fut_ret_10d,
@@ -1154,6 +1207,53 @@ def build_features() -> pd.DataFrame:
     obv_val = np.cumsum(np.sign(np.diff(c_arr, prepend=c_arr[0])) * v_arr)
     obv_m = pd.Series(obv_val).rolling(20, min_periods=1).mean()
     res_df['obv_bias_20d'] = np.clip(((obv_val - obv_m) / (np.abs(obv_m) + 1e-5) * 100.0).fillna(0.0).values, -100.0, 100.0)
+
+    # ── 9 大籌碼信用交易、權值巨頭共振、費半領先與波動率期限特徵 ──
+    # 1. 全市場融資與融券 (Forward/Backward Fill 補齊缺漏)
+    m_tot = pd.Series(res_df['margin_total']).replace(0, np.nan).ffill().bfill()
+    s_tot = pd.Series(res_df['short_total']).replace(0, np.nan).ffill().bfill()
+    
+    # 融資 5 日變動率 (%)
+    res_df['margin_ret_5d'] = np.clip((m_tot.pct_change(5) * 100.0).fillna(0.0).values, -50.0, 50.0)
+    # 券資比 (%)
+    res_df['short_margin_ratio'] = np.clip(((s_tot / (m_tot + 1e-5)) * 100.0).fillna(0.0).values, 0.0, 100.0)
+    # 融資 60 日季線乖離率 (%)
+    m_ma60 = m_tot.rolling(60, min_periods=10).mean()
+    res_df['margin_bias_60d'] = np.clip(((m_tot / m_ma60 - 1.0) * 100.0).fillna(0.0).values, -100.0, 100.0)
+    # 大盤與融資 20 日價量背離度 (%)
+    res_df['margin_price_divergence_20d'] = np.clip((res_df['ret_20d'] - (m_tot.pct_change(20) * 100.0).fillna(0.0)).values, -100.0, 100.0)
+    
+    # 2. 權值三雄 (台積電 2330, 鴻海 2317, 聯發科 2454) 動能與共振
+    tsmc_s = pd.Series(res_df['tsmc_close']).replace(0, np.nan).ffill().bfill()
+    foxc_s = pd.Series(res_df['foxconn_close']).replace(0, np.nan).ffill().bfill()
+    medk_s = pd.Series(res_df['mediatek_close']).replace(0, np.nan).ffill().bfill()
+    
+    t_r5 = tsmc_s.pct_change(5).fillna(0.0) * 100.0
+    f_r5 = foxc_s.pct_change(5).fillna(0.0) * 100.0
+    m_r5 = medk_s.pct_change(5).fillna(0.0) * 100.0
+    # 權值三雄 5 日市值加權動能 (%) (台積 70%, 鴻海 15%, 發哥 15%)
+    res_df['top3_weight_ret_5d'] = (t_r5 * 0.70 + f_r5 * 0.15 + m_r5 * 0.15).values
+    
+    # 權值三雄站上月線共振度 (0~1)
+    t_m20 = tsmc_s > tsmc_s.rolling(20, min_periods=1).mean()
+    f_m20 = foxc_s > foxc_s.rolling(20, min_periods=1).mean()
+    m_m20 = medk_s > medk_s.rolling(20, min_periods=1).mean()
+    res_df['top3_ma20_resonance'] = ((t_m20.astype(int) + f_m20.astype(int) + m_m20.astype(int)) / 3.0).values
+    
+    # 3. 費半相對大盤 20 日超額強弱 (%)
+    res_df['sox_rel_strength_20d'] = (res_df['sox_ret_20d'] - res_df['ret_20d']).values
+    
+    # 4. 選擇權 P/C 未平倉 60 日滾動標準化 Z-Score
+    pc_s = pd.Series(res_df['pc_ratio_oi'])
+    pc_m60 = pc_s.rolling(60, min_periods=10).mean()
+    pc_std60 = pc_s.rolling(60, min_periods=10).std()
+    res_df['pc_ratio_oi_zscore_60d'] = np.clip(((pc_s - pc_m60) / (pc_std60 + 1e-6)).fillna(0.0).values, -5.0, 5.0)
+    
+    # 5. 波動率期限結構比率 (5d / 20d)
+    ret_daily = pd.Series(res_df['close']).pct_change()
+    vol_5d = ret_daily.rolling(5, min_periods=2).std() * np.sqrt(252) * 100.0
+    vol_20d = pd.Series(res_df['volatility_20d'])
+    res_df['vol_term_ratio_5d_20d'] = np.clip((vol_5d / (vol_20d + 1e-5)).fillna(1.0).values, 0.0, 5.0)
     
     return res_df
 
@@ -4155,7 +4255,14 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'retail_mtx_change_3d': int(latest_row.get('retail_mtx_change_3d', 0)),
             'pc_ratio_oi': round(float(latest_row.get('pc_ratio_oi', 100.0)), 2),
             'pc_ratio_oi_change_5d': round(float(latest_row.get('pc_ratio_oi_change_5d', 0.0)), 2),
-            'pc_ratio_vol': round(float(latest_row.get('pc_ratio_vol', 100.0)), 2)
+            'pc_ratio_vol': round(float(latest_row.get('pc_ratio_vol', 100.0)), 2),
+            'margin_ret_5d': round(float(latest_row.get('margin_ret_5d', 0.0)), 2),
+            'short_margin_ratio': round(float(latest_row.get('short_margin_ratio', 0.0)), 2),
+            'margin_bias_60d': round(float(latest_row.get('margin_bias_60d', 0.0)), 2),
+            'margin_price_divergence_20d': round(float(latest_row.get('margin_price_divergence_20d', 0.0)), 2),
+            'top3_weight_ret_5d': round(float(latest_row.get('top3_weight_ret_5d', 0.0)), 2),
+            'top3_ma20_resonance': round(float(latest_row.get('top3_ma20_resonance', 0.0)), 2),
+            'pc_ratio_oi_zscore_60d': round(float(latest_row.get('pc_ratio_oi_zscore_60d', 0.0)), 2)
         },
         # 兼容舊版看板欄位：直接對應選定模型
         'metrics': active_model.get('metrics', {}),
@@ -4174,6 +4281,8 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'usdtwd_ret_20d': round(float(latest_row.get('usdtwd_ret_20d', 0)), 2),
             'sox': round(float(latest_row.get('sox', 12692)), 1) if 'sox' in latest_row else 12692.0,
             'sox_ret_20d': round(float(latest_row.get('sox_ret_20d', 0)), 2),
+            'sox_rel_strength_20d': round(float(latest_row.get('sox_rel_strength_20d', 0.0)), 2) if 'sox_rel_strength_20d' in latest_row else 0.0,
+            'vol_term_ratio_5d_20d': round(float(latest_row.get('vol_term_ratio_5d_20d', 1.0)), 2) if 'vol_term_ratio_5d_20d' in latest_row else 1.0,
             'tsm_adr': round(float(latest_row.get('tsm_adr', 457.4)), 2) if 'tsm_adr' in latest_row else 457.4,
             'tsm_adr_premium': round(float(latest_row.get('tsm_adr_premium', 17.6)), 2) if 'tsm_adr_premium' in latest_row else 17.6,
             'tsm_adr_ret_20d': round(float(latest_row.get('tsm_adr_ret_20d', 0)), 2),
