@@ -1730,13 +1730,18 @@ function StockDashboard() {
   const fetchMarketMlData = async () => {
     try {
       setFetchingMarketMl(true);
-      const res = await supabaseFetch(`/stock_ml_cache?model_type=eq.taiex_macro&select=payload,updated_at&_t=${Date.now()}`);
+      const res = await supabaseFetch('/stock_ml_cache?model_type=eq.taiex_macro&select=payload,updated_at');
       if (res.ok) {
         const rows = await res.json();
         if (rows && rows.length > 0 && rows[0].payload) {
-          setMarketMlData(rows[0].payload);
+          const payloadData = typeof rows[0].payload === 'string'
+            ? JSON.parse(rows[0].payload)
+            : rows[0].payload;
+          setMarketMlData(payloadData);
           return;
         }
+      } else {
+        console.error('讀取大盤 ML 預測失敗 HTTP status:', res.status);
       }
     } catch (err) {
       console.error('讀取大盤 ML 預測失敗', err);
