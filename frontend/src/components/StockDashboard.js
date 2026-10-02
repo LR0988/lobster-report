@@ -716,7 +716,9 @@ function StockDashboard() {
 
   // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
   const [marketMlData, setMarketMlData] = useState(null);
+  const [marketMlBtData, setMarketMlBtData] = useState(null);  // 回測 curve 懶加載
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
+  const [fetchingMarketMlBt, setFetchingMarketMlBt] = useState(false);
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
   const [marketMlModelType, setMarketMlModelType] = useState(() => localStorage.getItem('market_ml_model_type') || 'ensemble');
   const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
@@ -1744,6 +1746,26 @@ function StockDashboard() {
       setFetchingMarketMl(false);
     }
   };
+
+  // 懶加載回測 curve 資料（只在點「回測分析」分頁時才抓）
+  const fetchMarketMlBtData = async () => {
+    if (marketMlBtData || fetchingMarketMlBt) return;
+    try {
+      setFetchingMarketMlBt(true);
+      const res = await supabaseFetch(`/stock_ml_cache?model_type=eq.taiex_macro_bt&select=payload&_t=${Date.now()}`);
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          setMarketMlBtData(rows[0].payload);
+        }
+      }
+    } catch (err) {
+      console.error('讀取回測資料失敗', err);
+    } finally {
+      setFetchingMarketMlBt(false);
+    }
+  };
+
 
   const handleSelectMarketModel = (modelId) => {
     setMarketMlModelType(modelId);
@@ -4920,6 +4942,7 @@ function StockDashboard() {
                 onClick={() => {
                   setMarketMlSubTab('backtest');
                   localStorage.setItem('market_ml_sub_tab', 'backtest');
+                  fetchMarketMlBtData();  // 懶加載回測 curve 資料
                 }}
               >
                 <span>📊</span>
@@ -8113,9 +8136,22 @@ function StockDashboard() {
                   </div>
                 )}
 
+
                 {/* ── 子視圖 3: 📊 歷年波段模擬回測績效 (Backtest) ── */}
                 {marketMlSubTab === 'backtest' && (() => {
-                  const bt = marketMlData?.backtest_simulation;
+                  // 優先用懶加載的完整回測資料，fallback 用輕量版（只有 comparison 摘要）
+                  const btSource = marketMlBtData || marketMlData;
+                  const bt = btSource?.backtest_simulation;
+                  const hasCurves = Boolean(marketMlBtData);
+
+                  if (fetchingMarketMlBt && !bt) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
+                        <div className="loader" style={{ width: '36px', height: '36px', margin: '0 auto 1rem' }}></div>
+                        <p style={{ margin: 0, color: '#93C5FD' }}>正在載入回測資料...</p>
+                      </div>
+                    );
+                  }
                   if (!bt || (!bt.test_period && !bt.periods)) {
                     return (
                       <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>

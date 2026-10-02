@@ -4545,8 +4545,14 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
     sync_market_ml_to_supabase(report)
     return report
 
+
 def sync_market_ml_to_supabase(payload=None):
-    """將大盤最新推論與多模型對比結果同步至雲端 Supabase stock_ml_cache (model_type='taiex_macro')"""
+    """將大盤最新推論與多模型對比結果同步至雲端 Supabase stock_ml_cache
+    
+    拆分成兩個 cache key 避免 21MB 超大 payload 阻塞前端載入：
+    - taiex_macro    : 輕量版 (~500KB)，含訊號/指標/模型清單，cockpit 快速載入
+    - taiex_macro_bt : 完整回測 curve，回測分頁懶加載
+    """
     try:
         from dotenv import load_dotenv
         load_dotenv()
@@ -4558,19 +4564,69 @@ def sync_market_ml_to_supabase(payload=None):
                 return
             with open(PREDICTION_JSON_PATH, 'r', encoding='utf-8') as f:
                 payload = json.load(f)
-                
+
+        import copy
+
+        # ── 1. 輕量版 payload (taiex_macro) — cockpit 快速載入 ────────────────
+        lite = copy.deepcopy(payload)
+        bt_sim = lite.get('backtest_simulation', {})
+
+        # 每個 period 只保留 comparison 摘要數字，移除 models_detail (curve/trades)
+        periods_lite = {}
+        for pk, pv in bt_sim.get('periods', {}).items():
+            periods_lite[pk] = {
+                'benchmark_return_pct':      pv.get('benchmark_return_pct'),
+                'benchmark_cagr_pct':        pv.get('benchmark_cagr_pct'),
+                'benchmark_max_drawdown_pct': pv.get('benchmark_max_drawdown_pct'),
+                'comparison_long_only':      pv.get('comparison_long_only', []),
+                'comparison_long_short':     pv.get('comparison_long_short', []),
+            }
+
+        lite['backtest_simulation'] = {
+            'periods':          periods_lite,
+            'available_periods': bt_sim.get('available_periods', []),
+            'selected_model_id': bt_sim.get('selected_model_id'),
+        }
+
+        # operations_6m 保留 current_action 和 consensus，移除每個模型的 curve/trades
+        ops = lite.get('operations_6m', {})
+        if ops:
+            md = ops.get('models_detail', {})
+            for mid in list(md.keys()):
+                m_entry = md[mid]
+                for mode in ('long_only', 'long_short'):
+                    if mode in m_entry:
+                        m_entry[mode] = {
+                            k: v for k, v in m_entry[mode].items()
+                            if k not in ('curve', 'trades', 'action_markers')
+                        }
+
+        # ── 2. 完整回測 payload (taiex_macro_bt) — 回測分頁懶加載 ─────────────
+        bt_full = {
+            'updated_at':          payload.get('trained_at', ''),
+            'backtest_simulation': payload.get('backtest_simulation', {}),
+        }
+
+        # ── 3. 寫入 Supabase ──────────────────────────────────────────────────
         sb_conn = get_supabase_conn()
         cur = sb_conn.cursor()
-        cur.execute("""
-            INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-            VALUES (%s, %s, CURRENT_TIMESTAMP)
-            ON CONFLICT (model_type) DO UPDATE SET
-                payload = EXCLUDED.payload,
-                updated_at = CURRENT_TIMESTAMP
-        """, ('taiex_macro', json.dumps(payload, ensure_ascii=False)))
+        for model_type, json_payload in [
+            ('taiex_macro',    json.dumps(lite,    ensure_ascii=False)),
+            ('taiex_macro_bt', json.dumps(bt_full, ensure_ascii=False)),
+        ]:
+            cur.execute("""
+                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (model_type) DO UPDATE SET
+                    payload = EXCLUDED.payload,
+                    updated_at = CURRENT_TIMESTAMP
+            """, (model_type, json_payload))
         sb_conn.commit()
         sb_conn.close()
-        print("[✓] 大盤多模型預測與評估結果已成功同步至 Supabase (stock_ml_cache -> taiex_macro)！")
+
+        lite_kb = len(json.dumps(lite,    ensure_ascii=False)) / 1024
+        bt_kb   = len(json.dumps(bt_full, ensure_ascii=False)) / 1024
+        print(f"[✓] 大盤 ML 已同步至 Supabase: taiex_macro={lite_kb:.0f}KB, taiex_macro_bt={bt_kb:.0f}KB")
     except Exception as e:
         print(f"[!] 同步大盤 ML 至 Supabase 失敗 (離線模式仍可本機運作): {e}")
 
