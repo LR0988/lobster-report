@@ -536,6 +536,9 @@ def execute_market_ml_job(config: dict) -> dict:
     import sync_macro_indicators
     importlib.reload(sync_macro_indicators)
     sync_macro_indicators.check_and_auto_backfill()
+    import sync_options_pc_ratio
+    importlib.reload(sync_options_pc_ratio)
+    sync_options_pc_ratio.sync_options_pc_ratio()
     
     print("[*] 正在執行大盤 ML 多因子推論與波段模擬回測...")
     import market_ml_engine
@@ -558,6 +561,9 @@ def execute_market_ml_train_job(config: dict) -> dict:
     import sync_macro_indicators
     importlib.reload(sync_macro_indicators)
     sync_macro_indicators.check_and_auto_backfill()
+    import sync_options_pc_ratio
+    importlib.reload(sync_options_pc_ratio)
+    sync_options_pc_ratio.sync_options_pc_ratio()
     
     import market_ml_engine
     importlib.reload(market_ml_engine)
@@ -753,6 +759,10 @@ def run_worker_loop():
                     import sync_macro_indicators
                     importlib.reload(sync_macro_indicators)
                     sync_macro_indicators.sync_macro_to_sqlite(range_param="1mo")
+                    
+                    import sync_options_pc_ratio
+                    importlib.reload(sync_options_pc_ratio)
+                    sync_options_pc_ratio.sync_options_pc_ratio()
                     
                     import market_ml_engine
                     importlib.reload(market_ml_engine)

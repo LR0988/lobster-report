@@ -6183,6 +6183,60 @@ function StockDashboard() {
                             <span style={{ marginLeft: '0.4rem', color: '#93C5FD' }}>權重佔比 &gt; 35%</span>
                           </div>
                         </div>
+
+                        {/* 選擇權 Put/Call Ratio 與散戶小台留倉卡片 */}
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.75)',
+                          border: '1px solid rgba(139, 92, 246, 0.35)',
+                          borderRadius: '12px',
+                          padding: '0.85rem 1rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                            <span style={{ fontSize: '0.82rem', color: '#DDD6FE' }}>選擇權 P/C Ratio (未平倉)</span>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 'bold',
+                              padding: '0.15rem 0.45rem',
+                              borderRadius: '6px',
+                              background: (marketMlData.institutional_cockpit?.pc_ratio_oi || 100) > 110
+                                ? 'rgba(16, 185, 129, 0.2)'
+                                : (marketMlData.institutional_cockpit?.pc_ratio_oi || 100) < 85
+                                ? 'rgba(239, 68, 68, 0.2)'
+                                : 'rgba(59, 130, 246, 0.2)',
+                              color: (marketMlData.institutional_cockpit?.pc_ratio_oi || 100) > 110
+                                ? '#6EE7B7'
+                                : (marketMlData.institutional_cockpit?.pc_ratio_oi || 100) < 85
+                                ? '#FCA5A5'
+                                : '#93C5FD'
+                            }}>
+                              {(marketMlData.institutional_cockpit?.pc_ratio_oi || 100) > 110
+                                ? '莊家偏多防守'
+                                : (marketMlData.institutional_cockpit?.pc_ratio_oi || 100) < 85
+                                ? '避險/極度悲觀'
+                                : '多空勢均力敵'}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: (marketMlData.institutional_cockpit?.pc_ratio_oi || 100) >= 100 ? '#34D399' : '#F87171' }}>
+                              {marketMlData.institutional_cockpit?.pc_ratio_oi?.toFixed(1) || '--'}%
+                            </div>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                              成交量比: <strong style={{ color: '#E2E8F0' }}>{marketMlData.institutional_cockpit?.pc_ratio_vol?.toFixed(1) || '--'}%</strong>
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between' }}>
+                            <span>
+                              散戶小台: <strong style={{ color: (marketMlData.institutional_cockpit?.retail_mtx_net || 0) < 0 ? '#34D399' : '#F87171' }}>
+                                {(marketMlData.institutional_cockpit?.retail_mtx_net || 0) > 0 ? '+' : ''}{(marketMlData.institutional_cockpit?.retail_mtx_net || 0).toLocaleString()} 口
+                              </strong>
+                            </span>
+                            <span>
+                              60日 Z: <strong style={{ color: (marketMlData.institutional_cockpit?.pc_ratio_oi_zscore_60d || 0) < -1 ? '#FCA5A5' : '#94A3B8' }}>
+                                {marketMlData.institutional_cockpit?.pc_ratio_oi_zscore_60d?.toFixed(2) || '0.00'}
+                              </strong>
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
