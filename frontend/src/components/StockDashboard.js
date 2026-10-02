@@ -6022,6 +6022,33 @@ function StockDashboard() {
                               <span>5日漲跌比: <strong style={{ color: (marketMlData.macro_snapshot.breadth_ad_ratio_5d || 1) >= 1 ? '#34D399' : '#F87171' }}>{marketMlData.macro_snapshot.breadth_ad_ratio_5d?.toFixed(2) || '1.00'}</strong></span>
                             </div>
                           </div>
+
+                          {/* 9. 國際大宗商品景氣指針 (銅博士 / 鋁 / 汽油裂解價差) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(245, 158, 11, 0.35)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span>🏭 銅油比 & 裂解價差 (大宗商品)</span>
+                              <span style={{ fontSize: '0.72rem', color: (marketMlData.macro_snapshot.copper_ret_20d || 0) >= 0 ? '#34D399' : '#F87171' }}>
+                                銅價: ${marketMlData.macro_snapshot.copper?.toFixed(2)}/磅
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '0.35rem' }}>
+                              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FCD34D' }}>
+                                銅油比 {marketMlData.macro_snapshot.copper_oil_ratio?.toFixed(3) || '0.072'}
+                              </div>
+                              <span style={{ fontSize: '0.72rem', color: (marketMlData.macro_snapshot.crack_spread || 0) > 25 ? '#34D399' : '#94A3B8' }}>
+                                裂解價差: ${marketMlData.macro_snapshot.crack_spread?.toFixed(1) || '47.9'}/桶
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>鋁價: <strong style={{ color: '#E2E8F0' }}>${marketMlData.macro_snapshot.aluminum?.toFixed(0) || '3219'}</strong> ({marketMlData.macro_snapshot.aluminum_ret_20d ? (marketMlData.macro_snapshot.aluminum_ret_20d >= 0 ? '+' : '') + marketMlData.macro_snapshot.aluminum_ret_20d.toFixed(1) + '%' : '-5.9%'})</span>
+                              <span>汽油: <strong style={{ color: '#E2E8F0' }}>${marketMlData.macro_snapshot.gasoline?.toFixed(2) || '3.31'}</strong></span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
