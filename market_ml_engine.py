@@ -3831,7 +3831,8 @@ def build_operations_6m(df: Optional[pd.DataFrame] = None, models_bundle: Option
 
     target_id = selected_model_id if selected_model_id in models_detail else list(models_detail.keys())[0]
     active_detail = models_detail[target_id]
-    curr_status = active_detail['long_short'].get('current_status', {})
+    # 使用 long_only 模式的 current_status — 只有買進/現金，不做空
+    curr_status = active_detail['long_only'].get('current_status', {})
     
     return {
         'start_date': start_date,

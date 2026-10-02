@@ -4976,17 +4976,18 @@ function StockDashboard() {
                   <div>
                     {/* 1.5 🎯 今日 AI 量化即時操作指示燈 (Today's Real-Time Action Directive) */}
                     {(() => {
+                      // Long-Only: bearish => CASH (持現金)，不做空
+                      const _fbSignal = activePrediction?.signal;
+                      const _fbIsLong = _fbSignal === 'bullish' || _fbSignal === 'mild_bullish';
                       const currentAction = marketMlData?.current_action || marketMlData?.operations_6m?.current_action || {
-                        action_code: activePrediction?.signal === 'bullish' ? 'HOLD_LONG' : (activePrediction?.signal === 'bearish' ? 'HOLD_SHORT' : 'CASH'),
-                        action_title: activePrediction?.signal === 'bullish' ? '🟢 建議操作：多單續抱（持有多方部位）' : (activePrediction?.signal === 'bearish' ? '🔴 建議操作：空單避險（持有空方部位）' : '🛡️ 建議操作：空手觀望 / 現金避險（持幣率 100%）'),
-                        action_badge: activePrediction?.signal === 'bullish' ? '🟢 多方持倉中 (Long 100%)' : (activePrediction?.signal === 'bearish' ? '🔴 空方持倉中 (Short 100%)' : '🛡️ 現金避險觀望 (Cash 100%)'),
-                        action_summary: activePrediction?.signal === 'bullish'
+                        action_code: _fbIsLong ? 'HOLD_LONG' : 'CASH',
+                        action_title: _fbIsLong ? '🟢 建議操作：多單續抱（持有多方部位）' : '🛡️ 建議操作：空手觀望 / 現金避險（持幣率 100%）',
+                        action_badge: _fbIsLong ? '🟢 多方持倉中 (Long 100%)' : '🛡️ 現金避險觀望 (Cash 100%)',
+                        action_summary: _fbIsLong
                           ? '目前大盤多頭架構穩健，AI 20日勝率領先，建議 100% 多方部位續抱或逢回佈局。'
-                          : (activePrediction?.signal === 'bearish'
-                            ? '目前大盤回檔風險升高，建議建立避險空單或降至現金水位。'
-                            : '目前大盤高檔橫盤整理，多空方向未見明顯共識突破，建議保留 100% 現金空手觀望，靜待下一次勝率跨越 45% 的波段買點出現！'),
-                        position_size_pct: activePrediction?.signal === 'bullish' ? 100 : (activePrediction?.signal === 'bearish' ? 100 : 0),
-                        direction: activePrediction?.signal === 'bullish' ? '多方 (Long)' : (activePrediction?.signal === 'bearish' ? '空方 (Short)' : '空手觀望 (Cash)'),
+                          : '目前大盤多空方向未見明顯共識突破或回檔風險升高，演算法嚴格執行資本保全原則，建議 100% 現金空手觀望，靜待下一次勝率跨越 45% 的波段買點出現！',
+                        position_size_pct: _fbIsLong ? 100 : 0,
+                        direction: _fbIsLong ? '多方 (Long)' : '空手觀望 (Cash)',
                         stop_loss_pts: activePrediction?.support_pts || 46820,
                         take_profit_pts: activePrediction?.resistance_pts || 47866,
                         rationales: [
