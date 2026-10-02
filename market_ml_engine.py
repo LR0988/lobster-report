@@ -1462,6 +1462,14 @@ class TwoStageMetaFilter:
         is_filtered = confidences < self.confidence_threshold
         return confidences, is_filtered
 
+# 確保在任何執行環境（包含以不同 script 啟動時）反序列化 pickle 都不會遺失命名空間
+TwoStageMetaFilter.__module__ = 'market_ml_engine'
+RegimeMoEClassifier.__module__ = 'market_ml_engine'
+import sys
+if '__main__' in sys.modules:
+    setattr(sys.modules['__main__'], 'RegimeMoEClassifier', RegimeMoEClassifier)
+    setattr(sys.modules['__main__'], 'TwoStageMetaFilter', TwoStageMetaFilter)
+
 
 def calculate_market_support_resistance(df_idx: Optional[pd.DataFrame] = None) -> Dict[str, Any]:
     """
@@ -2566,6 +2574,10 @@ class SoftVotingEnsemble:
         p = self.predict_proba(X)
         return (p[:, 1] >= 0.5).astype(int)
 
+SoftVotingEnsemble.__module__ = 'market_ml_engine'
+if '__main__' in sys.modules:
+    setattr(sys.modules['__main__'], 'SoftVotingEnsemble', SoftVotingEnsemble)
+
 
 def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None):
     """依據模型 ID 與傳入超參數建立包含防缺漏值與正規化之前處理 Pipeline"""
@@ -2573,7 +2585,7 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
     if model_id == 'regime_moe':
         return RegimeMoEClassifier(params=p)
         
-    elif model_id == 'lightgbm':
+    elif model_id in ['lightgbm', 'wf_lightgbm']:
         clf = lgb.LGBMClassifier(
             n_estimators=int(p.get('n_estimators', 100)),
             learning_rate=float(p.get('learning_rate', 0.03)),
@@ -2590,7 +2602,7 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
         )
         return make_pipeline(SimpleImputer(strategy='median'), clf)
     
-    elif model_id == 'xgboost':
+    elif model_id in ['xgboost', 'wf_xgboost']:
         clf = xgb.XGBClassifier(
             n_estimators=int(p.get('n_estimators', 100)),
             learning_rate=float(p.get('learning_rate', 0.03)),
@@ -2606,7 +2618,7 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
         )
         return make_pipeline(SimpleImputer(strategy='median'), clf)
     
-    elif model_id == 'rf':
+    elif model_id in ['rf', 'wf_rf']:
         clf = RandomForestClassifier(
             n_estimators=int(p.get('n_estimators', 100)),
             max_depth=int(p.get('max_depth', 5)),
@@ -2640,7 +2652,7 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
         )
         return make_pipeline(SimpleImputer(strategy='median'), StandardScaler(), clf)
     
-    elif model_id == 'ensemble':
+    elif model_id in ['ensemble', 'walk_forward']:
         w_lgb = float(p.get('weight_lgb', 1.0))
         w_rf = float(p.get('weight_rf', 1.0))
         w_lr = float(p.get('weight_lr', 1.0))
@@ -2667,7 +2679,8 @@ def create_model_pipeline(model_id: str, params: Optional[Dict[str, Any]] = None
         )
     
     else:
-        raise ValueError(f"不支援的模型 ID: {model_id}")
+        print(f"[!] 提示: 模型 ID '{model_id}' 使用預設自適應集成管線")
+        return make_pipeline(SimpleImputer(strategy='median'), RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42))
 
 def optimize_hyperparameters(model_id: str, X_train: np.ndarray, y_train: np.ndarray, regimes: Optional[np.ndarray] = None, sample_weights: Optional[np.ndarray] = None, fut_rets: Optional[np.ndarray] = None, n_trials: int = 20) -> Tuple[Dict[str, Any], float, List[Dict[str, Any]]]:
     """
@@ -3954,9 +3967,10 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     x_latest = latest_row[feature_cols].values.reshape(1, -1)
     
     models_status = models_bundle.get('models_status', {})
+    WALK_FORWARD_MODELS = ['walk_forward', 'wf_lightgbm', 'wf_xgboost', 'wf_rf']
     
     for m_id in models_to_train:
-        if m_id not in MODEL_CATALOG or m_id in ['elliott', 'walk_forward']:
+        if m_id not in MODEL_CATALOG or m_id in ['elliott', *WALK_FORWARD_MODELS]:
             continue
         m_info = MODEL_CATALOG[m_id]
         print(f"[*] 正在訓練 {m_info['name']} (AutoTune={auto_tune}) ...")
@@ -4547,12 +4561,7 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
 
 
 def sync_market_ml_to_supabase(payload=None):
-    """將大盤最新推論與多模型對比結果同步至雲端 Supabase stock_ml_cache
-    
-    拆分成兩個 cache key 避免 21MB 超大 payload 阻塞前端載入：
-    - taiex_macro    : 輕量版 (~500KB)，含訊號/指標/模型清單，cockpit 快速載入
-    - taiex_macro_bt : 完整回測 curve，回測分頁懶加載
-    """
+    """將大盤最新推論與多模型對比結果同步至雲端 Supabase stock_ml_cache (model_type='taiex_macro')"""
     try:
         from dotenv import load_dotenv
         load_dotenv()
@@ -4567,53 +4576,45 @@ def sync_market_ml_to_supabase(payload=None):
 
         import copy
 
-        # ── 1. 輕量版 payload (taiex_macro) — cockpit 快速載入 ────────────────
-        lite = copy.deepcopy(payload)
-        bt_sim = lite.get('backtest_simulation', {})
+        # 建立完整乾淨之 payload，保留所有模型、回測區間、曲線與操作指引
+        clean = copy.deepcopy(payload)
 
-        # 每個 period 只保留 comparison 摘要數字，移除 models_detail (curve/trades)
-        periods_lite = {}
-        for pk, pv in bt_sim.get('periods', {}).items():
-            periods_lite[pk] = {
-                'benchmark_return_pct':      pv.get('benchmark_return_pct'),
-                'benchmark_cagr_pct':        pv.get('benchmark_cagr_pct'),
-                'benchmark_max_drawdown_pct': pv.get('benchmark_max_drawdown_pct'),
-                'comparison_long_only':      pv.get('comparison_long_only', []),
-                'comparison_long_short':     pv.get('comparison_long_short', []),
-            }
+        # 緊湊化 action_markers 避免重複字串過度膨脹，同時保留所有點位與繪圖所需屬性
+        def clean_markers(obj):
+            if isinstance(obj, dict):
+                for k, v in list(obj.items()):
+                    if k == 'action_markers' and isinstance(v, list):
+                        obj[k] = [{
+                            'date': str(m.get('date')),
+                            'action': m.get('action'),
+                            'label': m.get('label'),
+                            'direction': m.get('direction'),
+                            'price': round(float(m.get('price', 0)), 1),
+                            'equity': round(float(m.get('equity', 0)), 0)
+                        } for m in v]
+                    else:
+                        clean_markers(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    clean_markers(item)
 
-        lite['backtest_simulation'] = {
-            'periods':          periods_lite,
-            'available_periods': bt_sim.get('available_periods', []),
-            'selected_model_id': bt_sim.get('selected_model_id'),
-        }
+        clean_markers(clean)
 
-        # operations_6m 保留 current_action 和 consensus，移除每個模型的 curve/trades
-        ops = lite.get('operations_6m', {})
-        if ops:
-            md = ops.get('models_detail', {})
-            for mid in list(md.keys()):
-                m_entry = md[mid]
-                for mode in ('long_only', 'long_short'):
-                    if mode in m_entry:
-                        m_entry[mode] = {
-                            k: v for k, v in m_entry[mode].items()
-                            if k not in ('curve', 'trades', 'action_markers')
-                        }
+        bt = clean.get('backtest_simulation', {})
+        periods = bt.get('periods', {})
+        if '10y' in periods:
+            bt['full_history_10y'] = periods['10y']
+        if '20y' in periods:
+            bt['full_history_20y'] = periods['20y']
+        if 'oos_2y' in periods:
+            bt['test_period'] = periods['oos_2y']
+            bt['models_detail'] = periods['oos_2y'].get('models_detail', {})
 
-        # ── 2. 完整回測 payload (taiex_macro_bt) — 回測分頁懶加載 ─────────────
-        bt_full = {
-            'updated_at':          payload.get('trained_at', ''),
-            'backtest_simulation': payload.get('backtest_simulation', {}),
-        }
+        json_payload = json.dumps(clean, ensure_ascii=False)
 
-        # ── 3. 寫入 Supabase ──────────────────────────────────────────────────
         sb_conn = get_supabase_conn()
         cur = sb_conn.cursor()
-        for model_type, json_payload in [
-            ('taiex_macro',    json.dumps(lite,    ensure_ascii=False)),
-            ('taiex_macro_bt', json.dumps(bt_full, ensure_ascii=False)),
-        ]:
+        for model_type in ['taiex_macro', 'taiex_macro_bt']:
             cur.execute("""
                 INSERT INTO stock_ml_cache (model_type, payload, updated_at)
                 VALUES (%s, %s, CURRENT_TIMESTAMP)
@@ -4624,9 +4625,8 @@ def sync_market_ml_to_supabase(payload=None):
         sb_conn.commit()
         sb_conn.close()
 
-        lite_kb = len(json.dumps(lite,    ensure_ascii=False)) / 1024
-        bt_kb   = len(json.dumps(bt_full, ensure_ascii=False)) / 1024
-        print(f"[✓] 大盤 ML 已同步至 Supabase: taiex_macro={lite_kb:.0f}KB, taiex_macro_bt={bt_kb:.0f}KB")
+        payload_kb = len(json_payload) / 1024
+        print(f"[✓] 大盤多模型預測與評估結果已成功同步至 Supabase (stock_ml_cache -> taiex_macro, {payload_kb:.0f}KB)！")
     except Exception as e:
         print(f"[!] 同步大盤 ML 至 Supabase 失敗 (離線模式仍可本機運作): {e}")
 

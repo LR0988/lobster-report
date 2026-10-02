@@ -540,9 +540,13 @@ def execute_market_ml_job(config: dict) -> dict:
     print("[*] 正在執行大盤 ML 多因子推論與波段模擬回測...")
     import market_ml_engine
     importlib.reload(market_ml_engine)
+    sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
+    sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
+    sys.modules['__main__'].SoftVotingEnsemble = market_ml_engine.SoftVotingEnsemble
+
     selected_model = config.get("model_type")
     result = market_ml_engine.generate_prediction_report(selected_model_id=selected_model)
-    return {"status": "ok", "message": "大盤預測與回測模擬已更新並同步至雲端！", "data": result}
+    return {"status": "ok", "message": "大盤預測與回測模擬已更新並同步至雲端！", "data": {"status": "success", "latest_date": result.get("latest_date"), "best_model_id": result.get("best_model_id")}}
 
 def execute_market_ml_train_job(config: dict) -> dict:
     """重新訓練大盤多因子模型並產出最新推論與波段回測"""
@@ -557,8 +561,12 @@ def execute_market_ml_train_job(config: dict) -> dict:
     
     import market_ml_engine
     importlib.reload(market_ml_engine)
+    sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
+    sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
+    sys.modules['__main__'].SoftVotingEnsemble = market_ml_engine.SoftVotingEnsemble
+
     result = market_ml_engine.train_and_evaluate_models(config=config)
-    return {"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論與回測！", "data": result}
+    return {"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論與回測！", "data": {"status": "success", "latest_date": result.get("latest_date"), "best_model_id": result.get("best_model_id")}}
 
 def execute_ml_backtest_job(config: dict) -> dict:
     """執行本機 ML 策略歷史回測並回傳績效指標"""
