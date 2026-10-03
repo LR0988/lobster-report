@@ -4845,12 +4845,12 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
     except Exception as e:
         print(f"[!] 警告：構建 alpha_dynamic_convex models_status 失敗: {e}")
 
-    best_model_id = models_bundle.get('best_model_id', 'wf_lightgbm')
+    best_model_id = 'wf_lightgbm' if 'wf_lightgbm' in models_status else models_bundle.get('best_model_id', 'wf_lightgbm')
     if best_model_id not in models_status:
         best_model_id = 'wf_lightgbm' if 'wf_lightgbm' in models_status else ('walk_forward' if 'walk_forward' in models_status else list(models_status.keys())[0])
-    selected_id = selected_model_id or best_model_id
+    selected_id = selected_model_id or 'wf_lightgbm'
     if selected_id not in models_status and models_status:
-        selected_id = list(models_status.keys())[0]
+        selected_id = 'wf_lightgbm' if 'wf_lightgbm' in models_status else list(models_status.keys())[0]
         
     latest_row = df.iloc[-1]
     latest_date = str(latest_row['date'])
@@ -5114,7 +5114,7 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
 
 
 def sync_market_ml_to_supabase(payload=None):
-    """將大盤最新推論與多模型對比結果同步至雲端 Supabase stock_ml_cache (model_type='taiex_macro')"""
+    """將大盤最新推論與多模型對比結果同步至雲端 Supabase stock_ml_cache (taiex_macro: 輕量版, taiex_macro_bt: 完整回測)"""
     try:
         from dotenv import load_dotenv
         load_dotenv()
@@ -5163,23 +5163,75 @@ def sync_market_ml_to_supabase(payload=None):
             bt['test_period'] = periods['oos_2y']
             bt['models_detail'] = periods['oos_2y'].get('models_detail', {})
 
-        json_payload = json.dumps(clean, ensure_ascii=False)
+        # ── 1. 輕量版 payload (taiex_macro) — cockpit 快速載入 (< 500KB) ──
+        lite = copy.deepcopy(clean)
+        bt_sim = lite.get('backtest_simulation', {})
+        periods_lite = {}
+        for pk, pv in bt_sim.get('periods', {}).items():
+            periods_lite[pk] = {
+                'key': pv.get('key', pk),
+                'name': pv.get('name', pk),
+                'benchmark_return_pct': pv.get('benchmark_return_pct'),
+                'benchmark_cagr_pct': pv.get('benchmark_cagr_pct'),
+                'benchmark_max_drawdown_pct': pv.get('benchmark_max_drawdown_pct'),
+                'comparison_long_only': pv.get('comparison_long_only', []),
+                'comparison_long_short': pv.get('comparison_long_short', []),
+                'benchmark': pv.get('benchmark', {}),
+                'etf0050': pv.get('etf0050', {})
+            }
+
+        lite['backtest_simulation'] = {
+            'periods': periods_lite,
+            'available_periods': bt_sim.get('available_periods', []),
+            'available_years': bt_sim.get('available_years', []),
+            'selected_model_id': bt_sim.get('selected_model_id', 'wf_lightgbm'),
+            'default_period_key': bt_sim.get('default_period_key', '10y'),
+            'model_name': bt_sim.get('model_name', '漸進 LightGBM'),
+            'test_period': {
+                'benchmark': bt_sim.get('test_period', {}).get('benchmark', {}),
+                'etf0050': bt_sim.get('test_period', {}).get('etf0050', {}),
+                'comparison_long_only': bt_sim.get('test_period', {}).get('comparison_long_only', []),
+                'comparison_long_short': bt_sim.get('test_period', {}).get('comparison_long_short', []),
+            } if bt_sim.get('test_period') else {}
+        }
+
+        ops = lite.get('operations_6m', {})
+        if ops:
+            md = ops.get('models_detail', {})
+            for mid in list(md.keys()):
+                m_entry = md[mid]
+                for mode in ('long_only', 'long_short'):
+                    if mode in m_entry:
+                        m_entry[mode] = {
+                            k: v for k, v in m_entry[mode].items()
+                            if k not in ('curve', 'trades', 'action_markers')
+                        }
+
+        # ── 2. 完整回測 payload (taiex_macro_bt) — 回測分頁懶加載 ──
+        bt_full = {
+            'updated_at': clean.get('trained_at', ''),
+            'backtest_simulation': clean.get('backtest_simulation', {}),
+        }
+
+        lite_json = json.dumps(lite, ensure_ascii=False)
+        bt_json = json.dumps(bt_full, ensure_ascii=False)
 
         sb_conn = get_supabase_conn()
         cur = sb_conn.cursor()
-        for model_type in ['taiex_macro', 'taiex_macro_bt']:
+        for model_type, j_pay in [('taiex_macro', lite_json), ('taiex_macro_bt', bt_json)]:
             cur.execute("""
                 INSERT INTO stock_ml_cache (model_type, payload, updated_at)
                 VALUES (%s, %s, CURRENT_TIMESTAMP)
                 ON CONFLICT (model_type) DO UPDATE SET
                     payload = EXCLUDED.payload,
                     updated_at = CURRENT_TIMESTAMP
-            """, (model_type, json_payload))
+            """, (model_type, j_pay))
         sb_conn.commit()
         sb_conn.close()
 
-        payload_kb = len(json_payload) / 1024
-        print(f"[✓] 大盤多模型預測與評估結果已成功同步至 Supabase (stock_ml_cache -> taiex_macro, {payload_kb:.0f}KB)！")
+        lite_kb = len(lite_json) / 1024
+        bt_kb = len(bt_json) / 1024
+        print(f"[✓] 大盤多模型預測已成功同步至 Supabase: taiex_macro={lite_kb:.0f}KB, taiex_macro_bt={bt_kb:.0f}KB！")
     except Exception as e:
         print(f"[!] 同步大盤 ML 至 Supabase 失敗 (離線模式仍可本機運作): {e}")
 

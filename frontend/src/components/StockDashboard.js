@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../api';
+import defaultMarketMlData from '../data/defaultMarketMlData.json';
 import './StockDashboard.css';
 
 const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
@@ -512,11 +513,12 @@ const STORAGE_KEY = 'stock_screener_config';
 const PROMPT_KEY  = 'stock_screener_prompt';
 
 function StockDashboard() {
-  const user = getCurrentUser();
+  const authUser = getCurrentUser();
+  const user = authUser || { username: '訪客', role: 'viewer', is_guest: true };
   const navigate = useNavigate();
   const [screeningStatus, setScreeningStatus] = useState('');
 
-  const [activeTab, setActiveTab] = useState('screener');
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('active_tab') || 'market_ml');
   const [activeDbTable, setActiveDbTable] = useState('');
   const [portfolioList, setPortfolioList] = useState([]);
   const [portfolioInput, setPortfolioInput] = useState({ stock_id: '', buy_price: '', notes: '', auto_analyze: true });
@@ -696,8 +698,10 @@ function StockDashboard() {
   // ML 預測表格排序狀態
 
   // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
-  const [marketMlData, setMarketMlData] = useState(null);
+  const [marketMlData, setMarketMlData] = useState(() => defaultMarketMlData);
+  const [marketMlBtData, setMarketMlBtData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
+  const [fetchingMarketMlBt, setFetchingMarketMlBt] = useState(false);
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
   const [marketMlModelType, setMarketMlModelType] = useState(() => {
     const saved = localStorage.getItem('market_ml_model_type');
@@ -1735,6 +1739,27 @@ function StockDashboard() {
     }
   };
 
+  const fetchMarketMlBtData = async () => {
+    if (marketMlBtData || fetchingMarketMlBt) return;
+    try {
+      setFetchingMarketMlBt(true);
+      const res = await supabaseFetch('/stock_ml_cache?model_type=eq.taiex_macro_bt&select=payload');
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          const payloadData = typeof rows[0].payload === 'string'
+            ? JSON.parse(rows[0].payload)
+            : rows[0].payload;
+          setMarketMlBtData(payloadData?.backtest_simulation || payloadData);
+        }
+      }
+    } catch (err) {
+      console.error('讀取回測詳細資料失敗', err);
+    } finally {
+      setFetchingMarketMlBt(false);
+    }
+  };
+
   const handleSelectMarketModel = (modelId) => {
     setMarketMlModelType(modelId);
     localStorage.setItem('market_ml_model_type', modelId);
@@ -2313,6 +2338,7 @@ function StockDashboard() {
     fetchScheduleSettings();
     fetchBacktestSettings();
     fetchActiveTasks();
+    fetchMarketMlData();
 
     // 1. 每秒碼表遞增
     const timerInterval = setInterval(() => {
@@ -2379,8 +2405,11 @@ function StockDashboard() {
       fetchLowFreqStatus();
     } else if (activeTab === 'market_ml') {
       fetchMarketMlData();
+      if (marketMlSubTab === 'backtest') {
+        fetchMarketMlBtData();
+      }
     }
-  }, [activeTab, mlModelType]);
+  }, [activeTab, mlModelType, marketMlSubTab]);
 
   const handleStockIdChange = (val) => {
     const cleaned = val.trim();
@@ -3077,7 +3106,13 @@ function StockDashboard() {
             <button
               key={t.id}
               className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
-              onClick={() => { setActiveTab(t.id); setData(null); setScraperStatus(''); setActiveDbTable(''); }}
+              onClick={() => {
+                setActiveTab(t.id);
+                try { localStorage.setItem('active_tab', t.id); } catch {}
+                setData(null);
+                setScraperStatus('');
+                setActiveDbTable('');
+              }}
               style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
               {t.label}
@@ -4932,6 +4967,7 @@ function StockDashboard() {
                 onClick={() => {
                   setMarketMlSubTab('backtest');
                   localStorage.setItem('market_ml_sub_tab', 'backtest');
+                  fetchMarketMlBtData();
                 }}
               >
                 <span>📊</span>
@@ -4989,24 +5025,27 @@ function StockDashboard() {
                     {/* 1.5 🎯 今日 AI 量化即時操作指示燈 (Today's Real-Time Action Directive) */}
                     {(() => {
                       // Long-Only: bearish => CASH (持現金)，不做空
+                      const rawAction = marketMlData?.current_action || marketMlData?.operations_6m?.current_action || {};
                       const _fbSignal = activePrediction?.signal;
-                      const _fbIsLong = _fbSignal === 'bullish' || _fbSignal === 'mild_bullish';
-                      const currentAction = marketMlData?.current_action || marketMlData?.operations_6m?.current_action || {
-                        action_code: _fbIsLong ? 'HOLD_LONG' : 'CASH',
-                        action_title: _fbIsLong ? '🟢 建議操作：多單續抱（持有多方部位）' : '🛡️ 建議操作：空手觀望 / 現金避險（持幣率 100%）',
-                        action_badge: _fbIsLong ? '🟢 多方持倉中 (Long 100%)' : '🛡️ 現金避險觀望 (Cash 100%)',
-                        action_summary: _fbIsLong
+                      const _fbIsLong = rawAction.stance?.includes('多') || (rawAction.position_size_pct !== undefined && rawAction.position_size_pct > 0) || rawAction.action_code?.includes('LONG') || rawAction.action_code === 'BUY' || _fbSignal === 'bullish' || _fbSignal === 'mild_bullish';
+                      const _fbIsShort = rawAction.stance?.includes('空') || rawAction.action_code?.includes('SHORT') || rawAction.action_code === 'SELL' || _fbSignal === 'bearish';
+
+                      const currentAction = {
+                        action_code: rawAction.action_code || (_fbIsLong ? 'HOLD_LONG' : (_fbIsShort ? 'HOLD_SHORT' : 'CASH')),
+                        action_title: rawAction.action_title || rawAction.signal_badge || (_fbIsLong ? '🟢 建議操作：多單續抱（持有多方部位）' : '🛡️ 建議操作：空手觀望 / 現金避險'),
+                        action_badge: rawAction.action_badge || rawAction.signal_badge || (_fbIsLong ? '🟢 多方持倉中 (Long 100%)' : '🛡️ 現金避險觀望 (Cash 100%)'),
+                        action_summary: rawAction.action_summary || rawAction.signal_desc || (_fbIsLong
                           ? '目前大盤多頭架構穩健，AI 20日勝率領先，建議 100% 多方部位續抱或逢回佈局。'
-                          : '目前大盤多空方向未見明顯共識突破或回檔風險升高，演算法嚴格執行資本保全原則，建議 100% 現金空手觀望，靜待下一次勝率跨越 45% 的波段買點出現！',
-                        position_size_pct: _fbIsLong ? 100 : 0,
-                        direction: _fbIsLong ? '多方 (Long)' : '空手觀望 (Cash)',
-                        stop_loss_pts: activePrediction?.support_pts || 46820,
-                        take_profit_pts: activePrediction?.resistance_pts || 47866,
-                        rationales: [
+                          : '目前大盤多空方向未見明顯共識突破或回檔風險升高，演算法嚴格執行資本保全原則，建議 100% 現金空手觀望，靜待下一次勝率跨越 45% 的波段買點出現！'),
+                        position_size_pct: rawAction.position_size_pct ?? (_fbIsLong ? 100 : 0),
+                        direction: rawAction.stance || rawAction.direction || (_fbIsLong ? '多方 (Long)' : '空手觀望 (Cash)'),
+                        stop_loss_pts: rawAction.stop_loss_pts || activePrediction?.support_pts || marketMlData.current_market?.ma20 || 47097,
+                        take_profit_pts: rawAction.take_profit_pts || activePrediction?.resistance_pts || ((marketMlData.current_market?.close || 48475) * 1.05) || 50000,
+                        rationales: rawAction.rationales || [
                           `AI 20日勝率判定：多方機率 ${activePrediction?.prob_up_20d || 50}% vs 空方機率 ${activePrediction?.prob_down_20d || 25}%`,
-                          `均線架構支撐：指數穩居 20MA 月線 (${activePrediction?.support_pts || 46820} 點) 之上`,
+                          `均線架構支撐：指數穩居 20MA 月線 (${Math.round(activePrediction?.support_pts || marketMlData.current_market?.ma20 || 47097).toLocaleString()} 點) 之上`,
                           '籌碼與流動性：外資期現貨與權值台積電維持正向推升力道',
-                          `風控執行守則：跌破 ${activePrediction?.support_pts || 46820} 點停損線立即平倉退回現金`
+                          `風控執行守則：跌破 ${Math.round(activePrediction?.support_pts || marketMlData.current_market?.ma20 || 47097).toLocaleString()} 點停損線立即平倉退回現金`
                         ]
                       };
 
@@ -5043,11 +5082,11 @@ function StockDashboard() {
                               <span style={{ fontSize: '1.4rem' }}>🎯</span>
                               <div>
                                 <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#F8FAFC', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                  <span>今日 AI 量化即時操作指示 (Today\'s Action Directive)</span>
+                                  <span>今日 AI 量化即時操作指示 (Today's Action Directive)</span>
                                 </h3>
-                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                                  依據當前選定【{marketMlData.model_name ? marketMlData.model_name.slice(0, 15) : 'AI 模型'}】推論與風控規則產出之具體交易行為
-                                </span>
+                                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                    依據當前選定【{activeModelInfo.name || MARKET_ML_MODELS.find(m => m.val === activeModelKey)?.label || marketMlData.model_name || 'AI 模型'}】推論與風控規則產出之具體交易行為
+                                  </span>
                               </div>
                             </div>
 
@@ -8263,7 +8302,7 @@ function StockDashboard() {
 
                 {/* ── 子視圖 3: 📊 歷年波段模擬回測績效 (Backtest) ── */}
                 {marketMlSubTab === 'backtest' && (() => {
-                  const bt = marketMlData?.backtest_simulation;
+                  const bt = marketMlBtData || marketMlData?.backtest_simulation;
                   if (!bt || (!bt.test_period && !bt.periods)) {
                     return (
                       <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--border-color)', color: 'var(--text-muted)' }}>
@@ -9198,6 +9237,14 @@ function StockDashboard() {
                               市場曝險比率: <span style={{ color: '#E2E8F0' }}>{activeModeData.market_exposure_pct?.toFixed(1)}%</span>
                             </div>
                           </div>
+                        </div>
+                      )}
+
+                      {curve.length === 0 && fetchingMarketMlBt && (
+                        <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'rgba(15, 23, 42, 0.7)', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                          <span className="loader" style={{ width: '22px', height: '22px', margin: '0 auto 0.75rem auto', display: 'block', borderColor: '#38BDF8', borderBottomColor: 'transparent' }}></span>
+                          <p style={{ margin: 0, color: '#38BDF8', fontSize: '0.95rem', fontWeight: 'bold' }}>正在載入完整多模型回測權益曲線與逐筆交易資料...</p>
+                          <p style={{ margin: '0.4rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>包含 10 年多模型各年度對照、歷史回撤與操作標記，請稍候 1~2 秒</p>
                         </div>
                       )}
 
