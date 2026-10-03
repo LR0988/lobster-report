@@ -6050,6 +6050,60 @@ function StockDashboard() {
                               <span>汽油: <strong style={{ color: '#E2E8F0' }}>${marketMlData.macro_snapshot.gasoline?.toFixed(2) || '3.31'}</strong></span>
                             </div>
                           </div>
+
+                          {/* 10. 那斯達克 & 標普 500 (Nasdaq / S&P 500) */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>那斯達克 & 標普 500</span>
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(59, 130, 246, 0.15)', color: '#93C5FD', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                美股大盤定價
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#38BDF8' }}>
+                                {marketMlData.macro_snapshot.nasdaq ? marketMlData.macro_snapshot.nasdaq.toLocaleString() : '27,190'}
+                                <span style={{ fontSize: '0.74rem', marginLeft: '0.35rem', color: (marketMlData.macro_snapshot.nasdaq_ret_20d || 0) >= 0 ? '#34D399' : '#F87171' }}>
+                                  ({(marketMlData.macro_snapshot.nasdaq_ret_20d || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.nasdaq_ret_20d?.toFixed(1)}%)
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>S&P 500: <strong style={{ color: '#F8FAFC' }}>{marketMlData.macro_snapshot.sp500?.toLocaleString() || '7,722'}</strong> ({marketMlData.macro_snapshot.sp500_ret_20d ? (marketMlData.macro_snapshot.sp500_ret_20d >= 0 ? '+' : '') + marketMlData.macro_snapshot.sp500_ret_20d.toFixed(1) + '%' : '+3.1%'})</span>
+                              <span>那/標比: <strong style={{ color: (marketMlData.macro_snapshot.nasdaq_sp500_ratio_chg20 || 0) >= 0 ? '#34D399' : '#F87171' }}>{(marketMlData.macro_snapshot.nasdaq_sp500_ratio_chg20 || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.nasdaq_sp500_ratio_chg20?.toFixed(2)}%</strong></span>
+                            </div>
+                          </div>
+
+                          {/* 11. 道瓊工業指數 & VT 全球股票 ETF */}
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                            borderRadius: '12px',
+                            padding: '0.85rem 1rem'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>道瓊工業 & VT 全球市場</span>
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(168, 85, 247, 0.15)', color: '#D8B4FE', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                全球系統流動性
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#C084FC' }}>
+                                {marketMlData.macro_snapshot.dow ? marketMlData.macro_snapshot.dow.toLocaleString() : '51,176'}
+                                <span style={{ fontSize: '0.74rem', marginLeft: '0.35rem', color: (marketMlData.macro_snapshot.dow_ret_20d || 0) >= 0 ? '#34D399' : '#F87171' }}>
+                                  ({(marketMlData.macro_snapshot.dow_ret_20d || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.dow_ret_20d?.toFixed(1)}%)
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>VT 全球: <strong style={{ color: '#F8FAFC' }}>${marketMlData.macro_snapshot.vt?.toFixed(2) || '159.13'}</strong> ({marketMlData.macro_snapshot.vt_ret_20d ? (marketMlData.macro_snapshot.vt_ret_20d >= 0 ? '+' : '') + marketMlData.macro_snapshot.vt_ret_20d.toFixed(1) + '%' : '+2.4%'})</span>
+                              <span>美/球比: <strong style={{ color: (marketMlData.macro_snapshot.sp500_vt_ratio_chg20 || 0) >= 0 ? '#34D399' : '#F87171' }}>{(marketMlData.macro_snapshot.sp500_vt_ratio_chg20 || 0) >= 0 ? '+' : ''}{marketMlData.macro_snapshot.sp500_vt_ratio_chg20?.toFixed(2)}%</strong></span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}

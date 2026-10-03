@@ -158,7 +158,13 @@ FEATURE_NAMES_ZH = {
     'copper_oil_ratio': '銅油比率 (實體景氣 vs 通膨成本)',
     'aluminum_ret_20d': 'COMEX 鋁期貨 20 日波段漲跌 (%)',
     'gasoline_ret_20d': 'RBOB 汽油期貨 20 日波段漲跌 (%)',
-    'crack_spread': '汽油/原油 1:1 煉油裂解價差 (USD/桶)'
+    'crack_spread': '汽油/原油 1:1 煉油裂解價差 (USD/桶)',
+    'nasdaq_ret_20d': '那斯達克綜合指數 20 日波段漲跌 (%)',
+    'sp500_ret_20d': '標普 500 指數 20 日波段漲跌 (%)',
+    'dow_ret_20d': '道瓊工業指數 20 日波段漲跌 (%)',
+    'vt_ret_20d': 'VT 全球股票 ETF 20 日波段漲跌 (%)',
+    'nasdaq_sp500_ratio_chg20': '科技vs大盤強弱度 (那指/標普 20日變動率 %)',
+    'sp500_vt_ratio_chg20': '美股vs全球配置強度 (標普/VT 20日變動率 %)'
 }
 
 MODEL_CATALOG = {
@@ -287,6 +293,7 @@ FEATURE_PRESETS = {
             'sox_rel_strength_20d', 'top3_weight_ret_5d', 'top3_ma20_resonance',
             'us10y_change_20d', 'sox_ret_20d', 'oil_ret_20d', 'usdtwd_ret_20d',
             'copper_ret_20d', 'copper_oil_ratio', 'aluminum_ret_20d', 'gasoline_ret_20d', 'crack_spread',
+            'nasdaq_ret_20d', 'sp500_ret_20d', 'dow_ret_20d', 'vt_ret_20d', 'nasdaq_sp500_ratio_chg20', 'sp500_vt_ratio_chg20',
             'tsm_adr_premium', 'tsm_adr_ret_20d', 'nvda_ret_20d', 'usdjpy_ret_20d',
             'foreign_futures_net', 'foreign_cash_net_5d', 'tsmc_ret_20d'
         ]
@@ -628,11 +635,11 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
         elif sid == '2454':
             mediatek_dict[d] = c
     
-    # 5. 載入國際宏觀指標 (macro_indicators: 美債10Y, 原油, 匯率, 費半, 台積電ADR, 輝達, 日圓)
+    # 5. 載入國際宏觀指標 (macro_indicators: 美債10Y, 原油, 匯率, 費半, 台積電ADR, 輝達, 日圓, 那指, 標普, 道瓊, VT)
     macro_dict = {}
     try:
         df_macro = pd.read_sql_query("""
-            SELECT date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, copper, aluminum, gasoline
+            SELECT date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, copper, aluminum, gasoline, nasdaq, sp500, dow, vt
             FROM macro_indicators
             ORDER BY date ASC
         """, conn)
@@ -651,6 +658,10 @@ def load_raw_data() -> Tuple[pd.DataFrame, Dict, Dict, Dict, Dict, Dict]:
                 'copper': float(r['copper']) if ('copper' in r and pd.notnull(r['copper'])) else None,
                 'aluminum': float(r['aluminum']) if ('aluminum' in r and pd.notnull(r['aluminum'])) else None,
                 'gasoline': float(r['gasoline']) if ('gasoline' in r and pd.notnull(r['gasoline'])) else None,
+                'nasdaq': float(r['nasdaq']) if ('nasdaq' in r and pd.notnull(r['nasdaq'])) else None,
+                'sp500': float(r['sp500']) if ('sp500' in r and pd.notnull(r['sp500'])) else None,
+                'dow': float(r['dow']) if ('dow' in r and pd.notnull(r['dow'])) else None,
+                'vt': float(r['vt']) if ('vt' in r and pd.notnull(r['vt'])) else None,
             }
     except Exception as e:
         print(f"[!] 載入 macro_indicators 失敗或數據表未建立: {e}")
@@ -914,7 +925,8 @@ def build_features() -> pd.DataFrame:
     last_macro_info = {
         'us10y': 4.0, 'oil_wti': 75.0, 'usdtwd': 31.0, 'sox': 4000.0, 'dxy': 100.0,
         'tsm_adr': 400.0, 'nvda': 200.0, 'usdjpy': 150.0, 'etf_0050': 100.0,
-        'copper': 4.0, 'aluminum': 2200.0, 'gasoline': 2.5
+        'copper': 4.0, 'aluminum': 2200.0, 'gasoline': 2.5,
+        'nasdaq': 16000.0, 'sp500': 5000.0, 'dow': 40000.0, 'vt': 110.0
     }
 
     for i in range(n):
@@ -1079,6 +1091,32 @@ def build_features() -> pd.DataFrame:
         gasoline_ret20 = round(float((gasoline_val / gasoline_prev20 - 1) * 100), 2) if gasoline_prev20 else 0.0
         crack_spread = round(float(gasoline_val * 42.0 - oil_val), 2) if oil_val else 0.0
 
+        # 美股三大指數與全球 ETF (Nasdaq, S&P 500, Dow Jones, VT)
+        nasdaq_val = m_info.get('nasdaq', 16000.0)
+        nasdaq_prev20 = m_prev20.get('nasdaq', nasdaq_val) if m_prev20.get('nasdaq') is not None else nasdaq_val
+        nasdaq_ret20 = round(float((nasdaq_val / nasdaq_prev20 - 1) * 100), 2) if nasdaq_prev20 else 0.0
+
+        sp500_val = m_info.get('sp500', 5000.0)
+        sp500_prev20 = m_prev20.get('sp500', sp500_val) if m_prev20.get('sp500') is not None else sp500_val
+        sp500_ret20 = round(float((sp500_val / sp500_prev20 - 1) * 100), 2) if sp500_prev20 else 0.0
+
+        dow_val = m_info.get('dow', 40000.0)
+        dow_prev20 = m_prev20.get('dow', dow_val) if m_prev20.get('dow') is not None else dow_val
+        dow_ret20 = round(float((dow_val / dow_prev20 - 1) * 100), 2) if dow_prev20 else 0.0
+
+        vt_val = m_info.get('vt', 110.0)
+        vt_prev20 = m_prev20.get('vt', vt_val) if m_prev20.get('vt') is not None else vt_val
+        vt_ret20 = round(float((vt_val / vt_prev20 - 1) * 100), 2) if vt_prev20 else 0.0
+
+        # 相對強弱比例 (Tech Risk-on / Global Allocation)
+        nasdaq_sp500_curr = (nasdaq_val / sp500_val) if (sp500_val and sp500_val > 0) else 1.0
+        nasdaq_sp500_prev = (nasdaq_prev20 / sp500_prev20) if (sp500_prev20 and sp500_prev20 > 0) else 1.0
+        nasdaq_sp500_ratio_chg20 = round(float((nasdaq_sp500_curr / nasdaq_sp500_prev - 1) * 100), 2) if nasdaq_sp500_prev else 0.0
+
+        sp500_vt_curr = (sp500_val / vt_val) if (vt_val and vt_val > 0) else 1.0
+        sp500_vt_prev = (sp500_prev20 / vt_prev20) if (vt_prev20 and vt_prev20 > 0) else 1.0
+        sp500_vt_ratio_chg20 = round(float((sp500_vt_curr / sp500_vt_prev - 1) * 100), 2) if sp500_vt_prev else 0.0
+
         # 台積電 ADR 溢價率計算 (1 ADR = 5 股普通股)
         adr_twd = (tsm_adr_val * usdtwd_val) / 5.0
         tsm_adr_prem = round(float((adr_twd / tsmc_c - 1) * 100), 2) if (tsmc_c and tsmc_c > 0) else 0.0
@@ -1182,6 +1220,12 @@ def build_features() -> pd.DataFrame:
             'aluminum_ret_20d': aluminum_ret20,
             'gasoline_ret_20d': gasoline_ret20,
             'crack_spread': crack_spread,
+            'nasdaq_ret_20d': nasdaq_ret20,
+            'sp500_ret_20d': sp500_ret20,
+            'dow_ret_20d': dow_ret20,
+            'vt_ret_20d': vt_ret20,
+            'nasdaq_sp500_ratio_chg20': nasdaq_sp500_ratio_chg20,
+            'sp500_vt_ratio_chg20': sp500_vt_ratio_chg20,
             # Snapshot raw references
             'us10y': us10y_val,
             'oil_wti': oil_val,
@@ -1194,6 +1238,10 @@ def build_features() -> pd.DataFrame:
             'copper': copper_val,
             'aluminum': aluminum_val,
             'gasoline': gasoline_val,
+            'nasdaq': nasdaq_val,
+            'sp500': sp500_val,
+            'dow': dow_val,
+            'vt': vt_val,
             'etf0050_close': m_info.get('etf_0050', 100.0),
             'tsmc_close': tsmc_c,
             'foxconn_close': foxconn_c,
@@ -4915,6 +4963,16 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'gasoline': round(float(latest_row.get('gasoline', 2.5)), 3) if 'gasoline' in latest_row else 2.5,
             'gasoline_ret_20d': round(float(latest_row.get('gasoline_ret_20d', 0)), 2),
             'crack_spread': round(float(latest_row.get('crack_spread', 20.0)), 2) if 'crack_spread' in latest_row else 20.0,
+            'nasdaq': round(float(latest_row.get('nasdaq', 18000.0)), 1) if 'nasdaq' in latest_row else 18000.0,
+            'nasdaq_ret_20d': round(float(latest_row.get('nasdaq_ret_20d', 0)), 2),
+            'sp500': round(float(latest_row.get('sp500', 5500.0)), 1) if 'sp500' in latest_row else 5500.0,
+            'sp500_ret_20d': round(float(latest_row.get('sp500_ret_20d', 0)), 2),
+            'dow': round(float(latest_row.get('dow', 42000.0)), 1) if 'dow' in latest_row else 42000.0,
+            'dow_ret_20d': round(float(latest_row.get('dow_ret_20d', 0)), 2),
+            'vt': round(float(latest_row.get('vt', 115.0)), 2) if 'vt' in latest_row else 115.0,
+            'vt_ret_20d': round(float(latest_row.get('vt_ret_20d', 0)), 2),
+            'nasdaq_sp500_ratio_chg20': round(float(latest_row.get('nasdaq_sp500_ratio_chg20', 0)), 2),
+            'sp500_vt_ratio_chg20': round(float(latest_row.get('sp500_vt_ratio_chg20', 0)), 2),
             'frac_diff_045': round(float(latest_row.get('frac_diff_045', 0)), 4) if 'frac_diff_045' in latest_row else 0.0,
             'amihud_illiq_20d': round(float(latest_row.get('amihud_illiq_20d', 0)), 6) if 'amihud_illiq_20d' in latest_row else 0.0,
             'hurst_60d': round(float(latest_row.get('hurst_60d', 0.5)), 3) if 'hurst_60d' in latest_row else 0.5,

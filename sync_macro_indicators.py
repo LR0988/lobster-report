@@ -39,6 +39,13 @@ MACRO_TICKERS = {
     'nvda': 'NVDA',        # 輝達 (USD)
     'usdjpy': 'JPY=X',     # 美元兌日圓 (JPY)
     'etf_0050': '0050.TW', # 元大台灣50 ETF (台幣，自動除權息還原)
+    'copper': 'HG=F',      # 紐約高級銅期貨 (USD/磅) - 實體經濟景氣博士
+    'aluminum': 'ALI=F',   # COMEX 鋁期貨 (USD/噸) - 工業與能源金屬
+    'gasoline': 'RB=F',    # RBOB 汽油期貨 (USD/加侖) - 終端消費通膨
+    'nasdaq': '^IXIC',     # 那斯達克綜合指數 (美股科技成長風向球)
+    'sp500': '^GSPC',      # 標普 500 指數 (美股大盤核心定價)
+    'dow': '^DJI',         # 道瓊工業指數 (美股傳產與藍籌價值)
+    'vt': 'VT',            # Vanguard 全球全世界股票 ETF (全球系統性流動性)
 }
 
 def get_db_connection():
@@ -66,7 +73,7 @@ def init_macro_table():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    for col in ['tsm_adr', 'nvda', 'usdjpy', 'etf_0050']:
+    for col in ['tsm_adr', 'nvda', 'usdjpy', 'etf_0050', 'copper', 'aluminum', 'gasoline', 'nasdaq', 'sp500', 'dow', 'vt']:
         try:
             cur.execute(f"ALTER TABLE macro_indicators ADD COLUMN {col} REAL")
         except sqlite3.OperationalError:
@@ -173,9 +180,17 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
         jpy = row.get("usdjpy") if pd.notnull(row.get("usdjpy")) else None
         etf0050 = row.get("etf_0050") if pd.notnull(row.get("etf_0050")) else None
         
+        copper = row.get("copper") if pd.notnull(row.get("copper")) else None
+        aluminum = row.get("aluminum") if pd.notnull(row.get("aluminum")) else None
+        gasoline = row.get("gasoline") if pd.notnull(row.get("gasoline")) else None
+        nasdaq = row.get("nasdaq") if pd.notnull(row.get("nasdaq")) else None
+        sp500 = row.get("sp500") if pd.notnull(row.get("sp500")) else None
+        dow = row.get("dow") if pd.notnull(row.get("dow")) else None
+        vt = row.get("vt") if pd.notnull(row.get("vt")) else None
+        
         cur.execute("""
-            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, copper, aluminum, gasoline, nasdaq, sp500, dow, vt, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(date) DO UPDATE SET
                 us10y = COALESCE(excluded.us10y, macro_indicators.us10y),
                 oil_wti = COALESCE(excluded.oil_wti, macro_indicators.oil_wti),
@@ -186,8 +201,15 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
                 nvda = COALESCE(excluded.nvda, macro_indicators.nvda),
                 usdjpy = COALESCE(excluded.usdjpy, macro_indicators.usdjpy),
                 etf_0050 = COALESCE(excluded.etf_0050, macro_indicators.etf_0050),
+                copper = COALESCE(excluded.copper, macro_indicators.copper),
+                aluminum = COALESCE(excluded.aluminum, macro_indicators.aluminum),
+                gasoline = COALESCE(excluded.gasoline, macro_indicators.gasoline),
+                nasdaq = COALESCE(excluded.nasdaq, macro_indicators.nasdaq),
+                sp500 = COALESCE(excluded.sp500, macro_indicators.sp500),
+                dow = COALESCE(excluded.dow, macro_indicators.dow),
+                vt = COALESCE(excluded.vt, macro_indicators.vt),
                 updated_at = excluded.updated_at
-        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, etf0050, now_str))
+        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, etf0050, copper, aluminum, gasoline, nasdaq, sp500, dow, vt, now_str))
         upsert_count += 1
         
     conn.commit()
