@@ -3539,7 +3539,7 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
     v_dates = valid_df['date'].astype(str)
     v_years = v_dates.str.slice(0, 4)
     
-    target_id = selected_model_id if selected_model_id else 'alpha_dynamic_convex'
+    target_id = selected_model_id if selected_model_id else 'wf_lightgbm'
     pipe_target = pipelines.get(target_id, pipelines.get('regime_moe', list(pipelines.values())[0]))
 
     # 預先取得或計算全歷史 Walk-Forward 滾動走步動態預測字典 (純樣本外 OOS，嚴格 purge=25 零偷看未來)
@@ -4127,7 +4127,7 @@ def simulate_single_model_backtest_with_reasons(df_slice: pd.DataFrame, pipe: Di
         'action_markers': action_markers
     }
 
-def build_operations_6m(df: Optional[pd.DataFrame] = None, models_bundle: Optional[Dict] = None, selected_model_id: str = 'regime_moe') -> Dict[str, Any]:
+def build_operations_6m(df: Optional[pd.DataFrame] = None, models_bundle: Optional[Dict] = None, selected_model_id: str = 'wf_lightgbm') -> Dict[str, Any]:
     """
     建構「近半年至今日」全模型實戰操作指引與逐筆交易日誌
     - 涵蓋 2026/03/01 至最新交易日
@@ -4727,13 +4727,12 @@ def train_and_evaluate_models(config: Optional[Dict[str, Any]] = None) -> Dict[s
     models_bundle['last_trained_at'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     # 尋找綜合評分最高之模型 (Best Model)
-    best_model_id = max(models_status.keys(), key=lambda k: models_status[k]['metrics'].get('composite_score', 0))
-    if 'walk_forward' in models_status and models_status['walk_forward']['metrics'].get('composite_score', 0) >= 60.0:
+    if 'wf_lightgbm' in models_status and models_status['wf_lightgbm']['metrics'].get('composite_score', 0) >= 60.0:
+        best_model_id = 'wf_lightgbm'
+    elif 'walk_forward' in models_status and models_status['walk_forward']['metrics'].get('composite_score', 0) >= 60.0:
         best_model_id = 'walk_forward'
-    elif 'regime_moe' in models_status and models_status['regime_moe']['metrics'].get('auc_up', 0) >= 62.0:
-        best_model_id = 'regime_moe'
-    elif 'ensemble' in models_status and models_status['ensemble']['metrics'].get('auc_up', 0) >= 65.0:
-        best_model_id = 'ensemble'
+    else:
+        best_model_id = max(models_status.keys(), key=lambda k: models_status[k]['metrics'].get('composite_score', 0))
     models_bundle['best_model_id'] = best_model_id
     
     joblib.dump(models_bundle, MODELS_BUNDLE_PATH)
@@ -4846,7 +4845,9 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
     except Exception as e:
         print(f"[!] 警告：構建 alpha_dynamic_convex models_status 失敗: {e}")
 
-    best_model_id = 'alpha_dynamic_convex'
+    best_model_id = models_bundle.get('best_model_id', 'wf_lightgbm')
+    if best_model_id not in models_status:
+        best_model_id = 'wf_lightgbm' if 'wf_lightgbm' in models_status else ('walk_forward' if 'walk_forward' in models_status else list(models_status.keys())[0])
     selected_id = selected_model_id or best_model_id
     if selected_id not in models_status and models_status:
         selected_id = list(models_status.keys())[0]

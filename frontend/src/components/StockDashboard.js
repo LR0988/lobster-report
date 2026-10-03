@@ -183,10 +183,9 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'alpha_dynamic_convex', label: '🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)', short: '🚀 凸性 1.75x 熔斷', tag: '🏆 跨週期全贏大盤', desc: '結合 AQR 波動率目標控制 (Vol-Targeting)、台積電解耦過濾與凸性趨勢倍增；超級多頭以 1.75x 複利飆升，破線破季線即時階梯防守，近 1年 (+108.1% vs 大盤 +89.5%)、近 10年 (+500.4% vs 大盤 +458.7%) 實現全週期雙贏大盤！' },
-  { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🛡️ 純樣本外金標', desc: '每 40 日納入最新數據滾動重訓，嚴格 25 日隔離零偷看未來，時間衰減加權與體制門控，100% 純樣本外 (OOS)' },
-  { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '🛡️ 純樣本外金標', desc: 'LightGBM 滾動增量訓練，結合嚴格 25 日 Embargo 隔離，捕捉最新籌碼結構與技術非線性特徵' },
-  { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
+  { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
+  { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
+  { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，納入美股四大盤，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
   { val: 'wf_rf', label: '🌳 漸進隨機森林 (WF-RandomForest)', short: '🌳 漸進森林', tag: '🛡️ 純樣本外金標', desc: '隨機森林滾動重訓，嚴格 25 日隔離，平滑極端噪聲並持續吸收最新宏觀格局' },
   { val: 'regime_moe', label: '🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)', short: '🏛️ 狀態 MoE', tag: '👑 前沿旗艦', desc: '依牛市擴張、熊市防禦與箱型震盪切成三段專家獨立訓練，結合時間衰減與二階段元標籤置信度過濾' },
   { val: 'ensemble', label: '👑 多模型融合集成 (Ensemble)', short: '👑 集成模型', tag: '🥇 綜合推薦首選', desc: '軟投票融合 LightGBM、隨機森林與高泛化羅吉斯迴歸，AUC 表現最佳' },
@@ -194,14 +193,15 @@ const MARKET_ML_MODELS = [
   { val: 'lr', label: '📏 Logistic Regression (線性基準)', short: '📏 羅吉斯迴歸', tag: '🎯 泛化穩定', desc: '宏觀全因子 L2 正則化羅吉斯迴歸，方向預測穩定度高、抗過擬合' },
   { val: 'rf', label: '🌳 Random Forest (隨機森林)', short: '🌳 隨機森林', tag: '🛡️ 穩健防禦', desc: '多決策樹 Bagging 集成，能有效平滑單一極端指標雜訊' },
   { val: 'xgboost', label: '🌲 XGBoost (經典量化)', short: '🌲 XGBoost', tag: '🔥 經典量化', desc: '華爾街與量化基金經典極限梯度提升，對波動急遽擴大有高敏感度' },
-  { val: 'mlp', label: '🕸️ MLP Neural Net (深度感知器)', short: '🕸️ MLP 類神經', tag: '🧠 深度網路', desc: '多層前饋神經網絡，透過深度隱藏層提煉宏觀多因子交互效應' }
+  { val: 'mlp', label: '🕸️ MLP Neural Net (深度感知器)', short: '🕸️ MLP 類神經', tag: '🧠 深度網路', desc: '多層前饋神經網絡，透過深度隱藏層提煉宏觀多因子交互效應' },
+  { val: 'alpha_dynamic_convex', label: '🚀 凸性趨勢倍增 (Convex Alpha 1.75x)', short: '🚀 凸性 1.75x', tag: '⚡ 槓桿放大模式', desc: '結合 AQR 波動率目標控制，以 1.75x 槓桿加速，破季線即時階梯防守' }
 ];
 
 const BUILTIN_MARKET_ML_PRESETS = [
   {
     id: 'all_factors',
-    name: '⚡ 宏觀全因子標準',
-    desc: '全歷史 10 年 2,400+ 天資料 + 50+ 維技術面、外資期貨、三大法人現貨、美債、費半、台積電 ADR 與學術因子',
+    name: '⚡ 宏觀全因子標準 (含美股四大盤)',
+    desc: '全歷史 20 年資料 + 98 維全因子：包含美股四大盤（那指、標普500、道瓊、VT）、科技/大盤比率、美債、費半、台積電 ADR 與籌碼全維度',
     trainDays: 0,
     presetKey: 'all_factors',
     testRatio: 0.2,
@@ -219,7 +219,7 @@ const BUILTIN_MARKET_ML_PRESETS = [
   {
     id: 'macro_intermarket',
     name: '🌐 宏觀跨市場多因子',
-    desc: '聚焦美債 10Y、費半半導體、台積電 ADR 溢價、輝達 NVDA、日圓 Carry Trade 與外資台指期主力留倉',
+    desc: '聚焦美股四大盤 (Nasdaq, S&P 500, Dow, VT)、科技大盤比率、美債 10Y、費半、台積電 ADR 溢價與外資主力留倉',
     trainDays: 0,
     presetKey: 'macro_intermarket',
     testRatio: 0.2,
@@ -718,8 +718,11 @@ function StockDashboard() {
   // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
   const [marketMlData, setMarketMlData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
-  const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
-  const [marketMlModelType, setMarketMlModelType] = useState(() => localStorage.getItem('market_ml_model_type') || 'alpha_dynamic_convex');
+  const [marketMlModelType, setMarketMlModelType] = useState(() => {
+    const saved = localStorage.getItem('market_ml_model_type');
+    if (!saved || saved === 'alpha_dynamic_convex') return 'wf_lightgbm';
+    return saved;
+  });
   const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
   const [marketMlSubTab, setMarketMlSubTab] = useState(() => localStorage.getItem('market_ml_sub_tab') || 'cockpit');
   const [marketMlPreset, setMarketMlPreset] = useState(() => localStorage.getItem('market_ml_preset') || 'all_factors');
