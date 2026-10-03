@@ -516,26 +516,6 @@ function StockDashboard() {
   const navigate = useNavigate();
   const [screeningStatus, setScreeningStatus] = useState('');
 
-  if (!user) {
-    return (
-      <div className="stock-auth-lock-card glass-panel" style={{ maxWidth: '600px', margin: '60px auto', textAlign: 'center', padding: '40px 20px' }}>
-        <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🔒</div>
-        <h2 style={{ fontSize: '1.8rem', color: '#F8FAFC', marginBottom: '12px' }}>智慧選股與量化分析系統</h2>
-        <p style={{ color: '#94A3B8', fontSize: '1rem', lineHeight: '1.6', marginBottom: '24px' }}>
-          本功能包含完整台股歷史資料庫、機器學習波段飆股預測與智慧選股篩選。<br />
-          <span style={{ color: '#F87171', fontWeight: 'bold' }}>⚠️ 本系統資料受保護，請先登入帳號後繼續瀏覽。</span>
-        </p>
-        <button 
-          onClick={() => navigate('/login')}
-          className="btn"
-          style={{ background: 'linear-gradient(135deg, #4F46E5, #06B6D4)', padding: '12px 28px', fontSize: '1.1rem', borderRadius: '8px', cursor: 'pointer', border: 'none', color: '#FFF' }}
-        >
-          🔐 前往登入 (hotpotlu)
-        </button>
-      </div>
-    );
-  }
-
   const [activeTab, setActiveTab] = useState('screener');
   const [activeDbTable, setActiveDbTable] = useState('');
   const [portfolioList, setPortfolioList] = useState([]);
@@ -718,6 +698,7 @@ function StockDashboard() {
   // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
   const [marketMlData, setMarketMlData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
+  const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
   const [marketMlModelType, setMarketMlModelType] = useState(() => {
     const saved = localStorage.getItem('market_ml_model_type');
     if (!saved || saved === 'alpha_dynamic_convex') return 'wf_lightgbm';
@@ -2327,6 +2308,7 @@ function StockDashboard() {
   }, [mlModelType]);
 
   React.useEffect(() => {
+    if (!user) return;
     fetchSettings();
     fetchScheduleSettings();
     fetchBacktestSettings();
@@ -2380,6 +2362,7 @@ function StockDashboard() {
   }, []);
 
   React.useEffect(() => {
+    if (!user) return;
     if (activeTab === 'portfolio') {
       fetchPortfolio();
     } else if (activeTab === 'ml') {
@@ -3049,6 +3032,26 @@ function StockDashboard() {
     const text = aiPrompt.replace('{stock_id}', stockId);
     navigator.clipboard.writeText(text);
   };
+
+  if (!user) {
+    return (
+      <div className="stock-auth-lock-card glass-panel" style={{ maxWidth: '600px', margin: '60px auto', textAlign: 'center', padding: '40px 20px' }}>
+        <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🔒</div>
+        <h2 style={{ fontSize: '1.8rem', color: '#F8FAFC', marginBottom: '12px' }}>智慧選股與量化分析系統</h2>
+        <p style={{ color: '#94A3B8', fontSize: '1rem', lineHeight: '1.6', marginBottom: '24px' }}>
+          本功能包含完整台股歷史資料庫、機器學習波段飆股預測與智慧選股篩選。<br />
+          <span style={{ color: '#F87171', fontWeight: 'bold' }}>⚠️ 本系統資料受保護，請先登入帳號後繼續瀏覽。</span>
+        </p>
+        <button 
+          onClick={() => navigate('/login')}
+          className="btn"
+          style={{ background: 'linear-gradient(135deg, #4F46E5, #06B6D4)', padding: '12px 28px', fontSize: '1.1rem', borderRadius: '8px', cursor: 'pointer', border: 'none', color: '#FFF' }}
+        >
+          🔐 前往登入 (hotpotlu)
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
