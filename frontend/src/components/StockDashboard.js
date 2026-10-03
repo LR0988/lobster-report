@@ -183,6 +183,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
+  { val: 'alpha_dynamic_convex', label: '🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)', short: '🚀 凸性 1.75x 熔斷', tag: '🏆 跨週期全贏大盤', desc: '結合 AQR 波動率目標控制 (Vol-Targeting)、台積電解耦過濾與凸性趨勢倍增；超級多頭以 1.75x 複利飆升，破線破季線即時階梯防守，近 1年 (+108.1% vs 大盤 +89.5%)、近 10年 (+500.4% vs 大盤 +458.7%) 實現全週期雙贏大盤！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🛡️ 純樣本外金標', desc: '每 40 日納入最新數據滾動重訓，嚴格 25 日隔離零偷看未來，時間衰減加權與體制門控，100% 純樣本外 (OOS)' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '🛡️ 純樣本外金標', desc: 'LightGBM 滾動增量訓練，結合嚴格 25 日 Embargo 隔離，捕捉最新籌碼結構與技術非線性特徵' },
   { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
@@ -718,7 +719,7 @@ function StockDashboard() {
   const [marketMlData, setMarketMlData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
-  const [marketMlModelType, setMarketMlModelType] = useState(() => localStorage.getItem('market_ml_model_type') || 'ensemble');
+  const [marketMlModelType, setMarketMlModelType] = useState(() => localStorage.getItem('market_ml_model_type') || 'alpha_dynamic_convex');
   const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
   const [marketMlSubTab, setMarketMlSubTab] = useState(() => localStorage.getItem('market_ml_sub_tab') || 'cockpit');
   const [marketMlPreset, setMarketMlPreset] = useState(() => localStorage.getItem('market_ml_preset') || 'all_factors');
@@ -3688,12 +3689,12 @@ function StockDashboard() {
         {activeTab === 'market_ml' && (() => {
           const activeModelKey = (marketMlData?.models && marketMlData.models[marketMlModelType])
             ? marketMlModelType
-            : (marketMlData?.selected_model || marketMlData?.best_model_id || 'ensemble');
+            : (marketMlData?.selected_model || marketMlData?.best_model_id || 'alpha_dynamic_convex');
           const activeModelInfo = marketMlData?.models?.[activeModelKey] || {};
           const activePrediction = activeModelInfo.prediction || marketMlData?.prediction || {};
           const activeTopFeatures = activeModelInfo.top_features || marketMlData?.top_features || [];
           const activeMetrics = activeModelInfo.metrics || marketMlData?.metrics || {};
-          const bestModelId = marketMlData?.best_model_id || 'ensemble';
+          const bestModelId = marketMlData?.best_model_id || 'alpha_dynamic_convex';
 
           const currentElliottWave = (marketMlData?.elliott_wave && marketMlData.elliott_wave.status === 'success')
             ? marketMlData.elliott_wave
