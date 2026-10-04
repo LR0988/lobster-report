@@ -2995,7 +2995,7 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
         'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
         'benchmark_sharpe': round(float(b_sharpe), 2),
         'curve': curve,
-        'trades': sub_trades[-20:],
+        'trades': sub_trades,
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),

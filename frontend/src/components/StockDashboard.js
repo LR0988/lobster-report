@@ -738,6 +738,7 @@ function StockDashboard() {
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode_v2') || 'long_only');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
   const [operationsSortOrder, setOperationsSortOrder] = useState('desc');
+  const [backtestTradeFilter, setBacktestTradeFilter] = useState('all');
   const [elliottBtMode, setElliottBtMode] = useState(() => localStorage.getItem('elliott_bt_mode') || 'long_only');
   const [elliottBtPeriod, setElliottBtPeriod] = useState(() => localStorage.getItem('elliott_bt_period') || '10y');
   const [marketMlAutoTune, setMarketMlAutoTune] = useState(() => localStorage.getItem('market_ml_auto_tune') !== 'false');
@@ -9748,78 +9749,195 @@ function StockDashboard() {
                       })()}
 
                       {/* 6. 模擬交易日誌明細 (Recent Closed Trades Log) */}
-                      <div style={{
-                        background: 'rgba(15, 23, 42, 0.75)',
-                        borderRadius: '12px',
-                        border: '1px solid var(--border-color)',
-                        padding: '1.25rem',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                          <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <span>📜</span>
-                            <span>【{activePeriodData?.name || '選定區間'}】模擬波段交易明細 (共 {trades.length} 筆)</span>
-                          </h4>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            每次進場均嚴格扣除 0.05% 摩擦成本
-                          </span>
-                        </div>
+                      {(() => {
+                        const hasStockDetail = trades.some(t => t.stock_name || t.stock_id);
+                        const filteredTrades = trades.filter(t => {
+                          if (backtestTradeFilter === 'win') return (t.return_pct || 0) > 0;
+                          if (backtestTradeFilter === 'loss') return (t.return_pct || 0) <= 0;
+                          return true;
+                        });
+                        const winCount = trades.filter(t => (t.return_pct || 0) > 0).length;
+                        const lossCount = trades.filter(t => (t.return_pct || 0) <= 0).length;
 
-                        {trades.length === 0 ? (
-                          <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            此選定區間內無已平倉之交易紀錄（部位可能長期持有中或跨區間未平倉）。
-                          </div>
-                        ) : (
-                          <div style={{ overflowX: 'auto' }}>
-                            <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
-                              <thead>
-                                <tr style={{ background: 'rgba(30, 41, 59, 0.8)', color: '#CBD5E1' }}>
-                                  <th>進場日期</th>
-                                  <th>操作方向</th>
-                                  <th>進場點位</th>
-                                  <th>出場日期</th>
-                                  <th>出場點位</th>
-                                  <th>持有天數</th>
-                                  <th>單筆淨報酬率</th>
-                                  <th>損益金額 (NT$)</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {trades.map((t, idx) => {
-                                  const isWin = (t.return_pct || 0) >= 0;
-                                  return (
-                                    <tr key={idx} style={{ background: idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent' }}>
-                                      <td>{formatDateStr(t.entry_date)}</td>
-                                      <td>
-                                        <span style={{
-                                          padding: '0.15rem 0.45rem',
-                                          borderRadius: '4px',
-                                          fontSize: '0.74rem',
-                                          fontWeight: 'bold',
-                                          background: t.direction?.includes('多') ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                          color: t.direction?.includes('多') ? '#6EE7B7' : '#FCA5A5'
-                                        }}>
-                                          {t.direction}
-                                        </span>
-                                      </td>
-                                      <td style={{ fontFamily: 'monospace' }}>{t.entry_price ? t.entry_price.toLocaleString() : '--'}</td>
-                                      <td>{formatDateStr(t.exit_date)}</td>
-                                      <td style={{ fontFamily: 'monospace' }}>{t.exit_price ? t.exit_price.toLocaleString() : '--'}</td>
-                                      <td>{t.holding_days} 天</td>
-                                      <td style={{ fontWeight: 'bold', color: isWin ? '#34D399' : '#F87171' }}>
-                                        {isWin ? '+' : ''}{t.return_pct?.toFixed(2)}%
-                                      </td>
-                                      <td style={{ fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
-                                        {t.profit_amount ? (t.profit_amount >= 0 ? `+${Math.round(t.profit_amount).toLocaleString()}` : Math.round(t.profit_amount).toLocaleString()) : '--'}
-                                      </td>
+                        const handleExportCsv = () => {
+                          const headers = hasStockDetail
+                            ? ['標的名稱', '股票代號', '配置角色', '進場日期', '進場價位', '出場日期', '出場價位', '持有天數', '單筆淨報酬率(%)', '出場原因']
+                            : ['進場日期', '操作方向', '進場點位', '出場日期', '出場點位', '持有天數', '單筆淨報酬率(%)', '損益金額(NT$)'];
+                          const rows = trades.map(t => hasStockDetail
+                            ? [
+                                t.stock_name || '加權指數',
+                                t.stock_id || '--',
+                                t.role || t.direction || '多方 (Long)',
+                                t.entry_date,
+                                t.entry_price || '',
+                                t.exit_date,
+                                t.exit_price || '',
+                                t.holding_days || 0,
+                                (t.return_pct || 0).toFixed(2),
+                                t.exit_reason || '--'
+                              ]
+                            : [
+                                t.entry_date,
+                                t.direction || '多方',
+                                t.entry_price || '',
+                                t.exit_date,
+                                t.exit_price || '',
+                                t.holding_days || 0,
+                                (t.return_pct || 0).toFixed(2),
+                                t.profit_amount ? Math.round(t.profit_amount) : 0
+                              ]
+                          );
+                          const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
+                          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                          const url = URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.setAttribute('href', url);
+                          link.setAttribute('download', `${activeModelKey}_trades_${activePeriodKey}.csv`);
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        };
+
+                        return (
+                          <div style={{
+                            background: 'rgba(15, 23, 42, 0.75)',
+                            borderRadius: '12px',
+                            border: '1px solid var(--border-color)',
+                            padding: '1.25rem',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                              <div>
+                                <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <span>📜</span>
+                                  <span>【{activePeriodData?.name || '選定區間'}】逐筆模擬交易明細 (共 {trades.length} 筆)</span>
+                                </h4>
+                                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                                  {hasStockDetail
+                                    ? '👑 泰坦王權動態推舉個股 (50% 泰坦 + 25% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
+                                    : '大盤指數模擬交易，每次進出場扣除 0.05% 摩擦成本'}
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-color)' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setBacktestTradeFilter('all')}
+                                    style={{
+                                      padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                                      background: backtestTradeFilter === 'all' ? '#2563EB' : 'transparent',
+                                      color: backtestTradeFilter === 'all' ? 'white' : 'var(--text-muted)'
+                                    }}
+                                  >
+                                    全部 ({trades.length})
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setBacktestTradeFilter('win')}
+                                    style={{
+                                      padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                                      background: backtestTradeFilter === 'win' ? '#059669' : 'transparent',
+                                      color: backtestTradeFilter === 'win' ? 'white' : 'var(--text-muted)'
+                                    }}
+                                  >
+                                    🟢 獲利 ({winCount})
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setBacktestTradeFilter('loss')}
+                                    style={{
+                                      padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                                      background: backtestTradeFilter === 'loss' ? '#DC2626' : 'transparent',
+                                      color: backtestTradeFilter === 'loss' ? 'white' : 'var(--text-muted)'
+                                    }}
+                                  >
+                                    🔴 虧損/停損 ({lossCount})
+                                  </button>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="btn"
+                                  onClick={handleExportCsv}
+                                  style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid #3B82F6', color: '#93C5FD' }}
+                                  title="匯出此區間內所有逐筆買賣交易紀錄成 CSV 檔案"
+                                >
+                                  📥 下載 CSV 明細
+                                </button>
+                              </div>
+                            </div>
+
+                            {trades.length === 0 ? (
+                              <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                此選定區間內無已平倉之交易紀錄（部位可能長期持有中或處於現金防守期）。
+                              </div>
+                            ) : (
+                              <div style={{ overflowX: 'auto', maxHeight: '520px', overflowY: 'auto' }}>
+                                <table className="analysis-table" style={{ width: '100%', fontSize: '0.78rem', textAlign: 'center' }}>
+                                  <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+                                    <tr style={{ background: '#1E293B', color: '#CBD5E1' }}>
+                                      {hasStockDetail && <th>標的股票</th>}
+                                      {hasStockDetail && <th>配置角色</th>}
+                                      <th>進場日期</th>
+                                      <th>進場價位</th>
+                                      <th>出場日期</th>
+                                      <th>出場價位</th>
+                                      <th>持有天數</th>
+                                      <th>單筆報酬率</th>
+                                      {hasStockDetail ? <th>出場原因 / 風控機制</th> : <th>損益金額 (NT$)</th>}
                                     </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
+                                  </thead>
+                                  <tbody>
+                                    {filteredTrades.map((t, idx) => {
+                                      const isWin = (t.return_pct || 0) >= 0;
+                                      return (
+                                        <tr key={idx} style={{ background: idx % 2 === 0 ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.02)' }}>
+                                          {hasStockDetail && (
+                                            <td style={{ fontWeight: 'bold', color: '#FDE68A' }}>
+                                              {t.stock_name} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>({t.stock_id})</span>
+                                            </td>
+                                          )}
+                                          {hasStockDetail && (
+                                            <td>
+                                              <span style={{
+                                                padding: '0.12rem 0.4rem',
+                                                borderRadius: '4px',
+                                                fontSize: '0.72rem',
+                                                fontWeight: 'bold',
+                                                background: t.role?.includes('王者') ? 'rgba(245, 158, 11, 0.2)' : 'rgba(14, 165, 233, 0.2)',
+                                                color: t.role?.includes('王者') ? '#FBBF24' : '#38BDF8',
+                                                border: t.role?.includes('王者') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(14, 165, 233, 0.4)'
+                                              }}>
+                                                {t.role || t.direction || '多方'}
+                                              </span>
+                                            </td>
+                                          )}
+                                          <td>{formatDateStr(t.entry_date)}</td>
+                                          <td style={{ fontFamily: 'monospace' }}>{t.entry_price ? t.entry_price.toLocaleString() : '--'}</td>
+                                          <td>{formatDateStr(t.exit_date)}</td>
+                                          <td style={{ fontFamily: 'monospace' }}>{t.exit_price ? t.exit_price.toLocaleString() : '--'}</td>
+                                          <td>{t.holding_days} 天</td>
+                                          <td style={{ fontWeight: 'bold', color: isWin ? '#34D399' : '#F87171' }}>
+                                            {isWin ? '+' : ''}{t.return_pct?.toFixed(2)}%
+                                          </td>
+                                          {hasStockDetail ? (
+                                            <td style={{ textAlign: 'left', fontSize: '0.74rem', color: t.exit_reason?.includes('停損') ? '#FCA5A5' : '#94A3B8' }}>
+                                              {t.exit_reason || '--'}
+                                            </td>
+                                          ) : (
+                                            <td style={{ fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
+                                              {t.profit_amount ? (t.profit_amount >= 0 ? `+${Math.round(t.profit_amount).toLocaleString()}` : Math.round(t.profit_amount).toLocaleString()) : '--'}
+                                            </td>
+                                          )}
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        );
+                      })()}
                     </div>
                   );
                 })()}
