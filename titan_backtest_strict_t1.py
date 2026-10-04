@@ -71,9 +71,9 @@ def run_titan_strict_t1():
     ''', conn, params=sids)
     conn.close()
     
-    price_pivot = df_px.pivot(index='date', columns='stock_id', values='closing_price').sort_index()
-    value_pivot = df_px.pivot(index='date', columns='stock_id', values='trade_value').sort_index()
-    pe_pivot = df_px.pivot(index='date', columns='stock_id', values='pe_ratio').sort_index()
+    price_pivot = df_px.pivot(index='date', columns='stock_id', values='closing_price').sort_index().ffill()
+    value_pivot = df_px.pivot(index='date', columns='stock_id', values='trade_value').sort_index().fillna(0)
+    pe_pivot = df_px.pivot(index='date', columns='stock_id', values='pe_ratio').sort_index().ffill()
     
     df_inst['inst_net'] = df_inst['foreign_net'].fillna(0) + df_inst['trust_net'].fillna(0)
     inst_pivot = df_inst.pivot(index='date', columns='stock_id', values='inst_net').fillna(0).sort_index()
@@ -81,12 +81,12 @@ def run_titan_strict_t1():
     
     all_dates = [d for d in price_pivot.index if d >= '20160104']
     
-    ma60_pivot = price_pivot.rolling(60).mean()
-    ret_120 = price_pivot.pct_change(120)
-    ret_250 = price_pivot.pct_change(250)
-    taiex_ret120 = df_taiex['close'].pct_change(120)
-    rolling_turnover_60 = value_pivot.rolling(60).mean()
-    rolling_inst_60 = inst_pivot.rolling(60).sum()
+    ma60_pivot = price_pivot.rolling(60, min_periods=20).mean()
+    ret_120 = price_pivot.pct_change(120, fill_method=None)
+    ret_250 = price_pivot.pct_change(250, fill_method=None)
+    taiex_ret120 = df_taiex['close'].pct_change(120, fill_method=None)
+    rolling_turnover_60 = value_pivot.rolling(60, min_periods=20).mean()
+    rolling_inst_60 = inst_pivot.rolling(60, min_periods=20).sum()
     
     rebalance_freq = 20  # 每 20 交易日重新產生目標倉位
     portfolio_equity = 1000000.0
