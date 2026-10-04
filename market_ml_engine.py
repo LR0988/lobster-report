@@ -2119,7 +2119,7 @@ def simulate_elliott_wave_backtest(df_slice: pd.DataFrame, mode: str = 'long_sho
         'benchmark_sharpe': round(float(b_sharpe), 2),
         'yearly': yearly,
         'curve': curve,
-        'trades': trades[-20:],
+        'trades': trades,
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),
@@ -2453,7 +2453,7 @@ def simulate_walk_forward_backtest(df_slice: pd.DataFrame, wf_dict: Dict[str, Di
         'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
         'benchmark_sharpe': round(float(b_sharpe), 2),
         'curve': curve,
-        'trades': trades[-20:],
+        'trades': trades,
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),
@@ -2742,7 +2742,7 @@ def simulate_alpha_dynamic_convex_backtest(df_slice: pd.DataFrame, pipe: Optiona
         'benchmark_max_drawdown_pct': round(float(b_mdd), 2),
         'benchmark_sharpe': round(float(b_sharpe), 2),
         'curve': curve,
-        'trades': trades[-20:],
+        'trades': trades,
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),
@@ -2932,9 +2932,13 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
                     'reason': '🛡️ 衛星個股跌破季線停損，保留核心王者泰坦'
                 })
 
-    sub_trades = [t for t in all_trades if t.get('entry_date') >= dates[0] and t.get('entry_date') <= dates[-1]]
-    if not sub_trades and all_trades:
-        sub_trades = all_trades[-20:]
+    d_start = str(dates[0]).replace('-', '').replace('/', '')
+    d_end = str(dates[-1]).replace('-', '').replace('/', '')
+    sub_trades = [
+        t for t in all_trades 
+        if str(t.get('entry_date', '')).replace('-', '').replace('/', '') >= d_start 
+        and str(t.get('entry_date', '')).replace('-', '').replace('/', '') <= d_end
+    ]
     wins = [t for t in sub_trades if t.get('return_pct', 0) > 0]
     losses = [t for t in sub_trades if t.get('return_pct', 0) <= 0]
     win_rate = round(float(len(wins) / len(sub_trades) * 100.0), 1) if len(sub_trades) > 0 else 68.2
@@ -2996,6 +3000,7 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
         'benchmark_sharpe': round(float(b_sharpe), 2),
         'curve': curve,
         'trades': sub_trades,
+        'all_trades': all_trades,
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),
@@ -3759,7 +3764,7 @@ def simulate_single_model_backtest(df_slice: pd.DataFrame, pipe: Dict, feature_c
         'profit_factor': round(float(profit_factor), 2),
         'market_exposure_pct': round(float(np.mean(positions != 0) * 100), 1),
         'yearly': yearly,
-        'trades': trades[-20:],
+        'trades': trades,
         'curve': curve,
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
@@ -3989,7 +3994,8 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'name': titan_cat['name'],
             'short_name': titan_cat['short_name'],
             'long_short': titan_ls,
-            'long_only': titan_lo
+            'long_only': titan_lo,
+            'all_trades': titan_lo.get('all_trades', [])
         }
         comp_ls.append({
             'model_id': 'titan_sovereign', 'name': titan_cat['name'], 'short_name': titan_cat['short_name'],
@@ -4054,6 +4060,7 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
         'available_years': sorted(list(set(v_years.unique()))),
         'periods': periods_data,
         'test_period': oos_data,
+        'all_titan_trades': periods_data.get('20y', {}).get('models_detail', {}).get('titan_sovereign', {}).get('all_trades', []),
         'full_history_10y': {
             'start_date': str(df_10y.iloc[0]['date']),
             'end_date': str(df_10y.iloc[-1]['date']),

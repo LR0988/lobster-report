@@ -739,6 +739,7 @@ function StockDashboard() {
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
   const [operationsSortOrder, setOperationsSortOrder] = useState('desc');
   const [backtestTradeFilter, setBacktestTradeFilter] = useState('all');
+  const [backtestTradeScope, setBacktestTradeScope] = useState('period'); // 'period' | 'all'
   const [elliottBtMode, setElliottBtMode] = useState(() => localStorage.getItem('elliott_bt_mode') || 'long_only');
   const [elliottBtPeriod, setElliottBtPeriod] = useState(() => localStorage.getItem('elliott_bt_period') || '10y');
   const [marketMlAutoTune, setMarketMlAutoTune] = useState(() => localStorage.getItem('market_ml_auto_tune') !== 'false');
@@ -9750,20 +9751,32 @@ function StockDashboard() {
 
                       {/* 6. 模擬交易日誌明細 (Recent Closed Trades Log) */}
                       {(() => {
-                        const hasStockDetail = trades.some(t => t.stock_name || t.stock_id);
-                        const filteredTrades = trades.filter(t => {
+                        const allAvailableTrades = (
+                          activeModeData?.all_trades || 
+                          selectedModelDetail?.all_trades || 
+                          bt.all_titan_trades || 
+                          bt.periods?.['20y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
+                          bt.periods?.['10y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
+                          []
+                        );
+                        const canToggleScope = allAvailableTrades.length > 0 && allAvailableTrades.length !== trades.length;
+                        const currentScope = (backtestTradeScope === 'all' && allAvailableTrades.length > 0) ? 'all' : 'period';
+                        const displayedTrades = currentScope === 'all' ? allAvailableTrades : trades;
+
+                        const hasStockDetail = displayedTrades.some(t => t.stock_name || t.stock_id);
+                        const filteredTrades = displayedTrades.filter(t => {
                           if (backtestTradeFilter === 'win') return (t.return_pct || 0) > 0;
                           if (backtestTradeFilter === 'loss') return (t.return_pct || 0) <= 0;
                           return true;
                         });
-                        const winCount = trades.filter(t => (t.return_pct || 0) > 0).length;
-                        const lossCount = trades.filter(t => (t.return_pct || 0) <= 0).length;
+                        const winCount = displayedTrades.filter(t => (t.return_pct || 0) > 0).length;
+                        const lossCount = displayedTrades.filter(t => (t.return_pct || 0) <= 0).length;
 
                         const handleExportCsv = () => {
                           const headers = hasStockDetail
                             ? ['標的名稱', '股票代號', '配置角色', '進場日期', '進場價位', '出場日期', '出場價位', '持有天數', '單筆淨報酬率(%)', '出場原因']
                             : ['進場日期', '操作方向', '進場點位', '出場日期', '出場點位', '持有天數', '單筆淨報酬率(%)', '損益金額(NT$)'];
-                          const rows = trades.map(t => hasStockDetail
+                          const rows = displayedTrades.map(t => hasStockDetail
                             ? [
                                 t.stock_name || '加權指數',
                                 t.stock_id || '--',
@@ -9792,7 +9805,7 @@ function StockDashboard() {
                           const url = URL.createObjectURL(blob);
                           const link = document.createElement('a');
                           link.setAttribute('href', url);
-                          link.setAttribute('download', `${activeModelKey}_trades_${activePeriodKey}.csv`);
+                          link.setAttribute('download', `${activeModelKey}_trades_${currentScope === 'all' ? 'all_history' : activePeriodKey}.csv`);
                           document.body.appendChild(link);
                           link.click();
                           document.body.removeChild(link);
@@ -9808,28 +9821,77 @@ function StockDashboard() {
                           }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
                               <div>
-                                <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                  <span>📜</span>
-                                  <span>【{activePeriodData?.name || '選定區間'}】逐筆模擬交易明細 (共 {trades.length} 筆)</span>
+                                <h4 style={{ margin: 0, fontSize: '0.95rem', color: currentScope === 'all' ? '#FBBF24' : '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                  <span>{currentScope === 'all' ? '👑' : '📜'}</span>
+                                  <span>
+                                    {currentScope === 'all'
+                                      ? `【${activeModelMeta.name || '模型'} 全歷史紀錄】逐筆模擬交易明細 (共 ${displayedTrades.length} 筆)`
+                                      : `【${activePeriodData?.name || '選定區間'}】逐筆模擬交易明細 (共 ${displayedTrades.length} 筆)`}
+                                  </span>
                                 </h4>
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                                   {hasStockDetail
                                     ? '👑 泰坦王權動態推舉個股 (50% 泰坦 + 25% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
                                     : '大盤指數模擬交易，每次進出場扣除 0.05% 摩擦成本'}
+                                  {currentScope === 'all' && (
+                                    <span style={{ color: '#FCD34D', marginLeft: '0.4rem' }}>• 🔍 正在直接瀏覽全歷史完整明細清單</span>
+                                  )}
                                 </div>
                               </div>
+
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                {/* 區間 vs 全歷史 切換按鈕 */}
+                                {canToggleScope && (
+                                  <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => setBacktestTradeScope('period')}
+                                      style={{
+                                        padding: '0.2rem 0.65rem',
+                                        fontSize: '0.75rem',
+                                        borderRadius: '4px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontWeight: currentScope === 'period' ? 'bold' : 'normal',
+                                        background: currentScope === 'period' ? '#2563EB' : 'transparent',
+                                        color: currentScope === 'period' ? 'white' : 'var(--text-muted)'
+                                      }}
+                                      title="僅檢視上方選定時間區間內的交易紀錄"
+                                    >
+                                      📍 當前區間 ({trades.length})
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setBacktestTradeScope('all')}
+                                      style={{
+                                        padding: '0.2rem 0.65rem',
+                                        fontSize: '0.75rem',
+                                        borderRadius: '4px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontWeight: currentScope === 'all' ? 'bold' : 'normal',
+                                        background: currentScope === 'all' ? '#D97706' : 'transparent',
+                                        color: currentScope === 'all' ? 'white' : 'var(--text-muted)'
+                                      }}
+                                      title="直接在畫面上切換檢視全歷史所有交易紀錄（無需下載 CSV）"
+                                    >
+                                      👑 全歷史明細 ({allAvailableTrades.length})
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* 獲利 / 虧損 篩選標籤 */}
                                 <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-color)' }}>
                                   <button
                                     type="button"
                                     onClick={() => setBacktestTradeFilter('all')}
                                     style={{
                                       padding: '0.2rem 0.6rem', fontSize: '0.75rem', borderRadius: '4px', border: 'none', cursor: 'pointer',
-                                      background: backtestTradeFilter === 'all' ? '#2563EB' : 'transparent',
+                                      background: backtestTradeFilter === 'all' ? '#3B82F6' : 'transparent',
                                       color: backtestTradeFilter === 'all' ? 'white' : 'var(--text-muted)'
                                     }}
                                   >
-                                    全部 ({trades.length})
+                                    全部 ({displayedTrades.length})
                                   </button>
                                   <button
                                     type="button"
@@ -9859,14 +9921,14 @@ function StockDashboard() {
                                   className="btn"
                                   onClick={handleExportCsv}
                                   style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid #3B82F6', color: '#93C5FD' }}
-                                  title="匯出此區間內所有逐筆買賣交易紀錄成 CSV 檔案"
+                                  title="匯出此清單所有逐筆買賣交易紀錄成 CSV 檔案"
                                 >
                                   📥 下載 CSV 明細
                                 </button>
                               </div>
                             </div>
 
-                            {trades.length === 0 ? (
+                            {displayedTrades.length === 0 ? (
                               <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                                 此選定區間內無已平倉之交易紀錄（部位可能長期持有中或處於現金防守期）。
                               </div>
