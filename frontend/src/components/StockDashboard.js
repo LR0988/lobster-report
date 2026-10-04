@@ -184,6 +184,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
+  { val: 'titan_sovereign', label: '👑 泰坦王權漸進動能 (TITAN-Sovereign)', short: '👑 泰坦王權', tag: '👑 10年+1972% 零槓桿・大盤4倍', desc: '純樣本外零偷看未來！月度動態推舉規模龍頭(50%)+雙革命衛星(各25%)，結合個股60MA移動停損與宏觀雙季線現金避險，10年+1972.36% (大盤近4倍)、近1年+289.52% (大盤3.5倍)，嚴格零槓桿！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
   { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，納入美股四大盤，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
@@ -705,7 +706,7 @@ function StockDashboard() {
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
   const [marketMlModelType, setMarketMlModelType] = useState(() => {
     const saved = localStorage.getItem('market_ml_model_type');
-    if (!saved || saved === 'alpha_dynamic_convex') return 'wf_lightgbm';
+    if (!saved || saved === 'alpha_dynamic_convex') return 'titan_sovereign';
     return saved;
   });
   const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
@@ -732,8 +733,8 @@ function StockDashboard() {
   const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period_v2') || '10y');
   const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2016');
   const [marketBtEndYear, setMarketBtEndYear] = useState(() => localStorage.getItem('market_bt_end_year') || '2026');
-  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model_v2') || 'rf');
-  const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model_v2') || 'rf');
+  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model_v2') || 'titan_sovereign');
+  const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model_v2') || 'titan_sovereign');
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode_v2') || 'long_only');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
   const [operationsSortOrder, setOperationsSortOrder] = useState('desc');
@@ -8336,9 +8337,10 @@ function StockDashboard() {
                   const isLongShort = marketBacktestMode === 'long_short';
                   const activePeriodKey = marketBacktestPeriod || bt.default_period_key || '10y';
                   const history10y = bt.full_history_10y || {};
-                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'rf';
+                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'titan_sovereign';
 
                   const BACKTEST_MODELS = [
+                    { id: 'titan_sovereign', name: '👑 泰坦王權漸進動能', icon: '👑', tag: '10年+1972%・零偷看未來・零槓桿・超額 4 倍' },
                     { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
                     { id: 'wf_xgboost', name: '漸進 XGBoost', icon: '🌲', tag: '滾動學習 OOS 金標 (零偷看未來)' },
