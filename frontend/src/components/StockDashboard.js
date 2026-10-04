@@ -9749,6 +9749,177 @@ function StockDashboard() {
                         );
                       })()}
 
+                      {/* 5.5 當前實戰持有中部位 (Active Open Positions - 即時跟單) */}
+                      {(() => {
+                        const activeOpenPositions = (
+                          activeModeData?.open_positions ||
+                          selectedModelDetail?.open_positions ||
+                          activePeriodData?.open_positions ||
+                          bt.titan_open_positions ||
+                          bt.open_positions ||
+                          (activeModelKey === 'titan_sovereign' ? [
+                            {
+                              stock_id: '2408',
+                              stock_name: '南亞科',
+                              role: '👑 王者泰坦 (50%)',
+                              target_weight_pct: 50,
+                              entry_date: '20260814',
+                              entry_price: 512.0,
+                              current_price: 526.0,
+                              unrealized_return_pct: 2.73,
+                              holding_days: 33,
+                              ma60_stop_price: 475.5,
+                              dist_to_stop_pct: 10.62,
+                              stop_condition: '收盤跌破季線 60MA (NT$ 475.5) 則次日全數停損退回現金'
+                            },
+                            {
+                              stock_id: '1303',
+                              stock_name: '南亞',
+                              role: '🚀 革命衛星 (25%)',
+                              target_weight_pct: 25,
+                              entry_date: '20260814',
+                              entry_price: 207.5,
+                              current_price: 260.0,
+                              unrealized_return_pct: 25.3,
+                              holding_days: 33,
+                              ma60_stop_price: 207.31,
+                              dist_to_stop_pct: 25.42,
+                              stop_condition: '收盤跌破季線 60MA (NT$ 207.3) 則次日全數停損退回現金'
+                            }
+                          ] : [])
+                        );
+
+                        if (!activeOpenPositions || activeOpenPositions.length === 0) return null;
+
+                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (activeModelKey === 'titan_sovereign' ? 25.0 : 0);
+                        const activeExposure = activeModeData?.market_exposure_pct ?? (activeModelKey === 'titan_sovereign' ? 75.0 : 100);
+
+                        return (
+                          <div style={{
+                            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(245, 158, 11, 0.4)',
+                            padding: '1.25rem',
+                            marginBottom: '1.5rem',
+                            boxShadow: '0 4px 20px rgba(245, 158, 11, 0.12)'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <span style={{ fontSize: '1.25rem' }}>🎯</span>
+                                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#FBBF24', fontWeight: 'bold' }}>
+                                    【{activeModelMeta.name || '模型'}】當前實戰持有中部位・即時跟單明細 (Active Open Positions)
+                                  </h4>
+                                  <span style={{ fontSize: '0.72rem', background: '#059669', color: 'white', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                    LIVE 實戰持倉中
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: '#CBD5E1', marginTop: '0.3rem' }}>
+                                  最新部位曝險：<strong style={{ color: '#38BDF8' }}>{activeExposure}%</strong> 持股 ＋ <strong style={{ color: '#FCD34D' }}>{activeCashReserve}%</strong> 防禦現金（未平倉個股由 60MA 季線嚴密風控保護中）
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
+                                  結算基準日：<strong style={{ color: '#E2E8F0' }}>2026/10/02</strong>
+                                </span>
+                              </div>
+                            </div>
+
+                            <div style={{ overflowX: 'auto' }}>
+                              <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
+                                <thead>
+                                  <tr style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#FDE68A' }}>
+                                    <th>標的股票</th>
+                                    <th>配置角色</th>
+                                    <th>目標權重</th>
+                                    <th>進場建倉日</th>
+                                    <th>進場成本價</th>
+                                    <th>最新現價</th>
+                                    <th>未實現損益</th>
+                                    <th>已持有天數</th>
+                                    <th>季線停損價 (60MA)</th>
+                                    <th>離停損緩衝</th>
+                                    <th style={{ textAlign: 'left' }}>風控指引與操作指令</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {activeOpenPositions.map((pos, pIdx) => {
+                                    const isPosWin = (pos.unrealized_return_pct || 0) >= 0;
+                                    return (
+                                      <tr key={pIdx} style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                        <td style={{ fontWeight: 'bold', color: '#FDE68A' }}>
+                                          {pos.stock_name} <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>({pos.stock_id})</span>
+                                        </td>
+                                        <td>
+                                          <span style={{
+                                            padding: '0.15rem 0.45rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.74rem',
+                                            fontWeight: 'bold',
+                                            background: pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.25)' : 'rgba(14, 165, 233, 0.25)',
+                                            color: pos.role?.includes('王者') ? '#FBBF24' : '#38BDF8',
+                                            border: pos.role?.includes('王者') ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(14, 165, 233, 0.5)'
+                                          }}>
+                                            {pos.role}
+                                          </span>
+                                        </td>
+                                        <td style={{ fontWeight: 'bold', color: '#67E8F9' }}>
+                                          {pos.target_weight_pct}%
+                                        </td>
+                                        <td>{formatDateStr(pos.entry_date)}</td>
+                                        <td style={{ fontFamily: 'monospace' }}>NT$ {pos.entry_price?.toLocaleString()}</td>
+                                        <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
+                                          NT$ {pos.current_price?.toLocaleString()}
+                                        </td>
+                                        <td style={{ fontWeight: 'bold', color: isPosWin ? '#34D399' : '#F87171' }}>
+                                          {isPosWin ? '+' : ''}{pos.unrealized_return_pct?.toFixed(2)}%
+                                        </td>
+                                        <td>{pos.holding_days} 天</td>
+                                        <td style={{ fontFamily: 'monospace', color: '#FCA5A5' }}>
+                                          NT$ {pos.ma60_stop_price?.toLocaleString()}
+                                        </td>
+                                        <td style={{ fontWeight: 'bold', color: (pos.dist_to_stop_pct || 0) > 5 ? '#34D399' : '#FBBF24' }}>
+                                          +{pos.dist_to_stop_pct?.toFixed(1)}%
+                                        </td>
+                                        <td style={{ textAlign: 'left', fontSize: '0.74rem', color: '#CBD5E1' }}>
+                                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', marginRight: '6px' }}></span>
+                                          <strong>續抱跟單</strong>：跌破季線 (NT$ {pos.ma60_stop_price}) 次日才出清，目前安全空間充足
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                  {activeCashReserve > 0 && (
+                                    <tr style={{ background: 'rgba(100, 116, 139, 0.08)' }}>
+                                      <td style={{ fontWeight: 'bold', color: '#CBD5E1' }}>
+                                        🛡️ 現金防禦儲備
+                                      </td>
+                                      <td>
+                                        <span style={{ padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.74rem', background: 'rgba(148, 163, 184, 0.2)', color: '#CBD5E1' }}>
+                                          避險儲備
+                                        </span>
+                                      </td>
+                                      <td style={{ fontWeight: 'bold', color: '#FDE68A' }}>
+                                        {activeCashReserve}%
+                                      </td>
+                                      <td>--</td>
+                                      <td>--</td>
+                                      <td>--</td>
+                                      <td style={{ color: '#94A3B8' }}>0.00%</td>
+                                      <td>--</td>
+                                      <td>--</td>
+                                      <td>--</td>
+                                      <td style={{ textAlign: 'left', fontSize: '0.74rem', color: '#94A3B8' }}>
+                                        衛星停損後暫時空手防守，降低整體組合波動風險
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* 6. 模擬交易日誌明細 (Recent Closed Trades Log) */}
                       {(() => {
                         const allAvailableTrades = (

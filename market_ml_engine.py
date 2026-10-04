@@ -2765,10 +2765,11 @@ def simulate_alpha_dynamic_convex_backtest(df_slice: pd.DataFrame, pipe: Optiona
 
 _TITAN_CURVE_CACHE = None
 _TITAN_TRADES_CACHE = None
+_TITAN_OPEN_POSITIONS_CACHE = None
 
-def get_titan_sovereign_data() -> Tuple[pd.DataFrame, List[Dict[str, Any]]]:
-    """取得 👑 泰坦王權漸進動能模型 (TITAN-Sovereign) 之全歷史純樣本外淨值曲線與逐筆交易紀錄"""
-    global _TITAN_CURVE_CACHE, _TITAN_TRADES_CACHE
+def get_titan_sovereign_data() -> Tuple[pd.DataFrame, List[Dict[str, Any]], Dict[str, Any]]:
+    """取得 👑 泰坦王權漸進動能模型 (TITAN-Sovereign) 之全歷史純樣本外淨值曲線、逐筆交易紀錄與現行持倉部位"""
+    global _TITAN_CURVE_CACHE, _TITAN_TRADES_CACHE, _TITAN_OPEN_POSITIONS_CACHE
     if _TITAN_CURVE_CACHE is None:
         p_curve = os.path.join(os.path.dirname(__file__), 'titan_sovereign_curve.csv')
         if not os.path.exists(p_curve):
@@ -2792,8 +2793,21 @@ def get_titan_sovereign_data() -> Tuple[pd.DataFrame, List[Dict[str, Any]]]:
                 _TITAN_TRADES_CACHE = []
         else:
             _TITAN_TRADES_CACHE = []
+
+    if _TITAN_OPEN_POSITIONS_CACHE is None:
+        p_open = os.path.join(os.path.dirname(__file__), 'titan_open_positions.json')
+        if not os.path.exists(p_open):
+            p_open = '/Users/huanggin-chen/gemini-stock-analysis/titan_open_positions.json'
+        if os.path.exists(p_open):
+            try:
+                with open(p_open, 'r', encoding='utf-8') as f:
+                    _TITAN_OPEN_POSITIONS_CACHE = json.load(f)
+            except Exception:
+                _TITAN_OPEN_POSITIONS_CACHE = {}
+        else:
+            _TITAN_OPEN_POSITIONS_CACHE = {}
             
-    return _TITAN_CURVE_CACHE, _TITAN_TRADES_CACHE
+    return _TITAN_CURVE_CACHE, _TITAN_TRADES_CACHE, _TITAN_OPEN_POSITIONS_CACHE
 
 
 def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_only', cost_bps: float = 5.0, **kwargs) -> Dict[str, Any]:
@@ -2827,7 +2841,8 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
         else:
             etf0050_rets[i] = mkt_rets[i]
 
-    titan_curve_df, all_trades = get_titan_sovereign_data()
+    titan_curve_df, all_trades, open_pos_meta = get_titan_sovereign_data()
+    open_positions = open_pos_meta.get('open_positions', [])
     
     if not titan_curve_df.empty:
         t_sub = titan_curve_df[titan_curve_df['date'].isin(dates)].copy()
@@ -3001,6 +3016,9 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
         'curve': curve,
         'trades': sub_trades,
         'all_trades': all_trades,
+        'open_positions': open_positions,
+        'cash_reserve_pct': open_pos_meta.get('cash_reserve_pct', 25.0),
+        'market_exposure_pct': open_pos_meta.get('total_exposure_pct', 75.0),
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),
@@ -3014,9 +3032,11 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
             'signal_badge': curr_badge,
             'signal_desc': curr_desc,
             'position_size_pct': round(float(latest_p * 100)) if latest_p > 0 else 0,
+            'cash_reserve_pct': open_pos_meta.get('cash_reserve_pct', 25.0),
             'leverage_ratio': round(float(latest_p), 2) if latest_p > 0 else 0.0,
             'latest_price': float(closes[-1]),
-            'confidence_pct': 92.0
+            'confidence_pct': 92.0,
+            'open_positions': open_positions
         }
     }
 
@@ -3995,7 +4015,8 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
             'short_name': titan_cat['short_name'],
             'long_short': titan_ls,
             'long_only': titan_lo,
-            'all_trades': titan_lo.get('all_trades', [])
+            'all_trades': titan_lo.get('all_trades', []),
+            'open_positions': titan_lo.get('open_positions', [])
         }
         comp_ls.append({
             'model_id': 'titan_sovereign', 'name': titan_cat['name'], 'short_name': titan_cat['short_name'],
@@ -4061,6 +4082,8 @@ def simulate_market_backtest(df: Optional[pd.DataFrame] = None, models_bundle: O
         'periods': periods_data,
         'test_period': oos_data,
         'all_titan_trades': periods_data.get('20y', {}).get('models_detail', {}).get('titan_sovereign', {}).get('all_trades', []),
+        'titan_open_positions': periods_data.get('20y', {}).get('models_detail', {}).get('titan_sovereign', {}).get('open_positions', []),
+        'open_positions': periods_data.get('20y', {}).get('models_detail', {}).get('titan_sovereign', {}).get('open_positions', []),
         'full_history_10y': {
             'start_date': str(df_10y.iloc[0]['date']),
             'end_date': str(df_10y.iloc[-1]['date']),
