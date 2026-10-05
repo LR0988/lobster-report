@@ -7144,9 +7144,10 @@ function StockDashboard() {
                   }
 
                   const activeModelKey = operationsModel || op.selected_model_id || 'regime_moe';
-                  const modelData = op.models_detail[activeModelKey] || op.models_detail['regime_moe'] || Object.values(op.models_detail)[0];
+                  const modelData = op?.models_detail?.[activeModelKey] || op?.models_detail?.['regime_moe'] || (op?.models_detail ? Object.values(op.models_detail)[0] : {}) || {};
                   const activeModeKey = operationsMode || 'long_short';
                   const isLongShort = activeModeKey === 'long_short';
+                  const modeData = modelData?.[activeModeKey] || modelData?.long_short || {};
                   const trades = (modeData?.trades && modeData.trades.length > 0)
                     ? modeData.trades
                     : (activeModelKey === 'titan_sovereign'
@@ -7913,7 +7914,7 @@ function StockDashboard() {
                           </div>
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                            {filteredTrades.map((trade) => {
+                            {filteredTrades.map((trade, idx) => {
                               const isWin = (trade.return_pct || 0) > 0;
                               const isLong = trade.direction?.includes('多') || trade.direction === 'LONG';
                               const pnlColor = isWin ? '#34D399' : '#F87171';
@@ -7922,7 +7923,7 @@ function StockDashboard() {
 
                               return (
                                 <div
-                                  key={trade.trade_no}
+                                  key={trade.trade_no || `${trade.stock_id || 'trade'}-${trade.entry_date}-${trade.exit_date}-${idx}`}
                                   style={{
                                     background: pnlBg,
                                     border: pnlBorder,
@@ -7944,8 +7945,19 @@ function StockDashboard() {
                                         borderRadius: '6px',
                                         fontFamily: 'monospace'
                                       }}>
-                                        #{String(trade.trade_no).padStart(2, '0')}
+                                        #{String(trade.trade_no || (filteredTrades.length - idx)).padStart(2, '0')}
                                       </span>
+
+                                      {/* 個股名稱與代號 (若為個股交易) */}
+                                      {trade.stock_name && (
+                                        <span style={{
+                                          color: '#FDE68A',
+                                          fontWeight: 'bold',
+                                          fontSize: '0.86rem'
+                                        }}>
+                                          {trade.stock_name} <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>({trade.stock_id})</span>
+                                        </span>
+                                      )}
 
                                       {/* 動作歷程標籤 */}
                                       <span style={{
@@ -7969,23 +7981,25 @@ function StockDashboard() {
                                         padding: '0.15rem 0.5rem',
                                         borderRadius: '6px'
                                       }}>
-                                        {trade.direction}
+                                        {trade.role || trade.direction || '多方 (Long)'}
                                       </span>
 
                                       {/* 持倉天數 */}
                                       <span style={{ fontSize: '0.76rem', color: '#94A3B8' }}>
-                                        ⏱️ 持倉 {trade.holding_days} 天
+                                        ⏱️ 持倉 {trade.holding_days ?? '--'} 天
                                       </span>
                                     </div>
 
                                     {/* 損益結果 */}
                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.65rem' }}>
                                       <span style={{ fontSize: '1.25rem', fontWeight: 900, color: pnlColor, fontFamily: 'monospace' }}>
-                                        {(trade.return_pct || 0) >= 0 ? '+' : ''}{trade.return_pct?.toFixed(2)}%
+                                        {(trade.return_pct || 0) >= 0 ? '+' : ''}{(trade.return_pct || 0).toFixed(2)}%
                                       </span>
-                                      <span style={{ fontSize: '0.84rem', color: pnlColor, fontWeight: 700 }}>
-                                        ({(trade.profit_amount || 0) >= 0 ? '+' : ''}NT$ {Math.round(trade.profit_amount || 0).toLocaleString()})
-                                      </span>
+                                      {trade.profit_amount !== undefined && (
+                                        <span style={{ fontSize: '0.84rem', color: pnlColor, fontWeight: 700 }}>
+                                          ({(trade.profit_amount || 0) >= 0 ? '+' : ''}NT$ {Math.round(trade.profit_amount || 0).toLocaleString()})
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
 
@@ -8004,19 +8018,19 @@ function StockDashboard() {
                                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ color: '#94A3B8' }}>進場建倉：</span>
                                         <span style={{ color: '#F8FAFC', fontWeight: 700, fontFamily: 'monospace' }}>
-                                          {formatOpDate(trade.entry_date)} @ {trade.entry_price?.toLocaleString()} 點
+                                          {formatOpDate(trade.entry_date)} @ {trade.entry_price?.toLocaleString()} {trade.stock_id ? '元' : '點'}
                                         </span>
                                       </div>
                                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ color: '#94A3B8' }}>出場平倉：</span>
                                         <span style={{ color: '#F8FAFC', fontWeight: 700, fontFamily: 'monospace' }}>
-                                          {formatOpDate(trade.exit_date)} @ {trade.exit_price?.toLocaleString()} 點
+                                          {formatOpDate(trade.exit_date)} @ {trade.exit_price?.toLocaleString()} {trade.stock_id ? '元' : '點'}
                                         </span>
                                       </div>
                                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.2rem', paddingTop: '0.35rem', borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
                                         <span style={{ color: '#94A3B8' }}>點數價差：</span>
                                         <span style={{ color: pnlColor, fontWeight: 800, fontFamily: 'monospace' }}>
-                                          {trade.exit_price && trade.entry_price ? `${(trade.exit_price - trade.entry_price) >= 0 ? '+' : ''}${Math.round(trade.exit_price - trade.entry_price).toLocaleString()} 點` : '-'}
+                                          {trade.exit_price && trade.entry_price ? `${(trade.exit_price - trade.entry_price) >= 0 ? '+' : ''}${Math.round(trade.exit_price - trade.entry_price).toLocaleString()} ${trade.stock_id ? '元' : '點'}` : '-'}
                                         </span>
                                       </div>
                                     </div>
@@ -8025,11 +8039,11 @@ function StockDashboard() {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', lineHeight: 1.45 }}>
                                         <span style={{ color: '#38BDF8', fontWeight: 'bold', minWidth: '85px' }}>🎯 進場依據:</span>
-                                        <span style={{ color: '#E2E8F0' }}>{trade.entry_reason}</span>
+                                        <span style={{ color: '#E2E8F0' }}>{trade.entry_reason || (trade.role ? `👑 依動能選拔入選【${trade.role}】次日開盤買進` : 'AI 訊號進場')}</span>
                                       </div>
                                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', lineHeight: 1.45 }}>
                                         <span style={{ color: isWin ? '#34D399' : '#F87171', fontWeight: 'bold', minWidth: '85px' }}>🏁 出場依據:</span>
-                                        <span style={{ color: '#E2E8F0' }}>{trade.exit_reason}</span>
+                                        <span style={{ color: '#E2E8F0' }}>{trade.exit_reason || '正常波段平倉'}</span>
                                       </div>
                                     </div>
                                   </div>
@@ -8512,9 +8526,9 @@ function StockDashboard() {
                   }
 
                   const selectedModelDetail = activePeriodData?.models_detail?.[activeModelKey];
-                  const activeModeData = selectedModelDetail
+                  const activeModeData = (selectedModelDetail
                     ? (isLongShort ? selectedModelDetail.long_short : selectedModelDetail.long_only)
-                    : (isLongShort ? activePeriodData?.long_short : activePeriodData?.long_only);
+                    : (isLongShort ? activePeriodData?.long_short : activePeriodData?.long_only)) || {};
 
                   const activeModelMeta = BACKTEST_MODELS.find(m => m.id === activeModelKey) || {
                     id: activeModelKey,
