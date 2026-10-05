@@ -194,9 +194,9 @@ def run_titan_strict_t1():
                     remaining = sdf.drop(index=[sovereign_leader])
                     satellites = remaining.nlargest(2, 'titan_score').index.tolist()
                     
-                    next_targets = {sovereign_leader: 0.50}
+                    next_targets = {sovereign_leader: 0.40}
                     for sat in satellites:
-                        next_targets[sat] = 0.25
+                        next_targets[sat] = 0.30
                 else:
                     next_targets = {}
                     

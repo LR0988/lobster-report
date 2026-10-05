@@ -8342,7 +8342,7 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'titan_sovereign';
 
                   const BACKTEST_MODELS = [
-                    { id: 'titan_sovereign', name: '👑 泰坦王權漸進動能', icon: '👑', tag: '10年+1972%・零偷看未來・零槓桿・超額 4 倍' },
+                    { id: 'titan_sovereign', name: '👑 泰坦王權漸進動能 (40/30/30)', icon: '👑', tag: '10年+2791%・夏普 1.04・零偷看未來・零槓桿・40/30/30黃金配權' },
                     { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
                     { id: 'wf_xgboost', name: '漸進 XGBoost', icon: '🌲', tag: '滾動學習 OOS 金標 (零偷看未來)' },
@@ -9761,8 +9761,8 @@ function StockDashboard() {
                             {
                               stock_id: '2408',
                               stock_name: '南亞科',
-                              role: '👑 王者泰坦 (50%)',
-                              target_weight_pct: 50,
+                              role: '👑 王者泰坦 (40%)',
+                              target_weight_pct: 40,
                               entry_date: '20260814',
                               entry_price: 512.0,
                               current_price: 526.0,
@@ -9775,8 +9775,8 @@ function StockDashboard() {
                             {
                               stock_id: '1303',
                               stock_name: '南亞',
-                              role: '🚀 革命衛星 (25%)',
-                              target_weight_pct: 25,
+                              role: '🚀 革命衛星 (30%)',
+                              target_weight_pct: 30,
                               entry_date: '20260814',
                               entry_price: 207.5,
                               current_price: 260.0,
@@ -9791,8 +9791,8 @@ function StockDashboard() {
 
                         if (!activeOpenPositions || activeOpenPositions.length === 0) return null;
 
-                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (activeModelKey === 'titan_sovereign' ? 25.0 : 0);
-                        const activeExposure = activeModeData?.market_exposure_pct ?? (activeModelKey === 'titan_sovereign' ? 75.0 : 100);
+                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (activeModelKey === 'titan_sovereign' ? 30.0 : 0);
+                        const activeExposure = activeModeData?.market_exposure_pct ?? (activeModelKey === 'titan_sovereign' ? 70.0 : 100);
 
                         return (
                           <div style={{

@@ -1,13 +1,13 @@
 {
   "as_of_date": "20261002",
-  "total_exposure_pct": 75.0,
-  "cash_reserve_pct": 25.0,
+  "total_exposure_pct": 70.0,
+  "cash_reserve_pct": 30.0,
   "open_positions": [
     {
       "stock_id": "2408",
       "stock_name": "南亞科",
-      "role": "👑 王者泰坦 (50%)",
-      "target_weight_pct": 50,
+      "role": "👑 王者泰坦 (40%)",
+      "target_weight_pct": 40,
       "entry_date": "20260814",
       "entry_price": 512.0,
       "current_price": 526.0,
@@ -20,8 +20,8 @@
     {
       "stock_id": "1303",
       "stock_name": "南亞",
-      "role": "🚀 革命衛星 (25%)",
-      "target_weight_pct": 25,
+      "role": "🚀 革命衛星 (30%)",
+      "target_weight_pct": 30,
       "entry_date": "20260814",
       "entry_price": 207.5,
       "current_price": 260.0,

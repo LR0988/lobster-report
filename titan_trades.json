@@ -2,7 +2,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20160311",
     "exit_date": "20160412",
     "entry_price": 241.0,
@@ -15,7 +15,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20160311",
     "exit_date": "20160420",
     "entry_price": 83.2,
@@ -28,7 +28,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20160311",
     "exit_date": "20160428",
     "entry_price": 155.0,
@@ -41,7 +41,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20160608",
     "exit_date": "20160613",
     "entry_price": 81.3,
@@ -54,7 +54,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20160608",
     "exit_date": "20160613",
     "entry_price": 230.0,
@@ -67,7 +67,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20160608",
     "exit_date": "20160627",
     "entry_price": 165.5,
@@ -80,7 +80,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20160708",
     "exit_date": "20160902",
     "entry_price": 93.3,
@@ -93,7 +93,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20160708",
     "exit_date": "20160912",
     "entry_price": 238.0,
@@ -106,20 +106,20 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20161102",
     "exit_date": "20161102",
     "entry_price": 82.6,
     "exit_price": 82.6,
     "direction": "多方 (Long)",
     "return_pct": 0.0,
-    "holding_days": 0,
+    "holding_days": 1,
     "exit_reason": "🛡️ 跌破季線 (60MA) 防禦停損"
   },
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20160708",
     "exit_date": "20161109",
     "entry_price": 164.5,
@@ -132,7 +132,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20161130",
     "exit_date": "20161202",
     "entry_price": 82.0,
@@ -145,7 +145,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20161228",
     "exit_date": "20170203",
     "entry_price": 84.0,
@@ -158,33 +158,33 @@
   {
     "stock_id": "2882",
     "stock_name": "國泰金",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170203",
     "exit_date": "20170203",
-    "entry_price": 46.6,
-    "exit_price": 46.6,
+    "entry_price": 46.65,
+    "exit_price": 46.65,
     "direction": "多方 (Long)",
     "return_pct": 0.0,
-    "holding_days": 0,
+    "holding_days": 1,
     "exit_reason": "🛡️ 跌破季線 (60MA) 防禦停損"
   },
   {
     "stock_id": "2881",
     "stock_name": "富邦金",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170203",
     "exit_date": "20170203",
     "entry_price": 49.4,
     "exit_price": 49.4,
     "direction": "多方 (Long)",
     "return_pct": 0.0,
-    "holding_days": 0,
+    "holding_days": 1,
     "exit_reason": "🛡️ 跌破季線 (60MA) 防禦停損"
   },
   {
     "stock_id": "2371",
     "stock_name": "大同",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170307",
     "exit_date": "20170313",
     "entry_price": 14.3,
@@ -197,7 +197,7 @@
   {
     "stock_id": "2882",
     "stock_name": "國泰金",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170307",
     "exit_date": "20170331",
     "entry_price": 49.0,
@@ -210,11 +210,11 @@
   {
     "stock_id": "2344",
     "stock_name": "華邦電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170406",
     "exit_date": "20170505",
-    "entry_price": 17.1,
-    "exit_price": 16.8,
+    "entry_price": 17.15,
+    "exit_price": 16.75,
     "direction": "多方 (Long)",
     "return_pct": -2.33,
     "holding_days": 20,
@@ -223,7 +223,7 @@
   {
     "stock_id": "2439",
     "stock_name": "美律",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170203",
     "exit_date": "20170606",
     "entry_price": 129.0,
@@ -236,7 +236,7 @@
   {
     "stock_id": "2344",
     "stock_name": "華邦電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170606",
     "exit_date": "20170704",
     "entry_price": 18.9,
@@ -249,7 +249,7 @@
   {
     "stock_id": "6456",
     "stock_name": "GIS-KY",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170505",
     "exit_date": "20170704",
     "entry_price": 178.0,
@@ -262,11 +262,11 @@
   {
     "stock_id": "2409",
     "stock_name": "友達",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170704",
     "exit_date": "20170717",
-    "entry_price": 13.2,
-    "exit_price": 12.3,
+    "entry_price": 13.15,
+    "exit_price": 12.35,
     "direction": "多方 (Long)",
     "return_pct": -6.08,
     "holding_days": 9,
@@ -275,11 +275,11 @@
   {
     "stock_id": "3481",
     "stock_name": "群創",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170704",
     "exit_date": "20170801",
-    "entry_price": 15.8,
-    "exit_price": 14.7,
+    "entry_price": 15.85,
+    "exit_price": 14.65,
     "direction": "多方 (Long)",
     "return_pct": -7.57,
     "holding_days": 20,
@@ -288,7 +288,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170406",
     "exit_date": "20170801",
     "entry_price": 97.3,
@@ -301,7 +301,7 @@
   {
     "stock_id": "6456",
     "stock_name": "GIS-KY",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170801",
     "exit_date": "20170829",
     "entry_price": 286.0,
@@ -314,7 +314,7 @@
   {
     "stock_id": "2439",
     "stock_name": "美律",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170801",
     "exit_date": "20170829",
     "entry_price": 245.0,
@@ -327,7 +327,7 @@
   {
     "stock_id": "3406",
     "stock_name": "玉晶光",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170829",
     "exit_date": "20170920",
     "entry_price": 482.0,
@@ -340,11 +340,11 @@
   {
     "stock_id": "6116",
     "stock_name": "彩晶",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170829",
     "exit_date": "20170926",
-    "entry_price": 12.2,
-    "exit_price": 11.9,
+    "entry_price": 12.25,
+    "exit_price": 11.95,
     "direction": "多方 (Long)",
     "return_pct": -2.45,
     "holding_days": 20,
@@ -353,20 +353,20 @@
   {
     "stock_id": "3406",
     "stock_name": "玉晶光",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170926",
     "exit_date": "20170926",
     "entry_price": 385.0,
     "exit_price": 385.0,
     "direction": "多方 (Long)",
     "return_pct": 0.0,
-    "holding_days": 0,
+    "holding_days": 1,
     "exit_reason": "🛡️ 跌破季線 (60MA) 防禦停損"
   },
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20170801",
     "exit_date": "20171122",
     "entry_price": 15.9,
@@ -379,10 +379,10 @@
   {
     "stock_id": "2344",
     "stock_name": "華邦電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20170926",
     "exit_date": "20171124",
-    "entry_price": 25.1,
+    "entry_price": 25.15,
     "exit_price": 28.7,
     "direction": "多方 (Long)",
     "return_pct": 14.12,
@@ -392,7 +392,7 @@
   {
     "stock_id": "2408",
     "stock_name": "南亞科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20171027",
     "exit_date": "20171130",
     "entry_price": 83.4,
@@ -405,7 +405,7 @@
   {
     "stock_id": "2448",
     "stock_name": "晶電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20171124",
     "exit_date": "20171208",
     "entry_price": 62.0,
@@ -418,11 +418,11 @@
   {
     "stock_id": "2313",
     "stock_name": "華通",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20171222",
     "exit_date": "20171225",
     "entry_price": 42.5,
-    "exit_price": 40.0,
+    "exit_price": 40.05,
     "direction": "多方 (Long)",
     "return_pct": -5.76,
     "holding_days": 1,
@@ -431,7 +431,7 @@
   {
     "stock_id": "3443",
     "stock_name": "創意",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20171222",
     "exit_date": "20171226",
     "entry_price": 289.0,
@@ -444,7 +444,7 @@
   {
     "stock_id": "2448",
     "stock_name": "晶電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20180122",
     "exit_date": "20180125",
     "entry_price": 54.8,
@@ -457,7 +457,7 @@
   {
     "stock_id": "3026",
     "stock_name": "禾伸堂",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180122",
     "exit_date": "20180206",
     "entry_price": 125.0,
@@ -470,7 +470,7 @@
   {
     "stock_id": "2327",
     "stock_name": "國巨*",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20171124",
     "exit_date": "20180209",
     "entry_price": 315.0,
@@ -483,7 +483,7 @@
   {
     "stock_id": "6182",
     "stock_name": "合晶",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20180227",
     "exit_date": "20180302",
     "entry_price": 45.3,
@@ -496,11 +496,11 @@
   {
     "stock_id": "2409",
     "stock_name": "友達",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180227",
     "exit_date": "20180328",
     "entry_price": 13.1,
-    "exit_price": 13.6,
+    "exit_price": 13.55,
     "direction": "多方 (Long)",
     "return_pct": 3.44,
     "holding_days": 20,
@@ -509,7 +509,7 @@
   {
     "stock_id": "3443",
     "stock_name": "創意",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180227",
     "exit_date": "20180328",
     "entry_price": 310.0,
@@ -522,11 +522,11 @@
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180328",
     "exit_date": "20180424",
     "entry_price": 48.3,
-    "exit_price": 43.5,
+    "exit_price": 43.45,
     "direction": "多方 (Long)",
     "return_pct": -10.04,
     "holding_days": 16,
@@ -535,7 +535,7 @@
   {
     "stock_id": "2327",
     "stock_name": "國巨*",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20180328",
     "exit_date": "20180430",
     "entry_price": 495.0,
@@ -548,7 +548,7 @@
   {
     "stock_id": "2408",
     "stock_name": "南亞科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180328",
     "exit_date": "20180430",
     "entry_price": 90.7,
@@ -561,7 +561,7 @@
   {
     "stock_id": "2408",
     "stock_name": "南亞科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180529",
     "exit_date": "20180613",
     "entry_price": 98.9,
@@ -574,7 +574,7 @@
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180529",
     "exit_date": "20180614",
     "entry_price": 48.6,
@@ -587,7 +587,7 @@
   {
     "stock_id": "2492",
     "stock_name": "華新科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20180529",
     "exit_date": "20180627",
     "entry_price": 366.5,
@@ -600,7 +600,7 @@
   {
     "stock_id": "2492",
     "stock_name": "華新科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20180725",
     "exit_date": "20180731",
     "entry_price": 415.0,
@@ -613,7 +613,7 @@
   {
     "stock_id": "6173",
     "stock_name": "信昌電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180725",
     "exit_date": "20180802",
     "entry_price": 116.0,
@@ -626,7 +626,7 @@
   {
     "stock_id": "3406",
     "stock_name": "玉晶光",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180725",
     "exit_date": "20180802",
     "entry_price": 481.0,
@@ -639,7 +639,7 @@
   {
     "stock_id": "1216",
     "stock_name": "統一",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20180919",
     "exit_date": "20181004",
     "entry_price": 79.0,
@@ -652,7 +652,7 @@
   {
     "stock_id": "1326",
     "stock_name": "台化",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180919",
     "exit_date": "20181011",
     "entry_price": 122.0,
@@ -665,7 +665,7 @@
   {
     "stock_id": "2371",
     "stock_name": "大同",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20180919",
     "exit_date": "20181018",
     "entry_price": 36.9,
@@ -678,7 +678,7 @@
   {
     "stock_id": "6462",
     "stock_name": "神盾",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190115",
     "exit_date": "20190221",
     "entry_price": 188.0,
@@ -691,7 +691,7 @@
   {
     "stock_id": "2492",
     "stock_name": "華新科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20190221",
     "exit_date": "20190429",
     "entry_price": 197.5,
@@ -704,7 +704,7 @@
   {
     "stock_id": "2308",
     "stock_name": "台達電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190115",
     "exit_date": "20190506",
     "entry_price": 150.0,
@@ -717,11 +717,11 @@
   {
     "stock_id": "3037",
     "stock_name": "欣興",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190115",
     "exit_date": "20190520",
     "entry_price": 21.1,
-    "exit_price": 30.4,
+    "exit_price": 30.45,
     "direction": "多方 (Long)",
     "return_pct": 44.31,
     "holding_days": 77,
@@ -730,7 +730,7 @@
   {
     "stock_id": "2379",
     "stock_name": "瑞昱",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190621",
     "exit_date": "20190719",
     "entry_price": 229.5,
@@ -743,7 +743,7 @@
   {
     "stock_id": "3338",
     "stock_name": "泰碩",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190621",
     "exit_date": "20190719",
     "entry_price": 61.1,
@@ -756,7 +756,7 @@
   {
     "stock_id": "3406",
     "stock_name": "玉晶光",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20190719",
     "exit_date": "20190819",
     "entry_price": 419.0,
@@ -769,10 +769,10 @@
   {
     "stock_id": "3037",
     "stock_name": "欣興",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20190621",
     "exit_date": "20190917",
-    "entry_price": 34.5,
+    "entry_price": 34.55,
     "exit_price": 46.1,
     "direction": "多方 (Long)",
     "return_pct": 33.43,
@@ -782,7 +782,7 @@
   {
     "stock_id": "6213",
     "stock_name": "聯茂",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190819",
     "exit_date": "20190917",
     "entry_price": 141.5,
@@ -795,7 +795,7 @@
   {
     "stock_id": "2408",
     "stock_name": "南亞科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190917",
     "exit_date": "20191009",
     "entry_price": 82.0,
@@ -808,7 +808,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20190917",
     "exit_date": "20191018",
     "entry_price": 383.0,
@@ -821,7 +821,7 @@
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20190719",
     "exit_date": "20191018",
     "entry_price": 29.1,
@@ -834,7 +834,7 @@
   {
     "stock_id": "3105",
     "stock_name": "穩懋",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20191018",
     "exit_date": "20191115",
     "entry_price": 307.0,
@@ -847,7 +847,7 @@
   {
     "stock_id": "2367",
     "stock_name": "燿華",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20191018",
     "exit_date": "20191202",
     "entry_price": 35.0,
@@ -860,7 +860,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20191115",
     "exit_date": "20191213",
     "entry_price": 90.1,
@@ -873,11 +873,11 @@
   {
     "stock_id": "2313",
     "stock_name": "華通",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20191018",
     "exit_date": "20191226",
     "entry_price": 41.3,
-    "exit_price": 45.1,
+    "exit_price": 45.15,
     "direction": "多方 (Long)",
     "return_pct": 9.32,
     "holding_days": 49,
@@ -886,7 +886,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20191213",
     "exit_date": "20200113",
     "entry_price": 339.0,
@@ -899,7 +899,7 @@
   {
     "stock_id": "3406",
     "stock_name": "玉晶光",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20200113",
     "exit_date": "20200219",
     "entry_price": 584.0,
@@ -912,11 +912,11 @@
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20191213",
     "exit_date": "20200219",
     "entry_price": 36.6,
-    "exit_price": 35.4,
+    "exit_price": 35.35,
     "direction": "多方 (Long)",
     "return_pct": -3.42,
     "holding_days": 40,
@@ -925,7 +925,7 @@
   {
     "stock_id": "2492",
     "stock_name": "華新科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200113",
     "exit_date": "20200227",
     "entry_price": 227.5,
@@ -938,7 +938,7 @@
   {
     "stock_id": "6488",
     "stock_name": "環球晶",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200219",
     "exit_date": "20200309",
     "entry_price": 454.0,
@@ -951,7 +951,7 @@
   {
     "stock_id": "3293",
     "stock_name": "鈊象",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20200420",
     "exit_date": "20200504",
     "entry_price": 546.0,
@@ -964,11 +964,11 @@
   {
     "stock_id": "2368",
     "stock_name": "金像電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200420",
     "exit_date": "20200616",
     "entry_price": 27.7,
-    "exit_price": 34.2,
+    "exit_price": 34.25,
     "direction": "多方 (Long)",
     "return_pct": 23.65,
     "holding_days": 40,
@@ -977,7 +977,7 @@
   {
     "stock_id": "2345",
     "stock_name": "智邦",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200519",
     "exit_date": "20200716",
     "entry_price": 212.0,
@@ -990,7 +990,7 @@
   {
     "stock_id": "3374",
     "stock_name": "精材",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200716",
     "exit_date": "20200813",
     "entry_price": 128.0,
@@ -1003,7 +1003,7 @@
   {
     "stock_id": "3661",
     "stock_name": "世芯-KY",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200420",
     "exit_date": "20200813",
     "entry_price": 241.0,
@@ -1016,7 +1016,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20200616",
     "exit_date": "20200820",
     "entry_price": 510.0,
@@ -1029,11 +1029,11 @@
   {
     "stock_id": "2303",
     "stock_name": "聯電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200813",
     "exit_date": "20200910",
-    "entry_price": 23.8,
-    "exit_price": 23.4,
+    "entry_price": 23.75,
+    "exit_price": 23.35,
     "direction": "多方 (Long)",
     "return_pct": -1.68,
     "holding_days": 20,
@@ -1042,11 +1042,11 @@
   {
     "stock_id": "2368",
     "stock_name": "金像電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200910",
     "exit_date": "20200925",
     "entry_price": 49.7,
-    "exit_price": 44.0,
+    "exit_price": 43.95,
     "direction": "多方 (Long)",
     "return_pct": -11.57,
     "holding_days": 11,
@@ -1055,7 +1055,7 @@
   {
     "stock_id": "8046",
     "stock_name": "南電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20200910",
     "exit_date": "20200925",
     "entry_price": 126.0,
@@ -1068,20 +1068,20 @@
   {
     "stock_id": "4142",
     "stock_name": "國光生",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20201013",
     "exit_date": "20201013",
     "entry_price": 68.8,
     "exit_price": 68.8,
     "direction": "多方 (Long)",
     "return_pct": 0.0,
-    "holding_days": 0,
+    "holding_days": 1,
     "exit_reason": "🛡️ 跌破季線 (60MA) 防禦停損"
   },
   {
     "stock_id": "3037",
     "stock_name": "欣興",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20200813",
     "exit_date": "20201028",
     "entry_price": 80.6,
@@ -1094,7 +1094,7 @@
   {
     "stock_id": "2303",
     "stock_name": "聯電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20201110",
     "exit_date": "20201208",
     "entry_price": 31.0,
@@ -1107,7 +1107,7 @@
   {
     "stock_id": "3017",
     "stock_name": "奇鋐",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20201013",
     "exit_date": "20201208",
     "entry_price": 69.9,
@@ -1120,7 +1120,7 @@
   {
     "stock_id": "3037",
     "stock_name": "欣興",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20201208",
     "exit_date": "20210201",
     "entry_price": 84.5,
@@ -1133,10 +1133,10 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20201110",
     "exit_date": "20210315",
-    "entry_price": 19.9,
+    "entry_price": 19.95,
     "exit_price": 40.0,
     "direction": "多方 (Long)",
     "return_pct": 100.5,
@@ -1146,7 +1146,7 @@
   {
     "stock_id": "8046",
     "stock_name": "南電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20201208",
     "exit_date": "20210315",
     "entry_price": 180.0,
@@ -1159,7 +1159,7 @@
   {
     "stock_id": "2368",
     "stock_name": "金像電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210203",
     "exit_date": "20210315",
     "entry_price": 51.8,
@@ -1172,7 +1172,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20210315",
     "exit_date": "20210414",
     "entry_price": 121.0,
@@ -1185,7 +1185,7 @@
   {
     "stock_id": "3711",
     "stock_name": "日月光投控",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210315",
     "exit_date": "20210414",
     "entry_price": 102.5,
@@ -1198,7 +1198,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20210414",
     "exit_date": "20210513",
     "entry_price": 59.9,
@@ -1211,7 +1211,7 @@
   {
     "stock_id": "2609",
     "stock_name": "陽明",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210315",
     "exit_date": "20210513",
     "entry_price": 31.3,
@@ -1224,7 +1224,7 @@
   {
     "stock_id": "3006",
     "stock_name": "晶豪科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210414",
     "exit_date": "20210513",
     "entry_price": 138.0,
@@ -1237,7 +1237,7 @@
   {
     "stock_id": "2615",
     "stock_name": "萬海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210610",
     "exit_date": "20210709",
     "entry_price": 159.0,
@@ -1250,7 +1250,7 @@
   {
     "stock_id": "2609",
     "stock_name": "陽明",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20210610",
     "exit_date": "20210727",
     "entry_price": 110.5,
@@ -1263,7 +1263,7 @@
   {
     "stock_id": "3545",
     "stock_name": "敦泰",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210610",
     "exit_date": "20210806",
     "entry_price": 240.0,
@@ -1276,7 +1276,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20210806",
     "exit_date": "20210810",
     "entry_price": 142.0,
@@ -1289,7 +1289,7 @@
   {
     "stock_id": "2636",
     "stock_name": "台驊",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210806",
     "exit_date": "20210811",
     "entry_price": 180.0,
@@ -1302,11 +1302,11 @@
   {
     "stock_id": "1802",
     "stock_name": "台玻",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210709",
     "exit_date": "20210813",
     "entry_price": 39.2,
-    "exit_price": 34.5,
+    "exit_price": 34.45,
     "direction": "多方 (Long)",
     "return_pct": -12.12,
     "holding_days": 25,
@@ -1315,7 +1315,7 @@
   {
     "stock_id": "2481",
     "stock_name": "強茂",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210903",
     "exit_date": "20210906",
     "entry_price": 98.5,
@@ -1328,7 +1328,7 @@
   {
     "stock_id": "4919",
     "stock_name": "新唐",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20210903",
     "exit_date": "20210914",
     "entry_price": 165.5,
@@ -1341,7 +1341,7 @@
   {
     "stock_id": "2303",
     "stock_name": "聯電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20210903",
     "exit_date": "20211005",
     "entry_price": 70.0,
@@ -1354,7 +1354,7 @@
   {
     "stock_id": "3707",
     "stock_name": "漢磊",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20211103",
     "exit_date": "20211201",
     "entry_price": 160.5,
@@ -1367,7 +1367,7 @@
   {
     "stock_id": "3035",
     "stock_name": "智原",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20211103",
     "exit_date": "20211229",
     "entry_price": 193.5,
@@ -1380,7 +1380,7 @@
   {
     "stock_id": "3141",
     "stock_name": "晶宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20211103",
     "exit_date": "20211229",
     "entry_price": 227.5,
@@ -1393,7 +1393,7 @@
   {
     "stock_id": "2609",
     "stock_name": "陽明",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20211201",
     "exit_date": "20220110",
     "entry_price": 115.0,
@@ -1406,7 +1406,7 @@
   {
     "stock_id": "2615",
     "stock_name": "萬海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20211229",
     "exit_date": "20220112",
     "entry_price": 201.0,
@@ -1419,7 +1419,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20211229",
     "exit_date": "20220118",
     "entry_price": 144.0,
@@ -1432,7 +1432,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20220606",
     "exit_date": "20220609",
     "entry_price": 143.5,
@@ -1445,11 +1445,11 @@
   {
     "stock_id": "2618",
     "stock_name": "長榮航",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20220606",
     "exit_date": "20220610",
     "entry_price": 34.9,
-    "exit_price": 32.9,
+    "exit_price": 32.85,
     "direction": "多方 (Long)",
     "return_pct": -5.87,
     "holding_days": 4,
@@ -1458,10 +1458,10 @@
   {
     "stock_id": "1605",
     "stock_name": "華新",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20220606",
     "exit_date": "20220622",
-    "entry_price": 43.5,
+    "entry_price": 43.55,
     "exit_price": 37.8,
     "direction": "多方 (Long)",
     "return_pct": -13.2,
@@ -1471,11 +1471,11 @@
   {
     "stock_id": "2618",
     "stock_name": "長榮航",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20220801",
     "exit_date": "20220802",
-    "entry_price": 33.0,
-    "exit_price": 31.6,
+    "entry_price": 32.95,
+    "exit_price": 31.55,
     "direction": "多方 (Long)",
     "return_pct": -4.25,
     "holding_days": 1,
@@ -1484,7 +1484,7 @@
   {
     "stock_id": "3558",
     "stock_name": "神準",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20220801",
     "exit_date": "20220829",
     "entry_price": 217.5,
@@ -1497,7 +1497,7 @@
   {
     "stock_id": "1560",
     "stock_name": "中砂",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20220801",
     "exit_date": "20220829",
     "entry_price": 152.5,
@@ -1510,11 +1510,11 @@
   {
     "stock_id": "2618",
     "stock_name": "長榮航",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20220829",
     "exit_date": "20220926",
     "entry_price": 32.6,
-    "exit_price": 31.9,
+    "exit_price": 31.85,
     "direction": "多方 (Long)",
     "return_pct": -2.3,
     "holding_days": 19,
@@ -1523,7 +1523,7 @@
   {
     "stock_id": "8069",
     "stock_name": "元太",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20220829",
     "exit_date": "20220927",
     "entry_price": 240.5,
@@ -1536,7 +1536,7 @@
   {
     "stock_id": "1513",
     "stock_name": "中興電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20220829",
     "exit_date": "20220927",
     "entry_price": 64.4,
@@ -1549,7 +1549,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20221123",
     "exit_date": "20230112",
     "entry_price": 153.5,
@@ -1562,7 +1562,7 @@
   {
     "stock_id": "1605",
     "stock_name": "華新",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20221123",
     "exit_date": "20230302",
     "entry_price": 42.9,
@@ -1575,7 +1575,7 @@
   {
     "stock_id": "1795",
     "stock_name": "美時",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20221123",
     "exit_date": "20230302",
     "entry_price": 217.5,
@@ -1588,7 +1588,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20230302",
     "exit_date": "20230330",
     "entry_price": 519.0,
@@ -1601,7 +1601,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230302",
     "exit_date": "20230330",
     "entry_price": 160.5,
@@ -1614,7 +1614,7 @@
   {
     "stock_id": "2303",
     "stock_name": "聯電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230131",
     "exit_date": "20230330",
     "entry_price": 48.8,
@@ -1627,7 +1627,7 @@
   {
     "stock_id": "2327",
     "stock_name": "國巨*",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230330",
     "exit_date": "20230407",
     "entry_price": 520.0,
@@ -1640,7 +1640,7 @@
   {
     "stock_id": "3443",
     "stock_name": "創意",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20230330",
     "exit_date": "20230425",
     "entry_price": 1050.0,
@@ -1653,7 +1653,7 @@
   {
     "stock_id": "3034",
     "stock_name": "聯詠",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230330",
     "exit_date": "20230425",
     "entry_price": 415.0,
@@ -1666,7 +1666,7 @@
   {
     "stock_id": "3443",
     "stock_name": "創意",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20230503",
     "exit_date": "20230531",
     "entry_price": 1080.0,
@@ -1679,7 +1679,7 @@
   {
     "stock_id": "4763",
     "stock_name": "材料*-KY",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230503",
     "exit_date": "20230531",
     "entry_price": 530.0,
@@ -1692,7 +1692,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20230531",
     "exit_date": "20230630",
     "entry_price": 558.0,
@@ -1705,7 +1705,7 @@
   {
     "stock_id": "1519",
     "stock_name": "華城",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230531",
     "exit_date": "20230630",
     "entry_price": 145.0,
@@ -1718,7 +1718,7 @@
   {
     "stock_id": "6235",
     "stock_name": "華孚",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230630",
     "exit_date": "20230719",
     "entry_price": 155.0,
@@ -1731,10 +1731,10 @@
   {
     "stock_id": "3231",
     "stock_name": "緯創",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20230503",
     "exit_date": "20230728",
-    "entry_price": 49.0,
+    "entry_price": 48.95,
     "exit_price": 157.0,
     "direction": "多方 (Long)",
     "return_pct": 220.74,
@@ -1744,7 +1744,7 @@
   {
     "stock_id": "2382",
     "stock_name": "廣達",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20230630",
     "exit_date": "20230828",
     "entry_price": 152.0,
@@ -1757,7 +1757,7 @@
   {
     "stock_id": "2376",
     "stock_name": "技嘉",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230728",
     "exit_date": "20230828",
     "entry_price": 347.5,
@@ -1770,7 +1770,7 @@
   {
     "stock_id": "1519",
     "stock_name": "華城",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20230728",
     "exit_date": "20230828",
     "entry_price": 229.0,
@@ -1783,7 +1783,7 @@
   {
     "stock_id": "3035",
     "stock_name": "智原",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20231123",
     "exit_date": "20231127",
     "entry_price": 336.0,
@@ -1796,7 +1796,7 @@
   {
     "stock_id": "2388",
     "stock_name": "威盛",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20231123",
     "exit_date": "20231221",
     "entry_price": 163.5,
@@ -1809,7 +1809,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20231221",
     "exit_date": "20240111",
     "entry_price": 976.0,
@@ -1822,7 +1822,7 @@
   {
     "stock_id": "2313",
     "stock_name": "華通",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20231123",
     "exit_date": "20240118",
     "entry_price": 64.9,
@@ -1835,7 +1835,7 @@
   {
     "stock_id": "3035",
     "stock_name": "智原",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20240119",
     "exit_date": "20240221",
     "entry_price": 430.0,
@@ -1848,7 +1848,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240119",
     "exit_date": "20240227",
     "entry_price": 155.0,
@@ -1861,7 +1861,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20240227",
     "exit_date": "20240327",
     "entry_price": 1115.0,
@@ -1874,7 +1874,7 @@
   {
     "stock_id": "1519",
     "stock_name": "華城",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20231221",
     "exit_date": "20240327",
     "entry_price": 318.5,
@@ -1887,7 +1887,7 @@
   {
     "stock_id": "2382",
     "stock_name": "廣達",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240327",
     "exit_date": "20240416",
     "entry_price": 257.5,
@@ -1900,7 +1900,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20240327",
     "exit_date": "20240426",
     "entry_price": 779.0,
@@ -1913,7 +1913,7 @@
   {
     "stock_id": "3017",
     "stock_name": "奇鋐",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240227",
     "exit_date": "20240527",
     "entry_price": 508.0,
@@ -1926,7 +1926,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240527",
     "exit_date": "20240628",
     "entry_price": 223.0,
@@ -1939,7 +1939,7 @@
   {
     "stock_id": "2382",
     "stock_name": "廣達",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240426",
     "exit_date": "20240722",
     "entry_price": 257.5,
@@ -1952,7 +1952,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20240426",
     "exit_date": "20240723",
     "entry_price": 155.0,
@@ -1965,7 +1965,7 @@
   {
     "stock_id": "1519",
     "stock_name": "華城",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20240723",
     "exit_date": "20240726",
     "entry_price": 940.0,
@@ -1978,7 +1978,7 @@
   {
     "stock_id": "2359",
     "stock_name": "所羅門",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240723",
     "exit_date": "20240729",
     "entry_price": 163.0,
@@ -1991,7 +1991,7 @@
   {
     "stock_id": "3013",
     "stock_name": "晟銘電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20240723",
     "exit_date": "20240805",
     "entry_price": 115.0,
@@ -2004,7 +2004,7 @@
   {
     "stock_id": "2330",
     "stock_name": "台積電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20241023",
     "exit_date": "20241121",
     "entry_price": 1060.0,
@@ -2017,7 +2017,7 @@
   {
     "stock_id": "2317",
     "stock_name": "鴻海",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20241121",
     "exit_date": "20241127",
     "entry_price": 202.5,
@@ -2030,7 +2030,7 @@
   {
     "stock_id": "2615",
     "stock_name": "萬海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20241023",
     "exit_date": "20241127",
     "entry_price": 87.7,
@@ -2043,7 +2043,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20241023",
     "exit_date": "20250109",
     "entry_price": 205.5,
@@ -2056,7 +2056,7 @@
   {
     "stock_id": "2609",
     "stock_name": "陽明",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20241219",
     "exit_date": "20250109",
     "entry_price": 78.2,
@@ -2069,7 +2069,7 @@
   {
     "stock_id": "3706",
     "stock_name": "神達",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20241219",
     "exit_date": "20250113",
     "entry_price": 73.8,
@@ -2082,10 +2082,10 @@
   {
     "stock_id": "2618",
     "stock_name": "長榮航",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250117",
     "exit_date": "20250211",
-    "entry_price": 47.6,
+    "entry_price": 47.65,
     "exit_price": 43.8,
     "direction": "多方 (Long)",
     "return_pct": -8.08,
@@ -2095,7 +2095,7 @@
   {
     "stock_id": "3450",
     "stock_name": "聯鈞",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250117",
     "exit_date": "20250225",
     "entry_price": 313.0,
@@ -2108,7 +2108,7 @@
   {
     "stock_id": "2383",
     "stock_name": "台光電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250117",
     "exit_date": "20250225",
     "entry_price": 598.0,
@@ -2121,7 +2121,7 @@
   {
     "stock_id": "3019",
     "stock_name": "亞光",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250225",
     "exit_date": "20250310",
     "entry_price": 203.0,
@@ -2134,7 +2134,7 @@
   {
     "stock_id": "2454",
     "stock_name": "聯發科",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250225",
     "exit_date": "20250310",
     "entry_price": 1550.0,
@@ -2147,7 +2147,7 @@
   {
     "stock_id": "2609",
     "stock_name": "陽明",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250526",
     "exit_date": "20250605",
     "entry_price": 83.0,
@@ -2160,7 +2160,7 @@
   {
     "stock_id": "2603",
     "stock_name": "長榮",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250526",
     "exit_date": "20250619",
     "entry_price": 253.0,
@@ -2173,7 +2173,7 @@
   {
     "stock_id": "2615",
     "stock_name": "萬海",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250526",
     "exit_date": "20250626",
     "entry_price": 117.0,
@@ -2186,7 +2186,7 @@
   {
     "stock_id": "2382",
     "stock_name": "廣達",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250624",
     "exit_date": "20250722",
     "entry_price": 289.5,
@@ -2199,11 +2199,11 @@
   {
     "stock_id": "2891",
     "stock_name": "中信金",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250624",
     "exit_date": "20250722",
-    "entry_price": 43.8,
-    "exit_price": 42.6,
+    "entry_price": 43.75,
+    "exit_price": 42.65,
     "direction": "多方 (Long)",
     "return_pct": -2.51,
     "holding_days": 20,
@@ -2212,7 +2212,7 @@
   {
     "stock_id": "2383",
     "stock_name": "台光電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250722",
     "exit_date": "20250819",
     "entry_price": 990.0,
@@ -2225,7 +2225,7 @@
   {
     "stock_id": "3017",
     "stock_name": "奇鋐",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250722",
     "exit_date": "20250916",
     "entry_price": 852.0,
@@ -2238,7 +2238,7 @@
   {
     "stock_id": "3706",
     "stock_name": "神達",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250819",
     "exit_date": "20250916",
     "entry_price": 92.0,
@@ -2251,7 +2251,7 @@
   {
     "stock_id": "2368",
     "stock_name": "金像電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20250722",
     "exit_date": "20251014",
     "entry_price": 326.5,
@@ -2264,7 +2264,7 @@
   {
     "stock_id": "2308",
     "stock_name": "台達電",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250916",
     "exit_date": "20251017",
     "entry_price": 841.0,
@@ -2277,7 +2277,7 @@
   {
     "stock_id": "8358",
     "stock_name": "金居",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20250916",
     "exit_date": "20251117",
     "entry_price": 214.0,
@@ -2290,7 +2290,7 @@
   {
     "stock_id": "2449",
     "stock_name": "京元電子",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20251017",
     "exit_date": "20251117",
     "entry_price": 175.0,
@@ -2303,7 +2303,7 @@
   {
     "stock_id": "8299",
     "stock_name": "群聯",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20251117",
     "exit_date": "20251215",
     "entry_price": 1290.0,
@@ -2316,7 +2316,7 @@
   {
     "stock_id": "8358",
     "stock_name": "金居",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20251215",
     "exit_date": "20260114",
     "entry_price": 274.0,
@@ -2329,10 +2329,10 @@
   {
     "stock_id": "2344",
     "stock_name": "華邦電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20251017",
     "exit_date": "20260211",
-    "entry_price": 44.0,
+    "entry_price": 43.95,
     "exit_price": 105.5,
     "direction": "多方 (Long)",
     "return_pct": 140.05,
@@ -2342,7 +2342,7 @@
   {
     "stock_id": "2408",
     "stock_name": "南亞科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20251117",
     "exit_date": "20260211",
     "entry_price": 166.5,
@@ -2355,7 +2355,7 @@
   {
     "stock_id": "6770",
     "stock_name": "力積電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20260114",
     "exit_date": "20260327",
     "entry_price": 50.6,
@@ -2368,7 +2368,7 @@
   {
     "stock_id": "3105",
     "stock_name": "穩懋",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260422",
     "exit_date": "20260521",
     "entry_price": 600.0,
@@ -2381,7 +2381,7 @@
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260211",
     "exit_date": "20260521",
     "entry_price": 98.5,
@@ -2394,7 +2394,7 @@
   {
     "stock_id": "3037",
     "stock_name": "欣興",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260211",
     "exit_date": "20260618",
     "entry_price": 369.0,
@@ -2407,7 +2407,7 @@
   {
     "stock_id": "2337",
     "stock_name": "旺宏",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260618",
     "exit_date": "20260701",
     "entry_price": 169.0,
@@ -2420,7 +2420,7 @@
   {
     "stock_id": "2344",
     "stock_name": "華邦電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260521",
     "exit_date": "20260720",
     "entry_price": 114.0,
@@ -2433,7 +2433,7 @@
   {
     "stock_id": "8046",
     "stock_name": "南電",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260717",
     "exit_date": "20260728",
     "entry_price": 1150.0,
@@ -2446,7 +2446,7 @@
   {
     "stock_id": "2408",
     "stock_name": "南亞科",
-    "role": "👑 王者泰坦 (50%)",
+    "role": "👑 王者泰坦 (40%)",
     "entry_date": "20260521",
     "exit_date": "20260729",
     "entry_price": 293.0,
@@ -2459,7 +2459,7 @@
   {
     "stock_id": "3189",
     "stock_name": "景碩",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260814",
     "exit_date": "20260903",
     "entry_price": 862.0,
@@ -2472,7 +2472,7 @@
   {
     "stock_id": "3037",
     "stock_name": "欣興",
-    "role": "🚀 革命衛星 (25%)",
+    "role": "🚀 革命衛星 (30%)",
     "entry_date": "20260911",
     "exit_date": "20260915",
     "entry_price": 977.0,
