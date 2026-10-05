@@ -1,7 +1,7 @@
 {
   "as_of_date": "20261002",
   "model_id": "titan_sovereign",
-  "model_name": "👑 泰坦波段主升王 (Scheme B: 58%勝率・十年+5092%)",
+  "model_name": "👑 泰坦王權主宰旗艦版 (Option A: 核心勝率66%・十年+9052%)",
   "cash_reserve_pct": 0.0,
   "market_exposure_pct": 100,
   "total_positions_count": 3,
@@ -9,8 +9,8 @@
     {
       "stock_id": "2454",
       "stock_name": "聯發科",
-      "role": "👑 王者泰坦 (40%)",
-      "target_weight_pct": 40,
+      "role": "👑 王者泰坦 (60%)",
+      "target_weight_pct": 60,
       "entry_date": "20260929",
       "entry_price": 4910.0,
       "current_price": 4950.0,
@@ -23,8 +23,8 @@
     {
       "stock_id": "3443",
       "stock_name": "創意",
-      "role": "🚀 革命衛星 (30%)",
-      "target_weight_pct": 30,
+      "role": "🚀 革命衛星 (20%)",
+      "target_weight_pct": 20,
       "entry_date": "20260929",
       "entry_price": 7925.0,
       "current_price": 7900.0,
@@ -35,18 +35,18 @@
       "stop_condition": "收盤跌破季線 60MA (NT$ 5483.6) 則次日全數停損退回現金"
     },
     {
-      "stock_id": "6213",
-      "stock_name": "聯茂",
-      "role": "🚀 革命衛星 (30%)",
-      "target_weight_pct": 30,
+      "stock_id": "3374",
+      "stock_name": "精材",
+      "role": "🚀 革命衛星 (20%)",
+      "target_weight_pct": 20,
       "entry_date": "20260929",
-      "entry_price": 620.0,
-      "current_price": 683.0,
-      "unrealized_return_pct": 10.16,
+      "entry_price": 455.0,
+      "current_price": 467.5,
+      "unrealized_return_pct": 2.75,
       "holding_days": 3,
-      "ma60_stop_price": 455.2,
-      "dist_to_stop_pct": 50.04,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 455.2) 則次日全數停損退回現金"
+      "ma60_stop_price": 378.8,
+      "dist_to_stop_pct": 23.42,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 378.8) 則次日全數停損退回現金"
     }
   ]
 }

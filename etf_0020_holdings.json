@@ -2,10 +2,10 @@
   "as_of_date": "20261002",
   "model_id": "etf_0020",
   "model_name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
-  "total_return_pct": 863.88,
-  "cagr_pct": 23.44,
-  "sharpe_ratio": 0.86,
-  "max_drawdown_pct": -52.1,
+  "total_return_pct": 680.37,
+  "cagr_pct": 20.94,
+  "sharpe_ratio": 0.74,
+  "max_drawdown_pct": -52.55,
   "cash_reserve_pct": 0.0,
   "market_exposure_pct": 100.0,
   "total_positions_count": 20,
@@ -16,8 +16,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 2505.0,
-      "avg_turnover_ntd_亿": 685.0
+      "current_price": 2500.0,
+      "avg_turnover_ntd_亿": 666.4
     },
     {
       "stock_id": "2454",
@@ -25,8 +25,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 4335.0,
-      "avg_turnover_ntd_亿": 369.1
+      "current_price": 4950.0,
+      "avg_turnover_ntd_亿": 362.0
     },
     {
       "stock_id": "2408",
@@ -34,8 +34,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 421.0,
-      "avg_turnover_ntd_亿": 357.3
+      "current_price": 526.0,
+      "avg_turnover_ntd_亿": 356.8
     },
     {
       "stock_id": "2327",
@@ -43,8 +43,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 1140.0,
-      "avg_turnover_ntd_亿": 325.6
+      "current_price": 626.0,
+      "avg_turnover_ntd_亿": 294.4
     },
     {
       "stock_id": "3037",
@@ -52,17 +52,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 1040.0,
-      "avg_turnover_ntd_亿": 232.2
-    },
-    {
-      "stock_id": "2344",
-      "stock_name": "華邦電",
-      "role": "🔷 0020 前20大成分股",
-      "target_weight_pct": 5.0,
-      "entry_date": "20261002",
-      "current_price": 190.0,
-      "avg_turnover_ntd_亿": 228.9
+      "current_price": 1305.0,
+      "avg_turnover_ntd_亿": 222.6
     },
     {
       "stock_id": "2303",
@@ -70,8 +61,17 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 169.0,
-      "avg_turnover_ntd_亿": 221.2
+      "current_price": 161.5,
+      "avg_turnover_ntd_亿": 222.1
+    },
+    {
+      "stock_id": "2344",
+      "stock_name": "華邦電",
+      "role": "🔷 0020 前20大成分股",
+      "target_weight_pct": 5.0,
+      "entry_date": "20261002",
+      "current_price": 179.0,
+      "avg_turnover_ntd_亿": 217.4
     },
     {
       "stock_id": "2308",
@@ -79,8 +79,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 1990.0,
-      "avg_turnover_ntd_亿": 213.2
+      "current_price": 1885.0,
+      "avg_turnover_ntd_亿": 210.4
     },
     {
       "stock_id": "1303",
@@ -88,8 +88,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 183.0,
-      "avg_turnover_ntd_亿": 185.1
+      "current_price": 260.0,
+      "avg_turnover_ntd_亿": 191.2
     },
     {
       "stock_id": "4958",
@@ -97,8 +97,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 603.0,
-      "avg_turnover_ntd_亿": 181.5
+      "current_price": 561.0,
+      "avg_turnover_ntd_亿": 177.1
     },
     {
       "stock_id": "8046",
@@ -106,17 +106,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 1175.0,
-      "avg_turnover_ntd_亿": 160.9
-    },
-    {
-      "stock_id": "3481",
-      "stock_name": "群創",
-      "role": "🔷 0020 前20大成分股",
-      "target_weight_pct": 5.0,
-      "entry_date": "20261002",
-      "current_price": 67.4,
-      "avg_turnover_ntd_亿": 151.2
+      "current_price": 1460.0,
+      "avg_turnover_ntd_亿": 155.6
     },
     {
       "stock_id": "3189",
@@ -124,17 +115,17 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 888.0,
-      "avg_turnover_ntd_亿": 138.4
+      "current_price": 1050.0,
+      "avg_turnover_ntd_亿": 138.0
     },
     {
-      "stock_id": "3711",
-      "stock_name": "日月光投控",
+      "stock_id": "3481",
+      "stock_name": "群創",
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 703.0,
-      "avg_turnover_ntd_亿": 127.7
+      "current_price": 52.8,
+      "avg_turnover_ntd_亿": 130.1
     },
     {
       "stock_id": "3008",
@@ -142,8 +133,8 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 4330.0,
-      "avg_turnover_ntd_亿": 126.9
+      "current_price": 6290.0,
+      "avg_turnover_ntd_亿": 128.9
     },
     {
       "stock_id": "6770",
@@ -151,26 +142,17 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 74.3,
-      "avg_turnover_ntd_亿": 122.0
+      "current_price": 76.5,
+      "avg_turnover_ntd_亿": 120.2
     },
     {
-      "stock_id": "2383",
-      "stock_name": "台光電",
+      "stock_id": "3711",
+      "stock_name": "日月光投控",
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 5535.0,
-      "avg_turnover_ntd_亿": 118.1
-    },
-    {
-      "stock_id": "3017",
-      "stock_name": "奇鋐",
-      "role": "🔷 0020 前20大成分股",
-      "target_weight_pct": 5.0,
-      "entry_date": "20261002",
-      "current_price": 2620.0,
-      "avg_turnover_ntd_亿": 114.4
+      "current_price": 713.0,
+      "avg_turnover_ntd_亿": 120.0
     },
     {
       "stock_id": "3231",
@@ -178,17 +160,35 @@
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 159.5,
-      "avg_turnover_ntd_亿": 111.8
+      "current_price": 186.5,
+      "avg_turnover_ntd_亿": 115.9
     },
     {
-      "stock_id": "6488",
-      "stock_name": "環球晶",
+      "stock_id": "2383",
+      "stock_name": "台光電",
       "role": "🔷 0020 前20大成分股",
       "target_weight_pct": 5.0,
       "entry_date": "20261002",
-      "current_price": 1105.0,
-      "avg_turnover_ntd_亿": 111.1
+      "current_price": 5185.0,
+      "avg_turnover_ntd_亿": 113.7
+    },
+    {
+      "stock_id": "3017",
+      "stock_name": "奇鋐",
+      "role": "🔷 0020 前20大成分股",
+      "target_weight_pct": 5.0,
+      "entry_date": "20261002",
+      "current_price": 3440.0,
+      "avg_turnover_ntd_亿": 111.9
+    },
+    {
+      "stock_id": "3443",
+      "stock_name": "創意",
+      "role": "🔷 0020 前20大成分股",
+      "target_weight_pct": 5.0,
+      "entry_date": "20261002",
+      "current_price": 7900.0,
+      "avg_turnover_ntd_亿": 105.1
     }
   ]
 }

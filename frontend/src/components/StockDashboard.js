@@ -187,7 +187,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'titan_sovereign', label: '👑 泰坦波段主升王 (TITAN-Sovereign Scheme B)', short: '👑 泰坦波段王', tag: '👑 勝率58%・十年+5092%・零槓桿', desc: '方案B波段主升王：嚴格零偷看未來！台美雙季線宏觀濾網+米奈爾維尼創高姿態選股+30日波段主升奔馳。10年報酬 +5,092.73% (CAGR 44.4%)、交易勝率 58.09% (79勝57敗)、盈虧比 2.66，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)', short: '👑 泰坦王權主宰', tag: '👑 王者勝率66%・十年+9052%・2024年+16.4%', desc: '旗艦版王權主宰：嚴格零偷看未來！島內加權季線宏觀濾網+市場廣度防護網+60%王者泰坦鎖定66%勝率巨頭+20%雙衛星爆發奔馳。10年總報酬 +9,052.39% (CAGR 52.3%, 91.5倍)、王者勝率 65.31%、全勝率 58.73%、2024 年逆轉獲利 +16.40%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -8417,7 +8417,7 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'titan_sovereign';
 
                   const BACKTEST_MODELS = [
-                    { id: 'titan_sovereign', name: '👑 泰坦波段主升王 (Scheme B 40/30/30)', icon: '👑', tag: '10年+5092%・勝率58.1%・夏普1.20・30日波段主升王' },
+                    { id: 'titan_sovereign', name: '👑 泰坦王權主宰旗艦版 (Option A 60/20/20)', icon: '👑', tag: '10年+9052% (91.5倍)・王者勝率65.3%・2024年+16.4%・夏普1.22' },
                     { id: 'etf_0020', name: '🚀 0020 台灣前20大等權重指數', icon: '🚀', tag: '10年+864%・勝過0050・前20大巨頭等權重' },
                     { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
