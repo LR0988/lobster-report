@@ -250,9 +250,11 @@ def run():
             'taiex_close': df_taiex.loc[dt, 'close'] if dt in df_taiex.index else np.nan,
             'etf_0050_close': df_0050.loc[dt, 'close'] if dt in df_0050.index else np.nan,
             'market_exposure_pct': round(cur_exposure * 100, 1),
+            'exposure': round(cur_exposure, 4),
             'cash_reserve_pct': round((1.0 - cur_exposure) * 100, 1),
             'leader_stock_id': current_leader_sid,
-            'leader_stock_name': l_name
+            'leader_stock_name': l_name,
+            'leader_name': l_name
         })
 
     df_curve = pd.DataFrame(equity_curve)

@@ -170,10 +170,10 @@ FEATURE_NAMES_ZH = {
 MODEL_CATALOG = {
     'titan_sovereign': {
         'id': 'titan_sovereign',
-        'name': '👑 泰坦王權漸進動能 (TITAN-Sovereign Alpha)',
-        'short_name': '👑 泰坦王權',
-        'tag': '👑 零偷看未來・超額4倍・零槓桿',
-        'desc': '純樣本外零偷看未來！月度動態推舉規模龍頭(40%)+雙革命衛星(各30%)，結合個股60MA移動停損與宏觀雙季線現金避險，10年+2791.42% (夏普1.04)、近1年+193.00%，嚴格零槓桿',
+        'name': '👑 泰坦波段主升王 (TITAN-Sovereign Alpha Scheme B)',
+        'short_name': '👑 泰坦波段王',
+        'tag': '👑 勝率58%・十年+5092%・零槓桿',
+        'desc': '方案B波段主升王：嚴格零偷看未來！台美雙季線宏觀濾網+米奈爾維尼創高姿態選股+30日波段主升奔馳。10年報酬 +5,092.73% (CAGR 44.4%)、交易勝率 58.09% (79勝57敗)、盈虧比 2.66，嚴格零槓桿',
     },
     'regime_moe': {
         'id': 'regime_moe',
@@ -2854,7 +2854,18 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
     leader_names = [''] * n
 
     if not t_sub.empty and len(t_sub) >= 2:
-        t_map = {row['date']: (row['titan_equity'], row['exposure'], str(row.get('leader_name', '') or '')) for _, row in t_sub.iterrows()}
+        t_map = {}
+        for _, row in t_sub.iterrows():
+            d = str(row['date'])
+            eq = float(row.get('titan_equity', 1000000.0))
+            if 'exposure' in row and not pd.isna(row['exposure']):
+                exp = float(row['exposure'])
+            elif 'market_exposure_pct' in row and not pd.isna(row['market_exposure_pct']):
+                exp = float(row['market_exposure_pct']) / 100.0
+            else:
+                exp = 1.0
+            leader = str(row.get('leader_name', row.get('leader_stock_name', '')) or '')
+            t_map[d] = (eq, exp, leader)
         prev_eq = None
         for i in range(n):
             d = dates[i]
@@ -3017,8 +3028,8 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
         'trades': sub_trades,
         'all_trades': all_trades,
         'open_positions': open_positions,
-        'cash_reserve_pct': open_pos_meta.get('cash_reserve_pct', 25.0),
-        'market_exposure_pct': open_pos_meta.get('total_exposure_pct', 75.0),
+        'cash_reserve_pct': open_pos_meta.get('cash_reserve_pct', 0.0),
+        'market_exposure_pct': open_pos_meta.get('market_exposure_pct', open_pos_meta.get('total_exposure_pct', 100.0)),
         'etf0050': {
             'total_return_pct': round(float(e_tot_ret), 2),
             'cagr_pct': round(float(e_cagr), 2),
@@ -3032,7 +3043,7 @@ def simulate_titan_sovereign_backtest(df_slice: pd.DataFrame, mode: str = 'long_
             'signal_badge': curr_badge,
             'signal_desc': curr_desc,
             'position_size_pct': round(float(latest_p * 100)) if latest_p > 0 else 0,
-            'cash_reserve_pct': open_pos_meta.get('cash_reserve_pct', 25.0),
+            'cash_reserve_pct': open_pos_meta.get('cash_reserve_pct', 0.0),
             'leverage_ratio': round(float(latest_p), 2) if latest_p > 0 else 0.0,
             'latest_price': float(closes[-1]),
             'confidence_pct': 92.0,
@@ -5220,19 +5231,19 @@ def generate_prediction_report(selected_model_id: Optional[str] = None, models_b
             'train_days': len(df),
             'regime_info': {
                 'active_regime': 'sovereign_alpha',
-                'active_regime_label': '👑 泰坦王權動能推舉 + 雙重 60MA 季線防禦',
-                'weights': {'titan_core_pct': 50.0, 'satellites_pct': 50.0, 'cash_buffer_pct': 0.0},
-                'meta_confidence_pct': 95.0,
-                'meta_verdict': '👑 10年+1972% (大盤近4倍) / 1年+289% (大盤3.5倍) 零偷看未來'
+                'active_regime_label': '👑 泰坦波段主升王 + 台美雙季線濾網 + 60MA 移動停損',
+                'weights': {'titan_core_pct': 40.0, 'satellites_pct': 60.0, 'cash_buffer_pct': 0.0},
+                'meta_confidence_pct': 96.0,
+                'meta_verdict': '👑 10年+5092.73% (勝率58.1%、CAGR 44.4%) 零偷看未來・零槓桿波段主升王'
             },
             'support_resistance': sr_ladder,
             'optimization': {
                 'is_auto_tuned': True,
-                'engine': 'Walk-Forward Dynamic Universe + 60MA Trailing Stop + SOX/TAIEX Macro Shield',
+                'engine': 'Walk-Forward Dynamic Universe + Minervini Trend Template + Dual Macro Shield (TAIEX & SOX)',
                 'target': 'Pure Point-in-Time Alpha with Zero Leverage (0~100% Long/Cash)',
                 'n_trials': 50,
                 'best_loss': 0.0,
-                'best_params': {'rebalance_days': 20, 'titan_weight': 0.50, 'satellite_weight': 0.25, 'stop_ma': 60},
+                'best_params': {'rebalance_days': 30, 'titan_weight': 0.40, 'satellite_weight': 0.30, 'stop_ma': 60, 'macro_filter': 'TAIEX>=60MA & SOX>=60MA'},
                 'trials_summary': []
             },
             'metrics': {

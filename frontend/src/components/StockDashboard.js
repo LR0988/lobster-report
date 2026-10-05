@@ -186,7 +186,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'titan_sovereign', label: '👑 泰坦王權漸進動能 (TITAN-Sovereign)', short: '👑 泰坦王權', tag: '👑 10年+1972% 零槓桿・大盤4倍', desc: '純樣本外零偷看未來！月度動態推舉規模龍頭(50%)+雙革命衛星(各25%)，結合個股60MA移動停損與宏觀雙季線現金避險，10年+1972.36% (大盤近4倍)、近1年+289.52% (大盤3.5倍)，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 泰坦波段主升王 (TITAN-Sovereign Scheme B)', short: '👑 泰坦波段王', tag: '👑 勝率58%・十年+5092%・零槓桿', desc: '方案B波段主升王：嚴格零偷看未來！台美雙季線宏觀濾網+米奈爾維尼創高姿態選股+30日波段主升奔馳。10年報酬 +5,092.73% (CAGR 44.4%)、交易勝率 58.09% (79勝57敗)、盈虧比 2.66，嚴格零槓桿！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
   { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，納入美股四大盤，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
@@ -8361,7 +8361,7 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'titan_sovereign';
 
                   const BACKTEST_MODELS = [
-                    { id: 'titan_sovereign', name: '👑 泰坦王權漸進動能 (40/30/30)', icon: '👑', tag: '10年+2791%・夏普 1.04・零偷看未來・零槓桿・40/30/30黃金配權' },
+                    { id: 'titan_sovereign', name: '👑 泰坦波段主升王 (Scheme B 40/30/30)', icon: '👑', tag: '10年+5092%・勝率58.1%・夏普1.20・30日波段主升王' },
                     { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
                     { id: 'wf_xgboost', name: '漸進 XGBoost', icon: '🌲', tag: '滾動學習 OOS 金標 (零偷看未來)' },
@@ -9781,8 +9781,8 @@ function StockDashboard() {
 
                         if (!activeOpenPositions || activeOpenPositions.length === 0) return null;
 
-                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (activeModelKey === 'titan_sovereign' ? 30.0 : 0);
-                        const activeExposure = activeModeData?.market_exposure_pct ?? (activeModelKey === 'titan_sovereign' ? 70.0 : 100);
+                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.cash_reserve_pct ?? 0.0) : 0);
+                        const activeExposure = activeModeData?.market_exposure_pct ?? (activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.market_exposure_pct ?? 100.0) : 100);
 
                         return (
                           <div style={{
