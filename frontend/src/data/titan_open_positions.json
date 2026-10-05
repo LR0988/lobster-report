@@ -1,0 +1,35 @@
+{
+  "as_of_date": "20261002",
+  "total_exposure_pct": 70.0,
+  "cash_reserve_pct": 30.0,
+  "open_positions": [
+    {
+      "stock_id": "2408",
+      "stock_name": "南亞科",
+      "role": "👑 王者泰坦 (40%)",
+      "target_weight_pct": 40,
+      "entry_date": "20260814",
+      "entry_price": 512.0,
+      "current_price": 526.0,
+      "unrealized_return_pct": 2.73,
+      "holding_days": 33,
+      "ma60_stop_price": 475.5,
+      "dist_to_stop_pct": 10.62,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 475.5) 則次日全數停損退回現金"
+    },
+    {
+      "stock_id": "1303",
+      "stock_name": "南亞",
+      "role": "🚀 革命衛星 (30%)",
+      "target_weight_pct": 30,
+      "entry_date": "20260814",
+      "entry_price": 207.5,
+      "current_price": 260.0,
+      "unrealized_return_pct": 25.3,
+      "holding_days": 33,
+      "ma60_stop_price": 207.31,
+      "dist_to_stop_pct": 25.42,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 207.3) 則次日全數停損退回現金"
+    }
+  ]
+}

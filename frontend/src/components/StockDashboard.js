@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../api';
 import defaultMarketMlData from '../data/defaultMarketMlData.json';
+import titanOpenPositionsData from '../data/titan_open_positions.json';
+import titanTradesData from '../data/titan_trades.json';
 import './StockDashboard.css';
 
 const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
@@ -7145,8 +7147,11 @@ function StockDashboard() {
                   const modelData = op.models_detail[activeModelKey] || op.models_detail['regime_moe'] || Object.values(op.models_detail)[0];
                   const activeModeKey = operationsMode || 'long_short';
                   const isLongShort = activeModeKey === 'long_short';
-                  const modeData = modelData?.[activeModeKey] || modelData?.long_short || {};
-                  const trades = modeData?.trades || [];
+                  const trades = (modeData?.trades && modeData.trades.length > 0)
+                    ? modeData.trades
+                    : (activeModelKey === 'titan_sovereign'
+                        ? (titanTradesData || []).filter(t => (t.exit_date || t.entry_date) >= '20260401')
+                        : []);
                   const currentStatus = modeData?.current_status || op.current_action || {};
                   const consensus = op.consensus || {};
                   const curve = modeData?.curve || [];
@@ -9757,36 +9762,7 @@ function StockDashboard() {
                           activePeriodData?.open_positions ||
                           bt.titan_open_positions ||
                           bt.open_positions ||
-                          (activeModelKey === 'titan_sovereign' ? [
-                            {
-                              stock_id: '2408',
-                              stock_name: '南亞科',
-                              role: '👑 王者泰坦 (40%)',
-                              target_weight_pct: 40,
-                              entry_date: '20260814',
-                              entry_price: 512.0,
-                              current_price: 526.0,
-                              unrealized_return_pct: 2.73,
-                              holding_days: 33,
-                              ma60_stop_price: 475.5,
-                              dist_to_stop_pct: 10.62,
-                              stop_condition: '收盤跌破季線 60MA (NT$ 475.5) 則次日全數停損退回現金'
-                            },
-                            {
-                              stock_id: '1303',
-                              stock_name: '南亞',
-                              role: '🚀 革命衛星 (30%)',
-                              target_weight_pct: 30,
-                              entry_date: '20260814',
-                              entry_price: 207.5,
-                              current_price: 260.0,
-                              unrealized_return_pct: 25.3,
-                              holding_days: 33,
-                              ma60_stop_price: 207.31,
-                              dist_to_stop_pct: 25.42,
-                              stop_condition: '收盤跌破季線 60MA (NT$ 207.3) 則次日全數停損退回現金'
-                            }
-                          ] : [])
+                          (activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.open_positions || []) : [])
                         );
 
                         if (!activeOpenPositions || activeOpenPositions.length === 0) return null;
@@ -9926,13 +9902,36 @@ function StockDashboard() {
                           activeModeData?.all_trades || 
                           selectedModelDetail?.all_trades || 
                           bt.all_titan_trades || 
+                          (activeModelKey === 'titan_sovereign' ? (titanTradesData || []) : []) ||
                           bt.periods?.['20y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
                           bt.periods?.['10y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
                           []
                         );
-                        const canToggleScope = allAvailableTrades.length > 0 && allAvailableTrades.length !== trades.length;
+
+                        // 動態計算當前選定區間之交易明細
+                        const periodTrades = (trades && trades.length > 0)
+                          ? trades
+                          : (activeModelKey === 'titan_sovereign' && allAvailableTrades && allAvailableTrades.length > 0
+                              ? allAvailableTrades.filter(t => {
+                                  const d = String(t.exit_date || t.entry_date || '');
+                                  if (!d) return true;
+                                  if (activePeriodKey === '10y' || activePeriodKey === '20y' || activePeriodKey === 'all') return true;
+                                  if (activePeriodKey === '5y') return d >= '20211002';
+                                  if (activePeriodKey === '3y') return d >= '20231002';
+                                  if (activePeriodKey === '1y') return d >= '20251002';
+                                  if (/^\d{4}$/.test(activePeriodKey)) return d.startsWith(activePeriodKey);
+                                  if (activePeriodKey === 'custom' && marketBtStartYear && marketBtEndYear) {
+                                    return d >= `${marketBtStartYear}0101` && d <= `${marketBtEndYear}1231`;
+                                  }
+                                  return true;
+                                })
+                              : []);
+
+                        const canToggleScope = allAvailableTrades.length > 0 && allAvailableTrades.length !== periodTrades.length;
                         const currentScope = (backtestTradeScope === 'all' && allAvailableTrades.length > 0) ? 'all' : 'period';
-                        const displayedTrades = currentScope === 'all' ? allAvailableTrades : trades;
+                        const displayedTrades = currentScope === 'all'
+                          ? allAvailableTrades
+                          : (periodTrades.length > 0 ? periodTrades : allAvailableTrades);
 
                         const hasStockDetail = displayedTrades.some(t => t.stock_name || t.stock_id);
                         const filteredTrades = displayedTrades.filter(t => {
@@ -10002,7 +10001,7 @@ function StockDashboard() {
                                 </h4>
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                                   {hasStockDetail
-                                    ? '👑 泰坦王權動態推舉個股 (50% 泰坦 + 25% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
+                                    ? '👑 泰坦王權動態推舉個股 (40% 泰坦 + 30% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
                                     : '大盤指數模擬交易，每次進出場扣除 0.05% 摩擦成本'}
                                   {currentScope === 'all' && (
                                     <span style={{ color: '#FCD34D', marginLeft: '0.4rem' }}>• 🔍 正在直接瀏覽全歷史完整明細清單</span>
@@ -10029,7 +10028,7 @@ function StockDashboard() {
                                       }}
                                       title="僅檢視上方選定時間區間內的交易紀錄"
                                     >
-                                      📍 當前區間 ({trades.length})
+                                      📍 當前區間 ({periodTrades.length})
                                     </button>
                                     <button
                                       type="button"

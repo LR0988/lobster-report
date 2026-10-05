@@ -5599,9 +5599,12 @@ def sync_market_ml_to_supabase(payload=None):
             'periods': periods_lite,
             'available_periods': bt_sim.get('available_periods', []),
             'available_years': bt_sim.get('available_years', []),
-            'selected_model_id': bt_sim.get('selected_model_id', 'wf_lightgbm'),
+            'selected_model_id': bt_sim.get('selected_model_id', 'titan_sovereign'),
             'default_period_key': bt_sim.get('default_period_key', '10y'),
-            'model_name': bt_sim.get('model_name', '漸進 LightGBM'),
+            'model_name': bt_sim.get('model_name', '👑 泰坦王權漸進動能 (40/30/30)'),
+            'all_titan_trades': bt_sim.get('all_titan_trades', []),
+            'titan_open_positions': bt_sim.get('titan_open_positions', []),
+            'open_positions': bt_sim.get('open_positions', []),
             'test_period': {
                 'benchmark': bt_sim.get('test_period', {}).get('benchmark', {}),
                 'etf0050': bt_sim.get('test_period', {}).get('etf0050', {}),
@@ -5617,10 +5620,16 @@ def sync_market_ml_to_supabase(payload=None):
                 m_entry = md[mid]
                 for mode in ('long_only', 'long_short'):
                     if mode in m_entry:
-                        m_entry[mode] = {
-                            k: v for k, v in m_entry[mode].items()
-                            if k not in ('curve', 'trades', 'action_markers')
-                        }
+                        if mid == 'titan_sovereign':
+                            m_entry[mode] = {
+                                k: v for k, v in m_entry[mode].items()
+                                if k not in ('curve', 'action_markers')
+                            }
+                        else:
+                            m_entry[mode] = {
+                                k: v for k, v in m_entry[mode].items()
+                                if k not in ('curve', 'trades', 'action_markers')
+                            }
 
         # ── 2. 完整回測 payload (taiex_macro_bt) — 回測分頁懶加載 ──
         bt_full = {
