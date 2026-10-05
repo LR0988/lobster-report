@@ -4,6 +4,7 @@ import { getCurrentUser } from '../api';
 import defaultMarketMlData from '../data/defaultMarketMlData.json';
 import titanOpenPositionsData from '../data/titan_open_positions.json';
 import titanTradesData from '../data/titan_trades.json';
+import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import './StockDashboard.css';
 
 const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
@@ -187,6 +188,7 @@ const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
   { val: 'titan_sovereign', label: '👑 泰坦波段主升王 (TITAN-Sovereign Scheme B)', short: '👑 泰坦波段王', tag: '👑 勝率58%・十年+5092%・零槓桿', desc: '方案B波段主升王：嚴格零偷看未來！台美雙季線宏觀濾網+米奈爾維尼創高姿態選股+30日波段主升奔馳。10年報酬 +5,092.73% (CAGR 44.4%)、交易勝率 58.09% (79勝57敗)、盈虧比 2.66，嚴格零槓桿！' },
+  { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
   { val: 'wf_xgboost', label: '🌲 漸進 XGBoost (WF-XGBoost)', short: '🌲 漸進 XGB', tag: '🛡️ 純樣本外金標', desc: 'XGBoost 滾動增量訓練，納入美股四大盤，嚴格 25 日隔離，對非線性波動轉折具高度動態適應性' },
@@ -6449,6 +6451,7 @@ function StockDashboard() {
                     sharpe: activeModeData?.benchmark_sharpe
                   };
                   const etf0050 = periodObj?.etf0050 || activeModeData?.etf0050 || null;
+                  const etf0020 = periodObj?.etf0020 || activeModeData?.etf0020 || null;
 
                   const curve = activeModeData?.curve || [];
                   const trades = activeModeData?.trades || [];
@@ -6467,7 +6470,7 @@ function StockDashboard() {
                   let minVal = 900000;
                   let maxVal = 2200000;
                   if (curve.length > 0) {
-                    const allVals = curve.flatMap(p => [p.strategy_equity, p.benchmark_equity, p.etf0050_equity].filter(v => typeof v === 'number' && !isNaN(v)));
+                    const allVals = curve.flatMap(p => [p.strategy_equity, p.benchmark_equity, p.etf0050_equity, p.etf0020_equity].filter(v => typeof v === 'number' && !isNaN(v)));
                     if (allVals.length > 0) {
                       minVal = Math.floor(Math.min(...allVals) * 0.96);
                       maxVal = Math.ceil(Math.max(...allVals) * 1.04);
@@ -6480,6 +6483,7 @@ function StockDashboard() {
                   const stratPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.strategy_equity).toFixed(1)}`).join(' ');
                   const benchPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.benchmark_equity).toFixed(1)}`).join(' ');
                   const etfPoints = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.etf0050_equity || p.benchmark_equity).toFixed(1)}`).join(' ');
+                  const etf0020Points = curve.map((p, i) => `${getX(i).toFixed(1)},${getY(p.etf0020_equity || p.benchmark_equity).toFixed(1)}`).join(' ');
 
                   // 水下回撤 SVG 計算
                   const ddH = 70;
@@ -6710,6 +6714,11 @@ function StockDashboard() {
                                     同期 0050: <span style={{ fontWeight: 'bold' }}>+{(etf0050.total_return_pct || 0).toFixed(1)}%</span>
                                   </div>
                                 )}
+                                {etf0020 && (
+                                  <div style={{ color: '#22D3EE' }}>
+                                    同期 0020: <span style={{ fontWeight: 'bold' }}>+{(etf0020.total_return_pct || 0).toFixed(1)}%</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -6732,6 +6741,11 @@ function StockDashboard() {
                                     0050 CAGR: <span style={{ fontWeight: 'bold' }}>+{(etf0050.cagr_pct || 0).toFixed(1)}%</span>
                                   </div>
                                 )}
+                                {etf0020 && (
+                                  <div style={{ color: '#22D3EE' }}>
+                                    0020 CAGR: <span style={{ fontWeight: 'bold' }}>+{(etf0020.cagr_pct || 0).toFixed(1)}%</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -6749,6 +6763,11 @@ function StockDashboard() {
                               </div>
                               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <div>大盤回撤: <span style={{ color: '#FCA5A5' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</span></div>
+                                {etf0020 && (
+                                  <div style={{ color: '#22D3EE' }}>
+                                    0020 回撤: <span style={{ fontWeight: 'bold' }}>{(etf0020.max_drawdown_pct || 0).toFixed(1)}%</span>
+                                  </div>
+                                )}
                                 <div style={{ color: '#34D399', fontWeight: '600' }}>
                                   🛡️ 結構防守有效避開重挫
                                 </div>
@@ -6878,6 +6897,12 @@ function StockDashboard() {
                                     <span style={{ color: '#38BDF8' }}>元大台灣 50 (0050)</span>
                                   </div>
                                 )}
+                                {etf0020 && (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                    <span style={{ display: 'inline-block', width: '14px', height: '2px', borderTop: '2px dashed #06B6D4' }}></span>
+                                    <span style={{ color: '#22D3EE' }}>前20大等權重 (0020)</span>
+                                  </div>
+                                )}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                   <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10B981' }}></span>
                                   <span style={{ color: '#6EE7B7' }}>買進</span>
@@ -6935,6 +6960,11 @@ function StockDashboard() {
                                 {/* 0050 ETF 走勢虛線 */}
                                 {curve.length > 1 && etf0050 && (
                                   <polyline points={etfPoints} fill="none" stroke="#38BDF8" strokeWidth="1.6" strokeDasharray="3 3" opacity="0.85" />
+                                )}
+
+                                {/* 0020 ETF 走勢虛線 */}
+                                {curve.length > 1 && etf0020 && (
+                                  <polyline points={etf0020Points} fill="none" stroke="#06B6D4" strokeWidth="1.6" strokeDasharray="4 2" opacity="0.9" />
                                 )}
 
                                 {/* 策略淨值走勢實線 (紫色微光) */}
@@ -7209,6 +7239,10 @@ function StockDashboard() {
                       if (pt.etf0050_equity < minVal) minVal = pt.etf0050_equity;
                       if (pt.etf0050_equity > maxVal) maxVal = pt.etf0050_equity;
                     }
+                    if (pt.etf0020_equity !== undefined) {
+                      if (pt.etf0020_equity < minVal) minVal = pt.etf0020_equity;
+                      if (pt.etf0020_equity > maxVal) maxVal = pt.etf0020_equity;
+                    }
                   });
 
                   if (minVal === Infinity) {
@@ -7226,6 +7260,7 @@ function StockDashboard() {
                   const stratPoints = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.strategy_equity).toFixed(1)}`).join(' ');
                   const benchPoints = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.benchmark_equity).toFixed(1)}`).join(' ');
                   const etfPoints = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.etf0050_equity || pt.benchmark_equity).toFixed(1)}`).join(' ');
+                  const etf0020Points = curve.map((pt, i) => `${getX(i).toFixed(1)},${getY(pt.etf0020_equity || pt.benchmark_equity).toFixed(1)}`).join(' ');
 
                   const opActionMarkers = modeData?.action_markers || [];
                   const curveDateMap = {};
@@ -7696,6 +7731,12 @@ function StockDashboard() {
                                   <span style={{ color: '#C4B5FD' }}>0050 ETF (+{modeData.etf0050.total_return_pct?.toFixed(1)}%)</span>
                                 </div>
                               )}
+                              {modeData.etf0020 && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#06B6D4', borderTop: '1px dashed #22D3EE' }}></span>
+                                  <span style={{ color: '#22D3EE' }}>0020 ETF (+{modeData.etf0020.total_return_pct?.toFixed(1)}%)</span>
+                                </div>
+                              )}
                               <button
                                 type="button"
                                 className="btn"
@@ -7754,6 +7795,11 @@ function StockDashboard() {
                                 <polyline fill="none" stroke="#8B5CF6" strokeWidth="1.8" strokeDasharray="3 3" points={etfPoints} />
                               )}
 
+                              {/* 0020 ETF 基準虛線 */}
+                              {curve.some(pt => pt.etf0020_equity !== undefined) && (
+                                <polyline fill="none" stroke="#06B6D4" strokeWidth="1.8" strokeDasharray="4 2" points={etf0020Points} opacity="0.9" />
+                              )}
+
                               {/* AI 策略折線 */}
                               <polyline fill="none" stroke="#10B981" strokeWidth="2.5" points={stratPoints} />
 
@@ -7791,6 +7837,16 @@ function StockDashboard() {
                                   <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].etf0050_equity)} r="3.5" fill="#8B5CF6" />
                                   <text x={getX(curve.length - 1) - 6} y={getY(curve[curve.length - 1].etf0050_equity) - 6} fill="#C4B5FD" fontSize="10" textAnchor="end">
                                     0050: NT$ {Math.round(curve[curve.length - 1].etf0050_equity).toLocaleString()}
+                                  </text>
+                                </>
+                              )}
+
+                              {/* 0020 終點標籤 */}
+                              {curve.length > 0 && curve[curve.length - 1].etf0020_equity && (
+                                <>
+                                  <circle cx={getX(curve.length - 1)} cy={getY(curve[curve.length - 1].etf0020_equity)} r="3.5" fill="#06B6D4" />
+                                  <text x={getX(curve.length - 1) - 6} y={getY(curve[curve.length - 1].etf0020_equity) - 6} fill="#22D3EE" fontSize="10" textAnchor="end">
+                                    0020: NT$ {Math.round(curve[curve.length - 1].etf0020_equity).toLocaleString()}
                                   </text>
                                 </>
                               )}
@@ -8362,6 +8418,7 @@ function StockDashboard() {
 
                   const BACKTEST_MODELS = [
                     { id: 'titan_sovereign', name: '👑 泰坦波段主升王 (Scheme B 40/30/30)', icon: '👑', tag: '10年+5092%・勝率58.1%・夏普1.20・30日波段主升王' },
+                    { id: 'etf_0020', name: '🚀 0020 台灣前20大等權重指數', icon: '🚀', tag: '10年+864%・勝過0050・前20大巨頭等權重' },
                     { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
                     { id: 'wf_xgboost', name: '漸進 XGBoost', icon: '🌲', tag: '滾動學習 OOS 金標 (零偷看未來)' },
@@ -8404,6 +8461,7 @@ function StockDashboard() {
                         const initStrat = filteredCurve[0].strategy_equity || 1;
                         const initBench = filteredCurve[0].benchmark_equity || 1;
                         const initEtf = filteredCurve[0].etf0050_equity || initBench;
+                        const initEtf20 = filteredCurve[0].etf0020_equity || initBench;
 
                         let peak = 1000000;
                         let maxDd = 0;
@@ -8411,11 +8469,14 @@ function StockDashboard() {
                         let benchMaxDd = 0;
                         let etfPeak = 1000000;
                         let etfMaxDd = 0;
+                        let etf20Peak = 1000000;
+                        let etf20MaxDd = 0;
 
                         const rebasedCurve = filteredCurve.map(p => {
                           const stratEq = (p.strategy_equity / initStrat) * 1000000;
                           const benchEq = (p.benchmark_equity / initBench) * 1000000;
                           const etfEq = p.etf0050_equity ? (p.etf0050_equity / initEtf) * 1000000 : benchEq;
+                          const etf20Eq = p.etf0020_equity ? (p.etf0020_equity / initEtf20) * 1000000 : benchEq;
 
                           if (stratEq > peak) peak = stratEq;
                           const dd = ((stratEq - peak) / peak) * 100;
@@ -8429,11 +8490,16 @@ function StockDashboard() {
                           const eDd = ((etfEq - etfPeak) / etfPeak) * 100;
                           if (eDd < etfMaxDd) etfMaxDd = eDd;
 
+                          if (etf20Eq > etf20Peak) etf20Peak = etf20Eq;
+                          const e20Dd = ((etf20Eq - etf20Peak) / etf20Peak) * 100;
+                          if (e20Dd < etf20MaxDd) etf20MaxDd = e20Dd;
+
                           return {
                             ...p,
                             strategy_equity: Math.round(stratEq),
                             benchmark_equity: Math.round(benchEq),
                             etf0050_equity: Math.round(etfEq),
+                            etf0020_equity: Math.round(etf20Eq),
                             drawdown_pct: dd
                           };
                         });
@@ -8441,14 +8507,17 @@ function StockDashboard() {
                         const finalStrat = rebasedCurve[rebasedCurve.length - 1].strategy_equity;
                         const finalBench = rebasedCurve[rebasedCurve.length - 1].benchmark_equity;
                         const finalEtf = rebasedCurve[rebasedCurve.length - 1].etf0050_equity;
+                        const finalEtf20 = rebasedCurve[rebasedCurve.length - 1].etf0020_equity;
                         const totalRet = ((finalStrat - 1000000) / 1000000) * 100;
                         const benchTotalRet = ((finalBench - 1000000) / 1000000) * 100;
                         const etfTotalRet = ((finalEtf - 1000000) / 1000000) * 100;
+                        const etf20TotalRet = ((finalEtf20 - 1000000) / 1000000) * 100;
 
                         const yearsElapsed = Math.max(0.2, (maxYr - minYr + 1));
                         const cagr = (Math.pow(Math.max(0.01, finalStrat / 1000000), 1 / yearsElapsed) - 1) * 100;
                         const benchCagr = (Math.pow(Math.max(0.01, finalBench / 1000000), 1 / yearsElapsed) - 1) * 100;
                         const etfCagr = (Math.pow(Math.max(0.01, finalEtf / 1000000), 1 / yearsElapsed) - 1) * 100;
+                        const etf20Cagr = (Math.pow(Math.max(0.01, finalEtf20 / 1000000), 1 / yearsElapsed) - 1) * 100;
 
                         const allTrades = baseMode?.trades || [];
                         const slicedTrades = allTrades.filter(t => {
@@ -8474,6 +8543,14 @@ function StockDashboard() {
                           alpha_pct: totalRet - etfTotalRet
                         };
 
+                        const customEtf0020 = {
+                          total_return_pct: etf20TotalRet,
+                          cagr_pct: etf20Cagr,
+                          max_drawdown_pct: etf20MaxDd,
+                          sharpe_ratio: basePeriod?.etf0020?.sharpe_ratio || 0.86,
+                          alpha_pct: totalRet - etf20TotalRet
+                        };
+
                         const customModeData = {
                           total_return_pct: totalRet,
                           cagr_pct: cagr,
@@ -8490,7 +8567,8 @@ function StockDashboard() {
                           curve: rebasedCurve,
                           trades: slicedTrades,
                           action_markers: slicedMarkers,
-                          etf0050: customEtf0050
+                          etf0050: customEtf0050,
+                          etf0020: customEtf0020
                         };
 
                         activePeriodData = {
@@ -8506,6 +8584,7 @@ function StockDashboard() {
                             sharpe_ratio: basePeriod?.benchmark?.sharpe_ratio || 0.95
                           },
                           etf0050: customEtf0050,
+                          etf0020: customEtf0020,
                           action_markers: slicedMarkers,
                           long_short: isLongShort ? customModeData : basePeriod?.long_short,
                           long_only: !isLongShort ? customModeData : basePeriod?.long_only,
@@ -9774,15 +9853,21 @@ function StockDashboard() {
                           activeModeData?.open_positions ||
                           selectedModelDetail?.open_positions ||
                           activePeriodData?.open_positions ||
-                          bt.titan_open_positions ||
-                          bt.open_positions ||
-                          (activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.open_positions || []) : [])
+                          (activeModelKey === 'etf_0020' ? (etf0020HoldingsData?.open_positions || []) :
+                           activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.open_positions || bt.titan_open_positions || bt.open_positions || []) :
+                           (bt.open_positions || []))
                         );
 
                         if (!activeOpenPositions || activeOpenPositions.length === 0) return null;
 
-                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.cash_reserve_pct ?? 0.0) : 0);
-                        const activeExposure = activeModeData?.market_exposure_pct ?? (activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.market_exposure_pct ?? 100.0) : 100);
+                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (
+                          activeModelKey === 'etf_0020' ? 0.0 :
+                          activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.cash_reserve_pct ?? 0.0) : 0
+                        );
+                        const activeExposure = activeModeData?.market_exposure_pct ?? (
+                          activeModelKey === 'etf_0020' ? 100.0 :
+                          activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.market_exposure_pct ?? 100.0) : 100
+                        );
 
                         return (
                           <div style={{
