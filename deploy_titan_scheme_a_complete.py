@@ -520,6 +520,11 @@ if row_macro:
     bt_macro['titan_open_positions'] = open_positions_export
     bt_macro['open_positions'] = open_positions_export
     bt_macro['all_titan_trades'] = all_completed_trades
+    bt_macro['as_of_date'] = str(latest_dt)
+    bt_macro['titan_open_positions_meta'] = open_positions_meta
+    bt_macro['market_exposure_pct'] = round(float(open_positions_meta.get('market_exposure_pct', 87.5)), 1)
+    bt_macro['cash_reserve_pct'] = round(float(open_positions_meta.get('cash_reserve_pct', 12.5)), 1)
+    p_macro['latest_date'] = str(latest_dt)
 
     # 更新 periods 中的 titan_sovereign 概覽數據
     if 'periods' in bt_macro:
@@ -561,6 +566,11 @@ if row_bt:
     bt_full['titan_open_positions'] = open_positions_export
     bt_full['open_positions'] = open_positions_export
     bt_full['all_titan_trades'] = all_completed_trades
+    bt_full['as_of_date'] = str(latest_dt)
+    bt_full['titan_open_positions_meta'] = open_positions_meta
+    bt_full['market_exposure_pct'] = round(float(open_positions_meta.get('market_exposure_pct', 87.5)), 1)
+    bt_full['cash_reserve_pct'] = round(float(open_positions_meta.get('cash_reserve_pct', 12.5)), 1)
+    p_bt['latest_date'] = str(latest_dt)
     
     # 注入 periods 10y 的完整曲線與操作標注
     if 'periods' in bt_full and '10y' in bt_full['periods']:

@@ -1814,6 +1814,18 @@ function StockDashboard() {
         labeling_param: extraConfig.labeling_param !== undefined ? extraConfig.labeling_param : marketMlLabelingParam,
         ...extraConfig
       };
+
+      // 雙軌發起：若有本地後端則直呼 /api/market_ml/predict
+      try {
+        if (jobType === 'market_ml_predict') {
+          stockFetch('/api/market_ml/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(configPayload)
+          }).catch(() => {});
+        }
+      } catch (e) {}
+
       const createRes = await supabaseFetch('/stock_screener_jobs', {
         method: 'POST',
         headers: { 'Prefer': 'return=representation' },
@@ -1850,6 +1862,7 @@ function StockDashboard() {
                     });
                   }
                   await fetchMarketMlData();
+                  await fetchMarketMlBtData();
                   const isAutoTuned = extraConfig.auto_tune || (extraConfig.auto_tune === undefined && marketMlAutoTune);
                   if (jobType === 'market_ml_train') {
                     alert(isAutoTuned
@@ -1857,7 +1870,7 @@ function StockDashboard() {
                       : '🎉 大盤 ML 模型訓練與指標評估完成！'
                     );
                   } else {
-                    alert('🚀 大盤最新推論與波段回測模擬已完成！');
+                    alert('🚀 大盤與泰坦實戰部位最新推論已完成！');
                   }
                   return;
                 } else if (current.status === 'error') {
@@ -1873,6 +1886,7 @@ function StockDashboard() {
     } finally {
       setTriggeringMarketMl(false);
       fetchMarketMlData();
+      fetchMarketMlBtData();
     }
   };
 
@@ -10384,6 +10398,9 @@ function StockDashboard() {
                           activePeriodData?.open_positions ||
                           (activeModelKey === 'etf_0020' ? (etf0020HoldingsData?.open_positions || []) :
                            activeModelKey === 'titan_sovereign' ? (
+                             (marketMlData?.backtest_simulation?.titan_open_positions && marketMlData.backtest_simulation.titan_open_positions.length > 0 ? marketMlData.backtest_simulation.titan_open_positions : null) ||
+                             (marketMlBtData?.titan_open_positions && marketMlBtData.titan_open_positions.length > 0 ? marketMlBtData.titan_open_positions : null) ||
+                             (marketMlData?.titan_open_positions && marketMlData.titan_open_positions.length > 0 ? marketMlData.titan_open_positions : null) ||
                              (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : titanOpenPositionsData?.open_positions) ||
                              bt.titan_open_positions || bt.open_positions || []
                            ) :
@@ -10392,17 +10409,23 @@ function StockDashboard() {
 
                         if (!activeOpenPositions || activeOpenPositions.length === 0) return null;
 
-                        const activeCashReserve = activeModeData?.cash_reserve_pct ?? (
-                          activeModelKey === 'etf_0020' ? 0.0 :
-                          activeModelKey === 'titan_sovereign' ? (
-                            titanOpenPositionsData?.cash_reserve_pct ?? bt.titan_open_positions?.cash_reserve_pct ?? 0.0
-                          ) : 0
+                        const activeCashReserve = (
+                          marketMlData?.backtest_simulation?.cash_reserve_pct ??
+                          activeModeData?.cash_reserve_pct ?? (
+                            activeModelKey === 'etf_0020' ? 0.0 :
+                            activeModelKey === 'titan_sovereign' ? (
+                              titanOpenPositionsData?.cash_reserve_pct ?? 12.5
+                            ) : 0
+                          )
                         );
-                        const activeExposure = activeModeData?.market_exposure_pct ?? (
-                          activeModelKey === 'etf_0020' ? 100.0 :
-                          activeModelKey === 'titan_sovereign' ? (
-                            titanOpenPositionsData?.market_exposure_pct ?? bt.titan_open_positions?.market_exposure_pct ?? 100.0
-                          ) : 100
+                        const activeExposure = (
+                          marketMlData?.backtest_simulation?.market_exposure_pct ??
+                          activeModeData?.market_exposure_pct ?? (
+                            activeModelKey === 'etf_0020' ? 100.0 :
+                            activeModelKey === 'titan_sovereign' ? (
+                              titanOpenPositionsData?.market_exposure_pct ?? 87.5
+                            ) : 100
+                          )
                         );
 
                         return (
@@ -10429,14 +10452,15 @@ function StockDashboard() {
                                   最新部位曝險：<strong style={{ color: '#38BDF8' }}>{Number(activeExposure || 0).toFixed(1)}%</strong> 持股 ＋ <strong style={{ color: '#FCD34D' }}>{Number(activeCashReserve || 0).toFixed(1)}%</strong> 防禦現金（未平倉個股由 60MA 季線嚴密風控保護中）
                                 </div>
                               </div>
-                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                                 <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
                                   結算基準日：<strong style={{ color: '#E2E8F0' }}>
                                     {(() => {
                                       const asOf = (
+                                        marketMlData?.backtest_simulation?.as_of_date ||
+                                        marketMlData?.latest_date ||
                                         titanOpenPositionsData?.as_of_date ||
                                         activeModeData?.as_of_date ||
-                                        marketMlData?.latest_date ||
                                         '20261006'
                                       );
                                       if (asOf && asOf.length === 8) {
@@ -10446,6 +10470,41 @@ function StockDashboard() {
                                     })()}
                                   </strong>
                                 </span>
+
+                                <button
+                                  type="button"
+                                  className="btn"
+                                  onClick={() => handleTriggerMarketMlJob('market_ml_predict', { model_type: activeModelKey || 'titan_sovereign' })}
+                                  disabled={triggeringMarketMl}
+                                  style={{
+                                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                                    color: '#0F172A',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.78rem',
+                                    padding: '0.35rem 0.85rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  title="以最新歷史日K立即執行全市場打分並更新實戰持倉部位"
+                                >
+                                  {triggeringMarketMl ? (
+                                    <>
+                                      <span className="loader" style={{ width: '12px', height: '12px', borderColor: '#0F172A', borderBottomColor: 'transparent' }}></span>
+                                      <span>推論運算中...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>⚡</span>
+                                      <span>按此推論更新</span>
+                                    </>
+                                  )}
+                                </button>
                               </div>
                             </div>
 

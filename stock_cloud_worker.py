@@ -541,6 +541,16 @@ sync_macro_indicators.check_and_auto_backfill()
 import sync_options_pc_ratio
 sync_options_pc_ratio.sync_options_pc_ratio()
 
+# 1.5 自動執行泰坦王權 Option A 70/15/15 實戰持倉與曲線最新推論
+try:
+    import subprocess
+    titan_script = '/Users/huanggin-chen/openclaw_test/deploy_titan_scheme_a_complete.py'
+    if os.path.exists(titan_script):
+        print('[*] 正在刷新泰坦王權持倉與曲線推論...')
+        subprocess.run(['/Users/huanggin-chen/gemini-stock-analysis/venv/bin/python', titan_script], cwd='/Users/huanggin-chen/openclaw_test', check=True)
+except Exception as e:
+    print("[!] 自動刷新泰坦持倉提醒 (非致命):", e)
+
 import market_ml_engine
 sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
 sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
