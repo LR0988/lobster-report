@@ -10426,12 +10426,25 @@ function StockDashboard() {
                                   </span>
                                 </div>
                                 <div style={{ fontSize: '0.78rem', color: '#CBD5E1', marginTop: '0.3rem' }}>
-                                  最新部位曝險：<strong style={{ color: '#38BDF8' }}>{activeExposure}%</strong> 持股 ＋ <strong style={{ color: '#FCD34D' }}>{activeCashReserve}%</strong> 防禦現金（未平倉個股由 60MA 季線嚴密風控保護中）
+                                  最新部位曝險：<strong style={{ color: '#38BDF8' }}>{Number(activeExposure || 0).toFixed(1)}%</strong> 持股 ＋ <strong style={{ color: '#FCD34D' }}>{Number(activeCashReserve || 0).toFixed(1)}%</strong> 防禦現金（未平倉個股由 60MA 季線嚴密風控保護中）
                                 </div>
                               </div>
                               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                 <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
-                                  結算基準日：<strong style={{ color: '#E2E8F0' }}>2026/10/02</strong>
+                                  結算基準日：<strong style={{ color: '#E2E8F0' }}>
+                                    {(() => {
+                                      const asOf = (
+                                        titanOpenPositionsData?.as_of_date ||
+                                        activeModeData?.as_of_date ||
+                                        marketMlData?.latest_date ||
+                                        '20261006'
+                                      );
+                                      if (asOf && asOf.length === 8) {
+                                        return `${asOf.slice(0, 4)}/${asOf.slice(4, 6)}/${asOf.slice(6, 8)}`;
+                                      }
+                                      return asOf || '最新交易日';
+                                    })()}
+                                  </strong>
                                 </span>
                               </div>
                             </div>

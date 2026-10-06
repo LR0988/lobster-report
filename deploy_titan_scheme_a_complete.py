@@ -15,8 +15,8 @@ print("[*] 正在載入資料庫並執行 👑 泰坦王權主宰旗艦版 (Opti
 conn = sqlite3.connect(DB_PATH)
 
 # 1. 讀取加權指數與 0050
-df_taiex = pd.read_sql_query('SELECT date, close FROM daily_index WHERE date >= "20150101" AND date <= "20261002" ORDER BY date', conn).set_index('date')
-df_0050 = pd.read_sql_query('SELECT date, closing_price as close FROM daily_stock WHERE stock_id = "0050" AND date >= "20150101" AND date <= "20261002" ORDER BY date', conn).set_index('date')
+df_taiex = pd.read_sql_query('SELECT date, close FROM daily_index WHERE date >= "20150101" ORDER BY date', conn).set_index('date')
+df_0050 = pd.read_sql_query('SELECT date, closing_price as close FROM daily_stock WHERE stock_id = "0050" AND date >= "20150101" ORDER BY date', conn).set_index('date')
 
 df_macro_overlay = df_taiex.copy()
 df_macro_overlay['taiex_ma60'] = df_macro_overlay['close'].rolling(60).mean()
@@ -43,13 +43,13 @@ placeholders = ','.join(['?']*len(sids))
 df_px = pd.read_sql_query(f'''
     SELECT date, stock_id, stock_name, opening_price, highest_price, lowest_price, closing_price, trade_value
     FROM daily_stock
-    WHERE stock_id IN ({placeholders}) AND date >= "20150101" AND date <= "20261002"
+    WHERE stock_id IN ({placeholders}) AND date >= "20150101"
 ''', conn, params=sids)
 
 df_inst = pd.read_sql_query(f'''
     SELECT date, stock_id, foreign_net, trust_net
     FROM institutional_trades
-    WHERE stock_id IN ({placeholders}) AND date >= "20150101" AND date <= "20261002"
+    WHERE stock_id IN ({placeholders}) AND date >= "20150101"
 ''', conn, params=sids)
 conn.close()
 
