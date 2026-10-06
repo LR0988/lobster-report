@@ -10100,7 +10100,7 @@ function StockDashboard() {
                                 </h4>
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                                   {hasStockDetail
-                                    ? '👑 泰坦王權動態推舉個股 (40% 泰坦 + 30% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
+                                    ? '👑 泰坦王權動態推舉個股 (60% 王者泰坦 + 20% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
                                     : '大盤指數模擬交易，每次進出場扣除 0.05% 摩擦成本'}
                                   {currentScope === 'all' && (
                                     <span style={{ color: '#FCD34D', marginLeft: '0.4rem' }}>• 🔍 正在直接瀏覽全歷史完整明細清單</span>
