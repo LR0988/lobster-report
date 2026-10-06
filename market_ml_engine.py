@@ -5971,9 +5971,22 @@ def sync_market_ml_to_supabase(payload=None):
                             }
 
         # ── 2. 完整回測 payload (taiex_macro_bt) — 回測分頁懶加載 ──
+        bt_sim_full = copy.deepcopy(clean.get('backtest_simulation', {}))
+        periods_full = bt_sim_full.get('periods', {})
+        for pk, pv in list(periods_full.items()):
+            md = pv.get('models_detail', {})
+            if 'alpha_dynamic_convex' in md:
+                del md['alpha_dynamic_convex']
+            if pk.isdigit() and len(pk) == 4:
+                keep_models = {'titan_sovereign', 'etf_0020', 'wf_lightgbm'}
+                pv['models_detail'] = {k: v for k, v in md.items() if k in keep_models}
+        for k in ['full_history_20y', 'full_history_10y', 'models_detail']:
+            if k in bt_sim_full:
+                del bt_sim_full[k]
+
         bt_full = {
             'updated_at': clean.get('trained_at', ''),
-            'backtest_simulation': clean.get('backtest_simulation', {}),
+            'backtest_simulation': bt_sim_full,
         }
 
         lite_json = json.dumps(lite, ensure_ascii=False)
