@@ -325,29 +325,19 @@ for i, dt in enumerate(all_dates):
 
 df_curve = pd.DataFrame(equity_curve)
 
-# 基準重設 (TAIEX, 0050, 0020 起始皆設為 1,000,000)
-base_taiex = df_taiex.loc[all_dates[0], 'close']
-base_0050 = df_0050.loc[all_dates[0], 'close'] if all_dates[0] in df_0050.index else 14.89
-base_0020 = df_0020_map.get(all_dates[0], 1000000.0)
+# 基準重設 (TAIEX, 0050, 0020 連續平滑無缺失補值，起始皆設為 1,000,000)
+s_taiex = df_taiex['close'].reindex(all_dates).ffill().bfill()
+s_0050 = df_0050['close'].reindex(all_dates).ffill().bfill()
+s_0020 = pd.Series([df_0020_map.get(d) for d in all_dates], index=all_dates).ffill().bfill()
+
+base_taiex = float(s_taiex.iloc[0])
+base_0050 = float(s_0050.iloc[0])
+base_0020 = float(s_0020.iloc[0])
 
 df_curve['strategy_equity'] = df_curve['titan_equity']
-
-# 計算各基準之走勢
-bench_list = []
-etf0050_list = []
-etf0020_list = []
-for d in df_curve['date']:
-    tx_val = df_taiex.loc[d, 'close'] if d in df_taiex.index else base_taiex
-    e50_val = df_0050.loc[d, 'close'] if d in df_0050.index else base_0050
-    e20_val = df_0020_map.get(d, base_0020)
-
-    bench_list.append(round(float(tx_val / base_taiex * 1000000.0), 2))
-    etf0050_list.append(round(float(e50_val / base_0050 * 1000000.0), 2))
-    etf0020_list.append(round(float(e20_val / base_0020 * 1000000.0), 2))
-
-df_curve['benchmark_equity'] = bench_list
-df_curve['etf0050_equity'] = etf0050_list
-df_curve['etf0020_equity'] = etf0020_list
+df_curve['benchmark_equity'] = [round(float(s_taiex.loc[d] / base_taiex * 1000000.0), 2) for d in all_dates]
+df_curve['etf0050_equity'] = [round(float(s_0050.loc[d] / base_0050 * 1000000.0), 2) for d in all_dates]
+df_curve['etf0020_equity'] = [round(float(s_0020.loc[d] / base_0020 * 1000000.0), 2) for d in all_dates]
 
 # 計算 Drawdown
 peak = df_curve['strategy_equity'].cummax()
