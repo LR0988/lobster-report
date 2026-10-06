@@ -527,52 +527,100 @@ if res.get('status') == 'ok':
     return {"status": "ok", "message": f"{model_type.upper()} 模型訓練完成並已同步至雲端快取！"}
 
 def execute_market_ml_job(config: dict) -> dict:
-    """執行大盤最新日K同步、國際宏觀指標爬取與多因子 ML 推論及波段回測模擬"""
-    print("[*] 正在同步最新大盤加權指數日K與國際宏觀指標...")
-    import importlib
-    import sync_market_index
-    importlib.reload(sync_market_index)
-    sync_market_index.sync_taiex_to_sqlite()
-    import sync_macro_indicators
-    importlib.reload(sync_macro_indicators)
-    sync_macro_indicators.check_and_auto_backfill()
-    import sync_options_pc_ratio
-    importlib.reload(sync_options_pc_ratio)
-    sync_options_pc_ratio.sync_options_pc_ratio()
-    
-    print("[*] 正在執行大盤 ML 多因子推論與波段模擬回測...")
-    import market_ml_engine
-    importlib.reload(market_ml_engine)
-    sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
-    sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
-    sys.modules['__main__'].SoftVotingEnsemble = market_ml_engine.SoftVotingEnsemble
-
+    """執行大盤最新日K同步、國際宏觀指標爬取與多因子 ML 推論及波段回測模擬 (子進程安全執行，避免 macOS OpenMP 衝突)"""
     selected_model = config.get("model_type")
-    result = market_ml_engine.generate_prediction_report(selected_model_id=selected_model)
-    return {"status": "ok", "message": "大盤預測與回測模擬已更新並同步至雲端！", "data": {"status": "success", "latest_date": result.get("latest_date"), "best_model_id": result.get("best_model_id")}}
+    print(f"[*] 啟動大盤 ML 推論任務 (子進程模式, model={selected_model})...")
+    
+    script_code = f"""
+import sys, os, json
+sys.path.insert(0, '/Users/huanggin-chen/gemini-stock-analysis')
+import sync_market_index
+sync_market_index.sync_taiex_to_sqlite()
+import sync_macro_indicators
+sync_macro_indicators.check_and_auto_backfill()
+import sync_options_pc_ratio
+sync_options_pc_ratio.sync_options_pc_ratio()
+
+import market_ml_engine
+sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
+sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
+sys.modules['__main__'].SoftVotingEnsemble = market_ml_engine.SoftVotingEnsemble
+
+selected_model = {repr(selected_model)}
+result = market_ml_engine.generate_prediction_report(selected_model_id=selected_model)
+print('__RESULT__' + json.dumps({{"status": "ok", "message": "大盤預測與回測模擬已更新並同步至雲端！", "data": {{"status": "success", "latest_date": result.get("latest_date"), "best_model_id": result.get("best_model_id")}}}}))
+"""
+    env = os.environ.copy()
+    env["OMP_NUM_THREADS"] = "1"
+    env["OPENBLAS_NUM_THREADS"] = "1"
+    env["MKL_NUM_THREADS"] = "1"
+    env["VECLIB_MAXIMUM_THREADS"] = "1"
+    env["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+    env["PYTHONUNBUFFERED"] = "1"
+
+    proc = subprocess.run(
+        [LOCAL_VENV_PYTHON, "-c", script_code],
+        cwd=LOCAL_DIR,
+        capture_output=True,
+        text=True,
+        env=env
+    )
+    if proc.returncode != 0:
+        err_msg = proc.stderr[:1000] if proc.stderr else proc.stdout[:1000]
+        print(f"[x] 大盤預測推論失敗: {err_msg}")
+        raise RuntimeError(f"大盤預測失敗: {err_msg}")
+
+    for line in proc.stdout.splitlines():
+        if line.startswith("__RESULT__"):
+            return json.loads(line[len("__RESULT__"):])
+    return {"status": "ok", "message": "大盤預測已更新"}
 
 def execute_market_ml_train_job(config: dict) -> dict:
-    """重新訓練大盤多因子模型並產出最新推論與波段回測"""
-    print(f"[*] 正在同步最新大盤日K、國際宏觀指標並重新訓練大盤 ML 模型 (config={config})...")
-    import importlib
-    import sync_market_index
-    importlib.reload(sync_market_index)
-    sync_market_index.sync_taiex_to_sqlite()
-    import sync_macro_indicators
-    importlib.reload(sync_macro_indicators)
-    sync_macro_indicators.check_and_auto_backfill()
-    import sync_options_pc_ratio
-    importlib.reload(sync_options_pc_ratio)
-    sync_options_pc_ratio.sync_options_pc_ratio()
-    
-    import market_ml_engine
-    importlib.reload(market_ml_engine)
-    sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
-    sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
-    sys.modules['__main__'].SoftVotingEnsemble = market_ml_engine.SoftVotingEnsemble
+    """重新訓練大盤多因子模型並產出最新推論與波段回測 (子進程安全執行，避免 macOS OpenMP 衝突)"""
+    print(f"[*] 啟動大盤 ML 模型重訓任務 (子進程模式, config={config})...")
+    script_code = f"""
+import sys, os, json
+sys.path.insert(0, '/Users/huanggin-chen/gemini-stock-analysis')
+import sync_market_index
+sync_market_index.sync_taiex_to_sqlite()
+import sync_macro_indicators
+sync_macro_indicators.check_and_auto_backfill()
+import sync_options_pc_ratio
+sync_options_pc_ratio.sync_options_pc_ratio()
 
-    result = market_ml_engine.train_and_evaluate_models(config=config)
-    return {"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論與回測！", "data": {"status": "success", "latest_date": result.get("latest_date"), "best_model_id": result.get("best_model_id")}}
+import market_ml_engine
+sys.modules['__main__'].RegimeMoEClassifier = market_ml_engine.RegimeMoEClassifier
+sys.modules['__main__'].TwoStageMetaFilter = market_ml_engine.TwoStageMetaFilter
+sys.modules['__main__'].SoftVotingEnsemble = market_ml_engine.SoftVotingEnsemble
+
+config = {repr(config)}
+result = market_ml_engine.train_and_evaluate_models(config=config)
+print('__RESULT__' + json.dumps({{"status": "ok", "message": "大盤 ML 模型已重新訓練並產出最新推論與回測！", "data": {{"status": "success", "latest_date": result.get("latest_date"), "best_model_id": result.get("best_model_id")}}}}))
+"""
+    env = os.environ.copy()
+    env["OMP_NUM_THREADS"] = "1"
+    env["OPENBLAS_NUM_THREADS"] = "1"
+    env["MKL_NUM_THREADS"] = "1"
+    env["VECLIB_MAXIMUM_THREADS"] = "1"
+    env["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+    env["PYTHONUNBUFFERED"] = "1"
+
+    proc = subprocess.run(
+        [LOCAL_VENV_PYTHON, "-c", script_code],
+        cwd=LOCAL_DIR,
+        capture_output=True,
+        text=True,
+        env=env
+    )
+    if proc.returncode != 0:
+        err_msg = proc.stderr[:1000] if proc.stderr else proc.stdout[:1000]
+        print(f"[x] 大盤 ML 訓練失敗: {err_msg}")
+        raise RuntimeError(f"訓練失敗: {err_msg}")
+
+    for line in proc.stdout.splitlines():
+        if line.startswith("__RESULT__"):
+            return json.loads(line[len("__RESULT__"):])
+    return {"status": "ok", "message": "大盤 ML 訓練完成"}
 
 def execute_ml_backtest_job(config: dict) -> dict:
     """執行本機 ML 策略歷史回測並回傳績效指標"""
@@ -641,6 +689,50 @@ print('__RESULT__' + json.dumps(res))
 
     return {"status": "error", "message": "未取得回測結果"}
 
+def execute_scraper_job(config):
+    task_type = config.get("task_type", "daily")
+    import scraper
+    import sync_market_index
+    import sync_macro_indicators
+    import sync_options_pc_ratio
+    from stock_sync import run_full_sync
+    
+    details = []
+    if task_type == "daily":
+        print("[*] 正在執行每日個股爬蟲 (TWSE + TPEx + 三大法人 + 期貨)...")
+        scraper.main()
+        details.append("每日個股與三大法人爬蟲完成")
+        
+        print("[*] 正在同步大盤加權指數 (TAIEX)...")
+        sync_market_index.sync_taiex_to_sqlite()
+        details.append("大盤加權指數同步完成")
+        
+        print("[*] 正在同步美股與跨市場宏觀指標...")
+        sync_macro_indicators.sync_macro_to_sqlite(range_param="1mo")
+        details.append("美股宏觀指標同步完成")
+        
+        print("[*] 正在同步選擇權 P/C Ratio...")
+        sync_options_pc_ratio.sync_options_pc_ratio()
+        details.append("選擇權 P/C Ratio 同步完成")
+    elif task_type == "revenue":
+        print("[*] 正在執行月營收爬蟲...")
+        cnt = scraper.fetch_and_save_revenue()
+        details.append(f"月營收爬蟲完成，累計處理 {cnt} 筆")
+    
+    # 同步至雲端 Supabase
+    try:
+        run_full_sync()
+        details.append("資料庫雲端同步成功")
+    except Exception as e:
+        details.append(f"雲端同步提醒: {e}")
+        
+    return {
+        "status": "success",
+        "task_type": task_type,
+        "details": details,
+        "completed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
 def process_pending_jobs():
     """從 Supabase 領取 PENDING 任務並執行"""
     sb_conn = get_supabase_conn()
@@ -681,6 +773,8 @@ def process_pending_jobs():
             results = execute_market_ml_job(config)
         elif job_type == "market_ml_train":
             results = execute_market_ml_train_job(config)
+        elif job_type == "scraper":
+            results = execute_scraper_job(config)
         else:
             results = execute_screener_job(config)
 

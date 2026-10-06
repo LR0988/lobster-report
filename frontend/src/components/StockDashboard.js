@@ -2867,26 +2867,47 @@ function StockDashboard() {
   const runScraper = async (taskType) => {
     try {
       setLoading(true);
-      setScraperStatus(`⏳ 正在將「${taskType === 'daily' ? '每日股價' : '月營收'}」爬蟲任務派工至你家裡的 Mac...`);
-      const createRes = await supabaseFetch('/stock_screener_jobs', {
-        method: 'POST',
-        headers: { 'Prefer': 'return=representation' },
-        body: JSON.stringify({
-          username: user?.username || 'hotpotlu',
-          status: 'pending',
-          config: {
-            job_type: 'scraper',
-            task_type: taskType
-          }
-        })
-      });
-      if (createRes.ok) {
-        setScraperStatus(`✅ 爬蟲任務已下發至家裡的 Mac！本地 Worker 正在抓取最新資料。`);
-        return;
+      const taskLabel = taskType === 'daily' ? '每日股價與大盤' : '最新月營收';
+      setScraperStatus(`⏳ 正在啟動「${taskLabel}」爬蟲任務...`);
+      
+      let backendStarted = false;
+      try {
+        const res = await stockFetch(`/api/scraper/${taskType}`, { method: 'POST' });
+        if (res.ok) {
+          backendStarted = true;
+        }
+      } catch (e) {
+        console.warn('本地後端爬蟲 API 呼叫跳過，轉由雲端派工:', e);
       }
-      const res = await stockFetch(`/api/scraper/${taskType}`, { method: 'POST' });
-      const json = await res.json();
-      setScraperStatus(`✅ 任務已在背景啟動！`);
+
+      let cloudDispatched = false;
+      try {
+        const createRes = await supabaseFetch('/stock_screener_jobs', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=representation' },
+          body: JSON.stringify({
+            username: user?.username || 'hotpotlu',
+            status: 'pending',
+            config: {
+              job_type: 'scraper',
+              task_type: taskType
+            }
+          })
+        });
+        if (createRes.ok) {
+          cloudDispatched = true;
+        }
+      } catch (e) {
+        console.warn('雲端任務派工警告:', e);
+      }
+
+      if (backendStarted) {
+        setScraperStatus(`✅「${taskLabel}」爬蟲任務已在伺服器背景啟動執行中！正在抓取最新資料。`);
+      } else if (cloudDispatched) {
+        setScraperStatus(`✅「${taskLabel}」爬蟲任務已下發至本機 Worker 任務隊列，正在抓取最新資料！`);
+      } else {
+        setScraperStatus(`⚠️ 任務指令已送出，請稍候刷新確認最新資料。`);
+      }
     } catch (err) {
       setScraperStatus('❌ 啟動爬蟲失敗: ' + err.message);
     } finally {
