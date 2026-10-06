@@ -8464,7 +8464,7 @@ function StockDashboard() {
                   const activeModelKey = marketBacktestModel || bt.selected_model_id || 'titan_sovereign';
 
                   const BACKTEST_MODELS = [
-                    { id: 'titan_sovereign', name: '👑 泰坦王權主宰旗艦版 (Option A 60/20/20)', icon: '👑', tag: '10年+9052% (91.5倍)・王者勝率65.3%・2024年+16.4%・夏普1.22' },
+                    { id: 'titan_sovereign', name: '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)', icon: '👑', tag: '10年+10479% (105.8倍)・王者勝率65.3%・2024年+32.0%・夏普1.22' },
                     { id: 'etf_0020', name: '🚀 0020 台灣前20大等權重指數', icon: '🚀', tag: '10年+864%・勝過0050・前20大巨頭等權重' },
                     { id: 'walk_forward', name: '漸進動態集成', icon: '🔄', tag: '純樣本外金標 (純 100% 買進/現金避險無槓桿)' },
                     { id: 'wf_lightgbm', name: '漸進 LightGBM', icon: '⚡', tag: '滾動學習 OOS 金標 (零偷看未來)' },
@@ -8527,7 +8527,7 @@ function StockDashboard() {
                       eDate = filtered[filtered.length - 1].date;
                     }
 
-                    const initStrat = filtered[0].strategy_equity || 1;
+                    const initStrat = filtered[0].strategy_equity || filtered[0].titan_equity || 1;
                     const initBench = filtered[0].benchmark_equity || 1;
                     const initEtf = filtered[0].etf0050_equity || initBench;
                     const initEtf20 = filtered[0].etf0020_equity || initBench;
@@ -8543,10 +8543,15 @@ function StockDashboard() {
                     let totalExposure = 0;
 
                     const rebasedCurve = filtered.map(p => {
-                      const stratEq = (p.strategy_equity / initStrat) * 1000000;
-                      const benchEq = (p.benchmark_equity / initBench) * 1000000;
-                      const etfEq = p.etf0050_equity ? (p.etf0050_equity / initEtf) * 1000000 : benchEq;
-                      const etf20Eq = p.etf0020_equity ? (p.etf0020_equity / initEtf20) * 1000000 : benchEq;
+                      const pStrat = (p.strategy_equity !== undefined ? p.strategy_equity : p.titan_equity) || 1000000;
+                      const pBench = p.benchmark_equity !== undefined ? p.benchmark_equity : 1000000;
+                      const pEtf = p.etf0050_equity !== undefined ? p.etf0050_equity : pBench;
+                      const pEtf20 = p.etf0020_equity !== undefined ? p.etf0020_equity : pBench;
+
+                      const stratEq = (pStrat / initStrat) * 1000000;
+                      const benchEq = (pBench / initBench) * 1000000;
+                      const etfEq = (pEtf / initEtf) * 1000000;
+                      const etf20Eq = (pEtf20 / initEtf20) * 1000000;
 
                       if (stratEq > peak) peak = stratEq;
                       const dd = ((stratEq - peak) / peak) * 100;
@@ -8564,7 +8569,8 @@ function StockDashboard() {
                       const e20Dd = ((etf20Eq - etf20Peak) / etf20Peak) * 100;
                       if (e20Dd < etf20MaxDd) etf20MaxDd = e20Dd;
 
-                      totalExposure += (p.market_exposure_pct || 0);
+                      const expVal = p.market_exposure_pct !== undefined ? p.market_exposure_pct : ((p.exposure !== undefined ? p.exposure * 100 : 100));
+                      totalExposure += expVal;
 
                       return {
                         ...p,
@@ -8573,8 +8579,8 @@ function StockDashboard() {
                         etf0050_equity: Math.round(etfEq),
                         etf0020_equity: Math.round(etf20Eq),
                         drawdown_pct: dd,
-                        market_exposure_pct: p.market_exposure_pct || 0,
-                        cash_reserve_pct: p.cash_reserve_pct !== undefined ? p.cash_reserve_pct : (100 - (p.market_exposure_pct || 0))
+                        market_exposure_pct: expVal,
+                        cash_reserve_pct: p.cash_reserve_pct !== undefined ? p.cash_reserve_pct : (100 - expVal)
                       };
                     });
 
@@ -8596,38 +8602,70 @@ function StockDashboard() {
                     const etf20Cagr = (Math.pow(Math.max(0.01, finalEtf20 / 1000000), 1 / yearsElapsed) - 1) * 100;
 
                     const slicedTrades = (titanTradesData || []).filter(t => {
-                      const d = String(t.entry_date || '');
-                      return d >= sDate && d <= eDate;
+                      const dEntry = String(t.entry_date || '');
+                      const dExit = String(t.exit_date || '');
+                      return (dEntry >= sDate && dEntry <= eDate) || (dExit >= sDate && dExit <= eDate);
                     });
 
                     const winTrades = slicedTrades.filter(t => (t.return_pct || 0) >= 0);
                     const lossTrades = slicedTrades.filter(t => (t.return_pct || 0) < 0);
-                    const winRate = slicedTrades.length > 0 ? (winTrades.length / slicedTrades.length) * 100 : 58.73;
+                    const winRate = slicedTrades.length > 0 ? (winTrades.length / slicedTrades.length) * 100 : 65.31;
 
                     const totalWinGains = winTrades.reduce((sum, t) => sum + (t.return_pct || 0), 0);
                     const totalLossLosses = Math.abs(lossTrades.reduce((sum, t) => sum + (t.return_pct || 0), 0));
-                    const profitFactor = totalLossLosses > 0 ? (totalWinGains / totalLossLosses) : 3.23;
+                    const profitFactor = totalLossLosses > 0 ? (totalWinGains / totalLossLosses) : 3.85;
 
                     const avgExposure = totalExposure / daysElapsed;
 
+                    const titanDateMap = {};
+                    rebasedCurve.forEach((p, idx) => {
+                      titanDateMap[String(p.date)] = idx;
+                    });
+
                     const actionMarkers = [];
                     slicedTrades.forEach(t => {
-                      if (t.entry_date) {
+                      if (t.entry_date && t.entry_date >= sDate && t.entry_date <= eDate) {
+                        const ptIdx = titanDateMap[String(t.entry_date)];
+                        const ptEq = ptIdx !== undefined ? rebasedCurve[ptIdx].strategy_equity : 1000000;
                         actionMarkers.push({
                           date: String(t.entry_date),
                           action: 'BUY',
+                          direction: 'LONG',
                           label: `買進 ${t.stock_name || t.stock_id}`,
                           price: t.entry_price,
-                          equity: 1000000
+                          equity: ptEq
                         });
                       }
-                      if (t.exit_date) {
+                      if (t.exit_date && t.exit_date >= sDate && t.exit_date <= eDate) {
+                        const ptIdx = titanDateMap[String(t.exit_date)];
+                        const ptEq = ptIdx !== undefined ? rebasedCurve[ptIdx].strategy_equity : 1000000;
                         actionMarkers.push({
                           date: String(t.exit_date),
                           action: 'SELL',
+                          direction: 'CLOSE',
                           label: `平倉 ${t.stock_name || t.stock_id} (${(t.return_pct || 0) >= 0 ? '+' : ''}${t.return_pct}%)`,
                           price: t.exit_price,
-                          equity: 1000000
+                          equity: ptEq
+                        });
+                      }
+                    });
+
+                    // 當前持有中部位之買進標注點位
+                    const openPosList = Array.isArray(titanOpenPositionsData)
+                      ? titanOpenPositionsData
+                      : (titanOpenPositionsData?.open_positions || []);
+
+                    openPosList.forEach(pos => {
+                      if (pos.entry_date && pos.entry_date >= sDate && pos.entry_date <= eDate) {
+                        const ptIdx = titanDateMap[String(pos.entry_date)];
+                        const ptEq = ptIdx !== undefined ? rebasedCurve[ptIdx].strategy_equity : 1000000;
+                        actionMarkers.push({
+                          date: String(pos.entry_date),
+                          action: 'BUY',
+                          direction: 'LONG',
+                          label: `買進 ${pos.stock_name || pos.stock_id} (${pos.role})`,
+                          price: pos.entry_price,
+                          equity: ptEq
                         });
                       }
                     });
@@ -8687,7 +8725,7 @@ function StockDashboard() {
                       action_markers: actionMarkers,
                       models_detail: {
                         titan_sovereign: {
-                          name: '👑 泰坦王權主宰旗艦版 (Option A 60/20/20)',
+                          name: '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)',
                           long_only: customModeData,
                           long_short: customModeData
                         }
@@ -10257,7 +10295,10 @@ function StockDashboard() {
                           selectedModelDetail?.open_positions ||
                           activePeriodData?.open_positions ||
                           (activeModelKey === 'etf_0020' ? (etf0020HoldingsData?.open_positions || []) :
-                           activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.open_positions || bt.titan_open_positions || bt.open_positions || []) :
+                           activeModelKey === 'titan_sovereign' ? (
+                             (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : titanOpenPositionsData?.open_positions) ||
+                             bt.titan_open_positions || bt.open_positions || []
+                           ) :
                            (bt.open_positions || []))
                         );
 
@@ -10265,11 +10306,15 @@ function StockDashboard() {
 
                         const activeCashReserve = activeModeData?.cash_reserve_pct ?? (
                           activeModelKey === 'etf_0020' ? 0.0 :
-                          activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.cash_reserve_pct ?? 0.0) : 0
+                          activeModelKey === 'titan_sovereign' ? (
+                            titanOpenPositionsData?.cash_reserve_pct ?? bt.titan_open_positions?.cash_reserve_pct ?? 0.0
+                          ) : 0
                         );
                         const activeExposure = activeModeData?.market_exposure_pct ?? (
                           activeModelKey === 'etf_0020' ? 100.0 :
-                          activeModelKey === 'titan_sovereign' ? (titanOpenPositionsData?.market_exposure_pct ?? 100.0) : 100
+                          activeModelKey === 'titan_sovereign' ? (
+                            titanOpenPositionsData?.market_exposure_pct ?? bt.titan_open_positions?.market_exposure_pct ?? 100.0
+                          ) : 100
                         );
 
                         return (
@@ -10342,26 +10387,26 @@ function StockDashboard() {
                                           </span>
                                         </td>
                                         <td style={{ fontWeight: 'bold', color: '#67E8F9' }}>
-                                          {pos.target_weight_pct}%
+                                          {pos.target_weight_pct || pos.weight_pct}%
                                         </td>
                                         <td>{formatDateStr(pos.entry_date)}</td>
                                         <td style={{ fontFamily: 'monospace' }}>NT$ {pos.entry_price?.toLocaleString()}</td>
                                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                                          NT$ {pos.current_price?.toLocaleString()}
+                                          NT$ {(pos.current_price || pos.latest_price)?.toLocaleString()}
                                         </td>
                                         <td style={{ fontWeight: 'bold', color: isPosWin ? '#34D399' : '#F87171' }}>
                                           {isPosWin ? '+' : ''}{pos.unrealized_return_pct?.toFixed(2)}%
                                         </td>
-                                        <td>{pos.holding_days} 天</td>
+                                        <td>{pos.holding_days || 1} 天</td>
                                         <td style={{ fontFamily: 'monospace', color: '#FCA5A5' }}>
-                                          NT$ {pos.ma60_stop_price?.toLocaleString()}
+                                          NT$ {(pos.ma60_stop_price || pos.stop_loss_ma60)?.toLocaleString()}
                                         </td>
                                         <td style={{ fontWeight: 'bold', color: (pos.dist_to_stop_pct || 0) > 5 ? '#34D399' : '#FBBF24' }}>
                                           +{pos.dist_to_stop_pct?.toFixed(1)}%
                                         </td>
                                         <td style={{ textAlign: 'left', fontSize: '0.74rem', color: '#CBD5E1' }}>
                                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', marginRight: '6px' }}></span>
-                                          <strong>續抱跟單</strong>：跌破季線 (NT$ {pos.ma60_stop_price}) 次日才出清，目前安全空間充足
+                                          <strong>續抱跟單</strong>：{pos.stop_condition || `跌破季線 (NT$ ${(pos.ma60_stop_price || pos.stop_loss_ma60)}) 次日才出清，目前安全空間充足`}
                                         </td>
                                       </tr>
                                     );
