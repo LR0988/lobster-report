@@ -1,52 +1,35 @@
-{
-  "as_of_date": "20261002",
-  "model_id": "titan_sovereign",
-  "model_name": "👑 泰坦王權主宰旗艦版 (Option A: 核心勝率66%・十年+9052%)",
-  "cash_reserve_pct": 0.0,
-  "market_exposure_pct": 100,
-  "total_positions_count": 3,
-  "open_positions": [
-    {
-      "stock_id": "2454",
-      "stock_name": "聯發科",
-      "role": "👑 王者泰坦 (60%)",
-      "target_weight_pct": 60,
-      "entry_date": "20260929",
-      "entry_price": 4910.0,
-      "current_price": 4950.0,
-      "unrealized_return_pct": 0.81,
-      "holding_days": 3,
-      "ma60_stop_price": 4132.92,
-      "dist_to_stop_pct": 19.77,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 4132.9) 則次日全數停損退回現金"
-    },
-    {
-      "stock_id": "3443",
-      "stock_name": "創意",
-      "role": "🚀 革命衛星 (20%)",
-      "target_weight_pct": 20,
-      "entry_date": "20260929",
-      "entry_price": 7925.0,
-      "current_price": 7900.0,
-      "unrealized_return_pct": -0.32,
-      "holding_days": 3,
-      "ma60_stop_price": 5483.58,
-      "dist_to_stop_pct": 44.07,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 5483.6) 則次日全數停損退回現金"
-    },
-    {
-      "stock_id": "3374",
-      "stock_name": "精材",
-      "role": "🚀 革命衛星 (20%)",
-      "target_weight_pct": 20,
-      "entry_date": "20260929",
-      "entry_price": 455.0,
-      "current_price": 467.5,
-      "unrealized_return_pct": 2.75,
-      "holding_days": 3,
-      "ma60_stop_price": 378.8,
-      "dist_to_stop_pct": 23.42,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 378.8) 則次日全數停損退回現金"
-    }
-  ]
-}
+[
+  {
+    "stock_id": "2454",
+    "stock_name": "聯發科",
+    "role": "👑 王者泰坦 (70%)",
+    "weight_pct": 70.0,
+    "entry_date": "20260929",
+    "entry_price": 5150.0,
+    "latest_price": 4950.0,
+    "unrealized_return_pct": -3.88,
+    "stop_loss_ma60": 4132.92
+  },
+  {
+    "stock_id": "3443",
+    "stock_name": "創意",
+    "role": "🚀 革命衛星 (15%)",
+    "weight_pct": 15.0,
+    "entry_date": "20260929",
+    "entry_price": 8410.0,
+    "latest_price": 7900.0,
+    "unrealized_return_pct": -6.06,
+    "stop_loss_ma60": 5483.58
+  },
+  {
+    "stock_id": "3374",
+    "stock_name": "精材",
+    "role": "🚀 革命衛星 (15%)",
+    "weight_pct": 15.0,
+    "entry_date": "20260929",
+    "entry_price": 439.5,
+    "latest_price": 467.5,
+    "unrealized_return_pct": 6.37,
+    "stop_loss_ma60": 378.8
+  }
+]

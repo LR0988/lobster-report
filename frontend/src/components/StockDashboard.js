@@ -6,6 +6,7 @@ import titanOpenPositionsData from '../data/titan_open_positions.json';
 import titanTradesData from '../data/titan_trades.json';
 import titanCurveData from '../data/titan_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
+import defaultPodcastData from '../data/defaultPodcastData.json';
 import './StockDashboard.css';
 
 const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
@@ -188,7 +189,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)', short: '👑 泰坦王權主宰', tag: '👑 王者勝率66%・十年+9052%・2024年+16.4%', desc: '旗艦版王權主宰：嚴格零偷看未來！島內加權季線宏觀濾網+市場廣度防護網+60%王者泰坦鎖定66%勝率巨頭+20%雙衛星爆發奔馳。10年總報酬 +9,052.39% (CAGR 52.3%, 91.5倍)、王者勝率 65.31%、全勝率 58.73%、2024 年逆轉獲利 +16.40%，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 70/15/15)', short: '👑 泰坦王權主宰', tag: '👑 十年+9873%・2024年+26.4%・近百倍', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+70%王者泰坦鎖定超額龍頭+15%雙革命衛星爆發奔馳+衛星收緊-12%停損。10年總報酬 +9,873.2% (CAGR 53.4%, 99.7倍)、MDD 縮減至 -44.8%、2024 年破局暴賺 +26.40%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -2169,26 +2170,64 @@ function StockDashboard() {
 
   const fetchPodcastChannels = async () => {
     try {
+      // 1. 優先從 Supabase 快取載入 (0ms 跨裝置同步)
+      const resSupabase = await supabaseFetch('/stock_ml_cache?model_type=eq.podcast_data&select=payload');
+      if (resSupabase.ok) {
+        const rows = await resSupabase.json();
+        if (rows && rows.length > 0 && rows[0].payload?.channels) {
+          setPodcastChannels(rows[0].payload.channels);
+          return;
+        }
+      }
+
+      // 2. 嘗試本地後端
       const res = await stockFetch('/api/podcast/channels');
       if (res.ok) {
         const json = await res.json();
         setPodcastChannels(json);
+        return;
       }
     } catch (err) {
-      console.error('無法讀取 Podcast 頻道列表', err);
+      console.warn('無法讀取 Podcast 頻道列表，啟用離線快取', err);
+    }
+
+    // 3. 離線靜態打包備援
+    if (defaultPodcastData?.channels) {
+      setPodcastChannels(defaultPodcastData.channels);
     }
   };
 
   const fetchPodcastEpisodes = async (channelId = selectedPodcastChannelId) => {
     try {
+      // 1. 優先從 Supabase 快取載入
+      const resSupabase = await supabaseFetch('/stock_ml_cache?model_type=eq.podcast_data&select=payload');
+      if (resSupabase.ok) {
+        const rows = await resSupabase.json();
+        if (rows && rows.length > 0 && rows[0].payload?.episodes) {
+          const allEps = rows[0].payload.episodes;
+          const filtered = channelId ? allEps.filter(e => e.channel_id === channelId) : allEps;
+          setPodcastEpisodes(filtered);
+          return;
+        }
+      }
+
+      // 2. 嘗試本地後端
       const url = channelId ? `/api/podcast/episodes?channel_id=${channelId}` : '/api/podcast/episodes';
       const res = await stockFetch(url);
       if (res.ok) {
         const json = await res.json();
         setPodcastEpisodes(json);
+        return;
       }
     } catch (err) {
-      console.error('無法讀取 Podcast 單集列表', err);
+      console.warn('無法讀取 Podcast 單集列表，啟用離線快取', err);
+    }
+
+    // 3. 離線靜態打包備援
+    if (defaultPodcastData?.episodes) {
+      const allEps = defaultPodcastData.episodes;
+      const filtered = channelId ? allEps.filter(e => e.channel_id === channelId) : allEps;
+      setPodcastEpisodes(filtered);
     }
   };
 
@@ -2807,13 +2846,20 @@ function StockDashboard() {
   const parsedAnalysis = useMemo(() => {
     if (!selectedEpisode?.analysis_report) return null;
     try {
-      // 搜尋 JSON block
-      const jsonMatch = selectedEpisode.analysis_report.match(/```json\s*([\s\S]*?)\s*```/) || selectedEpisode.analysis_report.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[1] || jsonMatch[0]);
+      // 1. 優先搜尋 ```json ... ``` 區塊
+      const jsonMatch = selectedEpisode.analysis_report.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (jsonMatch && jsonMatch[1]) {
+        return JSON.parse(jsonMatch[1].trim());
+      }
+      // 2. 尋找最末尾的 { ... } 物件 (因為 JSON 指標位於報告最尾端)
+      const lastOpenBrace = selectedEpisode.analysis_report.lastIndexOf('{');
+      const lastCloseBrace = selectedEpisode.analysis_report.lastIndexOf('}');
+      if (lastOpenBrace !== -1 && lastCloseBrace > lastOpenBrace) {
+        const potentialJson = selectedEpisode.analysis_report.substring(lastOpenBrace, lastCloseBrace + 1);
+        return JSON.parse(potentialJson);
       }
     } catch (e) {
-      console.error("解析 Gemini JSON 指標失敗", e);
+      console.warn("解析 Podcast JSON 指標警告:", e);
     }
     return null;
   }, [selectedEpisode]);
@@ -9408,7 +9454,7 @@ function StockDashboard() {
                         </div>
                       </div>
 
-                      {/* 2.8 👑 泰坦王權主宰旗艦版 (Option A 60/20/20) 核心量化操作邏輯與風控防線 */}
+                      {/* 2.8 👑 泰坦王權主宰旗艦版 (Option A 70/15/15) 核心量化操作邏輯與風控防線 */}
                       {activeModelKey === 'titan_sovereign' && (
                         <div style={{
                           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))',
@@ -9425,13 +9471,13 @@ function StockDashboard() {
                               <span style={{ fontSize: '1.35rem' }}>👑</span>
                               <div>
                                 <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                  <span>泰坦王權主宰旗艦版 (Option A 60/20/20) 核心操作邏輯與風控體系</span>
+                                  <span>泰坦王權主宰旗艦版 (Option A 70/15/15) 核心操作邏輯與風控體系</span>
                                   <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FDE68A', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '0.1rem 0.5rem', borderRadius: '10px' }}>
                                     嚴格零偷看未來・次日 T+1 開盤扣 0.585% 稅費
                                   </span>
                                 </h4>
                                 <span style={{ fontSize: '0.76rem', color: '#CBD5E1', marginTop: '0.2rem', display: 'block' }}>
-                                  融合 Marcos López de Prado (2018) 動能偏態理論與 Robeco 殘差動能廣度架構，以 60% 權重鎖定 65.3% 勝率龍頭霸主，輔以 20%+20% 雙衛星肥尾奔馳
+                                  融合 Marcos López de Prado (2018) 動能偏態理論與 DOE 實驗設計最佳化，以 70% 權重鎖定超額王者巨頭，輔以 15%+15% 雙衛星奔馳，收緊 -12% 停損守護本金
                                 </span>
                               </div>
                             </div>
@@ -9473,29 +9519,29 @@ function StockDashboard() {
                                 <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#6EE7B7' }}>第二道防線：市場廣度防護網</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                <strong style={{ color: '#F1F5F9' }}>全市場站上 20MA ≥ 40%</strong> 且 20MA 斜率走揚 (≥ +2.5%)。化解 2024 年中小型股「指數創高、個股破底」假突破，使 2024 年績效強勢逆轉翻紅為 <strong style={{ color: '#34D399' }}>+16.40%</strong>。
+                                <strong style={{ color: '#F1F5F9' }}>全市場站上 20MA ≥ 35%</strong> 且 20MA 斜率走揚 (≥ +2.5%)。化解 2024 年中小型股「指數創高、個股破底」假突破，使 2024 年績效強勢逆轉翻紅為 <strong style={{ color: '#34D399' }}>+26.40%</strong>。
                               </div>
                             </div>
 
-                            {/* 3. 👑 王者泰坦霸主 (60%) */}
+                            {/* 3. 👑 王者泰坦霸主 (70%) */}
                             <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245, 158, 11, 0.35)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
                                 <span>👑</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#FCD34D' }}>進攻主力：王者泰坦 (60% 權重)</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#FCD34D' }}>進攻主力：王者泰坦 (70% 權重)</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                鎖定成交額 Top 5 權值巨頭中動能最強者（現為 <strong style={{ color: '#FDE68A' }}>2454 聯發科</strong>）。機構買盤推升自然勝率達 <strong style={{ color: '#FBBF24' }}>65.31%</strong>，2024 年貢獻超額 +63.7%，為暴利定海神針。
+                                鎖定成交額 Top 5 權值巨頭中動能最強者（現為 <strong style={{ color: '#FDE68A' }}>2454 聯發科</strong>，配比 70%）。機構買盤推升自然勝率達 <strong style={{ color: '#FBBF24' }}>65.31%</strong>，為近百倍獲利之定海神針。
                               </div>
                             </div>
 
-                            {/* 4. 🚀 雙革命衛星 (20%+20%) & 季線防守 */}
+                            {/* 4. 🚀 雙革命衛星 (15%+15%) & -12% 防守 */}
                             <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
                                 <span>🚀</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>進攻奇兵：雙革命衛星 (20% + 20%)</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>進攻奇兵：雙革命衛星 (15% + 15%)</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                嚴選創高姿態最強之高 Beta 飆股（現為 <strong style={{ color: '#E9D5FF' }}>3443 創意、3374 精材</strong>），捕捉正偏態 3~5 倍翻倍肥尾；搭配<strong>季線 60MA 移動防守與保本鎖利機制</strong>，驅動 10 年 91.5 倍利潤。
+                                嚴選創高姿態最強之高 Beta 飆股（現為 <strong style={{ color: '#E9D5FF' }}>3443 創意、3374 精材</strong>，各 15%）；<strong>收緊至 -12% 災難停損線（及時斷尾）</strong>與季線 60MA 移動防守，驅動 10 年 99.7 倍利潤。
                               </div>
                             </div>
                           </div>
@@ -10457,7 +10503,7 @@ function StockDashboard() {
                                 </h4>
                                 <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                                   {hasStockDetail
-                                    ? '👑 泰坦王權動態推舉個股 (60% 王者泰坦 + 20% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
+                                    ? '👑 泰坦王權動態推舉個股 (70% 王者泰坦 + 15% 雙衛星)，嚴格次日 T+1 成交扣 0.585% 稅費'
                                     : '大盤指數模擬交易，每次進出場扣除 0.05% 摩擦成本'}
                                   {currentScope === 'all' && (
                                     <span style={{ color: '#FCD34D', marginLeft: '0.4rem' }}>• 🔍 正在直接瀏覽全歷史完整明細清單</span>
