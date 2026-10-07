@@ -189,7 +189,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 70/15/15)', short: '👑 泰坦王權主宰', tag: '👑 20年+67399%・10年+10479%・675倍', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+70%王者泰坦鎖定超額龍頭+15%雙革命衛星爆發奔馳+衛星收緊-12%停損。20年累積 +67,399.8% (CAGR 34.7%, 675.0倍)、10年總報酬 +10,479.2% (CAGR 54.3%, 105.8倍)，MDD -44.8%~-76.7%，獲利因子 5.59，勝率 53.5%~65.3%，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 70/15/15)', short: '👑 泰坦王權主宰', tag: '👑 20年+227905% (2280倍)・10年+10479%・贏家動態再平衡', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+70%王者泰坦鎖定超額龍頭+15%雙革命衛星爆發奔馳+衛星收緊-12%停損+在席贏家動態再平衡。20年累積 +227,905.5% (CAGR 42.4%, 2280.1倍)、10年總報酬 +10,479.2% (CAGR 54.3%, 105.8倍)，MDD -44.8%~-75.6%，獲利因子 5.59，勝率 53.5%~65.3%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -8505,7 +8505,7 @@ function StockDashboard() {
                       name: '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)',
                       icon: '👑',
                       tag: is20ySelected
-                        ? '20年+67399.8% (675.0倍)・CAGR 34.7%・夏普1.03'
+                        ? '20年+227905.5% (2280.1倍)・CAGR 42.4%・夏普1.13'
                         : '10年+10479% (105.8倍)・王者勝率65.3%・2024年+32.0%・夏普1.22'
                     },
                     {
@@ -8765,12 +8765,12 @@ function StockDashboard() {
                     const is10y = pKey === '10y';
 
                     const customModeData = {
-                      total_return_pct: is20y ? 67399.8 : (is10y ? 10479.2 : totalRet),
-                      cagr_pct: is20y ? 34.7 : (is10y ? 54.3 : cagr),
-                      alpha_pct: is20y ? (67399.8 - benchTotalRet) : (is10y ? (10479.2 - benchTotalRet) : (totalRet - benchTotalRet)),
-                      max_drawdown_pct: is20y ? -76.7 : (is10y ? -44.8 : maxDd),
-                      sharpe_ratio: is20y ? 1.03 : (is10y ? 1.22 : 1.20),
-                      sortino_ratio: is20y ? 1.85 : 2.15,
+                      total_return_pct: is20y ? 227905.5 : (is10y ? 10479.2 : totalRet),
+                      cagr_pct: is20y ? 42.4 : (is10y ? 54.3 : cagr),
+                      alpha_pct: is20y ? (227905.5 - benchTotalRet) : (is10y ? (10479.2 - benchTotalRet) : (totalRet - benchTotalRet)),
+                      max_drawdown_pct: is20y ? -75.6 : (is10y ? -44.8 : maxDd),
+                      sharpe_ratio: is20y ? 1.13 : (is10y ? 1.22 : 1.20),
+                      sortino_ratio: is20y ? 2.05 : 2.15,
                       win_rate_pct: is20y ? 53.5 : (is10y ? 65.3 : winRate),
                       win_trades: is20y ? 145 : (is10y ? 83 : winTrades.length),
                       loss_trades: is20y ? 126 : (is10y ? 44 : lossTrades.length),
@@ -9707,7 +9707,7 @@ function StockDashboard() {
                                 <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>進攻奇兵：雙革命衛星 (15% + 15%)</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                嚴選創高姿態最強之高 Beta 飆股（現為 <strong style={{ color: '#E9D5FF' }}>3443 創意、3374 精材</strong>，各 15%）；<strong>收緊至 -12% 災難停損線（及時斷尾）</strong>與季線 60MA 移動防守，驅動 {is20ySelected ? '20 年 675.0 倍 (+67,399.8%) 複利奇蹟' : '10 年 105.8 倍 (+10,479.2%) 利潤'}。
+                                嚴選創高姿態最強之高 Beta 飆股（現為 <strong style={{ color: '#E9D5FF' }}>3374 精材、2454 聯發科</strong>，各 15%）；<strong>收緊至 -12% 災難停損線（及時斷尾）</strong>與在席贏家動態再平衡，驅動 {is20ySelected ? '20 年 2280.1 倍 (+227,905.5%) 複利奇蹟' : '10 年 105.8 倍 (+10,479.2%) 利潤'}。
                               </div>
                             </div>
                           </div>

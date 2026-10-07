@@ -284,6 +284,20 @@ for i, dt in enumerate(all_dates):
             portfolio_equity -= portfolio_equity * reduced * fee_rate
         active_weights = temp_active
 
+        # 🚀 資金活化機制：在席贏家動態再平衡 (Dynamic Re-weighting to Surviving Winners)
+        # 停損釋出之資金，在大盤維持季線多頭 (TAIEX >= 60MA) 且市場廣度健康 (>= 40%) 時，
+        # 等比分配給目前站穩季線的在席強勢股，徹底消除現金閒置 (Cash Drag)，讓利潤在最強者身上奔跑！
+        is_macro_bull_curr = df_taiex.loc[dt, 'close'] >= df_macro_overlay.loc[dt, 'taiex_ma60'] if dt in df_macro_overlay.index else True
+        curr_breadth_val = breadth_ma20.loc[dt] if dt in breadth_ma20.index else 0.5
+        if is_macro_bull_curr and (curr_breadth_val >= 0.40) and active_weights:
+            tot_w = sum(active_weights.values())
+            if tot_w < 0.95 and tot_w > 0:
+                scale = 1.0 / tot_w
+                active_weights = {s: round(w * scale, 3) for s, w in active_weights.items()}
+                for s, new_w in active_weights.items():
+                    if s in open_position_tracker:
+                        open_position_tracker[s]['target_weight'] = new_w
+
     # 4. 定期調倉選股
     if i % rebalance_freq == 0:
         is_macro_bull = df_taiex.loc[dt, 'close'] >= df_macro_overlay.loc[dt, 'taiex_ma60'] if dt in df_macro_overlay.index else True

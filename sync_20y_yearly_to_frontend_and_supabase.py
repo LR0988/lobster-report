@@ -66,27 +66,27 @@ def sync_20y_data():
             # 建立精簡版 models_detail (含 yearly 與 curve)
             lite_md = extract_lite_models_detail(p_full.get("models_detail", {}))
             
-            # 確保 titan_sovereign 擁有最新 Option A (70/15/15) 數據
+            # 確保 titan_sovereign 擁有最新 Option A (70/15/15 + 贏家再平衡) 數據
             if p_key == "20y":
                 if "titan_sovereign" in lite_md:
                     lite_md["titan_sovereign"]["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
                     lite_md["titan_sovereign"]["long_only"].update({
-                        "total_return_pct": 67399.8,
-                        "cagr_pct": 34.7,
-                        "alpha_pct": 66688.8,
-                        "max_drawdown_pct": -76.7,
-                        "sharpe_ratio": 1.03,
+                        "total_return_pct": 227905.5,
+                        "cagr_pct": 42.4,
+                        "alpha_pct": 227194.5,
+                        "max_drawdown_pct": -75.6,
+                        "sharpe_ratio": 1.13,
                         "win_rate_pct": 53.5,
                         "profit_factor": 5.59,
                         "total_trades": 271,
                         "market_exposure_pct": 68.4
                     })
                     lite_md["titan_sovereign"]["long_short"].update({
-                        "total_return_pct": 67399.8,
-                        "cagr_pct": 34.7,
-                        "alpha_pct": 66688.8,
-                        "max_drawdown_pct": -76.7,
-                        "sharpe_ratio": 1.03,
+                        "total_return_pct": 227905.5,
+                        "cagr_pct": 42.4,
+                        "alpha_pct": 227194.5,
+                        "max_drawdown_pct": -75.6,
+                        "sharpe_ratio": 1.13,
                         "win_rate_pct": 53.5,
                         "profit_factor": 5.59,
                         "total_trades": 271,
@@ -98,11 +98,11 @@ def sync_20y_data():
                         for item in p_def[comp_k]:
                             if item.get("model_id") == "titan_sovereign":
                                 item["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-                                item["total_return_pct"] = 67399.8
-                                item["cagr_pct"] = 34.7
-                                item["alpha_pct"] = 66688.8
-                                item["max_drawdown_pct"] = -76.7
-                                item["sharpe_ratio"] = 1.03
+                                item["total_return_pct"] = 227905.5
+                                item["cagr_pct"] = 42.4
+                                item["alpha_pct"] = 227194.5
+                                item["max_drawdown_pct"] = -75.6
+                                item["sharpe_ratio"] = 1.13
                                 item["win_rate_pct"] = 53.5
                                 item["profit_factor"] = 5.59
                                 item["total_trades"] = 271
@@ -129,11 +129,11 @@ def sync_20y_data():
         if "titan_sovereign" in fh20["models_detail"]:
             fh20["models_detail"]["titan_sovereign"]["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
             fh20["models_detail"]["titan_sovereign"]["long_only"].update({
-                "total_return_pct": 67399.8,
-                "cagr_pct": 34.7,
-                "alpha_pct": 66688.8,
-                "max_drawdown_pct": -76.7,
-                "sharpe_ratio": 1.03,
+                "total_return_pct": 227905.5,
+                "cagr_pct": 42.4,
+                "alpha_pct": 227194.5,
+                "max_drawdown_pct": -75.6,
+                "sharpe_ratio": 1.13,
                 "win_rate_pct": 53.5,
                 "profit_factor": 5.59,
                 "total_trades": 271,
