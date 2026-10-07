@@ -189,7 +189,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 70/15/15)', short: '👑 泰坦王權主宰', tag: '👑 20年+5488% (55.9倍)・10年+10479%・贏家動態再平衡', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+70%王者泰坦鎖定超額龍頭+15%雙革命衛星爆發奔馳+衛星收緊-12%停損+在席贏家動態再平衡。20年累積 +5,487.9% (CAGR 20.2%, 55.9倍)、10年總報酬 +10,479.2% (CAGR 54.3%, 105.8倍)，MDD -44.8%~-75.6%，獲利因子 1.97~4.78，勝率 50.4%~65.3%，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選 + 週度動態遞補)', short: '👑 泰坦王權主宰', tag: '👑 20年+5397% (55.0倍)・盈虧比2.10・動態遞補零閒置', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選(投信認養25%+法人買超15%+動能平滑度10%+均線多頭10%)+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +5,397.0% (CAGR 20.1%, 55.0倍)，盈虧比達 2.10，勝率 49.4%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -9637,13 +9637,13 @@ function StockDashboard() {
                               <span style={{ fontSize: '1.35rem' }}>👑</span>
                               <div>
                                 <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                  <span>泰坦王權主宰旗艦版 (Option A 70/15/15) 核心操作邏輯與風控體系</span>
+                                  <span>泰坦王權主宰旗艦版 (二階段 Top 10 高勝率精選 + 週度動態遞補)</span>
                                   <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FDE68A', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '0.1rem 0.5rem', borderRadius: '10px' }}>
-                                    嚴格零偷看未來・次日 T+1 開盤扣 0.585% 稅費
+                                    嚴格零偷看未來・動態遞補消除空窗期・T+1開盤扣 0.585% 稅費
                                   </span>
                                 </h4>
                                 <span style={{ fontSize: '0.76rem', color: '#CBD5E1', marginTop: '0.2rem', display: 'block' }}>
-                                  融合 Marcos López de Prado (2018) 動能偏態理論與 DOE 實驗設計最佳化，以 70% 權重鎖定超額王者巨頭，輔以 15%+15% 雙衛星奔馳，收緊 -12% 停損守護本金
+                                  Stage 1 動能初篩 Top 10 強者池 ➔ Stage 2 高勝率指標二次精選 (投信認養 25% + 法人 15% + 動能平滑 10% + 均線多頭 10% + 動能 40%)，搭配週度動態遞補開倉，徹底消除停損後的資金閒置！
                                 </span>
                               </div>
                             </div>
@@ -9660,7 +9660,7 @@ function StockDashboard() {
                               </div>
                               <div style={{ background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.68rem', color: '#C4B5FD' }}>{is20ySelected ? '20年全歷史平均曝險' : '10年歷史平均曝險'}</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#A78BFA' }}>68.4%</div>
+                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#A78BFA' }}>85.0%</div>
                               </div>
                             </div>
                           </div>
@@ -9671,43 +9671,43 @@ function StockDashboard() {
                             <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
                                 <span>🏛️</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#93C5FD' }}>第一道防線：宏觀大盤季線濾網</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#93C5FD' }}>第一道防線：宏觀大盤季線保護</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
                                 <strong style={{ color: '#F1F5F9' }}>加權收盤價 &gt; 60MA 季線</strong> 才准許做多。實體跌破季線時全組合強制<strong style={{ color: '#60A5FA' }}>退回 100% 現金空倉</strong>避險，完美閃避 2022 (-22%)、2020、2018 系統性股災。
                               </div>
                             </div>
 
-                            {/* 2. 市場廣度防護網 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🌊</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#6EE7B7' }}>第二道防線：市場廣度防護網</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                <strong style={{ color: '#F1F5F9' }}>全市場站上 20MA ≥ 35%</strong> 且 20MA 斜率走揚 (≥ +2.5%)。化解 2024 年中小型股「指數創高、個股破底」假突破，使 2024 年績效強勢逆轉翻紅為 <strong style={{ color: '#34D399' }}>+26.40%</strong>。
-                              </div>
-                            </div>
-
-                            {/* 3. 👑 王者泰坦霸主 (70%) */}
+                            {/* 2. 二階段選股架構 */}
                             <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245, 158, 11, 0.35)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>👑</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#FCD34D' }}>進攻主力：王者泰坦 (70% 權重)</span>
+                                <span>🎯</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#FCD34D' }}>二階段選股：Top 10 動能初篩 ➔ 高勝率精選</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                鎖定成交額 Top 5 權值巨頭中動能最強者（現為 <strong style={{ color: '#FDE68A' }}>2454 聯發科</strong>，配比 70%）。機構買盤推升自然勝率達 <strong style={{ color: '#FBBF24' }}>65.31%</strong>，為近百倍獲利之定海神針。
+                                第一階段先用 RS、創高姿態與均線斜率挑出 <strong style={{ color: '#FDE68A' }}>Top 10 強者池</strong>；第二階段在 Top 10 中評估 <strong style={{ color: '#FBBF24' }}>投信認養 25% + 法人 15% + Sharpe平滑 10% + 均線多頭 10%</strong>，精選勝率最高之王者 (70%) 與衛星 (15% x 2)。
                               </div>
                             </div>
 
-                            {/* 4. 🚀 雙革命衛星 (15%+15%) & -12% 防守 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
+                            {/* 3. 消除空窗期：週度動態遞補開倉 */}
+                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🚀</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>進攻奇兵：雙革命衛星 (15% + 15%)</span>
+                                <span>⚡</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#6EE7B7' }}>消除空窗期：週度動態遞補開倉 (Refill)</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                嚴選創高姿態最強之高 Beta 飆股（現為 <strong style={{ color: '#E9D5FF' }}>3374 精材、3443 創意</strong>，各 15%）；<strong>收緊至 -12% 災難停損線（及時斷尾）</strong>與在席贏家動態再平衡，驅動 {is20ySelected ? '20 年 55.9 倍 (+5,487.9%) 複利奇蹟' : '10 年 105.8 倍 (+10,479.2%) 利潤'}。
+                                部位停損撤出後，只要大盤多頭健康，<strong style={{ color: '#34D399' }}>每 5 交易日 (週度) 檢視空缺直接開新倉遞補</strong>，資金不再乾等 30 天，徹底消除閒置 Cash Drag，盈虧比衝高至 <strong style={{ color: '#34D399' }}>2.10</strong>！
+                              </div>
+                            </div>
+
+                            {/* 4. 嚴格斷尾停損 & 贏家再平衡 */}
+                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
+                                <span>🛡️</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>嚴密風控：-12% 及時斷尾 & 季線停損</span>
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
+                                王者跌破 60MA 季線或衛星觸發 <strong>-12% 停損線</strong> 立即離場斷尾，釋出資金於大盤健康時等比向在席贏家再平衡與週度遞補，推動 20 年累積 <strong style={{ color: '#A78BFA' }}>+5,397.0% (55.0倍)</strong> 複利飛輪！
                               </div>
                             </div>
                           </div>

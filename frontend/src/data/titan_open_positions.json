@@ -39,21 +39,21 @@
       "stop_condition": "收盤跌破季線 60MA (NT$ 352.5) 或觸發 -12% 停損線 (及時斷尾)"
     },
     {
-      "stock_id": "3443",
-      "stock_name": "創意",
+      "stock_id": "3105",
+      "stock_name": "穩懋",
       "role": "🚀 革命衛星 (15%)",
       "target_weight_pct": 15.0,
       "weight_pct": 15.0,
       "entry_date": "20260924",
-      "entry_price": 8300.0,
-      "current_price": 8460.0,
-      "latest_price": 8460.0,
-      "unrealized_return_pct": 1.93,
+      "entry_price": 495.5,
+      "current_price": 592.0,
+      "latest_price": 592.0,
+      "unrealized_return_pct": 19.48,
       "holding_days": 7,
-      "ma60_stop_price": 5691.67,
-      "stop_loss_ma60": 5691.67,
-      "dist_to_stop_pct": 48.64,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 5691.7) 或觸發 -12% 停損線 (及時斷尾)"
+      "ma60_stop_price": 418.89,
+      "stop_loss_ma60": 418.89,
+      "dist_to_stop_pct": 41.33,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 418.9) 或觸發 -12% 停損線 (及時斷尾)"
     }
   ]
 }

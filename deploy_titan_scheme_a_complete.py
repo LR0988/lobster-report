@@ -96,10 +96,13 @@ price_adj_open = price_adj_pivot * open_ratio
 
 df_inst['inst_net'] = df_inst['foreign_net'].fillna(0) + df_inst['trust_net'].fillna(0)
 inst_pivot = df_inst.pivot(index='date', columns='stock_id', values='inst_net').fillna(0).sort_index().reindex(price_pivot.index).reindex(columns=price_pivot.columns).fillna(0)
+trust_pivot = df_inst.pivot(index='date', columns='stock_id', values='trust_net').fillna(0).sort_index().reindex(price_pivot.index).reindex(columns=price_pivot.columns).fillna(0)
 name_map = df_px.drop_duplicates(subset=['stock_id'])[['stock_id', 'stock_name']].set_index('stock_id')['stock_name'].to_dict()
 
 all_dates = [d for d in price_pivot.index if d >= '20050401']
 
+ma5_pivot = price_adj_pivot.rolling(5, min_periods=3).mean()
+ma10_pivot = price_adj_pivot.rolling(10, min_periods=5).mean()
 ma20_pivot = price_adj_pivot.rolling(20, min_periods=10).mean()
 ma60_pivot = price_adj_pivot.rolling(60, min_periods=20).mean()
 ma60_slope5 = (ma60_pivot - ma60_pivot.shift(5)) / ma60_pivot.shift(5)
@@ -110,12 +113,16 @@ ret_20 = price_adj_pivot.pct_change(20, fill_method=None)
 ret_60 = price_adj_pivot.pct_change(60, fill_method=None)
 ret_120 = price_adj_pivot.pct_change(120, fill_method=None)
 
+vol_60 = adj_ret.rolling(60, min_periods=20).std()
+sharpe_rs_pivot = ret_60 / (vol_60 * np.sqrt(60) + 1e-5)
+
 taiex_ret20 = df_taiex['close'].pct_change(20, fill_method=None)
 taiex_ret60 = df_taiex['close'].pct_change(60, fill_method=None)
 taiex_ret120 = df_taiex['close'].pct_change(120, fill_method=None)
 
 rolling_turnover_60 = value_pivot.rolling(60, min_periods=20).mean()
 rolling_inst_20 = inst_pivot.rolling(20, min_periods=10).sum()
+rolling_trust_20 = trust_pivot.rolling(20, min_periods=10).sum()
 breadth_ma20 = (price_adj_pivot >= ma20_pivot).astype(int).mean(axis=1)
 
 # 動態計算 0020 等權重基準曲線 (每 60 交易日取成交額前 20 大個股等權重 5%)
@@ -313,22 +320,38 @@ for i, dt in enumerate(all_dates):
                     if s in open_position_tracker:
                         open_position_tracker[s]['target_weight'] = new_w
 
-    # 4. 定期調倉選股
-    if i % rebalance_freq == 0:
-        is_macro_bull = df_taiex.loc[dt, 'close'] >= df_macro_overlay.loc[dt, 'taiex_ma60'] if dt in df_macro_overlay.index else True
+    # 4. 定期調倉選股與動態遞補開倉 (消除空窗期)
+    is_macro_bull = df_taiex.loc[dt, 'close'] >= df_macro_overlay.loc[dt, 'taiex_ma60'] if dt in df_macro_overlay.index else True
+    curr_breadth = breadth_ma20.loc[dt] if dt in breadth_ma20.index else 0.5
+    macro_healthy = is_macro_bull and (curr_breadth >= 0.35)
+
+    is_scheduled = (i % rebalance_freq == 0)
+    
+    # 🚀 消除空窗期核心：若處於宏觀多頭，且有部位因停損離場產生空缺，每 5 交易日 (週度) 檢視並即時開倉遞補
+    refill_freq = 5
+    is_refill_trigger = False
+    if (i % refill_freq == 0) and macro_healthy:
+        has_leader = any(w >= 0.50 for w in active_weights.values())
+        cur_sats = len([s for s in active_weights if active_weights[s] < 0.50])
+        if (not has_leader) or (cur_sats < num_sats):
+            is_refill_trigger = True
+
+    if is_scheduled or is_refill_trigger:
         if not is_macro_bull:
             next_targets = {}
         else:
-            curr_breadth = breadth_ma20.loc[dt] if dt in breadth_ma20.index else 0.5
             allow_sats = (curr_breadth >= min_breadth)
 
             valid_turnover = rolling_turnover_60.loc[dt].dropna()
             liquid_pool = valid_turnover.nlargest(50).index
+
             scores = {}
             for sid in liquid_pool:
                 p = price_adj_pivot.loc[dt, sid]
                 m60 = ma60_pivot.loc[dt, sid]
                 m20 = ma20_pivot.loc[dt, sid]
+                m10 = ma10_pivot.loc[dt, sid]
+                m5 = ma5_pivot.loc[dt, sid]
                 r20 = ret_20.loc[dt, sid]
                 r60 = ret_60.loc[dt, sid]
                 r120_raw = ret_120.loc[dt, sid]
@@ -354,37 +377,82 @@ for i, dt in enumerate(all_dates):
 
                 rs = (r20 - t20)*0.30 + (r60 - t60)*0.40 + (r120 - t120)*0.30
                 h_prox = (p / h60) if (not pd.isna(h60) and h60 > 0) else 1.0
-                inst_v = rolling_inst_20.loc[dt, sid] if (sid in rolling_inst_20.columns and dt in rolling_inst_20.index) else 0
-                scores[sid] = {'rs': rs, 'inst': inst_v, 'h_prox': h_prox, 'turnover': valid_turnover[sid]}
+                inst_v = rolling_inst_20.loc[dt, sid] if (sid in rolling_inst_20.columns and dt in rolling_inst_20.index) else 0.0
+                trust_v = rolling_trust_20.loc[dt, sid] if (sid in rolling_trust_20.columns and dt in rolling_trust_20.index) else 0.0
+                sharpe_v = sharpe_rs_pivot.loc[dt, sid] if (sid in sharpe_rs_pivot.columns and not pd.isna(sharpe_rs_pivot.loc[dt, sid])) else 0.0
+                align_score = 1.0 if (not pd.isna(m5) and not pd.isna(m10) and m5 >= m10 and m10 >= m20) else 0.0
+
+                scores[sid] = {
+                    'rs': rs,
+                    'h_prox': h_prox,
+                    'inst': inst_v,
+                    'trust': trust_v,
+                    'sharpe': sharpe_v,
+                    'align': align_score,
+                    'turnover': valid_turnover[sid]
+                }
 
             if len(scores) >= 1:
-                sdf = pd.DataFrame(scores).T
-                sdf['norm_rs'] = sdf['rs'].rank(pct=True).fillna(0.5)
-                sdf['norm_inst'] = sdf['inst'].rank(pct=True).fillna(0.5)
-                sdf['norm_prox'] = sdf['h_prox'].rank(pct=True).fillna(0.5)
-                sdf['norm_size'] = sdf['turnover'].rank(pct=True).fillna(0.5)
-                sdf['titan_score'] = 0.50 * sdf['norm_rs'] + 0.25 * sdf['norm_inst'] + 0.15 * sdf['norm_prox'] + 0.10 * sdf['norm_size']
-                
-                top_leaders = sdf.nlargest(min(5, len(sdf)), 'turnover')
-                leader = top_leaders['titan_score'].idxmax() if not top_leaders['titan_score'].isna().all() else top_leaders['turnover'].idxmax()
-                remaining = sdf.drop(index=[leader])
+                df_s = pd.DataFrame(scores).T
+                df_s['norm_rs'] = df_s['rs'].rank(pct=True).fillna(0.5)
+                df_s['norm_prox'] = df_s['h_prox'].rank(pct=True).fillna(0.5)
+                df_s['norm_inst'] = df_s['inst'].rank(pct=True).fillna(0.5)
+                df_s['norm_trust'] = df_s['trust'].rank(pct=True).fillna(0.5)
+                df_s['norm_sharpe'] = df_s['sharpe'].rank(pct=True).fillna(0.5)
+                df_s['norm_size'] = df_s['turnover'].rank(pct=True).fillna(0.5)
 
-                if not allow_sats or num_sats == 0:
-                    next_targets = {leader: 1.0}
-                else:
-                    if active_weights:
-                        current_sats = [s for s in active_weights if s != leader and s in scores and price_adj_pivot.loc[dt, s] >= ma20_pivot.loc[dt, s]]
-                        needed = num_sats - len(current_sats)
-                        new_candidates = [s for s in remaining.nlargest(num_sats * 2, 'titan_score').index if s not in current_sats]
-                        satellites = (current_sats + new_candidates)[:num_sats]
+                # 🎯 階段一：動能指標初篩 Top 10 (強者之池)
+                df_s['mom_rank_score'] = 0.50 * df_s['norm_rs'] + 0.35 * df_s['norm_prox'] + 0.15 * df_s['norm_size']
+                top10_idx = df_s.nlargest(min(10, len(df_s)), 'mom_rank_score').index
+                df_top10 = df_s.loc[top10_idx].copy()
+
+                # 🌟 階段二：在 Top 10 中評估高勝率指標二次精選 (投信認養 25% + 法人 15% + 平滑度 10% + 多頭排列 10% + 動能 40%)
+                df_top10['win_rate_score'] = (
+                    0.40 * df_top10['mom_rank_score'] +
+                    0.25 * df_top10['norm_trust'] +
+                    0.15 * df_top10['norm_inst'] +
+                    0.10 * df_top10['norm_sharpe'] +
+                    0.10 * df_top10['align']
+                )
+
+                # 王者挑選：兼顧流動性與勝率評分
+                top_leaders = df_top10.nlargest(min(5, len(df_top10)), 'turnover')
+                leader = top_leaders['win_rate_score'].idxmax()
+                remaining = df_top10.drop(index=[leader])
+                sat_candidates = remaining.nlargest(len(remaining), 'win_rate_score').index
+
+                if is_scheduled:
+                    if not allow_sats or num_sats == 0:
+                        next_targets = {leader: 1.0}
                     else:
-                        satellites = remaining.nlargest(num_sats, 'titan_score').index.tolist()
-                    
-                    next_targets = {leader: leader_w}
-                    for sat in satellites:
-                        next_targets[sat] = sat_w
+                        if active_weights:
+                            current_sats = [s for s in active_weights if s != leader and s in scores and price_adj_pivot.loc[dt, s] >= ma20_pivot.loc[dt, s]]
+                            needed = num_sats - len(current_sats)
+                            new_candidates = [s for s in sat_candidates if s not in current_sats]
+                            satellites = (current_sats + new_candidates)[:num_sats]
+                        else:
+                            satellites = sat_candidates[:num_sats].tolist()
+                        next_targets = {leader: leader_w}
+                        for sat in satellites:
+                            next_targets[sat] = sat_w
+                else:
+                    # 🚀 動態遞補模式 (保持在席贏家，僅填補停損產生的空位，徹底消除資金閒置)
+                    next_targets = dict(active_weights)
+                    has_leader = any(w >= 0.50 for w in active_weights.values())
+                    if not has_leader:
+                        if leader not in next_targets:
+                            next_targets[leader] = leader_w
+                        else:
+                            if len(sat_candidates) > 0:
+                                next_targets[sat_candidates[0]] = leader_w
+                    cur_sats = [s for s in next_targets if next_targets[s] < 0.50]
+                    needed_sats = num_sats - len(cur_sats)
+                    if needed_sats > 0 and allow_sats:
+                        avail = [s for s in sat_candidates if s not in next_targets]
+                        for c in avail[:needed_sats]:
+                            next_targets[c] = sat_w
             else:
-                next_targets = {}
+                next_targets = {} if is_scheduled else dict(active_weights)
         pending_weights = next_targets
 
     cur_exposure = sum(active_weights.values())

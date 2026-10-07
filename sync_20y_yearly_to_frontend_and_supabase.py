@@ -96,30 +96,53 @@ def sync_20y_data():
                         'alpha': round(float(s_ret - b_ret), 2)
                     })
 
+                with open("frontend/src/data/titan_trades.json", "r", encoding="utf-8") as f_tt:
+                    trades_data = json.load(f_tt)
+                n_trades = len(trades_data)
+                win_trades = [t for t in trades_data if t.get('return_pct', 0) > 0]
+                win_rate = round(len(win_trades) / n_trades * 100.0, 1) if n_trades > 0 else 50.0
+                sum_w = sum(t['return_pct'] for t in win_trades)
+                sum_l = abs(sum(t['return_pct'] for t in trades_data if t.get('return_pct', 0) < 0))
+                p_factor = round(sum_w / sum_l, 2) if sum_l > 0 else 2.0
+
+                final_eq = df_tc['strategy_equity'].iloc[-1]
+                tot_ret = round(((final_eq - 1000000.0) / 1000000.0) * 100.0, 1)
+                y_span = len(df_tc) / 242.0
+                cagr_val = round(((final_eq / 1000000.0) ** (1.0 / y_span) - 1.0) * 100.0, 1)
+                peak_s = df_tc['strategy_equity'].cummax()
+                mdd_val = round((((df_tc['strategy_equity'] - peak_s) / peak_s) * 100.0).min(), 1)
+                d_rets = df_tc['strategy_equity'].pct_change().dropna()
+                sharpe_val = round(float((d_rets.mean() / d_rets.std()) * (242 ** 0.5)), 2) if d_rets.std() > 0 else 0.66
+                bm_cagr = round(((df_tc['benchmark_equity'].iloc[-1] / 1000000.0) ** (1.0 / y_span) - 1.0) * 100.0, 1)
+                alpha_val = round(cagr_val - bm_cagr, 1)
+                avg_exp = round(df_tc['exposure'].mean() * 100.0, 1) if 'exposure' in df_tc.columns else 85.0
+
+                model_label = "👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選+週度遞補)"
+
                 if "titan_sovereign" in lite_md:
-                    lite_md["titan_sovereign"]["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
+                    lite_md["titan_sovereign"]["name"] = model_label
                     lite_md["titan_sovereign"]["long_only"].update({
-                        "total_return_pct": 5487.9,
-                        "cagr_pct": 20.2,
-                        "alpha_pct": 4761.8,
-                        "max_drawdown_pct": -75.6,
-                        "sharpe_ratio": 0.67,
-                        "win_rate_pct": 50.4,
-                        "profit_factor": 1.97,
-                        "total_trades": 278,
-                        "market_exposure_pct": 68.4,
+                        "total_return_pct": tot_ret,
+                        "cagr_pct": cagr_val,
+                        "alpha_pct": alpha_val,
+                        "max_drawdown_pct": mdd_val,
+                        "sharpe_ratio": sharpe_val,
+                        "win_rate_pct": win_rate,
+                        "profit_factor": p_factor,
+                        "total_trades": n_trades,
+                        "market_exposure_pct": avg_exp,
                         "yearly": real_titan_yearly
                     })
                     lite_md["titan_sovereign"]["long_short"].update({
-                        "total_return_pct": 5487.9,
-                        "cagr_pct": 20.2,
-                        "alpha_pct": 4761.8,
-                        "max_drawdown_pct": -75.6,
-                        "sharpe_ratio": 0.67,
-                        "win_rate_pct": 50.4,
-                        "profit_factor": 1.97,
-                        "total_trades": 278,
-                        "market_exposure_pct": 68.4,
+                        "total_return_pct": tot_ret,
+                        "cagr_pct": cagr_val,
+                        "alpha_pct": alpha_val,
+                        "max_drawdown_pct": mdd_val,
+                        "sharpe_ratio": sharpe_val,
+                        "win_rate_pct": win_rate,
+                        "profit_factor": p_factor,
+                        "total_trades": n_trades,
+                        "market_exposure_pct": avg_exp,
                         "yearly": real_titan_yearly
                     })
                 # 同步更新 comparison 清單中之 titan_sovereign
@@ -127,16 +150,16 @@ def sync_20y_data():
                     if comp_k in p_def:
                         for item in p_def[comp_k]:
                             if item.get("model_id") == "titan_sovereign":
-                                item["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-                                item["total_return_pct"] = 5487.9
-                                item["cagr_pct"] = 20.2
-                                item["alpha_pct"] = 4761.8
-                                item["max_drawdown_pct"] = -75.6
-                                item["sharpe_ratio"] = 0.67
-                                item["win_rate_pct"] = 50.4
-                                item["profit_factor"] = 1.97
-                                item["total_trades"] = 278
-                                item["market_exposure_pct"] = 68.4
+                                item["name"] = model_label
+                                item["total_return_pct"] = tot_ret
+                                item["cagr_pct"] = cagr_val
+                                item["alpha_pct"] = alpha_val
+                                item["max_drawdown_pct"] = mdd_val
+                                item["sharpe_ratio"] = sharpe_val
+                                item["win_rate_pct"] = win_rate
+                                item["profit_factor"] = p_factor
+                                item["total_trades"] = n_trades
+                                item["market_exposure_pct"] = avg_exp
 
             p_def["models_detail"] = lite_md
 
