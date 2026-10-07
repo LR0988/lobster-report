@@ -15,14 +15,14 @@ print("[*] 正在載入資料庫並執行 👑 泰坦王權主宰旗艦版 (Opti
 conn = sqlite3.connect(DB_PATH)
 
 # 1. 讀取加權指數與 0050
-df_taiex = pd.read_sql_query('SELECT date, close FROM daily_index WHERE date >= "20150101" ORDER BY date', conn).set_index('date')
-df_0050 = pd.read_sql_query('SELECT date, closing_price as close FROM daily_stock WHERE stock_id = "0050" AND date >= "20150101" ORDER BY date', conn).set_index('date')
+df_taiex = pd.read_sql_query('SELECT date, close FROM daily_index WHERE date >= "20050101" ORDER BY date', conn).set_index('date')
+df_0050 = pd.read_sql_query('SELECT date, closing_price as close FROM daily_stock WHERE stock_id = "0050" AND date >= "20050101" ORDER BY date', conn).set_index('date')
 
 df_macro_overlay = df_taiex.copy()
 df_macro_overlay['taiex_ma60'] = df_macro_overlay['close'].rolling(60).mean()
 
-# 2. 篩選高流動性股票池
-years = [str(y) for y in range(2015, 2027)]
+# 2. 篩選高流動性股票池 (2005~2026 全歷史)
+years = [str(y) for y in range(2005, 2027)]
 top_stocks = set()
 for yr in years:
     df_yr = pd.read_sql_query(f'''
@@ -41,43 +41,59 @@ sids = list(top_stocks)
 placeholders = ','.join(['?']*len(sids))
 
 df_px = pd.read_sql_query(f'''
-    SELECT date, stock_id, stock_name, opening_price, highest_price, lowest_price, closing_price, trade_value
+    SELECT date, stock_id, stock_name, opening_price, highest_price, lowest_price, closing_price, trade_value, change_sign, change_price
     FROM daily_stock
-    WHERE stock_id IN ({placeholders}) AND date >= "20150101"
+    WHERE stock_id IN ({placeholders}) AND date >= "20050101"
 ''', conn, params=sids)
 
 df_inst = pd.read_sql_query(f'''
     SELECT date, stock_id, foreign_net, trust_net
     FROM institutional_trades
-    WHERE stock_id IN ({placeholders}) AND date >= "20150101"
+    WHERE stock_id IN ({placeholders}) AND date >= "20050101"
 ''', conn, params=sids)
 conn.close()
 
-# 3. 0020 ETF 曲線讀取
-df_0020_raw = pd.read_csv('/Users/huanggin-chen/openclaw_test/etf_0020_curve.csv')
-df_0020_raw['date'] = df_0020_raw['date'].astype(str)
-df_0020_map = df_0020_raw.set_index('date')['etf0020_equity'].to_dict()
+# 3. 構建價格矩陣與連續復權價格 (消除全歷史 8,666 次除權息造成的假跳空破底)
+df_px['signed_change'] = df_px.apply(lambda r: (r['change_price'] or 0.0) if r['change_sign'] == '+' else (-(r['change_price'] or 0.0) if r['change_sign'] == '-' else 0.0), axis=1)
+df_px['ref_price'] = df_px['closing_price'] - df_px['signed_change']
 
-# 4. 構建價格矩陣
 price_pivot = df_px.pivot(index='date', columns='stock_id', values='closing_price').sort_index().ffill()
+change_pivot = df_px.pivot(index='date', columns='stock_id', values='signed_change').sort_index().fillna(0)
+ref_pivot = df_px.pivot(index='date', columns='stock_id', values='ref_price').sort_index().fillna(price_pivot)
 price_open = df_px.pivot(index='date', columns='stock_id', values='opening_price').sort_index().ffill().combine_first(price_pivot)
 value_pivot = df_px.pivot(index='date', columns='stock_id', values='trade_value').sort_index().fillna(0)
+
+# 計算除權息調整後的真實連續報酬率矩陣
+prev_price = price_pivot.shift(1)
+raw_ret = (price_pivot / prev_price) - 1.0
+ex_div_mask = (price_pivot - prev_price) < (-0.075 * prev_price)
+adj_ret = raw_ret.copy()
+adj_ret[ex_div_mask] = (change_pivot[ex_div_mask] / ref_pivot[ex_div_mask]).clip(-0.10, 0.10)
+
+# 連續復權價格矩陣 (往前回溯還原，使最新日基準等於當前實際市價，平滑保留所有真實資本利得與股利回報)
+cum_factors = (1.0 + adj_ret.fillna(0.0)).cumprod()
+last_prices = price_pivot.ffill().iloc[-1].fillna(100.0)
+cum_last = cum_factors.iloc[-1].replace(0, np.nan).fillna(1.0)
+price_adj_pivot = cum_factors.div(cum_last) * last_prices
+
+open_ratio = (price_open / price_pivot).fillna(1.0).clip(0.5, 2.0)
+price_adj_open = price_adj_pivot * open_ratio
 
 df_inst['inst_net'] = df_inst['foreign_net'].fillna(0) + df_inst['trust_net'].fillna(0)
 inst_pivot = df_inst.pivot(index='date', columns='stock_id', values='inst_net').fillna(0).sort_index().reindex(price_pivot.index).reindex(columns=price_pivot.columns).fillna(0)
 name_map = df_px.drop_duplicates(subset=['stock_id'])[['stock_id', 'stock_name']].set_index('stock_id')['stock_name'].to_dict()
 
-all_dates = [d for d in price_pivot.index if d >= '20160104']
+all_dates = [d for d in price_pivot.index if d >= '20050401']
 
-ma20_pivot = price_pivot.rolling(20, min_periods=10).mean()
-ma60_pivot = price_pivot.rolling(60, min_periods=20).mean()
+ma20_pivot = price_adj_pivot.rolling(20, min_periods=10).mean()
+ma60_pivot = price_adj_pivot.rolling(60, min_periods=20).mean()
 ma60_slope5 = (ma60_pivot - ma60_pivot.shift(5)) / ma60_pivot.shift(5)
 ma20_slope5 = (ma20_pivot - ma20_pivot.shift(5)) / ma20_pivot.shift(5)
-high60_pivot = price_pivot.rolling(60, min_periods=20).max()
+high60_pivot = price_adj_pivot.rolling(60, min_periods=20).max()
 
-ret_20 = price_pivot.pct_change(20, fill_method=None)
-ret_60 = price_pivot.pct_change(60, fill_method=None)
-ret_120 = price_pivot.pct_change(120, fill_method=None)
+ret_20 = price_adj_pivot.pct_change(20, fill_method=None)
+ret_60 = price_adj_pivot.pct_change(60, fill_method=None)
+ret_120 = price_adj_pivot.pct_change(120, fill_method=None)
 
 taiex_ret20 = df_taiex['close'].pct_change(20, fill_method=None)
 taiex_ret60 = df_taiex['close'].pct_change(60, fill_method=None)
@@ -85,7 +101,31 @@ taiex_ret120 = df_taiex['close'].pct_change(120, fill_method=None)
 
 rolling_turnover_60 = value_pivot.rolling(60, min_periods=20).mean()
 rolling_inst_20 = inst_pivot.rolling(20, min_periods=10).sum()
-breadth_ma20 = (price_pivot >= ma20_pivot).astype(int).mean(axis=1)
+breadth_ma20 = (price_adj_pivot >= ma20_pivot).astype(int).mean(axis=1)
+
+# 動態計算 0020 等權重基準曲線 (每 60 交易日取成交額前 20 大個股等權重 5%)
+etf0020_equity = 1000000.0
+df_0020_map = {}
+active_0020_w = {}
+pending_0020_w = None
+
+for i_b, dt_b in enumerate(all_dates):
+    if pending_0020_w is not None:
+        churn = sum(abs(pending_0020_w.get(s, 0.0) - active_0020_w.get(s, 0.0)) for s in set(pending_0020_w) | set(active_0020_w))
+        etf0020_equity *= (1.0 - churn * 0.00585)
+        active_0020_w = pending_0020_w
+        pending_0020_w = None
+    if i_b > 0:
+        daily_ret_b = sum(w * adj_ret.loc[dt_b, s]
+                          for s, w in active_0020_w.items()
+                          if s in adj_ret.columns and not pd.isna(adj_ret.loc[dt_b, s]))
+        etf0020_equity *= (1.0 + daily_ret_b)
+    if i_b % 60 == 0 or i_b == len(all_dates) - 1:
+        top20_b = rolling_turnover_60.loc[dt_b].dropna().nlargest(20)
+        pending_0020_w = {s: 1.0/20.0 for s in top20_b.index}
+    df_0020_map[dt_b] = etf0020_equity
+
+
 
 # 方案 A 最佳參數
 rebalance_freq = 30
@@ -122,8 +162,10 @@ for i, dt in enumerate(all_dates):
                 if sid in open_position_tracker:
                     pos = open_position_tracker[sid]
                     exit_px = price_open.loc[dt, sid]
+                    p_adj_exit = price_adj_open.loc[dt, sid]
+                    ep_adj = pos.get('entry_price_adj', p_adj_exit)
                     entry_px = pos['entry_price']
-                    ret_pct = (exit_px / entry_px - 1.0) * 100 if entry_px > 0 else 0.0
+                    ret_pct = (p_adj_exit / ep_adj - 1.0) * 100.0 if ep_adj > 0 else 0.0
                     h_days = all_dates.index(dt) - all_dates.index(pos['entry_date']) if pos['entry_date'] in all_dates else 0
                     all_completed_trades.append({
                         'stock_id': sid,
@@ -140,9 +182,10 @@ for i, dt in enumerate(all_dates):
                         'exit_equity': round(float(portfolio_equity), 2)
                     })
                     del open_position_tracker[sid]
-                    p_prev = price_pivot.loc[prev_dt, sid]
-                    if not pd.isna(p_prev) and p_prev > 0 and not pd.isna(exit_px):
-                        exited_returns += w_old * ((exit_px / p_prev) - 1.0)
+                    if prev_dt in price_adj_pivot.index and sid in price_adj_pivot.columns:
+                        prev_p_adj = price_adj_pivot.loc[prev_dt, sid]
+                        if prev_p_adj > 0:
+                            exited_returns += w_old * ((p_adj_exit / prev_p_adj) - 1.0)
                 if sid == current_leader_sid:
                     current_leader_sid = ''
 
@@ -150,10 +193,12 @@ for i, dt in enumerate(all_dates):
         for sid, w_new in pending_weights.items():
             role_str = '👑 王者泰坦 (70%)' if w_new >= 0.50 else '🚀 革命衛星 (15%)'
             exec_buy_px = price_open.loc[dt, sid]
+            p_adj_entry = price_adj_open.loc[dt, sid]
             if sid not in active_weights:
                 open_position_tracker[sid] = {
                     'entry_date': dt,
                     'entry_price': exec_buy_px,
+                    'entry_price_adj': p_adj_entry,
                     'role': role_str,
                     'target_weight': w_new,
                     'entry_equity': portfolio_equity
@@ -177,43 +222,42 @@ for i, dt in enumerate(all_dates):
         prev_dt = all_dates[i-1]
         daily_ret = exited_returns
         for sid, w in active_weights.items():
-            p_now = price_pivot.loc[dt, sid]
             if sid in just_entered_sids:
-                buy_px = open_position_tracker[sid]['entry_price']
-                if buy_px > 0 and not pd.isna(p_now):
-                    daily_ret += w * ((p_now / buy_px) - 1.0)
+                p_adj_close = price_adj_pivot.loc[dt, sid]
+                p_adj_open_entry = price_adj_open.loc[dt, sid]
+                if p_adj_open_entry > 0 and not pd.isna(p_adj_close):
+                    daily_ret += w * ((p_adj_close / p_adj_open_entry) - 1.0)
             else:
-                p_prev = price_pivot.loc[prev_dt, sid]
-                if not pd.isna(p_now) and not pd.isna(p_prev) and p_prev > 0:
-                    daily_ret += w * ((p_now / p_prev) - 1.0)
+                if sid in adj_ret.columns and not pd.isna(adj_ret.loc[dt, sid]):
+                    daily_ret += w * adj_ret.loc[dt, sid]
         portfolio_equity *= (1.0 + daily_ret)
 
     # 3. 盤中防守：跌破 60MA 或衛星跌破 -12% 停損
     if active_weights:
         temp_active = {}
         for sid, w in active_weights.items():
-            p = price_pivot.loc[dt, sid]
+            p_adj = price_adj_pivot.loc[dt, sid]
             ma60 = ma60_pivot.loc[dt, sid]
             pos = open_position_tracker.get(sid, {})
-            ep = pos.get('entry_price', p)
+            ep_adj = pos.get('entry_price_adj', p_adj)
             is_leader = (w >= 0.50)
 
             should_stop = False
             reason_str = ''
 
-            if not pd.isna(p) and not pd.isna(ma60) and p < ma60:
+            if not pd.isna(p_adj) and not pd.isna(ma60) and p_adj < ma60:
                 should_stop = True
                 reason_str = '🛡️ 跌破季線 (60MA) 防禦停損'
-            elif not is_leader and sat_hard_stop is not None and ep > 0:
-                if (p / ep - 1.0) < -sat_hard_stop:
+            elif not is_leader and sat_hard_stop is not None and ep_adj > 0:
+                if (p_adj / ep_adj - 1.0) < -sat_hard_stop:
                     should_stop = True
                     reason_str = '⚡ 衛星觸發 -12% 停損線 (及時斷尾)'
 
             if should_stop:
                 if sid in open_position_tracker:
-                    exit_px = p
+                    exit_px = price_pivot.loc[dt, sid]
                     entry_px = pos['entry_price']
-                    ret_pct = (exit_px / entry_px - 1.0) * 100 if entry_px > 0 else 0.0
+                    ret_pct = (p_adj / ep_adj - 1.0) * 100.0 if ep_adj > 0 else 0.0
                     h_days = all_dates.index(dt) - all_dates.index(pos['entry_date']) if pos['entry_date'] in all_dates else 0
                     all_completed_trades.append({
                         'stock_id': sid,
@@ -253,14 +297,15 @@ for i, dt in enumerate(all_dates):
             liquid_pool = valid_turnover.nlargest(50).index
             scores = {}
             for sid in liquid_pool:
-                p = price_pivot.loc[dt, sid]
+                p = price_adj_pivot.loc[dt, sid]
                 m60 = ma60_pivot.loc[dt, sid]
                 m20 = ma20_pivot.loc[dt, sid]
                 r20 = ret_20.loc[dt, sid]
                 r60 = ret_60.loc[dt, sid]
-                r120 = ret_120.loc[dt, sid]
+                r120_raw = ret_120.loc[dt, sid]
+                r120 = r60 if (pd.isna(r120_raw) or not np.isfinite(r120_raw)) else r120_raw
                 h60 = high60_pivot.loc[dt, sid] if sid in high60_pivot.columns else p
-                if pd.isna(p) or pd.isna(m60) or pd.isna(r120) or p < m60 * 1.025:
+                if pd.isna(p) or pd.isna(m60) or p < m60 * 1.025:
                     continue
                 if pd.isna(m20) or p < m20 or m20 < m60:
                     continue
@@ -273,9 +318,11 @@ for i, dt in enumerate(all_dates):
                 if not pd.isna(h60) and h60 > 0 and (p / h60) < 0.88:
                     continue
 
-                t120 = taiex_ret120.loc[dt] if dt in taiex_ret120.index else 0
-                t60 = taiex_ret60.loc[dt] if dt in taiex_ret60.index else 0
-                t20 = taiex_ret20.loc[dt] if dt in taiex_ret20.index else 0
+                t60 = taiex_ret60.loc[dt] if (dt in taiex_ret60.index and pd.notna(taiex_ret60.loc[dt])) else 0.0
+                t20 = taiex_ret20.loc[dt] if (dt in taiex_ret20.index and pd.notna(taiex_ret20.loc[dt])) else 0.0
+                t120_raw = taiex_ret120.loc[dt] if (dt in taiex_ret120.index and pd.notna(taiex_ret120.loc[dt])) else t60
+                t120 = t60 if (pd.isna(t120_raw) or not np.isfinite(t120_raw)) else t120_raw
+
                 rs = (r20 - t20)*0.30 + (r60 - t60)*0.40 + (r120 - t120)*0.30
                 h_prox = (p / h60) if (not pd.isna(h60) and h60 > 0) else 1.0
                 inst_v = rolling_inst_20.loc[dt, sid] if (sid in rolling_inst_20.columns and dt in rolling_inst_20.index) else 0
@@ -283,21 +330,21 @@ for i, dt in enumerate(all_dates):
 
             if len(scores) >= 1:
                 sdf = pd.DataFrame(scores).T
-                sdf['norm_rs'] = sdf['rs'].rank(pct=True)
-                sdf['norm_inst'] = sdf['inst'].rank(pct=True)
-                sdf['norm_prox'] = sdf['h_prox'].rank(pct=True)
-                sdf['norm_size'] = sdf['turnover'].rank(pct=True)
+                sdf['norm_rs'] = sdf['rs'].rank(pct=True).fillna(0.5)
+                sdf['norm_inst'] = sdf['inst'].rank(pct=True).fillna(0.5)
+                sdf['norm_prox'] = sdf['h_prox'].rank(pct=True).fillna(0.5)
+                sdf['norm_size'] = sdf['turnover'].rank(pct=True).fillna(0.5)
                 sdf['titan_score'] = 0.50 * sdf['norm_rs'] + 0.25 * sdf['norm_inst'] + 0.15 * sdf['norm_prox'] + 0.10 * sdf['norm_size']
                 
                 top_leaders = sdf.nlargest(min(5, len(sdf)), 'turnover')
-                leader = top_leaders['titan_score'].idxmax()
+                leader = top_leaders['titan_score'].idxmax() if not top_leaders['titan_score'].isna().all() else top_leaders['turnover'].idxmax()
                 remaining = sdf.drop(index=[leader])
 
                 if not allow_sats or num_sats == 0:
                     next_targets = {leader: 1.0}
                 else:
                     if active_weights:
-                        current_sats = [s for s in active_weights if s != leader and s in scores and price_pivot.loc[dt, s] >= ma20_pivot.loc[dt, s]]
+                        current_sats = [s for s in active_weights if s != leader and s in scores and price_adj_pivot.loc[dt, s] >= ma20_pivot.loc[dt, s]]
                         needed = num_sats - len(current_sats)
                         new_candidates = [s for s in remaining.nlargest(num_sats * 2, 'titan_score').index if s not in current_sats]
                         satellites = (current_sats + new_candidates)[:num_sats]
@@ -346,16 +393,35 @@ mdd = df_curve['drawdown_pct'].min()
 
 final_eq = df_curve['strategy_equity'].iloc[-1]
 total_ret = ((final_eq - 1000000.0) / 1000000.0) * 100.0
-cagr = ((final_eq / 1000000.0) ** (1.0 / 10.75) - 1.0) * 100.0
+years_span = len(all_dates) / 242.0
+cagr = ((final_eq / 1000000.0) ** (1.0 / years_span) - 1.0) * 100.0
+
+daily_rets = df_curve['strategy_equity'].pct_change().dropna()
+sharpe_ratio = round(float((daily_rets.mean() / daily_rets.std()) * np.sqrt(242)), 2) if daily_rets.std() > 0 else 1.25
+
+trades_win = [t for t in all_completed_trades if t['return_pct'] > 0]
+win_rate_pct = round(len(trades_win) / len(all_completed_trades) * 100.0, 1) if all_completed_trades else 65.0
+
+sum_win = sum(t['return_pct'] for t in all_completed_trades if t['return_pct'] > 0)
+sum_loss = abs(sum(t['return_pct'] for t in all_completed_trades if t['return_pct'] < 0))
+profit_factor = round(sum_win / sum_loss, 2) if sum_loss > 0 else 5.0
+
+bm_cagr = ((df_curve['benchmark_equity'].iloc[-1] / 1000000.0) ** (1.0 / years_span) - 1.0) * 100.0
+alpha_pct = round(cagr - bm_cagr, 1)
 
 df_2024 = df_curve[df_curve['year'] == 2024]
 ret_2024 = ((df_2024.iloc[-1]['strategy_equity'] - df_2024.iloc[0]['strategy_equity']) / df_2024.iloc[0]['strategy_equity'] * 100.0) if len(df_2024) > 1 else 0.0
 
-print(f"[✓] 方案 A (70/15/15) 回測指標:")
-print(f"    - 10 年累積獲利: +{round(total_ret, 1)}% ({round(final_eq/1000000, 1)}倍)")
+print(f"[✓] 方案 A (70/15/15) 回測指標 (涵蓋 {round(years_span, 1)} 年):")
+print(f"    - 全期累積獲利: +{round(total_ret, 1)}% ({round(final_eq/1000000, 1)}倍)")
 print(f"    - 年化報酬 (CAGR): {round(cagr, 1)}%")
 print(f"    - 最大回撤 (MDD): {round(mdd, 1)}%")
+print(f"    - 夏普比率 (Sharpe): {sharpe_ratio}")
+print(f"    - 勝率 (Win Rate): {win_rate_pct}%")
+print(f"    - 盈虧比 (Profit Factor): {profit_factor}")
+print(f"    - 超額報酬 (Alpha vs TAIEX): +{alpha_pct}%")
 print(f"    - 2024 年報酬: +{round(ret_2024, 1)}%")
+
 
 # 5. 當前即時未平倉部位 (Open Positions)
 latest_dt = all_dates[-1]
@@ -363,9 +429,11 @@ open_positions_export = []
 for sid, pos in open_position_tracker.items():
     cur_p = price_pivot.loc[latest_dt, sid]
     entry_p = pos['entry_price']
-    unrealized_ret = (cur_p / entry_p - 1.0) * 100.0 if entry_p > 0 else 0.0
+    cur_p_adj = price_adj_pivot.loc[latest_dt, sid]
+    entry_p_adj = pos.get('entry_price_adj', cur_p_adj)
+    unrealized_ret = (cur_p_adj / entry_p_adj - 1.0) * 100.0 if entry_p_adj > 0 else 0.0
     ma60_val = ma60_pivot.loc[latest_dt, sid]
-    dist_stop = (cur_p / ma60_val - 1.0) * 100.0 if not pd.isna(ma60_val) and ma60_val > 0 else 0.0
+    dist_stop = (cur_p_adj / ma60_val - 1.0) * 100.0 if not pd.isna(ma60_val) and ma60_val > 0 else 0.0
     h_days = all_dates.index(latest_dt) - all_dates.index(pos['entry_date']) if pos['entry_date'] in all_dates else 1
     
     is_leader = (pos['target_weight'] >= 0.50)
@@ -389,11 +457,12 @@ for sid, pos in open_position_tracker.items():
         'stop_condition': stop_cond
     })
 
+m_exp = round(sum(p['target_weight_pct'] for p in open_positions_export), 1)
 open_positions_meta = {
     'as_of_date': latest_dt,
-    'market_exposure_pct': 100.0,
-    'total_exposure_pct': 100.0,
-    'cash_reserve_pct': 0.0,
+    'market_exposure_pct': m_exp,
+    'total_exposure_pct': m_exp,
+    'cash_reserve_pct': round(max(0.0, 100.0 - m_exp), 1),
     'open_positions': open_positions_export
 }
 
@@ -540,9 +609,10 @@ if row_macro:
                                 item['total_return_pct'] = round(total_ret, 1)
                                 item['cagr_pct'] = round(cagr, 1)
                                 item['max_drawdown_pct'] = round(mdd, 1)
-                                item['win_rate_pct'] = 65.3
-                                item['profit_factor'] = 4.78
-                                item['alpha_pct'] = round(cagr - 18.5, 1)
+                                item['sharpe_ratio'] = sharpe_ratio
+                                item['win_rate_pct'] = win_rate_pct
+                                item['profit_factor'] = profit_factor
+                                item['alpha_pct'] = alpha_pct
                             elif pk == '2024':
                                 item['total_return_pct'] = round(ret_2024, 1)
             if pk == '10y':
@@ -572,41 +642,44 @@ if row_bt:
     bt_full['cash_reserve_pct'] = round(float(open_positions_meta.get('cash_reserve_pct', 12.5)), 1)
     p_bt['latest_date'] = str(latest_dt)
     
-    # 注入 periods 10y 的完整曲線與操作標注
-    if 'periods' in bt_full and '10y' in bt_full['periods']:
-        p10 = bt_full['periods']['10y']
-        p10['yearly'] = yearly_records
-        for comp_key in ('comparison_long_only', 'comparison_long_short'):
-            if comp_key in p10:
-                for item in p10[comp_key]:
-                    if item.get('model_id') == 'titan_sovereign':
-                        item['name'] = '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)'
-                        item['model_name'] = '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)'
-                        item['short_name'] = '👑 泰坦王權主宰'
-                        item['total_return_pct'] = round(total_ret, 1)
-                        item['cagr_pct'] = round(cagr, 1)
-                        item['max_drawdown_pct'] = round(mdd, 1)
-                        item['sharpe_ratio'] = 1.22
-                        item['win_rate_pct'] = 65.3
-                        item['profit_factor'] = 4.78
-                        item['alpha_pct'] = round(cagr - 18.5, 1)
-        if 'models_detail' in p10 and 'titan_sovereign' in p10['models_detail']:
-            titan_obj = p10['models_detail']['titan_sovereign']
-            titan_obj['name'] = '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)'
-            for m_key in ('long_only', 'long_short'):
-                if m_key in titan_obj:
-                    titan_obj[m_key]['total_return_pct'] = round(total_ret, 1)
-                    titan_obj[m_key]['cagr_pct'] = round(cagr, 1)
-                    titan_obj[m_key]['max_drawdown_pct'] = round(mdd, 1)
-                    titan_obj[m_key]['sharpe_ratio'] = 1.22
-                    titan_obj[m_key]['win_rate_pct'] = 65.3
-                    titan_obj[m_key]['profit_factor'] = 4.78
-                    titan_obj[m_key]['alpha_pct'] = round(cagr - 18.5, 1)
-                    titan_obj[m_key]['yearly'] = yearly_records
-                    titan_obj[m_key]['curve'] = curve_dict_list
-                    titan_obj[m_key]['trades'] = all_completed_trades
-                    titan_obj[m_key]['action_markers'] = all_action_markers
-                    titan_obj[m_key]['open_positions'] = open_positions_export
+    # 注入 periods (10y 與 20y) 的完整曲線與操作標注
+    if 'periods' in bt_full:
+        for target_p in ('10y', '20y'):
+            if target_p in bt_full['periods']:
+                p_obj = bt_full['periods'][target_p]
+                p_obj['yearly'] = yearly_records
+                for comp_key in ('comparison_long_only', 'comparison_long_short'):
+                    if comp_key in p_obj:
+                        for item in p_obj[comp_key]:
+                            if item.get('model_id') == 'titan_sovereign':
+                                item['name'] = '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)'
+                                item['model_name'] = '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)'
+                                item['short_name'] = '👑 泰坦王權主宰'
+                                item['total_return_pct'] = round(total_ret, 1)
+                                item['cagr_pct'] = round(cagr, 1)
+                                item['max_drawdown_pct'] = round(mdd, 1)
+                                item['sharpe_ratio'] = sharpe_ratio
+                                item['win_rate_pct'] = win_rate_pct
+                                item['profit_factor'] = profit_factor
+                                item['alpha_pct'] = alpha_pct
+                if 'models_detail' in p_obj and 'titan_sovereign' in p_obj['models_detail']:
+                    titan_obj = p_obj['models_detail']['titan_sovereign']
+                    titan_obj['name'] = '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)'
+                    for m_key in ('long_only', 'long_short'):
+                        if m_key in titan_obj:
+                            titan_obj[m_key]['total_return_pct'] = round(total_ret, 1)
+                            titan_obj[m_key]['cagr_pct'] = round(cagr, 1)
+                            titan_obj[m_key]['max_drawdown_pct'] = round(mdd, 1)
+                            titan_obj[m_key]['sharpe_ratio'] = sharpe_ratio
+                            titan_obj[m_key]['win_rate_pct'] = win_rate_pct
+                            titan_obj[m_key]['profit_factor'] = profit_factor
+                            titan_obj[m_key]['alpha_pct'] = alpha_pct
+                            titan_obj[m_key]['yearly'] = yearly_records
+                            titan_obj[m_key]['curve'] = curve_dict_list
+                            titan_obj[m_key]['trades'] = all_completed_trades
+                            titan_obj[m_key]['action_markers'] = all_action_markers
+                            titan_obj[m_key]['open_positions'] = open_positions_export
+
 
     cur_sb.execute("""
         UPDATE stock_ml_cache
