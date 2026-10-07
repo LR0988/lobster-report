@@ -5,21 +5,21 @@
   "cash_reserve_pct": 0.0,
   "open_positions": [
     {
-      "stock_id": "3105",
-      "stock_name": "穩懋",
+      "stock_id": "2454",
+      "stock_name": "聯發科",
       "role": "👑 王者泰坦 (70%)",
       "target_weight_pct": 70.0,
       "weight_pct": 70.0,
-      "entry_date": "20260813",
-      "entry_price": 406.5,
-      "current_price": 592.0,
-      "latest_price": 592.0,
-      "unrealized_return_pct": 45.63,
-      "holding_days": 37,
-      "ma60_stop_price": 389.16,
-      "stop_loss_ma60": 389.16,
-      "dist_to_stop_pct": 52.12,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 389.2) 則次日全數停損退回現金"
+      "entry_date": "20260924",
+      "entry_price": 5105.0,
+      "current_price": 4835.0,
+      "latest_price": 4835.0,
+      "unrealized_return_pct": -5.29,
+      "holding_days": 7,
+      "ma60_stop_price": 4187.0,
+      "stop_loss_ma60": 4187.0,
+      "dist_to_stop_pct": 15.48,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 4187.0) 則次日全數停損退回現金"
     },
     {
       "stock_id": "3374",
@@ -33,27 +33,27 @@
       "latest_price": 487.5,
       "unrealized_return_pct": 5.41,
       "holding_days": 7,
-      "ma60_stop_price": 303.91,
-      "stop_loss_ma60": 303.91,
-      "dist_to_stop_pct": 60.41,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 303.9) 或觸發 -12% 停損線 (及時斷尾)"
+      "ma60_stop_price": 352.53,
+      "stop_loss_ma60": 352.53,
+      "dist_to_stop_pct": 38.29,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 352.5) 或觸發 -12% 停損線 (及時斷尾)"
     },
     {
-      "stock_id": "2454",
-      "stock_name": "聯發科",
+      "stock_id": "3443",
+      "stock_name": "創意",
       "role": "🚀 革命衛星 (15%)",
       "target_weight_pct": 15.0,
       "weight_pct": 15.0,
       "entry_date": "20260924",
-      "entry_price": 5105.0,
-      "current_price": 4835.0,
-      "latest_price": 4835.0,
-      "unrealized_return_pct": -5.29,
+      "entry_price": 8300.0,
+      "current_price": 8460.0,
+      "latest_price": 8460.0,
+      "unrealized_return_pct": 1.93,
       "holding_days": 7,
-      "ma60_stop_price": 4187.0,
-      "stop_loss_ma60": 4187.0,
-      "dist_to_stop_pct": 15.48,
-      "stop_condition": "收盤跌破季線 60MA (NT$ 4187.0) 或觸發 -12% 停損線 (及時斷尾)"
+      "ma60_stop_price": 5691.67,
+      "stop_loss_ma60": 5691.67,
+      "dist_to_stop_pct": 48.64,
+      "stop_condition": "收盤跌破季線 60MA (NT$ 5691.7) 或觸發 -12% 停損線 (及時斷尾)"
     }
   ]
 }

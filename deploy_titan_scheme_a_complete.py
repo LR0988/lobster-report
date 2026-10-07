@@ -53,8 +53,21 @@ df_inst = pd.read_sql_query(f'''
 ''', conn, params=sids)
 conn.close()
 
-# 3. 構建價格矩陣與連續復權價格 (消除全歷史 8,666 次除權息造成的假跳空破底)
-df_px['signed_change'] = df_px.apply(lambda r: (r['change_price'] or 0.0) if r['change_sign'] == '+' else (-(r['change_price'] or 0.0) if r['change_sign'] == '-' else 0.0), axis=1)
+# 3. 構建價格矩陣與連續復權價格 (嚴格消除除權息假跳空，並防止跌停板反轉 Bug)
+def get_signed_change(r):
+    val = r['change_price']
+    if pd.isna(val) or val == 0:
+        return 0.0
+    sign = str(r['change_sign']).strip()
+    abs_val = abs(float(val))
+    if sign == '-':
+        return -abs_val
+    elif sign == '+':
+        return abs_val
+    else:
+        return float(val)
+
+df_px['signed_change'] = df_px.apply(get_signed_change, axis=1)
 df_px['ref_price'] = df_px['closing_price'] - df_px['signed_change']
 
 price_pivot = df_px.pivot(index='date', columns='stock_id', values='closing_price').sort_index().ffill()
@@ -66,7 +79,9 @@ value_pivot = df_px.pivot(index='date', columns='stock_id', values='trade_value'
 # 計算除權息調整後的真實連續報酬率矩陣
 prev_price = price_pivot.shift(1)
 raw_ret = (price_pivot / prev_price) - 1.0
-ex_div_mask = (price_pivot - prev_price) < (-0.075 * prev_price)
+
+# 嚴格除權息條件：跌幅 > 7.5% 且官方參考價漲跌幅明顯優於原始跌幅 (確認非真跌停而是除權息跳空)
+ex_div_mask = (raw_ret < -0.075) & ((change_pivot / ref_pivot) > raw_ret + 0.05)
 adj_ret = raw_ret.copy()
 adj_ret[ex_div_mask] = (change_pivot[ex_div_mask] / ref_pivot[ex_div_mask]).clip(-0.10, 0.10)
 

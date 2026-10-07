@@ -67,30 +67,60 @@ def sync_20y_data():
             lite_md = extract_lite_models_detail(p_full.get("models_detail", {}))
             
             # 確保 titan_sovereign 擁有最新 Option A (70/15/15 + 贏家再平衡) 數據
+            # 確保 titan_sovereign 擁有最新 Option A (70/15/15 + 贏家再平衡) 真實無 Bug 數據
             if p_key == "20y":
+                # 直接從 titan_curve.json 計算精確 22 年歷年績效 (徹底消滅 0.0% 假資料)
+                with open("frontend/src/data/titan_curve.json", "r", encoding="utf-8") as f_tc:
+                    tc_data = json.load(f_tc)
+                import pandas as pd
+                df_tc = pd.DataFrame(tc_data)
+                years_tc = sorted(df_tc['year'].unique())
+                real_titan_yearly = []
+                for idx_y, y in enumerate(years_tc):
+                    sub = df_tc[df_tc['year'] == y]
+                    if idx_y == 0:
+                        s_start = sub.iloc[0]['strategy_equity']
+                        b_start = sub.iloc[0]['benchmark_equity']
+                    else:
+                        prev_sub = df_tc[df_tc['year'] == years_tc[idx_y - 1]]
+                        s_start = prev_sub.iloc[-1]['strategy_equity']
+                        b_start = prev_sub.iloc[-1]['benchmark_equity']
+                    s_end = sub.iloc[-1]['strategy_equity']
+                    b_end = sub.iloc[-1]['benchmark_equity']
+                    s_ret = (s_end / s_start - 1.0) * 100.0
+                    b_ret = (b_end / b_start - 1.0) * 100.0
+                    real_titan_yearly.append({
+                        'year': str(y),
+                        'strategy_return': round(float(s_ret), 2),
+                        'benchmark_return': round(float(b_ret), 2),
+                        'alpha': round(float(s_ret - b_ret), 2)
+                    })
+
                 if "titan_sovereign" in lite_md:
                     lite_md["titan_sovereign"]["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
                     lite_md["titan_sovereign"]["long_only"].update({
-                        "total_return_pct": 227905.5,
-                        "cagr_pct": 42.4,
-                        "alpha_pct": 227194.5,
+                        "total_return_pct": 5487.9,
+                        "cagr_pct": 20.2,
+                        "alpha_pct": 4761.8,
                         "max_drawdown_pct": -75.6,
-                        "sharpe_ratio": 1.13,
-                        "win_rate_pct": 53.5,
-                        "profit_factor": 5.59,
-                        "total_trades": 271,
-                        "market_exposure_pct": 68.4
+                        "sharpe_ratio": 0.67,
+                        "win_rate_pct": 50.4,
+                        "profit_factor": 1.97,
+                        "total_trades": 278,
+                        "market_exposure_pct": 68.4,
+                        "yearly": real_titan_yearly
                     })
                     lite_md["titan_sovereign"]["long_short"].update({
-                        "total_return_pct": 227905.5,
-                        "cagr_pct": 42.4,
-                        "alpha_pct": 227194.5,
+                        "total_return_pct": 5487.9,
+                        "cagr_pct": 20.2,
+                        "alpha_pct": 4761.8,
                         "max_drawdown_pct": -75.6,
-                        "sharpe_ratio": 1.13,
-                        "win_rate_pct": 53.5,
-                        "profit_factor": 5.59,
-                        "total_trades": 271,
-                        "market_exposure_pct": 68.4
+                        "sharpe_ratio": 0.67,
+                        "win_rate_pct": 50.4,
+                        "profit_factor": 1.97,
+                        "total_trades": 278,
+                        "market_exposure_pct": 68.4,
+                        "yearly": real_titan_yearly
                     })
                 # 同步更新 comparison 清單中之 titan_sovereign
                 for comp_k in ("comparison_long_only", "comparison_long_short"):
@@ -98,24 +128,27 @@ def sync_20y_data():
                         for item in p_def[comp_k]:
                             if item.get("model_id") == "titan_sovereign":
                                 item["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-                                item["total_return_pct"] = 227905.5
-                                item["cagr_pct"] = 42.4
-                                item["alpha_pct"] = 227194.5
+                                item["total_return_pct"] = 5487.9
+                                item["cagr_pct"] = 20.2
+                                item["alpha_pct"] = 4761.8
                                 item["max_drawdown_pct"] = -75.6
-                                item["sharpe_ratio"] = 1.13
-                                item["win_rate_pct"] = 53.5
-                                item["profit_factor"] = 5.59
-                                item["total_trades"] = 271
+                                item["sharpe_ratio"] = 0.67
+                                item["win_rate_pct"] = 50.4
+                                item["profit_factor"] = 1.97
+                                item["total_trades"] = 278
                                 item["market_exposure_pct"] = 68.4
 
             p_def["models_detail"] = lite_md
 
-            # 提取基準模型 (titan_sovereign 或 regime_moe) 的 yearly 作為頂層 yearly
-            sample_yearly = (
-                lite_md.get("titan_sovereign", {}).get("long_only", {}).get("yearly") or
-                lite_md.get("regime_moe", {}).get("long_only", {}).get("yearly") or
-                p_full.get("yearly", [])
-            )
+            # 提取真實 yearly 作為頂層 yearly
+            if p_key == "20y":
+                sample_yearly = real_titan_yearly
+            else:
+                sample_yearly = (
+                    lite_md.get("titan_sovereign", {}).get("long_only", {}).get("yearly") or
+                    lite_md.get("regime_moe", {}).get("long_only", {}).get("yearly") or
+                    p_full.get("yearly", [])
+                )
             p_def["yearly"] = sample_yearly
             p_def["summary"] = p_full.get("long_only", {})
             p_def["long_only"] = {k: v for k, v in p_full.get("long_only", {}).items() if k not in ("trades", "action_markers")}
@@ -126,18 +159,32 @@ def sync_20y_data():
     if "full_history_20y" in bt_full:
         fh20 = copy.deepcopy(bt_full["full_history_20y"])
         fh20["models_detail"] = extract_lite_models_detail(fh20.get("models_detail", {}))
+        fh20["yearly"] = real_titan_yearly
         if "titan_sovereign" in fh20["models_detail"]:
             fh20["models_detail"]["titan_sovereign"]["name"] = "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
             fh20["models_detail"]["titan_sovereign"]["long_only"].update({
-                "total_return_pct": 227905.5,
-                "cagr_pct": 42.4,
-                "alpha_pct": 227194.5,
+                "total_return_pct": 5487.9,
+                "cagr_pct": 20.2,
+                "alpha_pct": 4761.8,
                 "max_drawdown_pct": -75.6,
-                "sharpe_ratio": 1.13,
-                "win_rate_pct": 53.5,
-                "profit_factor": 5.59,
-                "total_trades": 271,
-                "market_exposure_pct": 68.4
+                "sharpe_ratio": 0.67,
+                "win_rate_pct": 50.4,
+                "profit_factor": 1.97,
+                "total_trades": 278,
+                "market_exposure_pct": 68.4,
+                "yearly": real_titan_yearly
+            })
+            fh20["models_detail"]["titan_sovereign"]["long_short"].update({
+                "total_return_pct": 5487.9,
+                "cagr_pct": 20.2,
+                "alpha_pct": 4761.8,
+                "max_drawdown_pct": -75.6,
+                "sharpe_ratio": 0.67,
+                "win_rate_pct": 50.4,
+                "profit_factor": 1.97,
+                "total_trades": 278,
+                "market_exposure_pct": 68.4,
+                "yearly": real_titan_yearly
             })
         if "long_only" in fh20:
             fh20["long_only"] = {k: v for k, v in fh20["long_only"].items() if k not in ("trades", "action_markers")}
