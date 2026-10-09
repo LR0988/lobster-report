@@ -8502,11 +8502,11 @@ function StockDashboard() {
                   const BACKTEST_MODELS = [
                     {
                       id: 'titan_sovereign',
-                      name: '👑 泰坦 FIP 頂刊旗艦版 (TITAN-FIP DOE Alpha)',
+                      name: '👑 泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)',
                       icon: '👑',
                       tag: is20ySelected
-                        ? '20年+22355.6% (224.6倍)・CAGR 29.3%・MDD -37.5%・夏普0.98'
-                        : '10年超額Alpha・王者勝率・2026年+118.3%・夏普0.98'
+                        ? '20年+26550.7% (266.5倍)・CAGR 30.3%・MDD -36.6%・夏普1.00'
+                        : '10年超額Alpha・王者勝率45.5%・2026年+111.8%・夏普1.00'
                     },
                     {
                       id: 'etf_0020',

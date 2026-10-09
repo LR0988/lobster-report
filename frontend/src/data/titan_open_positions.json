@@ -9,7 +9,7 @@
       "stock_name": "南亞科",
       "role": "👑 王者泰坦 (70%)",
       "target_weight_pct": 70.0,
-      "weight_pct": 65.1,
+      "weight_pct": 65.5,
       "entry_date": "20261007",
       "entry_price": 551.0,
       "current_price": 514.0,
@@ -19,14 +19,14 @@
       "ma60_stop_price": 480.08,
       "stop_loss_ma60": 480.08,
       "dist_to_stop_pct": 7.06,
-      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
+      "stop_condition": "收盤跌破季線 60MA 退回現金；衛星浮盈逾 60% 回吐 20% 移動停利；浮盈逾 15% 保本平手鎖利"
     },
     {
       "stock_id": "6213",
       "stock_name": "聯茂",
       "role": "🚀 革命衛星 (15%)",
       "target_weight_pct": 15.0,
-      "weight_pct": 21.6,
+      "weight_pct": 21.8,
       "entry_date": "20261007",
       "entry_price": 550.0,
       "current_price": 796.0,
@@ -36,24 +36,24 @@
       "ma60_stop_price": 475.27,
       "stop_loss_ma60": 475.27,
       "dist_to_stop_pct": 67.48,
-      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
+      "stop_condition": "收盤跌破季線 60MA 退回現金；衛星浮盈逾 60% 回吐 20% 移動停利；浮盈逾 15% 保本平手鎖利"
     },
     {
-      "stock_id": "3443",
-      "stock_name": "創意",
+      "stock_id": "2449",
+      "stock_name": "京元電子",
       "role": "🚀 革命衛星 (15%)",
       "target_weight_pct": 15.0,
-      "weight_pct": 13.3,
+      "weight_pct": 12.8,
       "entry_date": "20261007",
-      "entry_price": 8040.0,
-      "current_price": 8460.0,
-      "latest_price": 8460.0,
-      "unrealized_return_pct": 5.22,
+      "entry_price": 298.0,
+      "current_price": 299.5,
+      "latest_price": 299.5,
+      "unrealized_return_pct": 0.5,
       "holding_days": 5,
-      "ma60_stop_price": 5691.67,
-      "stop_loss_ma60": 5691.67,
-      "dist_to_stop_pct": 48.64,
-      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
+      "ma60_stop_price": 259.23,
+      "stop_loss_ma60": 259.23,
+      "dist_to_stop_pct": 15.54,
+      "stop_condition": "收盤跌破季線 60MA 退回現金；衛星浮盈逾 60% 回吐 20% 移動停利；浮盈逾 15% 保本平手鎖利"
     }
   ]
 }

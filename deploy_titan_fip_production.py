@@ -176,9 +176,13 @@ for i in range(t0, T):
         elif not macro_ok: sell = '🛡️ 大盤跌破季線 (60MA) 防禦清倉'
         else:
             m60 = D['ma60'][i, s]
-            if np.isfinite(m60) and c < m60: sell = '🛡️ 跌破季線 (60MA) 防禦停損'
+            peak_gain = p['hh'] / entry - 1.0
+            # 🌟 衛星 +60% 移動停利鎖利 (自高點回吐 20% 出場)
+            if (not p['leader']) and peak_gain >= 0.60 and c < p['hh'] * 0.80:
+                sell = '🎯 衛星觸發 +60% 高檔回吐 20% 移動停利'
+            elif np.isfinite(m60) and c < m60: sell = '🛡️ 跌破季線 (60MA) 防禦停損'
             elif (not p['leader']) and (c / entry - 1.0 < -0.12): sell = '⚡ 衛星觸發 -12% 停損線'
-            elif p['hh'] >= entry * 1.12 and c < entry: sell = '🎯 觸發 +12% 保本平手鎖利'
+            elif p['hh'] >= entry * 1.15 and c < entry: sell = '🎯 觸發 +15% 保本平手鎖利'
         if sell: pend_sell[s] = (1.0, sell)
         
     # 週度選股訊號 (次日開盤執行)
@@ -223,8 +227,8 @@ for i in range(t0, T):
                 al_ = ((D['ma5'][i, sel] >= D['ma10'][i, sel]) & (D['ma10'][i, sel] >= D['ma20'][i, sel])).astype(float)
                 att_score = rank_pct(abnormal_attention[i, sel])
                 
-                # 🌟 逆向避開爆量過熱散戶狂歡股 (DOE最佳化權重: -0.10)
-                win = .40 * mom_t + .25 * tr_ + .15 * in_ + .10 * sh_ + .10 * al_ - .10 * att_score
+                # 🌟 逆向避開爆量過熱散戶狂歡股 (DOE最佳化權重: -0.20)
+                win = .40 * mom_t + .25 * tr_ + .15 * in_ + .10 * sh_ + .10 * al_ - .20 * att_score
                 order = np.argsort(-win)
                 
                 chosen = []; used = set(held)
@@ -303,7 +307,7 @@ for s, p in pos.items():
         'ma60_stop_price': round(float(m60_px), 2) if np.isfinite(m60_px) else 0.0,
         'stop_loss_ma60': round(float(m60_px), 2) if np.isfinite(m60_px) else 0.0,
         'dist_to_stop_pct': round(float(dist_to_stop), 2) if np.isfinite(dist_to_stop) else 0.0,
-        'stop_condition': "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
+        'stop_condition': "收盤跌破季線 60MA 退回現金；衛星浮盈逾 60% 回吐 20% 移動停利；浮盈逾 15% 保本平手鎖利"
     })
 
 cur_expo_pct = round(float((tot_pos_val / tot_port_val) * 100.0), 1) if tot_port_val > 0 else 0.0
@@ -363,7 +367,7 @@ try:
         p_macro = row_macro[0] if isinstance(row_macro[0], dict) else json.loads(row_macro[0])
         bt_macro = p_macro.get('backtest_simulation', {})
         bt_macro['selected_model_id'] = 'titan_sovereign_fip'
-        bt_macro['model_name'] = '👑 泰坦 FIP 頂刊旗艦版 (TITAN-FIP Sovereign Alpha 70/15/15)'
+        bt_macro['model_name'] = '👑 泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)'
         bt_macro['titan_open_positions'] = open_positions_export
         bt_macro['open_positions'] = open_positions_export
         bt_macro['all_titan_trades'] = trades
