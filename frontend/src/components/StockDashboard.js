@@ -7,6 +7,7 @@ import titanTradesData from '../data/titan_trades.json';
 import titanCurveData from '../data/titan_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import defaultPodcastData from '../data/defaultPodcastData.json';
+import TitanLiveDashboard from './TitanLiveDashboard';
 import './StockDashboard.css';
 
 const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
@@ -3183,6 +3184,7 @@ function StockDashboard() {
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📈 大盤多空預測' },
+            { id: 'titan_live', label: '👑 泰坦實盤監控' },
             { id: 'ml', label: '🤖 ML 波段飆股預測', badge: activeTasks.some(t => t.type === 'ml_train') ? '🏋️ 訓練中' : null },
             { id: 'low_freq', label: '📉 低頻量化交易' },
             { id: 'portfolio', label: '💼 我的持股' },
@@ -10999,6 +11001,12 @@ function StockDashboard() {
           </div>
           );
         })()}
+
+
+        {/* ===== 👑 泰坦實盤每日監控與對帳系統 ===== */}
+        {activeTab === 'titan_live' && (
+          <TitanLiveDashboard />
+        )}
 
 
         {/* ===== ML 波段飆股預測 ===== */}

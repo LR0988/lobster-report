@@ -202,3 +202,87 @@ export async function apiDeleteUser(id) {
     return { message: '刪除成功', status: 'ok' };
   }
 }
+
+// ==========================================
+// 👑 泰坦實盤每日監控與對帳 (Titan Live Monitor) API
+// ==========================================
+export async function apiGetTitanLiveState() {
+  try {
+    const res = await fetch(`${API_URL}/api/titan/live`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('API /api/titan/live 未連線，使用本地備援數據:', err.message);
+  }
+  // 備援讀取本地 JSON
+  try {
+    const fallback = await import('./data/live_portfolio_state.json');
+    return {
+      status: 'ok',
+      account: {
+        initial_capital: fallback.initial_capital || 1000000,
+        current_cash: fallback.current_cash || 1000000,
+        total_equity: fallback.total_equity || 1000000,
+        peak_equity: fallback.peak_equity || 1000000,
+        cum_return_pct: fallback.cum_return_pct || 0.0,
+        drawdown_pct: fallback.drawdown_pct || 0.0,
+        exposure_pct: fallback.exposure_pct || 0.0,
+        cash_reserve_pct: fallback.cash_reserve_pct || 100.0,
+        realized_trades: (fallback.trade_history || []).filter(t => t.action === 'SELL').length,
+        win_rate: 0.0,
+        profit_factor: 0.0,
+        total_realized_pnl: 0.0
+      },
+      taiex: {
+        close: 49806.37,
+        ma20: 47577.47,
+        ma60: 45650.53,
+        bullish: true
+      },
+      positions: fallback.positions || [],
+      trades: fallback.trade_history || []
+    };
+  } catch (e) {
+    return { status: 'error', message: '無可用實盤數據' };
+  }
+}
+
+export async function apiRecordTitanBuy(data) {
+  const res = await fetch(`${API_URL}/api/titan/live/buy`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '買進失敗' }));
+    throw new Error(err.detail || '買進失敗');
+  }
+  return await res.json();
+}
+
+export async function apiRecordTitanSell(data) {
+  const res = await fetch(`${API_URL}/api/titan/live/sell`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '平倉賣出失敗' }));
+    throw new Error(err.detail || '平倉賣出失敗');
+  }
+  return await res.json();
+}
+
+export async function apiUpdateTitanCash(data) {
+  const res = await fetch(`${API_URL}/api/titan/live/cash`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: '更新現金失敗' }));
+    throw new Error(err.detail || '更新現金失敗');
+  }
+  return await res.json();
+}
