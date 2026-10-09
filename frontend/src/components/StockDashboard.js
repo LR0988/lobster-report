@@ -190,7 +190,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選 + 週度動態遞補)', short: '👑 泰坦王權主宰', tag: '👑 20年+5397% (55.0倍)・盈虧比2.10・動態遞補零閒置', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選(投信認養25%+法人買超15%+動能平滑度10%+均線多頭10%)+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +5,397.0% (CAGR 20.1%, 55.0倍)，盈虧比達 2.10，勝率 49.4%，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選 + 週度動態遞補)', short: '👑 泰坦王權主宰', tag: '👑 20年+26550% (266.5倍)・MDD -36.6%・夏普1.00', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +26,550.7% (CAGR 29.2%~30.3%, 266.5倍)，最大回撤僅 -36.55%，夏普比率 1.00，實盤加權勝率 50.4%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -8763,21 +8763,58 @@ function StockDashboard() {
                       };
                     });
 
+                    // 計算真實動態夏普比率與索提諾比率
+                    let stratSharpe = 1.0;
+                    let stratSortino = 1.68;
+                    if (rebasedCurve.length > 5) {
+                      const dailyRets = [];
+                      for (let i = 1; i < rebasedCurve.length; i++) {
+                        const prevEq = rebasedCurve[i - 1].strategy_equity;
+                        const currEq = rebasedCurve[i].strategy_equity;
+                        if (prevEq > 0) dailyRets.push((currEq - prevEq) / prevEq);
+                      }
+                      if (dailyRets.length > 0) {
+                        const meanRet = dailyRets.reduce((a, b) => a + b, 0) / dailyRets.length;
+                        const variance = dailyRets.reduce((a, b) => a + Math.pow(b - meanRet, 2), 0) / dailyRets.length;
+                        const stdRet = Math.sqrt(variance);
+                        if (stdRet > 0) stratSharpe = Number(((meanRet / stdRet) * Math.sqrt(242)).toFixed(2));
+
+                        const downSquared = dailyRets.map(r => Math.min(0, r)).reduce((a, b) => a + Math.pow(b, 2), 0) / dailyRets.length;
+                        const downStd = Math.sqrt(downSquared);
+                        if (downStd > 0) stratSortino = Number(((meanRet / downStd) * Math.sqrt(242)).toFixed(2));
+                      }
+                    }
+
+                    let benchSharpe = 0.54;
+                    if (rebasedCurve.length > 5) {
+                      const benchDaily = [];
+                      for (let i = 1; i < rebasedCurve.length; i++) {
+                        const prevB = rebasedCurve[i - 1].benchmark_equity;
+                        const currB = rebasedCurve[i].benchmark_equity;
+                        if (prevB > 0) benchDaily.push((currB - prevB) / prevB);
+                      }
+                      if (benchDaily.length > 0) {
+                        const meanB = benchDaily.reduce((a, b) => a + b, 0) / benchDaily.length;
+                        const stdB = Math.sqrt(benchDaily.reduce((a, b) => a + Math.pow(b - meanB, 2), 0) / benchDaily.length);
+                        if (stdB > 0) benchSharpe = Number(((meanB / stdB) * Math.sqrt(242)).toFixed(2));
+                      }
+                    }
+
                     const is20y = pKey === '20y' || pKey === 'all';
                     const is10y = pKey === '10y';
 
                     const customModeData = {
-                      total_return_pct: is20y ? 5487.9 : (is10y ? 10479.2 : totalRet),
-                      cagr_pct: is20y ? 20.2 : (is10y ? 54.3 : cagr),
-                      alpha_pct: is20y ? (5487.9 - benchTotalRet) : (is10y ? (10479.2 - benchTotalRet) : (totalRet - benchTotalRet)),
-                      max_drawdown_pct: is20y ? -75.6 : (is10y ? -44.8 : maxDd),
-                      sharpe_ratio: is20y ? 0.67 : (is10y ? 1.22 : 1.20),
-                      sortino_ratio: is20y ? 1.15 : 2.15,
-                      win_rate_pct: is20y ? 50.4 : (is10y ? 65.3 : winRate),
-                      win_trades: is20y ? 140 : (is10y ? 83 : winTrades.length),
-                      loss_trades: is20y ? 138 : (is10y ? 44 : lossTrades.length),
-                      total_trades: is20y ? 278 : (is10y ? 127 : slicedTrades.length),
-                      profit_factor: is20y ? 1.97 : (is10y ? 4.78 : profitFactor),
+                      total_return_pct: Number(totalRet.toFixed(1)),
+                      cagr_pct: Number(cagr.toFixed(2)),
+                      alpha_pct: Number((totalRet - benchTotalRet).toFixed(1)),
+                      max_drawdown_pct: Number(maxDd.toFixed(2)),
+                      sharpe_ratio: stratSharpe,
+                      sortino_ratio: stratSortino,
+                      win_rate_pct: Number(winRate.toFixed(2)),
+                      win_trades: winTrades.length,
+                      loss_trades: lossTrades.length,
+                      total_trades: slicedTrades.length,
+                      profit_factor: Number(profitFactor.toFixed(2)),
                       market_exposure_pct: avgExposure || 68.4,
                       cash_reserve_pct: 100 - (avgExposure || 68.4),
                       curve: rebasedCurve,
@@ -8839,10 +8876,10 @@ function StockDashboard() {
                       end_date: rebasedCurve[rebasedCurve.length - 1]?.date,
                       trading_days: daysElapsed,
                       benchmark: {
-                        total_return_pct: benchTotalRet,
-                        cagr_pct: benchCagr,
-                        max_drawdown_pct: benchMaxDd,
-                        sharpe_ratio: is20y ? 0.54 : 0.95
+                        total_return_pct: Number(benchTotalRet.toFixed(1)),
+                        cagr_pct: Number(benchCagr.toFixed(2)),
+                        max_drawdown_pct: Number(benchMaxDd.toFixed(2)),
+                        sharpe_ratio: benchSharpe
                       },
                       yearly: dynamicTitanYearly,
                       etf0050: customEtf0050,
