@@ -1,25 +1,25 @@
 {
   "as_of_date": "20261007",
-  "market_exposure_pct": 99.7,
-  "total_exposure_pct": 99.7,
-  "cash_reserve_pct": 0.3,
+  "market_exposure_pct": 100.0,
+  "total_exposure_pct": 100.0,
+  "cash_reserve_pct": 0.0,
   "open_positions": [
     {
-      "stock_id": "2059",
-      "stock_name": "川湖",
+      "stock_id": "2408",
+      "stock_name": "南亞科",
       "role": "👑 王者泰坦 (70%)",
       "target_weight_pct": 70.0,
-      "weight_pct": 58.6,
+      "weight_pct": 65.1,
       "entry_date": "20261007",
-      "entry_price": 14010.0,
-      "current_price": 11790.0,
-      "latest_price": 11790.0,
-      "unrealized_return_pct": -15.85,
+      "entry_price": 551.0,
+      "current_price": 514.0,
+      "latest_price": 514.0,
+      "unrealized_return_pct": -6.72,
       "holding_days": 25,
-      "ma60_stop_price": 11533.67,
-      "stop_loss_ma60": 11533.67,
-      "dist_to_stop_pct": 2.22,
-      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +10% 保本平手鎖利"
+      "ma60_stop_price": 480.08,
+      "stop_loss_ma60": 480.08,
+      "dist_to_stop_pct": 7.06,
+      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
     },
     {
       "stock_id": "6213",
@@ -36,24 +36,24 @@
       "ma60_stop_price": 475.27,
       "stop_loss_ma60": 475.27,
       "dist_to_stop_pct": 67.48,
-      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +10% 保本平手鎖利"
+      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
     },
     {
-      "stock_id": "1303",
-      "stock_name": "南亞",
+      "stock_id": "3443",
+      "stock_name": "創意",
       "role": "🚀 革命衛星 (15%)",
       "target_weight_pct": 15.0,
-      "weight_pct": 19.5,
+      "weight_pct": 13.3,
       "entry_date": "20261007",
-      "entry_price": 236.0,
-      "current_price": 314.0,
-      "latest_price": 314.0,
-      "unrealized_return_pct": 33.05,
-      "holding_days": 20,
-      "ma60_stop_price": 212.82,
-      "stop_loss_ma60": 212.82,
-      "dist_to_stop_pct": 47.54,
-      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +10% 保本平手鎖利"
+      "entry_price": 8040.0,
+      "current_price": 8460.0,
+      "latest_price": 8460.0,
+      "unrealized_return_pct": 5.22,
+      "holding_days": 5,
+      "ma60_stop_price": 5691.67,
+      "stop_loss_ma60": 5691.67,
+      "dist_to_stop_pct": 48.64,
+      "stop_condition": "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
     }
   ]
 }

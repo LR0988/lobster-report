@@ -58,8 +58,9 @@ pos_days = pd.DataFrame((ret_1d > 0).astype(float)).rolling(60).mean().values
 neg_days = pd.DataFrame((ret_1d < 0).astype(float)).rolling(60).mean().values
 fip_quality = pos_days / (pos_days + neg_days + 1e-6)
 
-# 2. 計算加權指數 20MA
+# 2. 計算加權指數 20MA 與散戶異常關注度 / 爆量避雷代理指標
 tx_ma20 = pd.Series(D['tx']).rolling(20).mean().values
+abnormal_attention = D['rt60'] / (pd.DataFrame(D['rt60']).rolling(60).mean().values + 1e-6)
 
 # 3. 執行完整模擬回測
 cash = 1_000_000.0
@@ -177,7 +178,7 @@ for i in range(t0, T):
             m60 = D['ma60'][i, s]
             if np.isfinite(m60) and c < m60: sell = '🛡️ 跌破季線 (60MA) 防禦停損'
             elif (not p['leader']) and (c / entry - 1.0 < -0.12): sell = '⚡ 衛星觸發 -12% 停損線'
-            elif p['hh'] >= entry * 1.10 and c < entry: sell = '🎯 觸發 +10% 保本平手鎖利'
+            elif p['hh'] >= entry * 1.12 and c < entry: sell = '🎯 觸發 +12% 保本平手鎖利'
         if sell: pend_sell[s] = (1.0, sell)
         
     # 週度選股訊號 (次日開盤執行)
@@ -196,8 +197,8 @@ for i in range(t0, T):
             ok &= (c >= D['ma60'][i] * 1.025) & (c >= D['ma20'][i]) & (D['ma20'][i] >= D['ma60'][i])
             ok &= (D['s5'][i] >= 0) & (D['r20'][i] >= 0) & (D['s20'][i] >= 0.025) & (c >= 0.88 * D['h60'][i])
             
-            # 🌟 5MA拉回整理
-            ok &= (c <= D['ma5'][i] * 1.02)
+            # 🌟 5MA拉回整理 (DOE最佳化甜蜜點: 1.025)
+            ok &= (c <= D['ma5'][i] * 1.025)
             # 🌟 大盤站穩月線強濾網
             ok &= (D['tx'][i] >= tx_ma20[i])
             # 🌟 FIP 溫水煮青蛙高品質動能
@@ -220,8 +221,10 @@ for i in range(t0, T):
                 tr_ = rank_pct(D['trust20'][i, sel]); in_ = rank_pct(D['inst20'][i, sel])
                 sh_ = rank_pct(np.nan_to_num(D['sharpe'][i, sel]))
                 al_ = ((D['ma5'][i, sel] >= D['ma10'][i, sel]) & (D['ma10'][i, sel] >= D['ma20'][i, sel])).astype(float)
+                att_score = rank_pct(abnormal_attention[i, sel])
                 
-                win = .40 * mom_t + .25 * tr_ + .15 * in_ + .10 * sh_ + .10 * al_
+                # 🌟 逆向避開爆量過熱散戶狂歡股 (DOE最佳化權重: -0.10)
+                win = .40 * mom_t + .25 * tr_ + .15 * in_ + .10 * sh_ + .10 * al_ - .10 * att_score
                 order = np.argsort(-win)
                 
                 chosen = []; used = set(held)
@@ -300,7 +303,7 @@ for s, p in pos.items():
         'ma60_stop_price': round(float(m60_px), 2) if np.isfinite(m60_px) else 0.0,
         'stop_loss_ma60': round(float(m60_px), 2) if np.isfinite(m60_px) else 0.0,
         'dist_to_stop_pct': round(float(dist_to_stop), 2) if np.isfinite(dist_to_stop) else 0.0,
-        'stop_condition': "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +10% 保本平手鎖利"
+        'stop_condition': "收盤跌破季線 60MA 則次日停損退回現金，或觸發 +12% 保本平手鎖利"
     })
 
 cur_expo_pct = round(float((tot_pos_val / tot_port_val) * 100.0), 1) if tot_port_val > 0 else 0.0
