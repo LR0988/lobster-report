@@ -743,6 +743,71 @@ def execute_scraper_job(config):
         "completed_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
+def execute_podcast_job(job_type, config):
+    import podcast_pipeline
+    import podcast_scraper
+    import sqlite3
+    
+    conn = sqlite3.connect(LOCAL_STOCK_DB)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    
+    if job_type == "podcast_refresh":
+        channel_id = str(config.get("channel_id", ""))
+        cursor.execute("SELECT feed_url FROM podcast_channels WHERE channel_id = ?", (channel_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return {"status": "error", "message": f"找不到頻道 ID {channel_id}"}
+        feed_url = row["feed_url"]
+        episodes = podcast_scraper.parse_podcast_rss(feed_url, limit=15)
+        new_count = 0
+        for ep in episodes:
+            cursor.execute("SELECT episode_guid FROM podcast_episodes WHERE episode_guid = ?", (ep['guid'],))
+            if not cursor.fetchone():
+                cursor.execute("""
+                    INSERT INTO podcast_episodes (episode_guid, channel_id, title, pub_date, audio_url, duration, description, transcription, analysis_report, analysis_date, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (ep['guid'], channel_id, ep['title'], ep['pub_date'], ep['mp3_url'], ep['duration'], ep['description'], "", "", "", "pending"))
+                new_count += 1
+        conn.commit()
+        conn.close()
+        podcast_pipeline.sync_podcast_to_supabase()
+        return {"status": "ok", "message": f"頻道單集已刷新，新增了 {new_count} 個新單集", "new_count": new_count}
+        
+    elif job_type == "podcast_transcribe":
+        episode_guid = config.get("episode_guid")
+        gemini_api_key = config.get("gemini_api_key")
+        conn.close()
+        res = podcast_pipeline.process_single_episode(episode_guid, gemini_api_key)
+        return res
+        
+    elif job_type == "podcast_batch_transcribe":
+        channel_id = str(config.get("channel_id", ""))
+        limit = int(config.get("limit", 5))
+        gemini_api_key = config.get("gemini_api_key")
+        cursor.execute("""
+            SELECT episode_guid FROM podcast_episodes
+            WHERE channel_id = ? AND status = 'pending'
+            ORDER BY pub_date DESC LIMIT ?
+        """, (channel_id, limit))
+        rows = cursor.fetchall()
+        conn.close()
+        processed = 0
+        for r in rows:
+            podcast_pipeline.process_single_episode(r["episode_guid"], gemini_api_key)
+            processed += 1
+        return {"status": "ok", "message": f"已完成批次轉譯 {processed} 集", "processed": processed}
+        
+    elif job_type == "podcast_restore_defaults":
+        conn.close()
+        podcast_pipeline.init_podcast_tables()
+        podcast_pipeline.sync_podcast_to_supabase()
+        return {"status": "ok", "message": "已成功恢復預設頻道"}
+
+    conn.close()
+    return {"status": "error", "message": f"未知的 Podcast 任務: {job_type}"}
+
 def process_pending_jobs():
     """從 Supabase 領取 PENDING 任務並執行"""
     sb_conn = get_supabase_conn()
@@ -771,7 +836,9 @@ def process_pending_jobs():
     sb_conn.commit()
 
     try:
-        if job_type == "screener":
+        if job_type.startswith("podcast_"):
+            results = execute_podcast_job(job_type, config)
+        elif job_type == "screener":
             results = execute_screener_job(config)
         elif job_type == "database_query":
             results = execute_database_query(config)

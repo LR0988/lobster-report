@@ -10,7 +10,10 @@ import defaultPodcastData from '../data/defaultPodcastData.json';
 import TitanLiveDashboard from './TitanLiveDashboard';
 import './StockDashboard.css';
 
-const API_BASE = process.env.REACT_APP_STOCK_API_URL || 'http://localhost:8000';
+let dynamicApiBase = (typeof window !== 'undefined' && localStorage.getItem('remote_api_url')) 
+  || process.env.REACT_APP_STOCK_API_URL 
+  || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://compounds-intelligent-advisors-sword.trycloudflare.com');
+
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://hvequgcognhytunjjsyp.supabase.co';
 const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0';
 
@@ -25,8 +28,30 @@ const supabaseFetch = async (path, options = {}) => {
   return window.fetch(url, { ...options, headers, cache: 'no-store' });
 };
 
-const stockFetch = (url, opts) => {
-  const finalUrl = (typeof url === 'string' && url.startsWith('/api')) ? `${API_BASE}${url}` : url;
+const resolveApiBase = async () => {
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:8000';
+  }
+  try {
+    const sRes = await supabaseFetch('/stock_settings?key=eq.remote_api_url&select=value');
+    if (sRes.ok) {
+      const rows = await sRes.json();
+      if (rows && rows.length > 0 && rows[0].value) {
+        dynamicApiBase = rows[0].value;
+        try { localStorage.setItem('remote_api_url', rows[0].value); } catch {}
+        return rows[0].value;
+      }
+    }
+  } catch {}
+  return dynamicApiBase || 'http://localhost:8000';
+};
+
+const stockFetch = async (url, opts = {}) => {
+  let base = dynamicApiBase;
+  if (!base || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !base.startsWith('https://'))) {
+    base = await resolveApiBase();
+  }
+  const finalUrl = (typeof url === 'string' && url.startsWith('/api')) ? `${base}${url}` : url;
   return window.fetch(finalUrl, opts);
 };
 
@@ -2076,7 +2101,12 @@ function StockDashboard() {
           analysis_prompt: cfg.analysis_prompt || prev.analysis_prompt,
           telegram_bot_token: cfg.telegram_bot_token || prev.telegram_bot_token,
           telegram_chat_id: cfg.telegram_chat_id || prev.telegram_chat_id,
+          remote_api_url: cfg.remote_api_url || prev.remote_api_url,
         }));
+        if (cfg.remote_api_url) {
+          dynamicApiBase = cfg.remote_api_url;
+          try { localStorage.setItem('remote_api_url', cfg.remote_api_url); } catch {}
+        }
         if (cfg.screener_presets) {
           try {
             const parsed = JSON.parse(cfg.screener_presets);
@@ -2291,20 +2321,50 @@ function StockDashboard() {
     }
   };
 
+  const dispatchPodcastCloudJob = async (jobType, config = {}) => {
+    try {
+      const res = await supabaseFetch('/stock_screener_jobs', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: user?.username || 'cloud_user',
+          status: 'pending',
+          config: { job_type: jobType, ...config }
+        })
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
   const handleRestoreDefaultPodcastChannels = async () => {
     try {
       setAddingChannel(true);
-      const res = await stockFetch('/api/podcast/channels/restore_defaults', {
-        method: 'POST'
-      });
-      if (res.ok) {
-        const json = await res.json();
-        alert(json.message || '已成功恢復預設熱門頻道 (股癌、游庭皓的財經皓角)！');
-        fetchPodcastChannels();
-        fetchPodcastEpisodes();
-      } else {
-        const json = await res.json();
-        throw new Error(json.detail || '恢復失敗');
+      let success = false;
+      try {
+        const res = await stockFetch('/api/podcast/channels/restore_defaults', { method: 'POST' });
+        if (res.ok) {
+          const json = await res.json();
+          alert(json.message || '已成功恢復預設熱門頻道 (股癌、游庭皓的財經皓角)！');
+          success = true;
+          fetchPodcastChannels();
+          fetchPodcastEpisodes();
+        }
+      } catch (directErr) {
+        console.warn('直接連線失敗，自動轉派雲端 Worker 佇列', directErr);
+      }
+
+      if (!success) {
+        const queued = await dispatchPodcastCloudJob('podcast_restore_defaults');
+        if (queued) {
+          alert('🔄 已發送恢復推薦頻道指令至 Worker，請於數秒後刷新頁面！');
+          setTimeout(() => {
+            fetchPodcastChannels();
+            fetchPodcastEpisodes();
+          }, 3000);
+        } else {
+          throw new Error('無法恢復預設頻道');
+        }
       }
     } catch (err) {
       alert(formatPodcastApiError('恢復頻道', err));
@@ -2342,14 +2402,27 @@ function StockDashboard() {
   const handleRefreshPodcastChannel = async (channelId) => {
     try {
       setRefreshingChannelId(channelId);
-      const res = await stockFetch(`/api/podcast/channels/${channelId}/refresh`, { method: 'POST' });
-      if (res.ok) {
-        const json = await res.json();
-        alert(json.message);
-        fetchPodcastEpisodes();
-      } else {
-        const json = await res.json();
-        throw new Error(json.detail || '重新載入失敗');
+      let success = false;
+      try {
+        const res = await stockFetch(`/api/podcast/channels/${channelId}/refresh`, { method: 'POST' });
+        if (res.ok) {
+          const json = await res.json();
+          alert(json.message);
+          success = true;
+          fetchPodcastEpisodes();
+        }
+      } catch (directErr) {
+        console.warn('直接連線失敗，自動轉派雲端 Worker 佇列', directErr);
+      }
+
+      if (!success) {
+        const queued = await dispatchPodcastCloudJob('podcast_refresh', { channel_id: channelId });
+        if (queued) {
+          alert('⚡ 已成功發送「刷新單集」至本地 Worker 運算佇列！\n\n您的本地電腦將在背景執行單集解析與同步，請於 5~10 秒後刷新檢視最新單集。');
+          setTimeout(() => fetchPodcastEpisodes(), 5000);
+        } else {
+          throw new Error('無法連線後端且雲端佇列建立失敗');
+        }
       }
     } catch (err) {
       alert(formatPodcastApiError('刷新單集', err));
@@ -2361,22 +2434,32 @@ function StockDashboard() {
   const handleBatchAnalyzeChannel = async (channelId, limit) => {
     try {
       setBatchAnalyzingChannelId(channelId);
-      const headers = { 'Content-Type': 'application/json' };
-      if (geminiApiKey) {
-        headers['X-Gemini-API-Key'] = geminiApiKey;
+      let success = false;
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (geminiApiKey) headers['X-Gemini-API-Key'] = geminiApiKey;
+        const res = await stockFetch(`/api/podcast/channels/${channelId}/batch_transcribe`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ limit })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          alert(json.message);
+          success = true;
+          fetchPodcastEpisodes();
+        }
+      } catch (directErr) {
+        console.warn('直接連線失敗，自動轉派雲端 Worker 佇列', directErr);
       }
-      const res = await stockFetch(`/api/podcast/channels/${channelId}/batch_transcribe`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ limit })
-      });
-      if (res.ok) {
-        const json = await res.json();
-        alert(json.message);
-        fetchPodcastEpisodes();
-      } else {
-        const json = await res.json();
-        throw new Error(json.detail || '批次分析啟動失敗');
+
+      if (!success) {
+        const queued = await dispatchPodcastCloudJob('podcast_batch_transcribe', { channel_id: channelId, limit, gemini_api_key: geminiApiKey });
+        if (queued) {
+          alert(`🚀 已成功將批次分析 (${limit} 集) 任務發送至本地 Worker！\n\n本地電腦完成後將自動推播至雲端，請稍候重新整理。`);
+        } else {
+          throw new Error('批次分析啟動失敗');
+        }
       }
     } catch (err) {
       alert(formatPodcastApiError('批次分析', err));
@@ -2388,20 +2471,32 @@ function StockDashboard() {
   const handleTranscribeEpisode = async (episodeGuid) => {
     try {
       setPodcastEpisodes(prev => prev.map(ep => ep.episode_guid === episodeGuid ? { ...ep, status: 'transcribing' } : ep));
-      
-      const headers = {};
-      if (geminiApiKey) {
-        headers['X-Gemini-API-Key'] = geminiApiKey;
+      let success = false;
+      try {
+        const headers = {};
+        if (geminiApiKey) headers['X-Gemini-API-Key'] = geminiApiKey;
+        const res = await stockFetch(`/api/podcast/transcribe/${episodeGuid}`, {
+          method: 'POST',
+          headers
+        });
+        if (res.ok) {
+          const json = await res.json();
+          alert(json.message);
+          success = true;
+          fetchPodcastEpisodes();
+        }
+      } catch (directErr) {
+        console.warn('直接連線失敗，自動轉派雲端 Worker 佇列', directErr);
       }
-      
-      const res = await stockFetch(`/api/podcast/transcribe/${episodeGuid}`, {
-        method: 'POST',
-        headers
-      });
-      
-      const json = await res.json();
-      alert(json.message);
-      fetchPodcastEpisodes();
+
+      if (!success) {
+        const queued = await dispatchPodcastCloudJob('podcast_transcribe', { episode_guid: episodeGuid, gemini_api_key: geminiApiKey });
+        if (queued) {
+          alert('🤖 已成功將此單集發送至本地 GPU 語音轉譯佇列！\n\n本地電腦將使用 Whisper 模型解碼音訊並由 Gemini 產生趨勢報告。完成後將自動推播回雲端，請在背景稍候。');
+        } else {
+          throw new Error('無法建立轉譯任務');
+        }
+      }
     } catch (err) {
       alert(formatPodcastApiError('啟動轉譯', err));
       fetchPodcastEpisodes();
@@ -11268,38 +11363,26 @@ function StockDashboard() {
                 gap: '0.5rem'
               }}>
                 <span>🟢</span>
-                <span><strong>本地 AI 語音轉譯引擎連線就緒 (Port 8000)</strong>：支援 Apple Silicon GPU / Whisper 本地音訊解碼與即時單集抓取。</span>
+                <span><strong>AI 語音轉譯引擎連線就緒 (遠端/本地雙向同步)</strong>：支援外部 HTTPS 遠端存取與 Apple Silicon GPU / Whisper 本地音訊解碼。</span>
               </div>
             ) : (
               <div style={{
-                background: 'rgba(239, 68, 68, 0.12)',
-                border: '1px solid rgba(239, 68, 68, 0.35)',
+                background: 'rgba(99, 102, 241, 0.12)',
+                border: '1px solid rgba(99, 102, 241, 0.35)',
                 borderRadius: '8px',
-                padding: '0.75rem 1rem',
+                padding: '0.6rem 1rem',
                 marginBottom: '1.25rem',
-                color: '#FCA5A5',
+                color: '#A5B4FC',
                 fontSize: '0.85rem',
                 display: 'flex',
-                justifyContent: 'space-between',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 flexWrap: 'wrap',
                 gap: '0.5rem'
               }}>
                 <div>
-                  <div style={{ fontWeight: 'bold', marginBottom: '0.2rem' }}>💡 提示：目前為雲端快取模式 (唯讀)</div>
-                  <div style={{ fontSize: '0.78rem', color: '#CBD5E1' }}>
-                    若需刷新最新單集或執行本地 Whisper 音音轉文字模型，請確保本機已執行 <code>./start_server.sh</code>，並直接在本地網址操作：
-                  </div>
+                  <span>⚡ <strong>雲端非同步運算模式</strong>：已啟用遠端任務佇列。點擊刷新或轉譯將自動派發至本地 GPU Worker 於背景執行並推播回雲端！</span>
                 </div>
-                <a
-                  href="http://localhost:8000"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-save"
-                  style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                >
-                  🌐 開啟本地控制台 (localhost:8000)
-                </a>
               </div>
             )}
 
