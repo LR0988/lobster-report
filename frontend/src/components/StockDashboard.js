@@ -571,6 +571,7 @@ function StockDashboard() {
   const [batchLimits, setBatchLimits] = useState({});
   const [batchAnalyzingChannelId, setBatchAnalyzingChannelId] = useState(null);
   const [selectedPodcastChannelId, setSelectedPodcastChannelId] = useState(null);
+  const [localEngineOnline, setLocalEngineOnline] = useState(null);
 
   // 後端設定與歷史軌跡狀態
   const [serverSettings, setServerSettings] = useState({
@@ -2189,7 +2190,27 @@ function StockDashboard() {
     }
   };
 
+  const formatPodcastApiError = (actionName, err) => {
+    if (err?.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+      return `${actionName}失敗 (連線未建立)：\n無法連線至本地分析後端 (http://localhost:8000)。\n\n📌 處理解決方式：\n1. 本系統之 Whisper 音訊解碼與 RSS 爬取需依賴本地後端。\n2. 若您是透過雲端網址 (https://lobster-report.vercel.app) 操作，瀏覽器可能因跨網域安全性限制阻擋本機連線。\n3. 請直接在瀏覽器開啟本地控制台進行即時操作：\n👉 http://localhost:8000`;
+    }
+    return `${actionName}失敗: ${err.message || '未知錯誤'}`;
+  };
+
   const fetchPodcastChannels = async () => {
+    // 優先探測本地後端連線狀況
+    try {
+      const probeRes = await stockFetch('/api/podcast/channels');
+      if (probeRes.ok) {
+        setLocalEngineOnline(true);
+        const json = await probeRes.json();
+        setPodcastChannels(json);
+        return;
+      }
+    } catch {
+      setLocalEngineOnline(false);
+    }
+
     try {
       // 1. 優先從 Supabase 快取載入 (0ms 跨裝置同步)
       const resSupabase = await supabaseFetch('/stock_ml_cache?model_type=eq.podcast_data&select=payload');
@@ -2199,14 +2220,6 @@ function StockDashboard() {
           setPodcastChannels(rows[0].payload.channels);
           return;
         }
-      }
-
-      // 2. 嘗試本地後端
-      const res = await stockFetch('/api/podcast/channels');
-      if (res.ok) {
-        const json = await res.json();
-        setPodcastChannels(json);
-        return;
       }
     } catch (err) {
       console.warn('無法讀取 Podcast 頻道列表，啟用離線快取', err);
@@ -2272,7 +2285,7 @@ function StockDashboard() {
         throw new Error(json.detail || '新增失敗');
       }
     } catch (err) {
-      alert(`新增頻道失敗: ${err.message}`);
+      alert(formatPodcastApiError('新增頻道', err));
     } finally {
       setAddingChannel(false);
     }
@@ -2294,7 +2307,7 @@ function StockDashboard() {
         throw new Error(json.detail || '恢復失敗');
       }
     } catch (err) {
-      alert(`恢復失敗: ${err.message}`);
+      alert(formatPodcastApiError('恢復頻道', err));
     } finally {
       setAddingChannel(false);
     }
@@ -2322,7 +2335,7 @@ function StockDashboard() {
         throw new Error(json.detail || '刪除失敗');
       }
     } catch (err) {
-      alert(`刪除失敗: ${err.message}`);
+      alert(formatPodcastApiError('刪除頻道', err));
     }
   };
 
@@ -2339,7 +2352,7 @@ function StockDashboard() {
         throw new Error(json.detail || '重新載入失敗');
       }
     } catch (err) {
-      alert(`刷新失敗: ${err.message}`);
+      alert(formatPodcastApiError('刷新單集', err));
     } finally {
       setRefreshingChannelId(null);
     }
@@ -2366,7 +2379,7 @@ function StockDashboard() {
         throw new Error(json.detail || '批次分析啟動失敗');
       }
     } catch (err) {
-      alert(`批次分析失敗: ${err.message}`);
+      alert(formatPodcastApiError('批次分析', err));
     } finally {
       setBatchAnalyzingChannelId(null);
     }
@@ -2390,7 +2403,7 @@ function StockDashboard() {
       alert(json.message);
       fetchPodcastEpisodes();
     } catch (err) {
-      alert(`啟動轉譯失敗: ${err.message}`);
+      alert(formatPodcastApiError('啟動轉譯', err));
       fetchPodcastEpisodes();
     }
   };
@@ -11240,6 +11253,56 @@ function StockDashboard() {
         {/* ===== Podcast 觀點 ===== */}
         {activeTab === 'podcast' && (
           <div>
+            {/* 本地 AI 引擎連線狀態提示列 */}
+            {localEngineOnline === true ? (
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                borderRadius: '8px',
+                padding: '0.6rem 1rem',
+                marginBottom: '1.25rem',
+                color: '#6EE7B7',
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <span>🟢</span>
+                <span><strong>本地 AI 語音轉譯引擎連線就緒 (Port 8000)</strong>：支援 Apple Silicon GPU / Whisper 本地音訊解碼與即時單集抓取。</span>
+              </div>
+            ) : (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                borderRadius: '8px',
+                padding: '0.75rem 1rem',
+                marginBottom: '1.25rem',
+                color: '#FCA5A5',
+                fontSize: '0.85rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 'bold', marginBottom: '0.2rem' }}>💡 提示：目前為雲端快取模式 (唯讀)</div>
+                  <div style={{ fontSize: '0.78rem', color: '#CBD5E1' }}>
+                    若需刷新最新單集或執行本地 Whisper 音音轉文字模型，請確保本機已執行 <code>./start_server.sh</code>，並直接在本地網址操作：
+                  </div>
+                </div>
+                <a
+                  href="http://localhost:8000"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-save"
+                  style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                >
+                  🌐 開啟本地控制台 (localhost:8000)
+                </a>
+              </div>
+            )}
+
             {/* 新增與恢復 Podcast 頻道表單 */}
             <form onSubmit={handleAddPodcastChannel} className="portfolio-form-grid" style={{ marginBottom: '2rem' }}>
               <div className="portfolio-form-field" style={{ gridColumn: 'span 2' }}>
