@@ -2261,6 +2261,15 @@ function StockDashboard() {
     }
   };
 
+  const sortEpisodesChronologically = (eps) => {
+    if (!Array.isArray(eps)) return [];
+    return [...eps].sort((a, b) => {
+      const tA = new Date(a.pub_date || 0).getTime() || 0;
+      const tB = new Date(b.pub_date || 0).getTime() || 0;
+      return tB - tA;
+    });
+  };
+
   const fetchPodcastEpisodes = async (channelId = selectedPodcastChannelId) => {
     try {
       // 1. 優先從 Supabase 快取載入
@@ -2270,17 +2279,17 @@ function StockDashboard() {
         if (rows && rows.length > 0 && rows[0].payload?.episodes) {
           const allEps = rows[0].payload.episodes;
           const filtered = channelId ? allEps.filter(e => e.channel_id === channelId) : allEps;
-          setPodcastEpisodes(filtered);
+          setPodcastEpisodes(sortEpisodesChronologically(filtered));
           return;
         }
       }
 
       // 2. 嘗試本地後端
-      const url = channelId ? `/api/podcast/episodes?channel_id=${channelId}` : '/api/podcast/episodes';
+      const url = channelId ? `/api/podcast/episodes?channel_id=${channelId}&limit=100` : '/api/podcast/episodes?limit=100';
       const res = await stockFetch(url);
       if (res.ok) {
         const json = await res.json();
-        setPodcastEpisodes(json);
+        setPodcastEpisodes(sortEpisodesChronologically(json));
         return;
       }
     } catch (err) {
@@ -2291,7 +2300,7 @@ function StockDashboard() {
     if (defaultPodcastData?.episodes) {
       const allEps = defaultPodcastData.episodes;
       const filtered = channelId ? allEps.filter(e => e.channel_id === channelId) : allEps;
-      setPodcastEpisodes(filtered);
+      setPodcastEpisodes(sortEpisodesChronologically(filtered));
     }
   };
 
