@@ -601,7 +601,7 @@ function StockDashboard() {
   // 後端設定與歷史軌跡狀態
   const [serverSettings, setServerSettings] = useState({
     gemini_api_key: '',
-    gemini_model: 'gemini-3.8-flash',
+    gemini_model: 'gemini-3.5-flash-lite',
     analysis_prompt: '',
     telegram_bot_token: '',
     telegram_chat_id: ''
@@ -2871,7 +2871,7 @@ function StockDashboard() {
   const [selectedStocks, setSelectedStocks] = useState({});
   const [batchAnalyzing, setBatchAnalyzing] = useState(false);
   const [analyzeProgress, setAnalyzeProgress] = useState({ current: 0, total: 0 });
-  const [screenerModel, setScreenerModel] = useState('gemini-3.8-flash');
+  const [screenerModel, setScreenerModel] = useState('gemini-3.5-flash-lite');
 
   const toggleSelectStock = (stockId) => {
     setSelectedStocks(prev => ({
@@ -11697,7 +11697,8 @@ function StockDashboard() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="gemini-3.8-flash">Gemini 3.8 Flash (預設 / 最新極速)</option>
+                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (最便宜推薦 - 單集約0.2元 / 無思考溢價)</option>
+                <option value="gemini-3.8-flash">Gemini 3.8 Flash (高階思考)</option>
                 <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
                 <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
                 <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
@@ -12026,7 +12027,8 @@ function StockDashboard() {
                     cursor: 'pointer'
                   }}
                 >
-                  <option value="gemini-3.8-flash">Gemini 3.8 Flash (推薦 - 最新極速與精準分析)</option>
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (最便宜推薦 - 單集約0.2元 / 無思考溢價)</option>
+                  <option value="gemini-3.8-flash">Gemini 3.8 Flash (高階思考)</option>
                   <option value="gemini-3.5-flash">Gemini 3.5 Flash (極速模型)</option>
                   <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (最新旗艦模型)</option>
                   <option value="gemini-1.5-pro">Gemini 1.5 Pro (推理與細節佳)</option>
