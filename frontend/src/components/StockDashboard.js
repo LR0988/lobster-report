@@ -526,7 +526,13 @@ function StockDashboard() {
   const navigate = useNavigate();
   const [screeningStatus, setScreeningStatus] = useState('');
 
-  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('active_tab') || 'market_ml');
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem('active_tab');
+    if (['ml', 'low_freq', 'portfolio', 'watchlist'].includes(saved)) {
+      return 'market_ml';
+    }
+    return saved || 'market_ml';
+  });
   const [activeDbTable, setActiveDbTable] = useState('');
   const [portfolioList, setPortfolioList] = useState([]);
   const [portfolioInput, setPortfolioInput] = useState({ stock_id: '', buy_price: '', notes: '', auto_analyze: true });
@@ -3185,14 +3191,10 @@ function StockDashboard() {
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📈 大盤多空預測' },
             { id: 'titan_live', label: '👑 泰坦實盤監控' },
-            { id: 'ml', label: '🤖 ML 波段飆股預測', badge: activeTasks.some(t => t.type === 'ml_train') ? '🏋️ 訓練中' : null },
-            { id: 'low_freq', label: '📉 低頻量化交易' },
-            { id: 'portfolio', label: '💼 我的持股' },
-            { id: 'watchlist', label: '🔔 追蹤與警示' },
+            { id: 'podcast', label: '🎧 Podcast 觀點' },
             { id: 'database', label: '📊 資料庫檢視' },
             { id: 'scraper', label: '⚡ 爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
             { id: 'schedule', label: '⏰ 排程管理' },
-            { id: 'podcast', label: '🎧 Podcast 觀點' },
           ].map(t => (
             <button
               key={t.id}
