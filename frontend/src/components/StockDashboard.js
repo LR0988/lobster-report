@@ -597,6 +597,8 @@ function StockDashboard() {
   const [batchAnalyzingChannelId, setBatchAnalyzingChannelId] = useState(null);
   const [selectedPodcastChannelId, setSelectedPodcastChannelId] = useState(null);
   const [localEngineOnline, setLocalEngineOnline] = useState(null);
+  const [podcastProgress, setPodcastProgress] = useState(null);
+  const [showQueueDetails, setShowQueueDetails] = useState(false);
 
   // 後端設定與歷史軌跡狀態
   const [serverSettings, setServerSettings] = useState({
@@ -2304,6 +2306,27 @@ function StockDashboard() {
     }
   };
 
+  const fetchPodcastProgress = async () => {
+    try {
+      const res = await stockFetch('/api/podcast/progress');
+      if (res.ok) {
+        const json = await res.json();
+        setPodcastProgress(json);
+        return;
+      }
+    } catch (e) {}
+
+    try {
+      const resSupabase = await supabaseFetch('/stock_ml_cache?model_type=eq.podcast_progress&select=payload');
+      if (resSupabase.ok) {
+        const rows = await resSupabase.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          setPodcastProgress(rows[0].payload);
+        }
+      }
+    } catch (e) {}
+  };
+
   const handleAddPodcastChannel = async (e) => {
     e.preventDefault();
     if (!podcastUrlInput.trim()) return;
@@ -2524,6 +2547,7 @@ function StockDashboard() {
     fetchBacktestSettings();
     fetchActiveTasks();
     fetchMarketMlData();
+    fetchPodcastProgress();
 
     // 1. 每秒碼表遞增
     const timerInterval = setInterval(() => {
@@ -2533,6 +2557,7 @@ function StockDashboard() {
     // 2. 背景任務與模型訓練狀態自動輪詢 (每 3 秒同步最新任務與模型狀態)
     const taskPollInterval = setInterval(async () => {
       fetchActiveTasks();
+      fetchPodcastProgress();
       try {
         const resStatus = await supabaseFetch('/stock_ml_cache?model_type=eq.status_all&select=payload');
         let statuses = null;
@@ -2583,6 +2608,7 @@ function StockDashboard() {
     } else if (activeTab === 'podcast') {
       fetchPodcastChannels();
       fetchPodcastEpisodes();
+      fetchPodcastProgress();
     } else if (activeTab === 'watchlist') {
       fetchWatchlist();
       fetchWatchlistAlerts();
@@ -3308,7 +3334,7 @@ function StockDashboard() {
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📈 大盤多空預測' },
             { id: 'titan_live', label: '👑 泰坦實盤監控' },
-            { id: 'podcast', label: '🎧 Podcast 觀點' },
+            { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '📊 資料庫檢視' },
             { id: 'scraper', label: '⚡ 爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
             { id: 'schedule', label: '⏰ 排程管理' },
@@ -3329,9 +3355,9 @@ function StockDashboard() {
               {t.badge && (
                 <span style={{
                   fontSize: '0.68rem',
-                  background: 'rgba(239, 68, 68, 0.3)',
-                  border: '1px solid rgba(239, 68, 68, 0.7)',
-                  color: '#FECACA',
+                  background: t.id === 'podcast' ? 'rgba(6, 182, 212, 0.25)' : 'rgba(239, 68, 68, 0.3)',
+                  border: t.id === 'podcast' ? '1px solid rgba(6, 182, 212, 0.7)' : '1px solid rgba(239, 68, 68, 0.7)',
+                  color: t.id === 'podcast' ? '#67E8F9' : '#FECACA',
                   padding: '0.1rem 0.4rem',
                   borderRadius: '10px',
                   fontWeight: 'bold'
@@ -3341,6 +3367,63 @@ function StockDashboard() {
               )}
             </button>
           ))}
+
+          {podcastProgress?.is_active ? (
+            <div
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.25), rgba(6, 182, 212, 0.25))',
+                border: '1px solid rgba(99, 102, 241, 0.5)',
+                padding: '0.35rem 0.9rem',
+                borderRadius: '24px',
+                fontSize: '0.82rem',
+                color: '#E0E7FF',
+                cursor: 'pointer',
+                boxShadow: '0 0 15px rgba(99, 102, 241, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => setActiveTab('podcast')}
+              title="點擊切換至 Podcast 查看即時分析進度與任務佇列"
+            >
+              <span className="live-pulse-dot" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', display: 'inline-block', boxShadow: '0 0 8px #38BDF8' }}></span>
+              <span>
+                ⚡ <strong>AI 分析中：</strong>
+                <span style={{ color: '#FDE68A' }}>
+                  {podcastProgress.current_episode?.title ? (podcastProgress.current_episode.title.length > 18 ? podcastProgress.current_episode.title.substring(0, 18) + '...' : podcastProgress.current_episode.title) : '單集音訊'}
+                </span>
+                <span style={{ marginLeft: '0.4rem', color: '#93C5FD' }}>
+                  (第 {podcastProgress.current_job_index || 1}/{podcastProgress.total_jobs || 1} 集，剩餘 <strong style={{ color: '#F472B6' }}>{podcastProgress.remaining_jobs ?? 0}</strong> 個 job)
+                </span>
+              </span>
+              <span style={{ fontSize: '0.75rem', background: 'rgba(0,0,0,0.35)', padding: '2px 6px', borderRadius: '10px', color: '#6EE7B7', fontFamily: 'monospace' }}>
+                ⏱️ {formatSecondsToDuration(podcastProgress.current_episode?.started_at ? Math.max(0, Math.floor(Date.now() / 1000 - podcastProgress.current_episode.started_at)) : 0)}
+              </span>
+            </div>
+          ) : activeTasks.length > 0 ? (
+            <div
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                background: 'rgba(30, 58, 138, 0.35)',
+                border: '1px solid rgba(59, 130, 246, 0.5)',
+                padding: '0.35rem 0.8rem',
+                borderRadius: '20px',
+                fontSize: '0.82rem',
+                color: '#93C5FD',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              title="背景執行中之任務"
+            >
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block', boxShadow: '0 0 8px #10B981' }}></span>
+              <span><strong>{activeTasks.length}</strong> 個背景任務執行中</span>
+            </div>
+          ) : null}
         </div>
 
         {/* ===== 智慧選股器 ===== */}
@@ -11395,6 +11478,273 @@ function StockDashboard() {
               </div>
             )}
 
+            {/* 🚀 Podcast AI 即時分析進度與任務監控看板 */}
+            {podcastProgress?.is_active ? (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95))',
+                border: '1px solid rgba(99, 102, 241, 0.45)',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                marginBottom: '1.5rem',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+              }}>
+                {/* 頂部標題列 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{ fontSize: '1.25rem' }}>🎙️</span>
+                    <span style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#F1F5F9' }}>
+                      Podcast AI 語音分析進行中
+                    </span>
+                    <span style={{
+                      background: 'rgba(56, 189, 248, 0.2)',
+                      border: '1px solid rgba(56, 189, 248, 0.6)',
+                      color: '#38BDF8',
+                      fontSize: '0.72rem',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontWeight: 'bold',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <span className="live-pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#38BDF8', display: 'inline-block' }}></span>
+                      運算中
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>
+                      ⏱️ 當前單集耗時：
+                      <strong style={{ color: '#FDE68A', fontFamily: 'monospace' }}>
+                        {formatSecondsToDuration(podcastProgress.current_episode?.started_at ? Math.max(0, Math.floor(Date.now() / 1000 - podcastProgress.current_episode.started_at)) : 0)}
+                      </strong>
+                    </span>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                      onClick={() => { fetchPodcastProgress(); fetchPodcastEpisodes(); }}
+                      title="手動刷新進度"
+                    >
+                      🔄 刷新
+                    </button>
+                  </div>
+                </div>
+
+                {/* 當前分析單集與階段卡片 */}
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '10px',
+                  padding: '1rem',
+                  marginBottom: '1rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '0.82rem', color: '#818CF8', fontWeight: 'bold' }}>
+                      🎧 【{podcastProgress.channel_name || 'Podcast'}】
+                    </span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#F8FAFC' }}>
+                      {podcastProgress.current_episode?.title || '單集音訊處理中...'}
+                    </span>
+                  </div>
+
+                  {/* 4 步驟流程指示圖 */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                    gap: '0.5rem',
+                    marginBottom: '0.85rem'
+                  }}>
+                    {[
+                      { key: 'downloading', label: '📥 1. 下載音訊', idx: 1 },
+                      { key: 'transcribing', label: '🎙️ 2. Whisper 解碼', idx: 2 },
+                      { key: 'analyzing', label: '🤖 3. Gemini 分析', idx: 3 },
+                      { key: 'saving', label: '💾 4. 儲存與同步', idx: 4 }
+                    ].map(stepItem => {
+                      const curStep = podcastProgress.current_episode?.step;
+                      const curIdx = podcastProgress.current_episode?.step_index || 1;
+                      const isCurrent = (curStep === stepItem.key) || (stepItem.key === 'saving' && curStep === 'saving');
+                      const isPast = curIdx > stepItem.idx;
+
+                      let bg = 'rgba(255, 255, 255, 0.03)';
+                      let border = '1px solid rgba(255, 255, 255, 0.08)';
+                      let textCol = '#64748B';
+
+                      if (isCurrent) {
+                        bg = 'rgba(6, 182, 212, 0.15)';
+                        border = '1px solid #06B6D4';
+                        textCol = '#67E8F9';
+                      } else if (isPast) {
+                        bg = 'rgba(16, 185, 129, 0.12)';
+                        border = '1px solid rgba(16, 185, 129, 0.4)';
+                        textCol = '#6EE7B7';
+                      }
+
+                      return (
+                        <div key={stepItem.key} style={{
+                          background: bg,
+                          border: border,
+                          borderRadius: '6px',
+                          padding: '0.45rem 0.6rem',
+                          textAlign: 'center',
+                          fontSize: '0.8rem',
+                          fontWeight: isCurrent ? 'bold' : 'normal',
+                          color: textCol,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem'
+                        }}>
+                          {isCurrent && <span className="loader" style={{ width: '8px', height: '8px', borderWidth: '1.5px', borderColor: '#67E8F9', borderBottomColor: 'transparent' }}></span>}
+                          {isPast && <span>✓</span>}
+                          <span>{stepItem.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* 即時詳細狀態訊息 */}
+                  <div style={{
+                    fontSize: '0.82rem',
+                    color: '#CBD5E1',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem'
+                  }}>
+                    <span>💬</span>
+                    <span>{podcastProgress.current_episode?.message || '正在進行背景語音文字化與大模型金融剖析...'}</span>
+                  </div>
+                </div>
+
+                {/* 批次任務進度與指標卡 */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                  gap: '0.75rem',
+                  marginBottom: '1rem'
+                }}>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>總任務集數</div>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#F8FAFC' }}>{podcastProgress.total_jobs || 1} 集</div>
+                  </div>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>當前處理中</div>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#67E8F9' }}>第 {podcastProgress.current_job_index || 1} 集</div>
+                  </div>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>已完成</div>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#34D399' }}>{podcastProgress.completed_jobs || 0} 集</div>
+                  </div>
+                  <div style={{ background: 'rgba(244, 114, 182, 0.1)', border: '1px solid rgba(244, 114, 182, 0.3)', padding: '0.6rem', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#F472B6', fontWeight: 'bold' }}>剩餘 Job 待處理</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#F472B6' }}>{podcastProgress.remaining_jobs ?? 0} 個 job</div>
+                  </div>
+                </div>
+
+                {/* 進度條 */}
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.35rem' }}>
+                    <span>批次總體進度 ({podcastProgress.completed_jobs || 0} / {podcastProgress.total_jobs || 1} 集)</span>
+                    <span style={{ fontWeight: 'bold', color: '#38BDF8' }}>{podcastProgress.progress_pct || 0}%</span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${Math.min(100, Math.max(5, podcastProgress.progress_pct || 0))}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #4F46E5, #06B6D4, #10B981)',
+                      borderRadius: '4px',
+                      transition: 'width 0.4s ease'
+                    }}></div>
+                  </div>
+                </div>
+
+                {/* 任務佇列抽屜展開按鈕與列表 */}
+                {podcastProgress.job_queue && podcastProgress.job_queue.length > 0 && (
+                  <div style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>
+                        📊 系統總計：已完成 {podcastProgress.system_summary?.total_completed || 0} 集 | 尚有 {podcastProgress.system_summary?.total_pending || 0} 個 job 待分析
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowQueueDetails(prev => !prev)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#93C5FD',
+                          fontSize: '0.78rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}
+                      >
+                        <span>{showQueueDetails ? '▲ 收折佇列清單' : `▼ 展開任務佇列 (${podcastProgress.job_queue.length} 集)`}</span>
+                      </button>
+                    </div>
+
+                    {showQueueDetails && (
+                      <div style={{ marginTop: '0.6rem', maxHeight: '180px', overflowY: 'auto', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '0.5rem' }}>
+                        {podcastProgress.job_queue.map((item, idx) => (
+                          <div key={item.guid || idx} style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '0.35rem 0.5rem',
+                            borderBottom: idx < podcastProgress.job_queue.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                            fontSize: '0.78rem'
+                          }}>
+                            <span style={{ color: item.status === 'running' ? '#67E8F9' : item.status === 'completed' ? '#34D399' : '#94A3B8', fontWeight: item.status === 'running' ? 'bold' : 'normal' }}>
+                              {item.status === 'running' && '▶️ 運算中：'}
+                              {item.status === 'completed' && '✅ 已完成：'}
+                              {item.status === 'pending' && `⏳ 排隊中 (第 ${idx + 1} 集)：`}
+                              {item.status === 'failed' && '❌ 失敗：'}
+                              {item.title}
+                            </span>
+                            <span style={{
+                              fontSize: '0.7rem',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              background: item.status === 'running' ? 'rgba(6, 182, 212, 0.2)' : item.status === 'completed' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                              color: item.status === 'running' ? '#67E8F9' : item.status === 'completed' ? '#6EE7B7' : '#94A3B8'
+                            }}>
+                              {item.status === 'running' ? '處理中' : item.status === 'completed' ? '完成' : '待處理'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{
+                background: 'rgba(30, 41, 59, 0.5)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                padding: '0.65rem 1rem',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                fontSize: '0.83rem',
+                color: '#94A3B8'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>📊</span>
+                  <span><strong>AI 語音分析系統就緒</strong>：目前無進行中之背景運算。</span>
+                  <span style={{ color: '#34D399' }}>✅ 已完成 {podcastProgress?.system_summary?.total_completed || (podcastEpisodes ? podcastEpisodes.filter(e => e.status === 'completed').length : 0)} 集</span>
+                  <span style={{ color: '#F472B6' }}>⏳ 尚有 {podcastProgress?.system_summary?.total_pending || (podcastEpisodes ? podcastEpisodes.filter(e => e.status === 'pending').length : 0)} 個 job 待分析</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
+                  提示：可在下方點擊「🚀 批次分析」或單集「語音分析」開始排程
+                </div>
+              </div>
+            )}
+
             {/* 新增與恢復 Podcast 頻道表單 */}
             <form onSubmit={handleAddPodcastChannel} className="portfolio-form-grid" style={{ marginBottom: '2rem' }}>
               <div className="portfolio-form-field" style={{ gridColumn: 'span 2' }}>
@@ -11550,8 +11900,16 @@ function StockDashboard() {
                         </div>
                         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                           <span className={`podcast-status-badge ${ep.status}`}>
-                            {ep.status === 'pending' && '⚪ 未分析'}
-                            {ep.status === 'transcribing' && '⏳ 語音分析中'}
+                            {ep.status === 'pending' && (
+                              podcastProgress?.is_active && podcastProgress.job_queue?.some(q => q.guid === ep.episode_guid && q.status === 'pending')
+                                ? `⏳ 佇列排隊中 (第 ${podcastProgress.job_queue.findIndex(q => q.guid === ep.episode_guid) + 1} 集)`
+                                : '⚪ 未分析'
+                            )}
+                            {ep.status === 'transcribing' && (
+                              podcastProgress?.current_episode?.episode_guid === ep.episode_guid
+                                ? `🎙️ ${podcastProgress.current_episode.step_name || '語音分析中'} (${podcastProgress.current_episode.step_index || 1}/3)`
+                                : '⏳ 語音分析中'
+                            )}
                             {ep.status === 'completed' && '✅ 分析完成'}
                             {ep.status === 'failed' && '❌ 分析失敗'}
                           </span>
@@ -11574,7 +11932,10 @@ function StockDashboard() {
                             </button>
                           )}
                           {ep.status === 'transcribing' && (
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>請在背景稍候...</span>
+                            <span style={{ fontSize: '0.82rem', color: '#38BDF8', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span className="loader" style={{ width: '8px', height: '8px', borderWidth: '1.5px', borderColor: '#38BDF8', borderBottomColor: 'transparent' }}></span>
+                              <span>{podcastProgress?.current_episode?.episode_guid === ep.episode_guid ? podcastProgress.current_episode.message : '請在背景稍候...'}</span>
+                            </span>
                           )}
                           {ep.status === 'completed' && (
                             <button

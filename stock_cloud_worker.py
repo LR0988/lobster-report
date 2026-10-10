@@ -779,7 +779,7 @@ def execute_podcast_job(job_type, config):
         episode_guid = config.get("episode_guid")
         gemini_api_key = config.get("gemini_api_key")
         conn.close()
-        res = podcast_pipeline.process_single_episode(episode_guid, gemini_api_key)
+        res = podcast_pipeline.batch_process_episodes([episode_guid], gemini_api_key)
         return res
         
     elif job_type == "podcast_batch_transcribe":
@@ -793,11 +793,9 @@ def execute_podcast_job(job_type, config):
         """, (channel_id, limit))
         rows = cursor.fetchall()
         conn.close()
-        processed = 0
-        for r in rows:
-            podcast_pipeline.process_single_episode(r["episode_guid"], gemini_api_key)
-            processed += 1
-        return {"status": "ok", "message": f"已完成批次轉譯 {processed} 集", "processed": processed}
+        guids = [r["episode_guid"] for r in rows]
+        res = podcast_pipeline.batch_process_episodes(guids, gemini_api_key)
+        return res
         
     elif job_type == "podcast_restore_defaults":
         conn.close()
