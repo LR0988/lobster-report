@@ -1,0 +1,652 @@
+{
+  "status": "ok",
+  "generated_at": "2026-10-11 07:56:20",
+  "latest_data_date": "2026-10-09",
+  "top_pick": {
+    "ticker": "EWY",
+    "country": "韓國",
+    "name": "MSCI韓國 (EWY)",
+    "flag": "🇰🇷",
+    "price": 177.24,
+    "ma200": 158.56,
+    "above_ma200": true,
+    "mom_1m": -3.03,
+    "mom_3m": 5.49,
+    "mom_12m": 115.25,
+    "score": 58.67,
+    "status": "🔥 國運強盛 (多頭)",
+    "rank": 1
+  },
+  "current_rankings": [
+    {
+      "ticker": "EWY",
+      "country": "韓國",
+      "name": "MSCI韓國 (EWY)",
+      "flag": "🇰🇷",
+      "price": 177.24,
+      "ma200": 158.56,
+      "above_ma200": true,
+      "mom_1m": -3.03,
+      "mom_3m": 5.49,
+      "mom_12m": 115.25,
+      "score": 58.67,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 1
+    },
+    {
+      "ticker": "EWT",
+      "country": "台灣",
+      "name": "MSCI台灣 (EWT)",
+      "flag": "🇹🇼",
+      "price": 114.31,
+      "ma200": 90.11,
+      "above_ma200": true,
+      "mom_1m": 4.95,
+      "mom_3m": 12.2,
+      "mom_12m": 82.12,
+      "score": 45.71,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 2
+    },
+    {
+      "ticker": "EWZ",
+      "country": "巴西",
+      "name": "MSCI巴西 (EWZ)",
+      "flag": "🇧🇷",
+      "price": 43.54,
+      "ma200": 36.46,
+      "above_ma200": true,
+      "mom_1m": 12.91,
+      "mom_3m": 23.03,
+      "mom_12m": 52.31,
+      "score": 35.65,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 3
+    },
+    {
+      "ticker": "QQQ",
+      "country": "美國",
+      "name": "那斯達克100 (QQQ)",
+      "flag": "🇺🇸",
+      "price": 751.27,
+      "ma200": 670.88,
+      "above_ma200": true,
+      "mom_1m": 6.12,
+      "mom_3m": 5.66,
+      "mom_12m": 23.45,
+      "score": 14.65,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 4
+    },
+    {
+      "ticker": "EWJ",
+      "country": "日本",
+      "name": "MSCI日本 (EWJ)",
+      "flag": "🇯🇵",
+      "price": 97.86,
+      "ma200": 90.56,
+      "above_ma200": true,
+      "mom_1m": 1.47,
+      "mom_3m": 5.54,
+      "mom_12m": 24.86,
+      "score": 14.39,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 5
+    },
+    {
+      "ticker": "SPY",
+      "country": "美國",
+      "name": "標普500 (SPY)",
+      "flag": "🇺🇸",
+      "price": 778.57,
+      "ma200": 719.66,
+      "above_ma200": true,
+      "mom_1m": 2.99,
+      "mom_3m": 4.18,
+      "mom_12m": 16.92,
+      "score": 10.31,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 6
+    },
+    {
+      "ticker": "EWN",
+      "country": "荷蘭",
+      "name": "MSCI荷蘭 (EWN)",
+      "flag": "🇳🇱",
+      "price": 66.64,
+      "ma200": 64.23,
+      "above_ma200": true,
+      "mom_1m": -1.32,
+      "mom_3m": -0.67,
+      "mom_12m": 19.61,
+      "score": 9.34,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 7
+    },
+    {
+      "ticker": "EWC",
+      "country": "加拿大",
+      "name": "MSCI加拿大 (EWC)",
+      "flag": "🇨🇦",
+      "price": 59.03,
+      "ma200": 57.7,
+      "above_ma200": true,
+      "mom_1m": -2.09,
+      "mom_3m": 0.51,
+      "mom_12m": 17.0,
+      "score": 8.24,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 8
+    },
+    {
+      "ticker": "EWU",
+      "country": "英國",
+      "name": "MSCI英國 (EWU)",
+      "flag": "🇬🇧",
+      "price": 46.52,
+      "ma200": 46.36,
+      "above_ma200": true,
+      "mom_1m": -2.12,
+      "mom_3m": 0.35,
+      "mom_12m": 12.69,
+      "score": 6.03,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 9
+    },
+    {
+      "ticker": "EWD",
+      "country": "瑞典",
+      "name": "MSCI瑞典 (EWD)",
+      "flag": "🇸🇪",
+      "price": 50.71,
+      "ma200": 50.73,
+      "above_ma200": false,
+      "mom_1m": -1.69,
+      "mom_3m": 2.16,
+      "mom_12m": 9.76,
+      "score": 5.19,
+      "status": "❄️ 轉弱震盪 (觀望)",
+      "rank": 10
+    },
+    {
+      "ticker": "EWW",
+      "country": "墨西哥",
+      "name": "MSCI墨西哥 (EWW)",
+      "flag": "🇲🇽",
+      "price": 71.95,
+      "ma200": 75.22,
+      "above_ma200": false,
+      "mom_1m": -4.39,
+      "mom_3m": -2.97,
+      "mom_12m": 13.21,
+      "score": 4.84,
+      "status": "❄️ 轉弱震盪 (觀望)",
+      "rank": 11
+    },
+    {
+      "ticker": "EWH",
+      "country": "香港",
+      "name": "MSCI香港 (EWH)",
+      "flag": "🇭🇰",
+      "price": 22.06,
+      "ma200": 22.54,
+      "above_ma200": false,
+      "mom_1m": -1.82,
+      "mom_3m": 3.57,
+      "mom_12m": 7.41,
+      "score": 4.41,
+      "status": "❄️ 轉弱震盪 (觀望)",
+      "rank": 12
+    },
+    {
+      "ticker": "EWA",
+      "country": "澳洲",
+      "name": "MSCI澳洲 (EWA)",
+      "flag": "🇦🇺",
+      "price": 28.62,
+      "ma200": 28.47,
+      "above_ma200": true,
+      "mom_1m": -1.58,
+      "mom_3m": 0.95,
+      "mom_12m": 8.4,
+      "score": 4.17,
+      "status": "🔥 國運強盛 (多頭)",
+      "rank": 13
+    },
+    {
+      "ticker": "EWL",
+      "country": "瑞士",
+      "name": "MSCI瑞士 (EWL)",
+      "flag": "🇨🇭",
+      "price": 59.75,
+      "ma200": 61.0,
+      "above_ma200": false,
+      "mom_1m": -0.91,
+      "mom_3m": -4.28,
+      "mom_12m": 7.0,
+      "score": 2.03,
+      "status": "❄️ 轉弱震盪 (觀望)",
+      "rank": 14
+    },
+    {
+      "ticker": "EWG",
+      "country": "德國",
+      "name": "MSCI德國 (EWG)",
+      "flag": "🇩🇪",
+      "price": 40.96,
+      "ma200": 41.87,
+      "above_ma200": false,
+      "mom_1m": -3.89,
+      "mom_3m": -0.65,
+      "mom_12m": -1.32,
+      "score": -1.63,
+      "status": "❄️ 轉弱震盪 (觀望)",
+      "rank": 15
+    }
+  ],
+  "summary": {
+    "total_return_pct": 1223.8,
+    "cagr_pct": 12.46,
+    "max_drawdown_pct": -28.62,
+    "multiple": 13.24,
+    "spy_total_return_pct": 848.7,
+    "spy_cagr_pct": 10.77,
+    "spy_max_drawdown_pct": -51.3,
+    "spy_multiple": 9.49,
+    "win_rate_years": 68.2
+  },
+  "yearly_performance": [
+    {
+      "year": 2005,
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "strategy_return": 47.81,
+      "spy_return": 4.8,
+      "alpha": 43.0,
+      "end_equity": 1478069.0
+    },
+    {
+      "year": 2006,
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "strategy_return": 28.57,
+      "spy_return": 15.73,
+      "alpha": 12.84,
+      "end_equity": 1900388.0
+    },
+    {
+      "year": 2007,
+      "main_country": "墨西哥",
+      "flag": "🇲🇽",
+      "strategy_return": 45.72,
+      "spy_return": 4.91,
+      "alpha": 40.81,
+      "end_equity": 2769220.0
+    },
+    {
+      "year": 2008,
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "strategy_return": -0.67,
+      "spy_return": -36.79,
+      "alpha": 36.12,
+      "end_equity": 2750590.0
+    },
+    {
+      "year": 2009,
+      "main_country": "現金避險",
+      "flag": "🛡️",
+      "strategy_return": 30.34,
+      "spy_return": 27.12,
+      "alpha": 3.21,
+      "end_equity": 3584996.0
+    },
+    {
+      "year": 2010,
+      "main_country": "墨西哥",
+      "flag": "🇲🇽",
+      "strategy_return": -2.72,
+      "spy_return": 14.97,
+      "alpha": -17.7,
+      "end_equity": 3487422.0
+    },
+    {
+      "year": 2011,
+      "main_country": "瑞典",
+      "flag": "🇸🇪",
+      "strategy_return": -10.7,
+      "spy_return": 2.94,
+      "alpha": -13.64,
+      "end_equity": 3114331.0
+    },
+    {
+      "year": 2012,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": 27.85,
+      "spy_return": 16.1,
+      "alpha": 11.75,
+      "end_equity": 3981597.0
+    },
+    {
+      "year": 2013,
+      "main_country": "德國",
+      "flag": "🇩🇪",
+      "strategy_return": 12.4,
+      "spy_return": 29.35,
+      "alpha": -16.94,
+      "end_equity": 4475444.0
+    },
+    {
+      "year": 2014,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": 17.0,
+      "spy_return": 14.37,
+      "alpha": 2.63,
+      "end_equity": 5236234.0
+    },
+    {
+      "year": 2015,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": -5.28,
+      "spy_return": -0.85,
+      "alpha": -4.43,
+      "end_equity": 4959616.0
+    },
+    {
+      "year": 2016,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": 0.62,
+      "spy_return": 14.66,
+      "alpha": -14.04,
+      "end_equity": 4990366.0
+    },
+    {
+      "year": 2017,
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "strategy_return": 13.07,
+      "spy_return": 21.33,
+      "alpha": -8.26,
+      "end_equity": 5642689.0
+    },
+    {
+      "year": 2018,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": -23.42,
+      "spy_return": -6.42,
+      "alpha": -17.0,
+      "end_equity": 4321064.0
+    },
+    {
+      "year": 2019,
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "strategy_return": 19.35,
+      "spy_return": 34.02,
+      "alpha": -14.67,
+      "end_equity": 5157068.0
+    },
+    {
+      "year": 2020,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": 26.78,
+      "spy_return": 18.17,
+      "alpha": 8.61,
+      "end_equity": 6538138.0
+    },
+    {
+      "year": 2021,
+      "main_country": "韓國",
+      "flag": "🇰🇷",
+      "strategy_return": -8.27,
+      "spy_return": 28.6,
+      "alpha": -36.87,
+      "end_equity": 5997756.0
+    },
+    {
+      "year": 2022,
+      "main_country": "墨西哥",
+      "flag": "🇲🇽",
+      "strategy_return": -21.45,
+      "spy_return": -17.99,
+      "alpha": -3.45,
+      "end_equity": 4711461.0
+    },
+    {
+      "year": 2023,
+      "main_country": "墨西哥",
+      "flag": "🇲🇽",
+      "strategy_return": 30.76,
+      "spy_return": 24.71,
+      "alpha": 6.05,
+      "end_equity": 6160622.0
+    },
+    {
+      "year": 2024,
+      "main_country": "美國",
+      "flag": "🇺🇸",
+      "strategy_return": 4.78,
+      "spy_return": 26.43,
+      "alpha": -21.65,
+      "end_equity": 6455320.0
+    },
+    {
+      "year": 2025,
+      "main_country": "德國",
+      "flag": "🇩🇪",
+      "strategy_return": 16.22,
+      "spy_return": 17.71,
+      "alpha": -1.49,
+      "end_equity": 7502445.0
+    },
+    {
+      "year": 2026,
+      "main_country": "韓國",
+      "flag": "🇰🇷",
+      "strategy_return": 76.45,
+      "spy_return": 14.09,
+      "alpha": 62.36,
+      "end_equity": 13237731.0
+    }
+  ],
+  "history_trades": [
+    {
+      "date": "2024-11-01",
+      "country": "台灣",
+      "flag": "🇹🇼",
+      "month_return": -2.33,
+      "spy_return": 5.54,
+      "cumulative_equity": 6602097.0
+    },
+    {
+      "date": "2024-12-02",
+      "country": "美國",
+      "flag": "🇺🇸",
+      "month_return": -2.22,
+      "spy_return": -1.92,
+      "cumulative_equity": 6455320.0
+    },
+    {
+      "date": "2025-01-02",
+      "country": "美國",
+      "flag": "🇺🇸",
+      "month_return": -0.46,
+      "spy_return": 0.56,
+      "cumulative_equity": 6425536.0
+    },
+    {
+      "date": "2025-02-03",
+      "country": "美國",
+      "flag": "🇺🇸",
+      "month_return": 0.29,
+      "spy_return": 0.59,
+      "cumulative_equity": 6444313.0
+    },
+    {
+      "date": "2025-03-03",
+      "country": "德國",
+      "flag": "🇩🇪",
+      "month_return": -0.99,
+      "spy_return": -6.22,
+      "cumulative_equity": 6380288.0
+    },
+    {
+      "date": "2025-04-01",
+      "country": "德國",
+      "flag": "🇩🇪",
+      "month_return": 6.55,
+      "spy_return": 0.52,
+      "cumulative_equity": 6798443.0
+    },
+    {
+      "date": "2025-05-01",
+      "country": "德國",
+      "flag": "🇩🇪",
+      "month_return": 5.5,
+      "spy_return": 4.89,
+      "cumulative_equity": 7172039.0
+    },
+    {
+      "date": "2025-06-02",
+      "country": "德國",
+      "flag": "🇩🇪",
+      "month_return": 2.2,
+      "spy_return": 5.18,
+      "cumulative_equity": 7329637.0
+    },
+    {
+      "date": "2025-07-01",
+      "country": "德國",
+      "flag": "🇩🇪",
+      "month_return": -2.92,
+      "spy_return": 1.61,
+      "cumulative_equity": 7115341.0
+    },
+    {
+      "date": "2025-08-01",
+      "country": "香港",
+      "flag": "🇭🇰",
+      "month_return": 3.23,
+      "spy_return": 1.79,
+      "cumulative_equity": 7345248.0
+    },
+    {
+      "date": "2025-09-02",
+      "country": "香港",
+      "flag": "🇭🇰",
+      "month_return": 1.94,
+      "spy_return": 4.32,
+      "cumulative_equity": 7487908.0
+    },
+    {
+      "date": "2025-10-01",
+      "country": "墨西哥",
+      "flag": "🇲🇽",
+      "month_return": -2.09,
+      "spy_return": 3.39,
+      "cumulative_equity": 7331595.0
+    },
+    {
+      "date": "2025-11-03",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": -10.41,
+      "spy_return": -1.0,
+      "cumulative_equity": 6568277.0
+    },
+    {
+      "date": "2025-12-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 14.22,
+      "spy_return": 1.31,
+      "cumulative_equity": 7502445.0
+    },
+    {
+      "date": "2026-01-02",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 17.58,
+      "spy_return": 0.56,
+      "cumulative_equity": 8821688.0
+    },
+    {
+      "date": "2026-02-02",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 21.35,
+      "spy_return": -1.58,
+      "cumulative_equity": 10705469.0
+    },
+    {
+      "date": "2026-03-02",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": -12.79,
+      "spy_return": -3.39,
+      "cumulative_equity": 9335716.0
+    },
+    {
+      "date": "2026-04-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 27.24,
+      "spy_return": 10.3,
+      "cumulative_equity": 11878377.0
+    },
+    {
+      "date": "2026-05-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 32.24,
+      "spy_return": 4.73,
+      "cumulative_equity": 15708338.0
+    },
+    {
+      "date": "2026-06-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": -10.29,
+      "spy_return": -1.12,
+      "cumulative_equity": 14091227.0
+    },
+    {
+      "date": "2026-07-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": -17.55,
+      "spy_return": 0.6,
+      "cumulative_equity": 11617648.0
+    },
+    {
+      "date": "2026-08-03",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 13.91,
+      "spy_return": 1.68,
+      "cumulative_equity": 13234017.0
+    },
+    {
+      "date": "2026-09-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": 3.44,
+      "spy_return": 0.56,
+      "cumulative_equity": 13689363.0
+    },
+    {
+      "date": "2026-10-01",
+      "country": "韓國",
+      "flag": "🇰🇷",
+      "month_return": -3.3,
+      "spy_return": 1.55,
+      "cumulative_equity": 13237731.0
+    }
+  ]
+}

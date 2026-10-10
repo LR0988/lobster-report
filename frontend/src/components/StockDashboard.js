@@ -8,6 +8,7 @@ import titanCurveData from '../data/titan_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import defaultPodcastData from '../data/defaultPodcastData.json';
 import TitanLiveDashboard from './TitanLiveDashboard';
+import GlobalSovereignDashboard from './GlobalSovereignDashboard';
 import './StockDashboard.css';
 
 let dynamicApiBase = (typeof window !== 'undefined' && localStorage.getItem('remote_api_url')) 
@@ -3334,6 +3335,7 @@ function StockDashboard() {
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📈 大盤多空預測' },
             { id: 'titan_live', label: '👑 泰坦實盤監控' },
+            { id: 'global_sovereign', label: '🌍 全球主權泰坦' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '📊 資料庫檢視' },
             { id: 'scraper', label: '⚡ 爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
@@ -11221,6 +11223,11 @@ function StockDashboard() {
         {/* ===== 👑 泰坦實盤每日監控與對帳系統 ===== */}
         {activeTab === 'titan_live' && (
           <TitanLiveDashboard />
+        )}
+
+        {/* ===== 🌍 全球主權泰坦動能看板 ===== */}
+        {activeTab === 'global_sovereign' && (
+          <GlobalSovereignDashboard />
         )}
 
 
