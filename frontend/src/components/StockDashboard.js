@@ -3164,7 +3164,7 @@ function StockDashboard() {
         <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🔒</div>
         <h2 style={{ fontSize: '1.8rem', color: '#F8FAFC', marginBottom: '12px' }}>智慧選股與量化分析系統</h2>
         <p style={{ color: '#94A3B8', fontSize: '1rem', lineHeight: '1.6', marginBottom: '24px' }}>
-          本功能包含完整台股歷史資料庫、機器學習波段飆股預測與智慧選股篩選。<br />
+          本功能包含完整台股歷史資料庫、大盤多空預測與智慧選股篩選。<br />
           <span style={{ color: '#F87171', fontWeight: 'bold' }}>⚠️ 本系統資料受保護，請先登入帳號後繼續瀏覽。</span>
         </p>
         <button 
