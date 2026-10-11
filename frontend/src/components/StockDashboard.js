@@ -14,9 +14,9 @@ import GlobalSovereignDashboard from './GlobalSovereignDashboard';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
 
-let dynamicApiBase = (typeof window !== 'undefined' && localStorage.getItem('remote_api_url')) 
-  || process.env.REACT_APP_STOCK_API_URL 
-  || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://compounds-intelligent-advisors-sword.trycloudflare.com');
+let dynamicApiBase = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://localhost:8000'
+  : (process.env.REACT_APP_STOCK_API_URL || '');
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://hvequgcognhytunjjsyp.supabase.co';
 const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0';
@@ -32,31 +32,64 @@ const supabaseFetch = async (path, options = {}) => {
   return window.fetch(url, { ...options, headers, cache: 'no-store' });
 };
 
-const resolveApiBase = async () => {
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+const resolveApiBase = async (forceRefresh = false) => {
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    dynamicApiBase = 'http://localhost:8000';
     return 'http://localhost:8000';
+  }
+  if (!forceRefresh && dynamicApiBase && dynamicApiBase.startsWith('http')) {
+    return dynamicApiBase;
   }
   try {
     const sRes = await supabaseFetch('/stock_settings?key=eq.remote_api_url&select=value');
     if (sRes.ok) {
       const rows = await sRes.json();
       if (rows && rows.length > 0 && rows[0].value) {
-        dynamicApiBase = rows[0].value;
-        try { localStorage.setItem('remote_api_url', rows[0].value); } catch {}
-        return rows[0].value;
+        const freshUrl = rows[0].value.replace(/\/+$/, '');
+        dynamicApiBase = freshUrl;
+        try { localStorage.setItem('remote_api_url', freshUrl); } catch {}
+        return freshUrl;
       }
     }
-  } catch {}
-  return dynamicApiBase || 'http://localhost:8000';
+  } catch (e) {
+    console.warn('查詢 Supabase remote_api_url 失敗:', e);
+  }
+  const cached = (typeof window !== 'undefined') ? localStorage.getItem('remote_api_url') : null;
+  return cached || dynamicApiBase || 'http://localhost:8000';
 };
 
 const stockFetch = async (url, opts = {}) => {
-  let base = dynamicApiBase;
-  if (!base || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && !base.startsWith('https://'))) {
-    base = await resolveApiBase();
+  let base = await resolveApiBase(false);
+  const getFinalUrl = (b) => (typeof url === 'string' && url.startsWith('/api')) ? `${b}${url}` : url;
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), opts.timeout || 12000);
+  const fetchOpts = { ...opts, signal: opts.signal || controller.signal };
+
+  try {
+    const res = await window.fetch(getFinalUrl(base), fetchOpts);
+    clearTimeout(timeoutId);
+    return res;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      console.warn('後端請求失敗，重新自雲端取得最新 Tunnel URL 重試:', err);
+      try {
+        const freshBase = await resolveApiBase(true);
+        if (freshBase) {
+          const retryController = new AbortController();
+          const retryTimeoutId = setTimeout(() => retryController.abort(), opts.timeout || 12000);
+          const retryOpts = { ...opts, signal: opts.signal || retryController.signal };
+          const retryRes = await window.fetch(getFinalUrl(freshBase), retryOpts);
+          clearTimeout(retryTimeoutId);
+          return retryRes;
+        }
+      } catch (retryErr) {
+        console.warn('重試最新 Tunnel URL 仍無法連線:', retryErr);
+      }
+    }
+    throw err;
   }
-  const finalUrl = (typeof url === 'string' && url.startsWith('/api')) ? `${base}${url}` : url;
-  return window.fetch(finalUrl, opts);
 };
 
 
@@ -607,7 +640,7 @@ const DEFAULT_DB_TABLES = [
     category: '期貨籌碼',
     categoryKey: 'chips',
     frequency: '每個交易日 15:30 盤後',
-    task_type: 'daily',
+    task_type: 'options',
     row_count: 49780,
     latest_date: '2026/10/08',
     columns_count: 8,
@@ -620,7 +653,7 @@ const DEFAULT_DB_TABLES = [
     category: '大盤總覽',
     categoryKey: 'macro',
     frequency: '每個交易日 14:00 盤後',
-    task_type: 'daily',
+    task_type: 'index',
     row_count: 5326,
     latest_date: '2026/10/08',
     columns_count: 9,
@@ -633,7 +666,7 @@ const DEFAULT_DB_TABLES = [
     category: '大盤總覽',
     categoryKey: 'macro',
     frequency: '每個交易日 14:00 盤後',
-    task_type: 'daily',
+    task_type: 'index',
     row_count: 5323,
     latest_date: '2026/10/08',
     columns_count: 9,
@@ -646,7 +679,7 @@ const DEFAULT_DB_TABLES = [
     category: '期貨籌碼',
     categoryKey: 'chips',
     frequency: '每個交易日 15:30 盤後',
-    task_type: 'daily',
+    task_type: 'options',
     row_count: 5444,
     latest_date: '2026/10/08',
     columns_count: 7,
@@ -659,7 +692,7 @@ const DEFAULT_DB_TABLES = [
     category: '總體經濟',
     categoryKey: 'macro',
     frequency: '每日美股開盤前後',
-    task_type: 'daily',
+    task_type: 'macro',
     row_count: 5676,
     latest_date: '2026/10/07',
     columns_count: 18,
@@ -672,7 +705,7 @@ const DEFAULT_DB_TABLES = [
     category: '全球資產',
     categoryKey: 'global',
     frequency: '每日美股盤後',
-    task_type: 'daily',
+    task_type: 'global_stock',
     row_count: 1239687,
     latest_date: '2026/10/09',
     columns_count: 8,
@@ -685,8 +718,34 @@ const DEFAULT_DB_TABLES = [
     category: '全球資產',
     categoryKey: 'global',
     frequency: '每日全球收盤後',
-    task_type: 'daily',
+    task_type: 'global_sovereign',
     row_count: 126258,
+    latest_date: '2026/10/09',
+    columns_count: 8,
+    status: 'active'
+  },
+  {
+    id: 'global_sovereign_metadata',
+    name: '全球主權商品清單 (global_sovereign_metadata)',
+    desc: '全球 18 大主權國家 ETF 與現金避險錨點商品規格定義',
+    category: '全球資產',
+    categoryKey: 'global',
+    frequency: '規格定義維護',
+    task_type: 'global_sovereign',
+    row_count: 18,
+    latest_date: '2026/10/09',
+    columns_count: 8,
+    status: 'active'
+  },
+  {
+    id: 'global_stock_metadata',
+    name: '全球旗艦股票清單 (global_stock_metadata)',
+    desc: '美股四大指數與全球最高流動性成分股商品池標的定義',
+    category: '全球資產',
+    categoryKey: 'global',
+    frequency: '規格定義維護',
+    task_type: 'global_stock',
+    row_count: 35,
     latest_date: '2026/10/09',
     columns_count: 8,
     status: 'active'
@@ -698,7 +757,7 @@ const DEFAULT_DB_TABLES = [
     category: '高頻當沖',
     categoryKey: 'futures',
     frequency: '交易時段連續同步',
-    task_type: 'daily',
+    task_type: 'futures',
     row_count: 139488,
     latest_date: '2026/10/08 13:44',
     columns_count: 9,
@@ -711,10 +770,88 @@ const DEFAULT_DB_TABLES = [
     category: '高頻當沖',
     categoryKey: 'futures',
     frequency: '交易時段連續同步',
-    task_type: 'daily',
+    task_type: 'futures',
     row_count: 41905,
     latest_date: '2026/10/08 13:40',
     columns_count: 9,
+    status: 'active'
+  },
+  {
+    id: 'portfolio',
+    name: '個人核心持股庫 (portfolio)',
+    desc: '個人追蹤持股清單、成本買價、Gemini AI 輿情診斷標記',
+    category: '個人投資',
+    categoryKey: 'system',
+    frequency: '即時同步',
+    task_type: 'daily',
+    row_count: 3,
+    latest_date: '2026/10/09',
+    columns_count: 12,
+    status: 'active'
+  },
+  {
+    id: 'watchlist',
+    name: '自選股監控池 (watchlist)',
+    desc: '自選股觀察清單、即時異動監控與 Telegram 警示配置',
+    category: '個人投資',
+    categoryKey: 'system',
+    frequency: '即時同步',
+    task_type: 'daily',
+    row_count: 5,
+    latest_date: '2026/10/09',
+    columns_count: 10,
+    status: 'active'
+  },
+  {
+    id: 'settings',
+    name: '系統全域設定參數 (settings)',
+    desc: '模型回測參數、Telegram 機器人設定、股本門檻等系統參數',
+    category: '系統設定',
+    categoryKey: 'system',
+    frequency: '用戶配置即時生效',
+    task_type: 'daily',
+    row_count: 8,
+    latest_date: '2026/10/09',
+    columns_count: 4,
+    status: 'active'
+  },
+  {
+    id: 'titan_live_account',
+    name: '泰坦實盤虛擬帳戶 (titan_live_account)',
+    desc: '泰坦實作模擬帳戶淨值、可用現金、累積已實現與未實現損益',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '每個交易日盤後',
+    task_type: 'daily',
+    row_count: 1,
+    latest_date: '2026/10/09',
+    columns_count: 10,
+    status: 'active'
+  },
+  {
+    id: 'titan_live_positions',
+    name: '泰坦實盤持股部位 (titan_live_positions)',
+    desc: '泰坦當前持股明細、進場成本、移動停利階梯狀態',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '每個交易日盤後',
+    task_type: 'daily',
+    row_count: 3,
+    latest_date: '2026/10/09',
+    columns_count: 12,
+    status: 'active'
+  },
+  {
+    id: 'titan_live_trades',
+    name: '泰坦實盤交易紀錄 (titan_live_trades)',
+    desc: '泰坦策略實作完整歷史買進/賣出交易紀錄與損益',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '交易觸發即時寫入',
+    task_type: 'daily',
+    row_count: 38,
+    latest_date: '2026/10/09',
+    columns_count: 11,
     status: 'active'
   }
 ];
@@ -742,6 +879,9 @@ function StockDashboard() {
   const [dbTableLoading, setDbTableLoading] = useState(false);
   const [dbPage, setDbPage] = useState(1);
   const [dbPageSize, setDbPageSize] = useState(100);
+  const [dbTotalCount, setDbTotalCount] = useState(0);
+  const [dbTotalPages, setDbTotalPages] = useState(1);
+  const [dbIsRemoteLoaded, setDbIsRemoteLoaded] = useState(true);
   const [dbJumpPageInput, setDbJumpPageInput] = useState('1');
   const [dbSortKey, setDbSortKey] = useState(null);
   const [dbSortDir, setDbSortDir] = useState('asc');
@@ -3461,19 +3601,38 @@ function StockDashboard() {
         const json = await res.json();
         if (json.tables && json.tables.length > 0) {
           setDbTablesList(prev => {
-            return prev.map(item => {
-              const remote = json.tables.find(t => t.id === item.id);
+            const remoteMap = new Map(json.tables.map(t => [t.id, t]));
+            const updated = prev.map(item => {
+              const remote = remoteMap.get(item.id);
               if (remote) {
                 return {
                   ...item,
-                  row_count: remote.row_count || item.row_count,
-                  latest_date: remote.latest_date !== '-' ? remote.latest_date : item.latest_date,
+                  row_count: remote.row_count !== undefined ? remote.row_count : item.row_count,
+                  latest_date: (remote.latest_date && remote.latest_date !== '-') ? remote.latest_date : item.latest_date,
                   columns_count: remote.columns_count || item.columns_count,
                   status: remote.status || item.status
                 };
               }
               return item;
             });
+            json.tables.forEach(rt => {
+              if (!prev.some(p => p.id === rt.id)) {
+                updated.push({
+                  id: rt.id,
+                  name: rt.name || rt.id,
+                  desc: rt.desc || '',
+                  category: rt.category || '其他',
+                  categoryKey: 'system',
+                  frequency: rt.frequency || '定期更新',
+                  task_type: rt.task_type || 'daily',
+                  row_count: rt.row_count || 0,
+                  latest_date: rt.latest_date || '-',
+                  columns_count: rt.columns_count || 0,
+                  status: rt.status || 'active'
+                });
+              }
+            });
+            return updated;
           });
         }
       }
@@ -3492,38 +3651,88 @@ function StockDashboard() {
     } catch (e) {}
   };
 
-  const loadDbTableData = async (tableId) => {
+  const loadDbTableData = async (
+    tableId = activeDbTable,
+    page = 1,
+    pageSize = dbPageSize,
+    search = dbSearchQuery,
+    sortKey = dbSortKey,
+    sortDir = dbSortDir
+  ) => {
+    if (!tableId) return;
     setDbTableLoading(true);
-    setDbTableRows([]);
-    setDbTableCols([]);
+    setDbActionBanner('');
     try {
       let loaded = false;
-      // 1. 優先嘗試從本地 FastAPI 讀取 (支援至多 1000 筆即時展示)
+      // 1. 優先嘗試從本地/遠端 FastAPI 讀取 (支援伺服器端分頁、精準搜尋與即時排序)
       try {
-        const res = await stockFetch(`/api/database/${tableId}?limit=1000`);
+        const params = new URLSearchParams({
+          page: String(page || 1),
+          page_size: String(pageSize || 100)
+        });
+        if (search && search.trim()) params.set('search', search.trim());
+        if (sortKey) {
+          params.set('sort_by', sortKey);
+          params.set('sort_dir', sortDir || 'asc');
+        }
+        const res = await stockFetch(`/api/database/${tableId}?${params.toString()}`);
         if (res.ok) {
           const json = await res.json();
-          if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+          if (json.data && Array.isArray(json.data)) {
             setDbTableRows(json.data);
-            setDbTableCols(json.columns || Object.keys(json.data[0]));
-            setData(json.data);
+            setDbTableCols(json.columns && json.columns.length > 0 ? json.columns : Object.keys(json.data[0] || {}));
+            const tot = json.total_count !== undefined ? json.total_count : json.data.length;
+            setDbTotalCount(tot);
+            const totPages = json.total_pages !== undefined ? json.total_pages : Math.max(1, Math.ceil(tot / (pageSize || 100)));
+            setDbTotalPages(totPages);
+            setDbPage(json.page || page || 1);
+            setDbJumpPageInput(String(json.page || page || 1));
+            setDbIsRemoteLoaded(true);
             loaded = true;
           }
         }
       } catch (err) {
-        console.warn('本地 API 讀取異常，切換至雲端快照備援:', err);
+        console.warn('FastAPI 資料庫讀取異常，切換至雲端快照備援:', err);
       }
 
-      // 2. 備援：若本地不可用，從 Supabase 快照讀取
+      // 2. 備援：若本地/遠端 API 不可用，從 Supabase 雲端快照讀取
       if (!loaded) {
-        const supRes = await supabaseFetch(`/stock_database_preview?table_name=eq.${tableId}&select=columns,data`);
+        const supRes = await supabaseFetch(`/stock_database_preview?table_name=eq.${tableId}&select=columns,data,row_count`);
         if (supRes.ok) {
           const rows = await supRes.json();
           if (rows && rows.length > 0 && rows[0].data) {
-            setDbTableRows(rows[0].data);
-            setDbTableCols(rows[0].columns || Object.keys(rows[0].data[0]));
-            setData(rows[0].data);
+            const rawData = rows[0].data;
+            const cols = rows[0].columns || (rawData[0] ? Object.keys(rawData[0]) : []);
+            setDbTableCols(cols);
+            const reportedTotal = rows[0].row_count || rawData.length;
+            setDbTotalCount(reportedTotal);
+            setDbIsRemoteLoaded(false);
+
+            // 在快照樣本 (最多 100 筆) 上進行客戶端搜尋與排序
+            let displayRows = rawData;
+            if (search && search.trim()) {
+              const q = search.trim().toLowerCase();
+              displayRows = displayRows.filter(r =>
+                Object.values(r).some(v => v !== null && v !== undefined && String(v).toLowerCase().includes(q))
+              );
+            }
+            if (sortKey) {
+              displayRows = [...displayRows].sort((a, b) => {
+                let va = a[sortKey], vb = b[sortKey];
+                if (va === null || va === undefined) return 1;
+                if (vb === null || vb === undefined) return -1;
+                const na = Number(va), nb = Number(vb);
+                if (!isNaN(na) && !isNaN(nb)) return sortDir === 'asc' ? na - nb : nb - na;
+                return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+              });
+            }
+            setDbTableRows(displayRows);
+            const totPages = Math.max(1, Math.ceil(reportedTotal / (pageSize || 100)));
+            setDbTotalPages(totPages);
+            setDbPage(page || 1);
+            setDbJumpPageInput(String(page || 1));
             loaded = true;
+            setDbActionBanner(`ℹ️ 已連線至雲端快照備援（顯示最新 ${displayRows.length} 筆樣本，總資料量 ${Number(reportedTotal).toLocaleString()} 筆）。`);
           }
         }
       }
@@ -3545,7 +3754,7 @@ function StockDashboard() {
     setDbSearchQuery('');
     setDbSortKey(null);
     setDbSortDir('asc');
-    await loadDbTableData(tableId);
+    await loadDbTableData(tableId, 1, dbPageSize, '', null, 'asc');
   };
 
   const handleTriggerDbScraper = async (taskType, tableName, tableId) => {
@@ -3559,7 +3768,7 @@ function StockDashboard() {
       // 若當前停留在該資料表畫面，2 秒後自動重新整理資料預覽
       if (activeDbTable && (activeDbTable === tableId || !tableId)) {
         setTimeout(() => {
-          loadDbTableData(activeDbTable);
+          loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
           fetchDbStatus();
         }, 2000);
       } else {
@@ -3580,43 +3789,15 @@ function StockDashboard() {
     selectDbTable(tableName);
   };
 
-  const filteredDbRows = useMemo(() => {
-    if (!dbTableRows || dbTableRows.length === 0) return [];
-    if (!dbSearchQuery.trim()) return dbTableRows;
-    const q = dbSearchQuery.trim().toLowerCase();
-    return dbTableRows.filter(row => {
-      return Object.values(row).some(val => 
-        val !== null && val !== undefined && String(val).toLowerCase().includes(q)
-      );
-    });
-  }, [dbTableRows, dbSearchQuery]);
-
-  const sortedDbRows = useMemo(() => {
-    if (!dbSortKey) return filteredDbRows;
-    return [...filteredDbRows].sort((a, b) => {
-      let va = a[dbSortKey];
-      let vb = b[dbSortKey];
-      if (va === null || va === undefined) return 1;
-      if (vb === null || vb === undefined) return -1;
-      const na = Number(va);
-      const nb = Number(vb);
-      if (!isNaN(na) && !isNaN(nb)) {
-        return dbSortDir === 'asc' ? na - nb : nb - na;
-      }
-      return dbSortDir === 'asc' 
-        ? String(va).localeCompare(String(vb))
-        : String(vb).localeCompare(String(va));
-    });
-  }, [filteredDbRows, dbSortKey, dbSortDir]);
-
-  const totalDbPages = useMemo(() => {
-    return Math.max(1, Math.ceil(sortedDbRows.length / dbPageSize));
-  }, [sortedDbRows.length, dbPageSize]);
-
   const currentDbPageRows = useMemo(() => {
+    if (!dbTableRows || dbTableRows.length === 0) return [];
+    if (dbIsRemoteLoaded) {
+      return dbTableRows;
+    }
+    if (dbTableRows.length <= dbPageSize) return dbTableRows;
     const start = (dbPage - 1) * dbPageSize;
-    return sortedDbRows.slice(start, start + dbPageSize);
-  }, [sortedDbRows, dbPage, dbPageSize]);
+    return dbTableRows.slice(start, start + dbPageSize);
+  }, [dbTableRows, dbIsRemoteLoaded, dbPage, dbPageSize]);
 
   const copyAiPrompt = (stockId) => {
     const text = aiPrompt.replace('{stock_id}', stockId);
@@ -7339,6 +7520,8 @@ function StockDashboard() {
                       { key: 'macro', label: '大盤總經' },
                       { key: 'global', label: '全球資產' },
                       { key: 'futures', label: '高頻當沖' },
+                      { key: 'titan', label: '泰坦實盤' },
+                      { key: 'system', label: '系統自選' },
                     ].map(cat => (
                       <button
                         key={cat.key}
@@ -7380,8 +7563,20 @@ function StockDashboard() {
                               fontSize: '0.72rem',
                               padding: '2px 8px',
                               borderRadius: '8px',
-                              background: table.categoryKey === 'core' ? 'rgba(59, 130, 246, 0.2)' : table.categoryKey === 'fundamental' ? 'rgba(16, 185, 129, 0.2)' : table.categoryKey === 'chips' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)',
-                              color: table.categoryKey === 'core' ? '#93C5FD' : table.categoryKey === 'fundamental' ? '#6EE7B7' : table.categoryKey === 'chips' ? '#FDE68A' : '#C4B5FD',
+                              background: table.categoryKey === 'core' ? 'rgba(59, 130, 246, 0.2)' :
+                                table.categoryKey === 'fundamental' ? 'rgba(16, 185, 129, 0.2)' :
+                                table.categoryKey === 'chips' ? 'rgba(245, 158, 11, 0.2)' :
+                                table.categoryKey === 'macro' ? 'rgba(236, 72, 153, 0.2)' :
+                                table.categoryKey === 'global' ? 'rgba(14, 165, 233, 0.2)' :
+                                table.categoryKey === 'futures' ? 'rgba(239, 68, 68, 0.2)' :
+                                table.categoryKey === 'titan' ? 'rgba(234, 179, 8, 0.2)' : 'rgba(139, 92, 246, 0.2)',
+                              color: table.categoryKey === 'core' ? '#93C5FD' :
+                                table.categoryKey === 'fundamental' ? '#6EE7B7' :
+                                table.categoryKey === 'chips' ? '#FDE68A' :
+                                table.categoryKey === 'macro' ? '#F472B6' :
+                                table.categoryKey === 'global' ? '#7DD3FC' :
+                                table.categoryKey === 'futures' ? '#FCA5A5' :
+                                table.categoryKey === 'titan' ? '#FDE047' : '#C4B5FD',
                               border: '1px solid rgba(255, 255, 255, 0.1)',
                               fontWeight: 'bold'
                             }}>
@@ -7502,7 +7697,7 @@ function StockDashboard() {
                     <button
                       className="btn btn-secondary"
                       style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
-                      onClick={() => loadDbTableData(activeDbTable)}
+                      onClick={() => loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir)}
                       title="重新載入資料表"
                     >
                       🔄 重新載入
@@ -7524,21 +7719,32 @@ function StockDashboard() {
                     <input
                       type="text"
                       className="db-search-input"
-                      placeholder="🔍 搜尋股票代號、名稱、日期或任意欄位..."
+                      placeholder="🔍 搜尋代號、名稱、日期或任意欄位..."
                       value={dbSearchQuery}
-                      onChange={e => {
-                        setDbSearchQuery(e.target.value);
-                        setDbPage(1);
-                        setDbJumpPageInput('1');
+                      onChange={e => setDbSearchQuery(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          loadDbTableData(activeDbTable, 1, dbPageSize, e.target.value, dbSortKey, dbSortDir);
+                        }
                       }}
                     />
+                    <button
+                      className="btn btn-secondary"
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}
+                      onClick={() => loadDbTableData(activeDbTable, 1, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir)}
+                    >
+                      搜尋
+                    </button>
                     {dbSearchQuery && (
                       <button
                         className="btn btn-secondary"
                         style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
-                        onClick={() => { setDbSearchQuery(''); setDbPage(1); }}
+                        onClick={() => {
+                          setDbSearchQuery('');
+                          loadDbTableData(activeDbTable, 1, dbPageSize, '', dbSortKey, dbSortDir);
+                        }}
                       >
-                        清除搜尋
+                        清除
                       </button>
                     )}
                   </div>
@@ -7552,8 +7758,7 @@ function StockDashboard() {
                       onChange={e => {
                         const newSize = Number(e.target.value);
                         setDbPageSize(newSize);
-                        setDbPage(1);
-                        setDbJumpPageInput('1');
+                        loadDbTableData(activeDbTable, 1, newSize, dbSearchQuery, dbSortKey, dbSortDir);
                       }}
                     >
                       <option value={50}>每頁 50 筆</option>
@@ -7566,19 +7771,20 @@ function StockDashboard() {
                 {/* 分頁導航控制器 (滿足「一頁顯示一百筆之類的」) */}
                 <div className="db-pagination-bar">
                   <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-                    當前第 <strong style={{ color: '#FCD34D' }}>{dbPage}</strong> / <strong>{totalDbPages}</strong> 頁
+                    當前第 <strong style={{ color: '#FCD34D' }}>{dbPage}</strong> / <strong>{dbTotalPages}</strong> 頁
                     <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>|</span>
-                    顯示第 <strong>{(dbPage - 1) * dbPageSize + 1}</strong> ～ <strong>{Math.min(dbPage * dbPageSize, sortedDbRows.length)}</strong> 筆
+                    顯示第 <strong>{dbTotalCount > 0 ? (dbPage - 1) * dbPageSize + 1 : 0}</strong> ～ <strong>{Math.min(dbPage * dbPageSize, dbTotalCount)}</strong> 筆
                     <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>|</span>
-                    共 <strong style={{ color: '#34D399' }}>{sortedDbRows.length.toLocaleString()}</strong> 筆資料
-                    {dbSearchQuery && <span style={{ color: '#60A5FA', marginLeft: '6px' }}>(已套用篩選)</span>}
+                    共 <strong style={{ color: '#34D399' }}>{dbTotalCount.toLocaleString()}</strong> 筆資料
+                    {dbSearchQuery && <span style={{ color: '#60A5FA', marginLeft: '6px' }}>(已套用搜尋篩選)</span>}
+                    {!dbIsRemoteLoaded && <span style={{ color: '#F59E0B', marginLeft: '6px' }}>(雲端快照備援模式)</span>}
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <button
                       className="db-page-btn"
-                      onClick={() => { setDbPage(1); setDbJumpPageInput('1'); }}
-                      disabled={dbPage <= 1}
+                      onClick={() => loadDbTableData(activeDbTable, 1, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir)}
+                      disabled={dbPage <= 1 || dbTableLoading}
                       title="第一頁"
                     >
                       ⏮ 首頁
@@ -7587,10 +7793,9 @@ function StockDashboard() {
                       className="db-page-btn"
                       onClick={() => {
                         const p = Math.max(1, dbPage - 1);
-                        setDbPage(p);
-                        setDbJumpPageInput(String(p));
+                        loadDbTableData(activeDbTable, p, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
                       }}
-                      disabled={dbPage <= 1}
+                      disabled={dbPage <= 1 || dbTableLoading}
                       title="上一頁"
                     >
                       ◀ 上一頁
@@ -7600,14 +7805,13 @@ function StockDashboard() {
                       <input
                         type="number"
                         min={1}
-                        max={totalDbPages}
+                        max={dbTotalPages}
                         value={dbJumpPageInput}
                         onChange={e => setDbJumpPageInput(e.target.value)}
                         onKeyDown={e => {
                           if (e.key === 'Enter') {
-                            const p = Math.max(1, Math.min(totalDbPages, Number(dbJumpPageInput) || 1));
-                            setDbPage(p);
-                            setDbJumpPageInput(String(p));
+                            const p = Math.max(1, Math.min(dbTotalPages, Number(dbJumpPageInput) || 1));
+                            loadDbTableData(activeDbTable, p, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
                           }
                         }}
                         style={{
@@ -7625,10 +7829,10 @@ function StockDashboard() {
                         className="db-page-btn"
                         style={{ padding: '0.35rem 0.55rem' }}
                         onClick={() => {
-                          const p = Math.max(1, Math.min(totalDbPages, Number(dbJumpPageInput) || 1));
-                          setDbPage(p);
-                          setDbJumpPageInput(String(p));
+                          const p = Math.max(1, Math.min(dbTotalPages, Number(dbJumpPageInput) || 1));
+                          loadDbTableData(activeDbTable, p, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
                         }}
+                        disabled={dbTableLoading}
                       >
                         跳頁
                       </button>
@@ -7637,22 +7841,18 @@ function StockDashboard() {
                     <button
                       className="db-page-btn"
                       onClick={() => {
-                        const p = Math.min(totalDbPages, dbPage + 1);
-                        setDbPage(p);
-                        setDbJumpPageInput(String(p));
+                        const p = Math.min(dbTotalPages, dbPage + 1);
+                        loadDbTableData(activeDbTable, p, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
                       }}
-                      disabled={dbPage >= totalDbPages}
+                      disabled={dbPage >= dbTotalPages || dbTableLoading}
                       title="下一頁"
                     >
                       下一頁 ▶
                     </button>
                     <button
                       className="db-page-btn"
-                      onClick={() => {
-                        setDbPage(totalDbPages);
-                        setDbJumpPageInput(String(totalDbPages));
-                      }}
-                      disabled={dbPage >= totalDbPages}
+                      onClick={() => loadDbTableData(activeDbTable, dbTotalPages, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir)}
+                      disabled={dbPage >= dbTotalPages || dbTableLoading}
                       title="最後一頁"
                     >
                       末頁 ⏭
@@ -7680,12 +7880,10 @@ function StockDashboard() {
                               <th
                                 key={col}
                                 onClick={() => {
-                                  if (dbSortKey === col) {
-                                    setDbSortDir(dbSortDir === 'asc' ? 'desc' : 'asc');
-                                  } else {
-                                    setDbSortKey(col);
-                                    setDbSortDir('asc');
-                                  }
+                                  const nextDir = (dbSortKey === col && dbSortDir === 'asc') ? 'desc' : 'asc';
+                                  setDbSortKey(col);
+                                  setDbSortDir(nextDir);
+                                  loadDbTableData(activeDbTable, 1, dbPageSize, dbSearchQuery, col, nextDir);
                                 }}
                                 className="sortable-th"
                                 style={{ whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}
@@ -7750,7 +7948,10 @@ function StockDashboard() {
                       <button
                         className="btn btn-secondary"
                         style={{ marginTop: '1rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                        onClick={() => { setDbSearchQuery(''); setDbPage(1); }}
+                        onClick={() => {
+                          setDbSearchQuery('');
+                          loadDbTableData(activeDbTable, 1, dbPageSize, '', dbSortKey, dbSortDir);
+                        }}
                       >
                         清除搜尋篩選條件
                       </button>
