@@ -103,7 +103,6 @@ const DEFAULT_TX_HISTORY = [
 export default function GlobalSovereignDashboard() {
   const [data, setData] = useState(defaultData);
   const [loading, setLoading] = useState(false);
-  const [activeMainTab, setActiveMainTab] = useState('trading'); // 'trading', 'history_audit', 'doe_audit'
 
   // 美元匯率
   const [usdFx, setUsdFx] = useState(() => {
@@ -872,32 +871,6 @@ export default function GlobalSovereignDashboard() {
         </div>
       </div>
 
-      {/* 簡約頁籤切換：主操盤 / 20年歷史數據 / DOE報告 */}
-      <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem' }}>
-        <button
-          className={`btn ${activeMainTab === 'trading' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveMainTab('trading')}
-          style={{ padding: '0.4rem 0.9rem', fontSize: '0.84rem' }}
-        >
-          💼 實戰操盤主介面 (持倉 / 月底調倉 / 進出紀錄)
-        </button>
-        <button
-          className={`btn ${activeMainTab === 'history_audit' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveMainTab('history_audit')}
-          style={{ padding: '0.4rem 0.9rem', fontSize: '0.84rem' }}
-        >
-          📅 20 年逐年回測績效 ({yearly.length} 年)
-        </button>
-        <button
-          className={`btn ${activeMainTab === 'doe_audit' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveMainTab('doe_audit')}
-          style={{ padding: '0.4rem 0.9rem', fontSize: '0.84rem' }}
-        >
-          🔬 1,134 組全覆蓋 DOE 報告
-        </button>
-      </div>
-
-      {activeMainTab === 'trading' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
           {/* 1. 目前持倉 (Current Live Holdings) */}
@@ -1354,68 +1327,7 @@ export default function GlobalSovereignDashboard() {
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* 20年歷史回測績效 */}
-      {activeMainTab === 'history_audit' && (
-        <div className="glass-card" style={{ padding: '1.2rem', overflowX: 'auto' }}>
-          <div style={{ marginBottom: '0.8rem', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-            🛡️ <strong>無上帝視角 22 年完整逐年回測</strong>：每月最後一日收盤確認動能 ➔ 次日開盤執行 ➔ 內扣稅費 ➔ 累積報酬 <strong>+294,215% (翻 2,942 倍)</strong>！
-          </div>
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'center', width: '65px' }}>年份</th>
-                <th style={{ textAlign: 'right', color: '#10B981', fontWeight: 'bold' }}>Calmar 冠軍 (Top 3 溫和階梯 40/30/30)</th>
-                <th style={{ textAlign: 'right', color: '#9CA3AF' }}>標普 500 (SPY 基準)</th>
-                <th style={{ textAlign: 'right', color: '#60A5FA' }}>超額報酬 (Alpha)</th>
-                <th style={{ textAlign: 'right' }}>年底淨值</th>
-              </tr>
-            </thead>
-            <tbody>
-              {yearly.map((y) => {
-                const alpha = y.scheme_a_ret - y.spy_ret;
-                return (
-                  <tr key={y.year}>
-                    <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{y.year}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: y.scheme_a_ret >= 0 ? '#10B981' : '#EF4444', fontFamily: 'monospace' }}>
-                      {y.scheme_a_ret >= 0 ? `+${y.scheme_a_ret}%` : `${y.scheme_a_ret}%`}
-                    </td>
-                    <td style={{ textAlign: 'right', color: y.spy_ret >= 0 ? 'var(--text-muted)' : '#EF4444', fontFamily: 'monospace' }}>
-                      {y.spy_ret >= 0 ? `+${y.spy_ret}%` : `${y.spy_ret}%`}
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: alpha >= 0 ? '#60A5FA' : '#F59E0B', fontFamily: 'monospace' }}>
-                      {alpha >= 0 ? `+${alpha.toFixed(2)}%` : `${alpha.toFixed(2)}%`}
-                    </td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                      ${y.capital?.toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* 1,134 組 DOE 最佳化報告 */}
-      {activeMainTab === 'doe_audit' && (
-        <div className="glass-card" style={{ padding: '1.4rem', borderTop: '4px solid #8B5CF6' }}>
-          <h4 style={{ margin: '0 0 0.8rem 0', color: '#C4B5FD', fontSize: '1.15rem' }}>
-            🔬 1,134 組全覆蓋 DOE 出場策略與分配比例最佳化總結
-          </h4>
-          <p style={{ color: '#CBD5E1', fontSize: '0.84rem', lineHeight: '1.5' }}>
-            經全歷史 5,720 交易日 1,134 組參數網格回測，您所採用的「<strong>最高 Calmar 冠軍（Top 3 溫和階梯 40/30/30 - 慢慢跟他玩）</strong>」以 <strong>Calmar 0.993、CAGR 42.38%、MDD -42.68%</strong> 奪得全場總冠軍。
-          </p>
-          <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '1rem', borderRadius: '6px', fontSize: '0.82rem', color: '#E2E8F0', marginTop: '1rem', lineHeight: '1.6' }}>
-            📌 <strong>核心風控要領</strong>：<br/>
-            1. 個股不設過敏短均線停損，讓真正的主升段主力狂飆；<br/>
-            2. 風險由系統宏觀安全氣囊統籌：當標普 500 (SPY) 跌破 200MA 年線時始判定空頭，全面清倉避險；<br/>
-            3. 平時部位由每月底動態更動建議進行權重平衡，確保資金效益極大化！
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* 資金存入 / 調整彈窗 Modal */}
       {cashModalOpen && (

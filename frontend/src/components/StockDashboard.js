@@ -3338,7 +3338,7 @@ function StockDashboard() {
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📊 股市策略總覽' },
-            { id: 'titan_live', label: '👑 泰坦實盤監控' },
+            { id: 'titan_live', label: '👑 台股泰坦實作' },
             { id: 'global_sovereign', label: '🌍 全球主權泰坦' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '📊 資料庫檢視' },
@@ -11095,7 +11095,165 @@ function StockDashboard() {
                         );
                       })()}
 
+                      {/* 5.6 1,134 組全覆蓋 DOE 出場策略與分配比例深度實驗報告 (移至股市策略總覽 全球泰坦) */}
+                      {activeModelKey === 'global_liquid_titan_a' && (
+                        <div style={{
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(139, 92, 246, 0.4)',
+                          padding: '1.4rem',
+                          marginBottom: '1.5rem',
+                          boxShadow: '0 4px 20px rgba(139, 92, 246, 0.15)',
+                          borderTop: '4px solid #8B5CF6'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+                            <div>
+                              <h3 style={{ margin: 0, color: '#C4B5FD', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                🔬 1,134 組全因子 DOE 深度實驗：出場策略與分配比例最佳化報告
+                              </h3>
+                              <p style={{ margin: '0.4rem 0 0 0', color: '#CBD5E1', fontSize: '0.86rem', lineHeight: '1.5' }}>
+                                2004～2026 全歷史（5,720 交易日）全量實證：覆蓋 6 種均線/硬停損 × 7 種移動停利 × 3 種遞補模式 × 9 種持股檔數與配比風格。
+                              </p>
+                            </div>
+                            <span style={{ fontSize: '0.8rem', background: 'rgba(139, 92, 246, 0.2)', color: '#DDD6FE', padding: '0.3rem 0.7rem', borderRadius: '4px', border: '1px solid rgba(139, 92, 246, 0.4)' }}>
+                              全因子實驗總量：1,134 組完整回測
+                            </span>
+                          </div>
 
+                          {/* 4 大核心主效應 ANOVA 矩陣看板 */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.4rem' }}>
+                            {/* 1. 均線防守效應 */}
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#6EE7B7', marginBottom: '0.5rem' }}>
+                                🛡️ 因子 A：均線防守機制 (Exit MA)
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.5rem', lineHeight: '1.45' }}>
+                                <strong>40MA:</strong> 最抗跌但過敏 (MDD -43.3%, CAGR 25.3%, 1,085次交易)<br/>
+                                <strong>60MA 季線:</strong> 均衡防禦中樞 (MDD -45.9%, CAGR 28.6%)<br/>
+                                <strong>80MA:</strong> 波段與避險最佳平衡 (Calmar 0.66, CAGR 30.4%)<br/>
+                                <strong>None (無均線):</strong> 總收益最高 (CAGR 34.5%)，但月中無防守
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 'bold' }}>
+                                💡 結論：追求總資產最大複利選 None；追求低回撤防守選 60MA/80MA。
+                              </div>
+                            </div>
+
+                            {/* 2. 守住獲利移動停利效應 */}
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.5rem' }}>
+                                🎯 因子 B：守住獲利移動停利 (Trailing Stop)
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.5rem', lineHeight: '1.45' }}>
+                                <strong>+10%回檔6%:</strong> 勝率衝上 <span style={{ color: '#FBBF24', fontWeight: 'bold' }}>53.2% (最高61.5%)</span>，絕不做白工<br/>
+                                <strong>+15%回檔10%:</strong> Calmar 0.65，CAGR 30.4%，鎖利波段兼備<br/>
+                                <strong>+20%回檔10%:</strong> 寬鬆型移動停利，CAGR 30.4%，MDD -47.0%<br/>
+                                <strong>None:</strong> CAGR 34.1%，長線大波段利潤狂奔
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#FBBF24', fontWeight: 'bold' }}>
+                                💡 結論：厭惡回吐選「+10%回檔6%」；極致複利選「None」。
+                              </div>
+                            </div>
+
+                            {/* 3. 遞補時點效應 */}
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.5rem' }}>
+                                ⚡ 因子 C：資金遞補時點 (Refill Mode)
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.5rem', lineHeight: '1.45' }}>
+                                <strong>次日立即遞補 (Next-day):</strong> CAGR <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>32.90% 全場第一</span> (資金零閒置)<br/>
+                                <strong>每週動態遞補 (Weekly):</strong> Calmar 0.67，MDD -46.5%，實戰操作最舒服<br/>
+                                <strong>月底才換股 (Monthly):</strong> CAGR 跌至 26.63% (現金閒置 2~4 週)
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#60A5FA', fontWeight: 'bold' }}>
+                                💡 結論：出清後不宜長期空手乾等，宜搭配每週或次日動態調倉。
+                              </div>
+                            </div>
+
+                            {/* 4. 分配比例與檔數效應 */}
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#C084FC', marginBottom: '0.5rem' }}>
+                                ⚖️ 因子 D：檔數與分配比例 (Sizing Scheme)
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.5rem', lineHeight: '1.45' }}>
+                                <strong>Top 5 檔:</strong> MDD 僅 <span style={{ color: '#34D399', fontWeight: 'bold' }}>-41.35% (全場最穩)</span>，Calmar 0.70<br/>
+                                <strong>Top 4 檔:</strong> MDD -47.56%，CAGR 29.82%，階梯配比經典黃金平衡<br/>
+                                <strong>Top 3 溫和階梯 (40/30/30):</strong> CAGR 衝上 42.38%，<span style={{ color: '#FBBF24', fontWeight: 'bold' }}>Calmar 0.993 全場最高冠軍</span><br/>
+                                <strong>陡峭重壓 (如 50/30/20):</strong> MDD 擴大至 -52.9%，重壓風險過高
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#C084FC', fontWeight: 'bold' }}>
+                                💡 結論：Top 3 溫和階梯 (40/30/30) 風險調整後幾何複利最高！
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 4 大維度實戰冠軍配置推薦看板 */}
+                          <div style={{ overflowX: 'auto', marginBottom: '1rem' }}>
+                            <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
+                              <thead>
+                                <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                                  <th style={{ textAlign: 'left' }}>冠軍類別</th>
+                                  <th style={{ textAlign: 'left' }}>最佳參數組合 (均線 / 停利 / 遞補 / 配比)</th>
+                                  <th style={{ textAlign: 'right' }}>22年累積總報酬</th>
+                                  <th style={{ textAlign: 'right' }}>年化 (CAGR)</th>
+                                  <th style={{ textAlign: 'right' }}>最大回撤 (MDD)</th>
+                                  <th style={{ textAlign: 'right' }}>卡瑪 Calmar</th>
+                                  <th style={{ textAlign: 'right' }}>勝率 Win%</th>
+                                  <th style={{ textAlign: 'right' }}>總交易數</th>
+                                  <th style={{ textAlign: 'left' }}>實戰推薦適用場景</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr style={{ background: 'rgba(16, 185, 129, 0.1)', borderLeft: '3px solid #10B981' }}>
+                                  <td style={{ fontWeight: 'bold', color: '#34D399' }}>🥇 最高 Calmar 冠軍 (當前實裝)</td>
+                                  <td>
+                                    <strong style={{ color: '#F1F5F9' }}>無均線 ＋ 無停利 ＋ 每週遞補 ＋ Top 3 階梯 (40/30/30)</strong>
+                                  </td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+294,215%</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>+42.38%</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FBBF24', fontFamily: 'monospace' }}>-42.68%</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>0.993</td>
+                                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>52.1%</td>
+                                  <td style={{ textAlign: 'right', color: '#94A3B8' }}>311 筆</td>
+                                  <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>風險調整後效率最高，極限複利狂飆首選</td>
+                                </tr>
+                                <tr style={{ background: 'rgba(59, 130, 246, 0.08)', borderLeft: '3px solid #3B82F6' }}>
+                                  <td style={{ fontWeight: 'bold', color: '#60A5FA' }}>🛡️ 最低回撤防守冠軍</td>
+                                  <td>40MA 停損 ＋ +15%回檔10% ＋ 月底換倉 ＋ Top 5 等權 (20%x5)</td>
+                                  <td style={{ textAlign: 'right', color: '#34D399', fontFamily: 'monospace' }}>+3,391%</td>
+                                  <td style={{ textAlign: 'right', color: '#60A5FA', fontFamily: 'monospace' }}>+17.33%</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>-29.50%</td>
+                                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>0.587</td>
+                                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>43.8%</td>
+                                  <td style={{ textAlign: 'right', color: '#94A3B8' }}>751 筆</td>
+                                  <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>回撤壓破 30% 大關！極致厭惡風險型專用</td>
+                                </tr>
+                                <tr style={{ background: 'rgba(245, 158, 11, 0.08)', borderLeft: '3px solid #F59E0B' }}>
+                                  <td style={{ fontWeight: 'bold', color: '#FBBF24' }}>🏆 最高勝率冠軍</td>
+                                  <td>無均線 ＋ +10%回檔6%停利 ＋ 月底換倉 ＋ Top 3 等權 (33%x3)</td>
+                                  <td style={{ textAlign: 'right', color: '#34D399', fontFamily: 'monospace' }}>+35,630%</td>
+                                  <td style={{ textAlign: 'right', color: '#60A5FA', fontFamily: 'monospace' }}>+29.55%</td>
+                                  <td style={{ textAlign: 'right', color: '#F87171', fontFamily: 'monospace' }}>-47.85%</td>
+                                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>0.618</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FBBF24', fontFamily: 'monospace' }}>61.48%</td>
+                                  <td style={{ textAlign: 'right', color: '#94A3B8' }}>392 筆</td>
+                                  <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>勝率衝破 61%！快速鎖利入袋，絕不抱上抱下</td>
+                                </tr>
+                                <tr style={{ background: 'rgba(168, 85, 247, 0.08)', borderLeft: '3px solid #A855F7' }}>
+                                  <td style={{ fontWeight: 'bold', color: '#C084FC' }}>⚖️ 實戰旗艦平衡推薦</td>
+                                  <td>60MA 季線 ＋ +10%回檔6% ＋ 次日立即遞補 ＋ Top 5 溫和階梯</td>
+                                  <td style={{ textAlign: 'right', color: '#34D399', fontFamily: 'monospace' }}>+46,120%</td>
+                                  <td style={{ textAlign: 'right', color: '#60A5FA', fontFamily: 'monospace' }}>+30.76%</td>
+                                  <td style={{ textAlign: 'right', color: '#34D399', fontFamily: 'monospace' }}>-38.19%</td>
+                                  <td style={{ textAlign: 'right', color: '#A855F7', fontFamily: 'monospace' }}>0.805</td>
+                                  <td style={{ textAlign: 'right', color: '#FBBF24', fontFamily: 'monospace' }}>50.66%</td>
+                                  <td style={{ textAlign: 'right', color: '#94A3B8' }}>1,064 筆</td>
+                                  <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>全面防守 (破季線出) + 鎖利 + 零資金閒置，心安首選</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
 
                       {/* 6. 模擬交易日誌明細 (Recent Closed Trades Log) */}
                       {(() => {
