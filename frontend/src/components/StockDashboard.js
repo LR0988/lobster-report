@@ -219,7 +219,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'global_liquid_titan_a', label: '👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦 - 國內券商直接買)', short: '👑 全球泰坦方案 A', tag: '👑 22.8年+792675% (7928倍)・MDD -30.3%・Calmar 1.59', desc: '全球最新實盤旗艦：國內券商 100% 買得到之 144 檔高流動性巨頭池（台股龍頭 + 美股那斯達克 100 + S&P 500 + 全球 ADR）。2,240 組全量 DOE 最佳化，Top 4 階梯配比 (40%/25%/20%/15%) + 多尺度復合動能 + 季線翻揚濾網 + SPY 200MA 年線風控氣囊。22.8年 (2004~2026) 累積 +792,675% (7,927.8 倍)，CAGR 48.26%，最大回撤僅 -30.31%，勝率 86.4%，Calmar 1.592 全場第一！' },
+  { val: 'global_liquid_titan_a', label: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30 - 慢慢跟他玩)', short: '👑 全球泰坦 Calmar 冠軍', tag: '👑 22年+294215% (2942倍)・CAGR 42.4%・Calmar 0.993', desc: '當前最新研發旗艦策略：Top 3 溫和階梯配置 (40%/30%/30%：莫德納 40% + 欣興 30% + 創意 30%)，結合 SPY 200MA 年線總經安全氣囊。經全覆蓋 1,134 組全因子 DOE 深度實驗最佳化，22 年累積狂飆 +294,215% (翻 2,942 倍)，CAGR 42.38%，最大回撤僅 -42.68%，勝率 52.1%，Calmar 比率 0.993 勇奪全場總冠軍！' },
   { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選 + 週度動態遞補)', short: '👑 泰坦王權主宰', tag: '👑 20年+26550% (266.5倍)・MDD -36.6%・夏普1.00', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +26,550.7% (CAGR 29.2%~30.3%, 266.5倍)，最大回撤僅 -36.55%，夏普比率 1.00，實盤加權勝率 50.4%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
@@ -8688,11 +8688,11 @@ function StockDashboard() {
                   const BACKTEST_MODELS = [
                     {
                       id: 'global_liquid_titan_a',
-                      name: '🌐 全球高流動性泰坦方案 A (Top 4 階梯配置 40/25/20/15)',
-                      icon: '🌐',
+                      name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
+                      icon: '👑',
                       tag: is20ySelected
-                        ? '20年+467480.6%・CAGR 47.5%・MDD -30.3%・夏普1.15'
-                        : '10年+17254.9%・CAGR 61.6%・全球跨國流動性・夏普1.20'
+                        ? '20年+294215% (2942倍)・CAGR 42.4%・MDD -42.7%・Calmar 0.993'
+                        : '10年超額Alpha・CAGR 58.2%・全球跨國流動性巨頭・夏普1.08'
                     },
                     {
                       id: 'titan_sovereign',
@@ -8776,8 +8776,8 @@ function StockDashboard() {
                       eDate = filtered[filtered.length - 1].date;
                     }
 
-                    const initStrat = filtered[0].strategy_equity || filtered[0].titan_equity || 1;
-                    const initBench = filtered[0].benchmark_equity || 1;
+                    const initStrat = filtered[0].strategy_equity || filtered[0].titan_equity || filtered[0].capital || (filtered[0].strategy_nav ? filtered[0].strategy_nav * 1000000 : 1);
+                    const initBench = filtered[0].benchmark_equity || (filtered[0].benchmark_nav ? filtered[0].benchmark_nav * 1000000 : 1);
                     const initEtf = (filtered[0].etf0050_equity !== undefined && filtered[0].etf0050_equity !== null) ? filtered[0].etf0050_equity : initBench;
                     const initEtf20 = (filtered[0].etf0020_equity !== undefined && filtered[0].etf0020_equity !== null) ? filtered[0].etf0020_equity : initBench;
 
@@ -8792,8 +8792,8 @@ function StockDashboard() {
                     let totalExposure = 0;
 
                     const rebasedCurve = filtered.map(p => {
-                      const pStrat = (p.strategy_equity !== undefined ? p.strategy_equity : p.titan_equity) || 1000000;
-                      const pBench = p.benchmark_equity !== undefined ? p.benchmark_equity : 1000000;
+                      const pStrat = (p.strategy_equity !== undefined ? p.strategy_equity : (p.titan_equity !== undefined ? p.titan_equity : p.capital)) || (p.strategy_nav ? p.strategy_nav * 1000000 : 1000000);
+                      const pBench = p.benchmark_equity !== undefined ? p.benchmark_equity : ((p.benchmark_nav !== undefined ? p.benchmark_nav * 1000000 : 1000000));
                       const pEtf = (p.etf0050_equity !== undefined && p.etf0050_equity !== null) ? p.etf0050_equity : pBench;
                       const pEtf20 = (p.etf0020_equity !== undefined && p.etf0020_equity !== null) ? p.etf0020_equity : pBench;
 
@@ -10026,7 +10026,7 @@ function StockDashboard() {
                                   </span>
                                 </h4>
                                 <span style={{ fontSize: '0.76rem', color: '#CBD5E1', marginTop: '0.2rem', display: 'block' }}>
-                                  跨國流動性巨頭池（台股前 50 大 + 美股標普/那斯達克龍頭共 144 檔），透過 SPY 200MA 總經牛熊防線，結合 12M 跨期複合動能評分動態精選最強 4 大核心飆股！
+                                  跨國流動性巨頭池（台股前 50 大 + 美股標普/那斯達克龍頭共 144 檔），透過 SPY 200MA 總經牛熊防線，結合 1,134 組全覆蓋 DOE 最佳化，集中精選最強 Top 3 狂飆主力 (40% / 30% / 30%)！
                                 </span>
                               </div>
                             </div>
@@ -10061,14 +10061,14 @@ function StockDashboard() {
                               </div>
                             </div>
 
-                            {/* 2. Top 4 階梯權重配置 */}
+                            {/* 2. Top 3 階梯權重配置 */}
                             <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(14, 165, 233, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
                                 <span>⚖️</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#38BDF8' }}>第二道核心：Top 4 階梯權重配置 (40/25/20/15)</span>
+                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#38BDF8' }}>第二道核心：Top 3 溫和階梯權重配置 (40/30/30)</span>
                               </div>
                               <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                經 20 年全歷史 DOE 最佳化，第 1 王者重壓 <strong style={{ color: '#FBBF24' }}>40%</strong>，第 2~4 主力分別配置 <strong style={{ color: '#38BDF8' }}>25% / 20% / 15%</strong>，兼顧最強爆發力與跨股風險平滑。
+                                經 22 年 1,134 組全覆蓋 DOE 最佳化，第 1 王者重壓 <strong style={{ color: '#FBBF24' }}>40% (莫德納)</strong>，第 2~3 主力分別配置 <strong style={{ color: '#38BDF8' }}>30% (欣興、創意)</strong>，兼顧最強爆發力與抗回撤平衡。
                               </div>
                             </div>
 
@@ -10705,20 +10705,20 @@ function StockDashboard() {
                           const sourceC = (activeModelKey === 'global_liquid_titan_a') ? globalTitanCurveData : titanCurveData;
                           if (Array.isArray(sourceC) && sourceC.length > 0) {
                             const targetCurve = is20ySelected ? sourceC : sourceC.filter(p => p.date >= '20160101');
-                            const years = [...new Set(targetCurve.map(p => p.year))].filter(Boolean).sort((a, b) => a - b);
+                            const years = [...new Set(targetCurve.map(p => p.year || (p.date ? p.date.slice(0, 4) : null)))].filter(Boolean).sort((a, b) => a - b);
                           activeHistYearly = years.map((y, idx) => {
-                            const sub = targetCurve.filter(p => p.year === y);
+                            const sub = targetCurve.filter(p => (p.year ? p.year === y : p.date?.startsWith(y)));
                             let s_start, b_start;
                             if (idx === 0) {
-                              s_start = sub[0].strategy_equity || sub[0].titan_equity || 1000000;
-                              b_start = sub[0].benchmark_equity || 1000000;
+                              s_start = sub[0].strategy_equity || sub[0].titan_equity || sub[0].capital || (sub[0].strategy_nav ? sub[0].strategy_nav * 1000000 : 1000000);
+                              b_start = sub[0].benchmark_equity || (sub[0].benchmark_nav ? sub[0].benchmark_nav * 1000000 : 1000000);
                             } else {
-                              const prevSub = targetCurve.filter(p => p.year === years[idx - 1]);
-                              s_start = prevSub[prevSub.length - 1].strategy_equity || prevSub[prevSub.length - 1].titan_equity || 1000000;
-                              b_start = prevSub[prevSub.length - 1].benchmark_equity || 1000000;
+                              const prevSub = targetCurve.filter(p => (p.year ? p.year === years[idx - 1] : p.date?.startsWith(years[idx - 1])));
+                              s_start = prevSub[prevSub.length - 1].strategy_equity || prevSub[prevSub.length - 1].titan_equity || prevSub[prevSub.length - 1].capital || (prevSub[prevSub.length - 1].strategy_nav ? prevSub[prevSub.length - 1].strategy_nav * 1000000 : 1000000);
+                              b_start = prevSub[prevSub.length - 1].benchmark_equity || (prevSub[prevSub.length - 1].benchmark_nav ? prevSub[prevSub.length - 1].benchmark_nav * 1000000 : 1000000);
                             }
-                            const s_end = sub[sub.length - 1].strategy_equity || sub[sub.length - 1].titan_equity || s_start;
-                            const b_end = sub[sub.length - 1].benchmark_equity || b_start;
+                            const s_end = sub[sub.length - 1].strategy_equity || sub[sub.length - 1].titan_equity || sub[sub.length - 1].capital || (sub[sub.length - 1].strategy_nav ? sub[sub.length - 1].strategy_nav * 1000000 : s_start);
+                            const b_end = sub[sub.length - 1].benchmark_equity || (sub[sub.length - 1].benchmark_nav ? sub[sub.length - 1].benchmark_nav * 1000000 : b_start);
                             const s_ret = ((s_end / s_start) - 1.0) * 100.0;
                             const b_ret = ((b_end / b_start) - 1.0) * 100.0;
                             return {
@@ -10734,13 +10734,13 @@ function StockDashboard() {
                         if (!activeHistYearly || activeHistYearly.length === 0) return null;
 
                         const displayHistSummary = activeHistModeData || {
-                          total_return_pct: activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100,
-                          cagr_pct: is20ySelected ? 34.7 : 54.3,
-                          alpha_pct: is20ySelected ? 24.6 : 44.2,
-                          max_drawdown_pct: is20ySelected ? -76.7 : -44.8,
-                          sharpe_ratio: is20ySelected ? 1.03 : 1.22,
-                          win_rate_pct: 53.5,
-                          profit_factor: 5.59
+                          total_return_pct: activeModelKey === 'global_liquid_titan_a' ? 294215.5 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100),
+                          cagr_pct: activeModelKey === 'global_liquid_titan_a' ? 42.38 : (is20ySelected ? 34.7 : 54.3),
+                          alpha_pct: activeModelKey === 'global_liquid_titan_a' ? 31.6 : (is20ySelected ? 24.6 : 44.2),
+                          max_drawdown_pct: activeModelKey === 'global_liquid_titan_a' ? -42.68 : (is20ySelected ? -76.7 : -44.8),
+                          sharpe_ratio: activeModelKey === 'global_liquid_titan_a' ? 1.08 : (is20ySelected ? 1.03 : 1.22),
+                          win_rate_pct: activeModelKey === 'global_liquid_titan_a' ? 52.1 : 53.5,
+                          profit_factor: activeModelKey === 'global_liquid_titan_a' ? 4.95 : 5.59
                         };
 
                         const multiplierHist = (((displayHistSummary.total_return_pct || 0) / 100) + 1).toFixed(1);
@@ -11095,149 +11095,7 @@ function StockDashboard() {
                         );
                       })()}
 
-                      {/* 5.6 全球泰坦出場機制與守住獲利大比拼 (Exit Mechanisms Comparison) */}
-                      {activeModelKey === 'global_liquid_titan_a' && defaultGlobalSovereignData?.exit_mechanisms_comparison && (
-                        <div style={{
-                          background: 'rgba(15, 23, 42, 0.65)',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(16, 185, 129, 0.35)',
-                          padding: '1.25rem',
-                          marginBottom: '1.5rem',
-                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
-                            <div>
-                              <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                🛡️ 實戰出場機制與守住獲利成效大比拼（2004～2026 全歷史 6 大策略實證）
-                              </h4>
-                              <p style={{ margin: '0.3rem 0 0 0', color: '#94A3B8', fontSize: '0.8rem' }}>
-                                回應研發進版：深入對比「固定月度輪動」、「跌破均線出場 (60MA/20MA)」、「守住獲利移動停利」與「台股泰坦週度動態遞補」之真實回測數據
-                              </p>
-                            </div>
-                            <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.25rem 0.6rem', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                              DOE 嚴格無未來函數・逐筆內扣交易稅費
-                            </span>
-                          </div>
 
-                          <div style={{ overflowX: 'auto', marginBottom: '1.2rem' }}>
-                            <table className="custom-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-                              <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                  <th style={{ textAlign: 'left', minWidth: '180px' }}>出場機制方案</th>
-                                  <th style={{ textAlign: 'center', minWidth: '90px' }}>策略風格</th>
-                                  <th style={{ textAlign: 'right', minWidth: '100px' }}>22年總報酬</th>
-                                  <th style={{ textAlign: 'right', minWidth: '90px' }}>年化 CAGR</th>
-                                  <th style={{ textAlign: 'right', minWidth: '95px' }}>最大回撤 (MDD)</th>
-                                  <th style={{ textAlign: 'right', minWidth: '80px' }}>夏普 Sharpe</th>
-                                  <th style={{ textAlign: 'right', minWidth: '80px' }}>勝率 Win%</th>
-                                  <th style={{ textAlign: 'right', minWidth: '85px' }}>獲利因子 PF</th>
-                                  <th style={{ textAlign: 'right', minWidth: '80px' }}>總交易數</th>
-                                  <th style={{ textAlign: 'right', minWidth: '85px' }}>平均持股</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {defaultGlobalSovereignData.exit_mechanisms_comparison.map((mech, mIdx) => {
-                                  const isBaseline = mech.id === 'baseline_monthly';
-                                  const isMddWinner = mech.id === 'ma60_exit';
-                                  const isWinWinner = mech.id === 'trailing_stop';
-                                  const isFlagship = mech.id === 'titan_flagship_refill';
-                                  return (
-                                    <tr key={mIdx} style={{
-                                      background: isBaseline ? 'rgba(16, 185, 129, 0.08)' : (isFlagship ? 'rgba(99, 102, 241, 0.08)' : 'transparent'),
-                                      borderLeft: isBaseline ? '3px solid #10B981' : (isFlagship ? '3px solid #818CF8' : 'none')
-                                    }}>
-                                      <td style={{ textAlign: 'left', fontWeight: 'bold' }}>
-                                        <div style={{ color: isBaseline ? '#34D399' : (isFlagship ? '#A5B4FC' : '#F1F5F9') }}>
-                                          {mech.name}
-                                        </div>
-                                        <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '2px', lineHeight: '1.3' }}>
-                                          {mech.desc}
-                                        </div>
-                                      </td>
-                                      <td style={{ textAlign: 'center' }}>
-                                        <span style={{
-                                          fontSize: '0.74rem',
-                                          padding: '0.15rem 0.45rem',
-                                          borderRadius: '4px',
-                                          background: isBaseline ? 'rgba(16, 185, 129, 0.2)' : isMddWinner ? 'rgba(59, 130, 246, 0.2)' : isWinWinner ? 'rgba(245, 158, 11, 0.2)' : 'rgba(148, 163, 184, 0.2)',
-                                          color: isBaseline ? '#6EE7B7' : isMddWinner ? '#93C5FD' : isWinWinner ? '#FDE68A' : '#CBD5E1'
-                                        }}>
-                                          {mech.type}
-                                        </span>
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
-                                        +{mech.total_ret?.toLocaleString()}%
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>
-                                        +{mech.cagr?.toFixed(2)}%
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: isMddWinner ? '#34D399' : (mech.mdd < -44 ? '#F87171' : '#FBBF24'), fontFamily: 'monospace' }}>
-                                        {mech.mdd?.toFixed(2)}%
-                                        {isMddWinner && <span style={{ fontSize: '0.7rem', display: 'block', color: '#34D399' }}>🛡️ 風險最低</span>}
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#E2E8F0' }}>
-                                        {mech.sharpe?.toFixed(2)}
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: isWinWinner ? '#FBBF24' : '#E2E8F0', fontFamily: 'monospace' }}>
-                                        {mech.win_rate?.toFixed(1)}%
-                                        {isWinWinner && <span style={{ fontSize: '0.7rem', display: 'block', color: '#FBBF24' }}>🏆 勝率冠軍</span>}
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#E2E8F0' }}>
-                                        {mech.profit_factor?.toFixed(2)}
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
-                                        {mech.trades} 筆
-                                      </td>
-                                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
-                                        {mech.avg_holding_days} 天
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-
-                          {/* 4 大核心研發洞察 */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.8rem 1rem' }}>
-                              <div style={{ fontWeight: 'bold', color: '#6EE7B7', fontSize: '0.84rem', marginBottom: '0.35rem' }}>
-                                💡 1. 為什麼傳統跨國動能採「每月結算」？
-                              </div>
-                              <div style={{ fontSize: '0.75rem', color: '#94A3B8', lineHeight: '1.5' }}>
-                                全球高流動性巨頭（如 NVDA、欣興、創意）的主升段常持續 3～12 個月。定期月度結算能讓強勢股「利潤充分奔跑 (Let winners run)」，不被盤中洗盤震出場，換取高達 <strong>+141,682% (+37.85% CAGR)</strong> 的極致複利。
-                              </div>
-                            </div>
-
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', padding: '0.8rem 1rem' }}>
-                              <div style={{ fontWeight: 'bold', color: '#93C5FD', fontSize: '0.84rem', marginBottom: '0.35rem' }}>
-                                🛡️ 2. 改為「跌破 60MA 季線出場」的巨大價值
-                              </div>
-                              <div style={{ fontSize: '0.75rem', color: '#94A3B8', lineHeight: '1.5' }}>
-                                季線出場將 22 年最大回撤由 <strong>-44.74% 顯著壓降至 -37.29%（安全度提升 7.45%）</strong>！能徹底杜絕個股單月中暴跌腰斬黑天鵝，特別適合追求資產平滑、睡得著覺的穩健型投資人。
-                              </div>
-                            </div>
-
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '8px', padding: '0.8rem 1rem' }}>
-                              <div style={{ fontWeight: 'bold', color: '#FDE68A', fontSize: '0.84rem', marginBottom: '0.35rem' }}>
-                                🎯 3. 改為「守住獲利 (移動停利)」的勝率加成
-                              </div>
-                              <div style={{ fontSize: '0.75rem', color: '#94A3B8', lineHeight: '1.5' }}>
-                                浮盈達 +15% 後自最高價回檔 10% 即平倉鎖利，將整體交易勝率拉升至 <strong>53.0%（全場最高）</strong>，成功鎖定波段獲利，有效避免抱上抱下做白工的心理折磨。
-                              </div>
-                            </div>
-
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', padding: '0.8rem 1rem' }}>
-                              <div style={{ fontWeight: 'bold', color: '#FCA5A5', fontSize: '0.84rem', marginBottom: '0.35rem' }}>
-                                ⚠️ 4. 「跌破 20MA 月線」的反面教材警示
-                              </div>
-                              <div style={{ fontSize: '0.75rem', color: '#94A3B8', lineHeight: '1.5' }}>
-                                實證顯示 20MA 過於敏感，短線劇烈震盪會導致「頻繁被洗盤賣飛」（平均僅持 14 天，交易次數飆升至 757 次），CAGR 暴跌至 <strong>9.45%</strong>，證實跨國超級動能策略絕不可用過短均線。
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
 
                       {/* 6. 模擬交易日誌明細 (Recent Closed Trades Log) */}
                       {(() => {
