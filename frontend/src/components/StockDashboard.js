@@ -4388,735 +4388,8 @@ function StockDashboard() {
 
           return (
           <div>
-            {/* 1. 頂部控制與模型選擇列 */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
-              border: '1px solid rgba(59, 130, 246, 0.35)',
-              borderRadius: '12px',
-              padding: '0.85rem 1.15rem',
-              marginBottom: '1rem',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '0.75rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  📈 台股大盤宏觀 ML 預測
-                </span>
 
-                {/* 當前 AI 模型選擇下拉選單 */}
-                <select
-                  value={marketMlModelType}
-                  onChange={e => handleSelectMarketModel(e.target.value)}
-                  style={{
-                    background: 'rgba(15, 23, 42, 0.95)',
-                    border: '1px solid #3B82F6',
-                    color: '#93C5FD',
-                    fontWeight: 'bold',
-                    padding: '0.3rem 0.6rem',
-                    borderRadius: '8px',
-                    fontSize: '0.86rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {MARKET_ML_MODELS.map(m => (
-                    <option key={m.val} value={m.val}>
-                      {m.label} {m.val === bestModelId ? '⭐ 最佳' : ''}
-                    </option>
-                  ))}
-                </select>
 
-                {/* 狀態徽章 */}
-                {activeMetrics?.auc_up ? (
-                  <span style={{
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    border: '1px solid #10B981',
-                    color: '#6EE7B7',
-                    fontSize: '0.78rem',
-                    padding: '0.2rem 0.55rem',
-                    borderRadius: '16px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem'
-                  }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }}></span>
-                    就緒 (AUC {activeMetrics.auc_up}% ｜ 準確 {activeMetrics.accuracy}%)
-                  </span>
-                ) : (
-                  <span style={{
-                    background: 'rgba(148, 163, 184, 0.15)',
-                    border: '1px solid rgba(148, 163, 184, 0.3)',
-                    color: '#94A3B8',
-                    fontSize: '0.78rem',
-                    padding: '0.2rem 0.55rem',
-                    borderRadius: '16px'
-                  }}>
-                    未載入
-                  </span>
-                )}
-
-                {marketMlData?.latest_date && (
-                  <span style={{
-                    fontSize: '0.78rem',
-                    background: 'rgba(59, 130, 246, 0.2)',
-                    border: '1px solid rgba(59, 130, 246, 0.4)',
-                    color: '#93C5FD',
-                    padding: '0.2rem 0.55rem',
-                    borderRadius: '12px'
-                  }}>
-                    🗓️ 基準日: {marketMlData.latest_date}
-                  </span>
-                )}
-              </div>
-
-              {/* 右側操作按鈕 */}
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => setShowMarketMlConfig(!showMarketMlConfig)}
-                  style={{
-                    padding: '0.35rem 0.8rem',
-                    fontSize: '0.84rem',
-                    background: showMarketMlConfig ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)',
-                    border: showMarketMlConfig ? '1px solid #3B82F6' : '1px solid var(--border-color)',
-                    color: showMarketMlConfig ? '#93C5FD' : 'white',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    borderRadius: '8px'
-                  }}
-                >
-                  ⚙️ 訓練條件設定 {showMarketMlConfig ? '▴ 收合' : '▾ 展開'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => handleTriggerMarketMlJob('market_ml_predict')}
-                  disabled={triggeringMarketMl || fetchingMarketMl}
-                  style={{
-                    padding: '0.35rem 0.8rem',
-                    fontSize: '0.84rem',
-                    background: 'rgba(59, 130, 246, 0.18)',
-                    border: '1px solid rgba(59, 130, 246, 0.4)',
-                    color: '#93C5FD',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    borderRadius: '8px'
-                  }}
-                  title="重新推論今日最新市場行情"
-                >
-                  {triggeringMarketMl ? <span className="loader" style={{ width: '12px', height: '12px' }}></span> : '🔄 重新推論'}
-                </button>
-
-                {/* 一鍵重訓＋全域尋優 (全模型) */}
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all', auto_tune: true, tune_trials: marketMlTuneTrials })}
-                  disabled={triggeringMarketMl || fetchingMarketMl}
-                  style={{
-                    padding: '0.35rem 0.85rem',
-                    fontSize: '0.84rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-                    border: '1px solid #A855F7',
-                    color: '#FFFFFF',
-                    fontWeight: 'bold',
-                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.4)',
-                    cursor: 'pointer'
-                  }}
-                  title="一鍵重訓全部 7 款 AI 模型並直接搭配 Optuna 貝氏全域超參數尋優 (尋找 Global Minima)"
-                >
-                  {triggeringMarketMl ? <span className="loader" style={{ width: '12px', height: '12px', borderColor: 'white', borderBottomColor: 'transparent' }}></span> : '🧬 一鍵重訓＋尋優 (全模型)'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-save"
-                  onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType, auto_tune: marketMlAutoTune, tune_trials: marketMlTuneTrials })}
-                  disabled={triggeringMarketMl || fetchingMarketMl}
-                  style={{
-                    padding: '0.35rem 0.8rem',
-                    fontSize: '0.84rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    borderRadius: '8px'
-                  }}
-                  title={`單獨訓練當前選取的 ${MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType} (自動套用尋優)`}
-                >
-                  🚀 訓練選定模型 {marketMlAutoTune ? '(含尋優)' : ''}
-                </button>
-              </div>
-            </div>
-
-            {/* 2. 可收折的「進階訓練配置與條件清單面板」 */}
-            {showMarketMlConfig && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95))',
-                border: '1px solid rgba(99, 102, 241, 0.4)',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                marginBottom: '1.25rem',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                animation: 'fadeIn 0.2s ease-in-out'
-              }}>
-                {/* 快捷訓練模式 Chips 清單 */}
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#93C5FD', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span>⚡</span>
-                    <span>快捷訓練條件清單（點擊立即套用配置）：</span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {BUILTIN_MARKET_ML_PRESETS.map(preset => {
-                      const isActive = marketMlPreset === preset.id;
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => handleApplyMarketMlPreset(preset)}
-                          title={preset.desc}
-                          style={{
-                            padding: '0.4rem 0.75rem',
-                            fontSize: '0.82rem',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            border: isActive ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.1)',
-                            background: isActive ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.4), rgba(59, 130, 246, 0.2))' : 'rgba(255, 255, 255, 0.04)',
-                            color: isActive ? '#93C5FD' : '#CBD5E1',
-                            fontWeight: isActive ? 'bold' : 'normal',
-                            boxShadow: isActive ? '0 0 10px rgba(59, 130, 246, 0.3)' : 'none'
-                          }}
-                        >
-                          {preset.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 參數設定 Grid (2 欄) */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '1.25rem',
-                  background: 'rgba(0, 0, 0, 0.28)',
-                  padding: '1.1rem',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  marginBottom: '1.25rem'
-                }}>
-                  {/* 區塊 1: 數據長度配置 */}
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <span>📅</span> 數據長度與驗證配置
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
-                        🏋️ 歷史訓練天數 (0 為 20 年全歷史 5,300+ 天)
-                      </label>
-                      <input
-                        type="number"
-                        value={marketMlTrainDays}
-                        onChange={e => {
-                          const val = parseInt(e.target.value) || 0;
-                          setMarketMlTrainDays(val);
-                          localStorage.setItem('market_ml_train_days', val);
-                        }}
-                        style={{ width: '100%', background: 'rgba(15,23,42,0.8)', color: '#FDE68A', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.4rem', fontSize: '0.9rem', fontWeight: 'bold' }}
-                      />
-                      <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.35rem', flexWrap: 'wrap' }}>
-                        {[
-                          { d: 500, label: '近2年 (500天)' },
-                          { d: 1000, label: '近4年 (1000天)' },
-                          { d: 1800, label: '近7年 (1800天)' },
-                          { d: 0, label: '全部歷史 (20年)' }
-                        ].map(item => (
-                          <button
-                            key={item.d}
-                            type="button"
-                            className="btn"
-                            style={{
-                              padding: '0.2rem 0.5rem',
-                              fontSize: '0.72rem',
-                              background: marketMlTrainDays === item.d ? 'rgba(59, 130, 246, 0.35)' : 'rgba(255,255,255,0.05)',
-                              border: marketMlTrainDays === item.d ? '1px solid #3B82F6' : '1px solid var(--border-color)',
-                              color: marketMlTrainDays === item.d ? '#93C5FD' : 'var(--text-muted)'
-                            }}
-                            onClick={() => {
-                              setMarketMlTrainDays(item.d);
-                              localStorage.setItem('market_ml_train_days', item.d);
-                            }}
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: '0.75rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
-                        <span>走步前瞻驗證切分比率 (Walk-forward Split)</span>
-                        <span style={{ color: '#93C5FD', fontWeight: 'bold' }}>{Math.round((1 - marketMlTestRatio) * 100)}% 訓練 / {Math.round(marketMlTestRatio * 100)}% 驗證</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.1"
-                        max="0.3"
-                        step="0.05"
-                        value={marketMlTestRatio}
-                        onChange={e => {
-                          const val = parseFloat(e.target.value);
-                          setMarketMlTestRatio(val);
-                          localStorage.setItem('market_ml_test_ratio', val);
-                        }}
-                        style={{ width: '100%', accentColor: '#3B82F6' }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* 區塊 2: 特徵工程模式 */}
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <span>🧬</span> 特徵工程組合模式 (Feature Group)
-                    </div>
-
-                    <div style={{ marginBottom: '0.75rem' }}>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                        特徵預設集 (多因子維度)
-                      </label>
-                      <select
-                        value={marketMlPreset}
-                        onChange={e => {
-                          setMarketMlPreset(e.target.value);
-                          localStorage.setItem('market_ml_preset', e.target.value);
-                        }}
-                        style={{
-                          width: '100%',
-                          background: 'rgba(15, 23, 42, 0.95)',
-                          border: '1px solid var(--border-color)',
-                          color: '#F8FAFC',
-                          padding: '0.45rem 0.6rem',
-                          borderRadius: '6px',
-                          fontSize: '0.84rem'
-                        }}
-                      >
-                        {BUILTIN_MARKET_ML_PRESETS.map(p => (
-                          <option key={p.id} value={p.id}>{p.name} — {p.desc}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div style={{ fontSize: '0.76rem', color: '#94A3B8', lineHeight: 1.5, background: 'rgba(255,255,255,0.03)', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      💡 包含台指期未平倉、外資投信現貨、美債10Y、費半、台積電ADR溢價、分數階微分 (FFD)、Amihud 流動性衝擊、赫斯特指數與多階支撐壓力階梯。
-                    </div>
-                  </div>
-
-                  {/* 區塊 3: 🎯 波段標籤制定方法 (Quantitative Labeling Methodology) */}
-                  {(() => {
-                    const curMethod = MARKET_ML_LABELING_METHODS.find(m => m.id === marketMlLabelingMethod) || MARKET_ML_LABELING_METHODS[0];
-                    return (
-                      <div style={{
-                        gridColumn: '1 / -1',
-                        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.75))',
-                        border: '1px solid rgba(59, 130, 246, 0.35)',
-                        borderRadius: '10px',
-                        padding: '1rem 1.15rem'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.85rem' }}>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '1.15rem' }}>🎯</span>
-                              <strong style={{ color: '#F8FAFC', fontSize: '0.92rem' }}>
-                                波段標籤制定方法 (Quantitative Labeling Methodology)
-                              </strong>
-                              <span style={{
-                                fontSize: '0.72rem',
-                                padding: '0.15rem 0.5rem',
-                                borderRadius: '4px',
-                                background: 'rgba(59, 130, 246, 0.2)',
-                                color: '#93C5FD',
-                                border: '1px solid rgba(59, 130, 246, 0.4)'
-                              }}>
-                                5 大頂級量化演算法
-                              </span>
-                            </div>
-                            <span style={{ fontSize: '0.76rem', color: '#94A3B8', display: 'block', marginTop: '0.25rem', lineHeight: 1.5 }}>
-                              固定突破門檻 (如 ±2.5%) 在低波動期難以觸發、在高波動期充斥假突破，且忽略持有期間暴跌觸及停損洗盤之路徑依賴 (Path-dependency)。
-                              本系統完整實作頂級量化文獻 5 大標籤演算法，可自由切換訓練：
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 5 大方法卡片群 (Grid Selector) */}
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-                          gap: '0.65rem',
-                          marginBottom: '1rem'
-                        }}>
-                          {MARKET_ML_LABELING_METHODS.map(m => {
-                            const isSelected = marketMlLabelingMethod === m.id;
-                            return (
-                              <div
-                                key={m.id}
-                                onClick={() => {
-                                  setMarketMlLabelingMethod(m.id);
-                                  setMarketMlLabelingParam(m.defaultParam);
-                                  localStorage.setItem('market_ml_labeling_method', m.id);
-                                  localStorage.setItem('market_ml_labeling_param', m.defaultParam);
-                                }}
-                                style={{
-                                  background: isSelected
-                                    ? 'linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(30, 58, 138, 0.45))'
-                                    : 'rgba(255, 255, 255, 0.03)',
-                                  border: isSelected ? '1.5px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.08)',
-                                  borderRadius: '8px',
-                                  padding: '0.75rem',
-                                  cursor: 'pointer',
-                                  transition: 'all 0.2s ease',
-                                  boxShadow: isSelected ? '0 0 14px rgba(59, 130, 246, 0.3)' : 'none'
-                                }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                                  <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.1)', color: '#CBD5E1', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
-                                    {m.tag}
-                                  </span>
-                                  {isSelected && <span style={{ color: '#60A5FA', fontSize: '0.8rem', fontWeight: 900 }}>✓ 選定中</span>}
-                                </div>
-                                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: isSelected ? '#93C5FD' : '#F1F5F9', marginBottom: '0.2rem' }}>
-                                  {m.short}
-                                </div>
-                                <div style={{ fontSize: '0.72rem', color: isSelected ? '#BFDBFE' : '#94A3B8', lineHeight: 1.35 }}>
-                                  {m.author}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* 所選方法之深度說明與超參數微調面板 */}
-                        <div style={{
-                          background: 'rgba(0, 0, 0, 0.35)',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
-                          padding: '0.85rem 1rem'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.65rem' }}>
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#FCD34D' }}>
-                                  {curMethod.name}
-                                </span>
-                                <span style={{ fontSize: '0.74rem', color: '#93C5FD', background: 'rgba(59, 130, 246, 0.15)', padding: '0.1rem 0.45rem', borderRadius: '4px' }}>
-                                  {curMethod.citation}
-                                </span>
-                              </div>
-                              <div style={{ fontSize: '0.78rem', color: '#CBD5E1', marginTop: '0.3rem', lineHeight: 1.5 }}>
-                                💡 <strong>機制原理：</strong>{curMethod.desc}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* 參數微調與預設 Pills */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            flexWrap: 'wrap',
-                            gap: '0.75rem',
-                            marginTop: '0.75rem',
-                            paddingTop: '0.75rem',
-                            borderTop: '1px dashed rgba(255, 255, 255, 0.1)'
-                          }}>
-                            {/* 數值輸入與單位 */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                              <label style={{ fontSize: '0.78rem', color: '#E2E8F0', fontWeight: 'bold' }}>
-                                ⚙️ {curMethod.paramName}:
-                              </label>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                <input
-                                  type="number"
-                                  step={curMethod.step}
-                                  min={curMethod.min}
-                                  max={curMethod.max}
-                                  value={marketMlLabelingParam}
-                                  onChange={e => {
-                                    const val = parseFloat(e.target.value) || curMethod.defaultParam;
-                                    setMarketMlLabelingParam(val);
-                                    localStorage.setItem('market_ml_labeling_param', val);
-                                  }}
-                                  style={{
-                                    width: '85px',
-                                    background: 'rgba(15,23,42,0.9)',
-                                    color: '#FDE68A',
-                                    border: '1px solid #3B82F6',
-                                    borderRadius: '6px',
-                                    padding: '0.35rem 0.5rem',
-                                    fontSize: '0.88rem',
-                                    fontWeight: 'bold',
-                                    textAlign: 'center'
-                                  }}
-                                />
-                                <span style={{ fontSize: '0.82rem', color: '#93C5FD', fontWeight: 'bold' }}>
-                                  {curMethod.paramUnit}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* 快速預設值 Pills */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>快速配置:</span>
-                              {curMethod.presets.map(p => {
-                                const isCurVal = Math.abs(marketMlLabelingParam - p.val) < 0.001;
-                                return (
-                                  <button
-                                    key={p.val}
-                                    type="button"
-                                    className="btn"
-                                    onClick={() => {
-                                      setMarketMlLabelingParam(p.val);
-                                      localStorage.setItem('market_ml_labeling_param', p.val);
-                                    }}
-                                    style={{
-                                      padding: '0.2rem 0.55rem',
-                                      fontSize: '0.74rem',
-                                      borderRadius: '6px',
-                                      background: isCurVal ? 'rgba(59, 130, 246, 0.45)' : 'rgba(255, 255, 255, 0.06)',
-                                      border: isCurVal ? '1px solid #60A5FA' : '1px solid rgba(255, 255, 255, 0.1)',
-                                      color: isCurVal ? '#EFF6FF' : '#CBD5E1',
-                                      fontWeight: isCurVal ? 'bold' : 'normal'
-                                    }}
-                                  >
-                                    {p.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* 區塊 3: 🧪 AI 貝氏超參數全域尋優 (AutoML Global Minima Search) */}
-                  <div style={{
-                    gridColumn: '1 / -1',
-                    background: 'linear-gradient(135deg, rgba(88, 28, 135, 0.25), rgba(30, 27, 75, 0.4))',
-                    border: '1px solid rgba(168, 85, 247, 0.35)',
-                    borderRadius: '10px',
-                    padding: '1rem 1.15rem'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.6rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1.1rem' }}>🧪</span>
-                        <div>
-                          <strong style={{ color: '#E9D5FF', fontSize: '0.9rem' }}>
-                            Optuna 貝氏全域超參數尋優 (AutoML Global Minima Search)
-                          </strong>
-                          <span style={{ fontSize: '0.75rem', color: '#C4B5FD', display: 'block', marginTop: '0.15rem' }}>
-                            以 TPE (Tree-structured Parzen Estimator) 尋找時間序列交叉熵與勝率損失函數之全域極小值，跳脫局部鞍點
-                          </span>
-                        </div>
-                      </div>
-                      <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: '0.45rem' }}>
-                        <input
-                          type="checkbox"
-                          checked={marketMlAutoTune}
-                          onChange={e => {
-                            setMarketMlAutoTune(e.target.checked);
-                            localStorage.setItem('market_ml_auto_tune', e.target.checked);
-                          }}
-                          style={{ width: '18px', height: '18px', accentColor: '#A855F7', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '0.86rem', color: marketMlAutoTune ? '#D8B4FE' : '#94A3B8', fontWeight: marketMlAutoTune ? 'bold' : 'normal' }}>
-                          {marketMlAutoTune ? '已啟用全域尋優模式' : '停用 (使用標準預設參數)'}
-                        </span>
-                      </label>
-                    </div>
-
-                    {marketMlAutoTune && (
-                      <div style={{
-                        marginTop: '0.75rem',
-                        paddingTop: '0.75rem',
-                        borderTop: '1px solid rgba(168, 85, 247, 0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        gap: '0.75rem'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.78rem', color: '#DDD6FE' }}>
-                            🔬 尋優世代試驗次數 (Trials):
-                          </span>
-                          {[
-                            { n: 10, label: '10次 (快速探索 ~5s)' },
-                            { n: 20, label: '20次 (平衡推薦 ~15s)' },
-                            { n: 40, label: '40次 (深度全域搜尋 ~35s)' }
-                          ].map(t => (
-                            <button
-                              key={t.n}
-                              type="button"
-                              className="btn"
-                              style={{
-                                padding: '0.25rem 0.6rem',
-                                fontSize: '0.75rem',
-                                borderRadius: '6px',
-                                background: marketMlTuneTrials === t.n ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.05)',
-                                border: marketMlTuneTrials === t.n ? '1px solid #A855F7' : '1px solid rgba(255, 255, 255, 0.1)',
-                                color: marketMlTuneTrials === t.n ? '#F3E8FF' : '#CBD5E1',
-                                fontWeight: marketMlTuneTrials === t.n ? 'bold' : 'normal'
-                              }}
-                              onClick={() => {
-                                setMarketMlTuneTrials(t.n);
-                                localStorage.setItem('market_ml_tune_trials', t.n);
-                              }}
-                            >
-                              {t.label}
-                            </button>
-                          ))}
-                        </div>
-                        <span style={{ fontSize: '0.74rem', color: '#A78BFA', background: 'rgba(124, 58, 237, 0.2)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(124, 58, 237, 0.3)' }}>
-                          目標: 3-Fold 滾動前瞻時間序列交叉驗證極小損失 (Min Loss)
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 底部操作與派工按鈕列 */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem' }}>
-                  <div style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      className="btn"
-                      style={{
-                        padding: '0.45rem 0.85rem',
-                        fontSize: '0.85rem',
-                        background: 'rgba(59, 130, 246, 0.2)',
-                        border: '1px solid rgba(59, 130, 246, 0.5)',
-                        color: '#93C5FD',
-                        borderRadius: '8px'
-                      }}
-                      onClick={handleSaveMarketTrainSettings}
-                    >
-                      💾 儲存條件
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn"
-                      style={{
-                        padding: '0.45rem 0.85rem',
-                        fontSize: '0.85rem',
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        border: '1px solid var(--border-color)',
-                        color: 'white',
-                        borderRadius: '8px'
-                      }}
-                      onClick={() => handleApplyMarketMlPreset(BUILTIN_MARKET_ML_PRESETS[0])}
-                    >
-                      ↺ 還原預設
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    {marketMlSavedToast && (
-                      <span style={{
-                        background: 'rgba(16, 185, 129, 0.2)',
-                        border: '1px solid #10B981',
-                        color: '#6EE7B7',
-                        fontSize: '0.82rem',
-                        padding: '0.3rem 0.75rem',
-                        borderRadius: '6px',
-                        fontWeight: 'bold'
-                      }}>
-                        ✅ 條件已儲存！
-                      </span>
-                    )}
-
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all', auto_tune: true, tune_trials: marketMlTuneTrials })}
-                      disabled={triggeringMarketMl || fetchingMarketMl}
-                      style={{
-                        padding: '0.5rem 1.15rem',
-                        fontSize: '0.88rem',
-                        background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
-                        border: '1.5px solid #C084FC',
-                        color: '#FFFFFF',
-                        borderRadius: '8px',
-                        fontWeight: 'bold',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                        boxShadow: '0 0 16px rgba(168, 85, 247, 0.45)',
-                        cursor: 'pointer'
-                      }}
-                      title="一鍵對全體 7 款模型啟動 Optuna 貝氏尋優尋找各模型 Global Minima 最適參數與超額夏普，並重新訓練產生最新回測排行榜"
-                    >
-                      {triggeringMarketMl ? <span className="loader" style={{ width: '13px', height: '13px', borderColor: 'white', borderBottomColor: 'transparent' }}></span> : '🧬 🏆 一鍵重訓全部 7 款模型 (直接搭配全域尋優)'}
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: marketMlModelType, auto_tune: true, tune_trials: marketMlTuneTrials })}
-                      disabled={triggeringMarketMl || fetchingMarketMl}
-                      style={{
-                        padding: '0.45rem 1rem',
-                        fontSize: '0.85rem',
-                        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35))',
-                        border: '1px solid #10B981',
-                        color: '#6EE7B7',
-                        borderRadius: '8px',
-                        fontWeight: 'bold',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        cursor: 'pointer'
-                      }}
-                      title={`對當前選定之 ${MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType} 執行貝氏尋優訓練`}
-                    >
-                      🎯 尋優重訓選定模型 ({MARKET_ML_MODELS.find(m => m.val === marketMlModelType)?.short || marketMlModelType})
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => handleTriggerMarketMlJob('market_ml_train', { model_type: 'all', auto_tune: false })}
-                      disabled={triggeringMarketMl || fetchingMarketMl}
-                      style={{
-                        padding: '0.45rem 0.95rem',
-                        fontSize: '0.85rem',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        color: '#94A3B8',
-                        borderRadius: '8px',
-                        fontWeight: 'normal',
-                        cursor: 'pointer'
-                      }}
-                      title="略過 Optuna 尋優，以標準既定參數快速重新訓練全體模型（節省時間）"
-                    >
-                      ⚡ 快速重訓 (不尋優)
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
 
 
 
@@ -5898,7 +5171,230 @@ function StockDashboard() {
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-                      {/* 1. 🏆 全 AI 大盤模型效能大比拼 (Leaderboard) 以供選擇 */}
+                      {/* 1. 回測時間區間與年份選擇器控制卡 (Time Horizon & Year Selector) */}
+                      <div style={{
+                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
+                        border: '1px solid rgba(59, 130, 246, 0.35)',
+                        borderRadius: '12px',
+                        padding: '1rem 1.25rem',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.85rem'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '1.1rem' }}>🗓️</span>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.96rem', color: '#93C5FD' }}>回測時間區間與年份選擇</span>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>（支援標準跨度、重大歷史黑天鵝壓測、單一年度或自訂跨年區間）</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>目前鎖定：</span>
+                            <span style={{
+                              background: 'rgba(59, 130, 246, 0.25)',
+                              color: '#93C5FD',
+                              border: '1px solid rgba(59, 130, 246, 0.5)',
+                              padding: '0.2rem 0.65rem',
+                              borderRadius: '6px',
+                              fontSize: '0.82rem',
+                              fontWeight: 'bold'
+                            }}>
+                              {activePeriodData?.name || activePeriodKey}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                              ({formatDateStr(activePeriodData?.start_date)} ~ {formatDateStr(activePeriodData?.end_date)}, {activePeriodData?.trading_days || 0} 交易日)
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 選擇維度 */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', paddingTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                          {/* 列 1：標準跨度 */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#CBD5E1', minWidth: '70px', fontWeight: 'bold' }}>標準跨度：</span>
+                            {[
+                              { key: 'oos_2y', label: '🎯 盲測驗證 (近 2 年 OOS)' },
+                              { key: '1y', label: '⚡ 近 1 年 (2025~2026)' },
+                              { key: '3y', label: '📈 近 3 年 (2023~2026)' },
+                              { key: '5y', label: '🏆 近 5 年 (2021~2026)' },
+                              { key: '10y', label: '🏛️ 近 10 年 (2016~2026)' },
+                              { key: '20y', label: '👑 20 年超長全歷史 (2005~2026)' }
+                            ].map(p => {
+                              const isActive = activePeriodKey === p.key;
+                              return (
+                                <button
+                                  key={p.key}
+                                  type="button"
+                                  className="btn"
+                                  style={{
+                                    padding: '0.3rem 0.75rem',
+                                    fontSize: '0.78rem',
+                                    borderRadius: '8px',
+                                    fontWeight: isActive ? 'bold' : 'normal',
+                                    background: isActive ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'rgba(255,255,255,0.05)',
+                                    color: isActive ? '#FFFFFF' : '#94A3B8',
+                                    border: isActive ? '1px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onClick={() => {
+                                    setMarketBacktestPeriod(p.key);
+                                    localStorage.setItem('market_bt_period_v2', p.key);
+                                    localStorage.setItem('market_bt_period', p.key);
+                                  }}
+                                >
+                                  {p.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* 列 2：情境壓測 */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#F59E0B', minWidth: '70px', fontWeight: 'bold' }}>情境壓測：</span>
+                            {[
+                              { key: '2008', label: '📉 2008 金融海嘯 (-46%)' },
+                              { key: '2011', label: '🇪🇺 2011 歐債危機 (-21%)' },
+                              { key: '2015', label: '🇨🇳 2015 陸股股災 (-10%)' },
+                              { key: '2018', label: '🛡️ 2018 中美貿易戰 (-8.6%)' },
+                              { key: '2020', label: '⚡ 2020 疫情恐慌急挫' },
+                              { key: '2022', label: '🔥 2022 Fed升息熊市 (-22.6%)' },
+                              { key: '2024', label: '🚀 2024 AI大狂潮 (+28.5%)' }
+                            ].map(p => {
+                              const isActive = activePeriodKey === p.key;
+                              return (
+                                <button
+                                  key={p.key}
+                                  type="button"
+                                  className="btn"
+                                  style={{
+                                    padding: '0.3rem 0.75rem',
+                                    fontSize: '0.78rem',
+                                    borderRadius: '8px',
+                                    fontWeight: isActive ? 'bold' : 'normal',
+                                    background: isActive ? 'linear-gradient(135deg, #D97706, #B45309)' : 'rgba(245, 158, 11, 0.08)',
+                                    color: isActive ? '#FFFFFF' : '#FDE68A',
+                                    border: isActive ? '1px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.25)',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onClick={() => {
+                                    setMarketBacktestPeriod(p.key);
+                                    localStorage.setItem('market_bt_period_v2', p.key);
+                                    localStorage.setItem('market_bt_period', p.key);
+                                  }}
+                                >
+                                  {p.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* 列 3：單一年度快選 & 自訂跨年區間 */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                            {/* 單一年度 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#CBD5E1', minWidth: '70px', fontWeight: 'bold' }}>單一年份：</span>
+                              <select
+                                className="form-control"
+                                style={{
+                                  padding: '0.25rem 0.65rem',
+                                  fontSize: '0.78rem',
+                                  borderRadius: '6px',
+                                  background: 'rgba(0,0,0,0.5)',
+                                  color: '#E2E8F0',
+                                  border: '1px solid rgba(255,255,255,0.2)',
+                                  cursor: 'pointer'
+                                }}
+                                value={(bt.available_years || []).includes(activePeriodKey) ? activePeriodKey : ''}
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    setMarketBacktestPeriod(e.target.value);
+                                    localStorage.setItem('market_bt_period_v2', e.target.value);
+                                    localStorage.setItem('market_bt_period', e.target.value);
+                                  }
+                                }}
+                              >
+                                <option value="" disabled>-- 選擇特定年份 --</option>
+                                {(bt.available_years || ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016']).slice().reverse().map(yr => (
+                                  <option key={yr} value={yr}>
+                                    📅 {yr} 年度
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* 自訂跨年份區間 */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#CBD5E1', fontWeight: 'bold' }}>自訂跨度：</span>
+                              <select
+                                className="form-control"
+                                style={{
+                                  padding: '0.25rem 0.5rem',
+                                  fontSize: '0.78rem',
+                                  borderRadius: '6px',
+                                  background: 'rgba(0,0,0,0.5)',
+                                  color: '#E2E8F0',
+                                  border: '1px solid rgba(255,255,255,0.2)'
+                                }}
+                                value={marketBtStartYear}
+                                onChange={(e) => {
+                                  setMarketBtStartYear(e.target.value);
+                                  localStorage.setItem('market_bt_start_year', e.target.value);
+                                }}
+                              >
+                                {(bt.available_years || ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026']).map(yr => (
+                                  <option key={yr} value={yr}>{yr} 年</option>
+                                ))}
+                              </select>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>至</span>
+                              <select
+                                className="form-control"
+                                style={{
+                                  padding: '0.25rem 0.5rem',
+                                  fontSize: '0.78rem',
+                                  borderRadius: '6px',
+                                  background: 'rgba(0,0,0,0.5)',
+                                  color: '#E2E8F0',
+                                  border: '1px solid rgba(255,255,255,0.2)'
+                                }}
+                                value={marketBtEndYear}
+                                onChange={(e) => {
+                                  setMarketBtEndYear(e.target.value);
+                                  localStorage.setItem('market_bt_end_year', e.target.value);
+                                }}
+                              >
+                                {(bt.available_years || ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026']).map(yr => (
+                                  <option key={yr} value={yr}>{yr} 年</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="btn"
+                                style={{
+                                  padding: '0.25rem 0.75rem',
+                                  fontSize: '0.78rem',
+                                  borderRadius: '6px',
+                                  background: activePeriodKey === 'custom' ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(16, 185, 129, 0.2)',
+                                  color: activePeriodKey === 'custom' ? '#FFFFFF' : '#6EE7B7',
+                                  border: activePeriodKey === 'custom' ? '1px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
+                                  fontWeight: 'bold',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                  setMarketBacktestPeriod('custom');
+                                  localStorage.setItem('market_bt_period_v2', 'custom');
+                                  localStorage.setItem('market_bt_period', 'custom');
+                                }}
+                              >
+                                {activePeriodKey === 'custom' ? '✓ 套用中' : '🔍 套用自訂區間'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+
+
+                      {/* 2. 🏆 全 AI 大盤模型效能大比拼 (Leaderboard) 以供選擇 */}
                       {comparisonList.length > 0 && (
                         <div style={{
                           background: 'rgba(15, 23, 42, 0.85)',
@@ -6223,576 +5719,6 @@ function StockDashboard() {
                             >
                               <span>🛡️ 做多 + 現金避險 (Long-Only)</span>
                             </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 2. 回測時間區間與年份選擇器控制卡 (Time Horizon & Year Selector) */}
-                      <div style={{
-                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
-                        border: '1px solid rgba(59, 130, 246, 0.35)',
-                        borderRadius: '12px',
-                        padding: '1rem 1.25rem',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.85rem'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '1.1rem' }}>🗓️</span>
-                            <span style={{ fontWeight: 'bold', fontSize: '0.96rem', color: '#93C5FD' }}>回測時間區間與年份選擇</span>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>（支援標準跨度、重大歷史黑天鵝壓測、單一年度或自訂跨年區間）</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>目前鎖定：</span>
-                            <span style={{
-                              background: 'rgba(59, 130, 246, 0.25)',
-                              color: '#93C5FD',
-                              border: '1px solid rgba(59, 130, 246, 0.5)',
-                              padding: '0.2rem 0.65rem',
-                              borderRadius: '6px',
-                              fontSize: '0.82rem',
-                              fontWeight: 'bold'
-                            }}>
-                              {activePeriodData?.name || activePeriodKey}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                              ({formatDateStr(activePeriodData?.start_date)} ~ {formatDateStr(activePeriodData?.end_date)}, {activePeriodData?.trading_days || 0} 交易日)
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 選擇維度 */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', paddingTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                          {/* 列 1：標準跨度 */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.78rem', color: '#CBD5E1', minWidth: '70px', fontWeight: 'bold' }}>標準跨度：</span>
-                            {[
-                              { key: 'oos_2y', label: '🎯 盲測驗證 (近 2 年 OOS)' },
-                              { key: '1y', label: '⚡ 近 1 年 (2025~2026)' },
-                              { key: '3y', label: '📈 近 3 年 (2023~2026)' },
-                              { key: '5y', label: '🏆 近 5 年 (2021~2026)' },
-                              { key: '10y', label: '🏛️ 近 10 年 (2016~2026)' },
-                              { key: '20y', label: '👑 20 年超長全歷史 (2005~2026)' }
-                            ].map(p => {
-                              const isActive = activePeriodKey === p.key;
-                              return (
-                                <button
-                                  key={p.key}
-                                  type="button"
-                                  className="btn"
-                                  style={{
-                                    padding: '0.3rem 0.75rem',
-                                    fontSize: '0.78rem',
-                                    borderRadius: '8px',
-                                    fontWeight: isActive ? 'bold' : 'normal',
-                                    background: isActive ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'rgba(255,255,255,0.05)',
-                                    color: isActive ? '#FFFFFF' : '#94A3B8',
-                                    border: isActive ? '1px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
-                                    transition: 'all 0.15s ease'
-                                  }}
-                                  onClick={() => {
-                                    setMarketBacktestPeriod(p.key);
-                                    localStorage.setItem('market_bt_period_v2', p.key);
-                                    localStorage.setItem('market_bt_period', p.key);
-                                  }}
-                                >
-                                  {p.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {/* 列 2：情境壓測 */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.78rem', color: '#F59E0B', minWidth: '70px', fontWeight: 'bold' }}>情境壓測：</span>
-                            {[
-                              { key: '2008', label: '📉 2008 金融海嘯 (-46%)' },
-                              { key: '2011', label: '🇪🇺 2011 歐債危機 (-21%)' },
-                              { key: '2015', label: '🇨🇳 2015 陸股股災 (-10%)' },
-                              { key: '2018', label: '🛡️ 2018 中美貿易戰 (-8.6%)' },
-                              { key: '2020', label: '⚡ 2020 疫情恐慌急挫' },
-                              { key: '2022', label: '🔥 2022 Fed升息熊市 (-22.6%)' },
-                              { key: '2024', label: '🚀 2024 AI大狂潮 (+28.5%)' }
-                            ].map(p => {
-                              const isActive = activePeriodKey === p.key;
-                              return (
-                                <button
-                                  key={p.key}
-                                  type="button"
-                                  className="btn"
-                                  style={{
-                                    padding: '0.3rem 0.75rem',
-                                    fontSize: '0.78rem',
-                                    borderRadius: '8px',
-                                    fontWeight: isActive ? 'bold' : 'normal',
-                                    background: isActive ? 'linear-gradient(135deg, #D97706, #B45309)' : 'rgba(245, 158, 11, 0.08)',
-                                    color: isActive ? '#FFFFFF' : '#FDE68A',
-                                    border: isActive ? '1px solid #F59E0B' : '1px solid rgba(245, 158, 11, 0.25)',
-                                    transition: 'all 0.15s ease'
-                                  }}
-                                  onClick={() => {
-                                    setMarketBacktestPeriod(p.key);
-                                    localStorage.setItem('market_bt_period_v2', p.key);
-                                    localStorage.setItem('market_bt_period', p.key);
-                                  }}
-                                >
-                                  {p.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {/* 列 3：單一年度快選 & 自訂跨年區間 */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-                            {/* 單一年度 */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#CBD5E1', minWidth: '70px', fontWeight: 'bold' }}>單一年份：</span>
-                              <select
-                                className="form-control"
-                                style={{
-                                  padding: '0.25rem 0.65rem',
-                                  fontSize: '0.78rem',
-                                  borderRadius: '6px',
-                                  background: 'rgba(0,0,0,0.5)',
-                                  color: '#E2E8F0',
-                                  border: '1px solid rgba(255,255,255,0.2)',
-                                  cursor: 'pointer'
-                                }}
-                                value={(bt.available_years || []).includes(activePeriodKey) ? activePeriodKey : ''}
-                                onChange={(e) => {
-                                  if (e.target.value) {
-                                    setMarketBacktestPeriod(e.target.value);
-                                    localStorage.setItem('market_bt_period_v2', e.target.value);
-                                    localStorage.setItem('market_bt_period', e.target.value);
-                                  }
-                                }}
-                              >
-                                <option value="" disabled>-- 選擇特定年份 --</option>
-                                {(bt.available_years || ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016']).slice().reverse().map(yr => (
-                                  <option key={yr} value={yr}>
-                                    📅 {yr} 年度
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            {/* 自訂跨年份區間 */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span style={{ fontSize: '0.78rem', color: '#CBD5E1', fontWeight: 'bold' }}>自訂跨度：</span>
-                              <select
-                                className="form-control"
-                                style={{
-                                  padding: '0.25rem 0.5rem',
-                                  fontSize: '0.78rem',
-                                  borderRadius: '6px',
-                                  background: 'rgba(0,0,0,0.5)',
-                                  color: '#E2E8F0',
-                                  border: '1px solid rgba(255,255,255,0.2)'
-                                }}
-                                value={marketBtStartYear}
-                                onChange={(e) => {
-                                  setMarketBtStartYear(e.target.value);
-                                  localStorage.setItem('market_bt_start_year', e.target.value);
-                                }}
-                              >
-                                {(bt.available_years || ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026']).map(yr => (
-                                  <option key={yr} value={yr}>{yr} 年</option>
-                                ))}
-                              </select>
-                              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>至</span>
-                              <select
-                                className="form-control"
-                                style={{
-                                  padding: '0.25rem 0.5rem',
-                                  fontSize: '0.78rem',
-                                  borderRadius: '6px',
-                                  background: 'rgba(0,0,0,0.5)',
-                                  color: '#E2E8F0',
-                                  border: '1px solid rgba(255,255,255,0.2)'
-                                }}
-                                value={marketBtEndYear}
-                                onChange={(e) => {
-                                  setMarketBtEndYear(e.target.value);
-                                  localStorage.setItem('market_bt_end_year', e.target.value);
-                                }}
-                              >
-                                {(bt.available_years || ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026']).map(yr => (
-                                  <option key={yr} value={yr}>{yr} 年</option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                className="btn"
-                                style={{
-                                  padding: '0.25rem 0.75rem',
-                                  fontSize: '0.78rem',
-                                  borderRadius: '6px',
-                                  background: activePeriodKey === 'custom' ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(16, 185, 129, 0.2)',
-                                  color: activePeriodKey === 'custom' ? '#FFFFFF' : '#6EE7B7',
-                                  border: activePeriodKey === 'custom' ? '1px solid #10B981' : '1px solid rgba(16, 185, 129, 0.4)',
-                                  fontWeight: 'bold',
-                                  cursor: 'pointer'
-                                }}
-                                onClick={() => {
-                                  setMarketBacktestPeriod('custom');
-                                  localStorage.setItem('market_bt_period_v2', 'custom');
-                                  localStorage.setItem('market_bt_period', 'custom');
-                                }}
-                              >
-                                {activePeriodKey === 'custom' ? '✓ 套用中' : '🔍 套用自訂區間'}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-
-                      {/* 2.8 👑 泰坦王權主宰旗艦版 (Option A 70/15/15) 核心量化操作邏輯與風控防線 */}
-                      {activeModelKey === 'titan_sovereign' && (
-                        <div style={{
-                          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))',
-                          border: '1px solid rgba(245, 158, 11, 0.45)',
-                          borderRadius: '12px',
-                          padding: '1.25rem 1.4rem',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.85rem'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                              <span style={{ fontSize: '1.35rem' }}>👑</span>
-                              <div>
-                                <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#FBBF24', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                  <span>泰坦王權主宰旗艦版 (二階段 Top 10 高勝率精選 + 週度動態遞補)</span>
-                                  <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FDE68A', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '0.1rem 0.5rem', borderRadius: '10px' }}>
-                                    嚴格零偷看未來・動態遞補消除空窗期・T+1開盤扣 0.585% 稅費
-                                  </span>
-                                </h4>
-                                <span style={{ fontSize: '0.76rem', color: '#CBD5E1', marginTop: '0.2rem', display: 'block' }}>
-                                  Stage 1 動能初篩 Top 10 強者池 ➔ Stage 2 高勝率指標二次精選 (投信認養 25% + 法人 15% + 動能平滑 10% + 均線多頭 10% + 動能 40%)，搭配週度動態遞補開倉，徹底消除停損後的資金閒置！
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* 即時資金水位現況 Badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                              <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>當前持股水位</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#34D399' }}>100.0%</div>
-                              </div>
-                              <div style={{ background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.68rem', color: '#93C5FD' }}>當前現金儲備</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#60A5FA' }}>0.0%</div>
-                              </div>
-                              <div style={{ background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.68rem', color: '#C4B5FD' }}>{is20ySelected ? '20年全歷史平均曝險' : '10年歷史平均曝險'}</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#A78BFA' }}>85.0%</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* 4 大核心操作邏輯模組卡片 */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '0.75rem' }}>
-                            {/* 1. 宏觀大盤季線濾網 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🏛️</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#93C5FD' }}>第一道防線：宏觀大盤季線保護</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                <strong style={{ color: '#F1F5F9' }}>加權收盤價 &gt; 60MA 季線</strong> 才准許做多。實體跌破季線時全組合強制<strong style={{ color: '#60A5FA' }}>退回 100% 現金空倉</strong>避險，完美閃避 2022 (-22%)、2020、2018 系統性股災。
-                              </div>
-                            </div>
-
-                            {/* 2. 二階段選股架構 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245, 158, 11, 0.35)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🎯</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#FCD34D' }}>二階段選股：Top 10 動能初篩 ➔ 高勝率精選</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                第一階段先用 RS、創高姿態與均線斜率挑出 <strong style={{ color: '#FDE68A' }}>Top 10 強者池</strong>；第二階段在 Top 10 中評估 <strong style={{ color: '#FBBF24' }}>投信認養 25% + 法人 15% + Sharpe平滑 10% + 均線多頭 10%</strong>，精選勝率最高之王者 (70%) 與衛星 (15% x 2)。
-                              </div>
-                            </div>
-
-                            {/* 3. 消除空窗期：週度動態遞補開倉 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>⚡</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#6EE7B7' }}>消除空窗期：週度動態遞補開倉 (Refill)</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                部位停損撤出後，只要大盤多頭健康，<strong style={{ color: '#34D399' }}>每 5 交易日 (週度) 檢視空缺直接開新倉遞補</strong>，資金不再乾等 30 天，徹底消除閒置 Cash Drag，盈虧比衝高至 <strong style={{ color: '#34D399' }}>2.10</strong>！
-                              </div>
-                            </div>
-
-                            {/* 4. 嚴格斷尾停損 & 贏家再平衡 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🛡️</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>嚴密風控：-12% 及時斷尾 & 季線停損</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                王者跌破 60MA 季線或衛星觸發 <strong>-12% 停損線</strong> 立即離場斷尾，釋出資金於大盤健康時等比向在席贏家再平衡與週度遞補，推動 20 年累積 <strong style={{ color: '#A78BFA' }}>+5,397.0% (55.0倍)</strong> 複利飛輪！
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 2.8.1 🌐 全球高流動性泰坦方案 A 核心量化操作邏輯與風控防線 */}
-                      {activeModelKey === 'global_liquid_titan_a' && (
-                        <div style={{
-                          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))',
-                          border: '1px solid rgba(14, 165, 233, 0.45)',
-                          borderRadius: '12px',
-                          padding: '1.25rem 1.4rem',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.85rem'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                              <span style={{ fontSize: '1.35rem' }}>🌐</span>
-                              <div>
-                                <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                  <span>全球高流動性泰坦旗艦（最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30 - 慢慢跟他玩）</span>
-                                  <span style={{ fontSize: '0.72rem', background: 'rgba(14, 165, 233, 0.2)', color: '#BAE6FD', border: '1px solid rgba(14, 165, 233, 0.4)', padding: '0.1rem 0.5rem', borderRadius: '10px' }}>
-                                    國內券商直購・零海外開戶門檻・月度動態輪動・扣除雙向交易摩擦
-                                  </span>
-                                </h4>
-                                <span style={{ fontSize: '0.76rem', color: '#CBD5E1', marginTop: '0.2rem', display: 'block' }}>
-                                  跨國流動性巨頭池（台股前 50 大 + 美股標普/那斯達克龍頭共 144 檔），透過 SPY 200MA 總經牛熊防線，結合 1,134 組全覆蓋 DOE 最佳化，集中精選最強 Top 3 狂飆主力 (40% / 30% / 30%)！
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* 即時資金水位現況 Badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                              <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>當前持股水位</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#34D399' }}>100.0%</div>
-                              </div>
-                              <div style={{ background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.68rem', color: '#93C5FD' }}>當前現金儲備</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#60A5FA' }}>0.0%</div>
-                              </div>
-                              <div style={{ background: 'rgba(14, 165, 233, 0.15)', border: '1px solid rgba(14, 165, 233, 0.4)', borderRadius: '8px', padding: '0.35rem 0.75rem', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.68rem', color: '#BAE6FD' }}>全球配置標的池</div>
-                                <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#38BDF8' }}>144 檔</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* 4 大核心操作邏輯模組卡片 */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '0.75rem' }}>
-                            {/* 1. SPY 200MA 總經牛熊防線 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🏛️</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#93C5FD' }}>第一道防線：SPY 200MA 總經牛熊防護網</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                標普 500 指數 (SPY) 收盤價 &gt; 200MA 年線方可做多；一旦實體跌破年線，全策略強制<strong style={{ color: '#60A5FA' }}>退回 100% 現金空倉</strong>避險，徹底閃避 2008 金融海嘯與 2022 升息大熊市。
-                              </div>
-                            </div>
-
-                            {/* 2. Top 3 階梯權重配置 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(14, 165, 233, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>⚖️</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#38BDF8' }}>第二道核心：Top 3 溫和階梯權重配置 (40/30/30)</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                經 22 年 1,134 組全覆蓋 DOE 最佳化，第 1 王者重壓 <strong style={{ color: '#FBBF24' }}>40% (莫德納)</strong>，第 2~3 主力分別配置 <strong style={{ color: '#38BDF8' }}>30% (欣興、創意)</strong>，兼顧最強爆發力與抗回撤平衡。
-                              </div>
-                            </div>
-
-                            {/* 3. 12M 跨期動能複合指標 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>🚀</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#6EE7B7' }}>第三道指標：12M 跨期複合動能評分</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                計算近 3 個月與近 12 個月複合動能強度，精確捕捉跨國超級成長股 (如 NVDA、TSLA、欣興、創意) 的主升段行情，剔除假突破噪聲。
-                              </div>
-                            </div>
-
-                            {/* 4. 月度輪動與券商無痛下單 */}
-                            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                                <span>💳</span>
-                                <span style={{ fontWeight: 'bold', fontSize: '0.84rem', color: '#C4B5FD' }}>第四道實戰：月度自動輪動 & 國內券商直購</span>
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#94A3B8', lineHeight: '1.45' }}>
-                                每月首個交易日開盤自動再平衡調倉，所有 144 檔成分股皆可在台灣本地券商以現股或海外複委託直接下單，免受海外券商出入金繁瑣困擾。
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 3. 核心量化指標 Hero 看板 (8 大量化評估卡片) */}
-                      {activeModeData && (
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                          gap: '0.85rem'
-                        }}>
-                          {/* 策略總報酬率 */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(16, 185, 129, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #10B981'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>累積總報酬率 (Total Return)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: activeModeData.total_return_pct >= 0 ? '#34D399' : '#F87171' }}>
-                              {activeModeData.total_return_pct >= 0 ? '+' : ''}{activeModeData.total_return_pct?.toFixed(1)}%
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <div>同期大盤: <span style={{ color: (benchmark.total_return_pct || 0) >= 0 ? '#E2E8F0' : '#FCA5A5' }}>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</span></div>
-                              {etf0050 && (
-                                <div style={{ color: '#C4B5FD' }}>
-                                  同期 0050: <span style={{ fontWeight: 'bold' }}>+{(etf0050.total_return_pct || 0).toFixed(1)}%</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 年化報酬率 (CAGR) */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(59, 130, 246, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #3B82F6'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>年化複合成長率 (CAGR)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#60A5FA' }}>
-                              +{activeModeData.cagr_pct?.toFixed(1)}%
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <div>同期大盤: <span style={{ color: (benchmark.cagr_pct || 0) >= 0 ? '#E2E8F0' : '#FCA5A5' }}>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</span></div>
-                              {etf0050 && (
-                                <div style={{ color: '#C4B5FD' }}>
-                                  0050 CAGR: <span style={{ fontWeight: 'bold' }}>+{(etf0050.cagr_pct || 0).toFixed(1)}%</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 超額報酬 (Alpha) */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(245, 158, 11, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #F59E0B'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>超額 Alpha (年化)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: activeModeData.alpha_pct >= 0 ? '#FBBF24' : '#94A3B8' }}>
-                              {activeModeData.alpha_pct >= 0 ? '+' : ''}{activeModeData.alpha_pct?.toFixed(1)}%
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              相對基準指數超額表現
-                            </div>
-                          </div>
-
-                          {/* 最大歷史回撤 (MDD) */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(239, 68, 68, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #EF4444'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>最大歷史回撤 (MDD)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#F87171' }}>
-                              {activeModeData.max_drawdown_pct?.toFixed(1)}%
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <div>大盤回撤: <span style={{ color: '#FCA5A5' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</span> (風險顯著降低)</div>
-                              {etf0050 && (
-                                <div style={{ color: '#C4B5FD' }}>
-                                  0050回撤: <span style={{ color: '#FCA5A5' }}>{(etf0050.max_drawdown_pct || 0).toFixed(1)}%</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 夏普比率 (Sharpe Ratio) */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(139, 92, 246, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #8B5CF6'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>夏普比率 (Sharpe Ratio)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#C084FC' }}>
-                              {activeModeData.sharpe_ratio?.toFixed(2)}
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              大盤買進持有: <span style={{ color: '#E2E8F0' }}>{benchmark.sharpe_ratio?.toFixed(2)}</span>
-                            </div>
-                          </div>
-
-                          {/* 索提諾比率 (Sortino Ratio) */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(236, 72, 153, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #EC4899'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>索提諾比率 (Sortino)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#F472B6' }}>
-                              {activeModeData.sortino_ratio?.toFixed(2)}
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              下檔波動懲罰回饋指標
-                            </div>
-                          </div>
-
-                          {/* 交易勝率 (Win Rate) */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(20, 184, 166, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #14B8A6'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>交易勝率 (Win Rate)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#2DD4BF' }}>
-                              {activeModeData.win_rate_pct?.toFixed(1)}%
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              {activeModeData.win_trades} 勝 / {activeModeData.loss_trades} 負 (共 {activeModeData.total_trades} 筆)
-                            </div>
-                          </div>
-
-                          {/* 獲利因子與曝險 */}
-                          <div style={{
-                            background: 'rgba(15, 23, 42, 0.75)',
-                            border: '1px solid rgba(99, 102, 241, 0.4)',
-                            borderRadius: '10px',
-                            padding: '0.85rem 1rem',
-                            borderTop: '3px solid #6366F1'
-                          }}>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>獲利因子 (Profit Factor)</div>
-                            <div style={{ fontSize: '1.45rem', fontWeight: 'bold', color: '#818CF8' }}>
-                              {activeModeData.profit_factor?.toFixed(2)}
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                              市場曝險比率: <span style={{ color: '#E2E8F0' }}>{activeModeData.market_exposure_pct?.toFixed(1)}%</span>
-                            </div>
                           </div>
                         </div>
                       )}
