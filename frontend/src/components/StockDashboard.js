@@ -851,7 +851,46 @@ const DEFAULT_DB_TABLES = [
     task_type: 'daily',
     row_count: 38,
     latest_date: '2026/10/09',
-    columns_count: 11,
+    columns_count: 14,
+    status: 'active'
+  },
+  {
+    id: 'global_sovereign_positions',
+    name: '全球主權實盤持股 (global_sovereign_positions)',
+    desc: '全球主權實作當前實盤持股明細、成本、股數與盈虧狀態',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '即時同步更新',
+    task_type: 'global_sovereign',
+    row_count: 3,
+    latest_date: '2026/10/11',
+    columns_count: 13,
+    status: 'active'
+  },
+  {
+    id: 'global_sovereign_trades',
+    name: '全球主權交易紀錄 (global_sovereign_trades)',
+    desc: '全球主權泰坦完整歷史買進/賣出交易紀錄與已實現損益',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '即時同步更新',
+    task_type: 'global_sovereign',
+    row_count: 3,
+    latest_date: '2026/10/11',
+    columns_count: 13,
+    status: 'active'
+  },
+  {
+    id: 'global_sovereign_account',
+    name: '全球主權帳戶資金 (global_sovereign_account)',
+    desc: '全球主權泰坦帳戶本金、當前可用現金 (TWD) 與即時匯率換算',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '即時同步更新',
+    task_type: 'global_sovereign',
+    row_count: 4,
+    latest_date: '2026/10/11',
+    columns_count: 2,
     status: 'active'
   }
 ];
@@ -3622,7 +3661,7 @@ function StockDashboard() {
                   name: rt.name || rt.id,
                   desc: rt.desc || '',
                   category: rt.category || '其他',
-                  categoryKey: 'system',
+                  categoryKey: rt.categoryKey || (rt.category === '泰坦實作' ? 'titan' : rt.category === '全球資產' ? 'global' : rt.category === '台股核心' ? 'core' : (rt.category === '總體經濟' || rt.category === '大盤總覽') ? 'macro' : rt.category === '基本面' ? 'fundamental' : (rt.category === '籌碼面' || rt.category === '期貨籌碼') ? 'chips' : 'system'),
                   frequency: rt.frequency || '定期更新',
                   task_type: rt.task_type || 'daily',
                   row_count: rt.row_count || 0,

@@ -190,6 +190,26 @@ export default function GlobalSovereignDashboard() {
     note: ''
   });
 
+  // 編輯/新增持股部位彈窗
+  const [editPosModal, setEditPosModal] = useState({
+    open: false,
+    isNew: false,
+    id: '',
+    ticker: '',
+    name: '',
+    market: '美股 (NASDAQ)',
+    currency: 'USD',
+    role: '👑 第1王者 (40%)',
+    shares: '',
+    entry_price: '',
+    current_price: '',
+    entry_date: new Date().toISOString().split('T')[0],
+    entry_fee: '15',
+    stop_loss_price: '',
+    stop_condition: '',
+    syncBuyTx: true
+  });
+
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
   const triggerNotice = (msg) => {
@@ -884,12 +904,180 @@ export default function GlobalSovereignDashboard() {
     triggerNotice(`✅ 已成功${editTxModal.isNew ? '新增' : '更新修正'}「${updatedTx.name}」歷史交易明細！`);
   };
 
-  const handleDeleteTx = (id, name, action) => {
-    if (window.confirm(`確定要刪除「${action} ${name}」這筆全球主權歷史紀錄嗎？\n刪除後無法復原。`)) {
+  const handleOpenAddPosition = () => {
+    setEditPosModal({
+      open: true,
+      isNew: true,
+      id: `pos_global_${Date.now()}`,
+      ticker: '',
+      name: '',
+      market: '美股 (NASDAQ)',
+      currency: 'USD',
+      role: '👑 第1王者 (40%)',
+      shares: '50',
+      entry_price: '',
+      current_price: '',
+      entry_date: new Date().toISOString().split('T')[0],
+      entry_fee: '15',
+      stop_loss_price: '',
+      stop_condition: '依全球主權階梯輪動持有',
+      syncBuyTx: true
+    });
+  };
+
+  const handleOpenEditPosition = (pos) => {
+    setEditPosModal({
+      open: true,
+      isNew: false,
+      id: pos.id,
+      ticker: pos.ticker,
+      name: pos.name,
+      market: pos.market || (pos.currency === 'USD' ? '美股 (NASDAQ)' : '台股 (TWSE)'),
+      currency: pos.currency || 'USD',
+      role: pos.role || '👑 第1王者 (40%)',
+      shares: String(pos.shares || ''),
+      entry_price: String(pos.entry_price || ''),
+      current_price: String(pos.current_price || pos.entry_price || ''),
+      entry_date: pos.entry_date || new Date().toISOString().split('T')[0],
+      entry_fee: String(pos.entry_fee || '0'),
+      stop_loss_price: String(pos.stop_loss_price || ''),
+      stop_condition: pos.stop_condition || '',
+      syncBuyTx: false
+    });
+  };
+
+  const handleDeletePosition = (pos) => {
+    const matchingTx = txHistory.find(t => (t.ticker === pos.ticker || t.name === pos.name) && (t.action === '買入' || t.action === 'BUY'));
+    if (matchingTx) {
+      const confirmBoth = window.confirm(
+        `確定要自全球持股清單中刪除「${pos.name} (${pos.ticker})」部位嗎？\n\n💡 系統偵測到歷史流水帳中存在建倉買進紀錄 (${matchingTx.date} 買入 ${pos.name})。\n\n是否【同時刪除持股部位與其歷史買入紀錄】？\n• 點擊「確定」：同時刪除持股部位 + 歷史買進紀錄\n• 點擊「取消」：保留不作變更`
+      );
+      if (confirmBoth) {
+        setUserPositions(prev => prev.filter(p => p.id !== pos.id));
+        setTxHistory(prev => prev.filter(t => t.id !== matchingTx.id));
+        triggerNotice(`🗑️ 已同步移除「${pos.name}」全球持股部位與歷史買進紀錄！`);
+        return;
+      }
+      return;
+    }
+
+    if (window.confirm(`確定要從全球持股清單中刪除「${pos.name} (${pos.ticker})」部位嗎？\n刪除後該部位不再計入總淨值。`)) {
+      setUserPositions(prev => prev.filter(p => p.id !== pos.id));
+      triggerNotice(`🗑️ 已成功刪除持股「${pos.name}」！`);
+    }
+  };
+
+  const handleSavePosition = (e) => {
+    e.preventDefault();
+    const ticker = editPosModal.ticker.trim();
+    const name = editPosModal.name.trim();
+    if (!ticker || !name) {
+      alert('請填寫標的代號與名稱！');
+      return;
+    }
+    const isUsd = editPosModal.currency === 'USD';
+    const fx = isUsd ? usdFx : 1.0;
+    const sharesNum = parseFloat(editPosModal.shares) || 0;
+    const entryPx = parseFloat(editPosModal.entry_price) || 0;
+    const curPx = parseFloat(editPosModal.current_price) || entryPx;
+    const feeNum = parseFloat(editPosModal.entry_fee) || 0;
+    const stopPx = parseFloat(editPosModal.stop_loss_price) || (entryPx * 0.9);
+
+    const posObj = {
+      id: editPosModal.id,
+      ticker: ticker,
+      name: name,
+      market: editPosModal.market,
+      currency: editPosModal.currency,
+      role: editPosModal.role,
+      shares: sharesNum,
+      entry_price: entryPx,
+      current_price: curPx,
+      entry_date: editPosModal.entry_date,
+      entry_fee: feeNum,
+      stop_loss_price: stopPx,
+      stop_condition: editPosModal.stop_condition || '依全球主權階梯輪動持有'
+    };
+
+    if (editPosModal.isNew) {
+      setUserPositions(prev => [posObj, ...prev.filter(p => p.ticker !== ticker)]);
+      if (editPosModal.syncBuyTx) {
+        const costOrig = sharesNum * entryPx + feeNum;
+        const costTwd = costOrig * fx;
+        const newTx = {
+          id: `tx_global_add_${Date.now()}`,
+          date: editPosModal.entry_date,
+          action: '買入',
+          ticker: ticker,
+          name: name,
+          currency: editPosModal.currency,
+          shares: sharesNum,
+          price: entryPx,
+          tax_fee: feeNum,
+          cash_flow_twd: -Math.round(costTwd),
+          realized_pnl_twd: null,
+          realized_return_pct: null,
+          note: `手動新增全球建倉 ${editPosModal.role}`
+        };
+        setTxHistory(prev => [newTx, ...prev]);
+        setIdleCash(prev => Math.max(0, prev - Math.round(costTwd)));
+      }
+      triggerNotice(`✅ 已成功新增全球持股「${name} (${ticker})」！`);
+    } else {
+      setUserPositions(prev => prev.map(p => p.id === posObj.id ? posObj : p));
+      triggerNotice(`✏️ 已成功更新全球持股「${name} (${ticker})」明細！`);
+    }
+    setEditPosModal(prev => ({ ...prev, open: false }));
+  };
+
+  const syncToDatabase = async () => {
+    try {
+      const res = await fetch('/api/global_titan/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          positions: userPositions,
+          trades: txHistory,
+          account: {
+            current_cash_twd: idleCash,
+            initial_capital_twd: 1000000.0,
+            usd_fx: usdFx,
+            updated_at: new Date().toISOString()
+          }
+        })
+      });
+      if (res.ok) {
+        triggerNotice('💾 已成功將全球主權泰坦持股與歷史帳簿持久化至資料庫！');
+      } else {
+        triggerNotice('⚠️ 資料庫同步回應異常，已妥善保存在本機快取');
+      }
+    } catch (e) {
+      console.warn('同步至後端資料庫跳過:', e);
+      triggerNotice('💾 目前離線模式，全球持股與交易已妥善保存在本機');
+    }
+  };
+
+  const handleDeleteTx = (id, ticker, name, action) => {
+    const matchingPos = userPositions.find(p => (ticker && p.ticker === ticker) || p.name === name);
+    if (matchingPos && (action === '買入' || action === 'BUY')) {
+      const confirmBoth = window.confirm(
+        `確定要刪除「${action} ${name} (${ticker})」這筆全球歷史交易紀錄嗎？\n\n⚠️ 系統偵測到您目前持有中部位亦包含「${name} (${matchingPos.shares} 股)」！\n\n是否【同步刪除持股部位】？\n• 點擊「確定」：同時刪除歷史交易紀錄 + 移除該持股部位\n• 點擊「取消」：保留兩者不作任何變更`
+      );
+      if (confirmBoth) {
+        setTxHistory(prev => prev.filter(item => item.id !== id));
+        setUserPositions(prev => prev.filter(p => p.id !== matchingPos.id));
+        triggerNotice(`🗑️ 已同步刪除「${name}」全球歷史交易紀錄與持股部位！`);
+        return;
+      }
+      return;
+    }
+
+    if (window.confirm(`確定要刪除「${action} ${name}」這筆全球歷史交易紀錄嗎？\n刪除後無法復原。`)) {
       setTxHistory(prev => prev.filter(item => item.id !== id));
       triggerNotice(`🗑️ 已成功刪除「${name}」該筆歷史交易紀錄！`);
     }
   };
+
 
   return (
     <div className="global-sovereign-dashboard" style={{ animation: 'fadeIn 0.25s ease', paddingBottom: '3rem' }}>
@@ -1024,17 +1212,56 @@ export default function GlobalSovereignDashboard() {
                   💼 當前實戰持有中部位 ({userPositions.length} 檔)
                 </h4>
                 <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  目前實戰帳戶真實持倉。若需平倉可隨時點擊右側「🚪 出場」自訂賣出價與稅費結算。
+                  目前實戰帳戶真實持倉。可點擊「➕ 新增持股部位」手動建倉，或點擊操作欄進行「✏️ 編輯修改」、「🚪 出場」與「🗑️ 刪除」。
                 </p>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.1)', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
-                當前持股市值合計: <strong>NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '0.78rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.1)', padding: '0.28rem 0.6rem', borderRadius: '4px' }}>
+                  當前持股市值合計: <strong>NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
+                </div>
+                <button
+                  onClick={handleOpenAddPosition}
+                  style={{
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    border: 'none',
+                    color: '#FFF',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '5px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                >
+                  ➕ 新增持股部位
+                </button>
+                <button
+                  onClick={syncToDatabase}
+                  style={{
+                    background: 'rgba(99, 102, 241, 0.2)',
+                    border: '1px solid rgba(99, 102, 241, 0.5)',
+                    color: '#A5B4FC',
+                    padding: '0.3rem 0.75rem',
+                    borderRadius: '5px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                  title="立即將全球主權泰坦持股部位與交易歷史持久化寫入本地 SQLite 資料庫與 Supabase 快照"
+                >
+                  💾 存入資料庫
+                </button>
               </div>
             </div>
 
             {userPositions.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-                目前尚無持股部位。請於下方「月底持倉更動建議」執行買入！
+                目前尚無持股部位。資金 100% 待命中，可點擊上方「➕ 新增持股部位」或於下方「月底持倉更動建議」執行買入！
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -1050,7 +1277,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>目前市值 (折合NT$)</th>
                       <th style={{ textAlign: 'right' }}>未實現損益</th>
                       <th style={{ textAlign: 'right' }}>佔總淨值%</th>
-                      <th style={{ textAlign: 'center', minWidth: '90px' }}>操作</th>
+                      <th style={{ textAlign: 'center', minWidth: '150px' }}>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1103,20 +1330,53 @@ export default function GlobalSovereignDashboard() {
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
                             {allocPct.toFixed(1)}%
                           </td>
-                          <td style={{ textAlign: 'center' }}>
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <button
+                              onClick={() => handleOpenEditPosition(pos)}
+                              style={{
+                                padding: '0.22rem 0.45rem',
+                                fontSize: '0.72rem',
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                border: '1px solid rgba(56, 189, 248, 0.4)',
+                                color: '#38BDF8',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginRight: '4px'
+                              }}
+                              title="編輯修改全球持股股數、成本均價與條件"
+                            >
+                              ✏️ 編輯
+                            </button>
                             <button
                               onClick={() => handleOpenExitModal(pos)}
                               style={{
-                                padding: '0.25rem 0.6rem',
-                                fontSize: '0.74rem',
-                                background: 'linear-gradient(135deg, #EF4444, #B91C1C)',
+                                padding: '0.22rem 0.45rem',
+                                fontSize: '0.72rem',
+                                background: 'linear-gradient(135deg, #F59E0B, #D97706)',
                                 color: '#FFF',
                                 border: 'none',
                                 borderRadius: '4px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                marginRight: '4px'
                               }}
+                              title="平倉出場"
                             >
                               🚪 出場
+                            </button>
+                            <button
+                              onClick={() => handleDeletePosition(pos)}
+                              style={{
+                                padding: '0.22rem 0.45rem',
+                                fontSize: '0.72rem',
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                color: '#F87171',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                              title="自持股清單中移除此部位"
+                            >
+                              🗑️ 刪除
                             </button>
                           </td>
                         </tr>
@@ -1502,7 +1762,7 @@ export default function GlobalSovereignDashboard() {
                               ✏️ 編輯
                             </button>
                             <button
-                              onClick={() => handleDeleteTx(tx.id, tx.name, tx.action)}
+                              onClick={() => handleDeleteTx(tx.id, tx.ticker, tx.name, tx.action)}
                               style={{
                                 background: 'rgba(239, 68, 68, 0.15)',
                                 border: '1px solid rgba(239, 68, 68, 0.4)',
@@ -2035,6 +2295,242 @@ export default function GlobalSovereignDashboard() {
           </div>
         </div>
       )}
+      {/* 編輯 / 新增全球持股部位彈窗 Modal */}
+      {editPosModal.open && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100000, backdropFilter: 'blur(4px)', padding: '1rem'
+        }}>
+          <div className="glass-card" style={{
+            maxWidth: '520px', width: '100%',
+            background: 'linear-gradient(135deg, #0F172A, #1E293B)',
+            border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '10px', padding: '1.4rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.15rem' }}>
+                {editPosModal.isNew ? '➕ 手動新增全球主權持股部位' : `✏️ 編輯持股部位 - ${editPosModal.name}`}
+              </h4>
+              <button
+                onClick={() => setEditPosModal({ ...editPosModal, open: false })}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePosition}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>標的代碼</label>
+                  <input
+                    type="text"
+                    placeholder="例: MRNA, 3037.TW"
+                    value={editPosModal.ticker}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, ticker: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>商品/股票名稱</label>
+                  <input
+                    type="text"
+                    placeholder="例: 莫德納 (Moderna)"
+                    value={editPosModal.name}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, name: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>市場別</label>
+                  <select
+                    value={editPosModal.market}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, market: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: '#1E293B', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  >
+                    <option value="美股 (NASDAQ)">美股 (NASDAQ)</option>
+                    <option value="美股 (NYSE)">美股 (NYSE)</option>
+                    <option value="台股 (TWSE)">台股 (TWSE)</option>
+                    <option value="全球 (ETF)">全球 (ETF)</option>
+                    <option value="避險債券 (CASH)">避險債券 (CASH)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>計價幣別</label>
+                  <select
+                    value={editPosModal.currency}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, currency: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: '#1E293B', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  >
+                    <option value="USD">美元 (USD)</option>
+                    <option value="TWD">新台幣 (TWD)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>配置角色</label>
+                  <select
+                    value={editPosModal.role}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, role: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: '#1E293B', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  >
+                    <option value="👑 第1王者 (40%)">👑 第1王者 (40%)</option>
+                    <option value="🥈 第2主力 (30%)">🥈 第2主力 (30%)</option>
+                    <option value="🥉 第3主力 (30%)">🥉 第3主力 (30%)</option>
+                    <option value="🛡️ 現金避險">🛡️ 現金避險</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>持有股數</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="例: 54"
+                    value={editPosModal.shares}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, shares: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>
+                    成本均價 ({editPosModal.currency})
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="例: 186.61"
+                    value={editPosModal.entry_price}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, entry_price: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>
+                    最新現價 ({editPosModal.currency})
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="例: 225.0"
+                    value={editPosModal.current_price}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, current_price: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>建倉日期</label>
+                  <input
+                    type="date"
+                    value={editPosModal.entry_date}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, entry_date: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>停損與出場條件</label>
+                  <input
+                    type="text"
+                    placeholder="例: SPY破年線清倉、月底階梯動態輪動"
+                    value={editPosModal.stop_condition}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, stop_condition: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {editPosModal.isNew && (
+                <div style={{ marginBottom: '1.2rem', background: 'rgba(16, 185, 129, 0.1)', padding: '0.6rem', borderRadius: '6px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.8rem', color: '#A7F3D0' }}>
+                    <input
+                      type="checkbox"
+                      checked={editPosModal.syncBuyTx}
+                      onChange={(e) => setEditPosModal({ ...editPosModal, syncBuyTx: e.target.checked })}
+                    />
+                    <span>連動於下方歷史帳簿新增一筆「買入建倉」流水帳紀錄（並自動扣抵可用資金）</span>
+                  </label>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setEditPosModal({ ...editPosModal, open: false })}
+                  style={{ padding: '0.45rem 1rem', fontSize: '0.84rem' }}
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  className="btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    color: '#FFF', fontWeight: 'bold', padding: '0.45rem 1.2rem', fontSize: '0.84rem'
+                  }}
+                >
+                  確認儲存全球持股
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
