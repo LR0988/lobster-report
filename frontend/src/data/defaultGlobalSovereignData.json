@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "generated_at": "2026-10-11 07:56:20",
+  "generated_at": "2026-10-11 08:08:42",
   "latest_data_date": "2026-10-09",
   "top_pick": {
     "ticker": "EWY",
@@ -16,6 +16,21 @@
     "score": 58.67,
     "status": "🔥 國運強盛 (多頭)",
     "rank": 1
+  },
+  "top_pick_second": {
+    "ticker": "EWT",
+    "country": "台灣",
+    "name": "MSCI台灣 (EWT)",
+    "flag": "🇹🇼",
+    "price": 114.31,
+    "ma200": 90.11,
+    "above_ma200": true,
+    "mom_1m": 4.95,
+    "mom_3m": 12.2,
+    "mom_12m": 82.12,
+    "score": 45.71,
+    "status": "🔥 國運強盛 (多頭)",
+    "rank": 2
   },
   "current_rankings": [
     {
@@ -244,409 +259,687 @@
       "rank": 15
     }
   ],
-  "summary": {
-    "total_return_pct": 1223.8,
-    "cagr_pct": 12.46,
-    "max_drawdown_pct": -28.62,
-    "multiple": 13.24,
-    "spy_total_return_pct": 848.7,
-    "spy_cagr_pct": 10.77,
-    "spy_max_drawdown_pct": -51.3,
-    "spy_multiple": 9.49,
-    "win_rate_years": 68.2
+  "current_titan_stocks": [
+    {
+      "ticker": "000660.KS",
+      "name": "SK海力士 (SK Hynix)",
+      "country": "韓國",
+      "country_flag": "🇰🇷",
+      "country_etf": "EWY",
+      "market": "韓股",
+      "price": 1681000.0,
+      "ma60": 1699522.71,
+      "ma200": 1466180.16,
+      "above_ma60": false,
+      "above_ma200": true,
+      "mom_1m": -9.28,
+      "mom_3m": -8.87,
+      "mom_12m": 326.28,
+      "score": 158.63,
+      "is_titan": false,
+      "status": "⚠️ 均線整理"
+    },
+    {
+      "ticker": "ASX",
+      "name": "日月光投控 (ASE ADR)",
+      "country": "台灣",
+      "country_flag": "🇹🇼",
+      "country_etf": "EWT",
+      "market": "美股ADR",
+      "price": 46.43,
+      "ma60": 39.6,
+      "ma200": 31.28,
+      "above_ma60": true,
+      "above_ma200": true,
+      "mom_1m": 16.48,
+      "mom_3m": 14.47,
+      "mom_12m": 295.42,
+      "score": 155.35,
+      "is_titan": true,
+      "status": "👑 王權泰坦 (多頭主升)"
+    },
+    {
+      "ticker": "UMC",
+      "name": "聯電 (UMC ADR)",
+      "country": "台灣",
+      "country_flag": "🇹🇼",
+      "country_etf": "EWT",
+      "market": "美股ADR",
+      "price": 22.96,
+      "ma60": 21.12,
+      "ma200": 16.04,
+      "above_ma60": true,
+      "above_ma200": true,
+      "mom_1m": 3.8,
+      "mom_3m": -2.13,
+      "mom_12m": 209.46,
+      "score": 104.85,
+      "is_titan": true,
+      "status": "👑 王權泰坦 (多頭主升)"
+    },
+    {
+      "ticker": "005930.KS",
+      "name": "三星電子 (Samsung)",
+      "country": "韓國",
+      "country_flag": "🇰🇷",
+      "country_etf": "EWY",
+      "market": "韓股",
+      "price": 262000.0,
+      "ma60": 258425.0,
+      "ma200": 233905.11,
+      "above_ma60": true,
+      "above_ma200": true,
+      "mom_1m": -2.6,
+      "mom_3m": 2.95,
+      "mom_12m": 194.27,
+      "score": 97.5,
+      "is_titan": true,
+      "status": "👑 王權泰坦 (多頭主升)"
+    },
+    {
+      "ticker": "TSM",
+      "name": "台積電 (TSMC ADR)",
+      "country": "台灣",
+      "country_flag": "🇹🇼",
+      "country_etf": "EWT",
+      "market": "美股ADR",
+      "price": 453.31,
+      "ma60": 426.86,
+      "ma200": 390.07,
+      "above_ma60": true,
+      "above_ma200": true,
+      "mom_1m": 6.19,
+      "mom_3m": 7.81,
+      "mom_12m": 50.44,
+      "score": 28.8,
+      "is_titan": true,
+      "status": "👑 王權泰坦 (多頭主升)"
+    },
+    {
+      "ticker": "005380.KS",
+      "name": "現代汽車 (Hyundai)",
+      "country": "韓國",
+      "country_flag": "🇰🇷",
+      "country_etf": "EWY",
+      "market": "韓股",
+      "price": 324500.0,
+      "ma60": 383932.52,
+      "ma200": 475869.62,
+      "above_ma60": false,
+      "above_ma200": false,
+      "mom_1m": -16.58,
+      "mom_3m": -26.45,
+      "mom_12m": 51.08,
+      "score": 14.29,
+      "is_titan": false,
+      "status": "⚠️ 均線整理"
+    },
+    {
+      "ticker": "051910.KS",
+      "name": "LG化學 (LG Chem)",
+      "country": "韓國",
+      "country_flag": "🇰🇷",
+      "country_etf": "EWY",
+      "market": "韓股",
+      "price": 286500.0,
+      "ma60": 265758.33,
+      "ma200": 314316.21,
+      "above_ma60": true,
+      "above_ma200": false,
+      "mom_1m": 2.14,
+      "mom_3m": 9.98,
+      "mom_12m": 3.91,
+      "score": 5.38,
+      "is_titan": false,
+      "status": "⚠️ 均線整理"
+    }
+  ],
+  "two_stage_comparison": {
+    "spy": {
+      "total_ret": 917.9,
+      "mult": 10.18,
+      "cagr": 10.77,
+      "mdd": -51.3
+    },
+    "stage1_etf": {
+      "total_ret": 682.2,
+      "mult": 7.82,
+      "cagr": 9.49,
+      "mdd": -35.69
+    },
+    "stage2a_single_titan": {
+      "total_ret": 3673.2,
+      "mult": 37.73,
+      "cagr": 17.35,
+      "mdd": -52.92
+    },
+    "stage2b_dual_titan": {
+      "total_ret": 16588.6,
+      "mult": 166.89,
+      "cagr": 25.3,
+      "mdd": -47.71
+    }
   },
   "yearly_performance": [
+    {
+      "year": 2004,
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "spy_ret": 9.0,
+      "stg1_etf_ret": 23.3,
+      "stg2a_titan_ret": 14.6,
+      "stg2b_dual_ret": 26.6,
+      "cap_stg2b": 1265937.0
+    },
     {
       "year": 2005,
       "main_country": "巴西",
       "flag": "🇧🇷",
-      "strategy_return": 47.81,
-      "spy_return": 4.8,
-      "alpha": 43.0,
-      "end_equity": 1478069.0
+      "spy_ret": 4.8,
+      "stg1_etf_ret": 29.2,
+      "stg2a_titan_ret": 40.2,
+      "stg2b_dual_ret": 64.2,
+      "cap_stg2b": 2078891.0
     },
     {
       "year": 2006,
       "main_country": "巴西",
       "flag": "🇧🇷",
-      "strategy_return": 28.57,
-      "spy_return": 15.73,
-      "alpha": 12.84,
-      "end_equity": 1900388.0
+      "spy_ret": 15.7,
+      "stg1_etf_ret": 19.7,
+      "stg2a_titan_ret": -3.8,
+      "stg2b_dual_ret": 16.4,
+      "cap_stg2b": 2419408.0
     },
     {
       "year": 2007,
-      "main_country": "墨西哥",
-      "flag": "🇲🇽",
-      "strategy_return": 45.72,
-      "spy_return": 4.91,
-      "alpha": 40.81,
-      "end_equity": 2769220.0
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "spy_ret": 4.9,
+      "stg1_etf_ret": 31.2,
+      "stg2a_titan_ret": 73.6,
+      "stg2b_dual_ret": 52.4,
+      "cap_stg2b": 3688262.0
     },
     {
       "year": 2008,
       "main_country": "巴西",
       "flag": "🇧🇷",
-      "strategy_return": -0.67,
-      "spy_return": -36.79,
-      "alpha": 36.12,
-      "end_equity": 2750590.0
+      "spy_ret": -36.8,
+      "stg1_etf_ret": -2.3,
+      "stg2a_titan_ret": -12.9,
+      "stg2b_dual_ret": -17.6,
+      "cap_stg2b": 3037458.0
     },
     {
       "year": 2009,
       "main_country": "現金避險",
       "flag": "🛡️",
-      "strategy_return": 30.34,
-      "spy_return": 27.12,
-      "alpha": 3.21,
-      "end_equity": 3584996.0
+      "spy_ret": 27.1,
+      "stg1_etf_ret": 21.9,
+      "stg2a_titan_ret": 4.1,
+      "stg2b_dual_ret": 5.9,
+      "cap_stg2b": 3217205.0
     },
     {
       "year": 2010,
       "main_country": "墨西哥",
       "flag": "🇲🇽",
-      "strategy_return": -2.72,
-      "spy_return": 14.97,
-      "alpha": -17.7,
-      "end_equity": 3487422.0
+      "spy_ret": 15.0,
+      "stg1_etf_ret": 1.2,
+      "stg2a_titan_ret": -11.7,
+      "stg2b_dual_ret": -2.3,
+      "cap_stg2b": 3142420.0
     },
     {
       "year": 2011,
       "main_country": "瑞典",
       "flag": "🇸🇪",
-      "strategy_return": -10.7,
-      "spy_return": 2.94,
-      "alpha": -13.64,
-      "end_equity": 3114331.0
+      "spy_ret": 2.9,
+      "stg1_etf_ret": -23.8,
+      "stg2a_titan_ret": -9.1,
+      "stg2b_dual_ret": -6.7,
+      "cap_stg2b": 2932056.0
     },
     {
       "year": 2012,
       "main_country": "美國",
       "flag": "🇺🇸",
-      "strategy_return": 27.85,
-      "spy_return": 16.1,
-      "alpha": 11.75,
-      "end_equity": 3981597.0
+      "spy_ret": 16.1,
+      "stg1_etf_ret": 23.1,
+      "stg2a_titan_ret": 67.8,
+      "stg2b_dual_ret": 74.6,
+      "cap_stg2b": 5120060.0
     },
     {
       "year": 2013,
-      "main_country": "德國",
-      "flag": "🇩🇪",
-      "strategy_return": 12.4,
-      "spy_return": 29.35,
-      "alpha": -16.94,
-      "end_equity": 4475444.0
+      "main_country": "荷蘭",
+      "flag": "🇳🇱",
+      "spy_ret": 29.3,
+      "stg1_etf_ret": 2.3,
+      "stg2a_titan_ret": 16.0,
+      "stg2b_dual_ret": 0.8,
+      "cap_stg2b": 5162151.0
     },
     {
       "year": 2014,
       "main_country": "美國",
       "flag": "🇺🇸",
-      "strategy_return": 17.0,
-      "spy_return": 14.37,
-      "alpha": 2.63,
-      "end_equity": 5236234.0
+      "spy_ret": 14.4,
+      "stg1_etf_ret": -7.5,
+      "stg2a_titan_ret": 17.8,
+      "stg2b_dual_ret": 38.2,
+      "cap_stg2b": 7132026.0
     },
     {
       "year": 2015,
       "main_country": "美國",
       "flag": "🇺🇸",
-      "strategy_return": -5.28,
-      "spy_return": -0.85,
-      "alpha": -4.43,
-      "end_equity": 4959616.0
+      "spy_ret": -0.8,
+      "stg1_etf_ret": -15.2,
+      "stg2a_titan_ret": -16.2,
+      "stg2b_dual_ret": -3.8,
+      "cap_stg2b": 6863844.0
     },
     {
       "year": 2016,
-      "main_country": "美國",
-      "flag": "🇺🇸",
-      "strategy_return": 0.62,
-      "spy_return": 14.66,
-      "alpha": -14.04,
-      "end_equity": 4990366.0
+      "main_country": "巴西",
+      "flag": "🇧🇷",
+      "spy_ret": 14.7,
+      "stg1_etf_ret": 4.3,
+      "stg2a_titan_ret": -10.2,
+      "stg2b_dual_ret": 39.8,
+      "cap_stg2b": 9598530.0
     },
     {
       "year": 2017,
       "main_country": "巴西",
       "flag": "🇧🇷",
-      "strategy_return": 13.07,
-      "spy_return": 21.33,
-      "alpha": -8.26,
-      "end_equity": 5642689.0
+      "spy_ret": 21.3,
+      "stg1_etf_ret": 16.8,
+      "stg2a_titan_ret": 10.0,
+      "stg2b_dual_ret": 16.1,
+      "cap_stg2b": 11147896.0
     },
     {
       "year": 2018,
       "main_country": "美國",
       "flag": "🇺🇸",
-      "strategy_return": -23.42,
-      "spy_return": -6.42,
-      "alpha": -17.0,
-      "end_equity": 4321064.0
+      "spy_ret": -6.4,
+      "stg1_etf_ret": -10.3,
+      "stg2a_titan_ret": -17.7,
+      "stg2b_dual_ret": -18.1,
+      "cap_stg2b": 9129894.0
     },
     {
       "year": 2019,
       "main_country": "巴西",
       "flag": "🇧🇷",
-      "strategy_return": 19.35,
-      "spy_return": 34.02,
-      "alpha": -14.67,
-      "end_equity": 5157068.0
+      "spy_ret": 34.0,
+      "stg1_etf_ret": 17.8,
+      "stg2a_titan_ret": 18.7,
+      "stg2b_dual_ret": 37.0,
+      "cap_stg2b": 12503414.0
     },
     {
       "year": 2020,
       "main_country": "美國",
       "flag": "🇺🇸",
-      "strategy_return": 26.78,
-      "spy_return": 18.17,
-      "alpha": 8.61,
-      "end_equity": 6538138.0
+      "spy_ret": 18.2,
+      "stg1_etf_ret": 39.0,
+      "stg2a_titan_ret": 119.1,
+      "stg2b_dual_ret": 110.8,
+      "cap_stg2b": 26360235.0
     },
     {
       "year": 2021,
       "main_country": "韓國",
       "flag": "🇰🇷",
-      "strategy_return": -8.27,
-      "spy_return": 28.6,
-      "alpha": -36.87,
-      "end_equity": 5997756.0
+      "spy_ret": 28.6,
+      "stg1_etf_ret": -11.0,
+      "stg2a_titan_ret": -33.6,
+      "stg2b_dual_ret": -14.3,
+      "cap_stg2b": 22602584.0
     },
     {
       "year": 2022,
       "main_country": "墨西哥",
       "flag": "🇲🇽",
-      "strategy_return": -21.45,
-      "spy_return": -17.99,
-      "alpha": -3.45,
-      "end_equity": 4711461.0
+      "spy_ret": -18.0,
+      "stg1_etf_ret": -23.3,
+      "stg2a_titan_ret": -24.7,
+      "stg2b_dual_ret": -31.8,
+      "cap_stg2b": 15409833.0
     },
     {
       "year": 2023,
       "main_country": "墨西哥",
       "flag": "🇲🇽",
-      "strategy_return": 30.76,
-      "spy_return": 24.71,
-      "alpha": 6.05,
-      "end_equity": 6160622.0
+      "spy_ret": 24.7,
+      "stg1_etf_ret": 28.2,
+      "stg2a_titan_ret": 52.8,
+      "stg2b_dual_ret": 33.2,
+      "cap_stg2b": 20528204.0
     },
     {
       "year": 2024,
       "main_country": "美國",
       "flag": "🇺🇸",
-      "strategy_return": 4.78,
-      "spy_return": 26.43,
-      "alpha": -21.65,
-      "end_equity": 6455320.0
+      "spy_ret": 26.4,
+      "stg1_etf_ret": 4.9,
+      "stg2a_titan_ret": 107.7,
+      "stg2b_dual_ret": 135.3,
+      "cap_stg2b": 48310778.0
     },
     {
       "year": 2025,
       "main_country": "德國",
       "flag": "🇩🇪",
-      "strategy_return": 16.22,
-      "spy_return": 17.71,
-      "alpha": -1.49,
-      "end_equity": 7502445.0
+      "spy_ret": 17.7,
+      "stg1_etf_ret": 16.3,
+      "stg2a_titan_ret": 19.3,
+      "stg2b_dual_ret": 68.2,
+      "cap_stg2b": 81269132.0
     },
     {
       "year": 2026,
       "main_country": "韓國",
       "flag": "🇰🇷",
-      "strategy_return": 76.45,
-      "spy_return": 14.09,
-      "alpha": 62.36,
-      "end_equity": 13237731.0
+      "spy_ret": 12.3,
+      "stg1_etf_ret": 80.1,
+      "stg2a_titan_ret": 151.1,
+      "stg2b_dual_ret": 105.4,
+      "cap_stg2b": 166886340.0
     }
   ],
   "history_trades": [
     {
+      "date": "2024-10-01",
+      "country": "瑞典",
+      "flag": "🇸🇪",
+      "alloc_2a": "SPOT(70%), ERIC(30%)",
+      "alloc_2b": "SPOT(50%), SAP(50%)",
+      "stg1_ret": -7.5,
+      "stg2a_ret": 6.1,
+      "stg2b_ret": 2.4,
+      "spy_ret": -0.4,
+      "equity_2b": 49323302.0
+    },
+    {
       "date": "2024-11-01",
       "country": "台灣",
       "flag": "🇹🇼",
-      "month_return": -2.33,
-      "spy_return": 5.54,
-      "cumulative_equity": 6602097.0
+      "alloc_2a": "TSM(70%), EWT(30%)",
+      "alloc_2b": "TSM(50%), NVDA(50%)",
+      "stg1_ret": -2.2,
+      "stg2a_ret": -2.5,
+      "stg2b_ret": 0.1,
+      "spy_ret": 5.5,
+      "equity_2b": 49388284.0
     },
     {
       "date": "2024-12-02",
       "country": "美國",
       "flag": "🇺🇸",
-      "month_return": -2.22,
-      "spy_return": -1.92,
-      "cumulative_equity": 6455320.0
+      "alloc_2a": "NVDA(70%), JPM(30%)",
+      "alloc_2b": "NVDA(100%)",
+      "stg1_ret": -2.1,
+      "stg2a_ret": -2.6,
+      "stg2b_ret": -2.2,
+      "spy_ret": -1.9,
+      "equity_2b": 48310778.0
     },
     {
       "date": "2025-01-02",
       "country": "美國",
       "flag": "🇺🇸",
-      "month_return": -0.46,
-      "spy_return": 0.56,
-      "cumulative_equity": 6425536.0
+      "alloc_2a": "AVGO(70%), TSLA(30%)",
+      "alloc_2b": "AVGO(50%), AMZN(50%)",
+      "stg1_ret": -0.3,
+      "stg2a_ret": -6.5,
+      "stg2b_ret": -1.8,
+      "spy_ret": 0.6,
+      "equity_2b": 47429818.0
     },
     {
       "date": "2025-02-03",
       "country": "美國",
       "flag": "🇺🇸",
-      "month_return": 0.29,
-      "spy_return": 0.59,
-      "cumulative_equity": 6444313.0
+      "alloc_2a": "JPM(70%), AMZN(30%)",
+      "alloc_2b": "JPM(50%), SAP(50%)",
+      "stg1_ret": 0.4,
+      "stg2a_ret": -2.2,
+      "stg2b_ret": 2.7,
+      "spy_ret": 0.6,
+      "equity_2b": 48724145.0
     },
     {
       "date": "2025-03-03",
       "country": "德國",
       "flag": "🇩🇪",
-      "month_return": -0.99,
-      "spy_return": -6.22,
-      "cumulative_equity": 6380288.0
+      "alloc_2a": "SAP(70%), SIEGY(30%)",
+      "alloc_2b": "SAP(50%), EWU(50%)",
+      "stg1_ret": -0.8,
+      "stg2a_ret": -5.1,
+      "stg2b_ret": -3.4,
+      "spy_ret": -6.2,
+      "equity_2b": 47089362.0
     },
     {
       "date": "2025-04-01",
       "country": "德國",
       "flag": "🇩🇪",
-      "month_return": 6.55,
-      "spy_return": 0.52,
-      "cumulative_equity": 6798443.0
+      "alloc_2a": "SIEGY(70%), EWG(30%)",
+      "alloc_2b": "SIEGY(50%), EWU(50%)",
+      "stg1_ret": 6.4,
+      "stg2a_ret": 2.7,
+      "stg2b_ret": 1.3,
+      "spy_ret": 0.5,
+      "equity_2b": 47707906.0
     },
     {
       "date": "2025-05-01",
       "country": "德國",
       "flag": "🇩🇪",
-      "month_return": 5.5,
-      "spy_return": 4.89,
-      "cumulative_equity": 7172039.0
+      "alloc_2a": "SAP(70%), SIEGY(30%)",
+      "alloc_2b": "SAP(50%), EWL(50%)",
+      "stg1_ret": 5.3,
+      "stg2a_ret": 3.0,
+      "stg2b_ret": 2.5,
+      "spy_ret": 4.9,
+      "equity_2b": 48882299.0
     },
     {
       "date": "2025-06-02",
       "country": "德國",
       "flag": "🇩🇪",
-      "month_return": 2.2,
-      "spy_return": 5.18,
-      "cumulative_equity": 7329637.0
+      "alloc_2a": "SAP(70%), SIEGY(30%)",
+      "alloc_2b": "SAP(50%), EWC(50%)",
+      "stg1_ret": 2.0,
+      "stg2a_ret": 2.0,
+      "stg2b_ret": 2.2,
+      "spy_ret": 5.2,
+      "equity_2b": 49954888.0
     },
     {
       "date": "2025-07-01",
       "country": "德國",
       "flag": "🇩🇪",
-      "month_return": -2.92,
-      "spy_return": 1.61,
-      "cumulative_equity": 7115341.0
+      "alloc_2a": "SAP(70%), SIEGY(30%)",
+      "alloc_2b": "SAP(50%), EWH(50%)",
+      "stg1_ret": -3.1,
+      "stg2a_ret": -5.9,
+      "stg2b_ret": -2.8,
+      "spy_ret": 1.6,
+      "equity_2b": 48572608.0
     },
     {
       "date": "2025-08-01",
       "country": "香港",
       "flag": "🇭🇰",
-      "month_return": 3.23,
-      "spy_return": 1.79,
-      "cumulative_equity": 7345248.0
+      "alloc_2a": "EWH(100%)",
+      "alloc_2b": "EWH(50%), SIEGY(50%)",
+      "stg1_ret": 3.4,
+      "stg2a_ret": 3.4,
+      "stg2b_ret": 5.5,
+      "spy_ret": 1.8,
+      "equity_2b": 51220862.0
     },
     {
       "date": "2025-09-02",
       "country": "香港",
       "flag": "🇭🇰",
-      "month_return": 1.94,
-      "spy_return": 4.32,
-      "cumulative_equity": 7487908.0
+      "alloc_2a": "EWH(100%)",
+      "alloc_2b": "EWH(50%), SIEGY(50%)",
+      "stg1_ret": 1.8,
+      "stg2a_ret": 1.8,
+      "stg2b_ret": 1.4,
+      "spy_ret": 4.3,
+      "equity_2b": 51922076.0
     },
     {
       "date": "2025-10-01",
       "country": "墨西哥",
       "flag": "🇲🇽",
-      "month_return": -2.09,
-      "spy_return": 3.39,
-      "cumulative_equity": 7331595.0
+      "alloc_2a": "CX(70%), AMX(30%)",
+      "alloc_2b": "CX(50%), 000660.KS(50%)",
+      "stg1_ret": -1.9,
+      "stg2a_ret": 11.5,
+      "stg2b_ret": 35.7,
+      "spy_ret": 3.4,
+      "equity_2b": 70448038.0
     },
     {
       "date": "2025-11-03",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": -10.41,
-      "spy_return": -1.0,
-      "cumulative_equity": 6568277.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), CX(50%)",
+      "stg1_ret": -10.3,
+      "stg2a_ret": -3.4,
+      "stg2b_ret": 1.2,
+      "spy_ret": -1.0,
+      "equity_2b": 71284958.0
     },
     {
       "date": "2025-12-01",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 14.22,
-      "spy_return": 1.31,
-      "cumulative_equity": 7502445.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), CX(50%)",
+      "stg1_ret": 14.1,
+      "stg2a_ret": 19.5,
+      "stg2b_ret": 14.0,
+      "spy_ret": 1.3,
+      "equity_2b": 81269132.0
     },
     {
       "date": "2026-01-02",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 17.58,
-      "spy_return": 0.56,
-      "cumulative_equity": 8821688.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), CX(50%)",
+      "stg1_ret": 17.4,
+      "stg2a_ret": 32.3,
+      "stg2b_ret": 20.3,
+      "spy_ret": 0.6,
+      "equity_2b": 97756890.0
     },
     {
       "date": "2026-02-02",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 21.35,
-      "spy_return": -1.58,
-      "cumulative_equity": 10705469.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), VALE(50%)",
+      "stg1_ret": 21.2,
+      "stg2a_ret": 25.0,
+      "stg2b_ret": 13.1,
+      "spy_ret": -1.6,
+      "equity_2b": 110564225.0
     },
     {
       "date": "2026-03-02",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": -12.79,
-      "spy_return": -3.39,
-      "cumulative_equity": 9335716.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), VALE(50%)",
+      "stg1_ret": -12.9,
+      "stg2a_ret": -15.6,
+      "stg2b_ret": -10.4,
+      "spy_ret": -3.4,
+      "equity_2b": 99089545.0
     },
     {
       "date": "2026-04-01",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 27.24,
-      "spy_return": 10.3,
-      "cumulative_equity": 11878377.0
+      "alloc_2a": "EWY(100%)",
+      "alloc_2b": "EWY(50%), PBR(50%)",
+      "stg1_ret": 27.1,
+      "stg2a_ret": 27.1,
+      "stg2b_ret": 17.4,
+      "spy_ret": 10.3,
+      "equity_2b": 116372457.0
     },
     {
       "date": "2026-05-01",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 32.24,
-      "spy_return": 4.73,
-      "cumulative_equity": 15708338.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), ASX(50%)",
+      "stg1_ret": 32.1,
+      "stg2a_ret": 64.4,
+      "stg2b_ret": 48.5,
+      "spy_ret": 4.7,
+      "equity_2b": 172767061.0
     },
     {
       "date": "2026-06-01",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": -10.29,
-      "spy_return": -1.12,
-      "cumulative_equity": 14091227.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), ASX(50%)",
+      "stg1_ret": -10.4,
+      "stg2a_ret": 12.4,
+      "stg2b_ret": 16.3,
+      "spy_ret": -1.1,
+      "equity_2b": 200864946.0
     },
     {
       "date": "2026-07-01",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": -17.55,
-      "spy_return": 0.6,
-      "cumulative_equity": 11617648.0
+      "alloc_2a": "000660.KS(70%), 005930.KS(30%)",
+      "alloc_2b": "000660.KS(50%), ASX(50%)",
+      "stg1_ret": -17.7,
+      "stg2a_ret": -34.8,
+      "stg2b_ret": -28.8,
+      "spy_ret": 0.6,
+      "equity_2b": 142937606.0
     },
     {
       "date": "2026-08-03",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 13.91,
-      "spy_return": 1.68,
-      "cumulative_equity": 13234017.0
+      "alloc_2a": "EWY(100%)",
+      "alloc_2b": "EWY(50%), EWT(50%)",
+      "stg1_ret": 13.8,
+      "stg2a_ret": 13.8,
+      "stg2b_ret": 13.9,
+      "spy_ret": 1.7,
+      "equity_2b": 162750749.0
     },
     {
       "date": "2026-09-01",
       "country": "韓國",
       "flag": "🇰🇷",
-      "month_return": 3.44,
-      "spy_return": 0.56,
-      "cumulative_equity": 13689363.0
-    },
-    {
-      "date": "2026-10-01",
-      "country": "韓國",
-      "flag": "🇰🇷",
-      "month_return": -3.3,
-      "spy_return": 1.55,
-      "cumulative_equity": 13237731.0
+      "alloc_2a": "EWY(100%)",
+      "alloc_2b": "EWY(50%), EWT(50%)",
+      "stg1_ret": 3.3,
+      "stg2a_ret": 3.3,
+      "stg2b_ret": 2.5,
+      "spy_ret": 0.6,
+      "equity_2b": 166886340.0
     }
   ]
 }
