@@ -1,0 +1,520 @@
+{
+  "total_experiments": 1134,
+  "date_range": "2004-03-01 ~ 2026-10-09 (22.8 年，5,720 個交易日)",
+  "factors": {
+    "exit_ma": [
+      "none",
+      "ma40",
+      "ma60",
+      "ma80",
+      "ma120",
+      "hard_10"
+    ],
+    "trailing_stop": [
+      "none",
+      "trail_10_6",
+      "trail_15_8",
+      "trail_15_10",
+      "trail_15_12",
+      "trail_20_10",
+      "trail_25_12"
+    ],
+    "refill_mode": [
+      "monthly",
+      "weekly",
+      "next_day"
+    ],
+    "sizing_scheme": [
+      "top3_equal",
+      "top3_ladder",
+      "top3_steep",
+      "top4_equal",
+      "top4_ladder",
+      "top4_steep",
+      "top4_balance",
+      "top5_equal",
+      "top5_ladder"
+    ]
+  },
+  "main_effects": {
+    "exit_ma": {
+      "hard_10": {
+        "cagr": 29.58,
+        "mdd": -48.68,
+        "calmar": 0.62,
+        "win_rate": 48.49,
+        "trades": 775.3
+      },
+      "ma120": {
+        "cagr": 32.29,
+        "mdd": -49.44,
+        "calmar": 0.66,
+        "win_rate": 51.09,
+        "trades": 527.89
+      },
+      "ma40": {
+        "cagr": 25.28,
+        "mdd": -43.28,
+        "calmar": 0.59,
+        "win_rate": 44.26,
+        "trades": 1085.1
+      },
+      "ma60": {
+        "cagr": 28.62,
+        "mdd": -45.89,
+        "calmar": 0.63,
+        "win_rate": 45.89,
+        "trades": 614.84
+      },
+      "ma80": {
+        "cagr": 30.38,
+        "mdd": -46.34,
+        "calmar": 0.66,
+        "win_rate": 48.83,
+        "trades": 552.14
+      },
+      "none": {
+        "cagr": 34.53,
+        "mdd": -49.32,
+        "calmar": 0.71,
+        "win_rate": 53.59,
+        "trades": 475.15
+      }
+    },
+    "trailing_stop": {
+      "none": {
+        "cagr": 34.06,
+        "mdd": -47.27,
+        "calmar": 0.73,
+        "win_rate": 46.58,
+        "trades": 550.06
+      },
+      "trail_10_6": {
+        "cagr": 28.04,
+        "mdd": -46.15,
+        "calmar": 0.61,
+        "win_rate": 53.17,
+        "trades": 812.49
+      },
+      "trail_15_10": {
+        "cagr": 30.41,
+        "mdd": -47.24,
+        "calmar": 0.65,
+        "win_rate": 48.92,
+        "trades": 679.59
+      },
+      "trail_15_12": {
+        "cagr": 29.29,
+        "mdd": -46.87,
+        "calmar": 0.63,
+        "win_rate": 47.72,
+        "trades": 649.2
+      },
+      "trail_15_8": {
+        "cagr": 28.45,
+        "mdd": -47.99,
+        "calmar": 0.6,
+        "win_rate": 49.71,
+        "trades": 721.96
+      },
+      "trail_20_10": {
+        "cagr": 30.44,
+        "mdd": -47.01,
+        "calmar": 0.65,
+        "win_rate": 47.78,
+        "trades": 662.77
+      },
+      "trail_25_12": {
+        "cagr": 30.1,
+        "mdd": -47.57,
+        "calmar": 0.64,
+        "win_rate": 46.96,
+        "trades": 626.09
+      }
+    },
+    "refill_mode": {
+      "monthly": {
+        "cagr": 26.63,
+        "mdd": -45.57,
+        "calmar": 0.59,
+        "win_rate": 49.05,
+        "trades": 471.46
+      },
+      "next_day": {
+        "cagr": 32.9,
+        "mdd": -49.44,
+        "calmar": 0.67,
+        "win_rate": 48.76,
+        "trades": 825.56
+      },
+      "weekly": {
+        "cagr": 30.82,
+        "mdd": -46.46,
+        "calmar": 0.67,
+        "win_rate": 48.27,
+        "trades": 718.19
+      }
+    },
+    "sizing_scheme": {
+      "top3_equal": {
+        "cagr": 31.4,
+        "mdd": -48.28,
+        "calmar": 0.65,
+        "win_rate": 49.54,
+        "trades": 519.31
+      },
+      "top3_ladder": {
+        "cagr": 31.48,
+        "mdd": -49.85,
+        "calmar": 0.63,
+        "win_rate": 49.54,
+        "trades": 519.31
+      },
+      "top3_steep": {
+        "cagr": 31.26,
+        "mdd": -53.36,
+        "calmar": 0.59,
+        "win_rate": 49.58,
+        "trades": 518.63
+      },
+      "top4_balance": {
+        "cagr": 29.94,
+        "mdd": -46.58,
+        "calmar": 0.64,
+        "win_rate": 48.16,
+        "trades": 693.7
+      },
+      "top4_equal": {
+        "cagr": 29.68,
+        "mdd": -42.41,
+        "calmar": 0.7,
+        "win_rate": 48.14,
+        "trades": 694.16
+      },
+      "top4_ladder": {
+        "cagr": 29.83,
+        "mdd": -48.82,
+        "calmar": 0.61,
+        "win_rate": 48.23,
+        "trades": 692.15
+      },
+      "top4_steep": {
+        "cagr": 29.81,
+        "mdd": -52.44,
+        "calmar": 0.57,
+        "win_rate": 48.28,
+        "trades": 687.41
+      },
+      "top5_equal": {
+        "cagr": 28.26,
+        "mdd": -38.1,
+        "calmar": 0.74,
+        "win_rate": 48.26,
+        "trades": 864.05
+      },
+      "top5_ladder": {
+        "cagr": 29.36,
+        "mdd": -44.6,
+        "calmar": 0.66,
+        "win_rate": 48.48,
+        "trades": 856.9
+      }
+    },
+    "capacity": {
+      "Top 3": {
+        "cagr": 31.38,
+        "mdd": -50.49,
+        "calmar": 0.62,
+        "win_rate": 49.56,
+        "trades": 519.08
+      },
+      "Top 4": {
+        "cagr": 29.82,
+        "mdd": -47.56,
+        "calmar": 0.63,
+        "win_rate": 48.2,
+        "trades": 691.86
+      },
+      "Top 5": {
+        "cagr": 28.81,
+        "mdd": -41.35,
+        "calmar": 0.7,
+        "win_rate": 48.37,
+        "trades": 860.48
+      }
+    },
+    "style": {
+      "等權配置 (Equal)": {
+        "cagr": 29.78,
+        "mdd": -42.93,
+        "calmar": 0.7,
+        "win_rate": 48.65,
+        "trades": 692.51
+      },
+      "陡峭配置 (Steep)": {
+        "cagr": 30.53,
+        "mdd": -52.9,
+        "calmar": 0.58,
+        "win_rate": 48.93,
+        "trades": 603.02
+      },
+      "階梯配置 (Ladder)": {
+        "cagr": 30.15,
+        "mdd": -47.46,
+        "calmar": 0.64,
+        "win_rate": 48.6,
+        "trades": 690.52
+      }
+    }
+  },
+  "top_champions": {
+    "best_calmar": [
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_equal",
+        "total_ret": 233450.96243232643,
+        "cagr": 40.929210033521166,
+        "mdd": -41.03008905569407,
+        "calmar": 0.99754134040421,
+        "win_rate": 52.09003215434084,
+        "trades": 311
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_ladder",
+        "total_ret": 294215.4563458352,
+        "cagr": 42.378240098886224,
+        "mdd": -42.67657729993008,
+        "calmar": 0.993009345642994,
+        "win_rate": 52.09003215434084,
+        "trades": 311
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "trail_10_6",
+        "refill_mode": "next_day",
+        "sizing_scheme": "top5_equal",
+        "total_ret": 97168.24541893732,
+        "cagr": 35.5730859259553,
+        "mdd": -38.71988415187306,
+        "calmar": 0.9187291415032414,
+        "win_rate": 58.898847631242,
+        "trades": 781
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_steep",
+        "total_ret": 301267.82491814904,
+        "cagr": 42.527453871752805,
+        "mdd": -46.71531076692537,
+        "calmar": 0.9103536543711148,
+        "win_rate": 52.09003215434084,
+        "trades": 311
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top5_equal",
+        "total_ret": 102426.37282512856,
+        "cagr": 35.889186176313515,
+        "mdd": -39.83795772652413,
+        "calmar": 0.9008791671170052,
+        "win_rate": 49.458483754512635,
+        "trades": 554
+      }
+    ],
+    "best_mdd": [
+      {
+        "exit_ma": "ma40",
+        "trailing_stop": "trail_15_10",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top5_equal",
+        "total_ret": 3608.23347270082,
+        "cagr": 17.33090225796696,
+        "mdd": -29.50375514552922,
+        "calmar": 0.587413438475243,
+        "win_rate": 43.80825565912117,
+        "trades": 751
+      },
+      {
+        "exit_ma": "ma40",
+        "trailing_stop": "trail_15_8",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top5_equal",
+        "total_ret": 2829.13737412411,
+        "cagr": 16.11317952866034,
+        "mdd": -29.503755145529247,
+        "calmar": 0.5461399557168571,
+        "win_rate": 44.272844272844274,
+        "trades": 777
+      },
+      {
+        "exit_ma": "ma40",
+        "trailing_stop": "trail_20_10",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top5_equal",
+        "total_ret": 3428.089394687016,
+        "cagr": 17.072721495317577,
+        "mdd": -29.997453034705764,
+        "calmar": 0.5691390357563081,
+        "win_rate": 43.04812834224599,
+        "trades": 748
+      },
+      {
+        "exit_ma": "ma40",
+        "trailing_stop": "none",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top4_equal",
+        "total_ret": 13731.55021989503,
+        "cagr": 24.36604932942987,
+        "mdd": -30.43993829828852,
+        "calmar": 0.8004631642370921,
+        "win_rate": 42.52252252252252,
+        "trades": 555
+      },
+      {
+        "exit_ma": "ma40",
+        "trailing_stop": "trail_15_12",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top5_equal",
+        "total_ret": 3602.727466408983,
+        "cagr": 17.32319041225654,
+        "mdd": -30.945725302577415,
+        "calmar": 0.5597926771105192,
+        "win_rate": 43.47826086956522,
+        "trades": 736
+      }
+    ],
+    "best_win_rate": [
+      {
+        "exit_ma": "none",
+        "trailing_stop": "trail_10_6",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top3_equal",
+        "total_ret": 34738.63281688797,
+        "cagr": 29.55332600289049,
+        "mdd": -47.84763640280055,
+        "calmar": 0.6176548775387516,
+        "win_rate": 61.47959183673469,
+        "trades": 392
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "trail_10_6",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top3_ladder",
+        "total_ret": 35448.39111319478,
+        "cagr": 29.668956618230567,
+        "mdd": -51.2420020480637,
+        "calmar": 0.5789968274542012,
+        "win_rate": 61.47959183673469,
+        "trades": 392
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "trail_10_6",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top3_steep",
+        "total_ret": 26899.155914970772,
+        "cagr": 28.10062484073088,
+        "mdd": -56.84777562424688,
+        "calmar": 0.4943135335051759,
+        "win_rate": 61.47959183673469,
+        "trades": 392
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "trail_10_6",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_steep",
+        "total_ret": 155047.53334786848,
+        "cagr": 38.40227208091793,
+        "mdd": -46.440223516757605,
+        "calmar": 0.8269183301208867,
+        "win_rate": 60.526315789473685,
+        "trades": 532
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "trail_10_6",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_equal",
+        "total_ret": 140896.04725820562,
+        "cagr": 37.817948540905256,
+        "mdd": -44.80460049781031,
+        "calmar": 0.844063960413027,
+        "win_rate": 60.41275797373359,
+        "trades": 533
+      }
+    ],
+    "best_cagr": [
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_steep",
+        "total_ret": 301267.82491814904,
+        "cagr": 42.527453871752805,
+        "mdd": -46.71531076692537,
+        "calmar": 0.9103536543711148,
+        "win_rate": 52.09003215434084,
+        "trades": 311
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "weekly",
+        "sizing_scheme": "top3_ladder",
+        "total_ret": 294215.4563458352,
+        "cagr": 42.378240098886224,
+        "mdd": -42.67657729993008,
+        "calmar": 0.993009345642994,
+        "win_rate": 52.09003215434084,
+        "trades": 311
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top3_ladder",
+        "total_ret": 290155.3673756102,
+        "cagr": 42.290779281876546,
+        "mdd": -54.97650928627552,
+        "calmar": 0.769251810107815,
+        "win_rate": 53.441295546558706,
+        "trades": 247
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "next_day",
+        "sizing_scheme": "top3_ladder",
+        "total_ret": 290155.3673756102,
+        "cagr": 42.290779281876546,
+        "mdd": -54.97650928627552,
+        "calmar": 0.769251810107815,
+        "win_rate": 53.441295546558706,
+        "trades": 247
+      },
+      {
+        "exit_ma": "none",
+        "trailing_stop": "none",
+        "refill_mode": "monthly",
+        "sizing_scheme": "top3_steep",
+        "total_ret": 287924.75803639565,
+        "cagr": 42.242229420344344,
+        "mdd": -59.673803657327554,
+        "calmar": 0.7078856521852914,
+        "win_rate": 53.2520325203252,
+        "trades": 246
+      }
+    ]
+  }
+}
