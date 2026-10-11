@@ -776,10 +776,10 @@ function StockDashboard() {
     return val !== null ? parseFloat(val) : 1.0;
   });
   const [marketBacktestMode, setMarketBacktestMode] = useState(() => localStorage.getItem('market_backtest_mode_v2') || 'long_only');
-  const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period_v2') || '10y');
-  const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2016');
+  const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period_v2') || '20y');
+  const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2005');
   const [marketBtEndYear, setMarketBtEndYear] = useState(() => localStorage.getItem('market_bt_end_year') || '2026');
-  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model_v2') || 'titan_sovereign');
+  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model_v2') || 'global_liquid_titan_a');
   const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model_v2') || 'titan_sovereign');
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode_v2') || 'long_only');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
@@ -5161,10 +5161,10 @@ function StockDashboard() {
                   }
 
                   const isLongShort = marketBacktestMode === 'long_short';
-                  const activePeriodKey = marketBacktestPeriod || bt.default_period_key || '10y';
+                  const activePeriodKey = marketBacktestPeriod || bt.default_period_key || '20y';
                   const is20ySelected = activePeriodKey === '20y' || activePeriodKey === 'all';
                   const history10y = bt.full_history_10y || {};
-                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'titan_sovereign';
+                  const activeModelKey = marketBacktestModel || bt.selected_model_id || 'global_liquid_titan_a';
 
                   const BACKTEST_MODELS = [
                     {
@@ -5827,6 +5827,10 @@ function StockDashboard() {
                     tag: 'AI 演算法模型'
                   };
 
+                  const hasLongShortSupport = !['global_liquid_titan_a', 'titan_sovereign', 'etf_0020'].includes(activeModelKey) && Boolean(
+                    activePeriodData?.models_detail?.[activeModelKey]?.long_short || activePeriodData?.long_short
+                  );
+
                   const rawComparisonList = isLongShort ? (activePeriodData?.comparison_long_short || []) : (activePeriodData?.comparison_long_only || []);
                   const comparisonList = buildCompleteLeaderboard(rawComparisonList, activePeriodKey, marketBtStartYear, marketBtEndYear);
                   const benchmark = activePeriodData?.benchmark || {};
@@ -5894,112 +5898,334 @@ function StockDashboard() {
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-                      {/* 1. 回測頂部設定與模式切換卡片 */}
-                      <div style={{
-                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.85))',
-                        border: '1px solid rgba(16, 185, 129, 0.35)',
-                        borderRadius: '12px',
-                        padding: '1.15rem 1.35rem',
-                        boxShadow: '0 4px 18px rgba(0,0,0,0.3)',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '1rem'
-                      }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#34D399', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <span>📊</span>
-                              <span>TAIEX 加權指數 AI 模擬回測績效驗證</span>
-                            </h3>
-                            <span style={{
-                              background: 'rgba(16, 185, 129, 0.2)',
-                              color: '#6EE7B7',
-                              border: '1px solid rgba(16, 185, 129, 0.4)',
-                              fontSize: '0.78rem',
-                              fontWeight: 'bold',
-                              padding: '0.15rem 0.6rem',
-                              borderRadius: '12px'
-                            }}>
-                              目前區間：{activePeriodData?.name || '盲測驗證期'}（{activePeriodData?.trading_days || 487} 個交易日, {formatDateStr(activePeriodData?.start_date)} ~ {formatDateStr(activePeriodData?.end_date)}）
-                            </span>
-                            <span style={{
-                              background: 'rgba(245, 158, 11, 0.2)',
-                              color: '#FDE68A',
-                              border: '1px solid rgba(245, 158, 11, 0.4)',
-                              fontSize: '0.75rem',
-                              padding: '0.15rem 0.55rem',
-                              borderRadius: '12px'
-                            }}>
-                              🪙 已扣除 0.05% (5 bps) 交易摩擦成本
-                            </span>
-                          </div>
-                          <p style={{ margin: 0, fontSize: '0.82rem', color: '#94A3B8' }}>
-                            全面升級：納入 KAMA 效率比率、ATR SuperTrend 超級趨勢軌道、Ehlers 零延遲濾波、CHOP 混沌指數、Yang-Zhang 跳空真實波動度、60日 VWAP 與宏觀跨市場因子，嚴格執行純 100% 多方進場／0% 現金防禦，零槓桿無擴張。
-                          </p>
-                        </div>
-
-                        {/* 回測模式切換按鈕組 */}
+                      {/* 1. 🏆 全 AI 大盤模型效能大比拼 (Leaderboard) 以供選擇 */}
+                      {comparisonList.length > 0 && (
                         <div style={{
-                          display: 'inline-flex',
-                          background: 'rgba(0,0,0,0.4)',
-                          padding: '0.25rem',
-                          borderRadius: '10px',
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          borderRadius: '12px',
                           border: '1px solid var(--border-color)',
-                          gap: '0.35rem'
+                          padding: '1.25rem',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
                         }}>
-                          <button
-                            type="button"
-                            className="btn"
-                            style={{
-                              padding: '0.45rem 0.95rem',
-                              fontSize: '0.86rem',
-                              fontWeight: 'bold',
-                              borderRadius: '8px',
-                              background: isLongShort ? 'linear-gradient(135deg, #059669, #047857)' : 'transparent',
-                              color: isLongShort ? 'white' : 'var(--text-muted)',
-                              border: isLongShort ? '1px solid #10B981' : '1px solid transparent',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                              transition: 'all 0.15s ease'
-                            }}
-                            onClick={() => {
-                              setMarketBacktestMode('long_short');
-                              localStorage.setItem('market_backtest_mode_v2', 'long_short');
-                              localStorage.setItem('market_backtest_mode', 'long_short');
-                            }}
-                          >
-                            <span>⚡ 多空雙向模式 (Long/Short)</span>
-                          </button>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                            <div>
+                              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                <span>🏆</span>
+                                <span>全 AI 大盤模型【{activePeriodData?.name || '🌐 20 年超長全歷史 (2005~2026)'}】效能大比拼 (Leaderboard)</span>
+                              </h4>
+                              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
+                                點選任意模型即可立即切換載入下方回測走勢、核心指標與進出場明細（相同 0.05% 摩擦成本 Walk-forward 嚴格評估）
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>目前鎖定模型：</span>
+                              <span style={{
+                                background: 'rgba(16, 185, 129, 0.22)',
+                                color: '#6EE7B7',
+                                border: '1px solid rgba(16, 185, 129, 0.5)',
+                                padding: '0.2rem 0.6rem',
+                                borderRadius: '6px',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem'
+                              }}>
+                                <span>{activeModelMeta?.icon}</span>
+                                <span>{activeModelMeta?.name}</span>
+                              </span>
+                              <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.06)', padding: '0.2rem 0.55rem', borderRadius: '6px', color: '#CBD5E1' }}>
+                                {hasLongShortSupport ? (isLongShort ? '⚡ 多空雙向模式' : '🛡️ 做多 + 現金避險') : '🛡️ 現貨做多 + 現金避險'}
+                              </span>
+                            </div>
+                          </div>
 
-                          <button
-                            type="button"
-                            className="btn"
-                            style={{
-                              padding: '0.45rem 0.95rem',
-                              fontSize: '0.86rem',
-                              fontWeight: 'bold',
-                              borderRadius: '8px',
-                              background: !isLongShort ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'transparent',
-                              color: !isLongShort ? 'white' : 'var(--text-muted)',
-                              border: !isLongShort ? '1px solid #3B82F6' : '1px solid transparent',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                              transition: 'all 0.15s ease'
-                            }}
-                            onClick={() => {
-                              setMarketBacktestMode('long_only');
-                              localStorage.setItem('market_backtest_mode_v2', 'long_only');
-                              localStorage.setItem('market_backtest_mode', 'long_only');
-                            }}
-                          >
-                            <span>🛡️ 做多 + 現金避險 (Long-Only)</span>
-                          </button>
+                          <div style={{ overflowX: 'auto' }}>
+                            <table className="analysis-table" style={{ width: '100%', fontSize: '0.82rem', textAlign: 'center' }}>
+                              <thead>
+                                <tr style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#93C5FD' }}>
+                                  <th style={{ textAlign: 'left', padding: '0.6rem 0.8rem' }}>AI 模型架構</th>
+                                  <th>累積總報酬</th>
+                                  <th>年化 CAGR</th>
+                                  <th>超額 Alpha</th>
+                                  <th>最大回撤 (MDD)</th>
+                                  <th>夏普比率</th>
+                                  <th>索提諾</th>
+                                  <th>勝率</th>
+                                  <th>獲利因子</th>
+                                  <th>總交易</th>
+                                  <th>市場曝險</th>
+                                  <th style={{ minWidth: '130px' }}>選擇模型回測</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* 基準大盤列 */}
+                                <tr style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--text-muted)' }}>
+                                  <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
+                                    🎯 TAIEX 大盤基準 (買進持有)
+                                  </td>
+                                  <td>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</td>
+                                  <td>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</td>
+                                  <td>0.0%</td>
+                                  <td style={{ color: '#F87171' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</td>
+                                  <td>{benchmark.sharpe_ratio?.toFixed(2)}</td>
+                                  <td>--</td>
+                                  <td>--</td>
+                                  <td>--</td>
+                                  <td>1</td>
+                                  <td>100.0%</td>
+                                  <td><span style={{ fontSize: '0.75rem', color: '#64748B' }}>基準</span></td>
+                                </tr>
+
+                                {/* 0050 ETF 對照列 */}
+                                {etf0050 && (
+                                  <tr style={{ background: 'rgba(139, 92, 246, 0.08)', color: '#DDD6FE' }}>
+                                    <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
+                                      🟣 0050 ETF (元大台灣50 買進持有)
+                                    </td>
+                                    <td style={{ fontWeight: 'bold', color: '#C4B5FD' }}>
+                                      {(etf0050.total_return_pct || 0) >= 0 ? '+' : ''}{etf0050.total_return_pct?.toFixed(1)}%
+                                    </td>
+                                    <td style={{ color: '#DDD6FE' }}>
+                                      {(etf0050.cagr_pct || 0) >= 0 ? '+' : ''}{etf0050.cagr_pct?.toFixed(1)}%
+                                    </td>
+                                    <td style={{ color: (etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                      {((etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '+' : '')}{(etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))).toFixed(1)}%
+                                    </td>
+                                    <td style={{ color: '#F87171' }}>{etf0050.max_drawdown_pct?.toFixed(1)}%</td>
+                                    <td>{etf0050.sharpe_ratio?.toFixed(2)}</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>1</td>
+                                    <td>100.0%</td>
+                                    <td><span style={{ fontSize: '0.75rem', color: '#A78BFA' }}>對照</span></td>
+                                  </tr>
+                                )}
+
+                                {/* 各 AI 模型列 */}
+                                {comparisonList.map((m, idx) => {
+                                  const isCurrentActive = marketMlModelType === m.model_id;
+                                  const isBtViewing = activeModelKey === m.model_id;
+                                  return (
+                                    <tr
+                                      key={m.model_id}
+                                      style={{
+                                        background: isBtViewing
+                                          ? 'rgba(16, 185, 129, 0.14)'
+                                          : (isCurrentActive ? 'rgba(59, 130, 246, 0.12)' : (idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent')),
+                                        borderLeft: isBtViewing ? '4px solid #10B981' : (isCurrentActive ? '4px solid #3B82F6' : '4px solid transparent'),
+                                        cursor: 'pointer'
+                                      }}
+                                      onClick={() => {
+                                        setMarketBacktestModel(m.model_id);
+                                        localStorage.setItem('market_backtest_model_v2', m.model_id);
+                                        localStorage.setItem('market_backtest_model', m.model_id);
+                                      }}
+                                    >
+                                      <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: (isCurrentActive || isBtViewing) ? 'bold' : 'normal' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                          <span style={{ color: isBtViewing ? '#6EE7B7' : (isCurrentActive ? '#93C5FD' : '#E2E8F0') }}>{m.name}</span>
+                                          {isBtViewing && (
+                                            <span style={{ fontSize: '0.68rem', background: '#10B981', color: '#0F172A', padding: '0.08rem 0.35rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                              回測中
+                                            </span>
+                                          )}
+                                          {isCurrentActive && (
+                                            <span style={{ fontSize: '0.68rem', background: '#2563EB', color: 'white', padding: '0.08rem 0.35rem', borderRadius: '4px' }}>
+                                              推論中
+                                            </span>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td style={{ fontWeight: 'bold', color: m.total_return_pct >= 80 ? '#34D399' : (m.total_return_pct >= 50 ? '#6EE7B7' : '#E2E8F0') }}>
+                                        +{Number(m.total_return_pct || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
+                                      </td>
+                                      <td style={{ color: '#93C5FD' }}>+{Number(m.cagr_pct || 0).toFixed(1)}%</td>
+                                      <td style={{ color: m.alpha_pct >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                        {m.alpha_pct >= 0 ? '+' : ''}{Number(m.alpha_pct || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
+                                      </td>
+                                      <td style={{ color: m.max_drawdown_pct > -20 ? '#34D399' : '#F87171', fontWeight: m.max_drawdown_pct > -20 ? 'bold' : 'normal' }}>
+                                        {m.max_drawdown_pct?.toFixed(1)}%
+                                      </td>
+                                      <td style={{ fontWeight: m.sharpe_ratio >= 1.6 ? 'bold' : 'normal', color: m.sharpe_ratio >= 1.6 ? '#C084FC' : '#E2E8F0' }}>
+                                        {m.sharpe_ratio?.toFixed(2)}
+                                      </td>
+                                      <td style={{ color: '#F472B6' }}>{m.sortino_ratio?.toFixed(2)}</td>
+                                      <td style={{ color: m.win_rate_pct >= 65 ? '#2DD4BF' : '#E2E8F0', fontWeight: m.win_rate_pct >= 65 ? 'bold' : 'normal' }}>
+                                        {m.win_rate_pct?.toFixed(1)}%
+                                      </td>
+                                      <td style={{ color: m.profit_factor >= 3.0 ? '#FDE68A' : '#E2E8F0', fontWeight: m.profit_factor >= 3.0 ? 'bold' : 'normal' }}>
+                                        {m.profit_factor?.toFixed(2)}
+                                      </td>
+                                      <td>{m.total_trades}</td>
+                                      <td style={{ color: 'var(--text-muted)' }}>{m.market_exposure_pct?.toFixed(1)}%</td>
+                                      <td>
+                                        <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
+                                          <button
+                                            type="button"
+                                            className="btn"
+                                            title="選擇此模型載入回測"
+                                            style={{
+                                              padding: '0.22rem 0.55rem',
+                                              fontSize: '0.74rem',
+                                              borderRadius: '6px',
+                                              background: isBtViewing ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(255,255,255,0.08)',
+                                              color: isBtViewing ? '#FFFFFF' : '#CBD5E1',
+                                              border: isBtViewing ? '1px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
+                                              fontWeight: isBtViewing ? 'bold' : 'normal',
+                                              cursor: 'pointer',
+                                              whiteSpace: 'nowrap'
+                                            }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setMarketBacktestModel(m.model_id);
+                                              localStorage.setItem('market_backtest_model_v2', m.model_id);
+                                              localStorage.setItem('market_backtest_model', m.model_id);
+                                            }}
+                                          >
+                                            {isBtViewing ? '✓ 回測中' : '選擇回測'}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="btn"
+                                            title="選用為戰情室主力模型"
+                                            style={{
+                                              padding: '0.2rem 0.45rem',
+                                              fontSize: '0.74rem',
+                                              borderRadius: '6px',
+                                              background: isCurrentActive ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)',
+                                              color: isCurrentActive ? '#93C5FD' : '#94A3B8',
+                                              border: isCurrentActive ? '1px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
+                                              cursor: 'pointer',
+                                              whiteSpace: 'nowrap'
+                                            }}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSelectMarketModel(m.model_id);
+                                            }}
+                                          >
+                                            {isCurrentActive ? '實時中' : '🎯 主力'}
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
-                      </div>
+                      )}
+
+                      {/* 2. TAIEX 加權指數 AI 模擬回測績效驗證 (僅在模型支援多空雙向/做多現金避險驗證時顯示) */}
+                      {hasLongShortSupport && (
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.85))',
+                          border: '1px solid rgba(16, 185, 129, 0.35)',
+                          borderRadius: '12px',
+                          padding: '1.15rem 1.35rem',
+                          boxShadow: '0 4px 18px rgba(0,0,0,0.3)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '1rem'
+                        }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
+                              <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#34D399', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span>📊</span>
+                                <span>TAIEX 加權指數 AI 模擬回測績效驗證</span>
+                              </h3>
+                              <span style={{
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                color: '#6EE7B7',
+                                border: '1px solid rgba(16, 185, 129, 0.4)',
+                                fontSize: '0.78rem',
+                                fontWeight: 'bold',
+                                padding: '0.15rem 0.6rem',
+                                borderRadius: '12px'
+                              }}>
+                                目前區間：{activePeriodData?.name || '盲測驗證期'}（{activePeriodData?.trading_days || 487} 個交易日, {formatDateStr(activePeriodData?.start_date)} ~ {formatDateStr(activePeriodData?.end_date)}）
+                              </span>
+                              <span style={{
+                                background: 'rgba(245, 158, 11, 0.2)',
+                                color: '#FDE68A',
+                                border: '1px solid rgba(245, 158, 11, 0.4)',
+                                fontSize: '0.75rem',
+                                padding: '0.15rem 0.55rem',
+                                borderRadius: '12px'
+                              }}>
+                                🪙 已扣除 0.05% (5 bps) 交易摩擦成本
+                              </span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#94A3B8' }}>
+                              全面升級：納入 KAMA 效率比率、ATR SuperTrend 超級趨勢軌道、Ehlers 零延遲濾波、CHOP 混沌指數、Yang-Zhang 跳空真實波動度、60日 VWAP 與宏觀跨市場因子，零槓桿無擴張。
+                            </p>
+                          </div>
+
+                          {/* 回測模式切換按鈕組 */}
+                          <div style={{
+                            display: 'inline-flex',
+                            background: 'rgba(0,0,0,0.4)',
+                            padding: '0.25rem',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                            gap: '0.35rem'
+                          }}>
+                            <button
+                              type="button"
+                              className="btn"
+                              style={{
+                                padding: '0.45rem 0.95rem',
+                                fontSize: '0.86rem',
+                                fontWeight: 'bold',
+                                borderRadius: '8px',
+                                background: isLongShort ? 'linear-gradient(135deg, #059669, #047857)' : 'transparent',
+                                color: isLongShort ? 'white' : 'var(--text-muted)',
+                                border: isLongShort ? '1px solid #10B981' : '1px solid transparent',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                transition: 'all 0.15s ease'
+                              }}
+                              onClick={() => {
+                                setMarketBacktestMode('long_short');
+                                localStorage.setItem('market_backtest_mode_v2', 'long_short');
+                                localStorage.setItem('market_backtest_mode', 'long_short');
+                              }}
+                            >
+                              <span>⚡ 多空雙向模式 (Long/Short)</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="btn"
+                              style={{
+                                padding: '0.45rem 0.95rem',
+                                fontSize: '0.86rem',
+                                fontWeight: 'bold',
+                                borderRadius: '8px',
+                                background: !isLongShort ? 'linear-gradient(135deg, #2563EB, #1D4ED8)' : 'transparent',
+                                color: !isLongShort ? 'white' : 'var(--text-muted)',
+                                border: !isLongShort ? '1px solid #3B82F6' : '1px solid transparent',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                transition: 'all 0.15s ease'
+                              }}
+                              onClick={() => {
+                                setMarketBacktestMode('long_only');
+                                localStorage.setItem('market_backtest_mode_v2', 'long_only');
+                                localStorage.setItem('market_backtest_mode', 'long_only');
+                              }}
+                            >
+                              <span>🛡️ 做多 + 現金避險 (Long-Only)</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* 2. 回測時間區間與年份選擇器控制卡 (Time Horizon & Year Selector) */}
                       <div style={{
@@ -6222,136 +6448,6 @@ function StockDashboard() {
                         </div>
                       </div>
 
-                      {/* 2.5 🤖 回測 AI 模型架構切換選單 (Model Selector) */}
-                      <div style={{
-                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.82))',
-                        border: '1px solid rgba(16, 185, 129, 0.4)',
-                        borderRadius: '12px',
-                        padding: '1rem 1.25rem',
-                        boxShadow: '0 4px 18px rgba(0,0,0,0.3)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.75rem'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '1.15rem' }}>🤖</span>
-                            <span style={{ fontWeight: 'bold', fontSize: '0.96rem', color: '#6EE7B7' }}>回測 AI 模型切換</span>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>（點選任意模型即可「即時更新」下方所有回測曲線、核心指標、加碼放空標注與交易紀錄）</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem' }}>
-                            <span style={{ color: '#94A3B8' }}>目前回測模型：</span>
-                            <span style={{
-                              background: 'rgba(16, 185, 129, 0.25)',
-                              color: '#34D399',
-                              border: '1px solid rgba(16, 185, 129, 0.55)',
-                              padding: '0.2rem 0.65rem',
-                              borderRadius: '6px',
-                              fontWeight: 'bold',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem'
-                            }}>
-                              <span>{activeModelMeta.icon}</span>
-                              <span>{activeModelMeta.name}</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 7 款 AI 模型切換卡片群組 */}
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                          gap: '0.65rem'
-                        }}>
-                          {BACKTEST_MODELS.map(m => {
-                            const isSelected = activeModelKey === m.id;
-                            const mPerf = comparisonList.find(c => c.model_id === m.id);
-                            const retVal = mPerf ? mPerf.total_return_pct : null;
-                            const mddVal = mPerf ? mPerf.max_drawdown_pct : null;
-
-                            return (
-                              <button
-                                key={m.id}
-                                type="button"
-                                className="btn"
-                                style={{
-                                  padding: '0.65rem 0.75rem',
-                                  borderRadius: '10px',
-                                  background: isSelected
-                                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.35))'
-                                    : 'rgba(255, 255, 255, 0.04)',
-                                  border: isSelected ? '1.5px solid #10B981' : '1px solid rgba(255, 255, 255, 0.09)',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  alignItems: 'center',
-                                  gap: '0.2rem',
-                                  cursor: 'pointer',
-                                  textAlign: 'center',
-                                  boxShadow: isSelected ? '0 0 14px rgba(16, 185, 129, 0.35)' : 'none',
-                                  transform: isSelected ? 'translateY(-1px)' : 'none',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                onClick={() => {
-                                  setMarketBacktestModel(m.id);
-                                  localStorage.setItem('market_backtest_model_v2', m.id);
-                                  localStorage.setItem('market_backtest_model', m.id);
-                                }}
-                              >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                  <span style={{ fontSize: '0.95rem' }}>{m.icon}</span>
-                                  <span style={{ fontWeight: isSelected ? 'bold' : '600', fontSize: '0.82rem', color: isSelected ? '#34D399' : '#E2E8F0' }}>
-                                    {m.name}
-                                  </span>
-                                </div>
-                                <span style={{ fontSize: '0.68rem', color: isSelected ? '#A7F3D0' : '#94A3B8' }}>
-                                  {m.tag}
-                                </span>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.74rem', marginTop: '0.15rem' }}>
-                                  {retVal !== null && retVal !== undefined ? (
-                                    <span style={{
-                                      color: retVal >= 0 ? '#34D399' : '#F87171',
-                                      fontWeight: 'bold',
-                                      fontFamily: 'monospace'
-                                    }}>
-                                      {retVal >= 0 ? '+' : ''}{retVal.toFixed(1)}%
-                                    </span>
-                                  ) : (
-                                    <span style={{ color: 'var(--text-muted)' }}>--</span>
-                                  )}
-                                  {mddVal !== null && mddVal !== undefined && (
-                                    <span style={{ color: '#94A3B8', fontSize: '0.68rem' }}>
-                                      ({mddVal.toFixed(0)}%)
-                                    </span>
-                                  )}
-                                </div>
-                                {isSelected ? (
-                                  <span style={{
-                                    fontSize: '0.66rem',
-                                    background: '#10B981',
-                                    color: '#0F172A',
-                                    fontWeight: 'bold',
-                                    padding: '0.08rem 0.45rem',
-                                    borderRadius: '4px',
-                                    marginTop: '0.2rem'
-                                  }}>
-                                    ✓ 檢視中
-                                  </span>
-                                ) : (
-                                  <span style={{
-                                    fontSize: '0.66rem',
-                                    color: 'var(--text-muted)',
-                                    padding: '0.08rem 0.45rem',
-                                    marginTop: '0.2rem'
-                                  }}>
-                                    點擊切換
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
 
                       {/* 2.8 👑 泰坦王權主宰旗艦版 (Option A 70/15/15) 核心量化操作邏輯與風控防線 */}
                       {activeModelKey === 'titan_sovereign' && (
@@ -6911,200 +7007,7 @@ function StockDashboard() {
                         </div>
                       )}
 
-                      {/* 4. 6 款 AI 模型效能大比拼排行榜 (All Models Comparison Table) */}
-                      {comparisonList.length > 0 && (
-                        <div style={{
-                          background: 'rgba(15, 23, 42, 0.85)',
-                          borderRadius: '12px',
-                          border: '1px solid var(--border-color)',
-                          padding: '1.25rem',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <div>
-                              <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                                <span>🏆</span>
-                                <span>全 AI 大盤模型【{activePeriodData?.name || '選定區間'}】效能大比拼 (Leaderboard)</span>
-                              </h4>
-                              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'block' }}>
-                                在相同 0.05% 摩擦成本下，針對選定歷史區間進行 Walk-forward 嚴格績效評估
-                              </span>
-                            </div>
-                            <span style={{ fontSize: '0.78rem', background: 'rgba(255,255,255,0.06)', padding: '0.25rem 0.65rem', borderRadius: '8px', color: '#CBD5E1' }}>
-                              目前評估模式：<strong>{isLongShort ? '⚡ 多空雙向衝刺' : '🛡️ 做多 + 現金避險'}</strong>
-                            </span>
-                          </div>
 
-                          <div style={{ overflowX: 'auto' }}>
-                            <table className="analysis-table" style={{ width: '100%', fontSize: '0.82rem', textAlign: 'center' }}>
-                              <thead>
-                                <tr style={{ background: 'rgba(30, 41, 59, 0.9)', color: '#93C5FD' }}>
-                                  <th style={{ textAlign: 'left', padding: '0.6rem 0.8rem' }}>AI 模型架構</th>
-                                  <th>累積總報酬</th>
-                                  <th>年化 CAGR</th>
-                                  <th>超額 Alpha</th>
-                                  <th>最大回撤 (MDD)</th>
-                                  <th>夏普比率</th>
-                                  <th>索提諾</th>
-                                  <th>勝率</th>
-                                  <th>獲利因子</th>
-                                  <th>總交易</th>
-                                  <th>市場曝險</th>
-                                  <th>戰情選用</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {/* 基準大盤列 */}
-                                <tr style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--text-muted)' }}>
-                                  <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
-                                    🎯 TAIEX 大盤基準 (買進持有)
-                                  </td>
-                                  <td>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</td>
-                                  <td>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</td>
-                                  <td>0.0%</td>
-                                  <td style={{ color: '#F87171' }}>{benchmark.max_drawdown_pct?.toFixed(1)}%</td>
-                                  <td>{benchmark.sharpe_ratio?.toFixed(2)}</td>
-                                  <td>--</td>
-                                  <td>--</td>
-                                  <td>--</td>
-                                  <td>1</td>
-                                  <td>100.0%</td>
-                                  <td><span style={{ fontSize: '0.75rem', color: '#64748B' }}>基準</span></td>
-                                </tr>
-
-                                {/* 0050 ETF 對照列 */}
-                                {etf0050 && (
-                                  <tr style={{ background: 'rgba(139, 92, 246, 0.08)', color: '#DDD6FE' }}>
-                                    <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
-                                      🟣 0050 ETF (元大台灣50 買進持有)
-                                    </td>
-                                    <td style={{ fontWeight: 'bold', color: '#C4B5FD' }}>
-                                      {(etf0050.total_return_pct || 0) >= 0 ? '+' : ''}{etf0050.total_return_pct?.toFixed(1)}%
-                                    </td>
-                                    <td style={{ color: '#DDD6FE' }}>
-                                      {(etf0050.cagr_pct || 0) >= 0 ? '+' : ''}{etf0050.cagr_pct?.toFixed(1)}%
-                                    </td>
-                                    <td style={{ color: (etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '#FBBF24' : '#94A3B8' }}>
-                                      {((etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '+' : '')}{(etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))).toFixed(1)}%
-                                    </td>
-                                    <td style={{ color: '#F87171' }}>{etf0050.max_drawdown_pct?.toFixed(1)}%</td>
-                                    <td>{etf0050.sharpe_ratio?.toFixed(2)}</td>
-                                    <td>--</td>
-                                    <td>--</td>
-                                    <td>--</td>
-                                    <td>1</td>
-                                    <td>100.0%</td>
-                                    <td><span style={{ fontSize: '0.75rem', color: '#A78BFA' }}>對照</span></td>
-                                  </tr>
-                                )}
-
-                                {/* 6 款模型 + 集成模型 */}
-                                {comparisonList.map((m, idx) => {
-                                  const isCurrentActive = marketMlModelType === m.model_id;
-                                  const isBtViewing = activeModelKey === m.model_id;
-                                  return (
-                                    <tr
-                                      key={m.model_id}
-                                      style={{
-                                        background: isBtViewing
-                                          ? 'rgba(16, 185, 129, 0.14)'
-                                          : (isCurrentActive ? 'rgba(59, 130, 246, 0.12)' : (idx % 2 === 0 ? 'rgba(0,0,0,0.15)' : 'transparent')),
-                                        borderLeft: isBtViewing ? '3px solid #10B981' : (isCurrentActive ? '3px solid #3B82F6' : '3px solid transparent')
-                                      }}
-                                    >
-                                      <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: (isCurrentActive || isBtViewing) ? 'bold' : 'normal' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                                          <span style={{ color: isBtViewing ? '#6EE7B7' : (isCurrentActive ? '#93C5FD' : '#E2E8F0') }}>{m.name}</span>
-                                          {isBtViewing && (
-                                            <span style={{ fontSize: '0.68rem', background: '#10B981', color: '#0F172A', padding: '0.08rem 0.35rem', borderRadius: '4px', fontWeight: 'bold' }}>
-                                              回測中
-                                            </span>
-                                          )}
-                                          {isCurrentActive && (
-                                            <span style={{ fontSize: '0.68rem', background: '#2563EB', color: 'white', padding: '0.08rem 0.35rem', borderRadius: '4px' }}>
-                                              推論中
-                                            </span>
-                                          )}
-                                        </div>
-                                      </td>
-                                      <td style={{ fontWeight: 'bold', color: m.total_return_pct >= 80 ? '#34D399' : (m.total_return_pct >= 50 ? '#6EE7B7' : '#E2E8F0') }}>
-                                        +{Number(m.total_return_pct || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
-                                      </td>
-                                      <td style={{ color: '#93C5FD' }}>+{Number(m.cagr_pct || 0).toFixed(1)}%</td>
-                                      <td style={{ color: m.alpha_pct >= 0 ? '#FBBF24' : '#94A3B8' }}>
-                                        {m.alpha_pct >= 0 ? '+' : ''}{Number(m.alpha_pct || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
-                                      </td>
-                                      <td style={{ color: m.max_drawdown_pct > -20 ? '#34D399' : '#F87171', fontWeight: m.max_drawdown_pct > -20 ? 'bold' : 'normal' }}>
-                                        {m.max_drawdown_pct?.toFixed(1)}%
-                                      </td>
-                                      <td style={{ fontWeight: m.sharpe_ratio >= 1.6 ? 'bold' : 'normal', color: m.sharpe_ratio >= 1.6 ? '#C084FC' : '#E2E8F0' }}>
-                                        {m.sharpe_ratio?.toFixed(2)}
-                                      </td>
-                                      <td style={{ color: '#F472B6' }}>{m.sortino_ratio?.toFixed(2)}</td>
-                                      <td style={{ color: m.win_rate_pct >= 65 ? '#2DD4BF' : '#E2E8F0', fontWeight: m.win_rate_pct >= 65 ? 'bold' : 'normal' }}>
-                                        {m.win_rate_pct?.toFixed(1)}%
-                                      </td>
-                                      <td style={{ color: m.profit_factor >= 3.0 ? '#FDE68A' : '#E2E8F0', fontWeight: m.profit_factor >= 3.0 ? 'bold' : 'normal' }}>
-                                        {m.profit_factor?.toFixed(2)}
-                                      </td>
-                                      <td>{m.total_trades}</td>
-                                      <td style={{ color: 'var(--text-muted)' }}>{m.market_exposure_pct?.toFixed(1)}%</td>
-                                      <td>
-                                        <div style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center' }}>
-                                          <button
-                                            type="button"
-                                            className="btn"
-                                            title="更新上方回測走勢與各項指標"
-                                            style={{
-                                              padding: '0.2rem 0.5rem',
-                                              fontSize: '0.74rem',
-                                              borderRadius: '6px',
-                                              background: isBtViewing ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(255,255,255,0.08)',
-                                              color: isBtViewing ? '#FFFFFF' : '#CBD5E1',
-                                              border: isBtViewing ? '1px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
-                                              cursor: 'pointer',
-                                              whiteSpace: 'nowrap'
-                                            }}
-                                            onClick={() => {
-                                              setMarketBacktestModel(m.model_id);
-                                              localStorage.setItem('market_backtest_model_v2', m.model_id);
-                                              localStorage.setItem('market_backtest_model', m.model_id);
-                                              const chartElem = document.getElementById('market-backtest-chart-card');
-                                              if (chartElem) chartElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                            }}
-                                          >
-                                            {isBtViewing ? '✓ 檢視中' : '📊 檢視回測'}
-                                          </button>
-                                          <button
-                                            type="button"
-                                            className="btn"
-                                            title="選用為戰情室主力模型"
-                                            style={{
-                                              padding: '0.2rem 0.45rem',
-                                              fontSize: '0.74rem',
-                                              borderRadius: '6px',
-                                              background: isCurrentActive ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.05)',
-                                              color: isCurrentActive ? '#93C5FD' : '#94A3B8',
-                                              border: isCurrentActive ? '1px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
-                                              cursor: 'pointer',
-                                              whiteSpace: 'nowrap'
-                                            }}
-                                            onClick={() => {
-                                              handleSelectMarketModel(m.model_id);
-                                            }}
-                                          >
-                                            {isCurrentActive ? '實時中' : '🎯 主力'}
-                                          </button>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      )}
 
                       {/* 5. 🏛️ 十年／二十年跨週期歷史全樣本實證回測 (2005/2016-2026 跨越牛熊實證) */}
                       {(() => {
