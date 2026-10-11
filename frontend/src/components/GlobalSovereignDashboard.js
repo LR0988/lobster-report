@@ -171,6 +171,25 @@ export default function GlobalSovereignDashboard() {
     reason: '依策略輪動換股'
   });
 
+  // 編輯/新增歷史紀錄彈窗
+  const [editTxModal, setEditTxModal] = useState({
+    open: false,
+    isNew: false,
+    id: '',
+    date: '',
+    action: '買入',
+    ticker: '',
+    name: '',
+    currency: 'USD',
+    shares: '',
+    price: '',
+    tax_fee: '',
+    cash_flow_twd: '',
+    realized_pnl_twd: '',
+    realized_return_pct: '',
+    note: ''
+  });
+
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
   const triggerNotice = (msg) => {
@@ -748,6 +767,130 @@ export default function GlobalSovereignDashboard() {
     triggerNotice(`🚪 成功平倉【${exitModal.name}】！閒置資金入帳 NT$ ${Math.round(netProceedsTwd).toLocaleString()}`);
   };
 
+  const handleOpenEditTx = (tx) => {
+    setEditTxModal({
+      open: true,
+      isNew: false,
+      id: tx.id,
+      date: tx.date || new Date().toISOString().split('T')[0],
+      action: tx.action || '買入',
+      ticker: tx.ticker || '',
+      name: tx.name || '',
+      currency: tx.currency || 'USD',
+      shares: tx.shares !== undefined && tx.shares !== null ? String(tx.shares) : '',
+      price: tx.price !== undefined && tx.price !== null ? String(tx.price) : '',
+      tax_fee: tx.tax_fee !== undefined && tx.tax_fee !== null ? String(tx.tax_fee) : '0',
+      cash_flow_twd: tx.cash_flow_twd !== undefined && tx.cash_flow_twd !== null ? String(tx.cash_flow_twd) : '',
+      realized_pnl_twd: tx.realized_pnl_twd !== undefined && tx.realized_pnl_twd !== null ? String(tx.realized_pnl_twd) : '',
+      realized_return_pct: tx.realized_return_pct !== undefined && tx.realized_return_pct !== null ? String(tx.realized_return_pct) : '',
+      note: tx.note || ''
+    });
+  };
+
+  const handleOpenAddTx = () => {
+    setEditTxModal({
+      open: true,
+      isNew: true,
+      id: `tx_gl_${Date.now()}`,
+      date: new Date().toISOString().split('T')[0],
+      action: '買入',
+      ticker: '',
+      name: '',
+      currency: 'USD',
+      shares: '50',
+      price: '',
+      tax_fee: '0',
+      cash_flow_twd: '',
+      realized_pnl_twd: '',
+      realized_return_pct: '',
+      note: ''
+    });
+  };
+
+  const handleAutoCalcTx = () => {
+    const s = parseFloat(editTxModal.shares) || 0;
+    const p = parseFloat(editTxModal.price) || 0;
+    const tf = parseFloat(editTxModal.tax_fee) || 0;
+    const act = editTxModal.action;
+    const isUsd = editTxModal.currency === 'USD';
+    const fx = isUsd ? (usdFx || 32.5) : 1.0;
+
+    let cf = 0;
+    if (['買入', '加碼'].includes(act)) {
+      cf = Math.round(-(s * p * fx + (isUsd ? tf * fx : tf)));
+      setEditTxModal(prev => ({
+        ...prev,
+        cash_flow_twd: String(cf),
+        realized_pnl_twd: '',
+        realized_return_pct: ''
+      }));
+    } else if (['賣出', '減持'].includes(act)) {
+      cf = Math.round(s * p * fx - (isUsd ? tf * fx : tf));
+      setEditTxModal(prev => ({
+        ...prev,
+        cash_flow_twd: String(cf)
+      }));
+    } else if (['存入', '入金'].includes(act)) {
+      cf = Math.round((p > 0 ? p : (s > 0 ? s : 0)) * (isUsd ? fx : 1.0));
+      setEditTxModal(prev => ({
+        ...prev,
+        cash_flow_twd: String(cf),
+        realized_pnl_twd: '',
+        realized_return_pct: ''
+      }));
+    } else if (['提出', '出金'].includes(act)) {
+      cf = -Math.round((p > 0 ? p : (s > 0 ? s : 0)) * (isUsd ? fx : 1.0));
+      setEditTxModal(prev => ({
+        ...prev,
+        cash_flow_twd: String(cf),
+        realized_pnl_twd: '',
+        realized_return_pct: ''
+      }));
+    }
+  };
+
+  const handleSaveTx = (e) => {
+    e.preventDefault();
+    if (!editTxModal.date || !editTxModal.name) {
+      alert('請填寫完整日期與標的名稱');
+      return;
+    }
+
+    const updatedTx = {
+      id: editTxModal.id || `tx_gl_${Date.now()}`,
+      date: editTxModal.date,
+      action: editTxModal.action,
+      ticker: editTxModal.ticker.trim() || '-',
+      name: editTxModal.name.trim(),
+      currency: editTxModal.currency || 'USD',
+      shares: parseFloat(editTxModal.shares) || 0,
+      price: parseFloat(editTxModal.price) || 0,
+      tax_fee: parseFloat(editTxModal.tax_fee) || 0,
+      cash_flow_twd: editTxModal.cash_flow_twd !== '' ? parseFloat(editTxModal.cash_flow_twd) : 0,
+      realized_pnl_twd: editTxModal.realized_pnl_twd !== '' ? parseFloat(editTxModal.realized_pnl_twd) : null,
+      realized_return_pct: editTxModal.realized_return_pct !== '' ? parseFloat(editTxModal.realized_return_pct) : null,
+      note: editTxModal.note.trim()
+    };
+
+    setTxHistory(prev => {
+      if (editTxModal.isNew) {
+        return [updatedTx, ...prev];
+      } else {
+        return prev.map(item => item.id === updatedTx.id ? updatedTx : item);
+      }
+    });
+
+    setEditTxModal(prev => ({ ...prev, open: false }));
+    triggerNotice(`✅ 已成功${editTxModal.isNew ? '新增' : '更新修正'}「${updatedTx.name}」歷史交易明細！`);
+  };
+
+  const handleDeleteTx = (id, name, action) => {
+    if (window.confirm(`確定要刪除「${action} ${name}」這筆全球主權歷史紀錄嗎？\n刪除後無法復原。`)) {
+      setTxHistory(prev => prev.filter(item => item.id !== id));
+      triggerNotice(`🗑️ 已成功刪除「${name}」該筆歷史交易紀錄！`);
+    }
+  };
+
   return (
     <div className="global-sovereign-dashboard" style={{ animation: 'fadeIn 0.25s ease', paddingBottom: '3rem' }}>
       {/* 提示通知氣泡 */}
@@ -1207,13 +1350,34 @@ export default function GlobalSovereignDashboard() {
           {/* 3. 最底下紀錄所有進出紀錄 (Complete Transaction History Ledger) */}
           <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #6366F1' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.6rem' }}>
-              <div>
-                <h4 style={{ margin: 0, color: '#A5B4FC', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  📜 所有進出歷史紀錄帳簿（共 {txHistory.length} 筆流水明細）
-                </h4>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  每次買入、加碼、減持、賣出與資金存入皆完整記錄扣款、入帳、稅費與已實現淨利。
-                </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                <div>
+                  <h4 style={{ margin: 0, color: '#A5B4FC', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    📜 所有進出歷史紀錄帳簿（共 {txHistory.length} 筆流水明細）
+                  </h4>
+                  <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
+                    每次買入、加碼、減持、賣出與資金存入皆完整記錄扣款、入帳、稅費與已實現淨利。
+                  </p>
+                </div>
+                <button
+                  onClick={handleOpenAddTx}
+                  style={{
+                    background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
+                    border: 'none',
+                    color: '#FFFFFF',
+                    borderRadius: '6px',
+                    padding: '0.32rem 0.75rem',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(99, 102, 241, 0.4)'
+                  }}
+                >
+                  ➕ 新增歷史交易紀錄
+                </button>
               </div>
 
               <div style={{ fontSize: '0.76rem', color: '#CBD5E1', display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
@@ -1247,6 +1411,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>現金流變動 (NT$)</th>
                       <th style={{ textAlign: 'right' }}>實現淨損益</th>
                       <th>備註原因</th>
+                      <th style={{ textAlign: 'center', width: '110px' }}>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1318,6 +1483,39 @@ export default function GlobalSovereignDashboard() {
                           </td>
                           <td style={{ color: '#94A3B8', fontSize: '0.76rem' }}>
                             {tx.note}
+                          </td>
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <button
+                              onClick={() => handleOpenEditTx(tx)}
+                              style={{
+                                background: 'rgba(99, 102, 241, 0.15)',
+                                border: '1px solid rgba(99, 102, 241, 0.4)',
+                                color: '#A5B4FC',
+                                borderRadius: '4px',
+                                padding: '2px 7px',
+                                fontSize: '0.74rem',
+                                cursor: 'pointer',
+                                marginRight: '4px'
+                              }}
+                              title="編輯修正此筆紀錄"
+                            >
+                              ✏️ 編輯
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTx(tx.id, tx.name, tx.action)}
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                color: '#F87171',
+                                borderRadius: '4px',
+                                padding: '2px 7px',
+                                fontSize: '0.74rem',
+                                cursor: 'pointer'
+                              }}
+                              title="刪除此筆紀錄"
+                            >
+                              🗑️ 刪除
+                            </button>
                           </td>
                         </tr>
                       );
@@ -1578,6 +1776,259 @@ export default function GlobalSovereignDashboard() {
                   }}
                 >
                   確認出場並入帳
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 編輯 / 新增全球主權歷史交易紀錄彈窗 Modal */}
+      {editTxModal.open && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100000, backdropFilter: 'blur(4px)', padding: '1rem'
+        }}>
+          <div className="glass-card" style={{
+            maxWidth: '520px', width: '100%',
+            background: 'linear-gradient(135deg, #1E293B, #0F172A)',
+            border: '1px solid rgba(99, 102, 241, 0.5)', borderRadius: '10px', padding: '1.4rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h4 style={{ margin: 0, color: '#A5B4FC', fontSize: '1.15rem' }}>
+                {editTxModal.isNew ? '➕ 新增全球主權歷史交易紀錄' : '✏️ 編輯修正歷史交易明細'}
+              </h4>
+              <button
+                onClick={() => setEditTxModal({ ...editTxModal, open: false })}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveTx}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>交易日期</label>
+                  <input
+                    type="date"
+                    value={editTxModal.date}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, date: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>交易動作</label>
+                  <select
+                    value={editTxModal.action}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, action: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: '#1E293B', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  >
+                    <option value="買入">買入</option>
+                    <option value="加碼">加碼</option>
+                    <option value="減持">減持</option>
+                    <option value="賣出">賣出 (平倉)</option>
+                    <option value="存入">存入 (資金投入)</option>
+                    <option value="提出">提出 (資金收回)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 0.8fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>代碼 (Ticker)</label>
+                  <input
+                    type="text"
+                    placeholder="例: MRNA / 3037.TW"
+                    value={editTxModal.ticker}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, ticker: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>標的名稱</label>
+                  <input
+                    type="text"
+                    placeholder="例: 莫德納 (Moderna)"
+                    value={editTxModal.name}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, name: e.target.value })}
+                    required
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>計價幣別</label>
+                  <select
+                    value={editTxModal.currency}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, currency: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: '#1E293B', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="TWD">TWD (NT$)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>成交股數</label>
+                  <input
+                    type="number"
+                    step="1"
+                    value={editTxModal.shares}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, shares: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>成交價格 ({editTxModal.currency})</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editTxModal.price}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, price: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>稅金/手續費 ({editTxModal.currency})</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editTxModal.tax_fee}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, tax_fee: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                    <label style={{ fontSize: '0.76rem', color: '#94A3B8' }}>現金流變動 (NT$)</label>
+                    <button
+                      type="button"
+                      onClick={handleAutoCalcTx}
+                      style={{ background: 'none', border: 'none', color: '#38BDF8', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
+                      title="依據幣別、匯率(1USD≈32.5NTD)與股價自動換算台幣現金流"
+                    >
+                      ⚡ 試算
+                    </button>
+                  </div>
+                  <input
+                    type="number"
+                    step="1"
+                    placeholder="負代表支出, 正代表入帳"
+                    value={editTxModal.cash_flow_twd}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, cash_flow_twd: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>實現淨損益 (NT$, 選填)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    placeholder="平倉時填寫"
+                    value={editTxModal.realized_pnl_twd}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, realized_pnl_twd: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>實現報酬率 %</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="例: 12.5"
+                    value={editTxModal.realized_return_pct}
+                    onChange={(e) => setEditTxModal({ ...editTxModal, realized_return_pct: e.target.value })}
+                    style={{
+                      width: '100%', padding: '0.45rem',
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.2rem' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>備註說明</label>
+                <input
+                  type="text"
+                  placeholder="例: 美股突破策略加碼、動態輪動平倉等"
+                  value={editTxModal.note}
+                  onChange={(e) => setEditTxModal({ ...editTxModal, note: e.target.value })}
+                  style={{
+                    width: '100%', padding: '0.45rem',
+                    background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setEditTxModal({ ...editTxModal, open: false })}
+                  style={{ padding: '0.45rem 1rem', fontSize: '0.84rem' }}
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  className="btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
+                    color: '#FFF', fontWeight: 'bold', padding: '0.45rem 1.2rem', fontSize: '0.84rem'
+                  }}
+                >
+                  確認儲存
                 </button>
               </div>
             </form>
