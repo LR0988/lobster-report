@@ -34,9 +34,9 @@ export default function GlobalSovereignDashboard() {
   const comparison = data?.two_stage_comparison || {};
   const yearly = data?.yearly_performance || [];
 
+  const stg3 = comparison.stage3_dual_tech || {};
+  const tw = comparison.taiwan_single_titan || {};
   const stg2b = comparison.stage2b_dual_titan || {};
-  const stg2a = comparison.stage2a_single_titan || {};
-  const stg1 = comparison.stage1_etf || {};
   const spy = comparison.spy || {};
 
   return (
@@ -48,7 +48,7 @@ export default function GlobalSovereignDashboard() {
             🌍 全球主權泰坦兩階段模型 (Two-Stage Global Titan)
           </h2>
           <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-            第一步：由上而下評選全球最強國運 (宏觀順風) ➔ 第二步：在天命之國境內挑選最強王權個股 (超級 Alpha)
+            由上而下國運動能評選 ➔ 深入本土真實交易所挑選王權個股 ➔ 聚焦美台科技雙霸權共振 Alpha
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
@@ -68,39 +68,39 @@ export default function GlobalSovereignDashboard() {
 
       {/* 核心 KPI 指標卡片 (四種策略 20 年實測對比) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1rem', marginBottom: '1.8rem' }}>
-        <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #10B981', background: 'rgba(16, 185, 129, 0.08)' }}>
+        <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #10B981', background: 'rgba(16, 185, 129, 0.12)' }}>
           <div style={{ fontSize: '0.82rem', color: '#34D399', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-            👑 階段 2B：全球雙雄泰坦 (50/50)
+            🚀 頂級旗艦：美台科技雙霸權 (雙月雙雄)
           </div>
           <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#10B981' }}>
-            +{stg2b.total_ret?.toLocaleString()}%
+            +{stg3.total_ret?.toLocaleString()}%
           </div>
           <div style={{ fontSize: '0.75rem', color: '#A7F3D0', marginTop: '0.2rem' }}>
-            翻 <strong>{stg2b.mult} 倍</strong> | CAGR <strong>{stg2b.cagr}%</strong> | MDD <strong>{stg2b.mdd}%</strong>
+            翻 <strong>{stg3.mult?.toLocaleString()} 倍</strong> | CAGR <strong>{stg3.cagr}%</strong> | MDD <strong>{stg3.mdd}%</strong>
           </div>
         </div>
 
         <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #6366F1' }}>
           <div style={{ fontSize: '0.82rem', color: '#818CF8', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-            ⚡ 階段 2A：單國泰坦 (70/30)
+            🇹🇼 台灣本土泰坦 (頂刊旗艦版)
           </div>
           <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#818CF8' }}>
-            +{stg2a.total_ret?.toLocaleString()}%
+            +{tw.total_ret?.toLocaleString()}%
           </div>
           <div style={{ fontSize: '0.75rem', color: '#C7D2FE', marginTop: '0.2rem' }}>
-            翻 <strong>{stg2a.mult} 倍</strong> | CAGR <strong>{stg2a.cagr}%</strong> | MDD <strong>{stg2a.mdd}%</strong>
+            翻 <strong>{tw.mult} 倍</strong> | CAGR <strong>{tw.cagr}%</strong> | MDD <strong>{tw.mdd}%</strong>
           </div>
         </div>
 
         <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #3B82F6' }}>
           <div style={{ fontSize: '0.82rem', color: '#60A5FA', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-            🌐 階段 1：純國家 ETF 輪動
+            🌐 全球 15 國廣泛雙雄 (月度輪動)
           </div>
           <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#60A5FA' }}>
-            +{stg1.total_ret?.toLocaleString()}%
+            +{stg2b.total_ret?.toLocaleString()}%
           </div>
           <div style={{ fontSize: '0.75rem', color: '#93C5FD', marginTop: '0.2rem' }}>
-            翻 <strong>{stg1.mult} 倍</strong> | CAGR <strong>{stg1.cagr}%</strong> | MDD <strong>{stg1.mdd}%</strong>
+            翻 <strong>{stg2b.mult} 倍</strong> | CAGR <strong>{stg2b.cagr}%</strong> | MDD <strong>{stg2b.mdd}%</strong>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "generated_at": "2026-10-11 08:27:27",
+  "generated_at": "2026-10-11 08:34:43",
   "latest_data_date": "2026-10-09",
   "top_pick": {
     "ticker": "EWY",
@@ -774,17 +774,23 @@
       "cagr": 9.49,
       "mdd": -35.69
     },
-    "stage2a_single_titan": {
-      "total_ret": 9432.0,
-      "mult": 95.32,
-      "cagr": 22.24,
-      "mdd": -46.81
+    "taiwan_single_titan": {
+      "total_ret": 26550.0,
+      "mult": 266.5,
+      "cagr": 30.34,
+      "mdd": -35.88
     },
     "stage2b_dual_titan": {
       "total_ret": 30888.1,
       "mult": 309.88,
       "cagr": 28.76,
       "mdd": -41.9
+    },
+    "stage3_dual_tech": {
+      "total_ret": 561043.0,
+      "mult": 5611.43,
+      "cagr": 46.74,
+      "mdd": -33.56
     }
   },
   "yearly_performance": [
