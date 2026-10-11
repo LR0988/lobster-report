@@ -552,7 +552,7 @@ const PROMPT_KEY  = 'stock_screener_prompt';
 
 function StockDashboard() {
   const authUser = getCurrentUser();
-  const user = authUser || { username: '訪客', role: 'viewer', is_guest: true };
+  const user = authUser;
   const navigate = useNavigate();
   const [screeningStatus, setScreeningStatus] = useState('');
 

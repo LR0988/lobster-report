@@ -20,7 +20,7 @@ const Login = () => {
       setCurrentUser(data.user);
       // 觸發自訂事件讓 Header 即時更新狀態
       window.dispatchEvent(new Event('authChange'));
-      navigate('/users');
+      navigate('/');
     } catch (err) {
       setError(err.message || '登入失敗，請檢查帳號密碼');
     } finally {
