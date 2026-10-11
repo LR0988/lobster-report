@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "generated_at": "2026-10-11 08:20:37",
+  "generated_at": "2026-10-11 08:27:27",
   "latest_data_date": "2026-10-09",
   "top_pick": {
     "ticker": "EWY",
@@ -775,16 +775,16 @@
       "mdd": -35.69
     },
     "stage2a_single_titan": {
-      "total_ret": 7839.7,
-      "mult": 79.4,
-      "cagr": 21.26,
-      "mdd": -45.74
+      "total_ret": 9432.0,
+      "mult": 95.32,
+      "cagr": 22.24,
+      "mdd": -46.81
     },
     "stage2b_dual_titan": {
-      "total_ret": 9743.9,
-      "mult": 98.44,
-      "cagr": 22.42,
-      "mdd": -30.46
+      "total_ret": 30888.1,
+      "mult": 309.88,
+      "cagr": 28.76,
+      "mdd": -41.9
     }
   },
   "yearly_performance": [
@@ -794,9 +794,9 @@
       "flag": "🇧🇷",
       "spy_ret": 9.0,
       "stg1_etf_ret": 23.3,
-      "stg2a_titan_ret": 23.3,
-      "stg2b_dual_ret": 17.9,
-      "cap_stg2b": 1179344.0
+      "stg2a_titan_ret": 2.1,
+      "stg2b_dual_ret": 13.2,
+      "cap_stg2b": 1131683.0
     },
     {
       "year": 2005,
@@ -804,9 +804,9 @@
       "flag": "🇧🇷",
       "spy_ret": 4.8,
       "stg1_etf_ret": 29.2,
-      "stg2a_titan_ret": 23.6,
-      "stg2b_dual_ret": 34.0,
-      "cap_stg2b": 1580026.0
+      "stg2a_titan_ret": 10.4,
+      "stg2b_dual_ret": 20.8,
+      "cap_stg2b": 1367570.0
     },
     {
       "year": 2006,
@@ -814,9 +814,9 @@
       "flag": "🇧🇷",
       "spy_ret": 15.7,
       "stg1_etf_ret": 19.7,
-      "stg2a_titan_ret": 7.3,
-      "stg2b_dual_ret": 18.2,
-      "cap_stg2b": 1867602.0
+      "stg2a_titan_ret": 9.0,
+      "stg2b_dual_ret": 18.5,
+      "cap_stg2b": 1620951.0
     },
     {
       "year": 2007,
@@ -824,9 +824,9 @@
       "flag": "🇧🇷",
       "spy_ret": 4.9,
       "stg1_etf_ret": 31.2,
-      "stg2a_titan_ret": 31.2,
-      "stg2b_dual_ret": 31.2,
-      "cap_stg2b": 2450361.0
+      "stg2a_titan_ret": 52.8,
+      "stg2b_dual_ret": 43.0,
+      "cap_stg2b": 2317257.0
     },
     {
       "year": 2008,
@@ -834,9 +834,9 @@
       "flag": "🇧🇷",
       "spy_ret": -36.8,
       "stg1_etf_ret": -2.3,
-      "stg2a_titan_ret": -2.3,
-      "stg2b_dual_ret": -15.8,
-      "cap_stg2b": 2063081.0
+      "stg2a_titan_ret": -19.1,
+      "stg2b_dual_ret": -29.5,
+      "cap_stg2b": 1633762.0
     },
     {
       "year": 2009,
@@ -844,9 +844,9 @@
       "flag": "🛡️",
       "spy_ret": 27.1,
       "stg1_etf_ret": 21.9,
-      "stg2a_titan_ret": 21.9,
-      "stg2b_dual_ret": 16.9,
-      "cap_stg2b": 2411068.0
+      "stg2a_titan_ret": 24.9,
+      "stg2b_dual_ret": 21.0,
+      "cap_stg2b": 1977496.0
     },
     {
       "year": 2010,
@@ -854,9 +854,9 @@
       "flag": "🇲🇽",
       "spy_ret": 15.0,
       "stg1_etf_ret": 1.2,
-      "stg2a_titan_ret": -5.9,
-      "stg2b_dual_ret": -2.5,
-      "cap_stg2b": 2350677.0
+      "stg2a_titan_ret": 13.4,
+      "stg2b_dual_ret": 10.7,
+      "cap_stg2b": 2188584.0
     },
     {
       "year": 2011,
@@ -864,9 +864,9 @@
       "flag": "🇸🇪",
       "spy_ret": 2.9,
       "stg1_etf_ret": -23.8,
-      "stg2a_titan_ret": -10.6,
-      "stg2b_dual_ret": -13.3,
-      "cap_stg2b": 2037368.0
+      "stg2a_titan_ret": -13.0,
+      "stg2b_dual_ret": -10.0,
+      "cap_stg2b": 1969374.0
     },
     {
       "year": 2012,
@@ -874,9 +874,9 @@
       "flag": "🇺🇸",
       "spy_ret": 16.1,
       "stg1_etf_ret": 23.1,
-      "stg2a_titan_ret": 47.6,
-      "stg2b_dual_ret": 33.7,
-      "cap_stg2b": 2722997.0
+      "stg2a_titan_ret": 45.3,
+      "stg2b_dual_ret": 29.4,
+      "cap_stg2b": 2549002.0
     },
     {
       "year": 2013,
@@ -884,9 +884,9 @@
       "flag": "🇳🇱",
       "spy_ret": 29.3,
       "stg1_etf_ret": 2.3,
-      "stg2a_titan_ret": 2.3,
-      "stg2b_dual_ret": 3.5,
-      "cap_stg2b": 2819521.0
+      "stg2a_titan_ret": 13.5,
+      "stg2b_dual_ret": 17.8,
+      "cap_stg2b": 3001713.0
     },
     {
       "year": 2014,
@@ -894,9 +894,9 @@
       "flag": "🇺🇸",
       "spy_ret": 14.4,
       "stg1_etf_ret": -7.5,
-      "stg2a_titan_ret": 27.8,
-      "stg2b_dual_ret": 34.9,
-      "cap_stg2b": 3803244.0
+      "stg2a_titan_ret": 30.0,
+      "stg2b_dual_ret": 24.2,
+      "cap_stg2b": 3727888.0
     },
     {
       "year": 2015,
@@ -904,9 +904,9 @@
       "flag": "🇺🇸",
       "spy_ret": -0.8,
       "stg1_etf_ret": -15.2,
-      "stg2a_titan_ret": -16.2,
-      "stg2b_dual_ret": -9.7,
-      "cap_stg2b": 3436184.0
+      "stg2a_titan_ret": -8.6,
+      "stg2b_dual_ret": -0.8,
+      "cap_stg2b": 3698135.0
     },
     {
       "year": 2016,
@@ -914,9 +914,9 @@
       "flag": "🇧🇷",
       "spy_ret": 14.7,
       "stg1_etf_ret": 4.3,
-      "stg2a_titan_ret": -2.1,
-      "stg2b_dual_ret": 6.9,
-      "cap_stg2b": 3673705.0
+      "stg2a_titan_ret": -17.0,
+      "stg2b_dual_ret": -2.0,
+      "cap_stg2b": 3625570.0
     },
     {
       "year": 2017,
@@ -924,9 +924,9 @@
       "flag": "🇧🇷",
       "spy_ret": 21.3,
       "stg1_etf_ret": 16.8,
-      "stg2a_titan_ret": 16.5,
-      "stg2b_dual_ret": 18.2,
-      "cap_stg2b": 4341340.0
+      "stg2a_titan_ret": 13.4,
+      "stg2b_dual_ret": 38.7,
+      "cap_stg2b": 5028462.0
     },
     {
       "year": 2018,
@@ -934,9 +934,9 @@
       "flag": "🇺🇸",
       "spy_ret": -6.4,
       "stg1_etf_ret": -10.3,
-      "stg2a_titan_ret": -4.6,
-      "stg2b_dual_ret": -14.3,
-      "cap_stg2b": 3721154.0
+      "stg2a_titan_ret": -2.3,
+      "stg2b_dual_ret": 4.1,
+      "cap_stg2b": 5234060.0
     },
     {
       "year": 2019,
@@ -944,9 +944,9 @@
       "flag": "🇧🇷",
       "spy_ret": 34.0,
       "stg1_etf_ret": 17.8,
-      "stg2a_titan_ret": 35.5,
-      "stg2b_dual_ret": 50.4,
-      "cap_stg2b": 5597074.0
+      "stg2a_titan_ret": 31.8,
+      "stg2b_dual_ret": 18.8,
+      "cap_stg2b": 6219849.0
     },
     {
       "year": 2020,
@@ -954,9 +954,9 @@
       "flag": "🇺🇸",
       "spy_ret": 18.2,
       "stg1_etf_ret": 39.0,
-      "stg2a_titan_ret": 119.1,
-      "stg2b_dual_ret": 74.9,
-      "cap_stg2b": 9789657.0
+      "stg2a_titan_ret": 186.8,
+      "stg2b_dual_ret": 145.9,
+      "cap_stg2b": 15295802.0
     },
     {
       "year": 2021,
@@ -964,9 +964,9 @@
       "flag": "🇰🇷",
       "spy_ret": 28.6,
       "stg1_etf_ret": -11.0,
-      "stg2a_titan_ret": -16.8,
-      "stg2b_dual_ret": 0.7,
-      "cap_stg2b": 9858348.0
+      "stg2a_titan_ret": -5.4,
+      "stg2b_dual_ret": 124.8,
+      "cap_stg2b": 34381637.0
     },
     {
       "year": 2022,
@@ -974,9 +974,9 @@
       "flag": "🇲🇽",
       "spy_ret": -18.0,
       "stg1_etf_ret": -23.3,
-      "stg2a_titan_ret": -30.7,
-      "stg2b_dual_ret": -20.4,
-      "cap_stg2b": 7851240.0
+      "stg2a_titan_ret": -35.4,
+      "stg2b_dual_ret": -28.1,
+      "cap_stg2b": 24715364.0
     },
     {
       "year": 2023,
@@ -986,7 +986,7 @@
       "stg1_etf_ret": 28.2,
       "stg2a_titan_ret": 63.5,
       "stg2b_dual_ret": 59.1,
-      "cap_stg2b": 12491264.0
+      "cap_stg2b": 39321963.0
     },
     {
       "year": 2024,
@@ -996,7 +996,7 @@
       "stg1_etf_ret": 4.9,
       "stg2a_titan_ret": 103.8,
       "stg2b_dual_ret": 59.0,
-      "cap_stg2b": 19864152.0
+      "cap_stg2b": 62531492.0
     },
     {
       "year": 2025,
@@ -1006,7 +1006,7 @@
       "stg1_etf_ret": 16.3,
       "stg2a_titan_ret": 46.4,
       "stg2b_dual_ret": 129.7,
-      "cap_stg2b": 45623512.0
+      "cap_stg2b": 143620852.0
     },
     {
       "year": 2026,
@@ -1016,7 +1016,7 @@
       "stg1_etf_ret": 80.1,
       "stg2a_titan_ret": 151.1,
       "stg2b_dual_ret": 115.8,
-      "cap_stg2b": 98438671.0
+      "cap_stg2b": 309880701.0
     }
   ],
   "history_trades": [
@@ -1030,7 +1030,7 @@
       "stg2a_ret": -7.5,
       "stg2b_ret": -1.7,
       "spy_ret": -0.4,
-      "equity_2b": 20191610.0
+      "equity_2b": 63562321.0
     },
     {
       "date": "2024-11-01",
@@ -1042,7 +1042,7 @@
       "stg2a_ret": 0.5,
       "stg2b_ret": 0.5,
       "spy_ret": 5.5,
-      "equity_2b": 20295938.0
+      "equity_2b": 63890747.0
     },
     {
       "date": "2024-12-02",
@@ -1054,7 +1054,7 @@
       "stg2a_ret": -2.1,
       "stg2b_ret": -2.1,
       "spy_ret": -1.9,
-      "equity_2b": 19864152.0
+      "equity_2b": 62531492.0
     },
     {
       "date": "2025-01-02",
@@ -1066,7 +1066,7 @@
       "stg2a_ret": -6.8,
       "stg2b_ret": -4.3,
       "spy_ret": 0.6,
-      "equity_2b": 19019056.0
+      "equity_2b": 59871169.0
     },
     {
       "date": "2025-02-03",
@@ -1078,7 +1078,7 @@
       "stg2a_ret": 0.4,
       "stg2b_ret": 26.8,
       "spy_ret": 0.6,
-      "equity_2b": 24118595.0
+      "equity_2b": 75924296.0
     },
     {
       "date": "2025-03-03",
@@ -1090,7 +1090,7 @@
       "stg2a_ret": 8.5,
       "stg2b_ret": 7.2,
       "spy_ret": -6.2,
-      "equity_2b": 25863046.0
+      "equity_2b": 81415755.0
     },
     {
       "date": "2025-04-01",
@@ -1102,7 +1102,7 @@
       "stg2a_ret": 8.0,
       "stg2b_ret": 5.7,
       "spy_ret": 0.5,
-      "equity_2b": 27332862.0
+      "equity_2b": 86042671.0
     },
     {
       "date": "2025-05-01",
@@ -1114,7 +1114,7 @@
       "stg2a_ret": 22.4,
       "stg2b_ret": 17.3,
       "spy_ret": 4.9,
-      "equity_2b": 32050876.0
+      "equity_2b": 100894776.0
     },
     {
       "date": "2025-06-02",
@@ -1126,7 +1126,7 @@
       "stg2a_ret": -5.1,
       "stg2b_ret": -1.8,
       "spy_ret": 5.2,
-      "equity_2b": 31475508.0
+      "equity_2b": 99083543.0
     },
     {
       "date": "2025-07-01",
@@ -1138,7 +1138,7 @@
       "stg2a_ret": -3.5,
       "stg2b_ret": -1.0,
       "spy_ret": 1.6,
-      "equity_2b": 31158910.0
+      "equity_2b": 98086906.0
     },
     {
       "date": "2025-08-01",
@@ -1150,7 +1150,7 @@
       "stg2a_ret": 3.4,
       "stg2b_ret": 3.6,
       "spy_ret": 1.8,
-      "equity_2b": 32267815.0
+      "equity_2b": 101577690.0
     },
     {
       "date": "2025-09-02",
@@ -1162,7 +1162,7 @@
       "stg2a_ret": 1.8,
       "stg2b_ret": -1.2,
       "spy_ret": 4.3,
-      "equity_2b": 31895546.0
+      "equity_2b": 100405805.0
     },
     {
       "date": "2025-10-01",
@@ -1174,7 +1174,7 @@
       "stg2a_ret": -1.9,
       "stg2b_ret": 28.3,
       "spy_ret": 3.4,
-      "equity_2b": 40922291.0
+      "equity_2b": 128821615.0
     },
     {
       "date": "2025-11-03",
@@ -1186,7 +1186,7 @@
       "stg2a_ret": -3.4,
       "stg2b_ret": -0.5,
       "spy_ret": -1.0,
-      "equity_2b": 40705718.0
+      "equity_2b": 128139848.0
     },
     {
       "date": "2025-12-01",
@@ -1198,7 +1198,7 @@
       "stg2a_ret": 19.5,
       "stg2b_ret": 12.1,
       "spy_ret": 1.3,
-      "equity_2b": 45623512.0
+      "equity_2b": 143620852.0
     },
     {
       "date": "2026-01-02",
@@ -1210,7 +1210,7 @@
       "stg2a_ret": 32.3,
       "stg2b_ret": 20.3,
       "spy_ret": 0.6,
-      "equity_2b": 54903007.0
+      "equity_2b": 172832294.0
     },
     {
       "date": "2026-02-02",
@@ -1222,7 +1222,7 @@
       "stg2a_ret": 25.0,
       "stg2b_ret": 9.3,
       "spy_ret": -1.6,
-      "equity_2b": 60032932.0
+      "equity_2b": 188981085.0
     },
     {
       "date": "2026-03-02",
@@ -1234,7 +1234,7 @@
       "stg2a_ret": -15.6,
       "stg2b_ret": -12.2,
       "spy_ret": -3.4,
-      "equity_2b": 52714646.0
+      "equity_2b": 165943431.0
     },
     {
       "date": "2026-04-01",
@@ -1246,7 +1246,7 @@
       "stg2a_ret": 27.1,
       "stg2b_ret": 15.4,
       "spy_ret": 10.3,
-      "equity_2b": 60808021.0
+      "equity_2b": 191421034.0
     },
     {
       "date": "2026-05-01",
@@ -1258,7 +1258,7 @@
       "stg2a_ret": 64.4,
       "stg2b_ret": 52.1,
       "spy_ret": 4.7,
-      "equity_2b": 92484445.0
+      "equity_2b": 291137052.0
     },
     {
       "date": "2026-06-01",
@@ -1270,7 +1270,7 @@
       "stg2a_ret": 12.4,
       "stg2b_ret": 8.5,
       "spy_ret": -1.1,
-      "equity_2b": 100355716.0
+      "equity_2b": 315915476.0
     },
     {
       "date": "2026-07-01",
@@ -1282,7 +1282,7 @@
       "stg2a_ret": -34.8,
       "stg2b_ret": -30.5,
       "spy_ret": 0.6,
-      "equity_2b": 69785409.0
+      "equity_2b": 219681465.0
     },
     {
       "date": "2026-08-03",
@@ -1294,7 +1294,7 @@
       "stg2a_ret": 13.8,
       "stg2b_ret": 21.1,
       "spy_ret": 1.7,
-      "equity_2b": 84536263.0
+      "equity_2b": 266116518.0
     },
     {
       "date": "2026-09-01",
@@ -1306,7 +1306,7 @@
       "stg2a_ret": 3.3,
       "stg2b_ret": 16.4,
       "spy_ret": 0.6,
-      "equity_2b": 98438671.0
+      "equity_2b": 309880701.0
     }
   ]
 }
