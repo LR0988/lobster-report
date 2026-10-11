@@ -5118,28 +5118,7 @@ function StockDashboard() {
               </div>
             )}
 
-            {/* 📊 歷年波段模擬回測 (Backtest) 主標頭 */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.65rem 1.15rem',
-              background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.25), rgba(15, 23, 42, 0.85))',
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              borderRadius: '10px',
-              marginBottom: '1.25rem',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                <span style={{ fontSize: '1.25rem' }}>📊</span>
-                <span style={{ fontWeight: 'bold', fontSize: '1.02rem', color: '#6EE7B7' }}>
-                  歷年波段模擬回測 (Backtest)
-                </span>
-                <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>
-                  — 跨牛熊歷史全樣本實證・15 款 AI 量化模型回測・勝率與歷史帳簿
-                </span>
-              </div>
-            </div>
+
 
             {fetchingMarketMl && !marketMlData ? (
               <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
@@ -5914,30 +5893,6 @@ function StockDashboard() {
 
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                      {/* 🌊 艾略特波浪最新定位捷徑提示條 */}
-                      <div style={{
-                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(91, 33, 182, 0.25))',
-                        border: '1px solid rgba(168, 85, 247, 0.45)',
-                        borderRadius: '10px',
-                        padding: '0.65rem 1rem',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '0.75rem'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                          <span style={{ fontSize: '1.2rem' }}>🌊</span>
-                          <div>
-                            <span style={{ fontWeight: 'bold', color: '#E9D5FF', fontSize: '0.86rem' }}>
-                              大盤波浪理論最新定位：加權指數目前處於【{currentElliottWave.wave_name}】
-                            </span>
-                            <span style={{ fontSize: '0.78rem', color: '#C4B5FD', marginLeft: '0.5rem' }}>
-                              斐波 1.618 目標：{currentElliottWave.targets?.fib_1618?.toLocaleString()} 點（潛在 +{currentElliottWave.upside_potential_pct}%），結構防守：{currentElliottWave.invalidation_level?.toLocaleString()} 點
-                            </span>
-                          </div>
-                        </div>
-                      </div>
 
                       {/* 1. 回測頂部設定與模式切換卡片 */}
                       <div style={{
