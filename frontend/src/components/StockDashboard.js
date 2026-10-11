@@ -8724,21 +8724,23 @@ function StockDashboard() {
                     { id: 'elliott', name: '波浪理論策略', icon: '🌊', tag: is20ySelected ? '20年+375%・幾何推動階梯' : '幾何推動與斐波階梯' }
                   ];
 
-                  // 動態計算所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
-                  const getTitanPeriodData = (pKey, startYr, endYr, targetModelKey = activeModelKey) => {
-                    const isGlobalTitan = targetModelKey === 'global_liquid_titan_a';
-                    const sourceCurveData = isGlobalTitan ? (globalTitanCurveData || []) : (titanCurveData || []);
-                    const sourceTradesData = isGlobalTitan ? (globalTitanTradesData || []) : (titanTradesData || []);
-                    if (!sourceCurveData || sourceCurveData.length === 0) return null;
+                  // 動態計算單一泰坦模型所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
+                  const calcSingleTitanModeData = (targetKey, pKey, startYr, endYr) => {
+                    const isGlobal = targetKey === 'global_liquid_titan_a';
+                    const sourceCurve = isGlobal ? (globalTitanCurveData || []) : (titanCurveData || []);
+                    const sourceTrades = isGlobal ? (globalTitanTradesData || []) : (titanTradesData || []);
+                    if (!sourceCurve || sourceCurve.length === 0) return null;
 
                     let sDate = '20160101';
                     let eDate = '20261231';
-                    let periodName = isGlobalTitan ? '🌐 近 10 年歷史 (2016~2026)' : '👑 近 10 年歷史 (2016~2026)';
+                    let periodName = isGlobal ? '🌐 近 10 年歷史 (2016~2026)' : '👑 近 10 年歷史 (2016~2026)';
 
                     if (pKey === '20y' || pKey === 'all') {
-                      sDate = '20050101'; eDate = '20261231'; periodName = isGlobalTitan ? '🌐 20 年超長全歷史 (2005~2026)' : '👑 20 年超長全歷史 (2005~2026)';
+                      sDate = isGlobal ? '20040101' : '20050101';
+                      eDate = '20261231';
+                      periodName = isGlobal ? '🌐 20 年超長全歷史 (2005~2026)' : '👑 20 年超長全歷史 (2005~2026)';
                     } else if (pKey === '10y') {
-                      sDate = '20160101'; eDate = '20261231'; periodName = isGlobalTitan ? '🏛️ 近 10 年歷史 (2016~2026)' : '🏛️ 近 10 年歷史 (2016~2026)';
+                      sDate = '20160101'; eDate = '20261231'; periodName = isGlobal ? '🏛️ 近 10 年歷史 (2016~2026)' : '🏛️ 近 10 年歷史 (2016~2026)';
                     } else if (pKey === '5y') {
                       sDate = '20210901'; eDate = '20261231'; periodName = '🏆 近 5 年 (2021~2026)';
                     } else if (pKey === '3y') {
@@ -8769,9 +8771,9 @@ function StockDashboard() {
                       sDate = `${sY}0101`; eDate = `${eY}1231`; periodName = `📅 自訂跨度 (${sY} ~ ${eY} 年)`;
                     }
 
-                    let filtered = sourceCurveData.filter(p => p.date >= sDate && p.date <= eDate);
+                    let filtered = sourceCurve.filter(p => p.date >= sDate && p.date <= eDate);
                     if (filtered.length < 2) {
-                      filtered = sourceCurveData;
+                      filtered = sourceCurve;
                       sDate = filtered[0].date;
                       eDate = filtered[filtered.length - 1].date;
                     }
@@ -8844,7 +8846,7 @@ function StockDashboard() {
                     const etf20TotalRet = ((finalEtf20 - 1000000) / 1000000) * 100;
 
                     const daysElapsed = Math.max(1, rebasedCurve.length);
-                    const sYr = parseInt(String(rebasedCurve[0].date).slice(0, 4)) || 2005;
+                    const sYr = parseInt(String(rebasedCurve[0].date).slice(0, 4)) || (isGlobal ? 2004 : 2005);
                     const sMo = parseInt(String(rebasedCurve[0].date).slice(4, 6)) || 1;
                     const eYr = parseInt(String(rebasedCurve[rebasedCurve.length - 1].date).slice(0, 4)) || 2026;
                     const eMo = parseInt(String(rebasedCurve[rebasedCurve.length - 1].date).slice(4, 6)) || 10;
@@ -8854,7 +8856,7 @@ function StockDashboard() {
                     const etfCagr = (Math.pow(Math.max(0.01, finalEtf / 1000000), 1 / yearsElapsed) - 1) * 100;
                     const etf20Cagr = (Math.pow(Math.max(0.01, finalEtf20 / 1000000), 1 / yearsElapsed) - 1) * 100;
 
-                    const slicedTrades = sourceTradesData.filter(t => {
+                    const slicedTrades = sourceTrades.filter(t => {
                       const dEntry = String(t.entry_date || '');
                       const dExit = String(t.exit_date || '');
                       return (dEntry >= sDate && dEntry <= eDate) || (dExit >= sDate && dExit <= eDate);
@@ -8862,7 +8864,7 @@ function StockDashboard() {
 
                     const winTrades = slicedTrades.filter(t => (t.return_pct || 0) >= 0);
                     const lossTrades = slicedTrades.filter(t => (t.return_pct || 0) < 0);
-                    const winRate = slicedTrades.length > 0 ? (winTrades.length / slicedTrades.length) * 100 : (isGlobalTitan ? 55.1 : 65.31);
+                    const winRate = slicedTrades.length > 0 ? (winTrades.length / slicedTrades.length) * 100 : (isGlobal ? 55.1 : 65.31);
 
                     const totalWinGains = winTrades.reduce((sum, t) => sum + (t.return_pct || 0), 0);
                     const totalLossLosses = Math.abs(lossTrades.reduce((sum, t) => sum + (t.return_pct || 0), 0));
@@ -8912,12 +8914,11 @@ function StockDashboard() {
                     });
 
                     // 當前持有中部位之買進標注點位
-                    const openPosList = isGlobalTitan
+                    const openPosList = isGlobal
                       ? [
                           { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1主力 (40%)', weight_pct: 40, entry_date: '20261001', entry_price: 225.0, latest_price: 225.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (25%)', weight_pct: 25, entry_date: '20261001', entry_price: 162.0, latest_price: 162.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 146.5, dist_to_stop_pct: 10.6, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (20%)', weight_pct: 20, entry_date: '20261001', entry_price: 1180.0, latest_price: 1180.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 1095.0, dist_to_stop_pct: 7.8, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
-                          { stock_id: '8069.TWO', stock_name: '元太 (E Ink)', role: '🎖️ 第4主力 (15%)', weight_pct: 15, entry_date: '20261001', entry_price: 245.0, latest_price: 245.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 228.0, dist_to_stop_pct: 7.5, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' }
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 162.0, latest_price: 162.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 146.5, dist_to_stop_pct: 10.6, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 1180.0, latest_price: 1180.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 1095.0, dist_to_stop_pct: 7.8, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' }
                         ]
                       : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
 
@@ -8975,12 +8976,11 @@ function StockDashboard() {
                       };
                     });
 
-                    // 計算真實動態夏普比率與索提諾比率
                     const isMonthlyData = rebasedCurve.length < 500;
                     const annualizeFactor = isMonthlyData ? Math.sqrt(12) : Math.sqrt(242);
 
-                    let stratSharpe = isGlobalTitan ? 1.27 : 1.0;
-                    let stratSortino = isGlobalTitan ? 2.12 : 1.68;
+                    let stratSharpe = isGlobal ? 1.08 : 1.0;
+                    let stratSortino = isGlobal ? 2.12 : 1.68;
                     if (rebasedCurve.length > 5) {
                       const dailyRets = [];
                       for (let i = 1; i < rebasedCurve.length; i++) {
@@ -9015,9 +9015,6 @@ function StockDashboard() {
                       }
                     }
 
-                    const is20y = pKey === '20y' || pKey === 'all';
-                    const is10y = pKey === '10y';
-
                     const customModeData = {
                       total_return_pct: Number(totalRet.toFixed(1)),
                       cagr_pct: Number(cagr.toFixed(2)),
@@ -9030,8 +9027,8 @@ function StockDashboard() {
                       loss_trades: lossTrades.length,
                       total_trades: slicedTrades.length,
                       profit_factor: Number(profitFactor.toFixed(2)),
-                      market_exposure_pct: avgExposure || 68.4,
-                      cash_reserve_pct: 100 - (avgExposure || 68.4),
+                      market_exposure_pct: avgExposure || (isGlobal ? 90.6 : 68.4),
+                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 90.6 : 68.4)),
                       curve: rebasedCurve,
                       trades: slicedTrades,
                       action_markers: actionMarkers,
@@ -9040,113 +9037,126 @@ function StockDashboard() {
                       etf0020: customEtf0020
                     };
 
+                    return {
+                      periodName,
+                      sDate,
+                      eDate,
+                      daysElapsed,
+                      benchTotalRet,
+                      benchCagr,
+                      benchMaxDd,
+                      benchSharpe,
+                      rebasedCurve,
+                      dynamicTitanYearly,
+                      customEtf0050,
+                      customEtf0020,
+                      actionMarkers,
+                      customModeData
+                    };
+                  };
+
+                  // 取得當前區間下雙泰坦旗艦模型的 Leaderboard 完整物件
+                  const getTitanLeaderboardItems = (pKey, startYr, endYr) => {
+                    const g = calcSingleTitanModeData('global_liquid_titan_a', pKey, startYr, endYr);
+                    const t = calcSingleTitanModeData('titan_sovereign', pKey, startYr, endYr);
+                    const globalItem = {
+                      model_id: 'global_liquid_titan_a',
+                      name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
+                      short_name: '👑 全球泰坦(Calmar冠軍)',
+                      model_name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
+                      total_return_pct: g?.customModeData?.total_return_pct ?? 294215.0,
+                      cagr_pct: g?.customModeData?.cagr_pct ?? 42.4,
+                      alpha_pct: g?.customModeData?.alpha_pct ?? 294000.0,
+                      max_drawdown_pct: g?.customModeData?.max_drawdown_pct ?? -42.7,
+                      sharpe_ratio: g?.customModeData?.sharpe_ratio ?? 1.08,
+                      sortino_ratio: g?.customModeData?.sortino_ratio ?? 2.12,
+                      win_rate_pct: g?.customModeData?.win_rate_pct ?? 55.1,
+                      profit_factor: g?.customModeData?.profit_factor ?? 1.98,
+                      total_trades: g?.customModeData?.total_trades ?? 311,
+                      market_exposure_pct: g?.customModeData?.market_exposure_pct ?? 90.6
+                    };
+                    const titanItem = {
+                      model_id: 'titan_sovereign',
+                      name: '👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)',
+                      short_name: '👑 台股泰坦(FIP旗艦)',
+                      model_name: '👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)',
+                      total_return_pct: t?.customModeData?.total_return_pct ?? 26550.7,
+                      cagr_pct: t?.customModeData?.cagr_pct ?? 30.3,
+                      alpha_pct: t?.customModeData?.alpha_pct ?? 26335.7,
+                      max_drawdown_pct: t?.customModeData?.max_drawdown_pct ?? -36.6,
+                      sharpe_ratio: t?.customModeData?.sharpe_ratio ?? 1.00,
+                      sortino_ratio: t?.customModeData?.sortino_ratio ?? 1.68,
+                      win_rate_pct: t?.customModeData?.win_rate_pct ?? 65.3,
+                      profit_factor: t?.customModeData?.profit_factor ?? 3.85,
+                      total_trades: t?.customModeData?.total_trades ?? 391,
+                      market_exposure_pct: t?.customModeData?.market_exposure_pct ?? 68.4
+                    };
+                    return { globalItem, titanItem, globalCalc: g, titanCalc: t };
+                  };
+
+                  // 確保 Leaderboard 排行榜頂部永遠完整列入雙泰坦旗艦，並去除重複項目
+                  const buildCompleteLeaderboard = (baseList, pKey, startYr, endYr) => {
+                    const { globalItem, titanItem } = getTitanLeaderboardItems(pKey, startYr, endYr);
+                    const seen = new Set(['global_liquid_titan_a', 'titan_sovereign']);
+                    const otherModels = [];
+                    (baseList || []).forEach(m => {
+                      if (!m || !m.model_id) return;
+                      if (m.model_id === 'global_liquid_titan_a' || m.model_id === 'titan_sovereign') return;
+                      if (seen.has(m.model_id)) return;
+                      seen.add(m.model_id);
+                      otherModels.push(m);
+                    });
+                    return [globalItem, titanItem, ...otherModels];
+                  };
+
+                  // 動態計算所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
+                  const getTitanPeriodData = (pKey, startYr, endYr, targetModelKey = activeModelKey) => {
+                    const isGlobalTitan = targetModelKey === 'global_liquid_titan_a';
+                    const { globalItem, titanItem, globalCalc, titanCalc } = getTitanLeaderboardItems(pKey, startYr, endYr);
+                    const activeCalc = isGlobalTitan ? globalCalc : titanCalc;
+                    if (!activeCalc) return null;
+
+                    const is20y = pKey === '20y' || pKey === 'all';
                     const basePeriodObj = is20y
                       ? (bt.periods?.['20y'] || bt.full_history_20y)
                       : (bt.periods?.[pKey] || bt.periods?.['10y']);
 
                     const baseCompList = (basePeriodObj?.comparison_long_only || bt.periods?.['20y']?.comparison_long_only || bt.periods?.['10y']?.comparison_long_only || []);
-                    const mergedCompLongOnly = baseCompList.map(m => {
-                      if (m.model_id === 'titan_sovereign' && !isGlobalTitan) {
-                        return {
-                          ...m,
-                          name: '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)',
-                          total_return_pct: customModeData.total_return_pct,
-                          cagr_pct: customModeData.cagr_pct,
-                          alpha_pct: customModeData.alpha_pct,
-                          max_drawdown_pct: customModeData.max_drawdown_pct,
-                          sharpe_ratio: customModeData.sharpe_ratio,
-                          win_rate_pct: customModeData.win_rate_pct,
-                          profit_factor: customModeData.profit_factor,
-                          total_trades: customModeData.total_trades,
-                          market_exposure_pct: customModeData.market_exposure_pct
-                        };
-                      }
-                      if (m.model_id === 'global_liquid_titan_a' && isGlobalTitan) {
-                        return {
-                          ...m,
-                          name: '🌐 全球高流動性泰坦方案 A (Top 4 階梯配置 40/25/20/15)',
-                          total_return_pct: customModeData.total_return_pct,
-                          cagr_pct: customModeData.cagr_pct,
-                          alpha_pct: customModeData.alpha_pct,
-                          max_drawdown_pct: customModeData.max_drawdown_pct,
-                          sharpe_ratio: customModeData.sharpe_ratio,
-                          win_rate_pct: customModeData.win_rate_pct,
-                          profit_factor: customModeData.profit_factor,
-                          total_trades: customModeData.total_trades,
-                          market_exposure_pct: customModeData.market_exposure_pct
-                        };
-                      }
-                      return m;
-                    });
-
                     const baseCompListLS = (basePeriodObj?.comparison_long_short || bt.periods?.['20y']?.comparison_long_short || bt.periods?.['10y']?.comparison_long_short || []);
-                    const mergedCompLongShort = baseCompListLS.map(m => {
-                      if (m.model_id === 'titan_sovereign' && !isGlobalTitan) {
-                        return {
-                          ...m,
-                          name: '👑 泰坦王權主宰旗艦版 (Option A 70/15/15)',
-                          total_return_pct: customModeData.total_return_pct,
-                          cagr_pct: customModeData.cagr_pct,
-                          alpha_pct: customModeData.alpha_pct,
-                          max_drawdown_pct: customModeData.max_drawdown_pct,
-                          sharpe_ratio: customModeData.sharpe_ratio,
-                          win_rate_pct: customModeData.win_rate_pct,
-                          profit_factor: customModeData.profit_factor,
-                          total_trades: customModeData.total_trades,
-                          market_exposure_pct: customModeData.market_exposure_pct
-                        };
-                      }
-                      if (m.model_id === 'global_liquid_titan_a' && isGlobalTitan) {
-                        return {
-                          ...m,
-                          name: '🌐 全球高流動性泰坦方案 A (Top 4 階梯配置 40/25/20/15)',
-                          total_return_pct: customModeData.total_return_pct,
-                          cagr_pct: customModeData.cagr_pct,
-                          alpha_pct: customModeData.alpha_pct,
-                          max_drawdown_pct: customModeData.max_drawdown_pct,
-                          sharpe_ratio: customModeData.sharpe_ratio,
-                          win_rate_pct: customModeData.win_rate_pct,
-                          profit_factor: customModeData.profit_factor,
-                          total_trades: customModeData.total_trades,
-                          market_exposure_pct: customModeData.market_exposure_pct
-                        };
-                      }
-                      return m;
-                    });
 
                     return {
                       key: pKey,
-                      name: periodName,
-                      start_date: rebasedCurve[0]?.date,
-                      end_date: rebasedCurve[rebasedCurve.length - 1]?.date,
-                      trading_days: daysElapsed,
+                      name: activeCalc.periodName,
+                      start_date: activeCalc.rebasedCurve[0]?.date,
+                      end_date: activeCalc.rebasedCurve[activeCalc.rebasedCurve.length - 1]?.date,
+                      trading_days: activeCalc.daysElapsed,
                       benchmark: {
-                        total_return_pct: Number(benchTotalRet.toFixed(1)),
-                        cagr_pct: Number(benchCagr.toFixed(2)),
-                        max_drawdown_pct: Number(benchMaxDd.toFixed(2)),
-                        sharpe_ratio: benchSharpe
+                        total_return_pct: Number(activeCalc.benchTotalRet.toFixed(1)),
+                        cagr_pct: Number(activeCalc.benchCagr.toFixed(2)),
+                        max_drawdown_pct: Number(activeCalc.benchMaxDd.toFixed(2)),
+                        sharpe_ratio: activeCalc.benchSharpe
                       },
-                      yearly: dynamicTitanYearly,
-                      etf0050: customEtf0050,
-                      etf0020: customEtf0020,
-                      long_only: customModeData,
-                      long_short: customModeData,
-                      action_markers: actionMarkers,
+                      yearly: activeCalc.dynamicTitanYearly,
+                      etf0050: activeCalc.customEtf0050,
+                      etf0020: activeCalc.customEtf0020,
+                      long_only: activeCalc.customModeData,
+                      long_short: activeCalc.customModeData,
+                      action_markers: activeCalc.actionMarkers,
                       models_detail: {
                         ...(basePeriodObj?.models_detail || bt.periods?.['20y']?.models_detail || bt.periods?.['10y']?.models_detail || {}),
                         titan_sovereign: {
                           name: '👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)',
-                          long_only: !isGlobalTitan ? customModeData : (basePeriodObj?.models_detail?.titan_sovereign?.long_only || customModeData),
-                          long_short: !isGlobalTitan ? customModeData : (basePeriodObj?.models_detail?.titan_sovereign?.long_short || customModeData)
+                          long_only: titanCalc?.customModeData,
+                          long_short: titanCalc?.customModeData
                         },
                         global_liquid_titan_a: {
-                          name: '🌐 全球高流動性泰坦方案 A (Top 4 階梯配置 40/25/20/15)',
-                          long_only: isGlobalTitan ? customModeData : (basePeriodObj?.models_detail?.global_liquid_titan_a?.long_only || customModeData),
-                          long_short: isGlobalTitan ? customModeData : (basePeriodObj?.models_detail?.global_liquid_titan_a?.long_short || customModeData)
+                          name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
+                          long_only: globalCalc?.customModeData,
+                          long_short: globalCalc?.customModeData
                         }
                       },
-                      comparison_long_only: mergedCompLongOnly,
-                      comparison_long_short: mergedCompLongShort
+                      comparison_long_only: buildCompleteLeaderboard(baseCompList, pKey, startYr, endYr),
+                      comparison_long_short: buildCompleteLeaderboard(baseCompListLS, pKey, startYr, endYr)
                     };
                   };
 
@@ -9336,7 +9346,8 @@ function StockDashboard() {
                     tag: 'AI 演算法模型'
                   };
 
-                  const comparisonList = isLongShort ? (activePeriodData?.comparison_long_short || []) : (activePeriodData?.comparison_long_only || []);
+                  const rawComparisonList = isLongShort ? (activePeriodData?.comparison_long_short || []) : (activePeriodData?.comparison_long_only || []);
+                  const comparisonList = buildCompleteLeaderboard(rawComparisonList, activePeriodKey, marketBtStartYear, marketBtEndYear);
                   const benchmark = activePeriodData?.benchmark || {};
                   const etf0050 = activePeriodData?.etf0050 || activeModeData?.etf0050 || null;
                   const curve = activeModeData?.curve || [];
@@ -10584,11 +10595,11 @@ function StockDashboard() {
                                         </div>
                                       </td>
                                       <td style={{ fontWeight: 'bold', color: m.total_return_pct >= 80 ? '#34D399' : (m.total_return_pct >= 50 ? '#6EE7B7' : '#E2E8F0') }}>
-                                        +{m.total_return_pct?.toFixed(1)}%
+                                        +{Number(m.total_return_pct || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
                                       </td>
-                                      <td style={{ color: '#93C5FD' }}>+{m.cagr_pct?.toFixed(1)}%</td>
+                                      <td style={{ color: '#93C5FD' }}>+{Number(m.cagr_pct || 0).toFixed(1)}%</td>
                                       <td style={{ color: m.alpha_pct >= 0 ? '#FBBF24' : '#94A3B8' }}>
-                                        {m.alpha_pct >= 0 ? '+' : ''}{m.alpha_pct?.toFixed(1)}%
+                                        {m.alpha_pct >= 0 ? '+' : ''}{Number(m.alpha_pct || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%
                                       </td>
                                       <td style={{ color: m.max_drawdown_pct > -20 ? '#34D399' : '#F87171', fontWeight: m.max_drawdown_pct > -20 ? 'bold' : 'normal' }}>
                                         {m.max_drawdown_pct?.toFixed(1)}%

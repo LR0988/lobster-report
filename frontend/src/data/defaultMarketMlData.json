@@ -19986,9 +19986,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 202.43,
             "cagr_pct": 202.66,
             "alpha_pct": 190.66,
@@ -19999,6 +19999,22 @@
             "profit_factor": 3.49,
             "total_trades": 52,
             "market_exposure_pct": 96.2
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 232.75,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 154.54,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 2.19,
+            "total_trades": 16,
+            "win_rate_pct": 81.2,
+            "profit_factor": 23.63,
+            "sortino_ratio": 2.96,
+            "max_drawdown_pct": -35.81,
+            "total_return_pct": 255.92,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -20196,37 +20212,6 @@
             "market_exposure_pct": 95.5
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 98.36,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 4.73,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 2.32,
-            "total_trades": 91,
-            "win_rate_pct": 50.5,
-            "profit_factor": 1.94,
-            "sortino_ratio": 2.9,
-            "max_drawdown_pct": -18.85,
-            "total_return_pct": 106.11,
-            "market_exposure_pct": 98.5
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 232.75,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 154.54,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 2.19,
-            "total_trades": 16,
-            "win_rate_pct": 81.2,
-            "profit_factor": 23.63,
-            "sortino_ratio": 2.96,
-            "max_drawdown_pct": -35.81,
-            "total_return_pct": 255.92,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 188.28,
             "model_id": "etf_0020",
@@ -20243,6 +20228,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 232.75,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 154.54,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 2.19,
+            "total_trades": 16,
+            "win_rate_pct": 81.2,
+            "profit_factor": 23.63,
+            "sortino_ratio": 2.96,
+            "max_drawdown_pct": -35.81,
+            "total_return_pct": 255.92,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -10.47,
@@ -20439,37 +20446,6 @@
             "market_exposure_pct": 99.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 93.1,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -1.03,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 2.23,
-            "total_trades": 94,
-            "win_rate_pct": 48.9,
-            "profit_factor": 1.83,
-            "sortino_ratio": 2.79,
-            "max_drawdown_pct": -18.85,
-            "total_return_pct": 100.35,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 232.75,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 154.54,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 2.19,
-            "total_trades": 16,
-            "win_rate_pct": 81.2,
-            "profit_factor": 23.63,
-            "sortino_ratio": 2.96,
-            "max_drawdown_pct": -35.81,
-            "total_return_pct": 255.92,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 188.28,
             "model_id": "etf_0020",
@@ -20515,9 +20491,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 421.44,
             "cagr_pct": 73.47,
             "alpha_pct": 61.47,
@@ -20528,6 +20504,22 @@
             "profit_factor": 2.26,
             "total_trades": 148,
             "market_exposure_pct": 94.6
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 54.5,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 76.91,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.11,
+            "total_trades": 43,
+            "win_rate_pct": 51.2,
+            "profit_factor": 3.11,
+            "sortino_ratio": 1.5,
+            "max_drawdown_pct": -42.27,
+            "total_return_pct": 268.14,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -20725,37 +20717,6 @@
             "market_exposure_pct": 82.9
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 45.28,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 14.95,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.66,
-            "total_trades": 231,
-            "win_rate_pct": 53.7,
-            "profit_factor": 1.76,
-            "sortino_ratio": 2.08,
-            "max_drawdown_pct": -20.8,
-            "total_return_pct": 206.18,
-            "market_exposure_pct": 86.8
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 54.5,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 76.91,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.11,
-            "total_trades": 43,
-            "win_rate_pct": 51.2,
-            "profit_factor": 3.11,
-            "sortino_ratio": 1.5,
-            "max_drawdown_pct": -42.27,
-            "total_return_pct": 268.14,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 56.7,
             "model_id": "etf_0020",
@@ -20772,6 +20733,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 54.5,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 76.91,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.11,
+            "total_trades": 43,
+            "win_rate_pct": 51.2,
+            "profit_factor": 3.11,
+            "sortino_ratio": 1.5,
+            "max_drawdown_pct": -42.27,
+            "total_return_pct": 268.14,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -15.6,
@@ -20968,37 +20951,6 @@
             "market_exposure_pct": 99.6
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 44.19,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 8.1,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.59,
-            "total_trades": 237,
-            "win_rate_pct": 53.2,
-            "profit_factor": 1.71,
-            "sortino_ratio": 1.99,
-            "max_drawdown_pct": -22.25,
-            "total_return_pct": 199.34,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 54.5,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 76.91,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.11,
-            "total_trades": 43,
-            "win_rate_pct": 51.2,
-            "profit_factor": 3.11,
-            "sortino_ratio": 1.5,
-            "max_drawdown_pct": -42.27,
-            "total_return_pct": 268.14,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 56.7,
             "model_id": "etf_0020",
@@ -21044,9 +20996,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 916.64,
             "cagr_pct": 59.02,
             "alpha_pct": 47.02,
@@ -21057,6 +21009,22 @@
             "profit_factor": 2.11,
             "total_trades": 244,
             "market_exposure_pct": 89.3
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 45.62,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 362.79,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.05,
+            "total_trades": 61,
+            "win_rate_pct": 50.8,
+            "profit_factor": 3.06,
+            "sortino_ratio": 1.42,
+            "max_drawdown_pct": -42.27,
+            "total_return_pct": 540.2,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -21254,37 +21222,6 @@
             "market_exposure_pct": 78.1
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 25.71,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 32.28,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.22,
-            "total_trades": 306,
-            "win_rate_pct": 53.3,
-            "profit_factor": 1.71,
-            "sortino_ratio": 1.52,
-            "max_drawdown_pct": -20.8,
-            "total_return_pct": 209.7,
-            "market_exposure_pct": 75.5
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 45.62,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 362.79,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.05,
-            "total_trades": 61,
-            "win_rate_pct": 50.8,
-            "profit_factor": 3.06,
-            "sortino_ratio": 1.42,
-            "max_drawdown_pct": -42.27,
-            "total_return_pct": 540.2,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 31.32,
             "model_id": "etf_0020",
@@ -21301,6 +21238,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 45.62,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 362.79,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.05,
+            "total_trades": 61,
+            "win_rate_pct": 50.8,
+            "profit_factor": 3.06,
+            "sortino_ratio": 1.42,
+            "max_drawdown_pct": -42.27,
+            "total_return_pct": 540.2,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -3.92,
@@ -21497,37 +21456,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 25.68,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 31.89,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.17,
-            "total_trades": 321,
-            "win_rate_pct": 52.0,
-            "profit_factor": 1.63,
-            "sortino_ratio": 1.46,
-            "max_drawdown_pct": -22.25,
-            "total_return_pct": 209.31,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 45.62,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 362.79,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.05,
-            "total_trades": 61,
-            "win_rate_pct": 50.8,
-            "profit_factor": 3.06,
-            "sortino_ratio": 1.42,
-            "max_drawdown_pct": -42.27,
-            "total_return_pct": 540.2,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 31.32,
             "model_id": "etf_0020",
@@ -21573,9 +21501,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 17254.86,
             "cagr_pct": 61.62,
             "alpha_pct": 49.62,
@@ -21586,6 +21514,22 @@
             "profit_factor": 2.09,
             "total_trades": 520,
             "market_exposure_pct": 91.5
+          },
+          {
+            "model_id": "titan_sovereign",
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "total_return_pct": 9052.39,
+            "cagr_pct": 54.08,
+            "alpha_pct": 8538.38,
+            "max_drawdown_pct": -50.53,
+            "sharpe_ratio": 1.2,
+            "sortino_ratio": 1.62,
+            "win_rate_pct": 58.7,
+            "profit_factor": 4.6,
+            "total_trades": 126,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "model_id": "regime_moe",
@@ -21783,36 +21727,6 @@
             "market_exposure_pct": 88.3
           },
           {
-            "model_id": "alpha_dynamic_convex",
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "total_return_pct": 595.31,
-            "cagr_pct": 20.39,
-            "alpha_pct": 81.3,
-            "max_drawdown_pct": -21.96,
-            "sharpe_ratio": 1.11,
-            "sortino_ratio": 1.39,
-            "win_rate_pct": 52.1,
-            "profit_factor": 1.69,
-            "total_trades": 674,
-            "market_exposure_pct": 82.4
-          },
-          {
-            "model_id": "titan_sovereign",
-            "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
-            "short_name": "👑 泰坦王權主宰",
-            "total_return_pct": 9052.39,
-            "cagr_pct": 54.08,
-            "alpha_pct": 8538.38,
-            "max_drawdown_pct": -50.53,
-            "sharpe_ratio": 1.2,
-            "sortino_ratio": 1.62,
-            "win_rate_pct": 58.7,
-            "profit_factor": 4.6,
-            "total_trades": 126,
-            "market_exposure_pct": 100
-          },
-          {
             "model_id": "etf_0020",
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "short_name": "🚀 0020 等權重",
@@ -21829,6 +21743,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "model_id": "titan_sovereign",
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "total_return_pct": 9052.39,
+            "cagr_pct": 54.08,
+            "alpha_pct": 8538.38,
+            "max_drawdown_pct": -50.53,
+            "sharpe_ratio": 1.2,
+            "sortino_ratio": 1.62,
+            "win_rate_pct": 58.7,
+            "profit_factor": 4.6,
+            "total_trades": 126,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "model_id": "regime_moe",
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -22023,36 +21959,6 @@
             "profit_factor": 3.32,
             "total_trades": 60,
             "market_exposure_pct": 100.0
-          },
-          {
-            "model_id": "alpha_dynamic_convex",
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "total_return_pct": 560.16,
-            "cagr_pct": 19.8,
-            "alpha_pct": 46.15,
-            "max_drawdown_pct": -27.54,
-            "sharpe_ratio": 1.04,
-            "sortino_ratio": 1.3,
-            "win_rate_pct": 50.6,
-            "profit_factor": 1.6,
-            "total_trades": 709,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "model_id": "titan_sovereign",
-            "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
-            "short_name": "👑 泰坦王權主宰",
-            "total_return_pct": 9052.39,
-            "cagr_pct": 54.08,
-            "alpha_pct": 8538.38,
-            "max_drawdown_pct": -50.53,
-            "sharpe_ratio": 1.2,
-            "sortino_ratio": 1.62,
-            "win_rate_pct": 58.7,
-            "profit_factor": 4.6,
-            "total_trades": 126,
-            "market_exposure_pct": 100
           },
           {
             "model_id": "etf_0020",
@@ -54953,19 +54859,35 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "total_return_pct": 467480.62,
-            "cagr_pct": 47.5,
-            "alpha_pct": 35.5,
-            "max_drawdown_pct": -30.31,
-            "sharpe_ratio": 1.15,
-            "sortino_ratio": 2.36,
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "total_return_pct": 294215.0,
+            "cagr_pct": 42.4,
+            "alpha_pct": 294000.0,
+            "max_drawdown_pct": -42.7,
+            "sharpe_ratio": 1.08,
+            "sortino_ratio": 2.12,
             "win_rate_pct": 55.1,
             "profit_factor": 1.98,
-            "total_trades": 1041,
+            "total_trades": 311,
             "market_exposure_pct": 90.6
+          },
+          {
+            "model_id": "titan_sovereign",
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "total_return_pct": 26550.7,
+            "cagr_pct": 30.3,
+            "alpha_pct": 26335.7,
+            "max_drawdown_pct": -36.6,
+            "sharpe_ratio": 1.0,
+            "sortino_ratio": 1.68,
+            "win_rate_pct": 65.3,
+            "profit_factor": 3.85,
+            "total_trades": 391,
+            "market_exposure_pct": 68.4,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "model_id": "regime_moe",
@@ -55163,36 +55085,6 @@
             "market_exposure_pct": 78.9
           },
           {
-            "model_id": "alpha_dynamic_convex",
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "total_return_pct": 968.37,
-            "cagr_pct": 11.77,
-            "alpha_pct": 257.34,
-            "max_drawdown_pct": -27.07,
-            "sharpe_ratio": 0.71,
-            "sortino_ratio": 0.89,
-            "win_rate_pct": 51.7,
-            "profit_factor": 1.59,
-            "total_trades": 1477,
-            "market_exposure_pct": 74.6
-          },
-          {
-            "model_id": "titan_sovereign",
-            "name": "👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選+週度遞補)",
-            "short_name": "👑 泰坦王權主宰",
-            "total_return_pct": 5397.0,
-            "cagr_pct": 20.1,
-            "alpha_pct": 10.0,
-            "max_drawdown_pct": -80.4,
-            "sharpe_ratio": 0.66,
-            "sortino_ratio": 1.1,
-            "win_rate_pct": 49.4,
-            "profit_factor": 2.1,
-            "total_trades": 391,
-            "market_exposure_pct": 74.0
-          },
-          {
             "model_id": "etf_0020",
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "short_name": "🚀 0020 等權重",
@@ -55209,6 +55101,38 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "total_return_pct": 294215.0,
+            "cagr_pct": 42.4,
+            "alpha_pct": 294000.0,
+            "max_drawdown_pct": -42.7,
+            "sharpe_ratio": 1.08,
+            "sortino_ratio": 2.12,
+            "win_rate_pct": 55.1,
+            "profit_factor": 1.98,
+            "total_trades": 311,
+            "market_exposure_pct": 90.6
+          },
+          {
+            "model_id": "titan_sovereign",
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "total_return_pct": 26550.7,
+            "cagr_pct": 30.3,
+            "alpha_pct": 26335.7,
+            "max_drawdown_pct": -36.6,
+            "sharpe_ratio": 1.0,
+            "sortino_ratio": 1.68,
+            "win_rate_pct": 65.3,
+            "profit_factor": 3.85,
+            "total_trades": 391,
+            "market_exposure_pct": 68.4,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "model_id": "regime_moe",
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -55403,36 +55327,6 @@
             "profit_factor": 1.66,
             "total_trades": 182,
             "market_exposure_pct": 100.0
-          },
-          {
-            "model_id": "alpha_dynamic_convex",
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "total_return_pct": 882.31,
-            "cagr_pct": 11.33,
-            "alpha_pct": 171.28,
-            "max_drawdown_pct": -31.0,
-            "sharpe_ratio": 0.65,
-            "sortino_ratio": 0.81,
-            "win_rate_pct": 49.1,
-            "profit_factor": 1.46,
-            "total_trades": 1582,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "model_id": "titan_sovereign",
-            "name": "👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選+週度遞補)",
-            "short_name": "👑 泰坦王權主宰",
-            "total_return_pct": 5397.0,
-            "cagr_pct": 20.1,
-            "alpha_pct": 10.0,
-            "max_drawdown_pct": -80.4,
-            "sharpe_ratio": 0.66,
-            "sortino_ratio": 1.1,
-            "win_rate_pct": 49.4,
-            "profit_factor": 2.1,
-            "total_trades": 391,
-            "market_exposure_pct": 74.0
           },
           {
             "model_id": "etf_0020",
@@ -92883,9 +92777,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 93.05,
             "cagr_pct": 106.2,
             "alpha_pct": 94.2,
@@ -92896,6 +92790,22 @@
             "profit_factor": 3.34,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -6.6,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -93093,37 +93003,6 @@
             "market_exposure_pct": 59.9
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 1.56,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -5.06,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.05,
-            "total_trades": 77,
-            "win_rate_pct": 51.9,
-            "profit_factor": 1.58,
-            "sortino_ratio": 0.07,
-            "max_drawdown_pct": -8.5,
-            "total_return_pct": 1.54,
-            "market_exposure_pct": 58.7
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -6.6,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 6.68,
             "model_id": "etf_0020",
@@ -93140,6 +93019,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -6.6,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -7.38,
@@ -93336,37 +93237,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -1.67,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -8.25,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.24,
-            "total_trades": 88,
-            "win_rate_pct": 45.5,
-            "profit_factor": 0.96,
-            "sortino_ratio": -0.3,
-            "max_drawdown_pct": -11.47,
-            "total_return_pct": -1.65,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -6.6,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 6.68,
             "model_id": "etf_0020",
@@ -93412,9 +93282,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 18.68,
             "cagr_pct": 20.66,
             "alpha_pct": 8.66,
@@ -93425,6 +93295,22 @@
             "profit_factor": 1.75,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -21.07,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -93622,37 +93508,6 @@
             "market_exposure_pct": 76.5
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 10.22,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -10.98,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.67,
-            "total_trades": 82,
-            "win_rate_pct": 47.6,
-            "profit_factor": 2.17,
-            "sortino_ratio": 0.83,
-            "max_drawdown_pct": -16.72,
-            "total_return_pct": 10.1,
-            "market_exposure_pct": 61.1
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -21.07,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 21.35,
             "model_id": "etf_0020",
@@ -93669,6 +93524,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -21.07,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -11.51,
@@ -93865,37 +93742,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 2.97,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -18.14,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.17,
-            "total_trades": 92,
-            "win_rate_pct": 42.4,
-            "profit_factor": 1.1,
-            "sortino_ratio": 0.21,
-            "max_drawdown_pct": -21.18,
-            "total_return_pct": 2.93,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -21.07,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 21.35,
             "model_id": "etf_0020",
@@ -93941,9 +93787,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 46.63,
             "cagr_pct": 51.79,
             "alpha_pct": 39.79,
@@ -93954,6 +93800,22 @@
             "profit_factor": 1.7,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -7.39,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -94151,37 +94013,6 @@
             "market_exposure_pct": 78.6
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -1.06,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -8.42,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.05,
-            "total_trades": 77,
-            "win_rate_pct": 53.2,
-            "profit_factor": 1.3,
-            "sortino_ratio": -0.06,
-            "max_drawdown_pct": -19.47,
-            "total_return_pct": -1.03,
-            "market_exposure_pct": 76.1
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -7.39,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 7.61,
             "model_id": "etf_0020",
@@ -94198,6 +94029,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -7.39,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -33.29,
@@ -94394,37 +94247,6 @@
             "market_exposure_pct": 96.7
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -6.78,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -13.99,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.35,
-            "total_trades": 87,
-            "win_rate_pct": 43.7,
-            "profit_factor": 0.93,
-            "sortino_ratio": -0.43,
-            "max_drawdown_pct": -22.42,
-            "total_return_pct": -6.6,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -7.39,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 7.61,
             "model_id": "etf_0020",
@@ -94470,9 +94292,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": -20.07,
             "cagr_pct": -21.73,
             "alpha_pct": -33.73,
@@ -94483,6 +94305,22 @@
             "profit_factor": 0.54,
             "total_trades": 44,
             "market_exposure_pct": 54.2
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 44.84,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -94680,37 +94518,6 @@
             "market_exposure_pct": 58.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -2.74,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 42.11,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.15,
-            "total_trades": 41,
-            "win_rate_pct": 46.3,
-            "profit_factor": 1.29,
-            "sortino_ratio": -0.18,
-            "max_drawdown_pct": -11.95,
-            "total_return_pct": -2.73,
-            "market_exposure_pct": 33.7
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 44.84,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -44.97,
             "model_id": "etf_0020",
@@ -94727,6 +94534,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 44.84,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 84.61,
@@ -94923,37 +94752,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 25.11,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 69.84,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.0,
-            "total_trades": 47,
-            "win_rate_pct": 42.6,
-            "profit_factor": 1.64,
-            "sortino_ratio": 1.25,
-            "max_drawdown_pct": -12.29,
-            "total_return_pct": 25.0,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 44.84,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -44.97,
             "model_id": "etf_0020",
@@ -94999,9 +94797,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 43.47,
             "cagr_pct": 48.58,
             "alpha_pct": 36.58,
@@ -95012,6 +94810,22 @@
             "profit_factor": 2.38,
             "total_trades": 45,
             "market_exposure_pct": 75.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -74.28,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -95209,37 +95023,6 @@
             "market_exposure_pct": 66.8
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 94.06,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 18.24,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 2.11,
-            "total_trades": 74,
-            "win_rate_pct": 51.4,
-            "profit_factor": 2.42,
-            "sortino_ratio": 2.64,
-            "max_drawdown_pct": -13.59,
-            "total_return_pct": 92.52,
-            "market_exposure_pct": 92.7
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -74.28,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 75.46,
             "model_id": "etf_0020",
@@ -95256,6 +95039,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -74.28,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 70.37,
@@ -95452,37 +95257,6 @@
             "market_exposure_pct": 99.6
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 89.86,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 14.13,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 2.03,
-            "total_trades": 78,
-            "win_rate_pct": 48.7,
-            "profit_factor": 2.01,
-            "sortino_ratio": 2.54,
-            "max_drawdown_pct": -15.42,
-            "total_return_pct": 88.41,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -74.28,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 75.46,
             "model_id": "etf_0020",
@@ -95528,9 +95302,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": -0.06,
             "cagr_pct": -0.06,
             "alpha_pct": -12.06,
@@ -95541,6 +95315,22 @@
             "profit_factor": 1.16,
             "total_trades": 48,
             "market_exposure_pct": 83.3
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -9.32,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -95738,37 +95528,6 @@
             "market_exposure_pct": 81.6
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 14.36,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 5.04,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.03,
-            "total_trades": 93,
-            "win_rate_pct": 52.7,
-            "profit_factor": 2.15,
-            "sortino_ratio": 1.29,
-            "max_drawdown_pct": -6.79,
-            "total_return_pct": 14.36,
-            "market_exposure_pct": 67.2
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -9.32,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 9.32,
             "model_id": "etf_0020",
@@ -95785,6 +95544,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -9.32,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 12.88,
@@ -95981,37 +95762,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 12.56,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 3.24,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.82,
-            "total_trades": 106,
-            "win_rate_pct": 47.2,
-            "profit_factor": 1.27,
-            "sortino_ratio": 1.02,
-            "max_drawdown_pct": -9.13,
-            "total_return_pct": 12.56,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -9.32,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 9.32,
             "model_id": "etf_0020",
@@ -96057,9 +95807,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 3.02,
             "cagr_pct": 3.33,
             "alpha_pct": -8.67,
@@ -96070,6 +95820,22 @@
             "profit_factor": 1.27,
             "total_trades": 48,
             "market_exposure_pct": 87.5
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 21.64,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -96267,37 +96033,6 @@
             "market_exposure_pct": 75.7
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -3.97,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 17.71,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -1.03,
-            "total_trades": 32,
-            "win_rate_pct": 40.6,
-            "profit_factor": 1.43,
-            "sortino_ratio": -1.28,
-            "max_drawdown_pct": -7.2,
-            "total_return_pct": -3.93,
-            "market_exposure_pct": 24.7
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 21.64,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -21.87,
             "model_id": "etf_0020",
@@ -96314,6 +96049,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 21.64,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 5.86,
@@ -96510,37 +96267,6 @@
             "market_exposure_pct": 98.4
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 3.06,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 24.66,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.19,
-            "total_trades": 42,
-            "win_rate_pct": 38.1,
-            "profit_factor": 1.2,
-            "sortino_ratio": 0.23,
-            "max_drawdown_pct": -11.36,
-            "total_return_pct": 3.02,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 21.64,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -21.87,
             "model_id": "etf_0020",
@@ -96586,9 +96312,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 23.78,
             "cagr_pct": 26.1,
             "alpha_pct": 14.1,
@@ -96599,6 +96325,22 @@
             "profit_factor": 1.72,
             "total_trades": 48,
             "market_exposure_pct": 95.8
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -9.16,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -96796,37 +96538,6 @@
             "market_exposure_pct": 27.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 11.04,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 1.69,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.82,
-            "total_trades": 45,
-            "win_rate_pct": 55.6,
-            "profit_factor": 2.04,
-            "sortino_ratio": 1.03,
-            "max_drawdown_pct": -10.79,
-            "total_return_pct": 10.85,
-            "market_exposure_pct": 42.3
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -9.16,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 9.32,
             "model_id": "etf_0020",
@@ -96843,6 +96554,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -9.16,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -6.69,
@@ -97039,37 +96772,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 8.37,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -0.93,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.56,
-            "total_trades": 52,
-            "win_rate_pct": 50.0,
-            "profit_factor": 1.29,
-            "sortino_ratio": 0.7,
-            "max_drawdown_pct": -11.29,
-            "total_return_pct": 8.24,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -9.16,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 9.32,
             "model_id": "etf_0020",
@@ -97115,9 +96817,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 139.35,
             "cagr_pct": 159.71,
             "alpha_pct": 147.71,
@@ -97128,6 +96830,22 @@
             "profit_factor": 5.85,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -10.7,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -97325,37 +97043,6 @@
             "market_exposure_pct": 82.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 0.23,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -10.47,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.06,
-            "total_trades": 97,
-            "win_rate_pct": 50.5,
-            "profit_factor": 1.39,
-            "sortino_ratio": -0.08,
-            "max_drawdown_pct": -10.76,
-            "total_return_pct": 0.23,
-            "market_exposure_pct": 78.3
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -10.7,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 10.98,
             "model_id": "etf_0020",
@@ -97372,6 +97059,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -10.7,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 28.03,
@@ -97568,37 +97277,6 @@
             "market_exposure_pct": 99.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -5.62,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -16.19,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.58,
-            "total_trades": 108,
-            "win_rate_pct": 42.6,
-            "profit_factor": 0.85,
-            "sortino_ratio": -0.73,
-            "max_drawdown_pct": -14.56,
-            "total_return_pct": -5.49,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -10.7,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 10.98,
             "model_id": "etf_0020",
@@ -97644,9 +97322,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 55.76,
             "cagr_pct": 62.59,
             "alpha_pct": 50.59,
@@ -97657,6 +97335,22 @@
             "profit_factor": 2.46,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -8.07,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -97854,37 +97548,6 @@
             "market_exposure_pct": 79.8
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 2.82,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -5.27,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.19,
-            "total_trades": 74,
-            "win_rate_pct": 52.7,
-            "profit_factor": 1.55,
-            "sortino_ratio": 0.24,
-            "max_drawdown_pct": -8.21,
-            "total_return_pct": 2.79,
-            "market_exposure_pct": 78.2
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -8.07,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 8.13,
             "model_id": "etf_0020",
@@ -97901,6 +97564,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -8.07,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -4.7,
@@ -98097,37 +97782,6 @@
             "market_exposure_pct": 93.5
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -1.2,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -9.26,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.25,
-            "total_trades": 83,
-            "win_rate_pct": 48.2,
-            "profit_factor": 0.98,
-            "sortino_ratio": -0.31,
-            "max_drawdown_pct": -11.0,
-            "total_return_pct": -1.19,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -8.07,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 8.13,
             "model_id": "etf_0020",
@@ -98173,9 +97827,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 25.07,
             "cagr_pct": 27.81,
             "alpha_pct": 15.81,
@@ -98186,6 +97840,22 @@
             "profit_factor": 2.14,
             "total_trades": 48,
             "market_exposure_pct": 91.7
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 10.09,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -98383,37 +98053,6 @@
             "market_exposure_pct": 60.7
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -1.46,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 8.67,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -0.29,
-            "total_trades": 32,
-            "win_rate_pct": 43.8,
-            "profit_factor": 1.3,
-            "sortino_ratio": -0.36,
-            "max_drawdown_pct": -7.04,
-            "total_return_pct": -1.42,
-            "market_exposure_pct": 39.8
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 10.09,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -10.33,
             "model_id": "etf_0020",
@@ -98430,6 +98069,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.0,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 10.09,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.0,
+            "total_trades": 0,
+            "win_rate_pct": 68.2,
+            "profit_factor": 2.85,
+            "sortino_ratio": 0.0,
+            "max_drawdown_pct": 0.0,
+            "total_return_pct": 0.0,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 18.05,
@@ -98626,37 +98287,6 @@
             "market_exposure_pct": 95.9
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 3.13,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 13.15,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.2,
-            "total_trades": 38,
-            "win_rate_pct": 42.1,
-            "profit_factor": 1.17,
-            "sortino_ratio": 0.25,
-            "max_drawdown_pct": -8.92,
-            "total_return_pct": 3.05,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.0,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 10.09,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.0,
-            "total_trades": 0,
-            "win_rate_pct": 68.2,
-            "profit_factor": 2.85,
-            "sortino_ratio": 0.0,
-            "max_drawdown_pct": 0.0,
-            "total_return_pct": 0.0,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -10.33,
             "model_id": "etf_0020",
@@ -98702,9 +98332,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 58.86,
             "cagr_pct": 66.39,
             "alpha_pct": 54.39,
@@ -98715,6 +98345,22 @@
             "profit_factor": 1.43,
             "total_trades": 48,
             "market_exposure_pct": 87.5
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.34,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -13.71,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.01,
+            "total_trades": 9,
+            "win_rate_pct": 44.4,
+            "profit_factor": 0.74,
+            "sortino_ratio": 0.01,
+            "max_drawdown_pct": -11.84,
+            "total_return_pct": 0.33,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -98912,37 +98558,6 @@
             "market_exposure_pct": 98.3
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 13.37,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -1.13,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.91,
-            "total_trades": 79,
-            "win_rate_pct": 59.5,
-            "profit_factor": 1.47,
-            "sortino_ratio": 1.13,
-            "max_drawdown_pct": -6.79,
-            "total_return_pct": 12.91,
-            "market_exposure_pct": 87.6
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.34,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -13.71,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.01,
-            "total_trades": 9,
-            "win_rate_pct": 44.4,
-            "profit_factor": 0.74,
-            "sortino_ratio": 0.01,
-            "max_drawdown_pct": -11.84,
-            "total_return_pct": 0.33,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 1.08,
             "model_id": "etf_0020",
@@ -98959,6 +98574,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 0.34,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -13.71,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.01,
+            "total_trades": 9,
+            "win_rate_pct": 44.4,
+            "profit_factor": 0.74,
+            "sortino_ratio": 0.01,
+            "max_drawdown_pct": -11.84,
+            "total_return_pct": 0.33,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 44.35,
@@ -99155,37 +98792,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 13.14,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -1.34,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.88,
-            "total_trades": 83,
-            "win_rate_pct": 57.8,
-            "profit_factor": 1.35,
-            "sortino_ratio": 1.09,
-            "max_drawdown_pct": -7.44,
-            "total_return_pct": 12.7,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 0.34,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -13.71,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.01,
-            "total_trades": 9,
-            "win_rate_pct": 44.4,
-            "profit_factor": 0.74,
-            "sortino_ratio": 0.01,
-            "max_drawdown_pct": -11.84,
-            "total_return_pct": 0.33,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 1.08,
             "model_id": "etf_0020",
@@ -99231,9 +98837,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 57.64,
             "cagr_pct": 64.99,
             "alpha_pct": 52.99,
@@ -99244,6 +98850,22 @@
             "profit_factor": 2.18,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 18.9,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 3.55,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.61,
+            "total_trades": 9,
+            "win_rate_pct": 66.7,
+            "profit_factor": 5.14,
+            "sortino_ratio": 0.83,
+            "max_drawdown_pct": -25.67,
+            "total_return_pct": 18.33,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -99441,37 +99063,6 @@
             "market_exposure_pct": 73.3
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 14.8,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -0.42,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.24,
-            "total_trades": 64,
-            "win_rate_pct": 45.3,
-            "profit_factor": 1.65,
-            "sortino_ratio": 1.55,
-            "max_drawdown_pct": -5.03,
-            "total_return_pct": 14.36,
-            "market_exposure_pct": 97.5
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 18.9,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 3.55,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.61,
-            "total_trades": 9,
-            "win_rate_pct": 66.7,
-            "profit_factor": 5.14,
-            "sortino_ratio": 0.83,
-            "max_drawdown_pct": -25.67,
-            "total_return_pct": 18.33,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 17.82,
             "model_id": "etf_0020",
@@ -99488,6 +99079,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 18.9,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 3.55,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.61,
+            "total_trades": 9,
+            "win_rate_pct": 66.7,
+            "profit_factor": 5.14,
+            "sortino_ratio": 0.83,
+            "max_drawdown_pct": -25.67,
+            "total_return_pct": 18.33,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 30.75,
@@ -99684,37 +99297,6 @@
             "market_exposure_pct": 74.9
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 13.24,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -1.93,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.1,
-            "total_trades": 67,
-            "win_rate_pct": 43.3,
-            "profit_factor": 1.41,
-            "sortino_ratio": 1.38,
-            "max_drawdown_pct": -5.46,
-            "total_return_pct": 12.84,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 18.9,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 3.55,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.61,
-            "total_trades": 9,
-            "win_rate_pct": 66.7,
-            "profit_factor": 5.14,
-            "sortino_ratio": 0.83,
-            "max_drawdown_pct": -25.67,
-            "total_return_pct": 18.33,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 17.82,
             "model_id": "etf_0020",
@@ -99760,9 +99342,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 2.45,
             "cagr_pct": 2.68,
             "alpha_pct": -9.32,
@@ -99773,6 +99355,22 @@
             "profit_factor": 1.21,
             "total_trades": 48,
             "market_exposure_pct": 95.8
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 54.93,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 62.76,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.24,
+            "total_trades": 9,
+            "win_rate_pct": 55.6,
+            "profit_factor": 4.69,
+            "sortino_ratio": 1.68,
+            "max_drawdown_pct": -21.56,
+            "total_return_pct": 53.58,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -99970,37 +99568,6 @@
             "market_exposure_pct": 87.3
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -11.9,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -2.5,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -1.71,
-            "total_trades": 38,
-            "win_rate_pct": 34.2,
-            "profit_factor": 1.54,
-            "sortino_ratio": -2.13,
-            "max_drawdown_pct": -17.66,
-            "total_return_pct": -11.68,
-            "market_exposure_pct": 40.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 54.93,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 62.76,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.24,
-            "total_trades": 9,
-            "win_rate_pct": 55.6,
-            "profit_factor": 4.69,
-            "sortino_ratio": 1.68,
-            "max_drawdown_pct": -21.56,
-            "total_return_pct": 53.58,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -38.62,
             "model_id": "etf_0020",
@@ -100017,6 +99584,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 54.93,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 62.76,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.24,
+            "total_trades": 9,
+            "win_rate_pct": 55.6,
+            "profit_factor": 4.69,
+            "sortino_ratio": 1.68,
+            "max_drawdown_pct": -21.56,
+            "total_return_pct": 53.58,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 33.38,
@@ -100213,37 +99802,6 @@
             "market_exposure_pct": 90.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -13.1,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -3.67,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -1.4,
-            "total_trades": 51,
-            "win_rate_pct": 25.5,
-            "profit_factor": 0.42,
-            "sortino_ratio": -1.75,
-            "max_drawdown_pct": -22.58,
-            "total_return_pct": -12.85,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 54.93,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 62.76,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.24,
-            "total_trades": 9,
-            "win_rate_pct": 55.6,
-            "profit_factor": 4.69,
-            "sortino_ratio": 1.68,
-            "max_drawdown_pct": -21.56,
-            "total_return_pct": 53.58,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -38.62,
             "model_id": "etf_0020",
@@ -100289,9 +99847,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 43.18,
             "cagr_pct": 48.07,
             "alpha_pct": 36.07,
@@ -100302,6 +99860,22 @@
             "profit_factor": 1.77,
             "total_trades": 48,
             "market_exposure_pct": 91.7
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 5.52,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -20.26,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.28,
+            "total_trades": 16,
+            "win_rate_pct": 75.0,
+            "profit_factor": 3.41,
+            "sortino_ratio": 0.38,
+            "max_drawdown_pct": -28.46,
+            "total_return_pct": 5.31,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -100499,37 +100073,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 40.2,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 12.93,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 2.64,
-            "total_trades": 42,
-            "win_rate_pct": 52.4,
-            "profit_factor": 3.03,
-            "sortino_ratio": 3.3,
-            "max_drawdown_pct": -7.32,
-            "total_return_pct": 38.5,
-            "market_exposure_pct": 90.9
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 5.52,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -20.26,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.28,
-            "total_trades": 16,
-            "win_rate_pct": 75.0,
-            "profit_factor": 3.41,
-            "sortino_ratio": 0.38,
-            "max_drawdown_pct": -28.46,
-            "total_return_pct": 5.31,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 55.64,
             "model_id": "etf_0020",
@@ -100546,6 +100089,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 5.52,
+            "model_id": "titan_sovereign",
+            "alpha_pct": -20.26,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.28,
+            "total_trades": 16,
+            "win_rate_pct": 75.0,
+            "profit_factor": 3.41,
+            "sortino_ratio": 0.38,
+            "max_drawdown_pct": -28.46,
+            "total_return_pct": 5.31,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 52.34,
@@ -100742,37 +100307,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 36.2,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 9.12,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 2.38,
-            "total_trades": 47,
-            "win_rate_pct": 42.6,
-            "profit_factor": 2.32,
-            "sortino_ratio": 2.97,
-            "max_drawdown_pct": -9.34,
-            "total_return_pct": 34.69,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 5.52,
-            "model_id": "titan_sovereign",
-            "alpha_pct": -20.26,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.28,
-            "total_trades": 16,
-            "win_rate_pct": 75.0,
-            "profit_factor": 3.41,
-            "sortino_ratio": 0.38,
-            "max_drawdown_pct": -28.46,
-            "total_return_pct": 5.31,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 55.64,
             "model_id": "etf_0020",
@@ -100818,9 +100352,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 102.51,
             "cagr_pct": 116.33,
             "alpha_pct": 104.33,
@@ -100831,6 +100365,22 @@
             "profit_factor": 4.0,
             "total_trades": 48,
             "market_exposure_pct": 87.5
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 90.32,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 66.13,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.83,
+            "total_trades": 12,
+            "win_rate_pct": 75.0,
+            "profit_factor": 34.12,
+            "sortino_ratio": 2.47,
+            "max_drawdown_pct": -20.3,
+            "total_return_pct": 87.88,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -101028,37 +100578,6 @@
             "market_exposure_pct": 85.7
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 24.31,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 2.02,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.22,
-            "total_trades": 46,
-            "win_rate_pct": 54.3,
-            "profit_factor": 2.6,
-            "sortino_ratio": 1.52,
-            "max_drawdown_pct": -14.01,
-            "total_return_pct": 23.77,
-            "market_exposure_pct": 72.7
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 90.32,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 66.13,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.83,
-            "total_trades": 12,
-            "win_rate_pct": 75.0,
-            "profit_factor": 34.12,
-            "sortino_ratio": 2.47,
-            "max_drawdown_pct": -20.3,
-            "total_return_pct": 87.88,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 27.08,
             "model_id": "etf_0020",
@@ -101075,6 +100594,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 90.32,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 66.13,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.83,
+            "total_trades": 12,
+            "win_rate_pct": 75.0,
+            "profit_factor": 34.12,
+            "sortino_ratio": 2.47,
+            "max_drawdown_pct": -20.3,
+            "total_return_pct": 87.88,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 99.55,
@@ -101271,37 +100812,6 @@
             "market_exposure_pct": 94.7
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 25.34,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 3.02,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.17,
-            "total_trades": 50,
-            "win_rate_pct": 50.0,
-            "profit_factor": 1.78,
-            "sortino_ratio": 1.46,
-            "max_drawdown_pct": -16.29,
-            "total_return_pct": 24.77,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 90.32,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 66.13,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.83,
-            "total_trades": 12,
-            "win_rate_pct": 75.0,
-            "profit_factor": 34.12,
-            "sortino_ratio": 2.47,
-            "max_drawdown_pct": -20.3,
-            "total_return_pct": 87.88,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 27.08,
             "model_id": "etf_0020",
@@ -101347,9 +100857,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 147.18,
             "cagr_pct": 171.44,
             "alpha_pct": 159.44,
@@ -101360,6 +100870,22 @@
             "profit_factor": 2.07,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 303.27,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 265.57,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 2.51,
+            "total_trades": 13,
+            "win_rate_pct": 61.5,
+            "profit_factor": 14.08,
+            "sortino_ratio": 3.39,
+            "max_drawdown_pct": -43.38,
+            "total_return_pct": 287.83,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -101557,37 +101083,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 18.35,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -4.47,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.96,
-            "total_trades": 75,
-            "win_rate_pct": 56.0,
-            "profit_factor": 1.6,
-            "sortino_ratio": 1.2,
-            "max_drawdown_pct": -13.78,
-            "total_return_pct": 17.79,
-            "market_exposure_pct": 90.5
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 303.27,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 265.57,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 2.51,
-            "total_trades": 13,
-            "win_rate_pct": 61.5,
-            "profit_factor": 14.08,
-            "sortino_ratio": 3.39,
-            "max_drawdown_pct": -43.38,
-            "total_return_pct": 287.83,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 40.22,
             "model_id": "etf_0020",
@@ -101604,6 +101099,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 303.27,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 265.57,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 2.51,
+            "total_trades": 13,
+            "win_rate_pct": 61.5,
+            "profit_factor": 14.08,
+            "sortino_ratio": 3.39,
+            "max_drawdown_pct": -43.38,
+            "total_return_pct": 287.83,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 92.42,
@@ -101800,37 +101317,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 11.56,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -11.04,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.61,
-            "total_trades": 81,
-            "win_rate_pct": 46.9,
-            "profit_factor": 1.17,
-            "sortino_ratio": 0.76,
-            "max_drawdown_pct": -17.61,
-            "total_return_pct": 11.22,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 303.27,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 265.57,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 2.51,
-            "total_trades": 13,
-            "win_rate_pct": 61.5,
-            "profit_factor": 14.08,
-            "sortino_ratio": 3.39,
-            "max_drawdown_pct": -43.38,
-            "total_return_pct": 287.83,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 40.22,
             "model_id": "etf_0020",
@@ -101876,9 +101362,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": -13.05,
             "cagr_pct": -14.26,
             "alpha_pct": -26.26,
@@ -101889,6 +101375,22 @@
             "profit_factor": 0.83,
             "total_trades": 48,
             "market_exposure_pct": 66.7
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": -21.58,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 1.34,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": -1.07,
+            "total_trades": 7,
+            "win_rate_pct": 14.3,
+            "profit_factor": 0.12,
+            "sortino_ratio": -1.44,
+            "max_drawdown_pct": -30.22,
+            "total_return_pct": -21.28,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -102086,37 +101588,6 @@
             "market_exposure_pct": 52.8
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": -4.22,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 18.47,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": -1.7,
-            "total_trades": 7,
-            "win_rate_pct": 14.3,
-            "profit_factor": 0.18,
-            "sortino_ratio": -2.12,
-            "max_drawdown_pct": -5.99,
-            "total_return_pct": -4.15,
-            "market_exposure_pct": 8.9
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": -21.58,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 1.34,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": -1.07,
-            "total_trades": 7,
-            "win_rate_pct": 14.3,
-            "profit_factor": 0.12,
-            "sortino_ratio": -1.44,
-            "max_drawdown_pct": -30.22,
-            "total_return_pct": -21.28,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -29.88,
             "model_id": "etf_0020",
@@ -102133,6 +101604,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": -21.58,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 1.34,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": -1.07,
+            "total_trades": 7,
+            "win_rate_pct": 14.3,
+            "profit_factor": 0.12,
+            "sortino_ratio": -1.44,
+            "max_drawdown_pct": -30.22,
+            "total_return_pct": -21.28,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 19.25,
@@ -102329,37 +101822,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 3.4,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 25.96,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 0.23,
-            "total_trades": 15,
-            "win_rate_pct": 33.3,
-            "profit_factor": 1.24,
-            "sortino_ratio": 0.29,
-            "max_drawdown_pct": -9.76,
-            "total_return_pct": 3.34,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": -21.58,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 1.34,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": -1.07,
-            "total_trades": 7,
-            "win_rate_pct": 14.3,
-            "profit_factor": 0.12,
-            "sortino_ratio": -1.44,
-            "max_drawdown_pct": -30.22,
-            "total_return_pct": -21.28,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": -29.88,
             "model_id": "etf_0020",
@@ -102405,9 +101867,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 88.44,
             "cagr_pct": 100.79,
             "alpha_pct": 88.79,
@@ -102418,6 +101880,22 @@
             "profit_factor": 2.9,
             "total_trades": 48,
             "market_exposure_pct": 91.7
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 101.83,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 69.63,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.89,
+            "total_trades": 11,
+            "win_rate_pct": 72.7,
+            "profit_factor": 10.82,
+            "sortino_ratio": 2.56,
+            "max_drawdown_pct": -20.75,
+            "total_return_pct": 95.69,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -102615,37 +102093,6 @@
             "market_exposure_pct": 55.6
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 27.04,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -0.35,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.59,
-            "total_trades": 63,
-            "win_rate_pct": 60.3,
-            "profit_factor": 2.15,
-            "sortino_ratio": 1.98,
-            "max_drawdown_pct": -9.18,
-            "total_return_pct": 25.71,
-            "market_exposure_pct": 95.4
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 101.83,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 69.63,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.89,
-            "total_trades": 11,
-            "win_rate_pct": 72.7,
-            "profit_factor": 10.82,
-            "sortino_ratio": 2.56,
-            "max_drawdown_pct": -20.75,
-            "total_return_pct": 95.69,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 41.74,
             "model_id": "etf_0020",
@@ -102662,6 +102109,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 101.83,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 69.63,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.89,
+            "total_trades": 11,
+            "win_rate_pct": 72.7,
+            "profit_factor": 10.82,
+            "sortino_ratio": 2.56,
+            "max_drawdown_pct": -20.75,
+            "total_return_pct": 95.69,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": 7.2,
@@ -102858,37 +102327,6 @@
             "market_exposure_pct": 95.4
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 22.2,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -4.93,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.31,
-            "total_trades": 68,
-            "win_rate_pct": 55.9,
-            "profit_factor": 1.7,
-            "sortino_ratio": 1.64,
-            "max_drawdown_pct": -10.15,
-            "total_return_pct": 21.13,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 101.83,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 69.63,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.89,
-            "total_trades": 11,
-            "win_rate_pct": 72.7,
-            "profit_factor": 10.82,
-            "sortino_ratio": 2.56,
-            "max_drawdown_pct": -20.75,
-            "total_return_pct": 95.69,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 41.74,
             "model_id": "etf_0020",
@@ -102934,9 +102372,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 88.76,
             "cagr_pct": 99.91,
             "alpha_pct": 87.91,
@@ -102947,6 +102385,22 @@
             "profit_factor": 2.83,
             "total_trades": 48,
             "market_exposure_pct": 100.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 31.61,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 3.14,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.54,
+            "total_trades": 15,
+            "win_rate_pct": 33.3,
+            "profit_factor": 0.7,
+            "sortino_ratio": 0.73,
+            "max_drawdown_pct": -29.48,
+            "total_return_pct": 31.61,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -103144,37 +102598,6 @@
             "market_exposure_pct": 84.7
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 29.52,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -0.57,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.32,
-            "total_trades": 72,
-            "win_rate_pct": 55.6,
-            "profit_factor": 1.61,
-            "sortino_ratio": 1.65,
-            "max_drawdown_pct": -17.43,
-            "total_return_pct": 28.45,
-            "market_exposure_pct": 94.2
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 31.61,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 3.14,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.54,
-            "total_trades": 15,
-            "win_rate_pct": 33.3,
-            "profit_factor": 0.7,
-            "sortino_ratio": 0.73,
-            "max_drawdown_pct": -29.48,
-            "total_return_pct": 31.61,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 22.55,
             "model_id": "etf_0020",
@@ -103191,6 +102614,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 31.61,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 3.14,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 0.54,
+            "total_trades": 15,
+            "win_rate_pct": 33.3,
+            "profit_factor": 0.7,
+            "sortino_ratio": 0.73,
+            "max_drawdown_pct": -29.48,
+            "total_return_pct": 31.61,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -23.4,
@@ -103387,37 +102832,6 @@
             "market_exposure_pct": 87.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 24.09,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -5.79,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.09,
-            "total_trades": 74,
-            "win_rate_pct": 52.7,
-            "profit_factor": 1.38,
-            "sortino_ratio": 1.36,
-            "max_drawdown_pct": -20.44,
-            "total_return_pct": 23.23,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 31.61,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 3.14,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 0.54,
-            "total_trades": 15,
-            "win_rate_pct": 33.3,
-            "profit_factor": 0.7,
-            "sortino_ratio": 0.73,
-            "max_drawdown_pct": -29.48,
-            "total_return_pct": 31.61,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 22.55,
             "model_id": "etf_0020",
@@ -103463,9 +102877,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 8.4,
             "cagr_pct": 9.25,
             "alpha_pct": -2.75,
@@ -103476,6 +102890,22 @@
             "profit_factor": 1.17,
             "total_trades": 48,
             "market_exposure_pct": 91.7
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 54.82,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 26.08,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.22,
+            "total_trades": 13,
+            "win_rate_pct": 53.8,
+            "profit_factor": 4.99,
+            "sortino_ratio": 1.64,
+            "max_drawdown_pct": -28.32,
+            "total_return_pct": 52.94,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -103673,37 +103103,6 @@
             "market_exposure_pct": 98.8
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 33.12,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 5.21,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.58,
-            "total_trades": 65,
-            "win_rate_pct": 52.3,
-            "profit_factor": 2.12,
-            "sortino_ratio": 1.98,
-            "max_drawdown_pct": -9.22,
-            "total_return_pct": 32.06,
-            "market_exposure_pct": 68.7
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 54.82,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 26.08,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.22,
-            "total_trades": 13,
-            "win_rate_pct": 53.8,
-            "profit_factor": 4.99,
-            "sortino_ratio": 1.64,
-            "max_drawdown_pct": -28.32,
-            "total_return_pct": 52.94,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 43.15,
             "model_id": "etf_0020",
@@ -103720,6 +103119,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 54.82,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 26.08,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.22,
+            "total_trades": 13,
+            "win_rate_pct": 53.8,
+            "profit_factor": 4.99,
+            "sortino_ratio": 1.64,
+            "max_drawdown_pct": -28.32,
+            "total_return_pct": 52.94,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -20.13,
@@ -103916,37 +103337,6 @@
             "market_exposure_pct": 99.2
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 30.69,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": 2.86,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.32,
-            "total_trades": 69,
-            "win_rate_pct": 47.8,
-            "profit_factor": 1.6,
-            "sortino_ratio": 1.65,
-            "max_drawdown_pct": -15.26,
-            "total_return_pct": 29.71,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 54.82,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 26.08,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.22,
-            "total_trades": 13,
-            "win_rate_pct": 53.8,
-            "profit_factor": 4.99,
-            "sortino_ratio": 1.64,
-            "max_drawdown_pct": -28.32,
-            "total_return_pct": 52.94,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 43.15,
             "model_id": "etf_0020",
@@ -103992,9 +103382,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 140.62,
             "cagr_pct": 225.13,
             "alpha_pct": 213.13,
@@ -104005,6 +103395,22 @@
             "profit_factor": 3.62,
             "total_trades": 40,
             "market_exposure_pct": 95.0
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 183.51,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 47.48,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.87,
+            "total_trades": 12,
+            "win_rate_pct": 75.0,
+            "profit_factor": 10.57,
+            "sortino_ratio": 2.53,
+            "max_drawdown_pct": -35.81,
+            "total_return_pct": 112.65,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -104202,37 +103608,6 @@
             "market_exposure_pct": 94.5
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 89.22,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -6.49,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.99,
-            "total_trades": 65,
-            "win_rate_pct": 50.8,
-            "profit_factor": 1.9,
-            "sortino_ratio": 2.49,
-            "max_drawdown_pct": -22.01,
-            "total_return_pct": 58.68,
-            "market_exposure_pct": 98.9
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 183.51,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 47.48,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.87,
-            "total_trades": 12,
-            "win_rate_pct": 75.0,
-            "profit_factor": 10.57,
-            "sortino_ratio": 2.53,
-            "max_drawdown_pct": -35.81,
-            "total_return_pct": 112.65,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 198.41,
             "model_id": "etf_0020",
@@ -104249,6 +103624,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 183.51,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 47.48,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.87,
+            "total_trades": 12,
+            "win_rate_pct": 75.0,
+            "profit_factor": 10.57,
+            "sortino_ratio": 2.53,
+            "max_drawdown_pct": -35.81,
+            "total_return_pct": 112.65,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -18.64,
@@ -104445,37 +103842,6 @@
             "market_exposure_pct": 100.0
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 80.4,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -11.88,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.84,
-            "total_trades": 67,
-            "win_rate_pct": 49.3,
-            "profit_factor": 1.6,
-            "sortino_ratio": 2.31,
-            "max_drawdown_pct": -24.66,
-            "total_return_pct": 53.29,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 183.51,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 47.48,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.87,
-            "total_trades": 12,
-            "win_rate_pct": 75.0,
-            "profit_factor": 10.57,
-            "sortino_ratio": 2.53,
-            "max_drawdown_pct": -35.81,
-            "total_return_pct": 112.65,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 198.41,
             "model_id": "etf_0020",
@@ -104521,9 +103887,9 @@
         "comparison_long_only": [
           {
             "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
-            "short_name": "👑 全球泰坦方案 A",
-            "model_name": "👑 全球高流動性泰坦方案 A (Top 4 階梯旗艦)",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
             "total_return_pct": 442.72,
             "cagr_pct": 85.14,
             "alpha_pct": 73.14,
@@ -104534,6 +103900,22 @@
             "profit_factor": 2.52,
             "total_trades": 136,
             "market_exposure_pct": 95.6
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 59.91,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 441.41,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.22,
+            "total_trades": 57,
+            "win_rate_pct": 52.6,
+            "profit_factor": 3.12,
+            "sortino_ratio": 1.65,
+            "max_drawdown_pct": -42.27,
+            "total_return_pct": 638.87,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
           },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
@@ -104731,37 +104113,6 @@
             "market_exposure_pct": 76.9
           },
           {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 27.81,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -12.99,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.23,
-            "total_trades": 291,
-            "win_rate_pct": 52.2,
-            "profit_factor": 1.72,
-            "sortino_ratio": 1.54,
-            "max_drawdown_pct": -20.8,
-            "total_return_pct": 184.46,
-            "market_exposure_pct": 80.5
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 59.91,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 441.41,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.22,
-            "total_trades": 57,
-            "win_rate_pct": 52.6,
-            "profit_factor": 3.12,
-            "sortino_ratio": 1.65,
-            "max_drawdown_pct": -42.27,
-            "total_return_pct": 638.87,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
-          },
-          {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
             "cagr_pct": 40.06,
             "model_id": "etf_0020",
@@ -104778,6 +104129,28 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_a",
+            "name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)",
+            "short_name": "👑 全球泰坦(Calmar冠軍)",
+            "model_name": "👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)"
+          },
+          {
+            "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
+            "cagr_pct": 59.91,
+            "model_id": "titan_sovereign",
+            "alpha_pct": 441.41,
+            "short_name": "👑 台股泰坦(FIP旗艦)",
+            "sharpe_ratio": 1.22,
+            "total_trades": 57,
+            "win_rate_pct": 52.6,
+            "profit_factor": 3.12,
+            "sortino_ratio": 1.65,
+            "max_drawdown_pct": -42.27,
+            "total_return_pct": 638.87,
+            "market_exposure_pct": 100,
+            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+          },
           {
             "name": "🏛️ 市場狀態多段專家 (Regime MoE + Meta-Filter)",
             "cagr_pct": -10.39,
@@ -104972,37 +104345,6 @@
             "max_drawdown_pct": -31.57,
             "total_return_pct": 132.54,
             "market_exposure_pct": 100.0
-          },
-          {
-            "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
-            "cagr_pct": 26.4,
-            "model_id": "alpha_dynamic_convex",
-            "alpha_pct": -26.18,
-            "short_name": "🚀 凸性 1.75x 熔斷",
-            "sharpe_ratio": 1.13,
-            "total_trades": 304,
-            "win_rate_pct": 50.3,
-            "profit_factor": 1.6,
-            "sortino_ratio": 1.42,
-            "max_drawdown_pct": -22.25,
-            "total_return_pct": 171.28,
-            "market_exposure_pct": 100.0
-          },
-          {
-            "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
-            "cagr_pct": 59.91,
-            "model_id": "titan_sovereign",
-            "alpha_pct": 441.41,
-            "short_name": "👑 泰坦王權主宰",
-            "sharpe_ratio": 1.22,
-            "total_trades": 57,
-            "win_rate_pct": 52.6,
-            "profit_factor": 3.12,
-            "sortino_ratio": 1.65,
-            "max_drawdown_pct": -42.27,
-            "total_return_pct": 638.87,
-            "market_exposure_pct": 100,
-            "model_name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)"
           },
           {
             "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
