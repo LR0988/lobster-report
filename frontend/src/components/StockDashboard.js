@@ -10020,7 +10020,7 @@ function StockDashboard() {
                               <span style={{ fontSize: '1.35rem' }}>🌐</span>
                               <div>
                                 <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                  <span>全球高流動性泰坦旗艦方案 A (Top 4 階梯配置 40/25/20/15)</span>
+                                  <span>全球高流動性泰坦旗艦（最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30 - 慢慢跟他玩）</span>
                                   <span style={{ fontSize: '0.72rem', background: 'rgba(14, 165, 233, 0.2)', color: '#BAE6FD', border: '1px solid rgba(14, 165, 233, 0.4)', padding: '0.1rem 0.5rem', borderRadius: '10px' }}>
                                     國內券商直購・零海外開戶門檻・月度動態輪動・扣除雙向交易摩擦
                                   </span>
@@ -10884,10 +10884,9 @@ function StockDashboard() {
                           activePeriodData?.open_positions ||
                           (activeModelKey === 'etf_0020' ? (etf0020HoldingsData?.open_positions || []) :
                            activeModelKey === 'global_liquid_titan_a' ? [
-                             { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1主力 (40%)', currency: 'USD', target_weight_pct: 40, weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, current_price: 225.0, unrealized_return_pct: 20.57, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: '守住獲利：高點回檔 12% 移動停利 或 SPY 跌破 200MA 全面清倉' },
-                             { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (25%)', currency: 'TWD', target_weight_pct: 25, weight_pct: 25, entry_date: '20261001', entry_price: 1195.0, latest_price: 1270.0, current_price: 1270.0, unrealized_return_pct: 6.28, holding_days: 8, ma60_stop_price: 1026.38, dist_to_stop_pct: 23.8, stop_condition: '守住獲利：跌破 60MA 季線 (NT$ 1,026) 次日出清，目前緩衝安全' },
-                             { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (20%)', currency: 'TWD', target_weight_pct: 20, weight_pct: 20, entry_date: '20261001', entry_price: 8040.0, latest_price: 8360.0, current_price: 8360.0, unrealized_return_pct: 3.98, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: '續抱跟單：跌破 60MA 季線 (NT$ 5,985) 次日出清，均線多頭保護' },
-                             { stock_id: 'MU', stock_name: '美光科技 (Micron)', role: '🎖️ 第4主力 (15%)', currency: 'USD', target_weight_pct: 15, weight_pct: 15, entry_date: '20261001', entry_price: 1054.08, latest_price: 1029.0, current_price: 1029.0, unrealized_return_pct: -2.38, holding_days: 8, ma60_stop_price: 964.45, dist_to_stop_pct: 6.7, stop_condition: '嚴守季線：防守 60MA (US$ 964.45)，若實體收破次日嚴格停損' }
+                             { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1王者 (40%)', currency: 'USD', target_weight_pct: 40, weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, current_price: 225.0, unrealized_return_pct: 20.57, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: '👑 最高Calmar冠軍 (40%重壓)：大主升段續抱狂奔！無短線均線過敏干擾，SPY破年線才清倉' },
+                             { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', currency: 'TWD', target_weight_pct: 30, weight_pct: 30, entry_date: '20261001', entry_price: 1195.0, latest_price: 1270.0, current_price: 1270.0, unrealized_return_pct: 6.28, holding_days: 8, ma60_stop_price: 1026.38, dist_to_stop_pct: 23.8, stop_condition: '🥈 第2主力 (30%配置)：載板王者主升段奔馳！持滿整月，不被盤中洗盤震下車' },
+                             { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', currency: 'TWD', target_weight_pct: 30, weight_pct: 30, entry_date: '20261001', entry_price: 8040.0, latest_price: 8360.0, current_price: 8360.0, unrealized_return_pct: 3.98, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: '🥉 第3主力 (30%配置)：ASIC龍頭多頭強勁，每週一動態檢視，消除資金閒置' }
                            ] :
                            activeModelKey === 'titan_sovereign' ? (
                              (marketMlData?.backtest_simulation?.titan_open_positions && marketMlData.backtest_simulation.titan_open_positions.length > 0 ? marketMlData.backtest_simulation.titan_open_positions : null) ||

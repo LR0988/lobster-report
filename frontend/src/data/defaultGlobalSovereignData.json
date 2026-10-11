@@ -11,12 +11,13 @@
   },
   "kpi": {
     "scheme_a": {
-      "total_ret": 792675.2,
-      "mult": 7927.75,
-      "cagr": 48.59,
-      "mdd": -30.31,
-      "calmar": 1.603,
-      "win_rate": 86.4
+      "total_ret": 294215.5,
+      "cagr": 42.38,
+      "mdd": -42.68,
+      "calmar": 0.993,
+      "sharpe": 1.08,
+      "win_rate": 52.1,
+      "mult": 2943
     },
     "spy": {
       "total_ret": 917.9,
@@ -39,40 +40,40 @@
     {
       "rank": 1,
       "ticker": "MRNA",
-      "name": "莫德納 (Moderna)",
+      "name": "莫德納 (Moderna 生技疫苗巨擘)",
       "market": "美股 (NASDAQ)",
       "currency": "USD",
       "weight_pct": 40,
       "price": 225.0,
       "ma60": 126.18,
-      "ma200": 73.56,
+      "ma200": 105.42,
       "mom_3m": 233.6,
       "mom_12m": 711.7,
-      "score": 4.3227,
+      "score": 5.2046,
       "is_active": true,
       "entry_date": "2026-10-01",
       "entry_price": 186.61,
       "unrealized_return_pct": 20.57,
-      "stop_condition": "守住獲利：高點回檔12%移動停利 或 SPY跌破200MA清倉"
+      "stop_condition": "👑 第1王者 (40%重壓)：大波段續抱奔跑！無過敏均線干擾，SPY破年線才清倉避險"
     },
     {
       "rank": 2,
       "ticker": "3037.TW",
-      "name": "欣興 (Unimicron ABF載板)",
+      "name": "欣興 (Unimicron 載板王者)",
       "market": "台股 (TWSE)",
       "currency": "TWD",
-      "weight_pct": 25,
+      "weight_pct": 30,
       "price": 1270.0,
       "ma60": 1026.38,
-      "ma200": 756.45,
+      "ma200": 789.15,
       "mom_3m": 45.3,
       "mom_12m": 702.9,
-      "score": 3.2478,
+      "score": 4.3987,
       "is_active": true,
       "entry_date": "2026-10-01",
       "entry_price": 1195.0,
       "unrealized_return_pct": 6.28,
-      "stop_condition": "守住獲利：跌破60MA季線 (NT$ 1,026) 次日出清，目前緩衝充足"
+      "stop_condition": "🥈 第2主力 (30%配置)：主升段狂飆中！離季線安全緩衝+23.8%，長線讓利潤狂奔"
     },
     {
       "rank": 3,
@@ -80,55 +81,36 @@
       "name": "創意 (Global Unichip ASIC)",
       "market": "台股 (TWSE)",
       "currency": "TWD",
-      "weight_pct": 20,
+      "weight_pct": 30,
       "price": 8360.0,
       "ma60": 5985.17,
       "ma200": 4214.01,
       "mom_3m": 108.0,
       "mom_12m": 469.4,
-      "score": 2.6483,
+      "score": 3.248,
       "is_active": true,
       "entry_date": "2026-10-01",
       "entry_price": 8040.0,
       "unrealized_return_pct": 3.98,
-      "stop_condition": "續抱跟單：跌破60MA季線 (NT$ 5,985) 次日出清，目前緩衝充足"
+      "stop_condition": "🥉 第3主力 (30%配置)：季線強勁斜率多頭支撐，持滿整月，不被盤中洗盤震下車"
     },
     {
       "rank": 4,
       "ticker": "MU",
-      "name": "美光科技 (Micron 記憶體巨頭)",
+      "name": "美光科技 (Micron 記憶體巨擘)",
       "market": "美股 (NASDAQ)",
       "currency": "USD",
-      "weight_pct": 15,
+      "weight_pct": 0,
       "price": 1029.0,
       "ma60": 964.45,
       "ma200": 711.39,
       "mom_3m": 4.7,
       "mom_12m": 436.6,
-      "score": 2.1379,
-      "is_active": true,
-      "entry_date": "2026-10-01",
-      "entry_price": 1054.08,
-      "unrealized_return_pct": -2.38,
-      "stop_condition": "嚴守季線：防守 60MA (US$ 964.45)，若實體收破次日停損"
-    },
-    {
-      "rank": 5,
-      "ticker": "2454.TW",
-      "name": "聯發科 (MediaTek 晶片霸主)",
-      "market": "台股 (TWSE)",
-      "currency": "TWD",
-      "weight_pct": 0,
-      "price": 4690.0,
-      "ma60": 4278.33,
-      "ma200": 3104.01,
-      "mom_3m": 28.1,
-      "mom_12m": 265.7,
-      "score": 1.6093,
+      "score": 2.6384,
       "is_active": false
     },
     {
-      "rank": 6,
+      "rank": 5,
       "ticker": "ASX",
       "name": "日月光投控 (ASE 封測龍頭ADR)",
       "market": "美股 ADR",
@@ -139,420 +121,350 @@
       "ma200": 31.63,
       "mom_3m": 15.0,
       "mom_12m": 293.1,
-      "score": 1.4356,
-      "is_active": false
-    },
-    {
-      "rank": 7,
-      "ticker": "3008.TW",
-      "name": "大立光 (Largan 光學鏡頭)",
-      "market": "台股 (TWSE)",
-      "currency": "TWD",
-      "weight_pct": 0,
-      "price": 6660.0,
-      "ma60": 5656.97,
-      "ma200": 3739.75,
-      "mom_3m": 57.6,
-      "mom_12m": 209.3,
-      "score": 1.3666,
-      "is_active": false
-    },
-    {
-      "rank": 8,
-      "ticker": "UMC",
-      "name": "聯電 (UMC 晶圓代工ADR)",
-      "market": "美股 ADR",
-      "currency": "USD",
-      "weight_pct": 0,
-      "price": 22.96,
-      "ma60": 21.12,
-      "ma200": 16.24,
-      "mom_3m": -3.7,
-      "mom_12m": 214.9,
-      "score": 1.2604,
-      "is_active": false
-    },
-    {
-      "rank": 9,
-      "ticker": "ILMN",
-      "name": "因美納 (Illumina 基因定序)",
-      "market": "美股 (NASDAQ)",
-      "currency": "USD",
-      "weight_pct": 0,
-      "price": 278.17,
-      "ma60": 221.76,
-      "ma200": 167.03,
-      "mom_3m": 45.5,
-      "mom_12m": 199.1,
-      "score": 1.2566,
-      "is_active": false
-    },
-    {
-      "rank": 10,
-      "ticker": "8996.TW",
-      "name": "高力 (Kaori 水冷散熱飆股)",
-      "market": "台股 (TWSE)",
-      "currency": "TWD",
-      "weight_pct": 0,
-      "price": 1710.0,
-      "ma60": 1254.78,
-      "ma200": 1080.62,
-      "mom_3m": 45.5,
-      "mom_12m": 239.8,
-      "score": 1.2481,
+      "score": 1.8188,
       "is_active": false
     }
   ],
   "yearly_performance": [
     {
+      "year": 2004,
+      "scheme_a_ret": 6.48,
+      "spy_ret": 6.05,
+      "capital": 1084610.0
+    },
+    {
       "year": 2005,
-      "scheme_a_ret": 99.8,
-      "spy_ret": 6.8,
-      "capital": 3273187.0
+      "scheme_a_ret": 142.27,
+      "spy_ret": 5.32,
+      "capital": 2630876.0
     },
     {
       "year": 2006,
-      "scheme_a_ret": 23.7,
-      "spy_ret": 11.1,
-      "capital": 4049608.0
+      "scheme_a_ret": 29.6,
+      "spy_ret": 15.85,
+      "capital": 3423000.0
     },
     {
       "year": 2007,
-      "scheme_a_ret": 49.6,
-      "spy_ret": 5.8,
-      "capital": 6057409.0
+      "scheme_a_ret": 53.98,
+      "spy_ret": 5.15,
+      "capital": 4368522.0
     },
     {
       "year": 2008,
-      "scheme_a_ret": -17.3,
-      "spy_ret": -49.3,
-      "capital": 5009621.0
+      "scheme_a_ret": 0.66,
+      "spy_ret": -36.24,
+      "capital": 4397535.0
     },
     {
       "year": 2009,
-      "scheme_a_ret": 43.2,
-      "spy_ret": 26.7,
-      "capital": 7173586.0
+      "scheme_a_ret": 20.24,
+      "spy_ret": 22.65,
+      "capital": 5287472.0
     },
     {
       "year": 2010,
-      "scheme_a_ret": 11.0,
-      "spy_ret": 9.7,
-      "capital": 7961348.0
+      "scheme_a_ret": -25.17,
+      "spy_ret": 13.14,
+      "capital": 3957959.0
     },
     {
       "year": 2011,
-      "scheme_a_ret": 1.3,
-      "spy_ret": 5.0,
-      "capital": 8063092.0
+      "scheme_a_ret": 20.49,
+      "spy_ret": 0.85,
+      "capital": 4905288.0
     },
     {
       "year": 2012,
-      "scheme_a_ret": 25.5,
-      "spy_ret": 14.2,
-      "capital": 10121463.0
+      "scheme_a_ret": 22.16,
+      "spy_ret": 15.99,
+      "capital": 5821925.0
     },
     {
       "year": 2013,
-      "scheme_a_ret": 146.9,
-      "spy_ret": 24.3,
-      "capital": 24987736.0
+      "scheme_a_ret": 63.59,
+      "spy_ret": 29.0,
+      "capital": 9764136.0
     },
     {
       "year": 2014,
-      "scheme_a_ret": 53.0,
-      "spy_ret": 13.4,
-      "capital": 38228579.0
+      "scheme_a_ret": 17.17,
+      "spy_ret": 14.56,
+      "capital": 11259605.0
     },
     {
       "year": 2015,
-      "scheme_a_ret": 26.7,
-      "spy_ret": 2.4,
-      "capital": 48431592.0
+      "scheme_a_ret": 21.92,
+      "spy_ret": 1.29,
+      "capital": 13679077.0
     },
     {
       "year": 2016,
-      "scheme_a_ret": 49.8,
-      "spy_ret": 5.7,
-      "capital": 72566447.0
+      "scheme_a_ret": 133.2,
+      "spy_ret": 13.59,
+      "capital": 30833212.0
     },
     {
       "year": 2017,
-      "scheme_a_ret": 76.6,
-      "spy_ret": 18.4,
-      "capital": 128161907.0
+      "scheme_a_ret": 62.93,
+      "spy_ret": 20.78,
+      "capital": 50033284.0
     },
     {
       "year": 2018,
-      "scheme_a_ret": -2.4,
-      "spy_ret": 6.4,
-      "capital": 125082553.0
+      "scheme_a_ret": 11.08,
+      "spy_ret": -5.25,
+      "capital": 55646371.0
     },
     {
       "year": 2019,
-      "scheme_a_ret": 35.0,
-      "spy_ret": 13.6,
-      "capital": 168806374.0
+      "scheme_a_ret": 29.95,
+      "spy_ret": 31.09,
+      "capital": 72313139.0
     },
     {
       "year": 2020,
-      "scheme_a_ret": 117.7,
-      "spy_ret": 19.2,
-      "capital": 367524443.0
+      "scheme_a_ret": 57.96,
+      "spy_ret": 17.24,
+      "capital": 117591649.0
     },
     {
       "year": 2021,
-      "scheme_a_ret": 124.6,
-      "spy_ret": 24.0,
-      "capital": 825638613.0
+      "scheme_a_ret": 140.47,
+      "spy_ret": 30.51,
+      "capital": 292767284.0
     },
     {
       "year": 2022,
-      "scheme_a_ret": -12.8,
-      "spy_ret": -9.7,
-      "capital": 719711621.0
+      "scheme_a_ret": 7.13,
+      "spy_ret": -18.65,
+      "capital": 247689591.0
     },
     {
       "year": 2023,
-      "scheme_a_ret": 90.6,
-      "spy_ret": 12.1,
-      "capital": 1371677636.0
+      "scheme_a_ret": 166.3,
+      "spy_ret": 26.71,
+      "capital": 659601446.0
     },
     {
       "year": 2024,
-      "scheme_a_ret": 101.0,
-      "spy_ret": 28.7,
-      "capital": 2757374506.0
+      "scheme_a_ret": 71.91,
+      "spy_ret": 25.59,
+      "capital": 1135353535.0
     },
     {
       "year": 2025,
-      "scheme_a_ret": 4.9,
-      "spy_ret": 12.5,
-      "capital": 2893115211.0
+      "scheme_a_ret": 4.27,
+      "spy_ret": 18.01,
+      "capital": 1184096034.0
     },
     {
       "year": 2026,
-      "scheme_a_ret": 174.0,
-      "spy_ret": 12.6,
-      "capital": 7927752049.0
+      "scheme_a_ret": 141.85,
+      "spy_ret": 14.85,
+      "capital": 2997834941.0
     }
   ],
   "recent_trades": [
     {
-      "exec_date": "2024-10-01",
-      "next_date": "2024-11-01",
-      "exposure": 1.0,
-      "allocation": "CEG(40%:+1.4%), SPOT(25%:+3.2%), 2603.TW(20%:+1.5%), AVGO(15%:-2.3%)",
-      "period_ret": 1.18,
-      "spy_ret": -0.36,
-      "capital": 2651382092.0
+      "ticker": "SPOT",
+      "entry_date": "2024-08-01",
+      "exit_date": "2025-03-11",
+      "entry_price": 345.09,
+      "exit_price": 490.4,
+      "return_pct": 42.11,
+      "holding_days": 222,
+      "reason": "SPY跌破200MA清倉避險"
     },
     {
-      "exec_date": "2024-11-01",
-      "next_date": "2024-12-02",
-      "exposure": 1.0,
-      "allocation": "NVDA(40%:+3.1%), CEG(25%:-2.0%), 2317.TW(20%:-1.7%), SPOT(15%:+25.2%)",
-      "period_ret": 4.0,
-      "spy_ret": 5.54,
-      "capital": 2757374506.0
+      "ticker": "BABA",
+      "entry_date": "2025-03-03",
+      "exit_date": "2025-03-11",
+      "entry_price": 134.01,
+      "exit_price": 138.16,
+      "return_pct": 3.1,
+      "holding_days": 8,
+      "reason": "SPY跌破200MA清倉避險"
     },
     {
-      "exec_date": "2024-12-02",
-      "next_date": "2025-01-02",
-      "exposure": 1.0,
-      "allocation": "NVDA(40%:-2.0%), SPOT(25%:-5.9%), CEG(20%:-11.9%), TSLA(15%:+10.7%)",
-      "period_ret": -3.21,
-      "spy_ret": -2.25,
-      "capital": 2668816395.0
+      "ticker": "TMUS",
+      "entry_date": "2025-03-03",
+      "exit_date": "2025-03-11",
+      "entry_price": 261.83,
+      "exit_price": 251.63,
+      "return_pct": -3.9,
+      "holding_days": 8,
+      "reason": "SPY跌破200MA清倉避險"
     },
     {
-      "exec_date": "2025-01-02",
-      "next_date": "2025-02-03",
-      "exposure": 1.0,
-      "allocation": "TSLA(40%:-0.9%), AVGO(25%:-8.8%), SPOT(20%:+19.6%), MRVL(15%:-1.7%)",
-      "period_ret": 0.98,
-      "spy_ret": 0.56,
-      "capital": 2694910368.0
+      "ticker": "TSLA",
+      "entry_date": "2025-05-19",
+      "exit_date": "2025-07-01",
+      "entry_price": 336.3,
+      "exit_price": 298.46,
+      "return_pct": -11.25,
+      "holding_days": 43,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-02-03",
-      "next_date": "2025-03-03",
-      "exposure": 1.0,
-      "allocation": "TSLA(40%:-22.3%), SPOT(25%:+13.3%), CEG(20%:-12.6%), TEAM(15%:-4.8%)",
-      "period_ret": -9.0,
-      "spy_ret": 0.59,
-      "capital": 2452272387.0
+      "ticker": "SPOT",
+      "entry_date": "2025-05-19",
+      "exit_date": "2025-08-01",
+      "entry_price": 649.0,
+      "exit_price": 622.0,
+      "return_pct": -4.16,
+      "holding_days": 74,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-03-03",
-      "next_date": "2025-04-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:-10.4%), BABA(25%:-0.9%), GILD(20%:-1.8%), TMUS(15%:-1.2%)",
-      "period_ret": -5.09,
-      "spy_ret": -6.5,
-      "capital": 2327435948.0
+      "ticker": "NFLX",
+      "entry_date": "2025-05-19",
+      "exit_date": "2025-08-01",
+      "entry_price": 117.36,
+      "exit_price": 116.3,
+      "return_pct": -0.9,
+      "holding_days": 74,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-04-01",
-      "next_date": "2025-05-01",
-      "exposure": 0.5,
-      "allocation": "BABA(20%:-9.5%), GILD(12%:-5.8%), TMUS(10%:-7.8%), SONY(7%:+1.3%), 現金(50%)",
-      "period_ret": -3.37,
-      "spy_ret": 0.52,
-      "capital": 2249045907.0
+      "ticker": "3661.TW",
+      "entry_date": "2025-08-01",
+      "exit_date": "2025-10-01",
+      "entry_price": 3700.75,
+      "exit_price": 3472.86,
+      "return_pct": -6.16,
+      "holding_days": 61,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-05-01",
-      "next_date": "2025-06-02",
-      "exposure": 0.5,
-      "allocation": "SPOT(20%:+8.9%), NFLX(12%:+7.0%), SONY(10%:+3.6%), FTNT(7%:-3.6%), 現金(50%)",
-      "period_ret": 2.67,
-      "spy_ret": 4.89,
-      "capital": 2309081217.0
+      "ticker": "DASH",
+      "entry_date": "2025-07-01",
+      "exit_date": "2025-11-03",
+      "entry_price": 247.62,
+      "exit_price": 255.89,
+      "return_pct": 3.34,
+      "holding_days": 125,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-06-02",
-      "next_date": "2025-07-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:+16.2%), NFLX(25%:+11.4%), AVGO(20%:+13.1%), TSLA(15%:-13.1%)",
-      "period_ret": 9.83,
-      "spy_ret": 4.87,
-      "capital": 2536063497.0
+      "ticker": "2308.TW",
+      "entry_date": "2025-10-01",
+      "exit_date": "2025-12-01",
+      "entry_price": 865.47,
+      "exit_price": 931.13,
+      "return_pct": 7.59,
+      "holding_days": 61,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-07-01",
-      "next_date": "2025-08-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:-18.9%), DASH(25%:+0.0%), NFLX(20%:-13.1%), ZS(15%:-10.5%)",
-      "period_ret": -11.89,
-      "spy_ret": 1.61,
-      "capital": 2234427525.0
+      "ticker": "AVGO",
+      "entry_date": "2025-08-01",
+      "exit_date": "2026-01-02",
+      "entry_price": 283.94,
+      "exit_price": 350.85,
+      "return_pct": 23.56,
+      "holding_days": 154,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-08-01",
-      "next_date": "2025-09-01",
-      "exposure": 1.0,
-      "allocation": "3017.TW(40%:+13.0%), AVGO(25%:+7.1%), DASH(20%:-0.1%), 3661.TW(15%:+6.9%)",
-      "period_ret": 7.85,
-      "spy_ret": 3.38,
-      "capital": 2409883547.0
+      "ticker": "MU",
+      "entry_date": "2025-11-03",
+      "exit_date": "2026-03-23",
+      "entry_price": 233.65,
+      "exit_price": 425.91,
+      "return_pct": 82.28,
+      "holding_days": 140,
+      "reason": "SPY跌破200MA清倉避險"
     },
     {
-      "exec_date": "2025-09-01",
-      "next_date": "2025-10-01",
-      "exposure": 1.0,
-      "allocation": "2308.TW(40%:+23.2%), 3017.TW(25%:+0.2%), AVGO(20%:+7.1%), 3661.TW(15%:-12.2%)",
-      "period_ret": 8.77,
-      "spy_ret": 2.42,
-      "capital": 2621310021.0
+      "ticker": "LRCX",
+      "entry_date": "2025-12-01",
+      "exit_date": "2026-03-23",
+      "entry_price": 154.14,
+      "exit_price": 229.98,
+      "return_pct": 49.21,
+      "holding_days": 112,
+      "reason": "SPY跌破200MA清倉避險"
     },
     {
-      "exec_date": "2025-10-01",
-      "next_date": "2025-11-03",
-      "exposure": 1.0,
-      "allocation": "2308.TW(40%:+14.0%), 6669.TW(25%:+30.8%), MU(20%:+41.3%), TSLA(15%:+2.7%)",
-      "period_ret": 21.83,
-      "spy_ret": 3.39,
-      "capital": 3193478608.0
+      "ticker": "3017.TW",
+      "entry_date": "2026-01-02",
+      "exit_date": "2026-03-23",
+      "entry_price": 1525.95,
+      "exit_price": 1973.29,
+      "return_pct": 29.32,
+      "holding_days": 80,
+      "reason": "SPY跌破200MA清倉避險"
     },
     {
-      "exec_date": "2025-11-03",
-      "next_date": "2025-12-01",
-      "exposure": 1.0,
-      "allocation": "8996.TW(40%:-17.5%), 2308.TW(25%:-5.6%), MU(20%:-0.7%), 3017.TW(15%:-4.8%)",
-      "period_ret": -9.41,
-      "spy_ret": -1.0,
-      "capital": 2893115211.0
+      "ticker": "2308.TW",
+      "entry_date": "2026-04-13",
+      "exit_date": "2026-07-01",
+      "entry_price": 1721.0,
+      "exit_price": 2020.0,
+      "return_pct": 17.37,
+      "holding_days": 79,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2025-12-01",
-      "next_date": "2026-01-02",
-      "exposure": 1.0,
-      "allocation": "MU(40%:+27.1%), INTC(25%:-5.2%), 3017.TW(20%:+11.2%), LRCX(15%:+15.0%)",
-      "period_ret": 13.88,
-      "spy_ret": 1.02,
-      "capital": 3294776799.0
+      "ticker": "3037.TW",
+      "entry_date": "2026-04-13",
+      "exit_date": "2026-08-03",
+      "entry_price": 633.7,
+      "exit_price": 842.0,
+      "return_pct": 32.87,
+      "holding_days": 112,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2026-01-02",
-      "next_date": "2026-02-02",
-      "exposure": 1.0,
-      "allocation": "MU(40%:+39.7%), 3017.TW(25%:-6.2%), 8996.TW(20%:+23.6%), LRCX(15%:+31.2%)",
-      "period_ret": 23.57,
-      "spy_ret": 0.56,
-      "capital": 4071366242.0
+      "ticker": "MU",
+      "entry_date": "2026-04-13",
+      "exit_date": "2026-08-03",
+      "entry_price": 416.41,
+      "exit_price": 786.36,
+      "return_pct": 88.84,
+      "holding_days": 112,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2026-02-02",
-      "next_date": "2026-03-02",
-      "exposure": 1.0,
-      "allocation": "MU(40%:-2.6%), 3037.TW(25%:+23.6%), LRCX(20%:-1.7%), 2308.TW(15%:+14.3%)",
-      "period_ret": 6.52,
-      "spy_ret": -1.58,
-      "capital": 4336632147.0
+      "ticker": "INTC",
+      "entry_date": "2026-07-01",
+      "exit_date": "2026-08-03",
+      "entry_price": 135.0,
+      "exit_price": 88.4,
+      "return_pct": -34.52,
+      "holding_days": 33,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2026-03-02",
-      "next_date": "2026-04-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+4.4%), MU(25%:-13.1%), 2308.TW(20%:+8.1%), 8996.TW(15%:+4.2%)",
-      "period_ret": 0.61,
-      "spy_ret": -3.65,
-      "capital": 4363075139.0
+      "ticker": "2330.TW",
+      "entry_date": "2026-08-03",
+      "exit_date": "2026-09-01",
+      "entry_price": 2382.99,
+      "exit_price": 2387.97,
+      "return_pct": 0.21,
+      "holding_days": 29,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2026-04-01",
-      "next_date": "2026-05-01",
-      "exposure": 0.5,
-      "allocation": "3037.TW(20%:+71.1%), 3017.TW(12%:+34.0%), 8996.TW(10%:+34.0%), 2308.TW(7%:+51.5%), 現金(50%)",
-      "period_ret": 25.65,
-      "spy_ret": 10.3,
-      "capital": 5482082062.0
+      "ticker": "ILMN",
+      "entry_date": "2026-08-03",
+      "exit_date": "2026-10-01",
+      "entry_price": 204.14,
+      "exit_price": 273.22,
+      "return_pct": 33.84,
+      "holding_days": 59,
+      "reason": "掉出Top10換股輪動"
     },
     {
-      "exec_date": "2026-05-01",
-      "next_date": "2026-06-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+29.2%), MU(25%:+97.3%), 2308.TW(20%:+10.4%), 8996.TW(15%:-9.6%)",
-      "period_ret": 36.49,
-      "spy_ret": 4.73,
-      "capital": 7482675201.0
-    },
-    {
-      "exec_date": "2026-06-01",
-      "next_date": "2026-07-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+1.4%), MU(25%:+7.2%), INTC(20%:+23.4%), 2308.TW(15%:-17.1%)",
-      "period_ret": 4.31,
-      "spy_ret": -1.37,
-      "capital": 7804873375.0
-    },
-    {
-      "exec_date": "2026-07-01",
-      "next_date": "2026-08-03",
-      "exposure": 1.0,
-      "allocation": "MU(40%:-27.3%), 3037.TW(25%:-22.2%), INTC(20%:-34.5%), 8996.TW(15%:-45.1%)",
-      "period_ret": -30.31,
-      "spy_ret": 0.6,
-      "capital": 5439468887.0
-    },
-    {
-      "exec_date": "2026-08-03",
-      "next_date": "2026-09-01",
-      "exposure": 1.0,
-      "allocation": "PANW(40%:+11.3%), FTNT(25%:+2.5%), ILMN(20%:+4.0%), 3008.TW(15%:+94.6%)",
-      "period_ret": 20.0,
-      "spy_ret": 1.68,
-      "capital": 6527609293.0
-    },
-    {
-      "exec_date": "2026-09-01",
-      "next_date": "2026-10-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+29.8%), MRNA(25%:+33.1%), 3443.TW(20%:+23.9%), 3008.TW(15%:-22.3%)",
-      "period_ret": 21.45,
-      "spy_ret": 0.31,
-      "capital": 7927752049.0
+      "ticker": "PANW",
+      "entry_date": "2026-08-03",
+      "exit_date": "2026-10-01",
+      "entry_price": 336.49,
+      "exit_price": 396.01,
+      "return_pct": 17.69,
+      "holding_days": 59,
+      "reason": "掉出Top10換股輪動"
     }
   ],
   "exit_mechanisms_comparison": [

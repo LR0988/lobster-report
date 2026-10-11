@@ -42,7 +42,7 @@ export default function GlobalSovereignDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#60A5FA', fontSize: '1.5rem' }}>
-            👑 全球高流動性泰坦旗艦（方案 A - 國內券商直接可買）
+            👑 全球高流動性泰坦旗艦（最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30 - 慢慢跟他玩）
           </h2>
           <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
             國內券商 100% 可買池（台股龍頭 ＋ 美股那斯達克 100 ＋ S&P 500 ＋ 全球 ADR） ➔ 2,240 組全量 DOE 最佳化旗艦
@@ -67,7 +67,7 @@ export default function GlobalSovereignDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.8rem' }}>
         <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #10B981', background: 'rgba(16, 185, 129, 0.12)' }}>
           <div style={{ fontSize: '0.82rem', color: '#34D399', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-            👑 方案 A 旗艦 (Top 4 階梯 40/25/20/15)
+            👑 最高 Calmar 冠軍方案 (Top 3 溫和階梯 40/30/30)
           </div>
           <div style={{ fontSize: '1.7rem', fontWeight: 'bold', color: '#10B981' }}>
             +{schemeA.total_ret?.toLocaleString()}%
@@ -164,7 +164,7 @@ export default function GlobalSovereignDashboard() {
           </div>
           <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '0.6rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div style={{ fontSize: '0.88rem', color: '#F9FAFB', fontWeight: 'bold' }}>
-              Top 4: 40% / 25% / 20% / 15%
+              Top 3: 40% / 30% / 30% (Calmar 0.993 冠軍)
             </div>
             <div style={{ fontSize: '0.8rem', color: '#A7F3D0', marginTop: '0.2rem' }}>
               台股現股 ＋ 國內複委託 1 秒買齊
@@ -180,7 +180,7 @@ export default function GlobalSovereignDashboard() {
           onClick={() => setActiveSubTab('current_picks')}
           style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
         >
-          👑 方案 A 最新實盤持倉推薦 ({currentPicks.filter(p => p.is_active).length} 檔)
+          👑 最高 Calmar 冠軍最新持倉推薦 ({currentPicks.filter(p => p.is_active).length} 檔)
         </button>
         <button
           className={`btn ${activeSubTab === 'history' ? '' : 'btn-secondary'}`}
