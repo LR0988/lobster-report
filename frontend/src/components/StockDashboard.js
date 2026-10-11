@@ -5014,19 +5014,37 @@ function StockDashboard() {
                       }
                     });
 
-                    const customEtf0050 = {
+                    const pPeriodObj = bt.periods?.[pKey] || bt.periods?.['20y'] || bt.test_period;
+                    const realEtf0050 = pPeriodObj?.etf0050;
+                    const realEtf0020 = pPeriodObj?.etf0020;
+                    const hasCurveEtf = filtered.some(p => p.etf0050_equity !== undefined && p.etf0050_equity !== null);
+
+                    const customEtf0050 = (!hasCurveEtf && realEtf0050) ? {
+                      total_return_pct: realEtf0050.total_return_pct,
+                      cagr_pct: realEtf0050.cagr_pct,
+                      max_drawdown_pct: realEtf0050.max_drawdown_pct,
+                      sharpe_ratio: realEtf0050.sharpe_ratio || 0.55,
+                      alpha_pct: Number((realEtf0050.total_return_pct - benchTotalRet).toFixed(1))
+                    } : {
                       total_return_pct: etfTotalRet,
                       cagr_pct: etfCagr,
                       max_drawdown_pct: etfMaxDd,
-                      sharpe_ratio: 1.4,
-                      alpha_pct: totalRet - etfTotalRet
+                      sharpe_ratio: 0.55,
+                      alpha_pct: Number((etfTotalRet - benchTotalRet).toFixed(1))
                     };
-                    const customEtf0020 = {
+
+                    const customEtf0020 = (!hasCurveEtf && realEtf0020) ? {
+                      total_return_pct: realEtf0020.total_return_pct,
+                      cagr_pct: realEtf0020.cagr_pct,
+                      max_drawdown_pct: realEtf0020.max_drawdown_pct,
+                      sharpe_ratio: realEtf0020.sharpe_ratio || 0.55,
+                      alpha_pct: Number((realEtf0020.total_return_pct - benchTotalRet).toFixed(1))
+                    } : {
                       total_return_pct: etf20TotalRet,
                       cagr_pct: etf20Cagr,
                       max_drawdown_pct: etf20MaxDd,
-                      sharpe_ratio: 0.86,
-                      alpha_pct: totalRet - etf20TotalRet
+                      sharpe_ratio: 0.55,
+                      alpha_pct: Number((etf20TotalRet - benchTotalRet).toFixed(1))
                     };
 
                     const titanYears = [...new Set(rebasedCurve.map(p => p.year))].filter(Boolean).sort((a, b) => a - b);
@@ -5346,16 +5364,16 @@ function StockDashboard() {
                           total_return_pct: etfTotalRet,
                           cagr_pct: etfCagr,
                           max_drawdown_pct: etfMaxDd,
-                          sharpe_ratio: basePeriod?.etf0050?.sharpe_ratio || 1.4,
-                          alpha_pct: totalRet - etfTotalRet
+                          sharpe_ratio: basePeriod?.etf0050?.sharpe_ratio || 0.55,
+                          alpha_pct: Number((etfTotalRet - benchTotalRet).toFixed(1))
                         };
 
                         const customEtf0020 = {
                           total_return_pct: etf20TotalRet,
                           cagr_pct: etf20Cagr,
                           max_drawdown_pct: etf20MaxDd,
-                          sharpe_ratio: basePeriod?.etf0020?.sharpe_ratio || 0.86,
-                          alpha_pct: totalRet - etf20TotalRet
+                          sharpe_ratio: basePeriod?.etf0020?.sharpe_ratio || 0.55,
+                          alpha_pct: Number((etf20TotalRet - benchTotalRet).toFixed(1))
                         };
 
                         const customModeData = {
@@ -5781,7 +5799,7 @@ function StockDashboard() {
                                 {/* 基準大盤列 */}
                                 <tr style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--text-muted)' }}>
                                   <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
-                                    🎯 TAIEX 大盤基準 (買進持有)
+                                    {activeModelKey === 'global_liquid_titan_a' ? '🌐 全球大盤基準 (標普500 / MSCI 全球買進持有)' : '🎯 TAIEX 加權大盤基準 (買進持有)'}
                                   </td>
                                   <td>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</td>
                                   <td>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</td>
@@ -5808,9 +5826,14 @@ function StockDashboard() {
                                     <td style={{ color: '#DDD6FE' }}>
                                       {(etf0050.cagr_pct || 0) >= 0 ? '+' : ''}{etf0050.cagr_pct?.toFixed(1)}%
                                     </td>
-                                    <td style={{ color: (etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '#FBBF24' : '#94A3B8' }}>
-                                      {((etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))) >= 0 ? '+' : '')}{(etf0050.alpha_pct ?? (etf0050.total_return_pct - (benchmark.total_return_pct || 0))).toFixed(1)}%
-                                    </td>
+                                    {(() => {
+                                      const etfAlpha = Number(((etf0050.total_return_pct || 0) - (benchmark.total_return_pct || 0)).toFixed(1));
+                                      return (
+                                        <td style={{ color: etfAlpha >= 0 ? '#FBBF24' : '#94A3B8' }}>
+                                          {etfAlpha >= 0 ? '+' : ''}{etfAlpha}%
+                                        </td>
+                                      );
+                                    })()}
                                     <td style={{ color: '#F87171' }}>{etf0050.max_drawdown_pct?.toFixed(1)}%</td>
                                     <td>{etf0050.sharpe_ratio?.toFixed(2)}</td>
                                     <td>--</td>
