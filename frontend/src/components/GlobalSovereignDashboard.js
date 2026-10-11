@@ -204,14 +204,14 @@ export default function GlobalSovereignDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#F3F4F6', fontSize: '1.1rem' }}>
-                👑 強勢主權國家境內泰坦王權個股池 (Titan Stock Universe)
+                👑 強勢主權國家境內本土交易所泰坦個股池 (True Domestic Titan Universe)
               </h4>
               <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.84rem' }}>
-                入選標準：所屬國家處於多頭 ➔ 個股站上 60MA 季線與 200MA 年線 ➔ 6M/12M 動能最高 ➔ 聚焦超級領頭羊
+                各國本土真實交易：台灣證交所 (TWD)・首爾交易所 (KRW)・東京交易所 (JPY)・法蘭克福 (EUR)・聖保羅 (BRL)・那斯達克 (USD)
               </p>
             </div>
             <div style={{ fontSize: '0.8rem', color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.3rem 0.6rem', borderRadius: '4px' }}>
-              ✓ 嚴格 T+1 執行・內扣 0.15% 摩擦成本
+              ✓ 真正本土全市場選股・嚴格 T+1 執行
             </div>
           </div>
 
@@ -219,10 +219,10 @@ export default function GlobalSovereignDashboard() {
             <thead>
               <tr>
                 <th style={{ textAlign: 'center', width: '50px' }}>排名</th>
-                <th>股票名稱 / 代碼</th>
+                <th>本土股票名稱 / 代碼</th>
                 <th>所屬國家</th>
-                <th>交易市場</th>
-                <th style={{ textAlign: 'right' }}>最新市價</th>
+                <th>本土交易市場</th>
+                <th style={{ textAlign: 'right' }}>本土現價 (貨幣)</th>
                 <th style={{ textAlign: 'right' }}>60MA 季線</th>
                 <th style={{ textAlign: 'right' }}>200MA 年線</th>
                 <th style={{ textAlign: 'right' }}>12個月動能</th>
@@ -249,7 +249,7 @@ export default function GlobalSovereignDashboard() {
                     </span>
                   </td>
                   <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                    {stk.price?.toLocaleString()}
+                    {stk.price?.toLocaleString()} <span style={{ fontSize: '0.75rem', color: '#93C5FD' }}>{stk.currency}</span>
                   </td>
                   <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>
                     {stk.ma60?.toLocaleString()}
