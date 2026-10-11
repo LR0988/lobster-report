@@ -547,8 +547,177 @@ function RangeInput({ label, minKey, maxKey, config, setConfig, step = 1, isFloa
   );
 }
 
-const STORAGE_KEY = 'stock_screener_config';
-const PROMPT_KEY  = 'stock_screener_prompt';
+const DEFAULT_DB_TABLES = [
+  {
+    id: 'daily_stock',
+    name: '每日個股價量 (daily_stock)',
+    desc: '台股上市櫃全市場每日開高低收、成交量、融資券等完整歷史行情 (2004~2026)',
+    category: '台股核心',
+    categoryKey: 'core',
+    frequency: '每個交易日 14:00 盤後',
+    task_type: 'daily',
+    row_count: 27056727,
+    latest_date: '2026/10/09',
+    columns_count: 26,
+    status: 'active'
+  },
+  {
+    id: 'institutional_trades',
+    name: '三大法人買賣超 (institutional_trades)',
+    desc: '外資、投信、自營商每日買進、賣出與買賣超張數及金額明細',
+    category: '台股核心',
+    categoryKey: 'core',
+    frequency: '每個交易日 15:30 盤後',
+    task_type: 'daily',
+    row_count: 11586237,
+    latest_date: '2026/10/08',
+    columns_count: 5,
+    status: 'active'
+  },
+  {
+    id: 'monthly_revenue',
+    name: '每月營收公告 (monthly_revenue)',
+    desc: '全市場上市櫃公司單月合併營收、MoM 與 YoY 成長率及累計營收數據',
+    category: '基本面',
+    categoryKey: 'fundamental',
+    frequency: '每月 10 日前更新',
+    task_type: 'revenue',
+    row_count: 170993,
+    latest_date: '2026/08',
+    columns_count: 10,
+    status: 'active'
+  },
+  {
+    id: 'shareholder_concentration',
+    name: '集保股權分散表 (shareholder_concentration)',
+    desc: '千張大戶持股比例、分級級距持股人次每週籌碼集中度變化',
+    category: '籌碼面',
+    categoryKey: 'chips',
+    frequency: '每週五盤後更新',
+    task_type: 'daily',
+    row_count: 8525330,
+    latest_date: '2026/10/08',
+    columns_count: 6,
+    status: 'active'
+  },
+  {
+    id: 'institutional_futures',
+    name: '期貨三大法人未平倉 (institutional_futures)',
+    desc: '台指期貨、選擇權各大法人多空留倉口數與契約金額變化',
+    category: '期貨籌碼',
+    categoryKey: 'chips',
+    frequency: '每個交易日 15:30 盤後',
+    task_type: 'daily',
+    row_count: 49780,
+    latest_date: '2026/10/08',
+    columns_count: 8,
+    status: 'active'
+  },
+  {
+    id: 'daily_index',
+    name: '加權指數每日行情 (daily_index)',
+    desc: 'TAIEX 加權股價指數每日開高低收、成交金額與漲跌點數',
+    category: '大盤總覽',
+    categoryKey: 'macro',
+    frequency: '每個交易日 14:00 盤後',
+    task_type: 'daily',
+    row_count: 5326,
+    latest_date: '2026/10/08',
+    columns_count: 9,
+    status: 'active'
+  },
+  {
+    id: 'market_breadth',
+    name: '市場寬幅騰落指標 (market_breadth)',
+    desc: '全市場上漲/下跌家數、漲跌停統計與累計騰落線 (ADL 指標)',
+    category: '大盤總覽',
+    categoryKey: 'macro',
+    frequency: '每個交易日 14:00 盤後',
+    task_type: 'daily',
+    row_count: 5323,
+    latest_date: '2026/10/08',
+    columns_count: 9,
+    status: 'active'
+  },
+  {
+    id: 'options_pc_ratio',
+    name: '選擇權 P/C Ratio (options_pc_ratio)',
+    desc: '台指選擇權 Put/Call 留倉比率與成交比率多空溫度計指標',
+    category: '期貨籌碼',
+    categoryKey: 'chips',
+    frequency: '每個交易日 15:30 盤後',
+    task_type: 'daily',
+    row_count: 5444,
+    latest_date: '2026/10/08',
+    columns_count: 7,
+    status: 'active'
+  },
+  {
+    id: 'macro_indicators',
+    name: '宏觀跨市場因子庫 (macro_indicators)',
+    desc: '美元指數、美債 10Y 殖利率、VIX 恐慌指數、台積電 ADR 跨市場數據',
+    category: '總體經濟',
+    categoryKey: 'macro',
+    frequency: '每日美股開盤前後',
+    task_type: 'daily',
+    row_count: 5676,
+    latest_date: '2026/10/07',
+    columns_count: 18,
+    status: 'active'
+  },
+  {
+    id: 'global_stock_daily',
+    name: '全球旗艦資產行情 (global_stock_daily)',
+    desc: '標普 500、那斯達克、道瓊、費半與全球主權資產每日報價庫',
+    category: '全球資產',
+    categoryKey: 'global',
+    frequency: '每日美股盤後',
+    task_type: 'daily',
+    row_count: 1239687,
+    latest_date: '2026/10/09',
+    columns_count: 8,
+    status: 'active'
+  },
+  {
+    id: 'global_sovereign_daily',
+    name: '全球主權泰坦行情 (global_sovereign_daily)',
+    desc: '全球高流動性主權主階梯商品逐日歷史回測報價',
+    category: '全球資產',
+    categoryKey: 'global',
+    frequency: '每日全球收盤後',
+    task_type: 'daily',
+    row_count: 126258,
+    latest_date: '2026/10/09',
+    columns_count: 8,
+    status: 'active'
+  },
+  {
+    id: 'futures_1m',
+    name: '台指期 1分K 資料 (futures_1m)',
+    desc: '台指期日內當沖高頻 1 分鐘線開高低收與成交量',
+    category: '高頻當沖',
+    categoryKey: 'futures',
+    frequency: '交易時段連續同步',
+    task_type: 'daily',
+    row_count: 139488,
+    latest_date: '2026/10/08 13:44',
+    columns_count: 9,
+    status: 'active'
+  },
+  {
+    id: 'futures_5m',
+    name: '台指期 5分K 資料 (futures_5m)',
+    desc: '台指期日內當沖 5 分鐘波段線開高低收與成交量',
+    category: '高頻當沖',
+    categoryKey: 'futures',
+    frequency: '交易時段連續同步',
+    task_type: 'daily',
+    row_count: 41905,
+    latest_date: '2026/10/08 13:40',
+    columns_count: 9,
+    status: 'active'
+  }
+];
 
 function StockDashboard() {
   const authUser = getCurrentUser();
@@ -564,6 +733,21 @@ function StockDashboard() {
     return saved || 'market_ml';
   });
   const [activeDbTable, setActiveDbTable] = useState('');
+  // 資料庫與爬蟲戰情中心狀態
+  const [dbTablesList, setDbTablesList] = useState(DEFAULT_DB_TABLES);
+  const [dbCategoryFilter, setDbCategoryFilter] = useState('all');
+  const [dbSearchQuery, setDbSearchQuery] = useState('');
+  const [dbTableRows, setDbTableRows] = useState([]);
+  const [dbTableCols, setDbTableCols] = useState([]);
+  const [dbTableLoading, setDbTableLoading] = useState(false);
+  const [dbPage, setDbPage] = useState(1);
+  const [dbPageSize, setDbPageSize] = useState(100);
+  const [dbJumpPageInput, setDbJumpPageInput] = useState('1');
+  const [dbSortKey, setDbSortKey] = useState(null);
+  const [dbSortDir, setDbSortDir] = useState('asc');
+  const [dbUpdatingTableId, setDbUpdatingTableId] = useState(null);
+  const [dbActionBanner, setDbActionBanner] = useState('');
+  const [dbBackfillStatus, setDbBackfillStatus] = useState(null);
   const [portfolioList, setPortfolioList] = useState([]);
   const [portfolioInput, setPortfolioInput] = useState({ stock_id: '', buy_price: '', notes: '', auto_analyze: true });
   const [geminiApiKey, setGeminiApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
@@ -2622,6 +2806,8 @@ function StockDashboard() {
     } else if (activeTab === 'market_ml') {
       fetchMarketMlData();
       fetchMarketMlBtData();
+    } else if (activeTab === 'database' || activeTab === 'scraper') {
+      fetchDbStatus();
     }
   }, [activeTab, mlModelType, marketMlSubTab]);
 
@@ -3268,36 +3454,169 @@ function StockDashboard() {
     }
   };
 
-  const loadDatabase = async (tableName) => {
+  const fetchDbStatus = async () => {
     try {
-      setLoading(true);
-      setData(null);
-      setActiveDbTable(tableName);
-
-      // 優先從 Supabase 雲端快照讀取
-      const res = await supabaseFetch(`/stock_database_preview?table_name=eq.${tableName}&select=columns,data`);
+      const res = await stockFetch('/api/database/status');
       if (res.ok) {
-        const rows = await res.json();
-        if (rows && rows.length > 0 && rows[0].data) {
-          setData(rows[0].data);
-          return;
+        const json = await res.json();
+        if (json.tables && json.tables.length > 0) {
+          setDbTablesList(prev => {
+            return prev.map(item => {
+              const remote = json.tables.find(t => t.id === item.id);
+              if (remote) {
+                return {
+                  ...item,
+                  row_count: remote.row_count || item.row_count,
+                  latest_date: remote.latest_date !== '-' ? remote.latest_date : item.latest_date,
+                  columns_count: remote.columns_count || item.columns_count,
+                  status: remote.status || item.status
+                };
+              }
+              return item;
+            });
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('載入資料庫狀態即時數據跳過，使用本地快照:', e);
+    }
+
+    try {
+      const bRes = await stockFetch('/api/scraper/history_status');
+      if (bRes.ok) {
+        const bJson = await bRes.json();
+        if (bJson.total_trading_days) {
+          setDbBackfillStatus(bJson);
+        }
+      }
+    } catch (e) {}
+  };
+
+  const loadDbTableData = async (tableId) => {
+    setDbTableLoading(true);
+    setDbTableRows([]);
+    setDbTableCols([]);
+    try {
+      let loaded = false;
+      // 1. 優先嘗試從本地 FastAPI 讀取 (支援至多 1000 筆即時展示)
+      try {
+        const res = await stockFetch(`/api/database/${tableId}?limit=1000`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+            setDbTableRows(json.data);
+            setDbTableCols(json.columns || Object.keys(json.data[0]));
+            setData(json.data);
+            loaded = true;
+          }
+        }
+      } catch (err) {
+        console.warn('本地 API 讀取異常，切換至雲端快照備援:', err);
+      }
+
+      // 2. 備援：若本地不可用，從 Supabase 快照讀取
+      if (!loaded) {
+        const supRes = await supabaseFetch(`/stock_database_preview?table_name=eq.${tableId}&select=columns,data`);
+        if (supRes.ok) {
+          const rows = await supRes.json();
+          if (rows && rows.length > 0 && rows[0].data) {
+            setDbTableRows(rows[0].data);
+            setDbTableCols(rows[0].columns || Object.keys(rows[0].data[0]));
+            setData(rows[0].data);
+            loaded = true;
+          }
         }
       }
 
-      // 備援：若本地 FastAPI 正在運行
-      const fallbackRes = await stockFetch(`/api/database/${tableName}`);
-      if (fallbackRes.ok) {
-        const json = await fallbackRes.json();
-        setData(json.data);
-      } else {
-        throw new Error('無法讀取資料表快照');
+      if (!loaded) {
+        setDbActionBanner(`⚠️ 目前未能取得「${tableId}」的資料預覽，請確認後端服務是否已就緒。`);
       }
     } catch (err) {
-      alert('無法載入資料表: ' + err.message);
+      setDbActionBanner(`❌ 載入資料表失敗: ${err.message}`);
     } finally {
-      setLoading(false);
+      setDbTableLoading(false);
     }
   };
+
+  const selectDbTable = async (tableId) => {
+    setActiveDbTable(tableId);
+    setDbPage(1);
+    setDbJumpPageInput('1');
+    setDbSearchQuery('');
+    setDbSortKey(null);
+    setDbSortDir('asc');
+    await loadDbTableData(tableId);
+  };
+
+  const handleTriggerDbScraper = async (taskType, tableName, tableId) => {
+    setDbUpdatingTableId(tableId || 'global_daily');
+    setDbActionBanner(`⏳ 正在連線交易所觸發「${tableName || '最新市場資料'}」即時爬蟲與資料補齊...`);
+    
+    try {
+      await runScraper(taskType || 'daily');
+      setDbActionBanner(`✅「${tableName || '最新市場資料'}」爬蟲指令已成功送達後端與雲端任務隊列！正在背景同步中。`);
+      
+      // 若當前停留在該資料表畫面，2 秒後自動重新整理資料預覽
+      if (activeDbTable && (activeDbTable === tableId || !tableId)) {
+        setTimeout(() => {
+          loadDbTableData(activeDbTable);
+          fetchDbStatus();
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          fetchDbStatus();
+        }, 2000);
+      }
+    } catch (err) {
+      setDbActionBanner(`❌ 觸發爬蟲更新失敗: ${err.message}`);
+    } finally {
+      setTimeout(() => {
+        setDbUpdatingTableId(null);
+      }, 3000);
+    }
+  };
+
+  const loadDatabase = (tableName) => {
+    selectDbTable(tableName);
+  };
+
+  const filteredDbRows = useMemo(() => {
+    if (!dbTableRows || dbTableRows.length === 0) return [];
+    if (!dbSearchQuery.trim()) return dbTableRows;
+    const q = dbSearchQuery.trim().toLowerCase();
+    return dbTableRows.filter(row => {
+      return Object.values(row).some(val => 
+        val !== null && val !== undefined && String(val).toLowerCase().includes(q)
+      );
+    });
+  }, [dbTableRows, dbSearchQuery]);
+
+  const sortedDbRows = useMemo(() => {
+    if (!dbSortKey) return filteredDbRows;
+    return [...filteredDbRows].sort((a, b) => {
+      let va = a[dbSortKey];
+      let vb = b[dbSortKey];
+      if (va === null || va === undefined) return 1;
+      if (vb === null || vb === undefined) return -1;
+      const na = Number(va);
+      const nb = Number(vb);
+      if (!isNaN(na) && !isNaN(nb)) {
+        return dbSortDir === 'asc' ? na - nb : nb - na;
+      }
+      return dbSortDir === 'asc' 
+        ? String(va).localeCompare(String(vb))
+        : String(vb).localeCompare(String(va));
+    });
+  }, [filteredDbRows, dbSortKey, dbSortDir]);
+
+  const totalDbPages = useMemo(() => {
+    return Math.max(1, Math.ceil(sortedDbRows.length / dbPageSize));
+  }, [sortedDbRows.length, dbPageSize]);
+
+  const currentDbPageRows = useMemo(() => {
+    const start = (dbPage - 1) * dbPageSize;
+    return sortedDbRows.slice(start, start + dbPageSize);
+  }, [sortedDbRows, dbPage, dbPageSize]);
 
   const copyAiPrompt = (stockId) => {
     const text = aiPrompt.replace('{stock_id}', stockId);
@@ -3339,22 +3658,25 @@ function StockDashboard() {
             { id: 'titan_live', label: '👑 台股泰坦實作' },
             { id: 'global_sovereign', label: '🌍 全球主權泰坦' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
-            { id: 'database', label: '📊 資料庫檢視' },
-            { id: 'scraper', label: '⚡ 爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
+            { id: 'database', label: '🗄️ 資料庫與爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
             { id: 'schedule', label: '⏰ 排程管理' },
-          ].map(t => (
-            <button
-              key={t.id}
-              className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab(t.id);
-                try { localStorage.setItem('active_tab', t.id); } catch {}
-                setData(null);
-                setScraperStatus('');
-                setActiveDbTable('');
-              }}
-              style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-            >
+          ].map(t => {
+            const isTabActive = (t.id === 'database') 
+              ? (activeTab === 'database' || activeTab === 'scraper')
+              : (activeTab === t.id);
+            return (
+              <button
+                key={t.id}
+                className={`tab-btn ${isTabActive ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab(t.id);
+                  try { localStorage.setItem('active_tab', t.id); } catch {}
+                  setData(null);
+                  setScraperStatus('');
+                  setActiveDbTable('');
+                }}
+                style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
               {t.label}
               {t.badge && (
                 <span style={{
@@ -3370,7 +3692,8 @@ function StockDashboard() {
                 </span>
               )}
             </button>
-          ))}
+            );
+          })}
 
           {podcastProgress?.is_active ? (
             <div
@@ -6839,92 +7162,578 @@ function StockDashboard() {
         )}
 
 
-        {/* ===== 資料庫檢視 ===== */}
-        {activeTab === 'database' && (
-          <div className="filter-section" style={{ marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.25rem' }}>📊 選擇後端資料庫資料表</h3>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <button
-                className={`btn ${activeDbTable === 'daily_stock' ? '' : 'btn-secondary'}`}
-                onClick={() => loadDatabase('daily_stock')}
-                disabled={loading}
-              >
-                📅 每日股價 (daily_stock)
-              </button>
-              <button
-                className={`btn ${activeDbTable === 'monthly_revenue' ? '' : 'btn-secondary'}`}
-                onClick={() => loadDatabase('monthly_revenue')}
-                disabled={loading}
-              >
-                📈 每月營收 (monthly_revenue)
-              </button>
-              <button
-                className={`btn ${activeDbTable === 'institutional_trades' ? '' : 'btn-secondary'}`}
-                onClick={() => loadDatabase('institutional_trades')}
-                disabled={loading}
-              >
-                🏢 三大法人買賣超 (institutional_trades)
-              </button>
-              <button
-                className={`btn ${activeDbTable === 'institutional_futures' ? '' : 'btn-secondary'}`}
-                onClick={() => loadDatabase('institutional_futures')}
-                disabled={loading}
-              >
-                📊 期貨未平倉 (institutional_futures)
-              </button>
-              <button
-                className={`btn ${activeDbTable === 'shareholder_concentration' ? '' : 'btn-secondary'}`}
-                onClick={() => loadDatabase('shareholder_concentration')}
-                disabled={loading}
-              >
-                👥 股權分散表 (shareholder_concentration)
-              </button>
+        {/* ===== 🗄️ 資料庫與爬蟲戰情中心 (合併全新設計) ===== */}
+        {(activeTab === 'database' || activeTab === 'scraper') && (
+          <div className="db-crawler-center">
+            {/* 1. 頂部 KPI 看板卡片 */}
+            <div className="db-kpi-grid">
+              <div className="db-kpi-card">
+                <span className="db-kpi-label">📁 核心資料表數量</span>
+                <span className="db-kpi-value" style={{ color: '#60A5FA' }}>
+                  {dbTablesList.length} <small style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>個</small>
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>涵蓋台股、期權、總經、全球資產</span>
+              </div>
+              <div className="db-kpi-card">
+                <span className="db-kpi-label">💾 歷史資料總容量</span>
+                <span className="db-kpi-value" style={{ color: '#34D399' }}>
+                  {dbTablesList.reduce((acc, t) => acc + (t.row_count || 0), 0).toLocaleString()} <small style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>筆</small>
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>2004~2026 完整全覆蓋大數據</span>
+              </div>
+              <div className="db-kpi-card">
+                <span className="db-kpi-label">📅 最新交易日數據</span>
+                <span className="db-kpi-value" style={{ color: '#FCD34D' }}>
+                  {dbTablesList.find(t => t.id === 'daily_stock')?.latest_date || '2026/10/09'}
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>每日盤後 14:00 自動補齊</span>
+              </div>
+              <div className="db-kpi-card">
+                <span className="db-kpi-label">⚡ 爬蟲引擎狀態</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                  <span className="live-pulse-dot" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34D399', display: 'inline-block' }}></span>
+                  <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '1.05rem' }}>連線就緒</span>
+                </div>
+                <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>非同步佇列 + 雲端排程連動</span>
+              </div>
             </div>
-            {loading && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem', color: 'var(--text-muted)' }}>
-                <span className="loader" style={{ width: '16px', height: '16px', borderWidth: '2px' }}></span>
-                <span>正在載入資料庫資料...</span>
+
+            {/* 2. 一鍵全局立即更新控制列 */}
+            <div className="db-quick-bar">
+              <div>
+                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>⚡ 爬蟲即時控制與資料庫同步</span>
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  點擊下方按鈕將立即啟動背景非同步爬蟲，自動連線交易所補齊最新市場資料。
+                </p>
+              </div>
+              <div className="db-quick-buttons">
+                <button
+                  className="db-btn-update"
+                  onClick={() => handleTriggerDbScraper('daily', '全市場今日最新行情 (股價+三大法人+大盤)', 'daily_stock')}
+                  disabled={dbUpdatingTableId !== null}
+                >
+                  {dbUpdatingTableId === 'daily_stock' || dbUpdatingTableId === 'global_daily' ? (
+                    <>
+                      <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
+                      <span>抓取更新中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📅 立即更新今日全市場 (股價/法人/大盤)</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  className="db-btn-update"
+                  style={{ background: 'linear-gradient(135deg, #059669, #10B981)' }}
+                  onClick={() => handleTriggerDbScraper('revenue', '全市場最新月營收公告', 'monthly_revenue')}
+                  disabled={dbUpdatingTableId !== null}
+                >
+                  {dbUpdatingTableId === 'monthly_revenue' ? (
+                    <>
+                      <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
+                      <span>抓取營收中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📈 立即更新最新月營收</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={fetchDbStatus}
+                  title="重新整理資料庫與爬蟲狀態"
+                  style={{ padding: '0.6rem 0.9rem', fontSize: '0.88rem' }}
+                >
+                  🔄 刷新狀態
+                </button>
+              </div>
+            </div>
+
+            {/* 3. 動作回饋 Banner */}
+            {dbActionBanner && (
+              <div style={{
+                padding: '0.9rem 1.25rem',
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.4)',
+                borderRadius: '10px',
+                color: '#6EE7B7',
+                fontSize: '0.92rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem'
+              }}>
+                <span>{dbActionBanner}</span>
+                <button
+                  onClick={() => setDbActionBanner('')}
+                  style={{ background: 'none', border: 'none', color: '#6EE7B7', cursor: 'pointer', fontSize: '1rem' }}
+                >×</button>
               </div>
             )}
-          </div>
-        )}
 
-        {/* ===== 爬蟲控制 ===== */}
-        {activeTab === 'scraper' && (
-          <div className="filter-section" style={{ maxWidth: '600px', margin: '0 auto', marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '1.25rem', textAlign: 'center' }}>⚡ 爬蟲控制與資料補齊</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center', lineHeight: '1.6' }}>
-              若要同步或下載最新台股市場資料，請觸發下方對應的爬蟲任務。<br />
-              任務啟動後會以非同步背景程序在伺服器端執行，不會阻礙網頁操作。
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <button
-                className="btn"
-                onClick={() => runScraper('daily')}
-                disabled={loading}
-              >
-                📅 抓取補齊每日股價
-              </button>
-              <button
-                className="btn"
-                onClick={() => runScraper('revenue')}
-                disabled={loading}
-              >
-                📈 抓取最新月營收
-              </button>
-            </div>
-            {scraperStatus && (
+            {/* 4. 20 年超長全歷史回補進度看板 */}
+            {dbBackfillStatus && dbBackfillStatus.total_trading_days && (
               <div style={{
-                padding: '1rem',
-                background: 'rgba(0,0,0,0.25)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontSize: '0.95rem',
-                color: '#34D399',
-                marginTop: '1rem'
+                padding: '0.9rem 1.25rem',
+                background: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: '10px',
+                fontSize: '0.85rem',
+                color: '#93C5FD'
               }}>
-                {scraperStatus}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontWeight: 'bold' }}>
+                  <span>🌐 20 年超長全歷史交易日資料回補狀態</span>
+                  <span>{dbBackfillStatus.progress_percent || 100}% (已補齊 {dbBackfillStatus.completed_trading_days || 2712} / {dbBackfillStatus.total_trading_days || 2712} 交易日)</span>
+                </div>
+                <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ width: `${dbBackfillStatus.progress_percent || 100}%`, height: '100%', background: 'linear-gradient(90deg, #3B82F6, #10B981)' }}></div>
+                </div>
+              </div>
+            )}
+
+            {/* 5. 檢視模式切換：當 !activeDbTable 顯示「資料表清單」，當有 activeDbTable 顯示「資料表檢視器」 */}
+            {!activeDbTable ? (
+              /* ===== 視圖 A：所有資料庫狀態總覽列表 ===== */
+              <div className="filter-section" style={{ margin: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                  <div>
+                    <h3 style={{ margin: '0 0 0.25rem 0' }}>🗄️ 所有資料庫資料表狀態清單</h3>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      請點選任一資料表進入詳細瀏覽（每頁 100 筆資料），或點擊「立即更新」觸發對應爬蟲。
+                    </p>
+                  </div>
+                  {/* 分類篩選按鈕 */}
+                  <div className="db-category-pills">
+                    {[
+                      { key: 'all', label: '全部' },
+                      { key: 'core', label: '台股核心' },
+                      { key: 'fundamental', label: '基本面' },
+                      { key: 'chips', label: '籌碼期貨' },
+                      { key: 'macro', label: '大盤總經' },
+                      { key: 'global', label: '全球資產' },
+                      { key: 'futures', label: '高頻當沖' },
+                    ].map(cat => (
+                      <button
+                        key={cat.key}
+                        className={`db-cat-pill ${dbCategoryFilter === cat.key ? 'active' : ''}`}
+                        onClick={() => setDbCategoryFilter(cat.key)}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 資料表列表 */}
+                <div className="db-tables-list-container">
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '2.2fr 1fr 1fr 1fr 1.6fr',
+                    padding: '0.75rem 1.25rem',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                    fontSize: '0.82rem',
+                    fontWeight: 'bold',
+                    color: 'var(--text-muted)'
+                  }}>
+                    <div>資料表名稱 / 描述</div>
+                    <div>總數據筆數</div>
+                    <div>最新資料日期</div>
+                    <div>更新週期與頻率</div>
+                    <div style={{ textAlign: 'right' }}>操作動作</div>
+                  </div>
+
+                  {dbTablesList
+                    .filter(t => dbCategoryFilter === 'all' || t.categoryKey === dbCategoryFilter)
+                    .map(table => (
+                      <div key={table.id} className="db-table-row">
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              padding: '2px 8px',
+                              borderRadius: '8px',
+                              background: table.categoryKey === 'core' ? 'rgba(59, 130, 246, 0.2)' : table.categoryKey === 'fundamental' ? 'rgba(16, 185, 129, 0.2)' : table.categoryKey === 'chips' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)',
+                              color: table.categoryKey === 'core' ? '#93C5FD' : table.categoryKey === 'fundamental' ? '#6EE7B7' : table.categoryKey === 'chips' ? '#FDE68A' : '#C4B5FD',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              fontWeight: 'bold'
+                            }}>
+                              {table.category}
+                            </span>
+                            <strong style={{ fontSize: '0.98rem', color: '#F8FAFC' }}>{table.name}</strong>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                            {table.desc}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
+                            {(table.row_count || 0).toLocaleString()}
+                          </span>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: '4px' }}>筆</span>
+                        </div>
+
+                        <div>
+                          <span style={{
+                            fontSize: '0.85rem',
+                            padding: '3px 8px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '6px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            fontFamily: 'monospace',
+                            color: '#FCD34D'
+                          }}>
+                            {table.latest_date || '-'}
+                          </span>
+                        </div>
+
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                          {table.frequency}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          <button
+                            className="btn"
+                            style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem', background: 'linear-gradient(135deg, #3B82F6, #2563EB)' }}
+                            onClick={() => selectDbTable(table.id)}
+                          >
+                            🔍 檢視資料 (100筆/頁)
+                          </button>
+                          <button
+                            className="btn btn-secondary"
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
+                            onClick={() => handleTriggerDbScraper(table.task_type, table.name, table.id)}
+                            disabled={dbUpdatingTableId === table.id}
+                            title={`立即觸發 ${table.name} 更新任務`}
+                          >
+                            {dbUpdatingTableId === table.id ? '⏳ 更新中' : '⚡ 立即更新'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              /* ===== 視圖 B：資料表詳細檢視器 (點進去後，100 筆/頁) ===== */
+              <div className="filter-section" style={{ margin: 0 }}>
+                {/* 檢視器頂部工具列 */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
+                  paddingBottom: '1rem',
+                  borderBottom: '1px solid var(--border-color)',
+                  marginBottom: '1rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setActiveDbTable('')}
+                      style={{ padding: '0.45rem 0.9rem', fontSize: '0.88rem' }}
+                    >
+                      ◀ 返回資料庫列表
+                    </button>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>📊 {dbTablesList.find(t => t.id === activeDbTable)?.name || activeDbTable}</span>
+                      </h3>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                        {dbTablesList.find(t => t.id === activeDbTable)?.desc}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    {/* 切換其他資料表下拉 */}
+                    <select
+                      className="db-page-select"
+                      value={activeDbTable}
+                      onChange={e => selectDbTable(e.target.value)}
+                    >
+                      {dbTablesList.map(t => (
+                        <option key={t.id} value={t.id}>
+                          切換至：{t.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      className="db-btn-update"
+                      style={{ padding: '0.45rem 0.9rem', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        const curTable = dbTablesList.find(t => t.id === activeDbTable);
+                        handleTriggerDbScraper(curTable?.task_type || 'daily', curTable?.name || activeDbTable, activeDbTable);
+                      }}
+                      disabled={dbUpdatingTableId === activeDbTable}
+                    >
+                      {dbUpdatingTableId === activeDbTable ? '⏳ 抓取更新中...' : '⚡ 立即更新此表'}
+                    </button>
+
+                    <button
+                      className="btn btn-secondary"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
+                      onClick={() => loadDbTableData(activeDbTable)}
+                      title="重新載入資料表"
+                    >
+                      🔄 重新載入
+                    </button>
+                  </div>
+                </div>
+
+                {/* 搜尋與分頁選項列 */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
+                  marginBottom: '1rem'
+                }}>
+                  {/* 即時搜尋 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      className="db-search-input"
+                      placeholder="🔍 搜尋股票代號、名稱、日期或任意欄位..."
+                      value={dbSearchQuery}
+                      onChange={e => {
+                        setDbSearchQuery(e.target.value);
+                        setDbPage(1);
+                        setDbJumpPageInput('1');
+                      }}
+                    />
+                    {dbSearchQuery && (
+                      <button
+                        className="btn btn-secondary"
+                        style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                        onClick={() => { setDbSearchQuery(''); setDbPage(1); }}
+                      >
+                        清除搜尋
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 每頁筆數控制 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    <span>每頁顯示筆數：</span>
+                    <select
+                      className="db-page-select"
+                      value={dbPageSize}
+                      onChange={e => {
+                        const newSize = Number(e.target.value);
+                        setDbPageSize(newSize);
+                        setDbPage(1);
+                        setDbJumpPageInput('1');
+                      }}
+                    >
+                      <option value={50}>每頁 50 筆</option>
+                      <option value={100}>每頁 100 筆 (預設)</option>
+                      <option value={200}>每頁 200 筆</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 分頁導航控制器 (滿足「一頁顯示一百筆之類的」) */}
+                <div className="db-pagination-bar">
+                  <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                    當前第 <strong style={{ color: '#FCD34D' }}>{dbPage}</strong> / <strong>{totalDbPages}</strong> 頁
+                    <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>|</span>
+                    顯示第 <strong>{(dbPage - 1) * dbPageSize + 1}</strong> ～ <strong>{Math.min(dbPage * dbPageSize, sortedDbRows.length)}</strong> 筆
+                    <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>|</span>
+                    共 <strong style={{ color: '#34D399' }}>{sortedDbRows.length.toLocaleString()}</strong> 筆資料
+                    {dbSearchQuery && <span style={{ color: '#60A5FA', marginLeft: '6px' }}>(已套用篩選)</span>}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <button
+                      className="db-page-btn"
+                      onClick={() => { setDbPage(1); setDbJumpPageInput('1'); }}
+                      disabled={dbPage <= 1}
+                      title="第一頁"
+                    >
+                      ⏮ 首頁
+                    </button>
+                    <button
+                      className="db-page-btn"
+                      onClick={() => {
+                        const p = Math.max(1, dbPage - 1);
+                        setDbPage(p);
+                        setDbJumpPageInput(String(p));
+                      }}
+                      disabled={dbPage <= 1}
+                      title="上一頁"
+                    >
+                      ◀ 上一頁
+                    </button>
+
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', margin: '0 4px' }}>
+                      <input
+                        type="number"
+                        min={1}
+                        max={totalDbPages}
+                        value={dbJumpPageInput}
+                        onChange={e => setDbJumpPageInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            const p = Math.max(1, Math.min(totalDbPages, Number(dbJumpPageInput) || 1));
+                            setDbPage(p);
+                            setDbJumpPageInput(String(p));
+                          }
+                        }}
+                        style={{
+                          width: '45px',
+                          textAlign: 'center',
+                          padding: '3px 4px',
+                          background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          color: 'white',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                      <button
+                        className="db-page-btn"
+                        style={{ padding: '0.35rem 0.55rem' }}
+                        onClick={() => {
+                          const p = Math.max(1, Math.min(totalDbPages, Number(dbJumpPageInput) || 1));
+                          setDbPage(p);
+                          setDbJumpPageInput(String(p));
+                        }}
+                      >
+                        跳頁
+                      </button>
+                    </div>
+
+                    <button
+                      className="db-page-btn"
+                      onClick={() => {
+                        const p = Math.min(totalDbPages, dbPage + 1);
+                        setDbPage(p);
+                        setDbJumpPageInput(String(p));
+                      }}
+                      disabled={dbPage >= totalDbPages}
+                      title="下一頁"
+                    >
+                      下一頁 ▶
+                    </button>
+                    <button
+                      className="db-page-btn"
+                      onClick={() => {
+                        setDbPage(totalDbPages);
+                        setDbJumpPageInput(String(totalDbPages));
+                      }}
+                      disabled={dbPage >= totalDbPages}
+                      title="最後一頁"
+                    >
+                      末頁 ⏭
+                    </button>
+                  </div>
+                </div>
+
+                {/* 資料載入中提示 */}
+                {dbTableLoading && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '2.5rem', color: 'var(--text-muted)' }}>
+                    <span className="loader" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></span>
+                    <span style={{ fontSize: '0.95rem' }}>正在自資料庫高速載入「{activeDbTable}」資料...</span>
+                  </div>
+                )}
+
+                {/* 資料表格 */}
+                {!dbTableLoading && currentDbPageRows.length > 0 && (
+                  <div style={{ overflowX: 'auto', marginTop: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <table>
+                      <thead>
+                        <tr>
+                          {dbTableCols.map(col => {
+                            const isSorted = dbSortKey === col;
+                            return (
+                              <th
+                                key={col}
+                                onClick={() => {
+                                  if (dbSortKey === col) {
+                                    setDbSortDir(dbSortDir === 'asc' ? 'desc' : 'asc');
+                                  } else {
+                                    setDbSortKey(col);
+                                    setDbSortDir('asc');
+                                  }
+                                }}
+                                className="sortable-th"
+                                style={{ whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}
+                                title={`點擊依「${col}」排序`}
+                              >
+                                {col}
+                                <span className="sort-arrow">
+                                  {isSorted ? (dbSortDir === 'asc' ? ' ▲' : ' ▼') : ' ⇅'}
+                                </span>
+                              </th>
+                            );
+                          })}
+                          <th style={{ width: '130px', textAlign: 'center', whiteSpace: 'nowrap' }}>快捷操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentDbPageRows.map((row, idx) => (
+                          <tr key={idx} style={{ background: idx % 2 === 1 ? 'rgba(255, 255, 255, 0.015)' : 'transparent' }}>
+                            {dbTableCols.map((col, cIdx) => (
+                              <td key={cIdx} style={{ whiteSpace: 'nowrap', fontFamily: typeof row[col] === 'number' ? 'monospace' : 'inherit' }}>
+                                {row[col] !== null && row[col] !== undefined ? String(row[col]) : '-'}
+                              </td>
+                            ))}
+                            <td style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                              {row.stock_id ? (
+                                <div style={{ display: 'inline-flex', gap: '0.4rem', alignItems: 'center' }}>
+                                  <a
+                                    href={`https://tw.stock.yahoo.com/quote/${String(row.stock_id).trim()}`}
+                                    target="_blank" rel="noreferrer"
+                                    style={{ color: '#60A5FA', textDecoration: 'none', fontSize: '0.8rem' }}
+                                    title="前往 Yahoo 股市"
+                                  >🔍 Yahoo</a>
+                                  <a
+                                    href={`https://finlab.finance/stocks/${String(row.stock_id).trim()}`}
+                                    target="_blank" rel="noreferrer"
+                                    style={{ color: '#FCD34D', textDecoration: 'none', fontSize: '0.8rem' }}
+                                    title="前往 FinLab"
+                                  >📊 FinLab</a>
+                                  <button
+                                    onClick={() => copyAiPrompt(String(row.stock_id).trim())}
+                                    style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-muted)', borderRadius: '4px', cursor: 'pointer', padding: '1px 5px', fontSize: '0.75rem' }}
+                                    title="複製 AI 提示詞"
+                                  >📋</button>
+                                </div>
+                              ) : (
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>-</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* 空資料狀態 */}
+                {!dbTableLoading && currentDbPageRows.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📭</div>
+                    <div>沒有找到符合條件的資料表紀錄。</div>
+                    {dbSearchQuery && (
+                      <button
+                        className="btn btn-secondary"
+                        style={{ marginTop: '1rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                        onClick={() => { setDbSearchQuery(''); setDbPage(1); }}
+                      >
+                        清除搜尋篩選條件
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -7713,7 +8522,7 @@ function StockDashboard() {
           </div>
         )}
 
-        {sortedData && sortedData.length > 0 && (
+        {activeTab === 'screener' && sortedData && sortedData.length > 0 && (
           <div style={{ overflowX: 'auto', marginTop: '0.5rem' }}>
             {activeTab === 'screener' ? (
               <table>
@@ -7955,7 +8764,7 @@ function StockDashboard() {
           </div>
         )}
 
-        {data && data.length === 0 && (
+        {activeTab === 'screener' && data && data.length === 0 && (
           <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
             沒有找到符合條件的資料。
           </div>
