@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import defaultData from '../data/defaultGlobalSovereignData.json';
 
-const STORAGE_KEY_POSITIONS = 'global_titan_user_positions_v1';
-const STORAGE_KEY_CLOSED = 'global_titan_user_closed_v1';
-const STORAGE_KEY_CAPITAL = 'global_titan_user_capital_v1';
-const STORAGE_KEY_USDFX = 'global_titan_user_usdfx_v1';
+const STORAGE_KEY_POSITIONS = 'global_titan_user_positions_v2';
+const STORAGE_KEY_IDLE_CASH = 'global_titan_idle_cash_v2';
+const STORAGE_KEY_ALL_TX = 'global_titan_all_tx_v2';
+const STORAGE_KEY_USDFX = 'global_titan_user_usdfx_v2';
+const STORAGE_KEY_DISMISSED_SUGG = 'global_titan_dismissed_sugg_v2';
 
 const DEFAULT_POSITIONS = [
   {
@@ -19,7 +20,7 @@ const DEFAULT_POSITIONS = [
     entry_date: '2026-10-01',
     entry_fee: 15,
     role: '👑 第1王者 (40%)',
-    stop_condition: '無均線過敏停損，SPY 破年線才清倉'
+    stop_condition: '大波段抱牢，SPY破年線才清倉'
   },
   {
     id: 'pos_3037_1',
@@ -51,18 +52,60 @@ const DEFAULT_POSITIONS = [
   }
 ];
 
+const DEFAULT_TX_HISTORY = [
+  {
+    id: 'tx_init_1',
+    date: '2026-10-01',
+    action: '買入',
+    ticker: 'MRNA',
+    name: '莫德納 (Moderna)',
+    currency: 'USD',
+    shares: 54,
+    price: 186.61,
+    tax_fee: 15,
+    cash_flow_twd: -327887,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '10月初策略建倉 第1王者 (40%)'
+  },
+  {
+    id: 'tx_init_2',
+    date: '2026-10-01',
+    action: '買入',
+    ticker: '3037.TW',
+    name: '欣興 (Unimicron)',
+    currency: 'TWD',
+    shares: 236,
+    price: 1195.0,
+    tax_fee: 400,
+    cash_flow_twd: -282420,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '10月初策略建倉 第2主力 (30%)'
+  },
+  {
+    id: 'tx_init_3',
+    date: '2026-10-01',
+    action: '買入',
+    ticker: '3443.TW',
+    name: '創意 (Global Unichip)',
+    currency: 'TWD',
+    shares: 35,
+    price: 8040.0,
+    tax_fee: 400,
+    cash_flow_twd: -281800,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '10月初策略建倉 第3主力 (30%)'
+  }
+];
+
 export default function GlobalSovereignDashboard() {
   const [data, setData] = useState(defaultData);
   const [loading, setLoading] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState('current_picks'); // 'current_picks', 'history', 'recent_trades', 'doe_audit'
+  const [activeMainTab, setActiveMainTab] = useState('trading'); // 'trading', 'history_audit', 'doe_audit'
 
-  // 資金試算機狀態
-  const [capital, setCapital] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_CAPITAL);
-      return saved ? parseFloat(saved) : 1000000;
-    } catch { return 1000000; }
-  });
+  // 美元匯率
   const [usdFx, setUsdFx] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_USDFX);
@@ -70,7 +113,17 @@ export default function GlobalSovereignDashboard() {
     } catch { return 32.5; }
   });
 
-  // 使用者實戰持股與平倉紀錄
+  // 閒置現金 (TWD) - 記錄投入但尚未買進的資金
+  const [idleCash, setIdleCash] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_IDLE_CASH);
+      if (saved !== null) return parseFloat(saved);
+      // 預設給予 108,000 閒置現金 (總資產約 110 萬)
+      return 108000;
+    } catch { return 108000; }
+  });
+
+  // 當前持股部位
   const [userPositions, setUserPositions] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_POSITIONS);
@@ -78,28 +131,31 @@ export default function GlobalSovereignDashboard() {
     } catch { return DEFAULT_POSITIONS; }
   });
 
-  const [userClosedTrades, setUserClosedTrades] = useState(() => {
+  // 所有歷史進出紀錄流水帳 (全進出紀錄)
+  const [txHistory, setTxHistory] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_CLOSED);
+      const saved = localStorage.getItem(STORAGE_KEY_ALL_TX);
+      return saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
+    } catch { return DEFAULT_TX_HISTORY; }
+  });
+
+  // 已送出/消掉的更動建議 key
+  const [dismissedSuggestions, setDismissedSuggestions] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DISMISSED_SUGG);
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
 
-  // 帶入建倉表單
-  const [orderForm, setOrderForm] = useState({
-    ticker: '',
-    name: '',
-    market: '台股 (TWSE)',
-    currency: 'TWD',
-    shares: '',
-    price: '',
-    date: '2026-10-11',
-    fee: '',
-    role: '👑 第1王者 (40%)',
-    stop_condition: '大波段抱牢，SPY破年線才清倉'
-  });
+  // 表格內即時修改的建議數據暫存
+  const [customEdits, setCustomEdits] = useState({});
 
-  // 出場平倉彈窗
+  // 現金調整彈窗
+  const [cashModalOpen, setCashModalOpen] = useState(false);
+  const [cashInputAmount, setCashInputAmount] = useState('');
+  const [cashActionType, setCashActionType] = useState('deposit'); // 'deposit' or 'set'
+
+  // 手動出場彈窗
   const [exitModal, setExitModal] = useState({
     open: false,
     posId: '',
@@ -111,7 +167,7 @@ export default function GlobalSovereignDashboard() {
     entry_date: '',
     entry_fee: 0,
     exit_price: '',
-    exit_date: '2026-10-11',
+    exit_date: new Date().toISOString().split('T')[0],
     exit_tax_fee: '',
     reason: '依策略輪動換股'
   });
@@ -123,21 +179,26 @@ export default function GlobalSovereignDashboard() {
     setTimeout(() => setFeedbackMsg(''), 4500);
   };
 
-  useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY_CAPITAL, String(capital)); } catch {}
-  }, [capital]);
-
+  // 持久化儲存
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY_USDFX, String(usdFx)); } catch {}
   }, [usdFx]);
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY_IDLE_CASH, String(idleCash)); } catch {}
+  }, [idleCash]);
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY_POSITIONS, JSON.stringify(userPositions)); } catch {}
   }, [userPositions]);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY_CLOSED, JSON.stringify(userClosedTrades)); } catch {}
-  }, [userClosedTrades]);
+    try { localStorage.setItem(STORAGE_KEY_ALL_TX, JSON.stringify(txHistory)); } catch {}
+  }, [txHistory]);
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY_DISMISSED_SUGG, JSON.stringify(dismissedSuggestions)); } catch {}
+  }, [dismissedSuggestions]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -161,87 +222,471 @@ export default function GlobalSovereignDashboard() {
   }, []);
 
   const macro = data?.macro_status || {};
-  const kpi = data?.kpi || {};
-  const schemeA = kpi?.scheme_a || {};
-  const spy = kpi?.spy || {};
   const currentPicks = data?.current_picks || [];
   const yearly = data?.yearly_performance || [];
-  const recentTrades = data?.recent_trades || [];
 
-  // 計算特定標的在當前資金下的建議部位
-  const getSizingSuggestion = (pick) => {
-    const weight = (pick.weight_pct || 30) / 100.0;
-    const targetTwd = capital * weight;
-    const isUsd = pick.currency === 'USD';
-    const price = pick.price || 1;
-    if (isUsd) {
-      const targetUsd = targetTwd / usdFx;
-      const shares = Math.max(1, Math.floor(targetUsd / price));
-      const actualUsd = shares * price;
-      const actualTwd = actualUsd * usdFx;
-      return { targetTwd, targetUsd, shares, actualUsd, actualTwd };
-    } else {
-      const shares = Math.max(1, Math.floor(targetTwd / price));
-      const actualTwd = shares * price;
-      return { targetTwd, targetUsd: targetTwd / usdFx, shares, actualUsd: actualTwd / usdFx, actualTwd };
-    }
-  };
-
-  // 點擊「📥 帶入實戰下單」
-  const handleImportToOrder = (pick) => {
-    const sizing = getSizingSuggestion(pick);
-    const estFee = pick.currency === 'USD' ? 15 : Math.max(20, Math.round(sizing.actualTwd * 0.001425));
-    setOrderForm({
-      ticker: pick.ticker,
-      name: pick.name,
-      market: pick.market,
-      currency: pick.currency,
-      shares: String(sizing.shares),
-      price: String(pick.price),
-      date: '2026-10-11',
-      fee: String(estFee),
-      role: pick.rank === 1 ? '👑 第1王者 (40%)' : pick.rank === 2 ? '🥈 第2主力 (30%)' : '🥉 第3主力 (30%)',
-      stop_condition: pick.stop_condition || '無過敏均線干擾，SPY破年線清倉'
+  // 1. 計算持股現值與整體統計
+  const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
+    let marketVal = 0;
+    let cost = 0;
+    userPositions.forEach(p => {
+      const fx = p.currency === 'USD' ? usdFx : 1.0;
+      const curPrice = p.current_price || p.entry_price;
+      marketVal += p.shares * curPrice * fx;
+      cost += (p.shares * p.entry_price + (p.entry_fee || 0)) * fx;
     });
-    triggerNotice(`已自動帶入【${pick.name}】至下方實戰建倉確認表單，您可以自由微調並確認！`);
-    const elem = document.getElementById('real-order-form-anchor');
-    if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+    const pnl = marketVal - cost;
+    const pct = cost > 0 ? (pnl / cost) * 100 : 0;
+    return {
+      totalStockMarketValTwd: marketVal,
+      totalCostTwd: cost,
+      unrealizedPnlTwd: pnl,
+      unrealizedReturnPct: pct
+    };
+  }, [userPositions, usdFx]);
+
+  // 當前總資產淨值 (閒置現金 + 持股市值)
+  const totalNetAssetsTwd = useMemo(() => {
+    return Math.max(0, idleCash + totalStockMarketValTwd);
+  }, [idleCash, totalStockMarketValTwd]);
+
+  // 2. 歷史全進出紀錄統計 (已實現損益、勝率、總稅費)
+  const { totalRealizedPnlTwd, totalTaxesPaidTwd, closedTradesCount, winningTradesCount, winRate } = useMemo(() => {
+    let pnl = 0;
+    let taxes = 0;
+    let closedCount = 0;
+    let winCount = 0;
+
+    txHistory.forEach(tx => {
+      if (tx.tax_fee) {
+        const fx = tx.currency === 'USD' ? usdFx : 1.0;
+        taxes += tx.tax_fee * fx;
+      }
+      if (tx.realized_pnl_twd !== null && tx.realized_pnl_twd !== undefined) {
+        pnl += tx.realized_pnl_twd;
+        closedCount += 1;
+        if (tx.realized_pnl_twd > 0) winCount += 1;
+      }
+    });
+
+    return {
+      totalRealizedPnlTwd: pnl,
+      totalTaxesPaidTwd: taxes,
+      closedTradesCount: closedCount,
+      winningTradesCount: winCount,
+      winRate: closedCount > 0 ? (winCount / closedCount) * 100 : 0
+    };
+  }, [txHistory, usdFx]);
+
+  // 3. 月底持倉更動建議演算法 (以當前總資金計算)
+  const rebalanceSuggestions = useMemo(() => {
+    if (totalNetAssetsTwd <= 0) return [];
+
+    const activeTopPicks = currentPicks.filter(p => p.is_active);
+    const suggestions = [];
+
+    // A. 針對目標 Top 3 標的
+    activeTopPicks.forEach(pick => {
+      const weight = (pick.weight_pct || 30) / 100.0;
+      const targetTwd = totalNetAssetsTwd * weight;
+      const isUsd = pick.currency === 'USD';
+      const price = pick.price || 1;
+      const fx = isUsd ? usdFx : 1.0;
+
+      // 計算目標總股數
+      let targetShares = 0;
+      if (isUsd) {
+        const targetUsd = targetTwd / fx;
+        targetShares = Math.floor(targetUsd / price);
+      } else {
+        targetShares = Math.floor(targetTwd / price);
+      }
+
+      // 檢查目前持有股數
+      const heldPos = userPositions.find(p => p.ticker === pick.ticker);
+      const heldShares = heldPos ? heldPos.shares : 0;
+      const diffShares = targetShares - heldShares;
+
+      const suggKey = `sugg_${pick.ticker}`;
+      if (dismissedSuggestions.includes(suggKey)) return;
+
+      if (heldShares === 0 && targetShares > 0) {
+        // 全新買入
+        const estFee = isUsd ? 15 : Math.max(20, Math.round(targetShares * price * 0.001425));
+        suggestions.push({
+          key: suggKey,
+          action: '買入',
+          actionColor: '#10B981',
+          ticker: pick.ticker,
+          name: pick.name,
+          market: pick.market,
+          currency: pick.currency,
+          targetWeightPct: pick.weight_pct,
+          targetTwd: targetTwd,
+          currentShares: heldShares,
+          targetShares: targetShares,
+          recShares: targetShares,
+          defaultPrice: price,
+          defaultTaxFee: estFee,
+          role: pick.rank === 1 ? '👑 第1王者 (40%)' : (pick.rank === 2 ? '🥈 第2主力 (30%)' : '🥉 第3主力 (30%)'),
+          heldPos: null
+        });
+      } else if (diffShares > 0 && Math.abs(diffShares * price * fx) > 5000) {
+        // 加碼
+        const estFee = isUsd ? 15 : Math.max(20, Math.round(diffShares * price * 0.001425));
+        suggestions.push({
+          key: suggKey,
+          action: '加碼',
+          actionColor: '#38BDF8',
+          ticker: pick.ticker,
+          name: pick.name,
+          market: pick.market,
+          currency: pick.currency,
+          targetWeightPct: pick.weight_pct,
+          targetTwd: targetTwd,
+          currentShares: heldShares,
+          targetShares: targetShares,
+          recShares: diffShares,
+          defaultPrice: price,
+          defaultTaxFee: estFee,
+          role: heldPos?.role || '主力加碼',
+          heldPos: heldPos
+        });
+      } else if (diffShares < 0 && Math.abs(diffShares * price * fx) > 5000) {
+        // 減持 (保留部分)
+        const reduceShares = Math.abs(diffShares);
+        const estTaxFee = isUsd ? 15 : Math.round(reduceShares * price * (0.003 + 0.001425));
+        suggestions.push({
+          key: suggKey,
+          action: '減持',
+          actionColor: '#F59E0B',
+          ticker: pick.ticker,
+          name: pick.name,
+          market: pick.market,
+          currency: pick.currency,
+          targetWeightPct: pick.weight_pct,
+          targetTwd: targetTwd,
+          currentShares: heldShares,
+          targetShares: targetShares,
+          recShares: reduceShares,
+          defaultPrice: price,
+          defaultTaxFee: estTaxFee,
+          role: heldPos?.role || '主力調節',
+          heldPos: heldPos
+        });
+      }
+    });
+
+    // B. 針對目前持倉中、但已不在 Top 3 的股票 (或跌破標準) -> 建議全部賣出
+    userPositions.forEach(heldPos => {
+      const isInTarget = activeTopPicks.some(p => p.ticker === heldPos.ticker);
+      const suggKey = `sugg_exit_${heldPos.ticker}`;
+      if (!isInTarget && !dismissedSuggestions.includes(suggKey)) {
+        const isUsd = heldPos.currency === 'USD';
+        const curPrice = heldPos.current_price || heldPos.entry_price;
+        const estTaxFee = isUsd ? 15 : Math.round(heldPos.shares * curPrice * (0.003 + 0.001425));
+        suggestions.push({
+          key: suggKey,
+          action: '賣出',
+          actionColor: '#EF4444',
+          ticker: heldPos.ticker,
+          name: heldPos.name,
+          market: heldPos.market,
+          currency: heldPos.currency,
+          targetWeightPct: 0,
+          targetTwd: 0,
+          currentShares: heldPos.shares,
+          targetShares: 0,
+          recShares: heldPos.shares,
+          defaultPrice: curPrice,
+          defaultTaxFee: estTaxFee,
+          role: heldPos.role,
+          heldPos: heldPos
+        });
+      }
+    });
+
+    return suggestions;
+  }, [totalNetAssetsTwd, currentPicks, userPositions, usdFx, dismissedSuggestions]);
+
+  // 取得目前某列的編輯數值
+  const getRowValues = (sugg) => {
+    const edits = customEdits[sugg.key] || {};
+    return {
+      shares: edits.shares !== undefined ? edits.shares : String(sugg.recShares),
+      price: edits.price !== undefined ? edits.price : String(sugg.defaultPrice),
+      taxFee: edits.taxFee !== undefined ? edits.taxFee : String(sugg.defaultTaxFee)
+    };
   };
 
-  // 確認建倉送出
-  const handleConfirmBuy = (e) => {
-    e.preventDefault();
-    if (!orderForm.ticker || !orderForm.shares || !orderForm.price) {
-      alert('請填寫完整的股票代號、買進股數與成交價格');
+  const handleUpdateRowInput = (key, field, val) => {
+    setCustomEdits(prev => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [field]: val
+      }
+    }));
+  };
+
+  // 4. 點擊「🚀 確認送出」執行建議更動
+  const handleExecuteSuggestion = (sugg) => {
+    const rowVal = getRowValues(sugg);
+    const actualShares = parseInt(rowVal.shares, 10);
+    const actualPrice = parseFloat(rowVal.price);
+    const actualTaxFee = parseFloat(rowVal.taxFee || 0);
+
+    if (isNaN(actualShares) || actualShares <= 0 || isNaN(actualPrice) || actualPrice <= 0) {
+      alert('請填寫有效的股數與成交價格');
       return;
     }
-    const sharesNum = parseInt(orderForm.shares, 10);
-    const priceNum = parseFloat(orderForm.price);
-    const feeNum = parseFloat(orderForm.fee || 0);
 
-    const newPos = {
-      id: 'pos_' + Date.now(),
-      ticker: orderForm.ticker.trim(),
-      name: orderForm.name.trim() || orderForm.ticker.trim(),
-      market: orderForm.market,
-      currency: orderForm.currency,
-      shares: sharesNum,
-      entry_price: priceNum,
-      current_price: priceNum,
-      entry_date: orderForm.date,
-      entry_fee: feeNum,
-      role: orderForm.role,
-      stop_condition: orderForm.stop_condition
-    };
+    const today = new Date().toISOString().split('T')[0];
+    const isUsd = sugg.currency === 'USD';
+    const fx = isUsd ? usdFx : 1.0;
 
-    setUserPositions(prev => [newPos, ...prev]);
-    triggerNotice(`✅ 成功建立實戰持股【${newPos.name} (${newPos.ticker})】，共 ${sharesNum} 股！`);
+    if (sugg.action === '買入') {
+      const grossValTwd = actualShares * actualPrice * fx;
+      const totalCostTwd = grossValTwd + (isUsd ? actualTaxFee * fx : actualTaxFee);
+
+      // 檢查閒置資金
+      if (idleCash < totalCostTwd) {
+        const proceed = window.confirm(
+          `提醒：當前閒置現金 (NT$ ${Math.round(idleCash).toLocaleString()}) 小於預計買進總成本 (NT$ ${Math.round(totalCostTwd).toLocaleString()})。\n是否依然確認建倉？(閒置現金將變為負值或需追加投入)`
+        );
+        if (!proceed) return;
+      }
+
+      // 新增至持股
+      const newPos = {
+        id: 'pos_' + Date.now(),
+        ticker: sugg.ticker,
+        name: sugg.name,
+        market: sugg.market,
+        currency: sugg.currency,
+        shares: actualShares,
+        entry_price: actualPrice,
+        current_price: actualPrice,
+        entry_date: today,
+        entry_fee: actualTaxFee,
+        role: sugg.role,
+        stop_condition: '大波段抱牢，SPY破年線才清倉'
+      };
+
+      setUserPositions(prev => [newPos, ...prev]);
+      setIdleCash(prev => prev - totalCostTwd);
+
+      // 記帳流水
+      const newTx = {
+        id: 'tx_' + Date.now(),
+        date: today,
+        action: '買入',
+        ticker: sugg.ticker,
+        name: sugg.name,
+        currency: sugg.currency,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: -totalCostTwd,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `月底調倉：新買入建倉 (${sugg.role})`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+
+      triggerNotice(`✅ 已成功【買入】${sugg.name} ${actualShares} 股！已扣除閒置現金 NT$ ${Math.round(totalCostTwd).toLocaleString()}`);
+
+    } else if (sugg.action === '加碼') {
+      const grossValTwd = actualShares * actualPrice * fx;
+      const totalCostTwd = grossValTwd + (isUsd ? actualTaxFee * fx : actualTaxFee);
+
+      // 更新持股 (加權平均成本)
+      setUserPositions(prev => prev.map(p => {
+        if (p.ticker === sugg.ticker) {
+          const oldCost = p.shares * p.entry_price;
+          const addCost = actualShares * actualPrice;
+          const totalShares = p.shares + actualShares;
+          const newAvgPrice = totalShares > 0 ? (oldCost + addCost) / totalShares : p.entry_price;
+          return {
+            ...p,
+            shares: totalShares,
+            entry_price: parseFloat(newAvgPrice.toFixed(2)),
+            current_price: actualPrice,
+            entry_fee: (p.entry_fee || 0) + actualTaxFee
+          };
+        }
+        return p;
+      }));
+
+      setIdleCash(prev => prev - totalCostTwd);
+
+      const newTx = {
+        id: 'tx_' + Date.now(),
+        date: today,
+        action: '加碼',
+        ticker: sugg.ticker,
+        name: sugg.name,
+        currency: sugg.currency,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: -totalCostTwd,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `月底調倉：加碼 ${actualShares} 股`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+
+      triggerNotice(`✅ 已成功【加碼】${sugg.name} ${actualShares} 股！已扣除閒置現金 NT$ ${Math.round(totalCostTwd).toLocaleString()}`);
+
+    } else if (sugg.action === '減持') {
+      const grossProceedsTwd = actualShares * actualPrice * fx;
+      const netProceedsTwd = grossProceedsTwd - (isUsd ? actualTaxFee * fx : actualTaxFee);
+
+      // 計算部分平倉已實現損益
+      const entryPrice = sugg.heldPos?.entry_price || actualPrice;
+      const grossPnl = (actualPrice - entryPrice) * actualShares;
+      const netPnlCurrency = grossPnl - actualTaxFee;
+      const netPnlTwd = netPnlCurrency * fx;
+      const costBasis = (entryPrice * actualShares) * fx;
+      const netRetPct = costBasis > 0 ? (netPnlTwd / costBasis) * 100 : 0;
+
+      // 減少持股
+      setUserPositions(prev => prev.map(p => {
+        if (p.ticker === sugg.ticker) {
+          return {
+            ...p,
+            shares: Math.max(0, p.shares - actualShares)
+          };
+        }
+        return p;
+      }).filter(p => p.shares > 0));
+
+      // 現金回流閒置現金
+      setIdleCash(prev => prev + netProceedsTwd);
+
+      const newTx = {
+        id: 'tx_' + Date.now(),
+        date: today,
+        action: '減持',
+        ticker: sugg.ticker,
+        name: sugg.name,
+        currency: sugg.currency,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: netProceedsTwd,
+        realized_pnl_twd: netPnlTwd,
+        realized_return_pct: netRetPct,
+        note: `月底調倉：減持部位 (實現淨利: NT$ ${Math.round(netPnlTwd).toLocaleString()})`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+
+      triggerNotice(`✅ 已成功【減持】${sugg.name} ${actualShares} 股！閒置資金入帳 NT$ ${Math.round(netProceedsTwd).toLocaleString()}`);
+
+    } else if (sugg.action === '賣出') {
+      // 完全清倉出場
+      const grossProceedsTwd = actualShares * actualPrice * fx;
+      const netProceedsTwd = grossProceedsTwd - (isUsd ? actualTaxFee * fx : actualTaxFee);
+
+      const entryPrice = sugg.heldPos?.entry_price || actualPrice;
+      const entryFee = sugg.heldPos?.entry_fee || 0;
+      const grossPnl = (actualPrice - entryPrice) * actualShares;
+      const totalTaxFeeCurrency = entryFee + actualTaxFee;
+      const netPnlCurrency = grossPnl - totalTaxFeeCurrency;
+      const netPnlTwd = netPnlCurrency * fx;
+      const totalCostBasis = (entryPrice * actualShares + entryFee) * fx;
+      const netRetPct = totalCostBasis > 0 ? (netPnlTwd / totalCostBasis) * 100 : 0;
+
+      setUserPositions(prev => prev.filter(p => p.ticker !== sugg.ticker));
+      setIdleCash(prev => prev + netProceedsTwd);
+
+      const newTx = {
+        id: 'tx_' + Date.now(),
+        date: today,
+        action: '賣出',
+        ticker: sugg.ticker,
+        name: sugg.name,
+        currency: sugg.currency,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: netProceedsTwd,
+        realized_pnl_twd: netPnlTwd,
+        realized_return_pct: netRetPct,
+        note: `月底調倉：完全出場清倉 (實現淨利: NT$ ${Math.round(netPnlTwd).toLocaleString()})`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+
+      triggerNotice(`🚪 已成功【清倉賣出】${sugg.name}！現金入帳 NT$ ${Math.round(netProceedsTwd).toLocaleString()}`);
+    }
+
+    // 送出後消掉該筆建議！
+    setDismissedSuggestions(prev => [...prev, sugg.key]);
   };
 
-  // 開啟出場彈窗
+  // 5. 現金存入/調整處理
+  const handleSaveCashChange = (e) => {
+    e.preventDefault();
+    const amt = parseFloat(cashInputAmount);
+    if (isNaN(amt)) {
+      alert('請輸入有效金額');
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    if (cashActionType === 'deposit') {
+      // 追加投入
+      setIdleCash(prev => prev + amt);
+      const newTx = {
+        id: 'tx_' + Date.now(),
+        date: today,
+        action: '投入現金',
+        ticker: '-',
+        name: '資金帳戶',
+        currency: 'TWD',
+        shares: 0,
+        price: 0,
+        tax_fee: 0,
+        cash_flow_twd: amt,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `追加存入資金 NT$ ${Math.round(amt).toLocaleString()}`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+      triggerNotice(`💰 已成功追加存入 NT$ ${Math.round(amt).toLocaleString()} 至閒置現金！`);
+    } else {
+      // 直接重設閒置資金
+      const diff = amt - idleCash;
+      setIdleCash(amt);
+      const newTx = {
+        id: 'tx_' + Date.now(),
+        date: today,
+        action: '調整資金',
+        ticker: '-',
+        name: '資金帳戶',
+        currency: 'TWD',
+        shares: 0,
+        price: 0,
+        tax_fee: 0,
+        cash_flow_twd: diff,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `手動調整閒置資金至 NT$ ${Math.round(amt).toLocaleString()}`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+      triggerNotice(`💰 閒置現金已調整為 NT$ ${Math.round(amt).toLocaleString()}！`);
+    }
+
+    setCashModalOpen(false);
+    setCashInputAmount('');
+  };
+
+  // 6. 手動出場彈窗邏輯
   const handleOpenExitModal = (pos) => {
     const isUsd = pos.currency === 'USD';
-    const estExitTaxFee = isUsd ? 15 : Math.round(pos.shares * pos.current_price * (0.003 + 0.001425));
+    const curPrice = pos.current_price || pos.entry_price;
+    const estTaxFee = isUsd ? 15 : Math.round(pos.shares * curPrice * (0.003 + 0.001425));
     setExitModal({
       open: true,
       posId: pos.id,
@@ -252,14 +697,13 @@ export default function GlobalSovereignDashboard() {
       entry_price: pos.entry_price,
       entry_date: pos.entry_date,
       entry_fee: pos.entry_fee || 0,
-      exit_price: String(pos.current_price || pos.entry_price),
-      exit_date: '2026-10-11',
-      exit_tax_fee: String(estExitTaxFee),
-      reason: '依策略輪動換股'
+      exit_price: String(curPrice),
+      exit_date: new Date().toISOString().split('T')[0],
+      exit_tax_fee: String(estTaxFee),
+      reason: '手動平倉獲利了結'
     });
   };
 
-  // 確認出場平倉送出
   const handleConfirmExit = (e) => {
     e.preventDefault();
     const exitPriceNum = parseFloat(exitModal.exit_price);
@@ -269,65 +713,45 @@ export default function GlobalSovereignDashboard() {
       return;
     }
 
-    const grossPnl = (exitPriceNum - exitModal.entry_price) * exitModal.shares;
-    const totalTaxFee = exitModal.entry_fee + taxFeeNum;
-    const netPnl = grossPnl - totalTaxFee;
-    const totalCost = exitModal.entry_price * exitModal.shares + exitModal.entry_fee;
-    const netReturnPct = totalCost > 0 ? (netPnl / totalCost) * 100 : 0;
+    const isUsd = exitModal.currency === 'USD';
+    const fx = isUsd ? usdFx : 1.0;
+    const grossProceedsTwd = exitModal.shares * exitPriceNum * fx;
+    const netProceedsTwd = grossProceedsTwd - (isUsd ? taxFeeNum * fx : taxFeeNum);
 
-    const closedRecord = {
-      id: 'closed_' + Date.now(),
+    const grossPnl = (exitPriceNum - exitModal.entry_price) * exitModal.shares;
+    const totalTaxFeeCurrency = exitModal.entry_fee + taxFeeNum;
+    const netPnlCurrency = grossPnl - totalTaxFeeCurrency;
+    const netPnlTwd = netPnlCurrency * fx;
+    const totalCostBasis = (exitModal.entry_price * exitModal.shares + exitModal.entry_fee) * fx;
+    const netRetPct = totalCostBasis > 0 ? (netPnlTwd / totalCostBasis) * 100 : 0;
+
+    setUserPositions(prev => prev.filter(p => p.id !== exitModal.posId));
+    setIdleCash(prev => prev + netProceedsTwd);
+
+    const newTx = {
+      id: 'tx_' + Date.now(),
+      date: exitModal.exit_date,
+      action: '賣出',
       ticker: exitModal.ticker,
       name: exitModal.name,
       currency: exitModal.currency,
       shares: exitModal.shares,
-      entry_date: exitModal.entry_date,
-      exit_date: exitModal.exit_date,
-      entry_price: exitModal.entry_price,
-      exit_price: exitPriceNum,
-      entry_fee: exitModal.entry_fee,
-      exit_tax_fee: taxFeeNum,
-      total_tax_fee: totalTaxFee,
-      gross_pnl: grossPnl,
-      net_pnl: netPnl,
-      net_return_pct: netReturnPct,
-      reason: exitModal.reason
+      price: exitPriceNum,
+      tax_fee: taxFeeNum,
+      cash_flow_twd: netProceedsTwd,
+      realized_pnl_twd: netPnlTwd,
+      realized_return_pct: netRetPct,
+      note: `${exitModal.reason} (實現淨利: NT$ ${Math.round(netPnlTwd).toLocaleString()})`
     };
+    setTxHistory(prev => [newTx, ...prev]);
 
-    setUserPositions(prev => prev.filter(p => p.id !== exitModal.posId));
-    setUserClosedTrades(prev => [closedRecord, ...prev]);
     setExitModal({ ...exitModal, open: false });
-    triggerNotice(`🚪 成功平倉【${closedRecord.name}】！淨損益: ${exitModal.currency === 'USD' ? 'US$' : 'NT$'} ${netPnl.toLocaleString(undefined, { maximumFractionDigits: 1 })} (${netReturnPct >= 0 ? '+' : ''}${netReturnPct.toFixed(2)}%)`);
+    triggerNotice(`🚪 成功平倉【${exitModal.name}】！閒置資金入帳 NT$ ${Math.round(netProceedsTwd).toLocaleString()}`);
   };
 
-  // 計算實戰持股的整體統計數據 (全部換算為台幣 TWD 統計)
-  let totalOpenCostTwd = 0;
-  let totalOpenMarketValTwd = 0;
-  userPositions.forEach(p => {
-    const fx = p.currency === 'USD' ? usdFx : 1.0;
-    const cost = (p.shares * p.entry_price + (p.entry_fee || 0)) * fx;
-    const val = (p.shares * (p.current_price || p.entry_price)) * fx;
-    totalOpenCostTwd += cost;
-    totalOpenMarketValTwd += val;
-  });
-  const totalOpenUnrealizedPnlTwd = totalOpenMarketValTwd - totalOpenCostTwd;
-  const totalOpenUnrealizedPct = totalOpenCostTwd > 0 ? (totalOpenUnrealizedPnlTwd / totalOpenCostTwd) * 100 : 0;
-
-  // 已實現損益換算 TWD
-  let totalRealizedNetPnlTwd = 0;
-  let totalTaxesPaidTwd = 0;
-  let winningTradesCount = 0;
-  userClosedTrades.forEach(t => {
-    const fx = t.currency === 'USD' ? usdFx : 1.0;
-    totalRealizedNetPnlTwd += t.net_pnl * fx;
-    totalTaxesPaidTwd += (t.total_tax_fee || 0) * fx;
-    if (t.net_pnl > 0) winningTradesCount++;
-  });
-  const realizedWinRate = userClosedTrades.length > 0 ? (winningTradesCount / userClosedTrades.length) * 100 : 0;
-
   return (
-    <div className="global-sovereign-dashboard" style={{ animation: 'fadeIn 0.3s ease' }}>
-      {/* 提示回饋氣泡 */}
+    <div className="global-sovereign-dashboard" style={{ animation: 'fadeIn 0.25s ease', paddingBottom: '3rem' }}>
+      {/* 提示通知氣泡 */}
       {feedbackMsg && (
         <div style={{
           position: 'fixed',
@@ -338,7 +762,7 @@ export default function GlobalSovereignDashboard() {
           padding: '0.85rem 1.4rem',
           borderRadius: '8px',
           boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
-          zIndex: 9999,
+          zIndex: 99999,
           fontWeight: 'bold',
           fontSize: '0.92rem',
           animation: 'slideIn 0.3s ease'
@@ -347,546 +771,170 @@ export default function GlobalSovereignDashboard() {
         </div>
       )}
 
-      {/* 頂部標題與更新按鈕 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#60A5FA', fontSize: '1.5rem' }}>
-            👑 全球高流動性泰坦旗艦（最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30 - 慢慢跟他玩）
-          </h2>
-          <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-            1,134 組全覆蓋 DOE 總冠軍 ➔ 22 年累積狂飆 +294,215% (翻 2,942 倍) | CAGR 42.38% | MDD -42.68% | Calmar 0.993
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            最後資料日: <strong style={{ color: '#E0E7FF' }}>{data?.latest_data_date || '即時'}</strong>
-          </span>
-          <button 
-            className="btn btn-secondary" 
-            onClick={fetchData} 
-            disabled={loading}
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-          >
-            {loading ? '🔄 更新中...' : '🔄 重新整理'}
-          </button>
-        </div>
-      </div>
-
-      {/* 核心 KPI 指標卡片 (僅保留 Calmar 冠軍、我的實戰投資組合總覽、標普500) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.8rem' }}>
-        {/* 卡片 1: Calmar 冠軍歷史績效 */}
-        <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #10B981', background: 'rgba(16, 185, 129, 0.12)' }}>
-          <div style={{ fontSize: '0.82rem', color: '#34D399', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-            👑 最高 Calmar 冠軍旗艦 (Top 3 階梯 40/30/30)
-          </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: 'bold', color: '#10B981' }}>
-            +{schemeA.total_ret?.toLocaleString()}%
-          </div>
-          <div style={{ fontSize: '0.78rem', color: '#A7F3D0', marginTop: '0.2rem' }}>
-            翻 <strong>{schemeA.mult?.toLocaleString()} 倍</strong> | CAGR <strong>{schemeA.cagr}%</strong> | MDD <strong>{schemeA.mdd}%</strong>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#6EE7B7', marginTop: '0.2rem' }}>
-            Calmar <strong>{schemeA.calmar} (全場最高)</strong> | 夏普 <strong>1.08</strong> | 勝率 <strong>{schemeA.win_rate}%</strong>
-          </div>
-        </div>
-
-        {/* 卡片 2: 我的實戰帳戶整體損益總覽 */}
-        <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.1)' }}>
-          <div style={{ fontSize: '0.82rem', color: '#38BDF8', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-            💼 我的實戰投資組合總市值與未實現損益
-          </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: 'bold', color: totalOpenUnrealizedPnlTwd >= 0 ? '#34D399' : '#F87171' }}>
-            NT$ {Math.round(totalOpenMarketValTwd).toLocaleString()}
-          </div>
-          <div style={{ fontSize: '0.78rem', color: '#BAE6FD', marginTop: '0.2rem' }}>
-            未實現: <strong style={{ color: totalOpenUnrealizedPnlTwd >= 0 ? '#34D399' : '#F87171' }}>{totalOpenUnrealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(totalOpenUnrealizedPnlTwd).toLocaleString()} ({totalOpenUnrealizedPct >= 0 ? '+' : ''}{totalOpenUnrealizedPct.toFixed(2)}%)</strong>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#CBD5E1', marginTop: '0.2rem' }}>
-            持股 <strong>{userPositions.length} 檔</strong> | 累計已實現淨利: <strong style={{ color: totalRealizedNetPnlTwd >= 0 ? '#34D399' : '#F87171' }}>{totalRealizedNetPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(totalRealizedNetPnlTwd).toLocaleString()}</strong>
-          </div>
-        </div>
-
-        {/* 卡片 3: 標普 500 被動大盤基準 */}
-        <div className="glass-card" style={{ padding: '1.2rem', textAlign: 'center', borderTop: '3px solid #9CA3AF' }}>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-            📊 基準：標普 500 (SPY 買入持有)
-          </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: 'bold', color: '#D1D5DB' }}>
-            +{spy.total_ret?.toLocaleString()}%
-          </div>
-          <div style={{ fontSize: '0.78rem', color: '#9CA3AF', marginTop: '0.2rem' }}>
-            翻 <strong>{spy.mult} 倍</strong> | CAGR <strong>{spy.cagr}%</strong> | MDD <strong>{spy.mdd}%</strong>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#9CA3AF', marginTop: '0.2rem' }}>
-            大盤被動持有基準線
-          </div>
-        </div>
-      </div>
-
-      {/* 當前宏觀風控狀態與當月持倉卡片 */}
+      {/* 頂部精簡橫條：小小的當前績效 (Mini Performance Header) */}
       <div className="glass-card" style={{
-        padding: '1.4rem',
-        marginBottom: '1.8rem',
-        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(17, 24, 39, 0.9) 100%)',
-        border: '1px solid rgba(16, 185, 129, 0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1.2rem'
+        padding: '0.9rem 1.2rem',
+        marginBottom: '1.2rem',
+        background: 'rgba(15, 23, 42, 0.85)',
+        border: '1px solid rgba(255, 255, 255, 0.08)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-          <div style={{ fontSize: '2.8rem', lineHeight: 1 }}>🛡️</div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.2rem' }}>
-              <span style={{ fontSize: '0.78rem', background: '#10B981', color: '#FFF', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
-                最高 Calmar 冠軍即時總經風控
-              </span>
-              <span style={{ fontSize: '0.82rem', color: '#34D399', fontWeight: 'bold' }}>
-                {macro.regime || '牛市滿倉 (100% 倉位狂飆)'}
-              </span>
-            </div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#F3F4F6' }}>
-              標普 500 (SPY): ${macro.spy_price} ＞ 年線 200MA: ${macro.spy_ma200}
+        {/* 第一行：標題、冠軍標籤與匯率控制 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              👑 全球高流動性泰坦旗艦
             </h3>
-            <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-              大盤穩站年線之上，安全氣囊判定多頭有效 ➔ <strong>100% 滿倉重壓 Top 3 超級狂飆王權股</strong>
+            <span style={{ fontSize: '0.74rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
+              最高 Calmar 冠軍 (Top 3 階梯 40/30/30)
+            </span>
+            <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
+              22年累積 +294,215% (2,942倍) | CAGR 42.4% | MDD -42.7% | Calmar 0.993
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: '#CBD5E1' }}>
+              <span>USD匯率:</span>
+              <input
+                type="number"
+                step="0.1"
+                value={usdFx}
+                onChange={(e) => setUsdFx(parseFloat(e.target.value) || 32.5)}
+                style={{ width: '60px', padding: '0.15rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#67E8F9', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem' }}
+              />
             </div>
+            <button
+              className="btn btn-secondary"
+              onClick={fetchData}
+              disabled={loading}
+              style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem' }}
+            >
+              {loading ? '🔄 更新中' : '🔄 重新整理'}
+            </button>
           </div>
         </div>
 
-        <div style={{ textAlign: 'right', minWidth: '220px' }}>
-          <div style={{ fontSize: '0.82rem', color: '#34D399', marginBottom: '0.3rem' }}>
-            💡 Calmar 冠軍配置權重
-          </div>
-          <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '0.5rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: '0.88rem', color: '#F9FAFB', fontWeight: 'bold' }}>
-              Top 3: 40% / 30% / 30%
+        {/* 第二行：5 個小小的當前績效數據方塊 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.7rem' }}>
+          {/* 總資產淨值 */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>💼 總資產淨值 (閒置+持股)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
+              NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.76rem', color: '#A7F3D0', marginTop: '0.2rem' }}>
-              國內台股現股 ＋ 複委託一鍵購足
+          </div>
+
+          {/* 當前閒置現金 */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💵 當前閒置現金 (可待命買入)</span>
+              <button
+                onClick={() => { setCashActionType('deposit'); setCashModalOpen(true); }}
+                style={{ background: 'rgba(245, 158, 11, 0.2)', border: 'none', color: '#FBBF24', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '3px', cursor: 'pointer' }}
+              >
+                ➕ 存入/調整
+              </button>
+            </div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>
+              NT$ {Math.round(idleCash).toLocaleString()}
+            </div>
+          </div>
+
+          {/* 持股市值 */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #6366F1' }}>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📊 股票總市值 ({userPositions.length} 檔)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#A5B4FC', fontFamily: 'monospace' }}>
+              NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}
+            </div>
+          </div>
+
+          {/* 未實現損益 */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: unrealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📈 當前未實現損益</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: unrealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
+              {unrealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(unrealizedPnlTwd).toLocaleString()}
+              <span style={{ fontSize: '0.78rem', marginLeft: '0.3rem' }}>
+                ({unrealizedReturnPct >= 0 ? '+' : ''}{unrealizedReturnPct.toFixed(2)}%)
+              </span>
+            </div>
+          </div>
+
+          {/* 累計已實現淨利 */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: totalRealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>🏆 累計已實現淨利 (扣稅費)</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
+              {totalRealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(totalRealizedPnlTwd).toLocaleString()}
+              <span style={{ fontSize: '0.74rem', color: '#94A3B8', marginLeft: '0.3rem' }}>
+                (勝率 {winRate.toFixed(0)}%)
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 子分頁切換按鈕 */}
-      <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.4rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.8rem', flexWrap: 'wrap' }}>
+      {/* 簡約頁籤切換：主操盤 / 20年歷史數據 / DOE報告 */}
+      <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem' }}>
         <button
-          className={`btn ${activeSubTab === 'current_picks' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveSubTab('current_picks')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          className={`btn ${activeMainTab === 'trading' ? '' : 'btn-secondary'}`}
+          onClick={() => setActiveMainTab('trading')}
+          style={{ padding: '0.4rem 0.9rem', fontSize: '0.84rem' }}
         >
-          👑 實戰跟單帳簿與部位試算 (Top 3 旗艦)
+          💼 實戰操盤主介面 (持倉 / 月底調倉 / 進出紀錄)
         </button>
         <button
-          className={`btn ${activeSubTab === 'history' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveSubTab('history')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          className={`btn ${activeMainTab === 'history_audit' ? '' : 'btn-secondary'}`}
+          onClick={() => setActiveMainTab('history_audit')}
+          style={{ padding: '0.4rem 0.9rem', fontSize: '0.84rem' }}
         >
           📅 20 年逐年回測績效 ({yearly.length} 年)
         </button>
         <button
-          className={`btn ${activeSubTab === 'recent_trades' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveSubTab('recent_trades')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          className={`btn ${activeMainTab === 'doe_audit' ? '' : 'btn-secondary'}`}
+          onClick={() => setActiveMainTab('doe_audit')}
+          style={{ padding: '0.4rem 0.9rem', fontSize: '0.84rem' }}
         >
-          📜 最近 24 個月調倉歷史
-        </button>
-        <button
-          className={`btn ${activeSubTab === 'doe_audit' ? '' : 'btn-secondary'}`}
-          onClick={() => setActiveSubTab('doe_audit')}
-          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-        >
-          🔬 1,134 組全覆蓋 DOE 出場與配比最佳化報告
+          🔬 1,134 組全覆蓋 DOE 報告
         </button>
       </div>
 
-      {/* 區塊 1: 當前實盤持倉名單與實戰記帳系統 */}
-      {activeSubTab === 'current_picks' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
+      {activeMainTab === 'trading' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          {/* 1.1 投入現金計算目前總額與部位試算機 (Capital & Sizing Calculator) */}
-          <div className="glass-card" style={{ padding: '1.3rem', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.05)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+          {/* 1. 目前持倉 (Current Live Holdings) */}
+          <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #10B981' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  💵 投入總資金部位試算機（動態換算台美股各主力買進股數）
+                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  💼 當前實戰持有中部位 ({userPositions.length} 檔)
                 </h4>
-                <p style={{ margin: '0.3rem 0 0 0', color: '#94A3B8', fontSize: '0.82rem' }}>
-                  輸入您的總投資現金，系統將自動依據【Top 3 溫和階梯 40/30/30】精確計算各標的應分配金額與建議買進股數
+                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
+                  目前實戰帳戶真實持倉。若需平倉可隨時點擊右側「🚪 出場」自訂賣出價與稅費結算。
                 </p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: '#CBD5E1' }}>
-                  <span>美金匯率:</span>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={usdFx}
-                    onChange={(e) => setUsdFx(parseFloat(e.target.value) || 32.5)}
-                    style={{ width: '70px', padding: '0.2rem 0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.2)', color: '#67E8F9', fontFamily: 'monospace', fontWeight: 'bold' }}
-                  />
-                </div>
+              <div style={{ fontSize: '0.78rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.1)', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
+                當前持股市值合計: <strong>NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
               </div>
-            </div>
-
-            {/* 資金輸入框與快捷金額鈕 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.2rem', background: 'rgba(0,0,0,0.25)', padding: '0.8rem 1rem', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#F8FAFC' }}>投入總現金 (NT$):</span>
-                <input
-                  type="number"
-                  step="10000"
-                  value={capital}
-                  onChange={(e) => setCapital(parseFloat(e.target.value) || 0)}
-                  style={{ width: '160px', padding: '0.4rem 0.6rem', borderRadius: '6px', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #38BDF8', color: '#FDE68A', fontWeight: 'bold', fontSize: '1.05rem', fontFamily: 'monospace' }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {[300000, 500000, 1000000, 2000000, 5000000].map(amt => (
-                  <button
-                    key={amt}
-                    onClick={() => setCapital(amt)}
-                    style={{
-                      background: capital === amt ? '#0284C7' : 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      color: '#FFF',
-                      padding: '0.25rem 0.6rem',
-                      borderRadius: '4px',
-                      fontSize: '0.78rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    NT$ {amt >= 1000000 ? `${amt / 1000000}百萬` : `${amt / 10000}萬`}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 3 大主力即時試算卡片 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-              {currentPicks.filter(p => p.is_active).map((pick) => {
-                const sizing = getSizingSuggestion(pick);
-                const isUsd = pick.currency === 'USD';
-                return (
-                  <div key={pick.ticker} style={{
-                    background: 'rgba(15, 23, 42, 0.75)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    borderLeft: pick.rank === 1 ? '4px solid #F59E0B' : (pick.rank === 2 ? '4px solid #38BDF8' : '4px solid #818CF8')
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <span style={{
-                        fontSize: '0.74rem',
-                        fontWeight: 'bold',
-                        padding: '0.15rem 0.45rem',
-                        borderRadius: '4px',
-                        background: pick.rank === 1 ? 'rgba(245, 158, 11, 0.25)' : 'rgba(56, 189, 248, 0.25)',
-                        color: pick.rank === 1 ? '#FBBF24' : '#38BDF8'
-                      }}>
-                        {pick.rank === 1 ? '👑 第1王者 (40%)' : pick.rank === 2 ? '🥈 第2主力 (30%)' : '🥉 第3主力 (30%)'}
-                      </span>
-                      <span style={{ fontSize: '0.76rem', color: '#94A3B8' }}>{pick.market}</span>
-                    </div>
-
-                    <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#F8FAFC' }}>
-                      {pick.name}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontFamily: 'monospace', marginBottom: '0.6rem' }}>
-                      代碼: {pick.ticker} | 現價: {isUsd ? 'US$ ' : 'NT$ '}{pick.price?.toLocaleString()}
-                    </div>
-
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem', borderRadius: '6px', fontSize: '0.82rem', marginBottom: '0.8rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#CBD5E1', marginBottom: '0.2rem' }}>
-                        <span>目標分配額:</span>
-                        <strong style={{ color: '#FDE68A' }}>NT$ {Math.round(sizing.targetTwd).toLocaleString()} {isUsd && `(≈ US$ ${Math.round(sizing.targetUsd).toLocaleString()})`}</strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#CBD5E1', marginBottom: '0.2rem' }}>
-                        <span>建議買進股數:</span>
-                        <strong style={{ color: '#34D399', fontSize: '1rem', fontFamily: 'monospace' }}>
-                          {sizing.shares.toLocaleString()} 股 {(!isUsd && sizing.shares >= 1000) && `(${Math.floor(sizing.shares / 1000)}張 ${sizing.shares % 1000}股)`}
-                        </strong>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94A3B8', fontSize: '0.76rem' }}>
-                        <span>實際動用資金:</span>
-                        <span>NT$ {Math.round(sizing.actualTwd).toLocaleString()} {isUsd && `(US$ ${sizing.actualUsd.toFixed(1)})`}</span>
-                      </div>
-                    </div>
-
-                    <button
-                      className="btn"
-                      onClick={() => handleImportToOrder(pick)}
-                      style={{
-                        width: '100%',
-                        padding: '0.45rem',
-                        fontSize: '0.84rem',
-                        background: 'linear-gradient(135deg, #0284C7, #0369A1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.4rem'
-                      }}
-                    >
-                      📥 帶入下單資料 ({sizing.shares} 股)
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 1.2 AI 當前持股推薦清單 (含右側帶入按鈕) */}
-          <div className="glass-card" style={{ padding: '1.25rem', overflowX: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
-              <div>
-                <h4 style={{ margin: 0, color: '#F3F4F6', fontSize: '1.1rem' }}>
-                  👑 AI 當前精選持倉推薦 (Domestic-Accessible Titan Pool - 集中最強 Top 3)
-                </h4>
-                <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                  前 3 名為當前滿倉主力（合計 100%），第 4～5 名為觀察候補。點擊右側按鈕可將建議股數直接帶入下方建倉表單！
-                </p>
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#10B981', background: 'rgba(16, 185, 129, 0.1)', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
-                ✓ 100% 國內券商可買・無海外換匯出入金門檻
-              </div>
-            </div>
-
-            <table className="custom-table" style={{ width: '100%', fontSize: '0.86rem' }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: 'center', width: '50px' }}>排名</th>
-                  <th>股票名稱 / 代碼</th>
-                  <th>交易市場</th>
-                  <th style={{ textAlign: 'center' }}>配置權重</th>
-                  <th style={{ textAlign: 'right' }}>最新現價</th>
-                  <th style={{ textAlign: 'right' }}>60MA 季線</th>
-                  <th style={{ textAlign: 'right' }}>3個月動能</th>
-                  <th style={{ textAlign: 'right' }}>12個月動能</th>
-                  <th style={{ textAlign: 'center' }}>持倉狀態</th>
-                  <th style={{ textAlign: 'center', minWidth: '130px' }}>操作動作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPicks.map((p) => {
-                  const curr = p.currency === 'USD' ? 'US$ ' : 'NT$ ';
-                  return (
-                    <tr key={p.ticker} style={{ background: p.is_active ? 'rgba(16, 185, 129, 0.06)' : 'transparent', borderLeft: p.is_active ? '3px solid #10B981' : 'none' }}>
-                      <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                        {p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : p.rank}
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 'bold', color: '#F3F4F6' }}>{p.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#9CA3AF', fontFamily: 'monospace' }}>{p.ticker}</div>
-                      </td>
-                      <td>
-                        <span style={{ fontSize: '0.76rem', padding: '0.15rem 0.45rem', borderRadius: '4px', background: p.market.includes('台股') ? 'rgba(99, 102, 241, 0.2)' : 'rgba(59, 130, 246, 0.2)', color: p.market.includes('台股') ? '#A5B4FC' : '#93C5FD' }}>
-                          {p.market}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {p.is_active ? (
-                          <span style={{ fontWeight: 'bold', color: '#10B981', background: 'rgba(16, 185, 129, 0.2)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
-                            {p.weight_pct}%
-                          </span>
-                        ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>候補 (0%)</span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#F3F4F6', fontFamily: 'monospace' }}>
-                        {curr}{p.price?.toLocaleString()}
-                      </td>
-                      <td style={{ textAlign: 'right', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                        {curr}{p.ma60?.toLocaleString()}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: p.mom_3m >= 0 ? '#34D399' : '#F87171' }}>
-                        {p.mom_3m >= 0 ? `+${p.mom_3m}%` : `${p.mom_3m}%`}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold', color: p.mom_12m >= 0 ? '#34D399' : '#F87171' }}>
-                        {p.mom_12m >= 0 ? `+${p.mom_12m}%` : `${p.mom_12m}%`}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {p.is_active ? (
-                          <span style={{ fontSize: '0.76rem', color: '#34D399', fontWeight: 'bold' }}>🔥 滿倉主力</span>
-                        ) : (
-                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>👀 候補儲備</span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() => handleImportToOrder(p)}
-                          style={{ padding: '0.25rem 0.6rem', fontSize: '0.76rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                        >
-                          📥 帶入下單
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* 1.3 實戰持股建倉表單 (Real Order Form) */}
-          <div id="real-order-form-anchor" className="glass-card" style={{ padding: '1.25rem', borderLeft: '4px solid #6366F1', background: 'rgba(99, 102, 241, 0.05)' }}>
-            <h4 style={{ margin: '0 0 0.8rem 0', color: '#A5B4FC', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              ✍️ 實戰持股建倉確認表單（修改確認股數與價格 ➔ 登記實盤持股）
-            </h4>
-            <p style={{ margin: '0 0 1rem 0', color: '#CBD5E1', fontSize: '0.82rem' }}>
-              您可以直接點擊上方表格「📥 帶入下單」自動預填，或手動修改買進股數、實際成交價與手續費，確認無誤後點擊「確認建倉並記錄」！
-            </p>
-
-            <form onSubmit={handleConfirmBuy}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem', marginBottom: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>股票代碼 (Ticker)</label>
-                  <input
-                    type="text"
-                    value={orderForm.ticker}
-                    onChange={(e) => setOrderForm({ ...orderForm, ticker: e.target.value })}
-                    placeholder="例如 MRNA 或 3037.TW"
-                    required
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', fontFamily: 'monospace' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>股票名稱</label>
-                  <input
-                    type="text"
-                    value={orderForm.name}
-                    onChange={(e) => setOrderForm({ ...orderForm, name: e.target.value })}
-                    placeholder="例如 莫德納"
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>幣別</label>
-                  <select
-                    value={orderForm.currency}
-                    onChange={(e) => setOrderForm({ ...orderForm, currency: e.target.value })}
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
-                  >
-                    <option value="TWD">新台幣 (TWD)</option>
-                    <option value="USD">美元 (USD)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>買進股數 (Shares)</label>
-                  <input
-                    type="number"
-                    value={orderForm.shares}
-                    onChange={(e) => setOrderForm({ ...orderForm, shares: e.target.value })}
-                    placeholder="例如 54 或 236"
-                    required
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid #38BDF8', color: '#38BDF8', fontWeight: 'bold', fontFamily: 'monospace' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>買進成交價 (Entry Price)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={orderForm.price}
-                    onChange={(e) => setOrderForm({ ...orderForm, price: e.target.value })}
-                    placeholder="例如 225.0"
-                    required
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', fontFamily: 'monospace' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>手續費 (Fee)</label>
-                  <input
-                    type="number"
-                    value={orderForm.fee}
-                    onChange={(e) => setOrderForm({ ...orderForm, fee: e.target.value })}
-                    placeholder="例如 15 或 400"
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', fontFamily: 'monospace' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>建倉日期</label>
-                  <input
-                    type="date"
-                    value={orderForm.date}
-                    onChange={(e) => setOrderForm({ ...orderForm, date: e.target.value })}
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>配置角色</label>
-                  <select
-                    value={orderForm.role}
-                    onChange={(e) => setOrderForm({ ...orderForm, role: e.target.value })}
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
-                  >
-                    <option value="👑 第1王者 (40%)">👑 第1王者 (40%)</option>
-                    <option value="🥈 第2主力 (30%)">🥈 第2主力 (30%)</option>
-                    <option value="🥉 第3主力 (30%)">🥉 第3主力 (30%)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.8rem' }}>
-                <button
-                  type="submit"
-                  className="btn"
-                  style={{
-                    padding: '0.55rem 1.4rem',
-                    fontSize: '0.9rem',
-                    background: 'linear-gradient(135deg, #10B981, #059669)',
-                    fontWeight: 'bold',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-                  }}
-                >
-                  ✅ 確認建倉並記錄到實戰部位
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* 1.4 我的實戰持有中部位 (My Live Positions) + 出場按鈕 */}
-          <div className="glass-card" style={{ padding: '1.25rem', borderLeft: '4px solid #10B981', background: 'rgba(16, 185, 129, 0.05)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
-              <div>
-                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🔥 我的實戰持有中部位（真實下單紀錄・即時損益監控・一鍵出場）
-                </h4>
-                <p style={{ margin: '0.3rem 0 0 0', color: '#94A3B8', fontSize: '0.82rem' }}>
-                  此處為您確認建倉的真實投資部位。點擊右側「🚪 執行出場平倉」可輸入實際賣出價與稅金，自動結算淨損益並記入歷史帳簿！
-                </p>
-              </div>
-              <span style={{ fontSize: '0.78rem', background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
-                當前持倉: {userPositions.length} 檔
-              </span>
             </div>
 
             {userPositions.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.9rem' }}>
-                目前尚無實戰持股。請利用上方試算機點擊「📥 帶入下單」建立您的第一筆持倉！
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
+                目前尚無持股部位。請於下方「月底持倉更動建議」執行買入！
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="custom-table" style={{ width: '100%', fontSize: '0.86rem' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
                   <thead>
-                    <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                      <th>標的名稱 (代碼)</th>
-                      <th style={{ textAlign: 'center' }}>角色</th>
+                    <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      <th>標的代碼與名稱</th>
+                      <th style={{ textAlign: 'center' }}>配置角色</th>
                       <th style={{ textAlign: 'center' }}>建倉日期</th>
                       <th style={{ textAlign: 'right' }}>持有股數</th>
-                      <th style={{ textAlign: 'right' }}>買進成本價</th>
+                      <th style={{ textAlign: 'right' }}>成本均價</th>
                       <th style={{ textAlign: 'right' }}>最新現價</th>
-                      <th style={{ textAlign: 'right' }}>目前市值 (折合台幣)</th>
-                      <th style={{ textAlign: 'right' }}>未實現淨損益</th>
-                      <th style={{ textAlign: 'center', minWidth: '110px' }}>出場操作</th>
+                      <th style={{ textAlign: 'right' }}>目前市值 (折合NT$)</th>
+                      <th style={{ textAlign: 'right' }}>未實現損益</th>
+                      <th style={{ textAlign: 'right' }}>佔總淨值%</th>
+                      <th style={{ textAlign: 'center', minWidth: '90px' }}>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -894,53 +942,65 @@ export default function GlobalSovereignDashboard() {
                       const isUsd = pos.currency === 'USD';
                       const curr = isUsd ? 'US$ ' : 'NT$ ';
                       const fx = isUsd ? usdFx : 1.0;
+                      const curPrice = pos.current_price || pos.entry_price;
                       const costTwd = (pos.shares * pos.entry_price + (pos.entry_fee || 0)) * fx;
-                      const valTwd = (pos.shares * (pos.current_price || pos.entry_price)) * fx;
+                      const valTwd = (pos.shares * curPrice) * fx;
                       const pnlTwd = valTwd - costTwd;
                       const retPct = costTwd > 0 ? (pnlTwd / costTwd) * 100 : 0;
+                      const allocPct = totalNetAssetsTwd > 0 ? (valTwd / totalNetAssetsTwd) * 100 : 0;
                       const isWin = pnlTwd >= 0;
 
                       return (
-                        <tr key={pos.id} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                          <td style={{ fontWeight: 'bold', color: '#FDE68A' }}>
-                            {pos.name} <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontFamily: 'monospace' }}>({pos.ticker})</span>
+                        <tr key={pos.id} style={{ background: 'rgba(255,255,255,0.015)' }}>
+                          <td>
+                            <strong style={{ color: '#F8FAFC' }}>{pos.name}</strong>
+                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <span style={{ fontSize: '0.74rem', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: 'bold', background: pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.25)' : 'rgba(14, 165, 233, 0.25)', color: pos.role?.includes('王者') ? '#FBBF24' : '#38BDF8' }}>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              padding: '0.15rem 0.45rem',
+                              borderRadius: '4px',
+                              fontWeight: 'bold',
+                              background: pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.25)' : 'rgba(14, 165, 233, 0.25)',
+                              color: pos.role?.includes('王者') ? '#FBBF24' : '#38BDF8'
+                            }}>
                               {pos.role}
                             </span>
                           </td>
-                          <td style={{ textAlign: 'center', color: '#94A3B8' }}>{pos.entry_date}</td>
-                          <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#E2E8F0' }}>
-                            {pos.shares.toLocaleString()} 股
+                          <td style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.78rem' }}>{pos.entry_date}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#F1F5F9' }}>
+                            {pos.shares?.toLocaleString()} 股
                           </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#E2E8F0' }}>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
                             {curr}{pos.entry_price?.toLocaleString()}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            {curr}{(pos.current_price || pos.entry_price)?.toLocaleString()}
+                            {curr}{curPrice?.toLocaleString()}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#67E8F9' }}>
                             NT$ {Math.round(valTwd).toLocaleString()}
                           </td>
-                          <td style={{ textAlign: 'right', fontWeight: 'bold', color: isWin ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
+                          <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
                             {isWin ? '+' : ''}NT$ {Math.round(pnlTwd).toLocaleString()} ({isWin ? '+' : ''}{retPct.toFixed(2)}%)
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                            {allocPct.toFixed(1)}%
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <button
-                              className="btn"
                               onClick={() => handleOpenExitModal(pos)}
                               style={{
-                                padding: '0.3rem 0.7rem',
-                                fontSize: '0.76rem',
+                                padding: '0.25rem 0.6rem',
+                                fontSize: '0.74rem',
                                 background: 'linear-gradient(135deg, #EF4444, #B91C1C)',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.3rem',
-                                border: 'none'
+                                color: '#FFF',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
                               }}
                             >
-                              🚪 執行出場
+                              🚪 出場
                             </button>
                           </td>
                         </tr>
@@ -952,97 +1012,365 @@ export default function GlobalSovereignDashboard() {
             )}
           </div>
 
-          {/* 1.5 實戰歷史成交與損益日誌 (Closed Trades Ledger) */}
-          <div className="glass-card" style={{ padding: '1.25rem', overflowX: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+          {/* 2. 月底持倉更動建議 (Rebalance Recommendations) */}
+          <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.04)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#F3F4F6', fontSize: '1.1rem' }}>
-                  📜 實戰歷史進出與實現損益帳簿（扣除手續費與證交稅淨損益）
+                <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  🔄 月底持倉更動建議（自動計算：賣出、減持、買入、加碼）
                 </h4>
-                <p style={{ margin: '0.3rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                  每次平倉皆完整記錄買進價、賣出價、交易稅費與淨報酬率，終身累計結算實戰成績
+                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
+                  系統以當前總淨值 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 自動計算 Top 3 (40% / 30% / 30%) 最佳部位。您可直接於表格內修改實際股數、價格與稅費，點擊右側送出後自動消掉並記帳！
                 </p>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#E2E8F0', background: 'rgba(255,255,255,0.06)', padding: '0.3rem 0.6rem', borderRadius: '4px' }}>
-                已實現總筆數: <strong>{userClosedTrades.length}</strong> | 勝率: <strong>{realizedWinRate.toFixed(1)}%</strong> | 累計稅費: <strong>NT$ {Math.round(totalTaxesPaidTwd).toLocaleString()}</strong>
+
+              {dismissedSuggestions.length > 0 && (
+                <button
+                  onClick={() => setDismissedSuggestions([])}
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#94A3B8',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ↺ 重新產生所有建議
+                </button>
+              )}
+            </div>
+
+            {rebalanceSuggestions.length === 0 ? (
+              <div style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px dashed #10B981' }}>
+                <span style={{ fontSize: '1.1rem' }}>✨</span>
+                <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.92rem', marginTop: '0.2rem' }}>
+                  目前持倉與總資金配置已完美平衡（Top 3 40/30/30），無須進行任何調倉！
+                </div>
+                <div style={{ color: '#94A3B8', fontSize: '0.76rem', marginTop: '0.2rem' }}>
+                  閒置資金已妥善保留，留待下一次月份結算或有追加資金時自動重新試算。
+                </div>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                      <th style={{ width: '80px', textAlign: 'center' }}>動作建議</th>
+                      <th>標的名稱 (代碼)</th>
+                      <th style={{ textAlign: 'right' }}>目標配置 (金額)</th>
+                      <th style={{ textAlign: 'right' }}>目前股數</th>
+                      <th style={{ textAlign: 'right', color: '#67E8F9' }}>建議更動股數</th>
+                      <th style={{ textAlign: 'center', width: '110px' }}>實際成交股數 (可改)</th>
+                      <th style={{ textAlign: 'center', width: '110px' }}>成交價格 (可改)</th>
+                      <th style={{ textAlign: 'center', width: '100px' }}>稅金/手續費</th>
+                      <th style={{ textAlign: 'right' }}>預估現金變動</th>
+                      <th style={{ textAlign: 'center', width: '110px' }}>執行確認</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rebalanceSuggestions.map((sugg) => {
+                      const rowVal = getRowValues(sugg);
+                      const isUsd = sugg.currency === 'USD';
+                      const curr = isUsd ? 'US$ ' : 'NT$ ';
+                      const fx = isUsd ? usdFx : 1.0;
+
+                      const sharesNum = parseInt(rowVal.shares, 10) || 0;
+                      const priceNum = parseFloat(rowVal.price) || 0;
+                      const feeNum = parseFloat(rowVal.taxFee) || 0;
+
+                      // 現金變動估算
+                      let cashDiffTwd = 0;
+                      if (sugg.action === '買入' || sugg.action === '加碼') {
+                        cashDiffTwd = -(sharesNum * priceNum * fx + (isUsd ? feeNum * fx : feeNum));
+                      } else {
+                        cashDiffTwd = (sharesNum * priceNum * fx - (isUsd ? feeNum * fx : feeNum));
+                      }
+
+                      return (
+                        <tr key={sugg.key} style={{ background: 'rgba(255,255,255,0.02)' }}>
+                          {/* 動作標籤 */}
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              padding: '0.2rem 0.5rem',
+                              borderRadius: '4px',
+                              fontWeight: 'bold',
+                              fontSize: '0.78rem',
+                              background: sugg.actionColor + '25',
+                              color: sugg.actionColor,
+                              border: `1px solid ${sugg.actionColor}60`
+                            }}>
+                              {sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出'))}
+                            </span>
+                          </td>
+
+                          {/* 標的名稱 */}
+                          <td>
+                            <strong style={{ color: '#F8FAFC' }}>{sugg.name}</strong>
+                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                              {sugg.ticker} | <span style={{ color: '#FBBF24' }}>{sugg.role}</span>
+                            </div>
+                          </td>
+
+                          {/* 目標配置 */}
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ color: '#CBD5E1', fontWeight: 'bold' }}>{sugg.targetWeightPct}%</div>
+                            <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                              NT$ {Math.round(sugg.targetTwd).toLocaleString()}
+                            </div>
+                          </td>
+
+                          {/* 目前股數 */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
+                            {sugg.currentShares.toLocaleString()} 股
+                          </td>
+
+                          {/* 建議股數 */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#67E8F9' }}>
+                            {sugg.action === '加碼' ? `+${sugg.recShares}` : (sugg.action === '減持' ? `-${sugg.recShares}` : `${sugg.recShares}`)} 股
+                          </td>
+
+                          {/* 實際股數 Input */}
+                          <td style={{ textAlign: 'center' }}>
+                            <input
+                              type="number"
+                              value={rowVal.shares}
+                              onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
+                              style={{
+                                width: '85px',
+                                padding: '0.3rem 0.4rem',
+                                borderRadius: '4px',
+                                background: 'rgba(0,0,0,0.6)',
+                                border: '1px solid #38BDF8',
+                                color: '#38BDF8',
+                                fontWeight: 'bold',
+                                textAlign: 'right',
+                                fontFamily: 'monospace',
+                                fontSize: '0.85rem'
+                              }}
+                            />
+                          </td>
+
+                          {/* 成交價格 Input */}
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
+                              <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>{curr}</span>
+                              <input
+                                type="number"
+                                step="0.1"
+                                value={rowVal.price}
+                                onChange={(e) => handleUpdateRowInput(sugg.key, 'price', e.target.value)}
+                                style={{
+                                  width: '80px',
+                                  padding: '0.3rem 0.4rem',
+                                  borderRadius: '4px',
+                                  background: 'rgba(0,0,0,0.6)',
+                                  border: '1px solid rgba(255,255,255,0.25)',
+                                  color: '#F8FAFC',
+                                  fontWeight: 'bold',
+                                  textAlign: 'right',
+                                  fontFamily: 'monospace',
+                                  fontSize: '0.85rem'
+                                }}
+                              />
+                            </div>
+                          </td>
+
+                          {/* 稅費 Input */}
+                          <td style={{ textAlign: 'center' }}>
+                            <input
+                              type="number"
+                              value={rowVal.taxFee}
+                              onChange={(e) => handleUpdateRowInput(sugg.key, 'taxFee', e.target.value)}
+                              style={{
+                                width: '70px',
+                                padding: '0.3rem 0.4rem',
+                                borderRadius: '4px',
+                                background: 'rgba(0,0,0,0.6)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                color: '#FCA5A5',
+                                textAlign: 'right',
+                                fontFamily: 'monospace',
+                                fontSize: '0.82rem'
+                              }}
+                            />
+                          </td>
+
+                          {/* 預估現金變動 */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: cashDiffTwd >= 0 ? '#34D399' : '#F87171' }}>
+                            {cashDiffTwd >= 0 ? '+' : ''}NT$ {Math.round(cashDiffTwd).toLocaleString()}
+                          </td>
+
+                          {/* 右側按鈕送出 */}
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              onClick={() => handleExecuteSuggestion(sugg)}
+                              style={{
+                                padding: '0.35rem 0.8rem',
+                                fontSize: '0.78rem',
+                                background: `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
+                                color: '#FFF',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              🚀 確認送出
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* 3. 最底下紀錄所有進出紀錄 (Complete Transaction History Ledger) */}
+          <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #6366F1' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+              <div>
+                <h4 style={{ margin: 0, color: '#A5B4FC', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  📜 所有進出歷史紀錄帳簿（共 {txHistory.length} 筆流水明細）
+                </h4>
+                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
+                  每次買入、加碼、減持、賣出與資金存入皆完整記錄扣款、入帳、稅費與已實現淨利。
+                </p>
+              </div>
+
+              <div style={{ fontSize: '0.76rem', color: '#CBD5E1', display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <span style={{ background: 'rgba(255,255,255,0.06)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  已實現獲利: <strong style={{ color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171' }}>{totalRealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(totalRealizedPnlTwd).toLocaleString()}</strong>
+                </span>
+                <span style={{ background: 'rgba(255,255,255,0.06)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  累計稅費: <strong style={{ color: '#FCA5A5' }}>NT$ {Math.round(totalTaxesPaidTwd).toLocaleString()}</strong>
+                </span>
+                <span style={{ background: 'rgba(255,255,255,0.06)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                  平倉勝率: <strong style={{ color: '#FBBF24' }}>{winRate.toFixed(1)}%</strong>
+                </span>
               </div>
             </div>
 
-            {userClosedTrades.length === 0 ? (
+            {txHistory.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-                目前尚無平倉歷史紀錄。持股出場時將自動在此歸檔並結算損益！
+                尚無進出紀錄。
               </div>
             ) : (
-              <table className="custom-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                    <th>標的名稱 (代碼)</th>
-                    <th style={{ textAlign: 'center' }}>進場日期</th>
-                    <th style={{ textAlign: 'center' }}>出場日期</th>
-                    <th style={{ textAlign: 'right' }}>成交股數</th>
-                    <th style={{ textAlign: 'right' }}>買進成本</th>
-                    <th style={{ textAlign: 'right' }}>出場價格</th>
-                    <th style={{ textAlign: 'right' }}>交易稅金與手續費</th>
-                    <th style={{ textAlign: 'right' }}>實現淨損益 (折合NT$)</th>
-                    <th style={{ textAlign: 'right' }}>淨報酬率</th>
-                    <th style={{ textAlign: 'left' }}>出場原因說明</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {userClosedTrades.map((t) => {
-                    const isUsd = t.currency === 'USD';
-                    const curr = isUsd ? 'US$ ' : 'NT$ ';
-                    const fx = isUsd ? usdFx : 1.0;
-                    const netPnlTwd = t.net_pnl * fx;
-                    const taxTwd = (t.total_tax_fee || 0) * fx;
-                    const isWin = t.net_pnl >= 0;
+              <div style={{ overflowX: 'auto' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      <th style={{ textAlign: 'center', width: '95px' }}>日期</th>
+                      <th style={{ textAlign: 'center', width: '70px' }}>動作</th>
+                      <th>標的代碼與名稱</th>
+                      <th style={{ textAlign: 'right' }}>成交股數</th>
+                      <th style={{ textAlign: 'right' }}>成交價格</th>
+                      <th style={{ textAlign: 'right' }}>稅金/手續費</th>
+                      <th style={{ textAlign: 'right' }}>現金流變動 (NT$)</th>
+                      <th style={{ textAlign: 'right' }}>實現淨損益</th>
+                      <th>備註原因</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {txHistory.map((tx) => {
+                      const isUsd = tx.currency === 'USD';
+                      const curr = isUsd ? 'US$ ' : 'NT$ ';
+                      const isWin = tx.realized_pnl_twd !== null && tx.realized_pnl_twd >= 0;
 
-                    return (
-                      <tr key={t.id} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                        <td style={{ fontWeight: 'bold', color: '#FDE68A' }}>
-                          {t.name} <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>({t.ticker})</span>
-                        </td>
-                        <td style={{ textAlign: 'center', color: '#94A3B8' }}>{t.entry_date}</td>
-                        <td style={{ textAlign: 'center', color: '#94A3B8' }}>{t.exit_date}</td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{t.shares?.toLocaleString()} 股</td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{curr}{t.entry_price?.toLocaleString()}</td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>{curr}{t.exit_price?.toLocaleString()}</td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FCA5A5' }}>
-                          NT$ {Math.round(taxTwd).toLocaleString()} {isUsd && `(US$ ${t.total_tax_fee})`}
-                        </td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
-                          {isWin ? '+' : ''}NT$ {Math.round(netPnlTwd).toLocaleString()}
-                        </td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
-                          {isWin ? '+' : ''}{t.net_return_pct?.toFixed(2)}%
-                        </td>
-                        <td style={{ textAlign: 'left', fontSize: '0.76rem', color: '#CBD5E1' }}>
-                          {t.reason || '平倉出場'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      return (
+                        <tr key={tx.id} style={{ background: 'rgba(255,255,255,0.015)' }}>
+                          <td style={{ textAlign: 'center', color: '#94A3B8', fontFamily: 'monospace' }}>
+                            {tx.date}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              padding: '0.15rem 0.4rem',
+                              borderRadius: '3px',
+                              fontWeight: 'bold',
+                              background: tx.action === '買入' ? 'rgba(16, 185, 129, 0.2)' : (
+                                tx.action === '加碼' ? 'rgba(56, 189, 248, 0.2)' : (
+                                  tx.action === '減持' ? 'rgba(245, 158, 11, 0.2)' : (
+                                    tx.action === '賣出' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(168, 85, 247, 0.2)'
+                                  )
+                                )
+                              ),
+                              color: tx.action === '買入' ? '#34D399' : (
+                                tx.action === '加碼' ? '#38BDF8' : (
+                                  tx.action === '減持' ? '#FBBF24' : (
+                                    tx.action === '賣出' ? '#F87171' : '#C084FC'
+                                  )
+                                )
+                              )
+                            }}>
+                              {tx.action}
+                            </span>
+                          </td>
+                          <td>
+                            <strong style={{ color: '#F1F5F9' }}>{tx.name}</strong>
+                            {tx.ticker !== '-' && (
+                              <span style={{ fontSize: '0.72rem', color: '#94A3B8', marginLeft: '0.3rem', fontFamily: 'monospace' }}>
+                                ({tx.ticker})
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            {tx.shares > 0 ? `${tx.shares.toLocaleString()} 股` : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            {tx.price > 0 ? `${curr}${tx.price.toLocaleString()}` : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FCA5A5' }}>
+                            {tx.tax_fee > 0 ? `${curr}${tx.tax_fee}` : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: tx.cash_flow_twd >= 0 ? '#34D399' : '#F87171' }}>
+                            {tx.cash_flow_twd >= 0 ? '+' : ''}NT$ {Math.round(tx.cash_flow_twd).toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: isWin ? '#34D399' : '#F87171' }}>
+                            {tx.realized_pnl_twd !== null && tx.realized_pnl_twd !== undefined ? (
+                              <span>
+                                {tx.realized_pnl_twd >= 0 ? '+' : ''}NT$ {Math.round(tx.realized_pnl_twd).toLocaleString()}
+                                {tx.realized_return_pct !== null && (
+                                  <span style={{ fontSize: '0.7rem', display: 'block', color: isWin ? '#6EE7B7' : '#FCA5A5' }}>
+                                    ({tx.realized_return_pct >= 0 ? '+' : ''}{tx.realized_return_pct.toFixed(1)}%)
+                                  </span>
+                                )}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td style={{ color: '#94A3B8', fontSize: '0.76rem' }}>
+                            {tx.note}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* 區塊 2: 20年歷年戰績對比 */}
-      {activeSubTab === 'history' && (
+      {/* 20年歷史回測績效 */}
+      {activeMainTab === 'history_audit' && (
         <div className="glass-card" style={{ padding: '1.2rem', overflowX: 'auto' }}>
-          <div style={{ marginBottom: '1rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-            🛡️ <strong>無上帝視角原則</strong>：每月最後一個交易日收盤確認動能 ➔ 次日開盤執行 ➔ 逐筆內扣交易稅費 ➔ 22 年累積狂飆 <strong>+294,215% (翻 2,942 倍)</strong>！
+          <div style={{ marginBottom: '0.8rem', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+            🛡️ <strong>無上帝視角 22 年完整逐年回測</strong>：每月最後一日收盤確認動能 ➔ 次日開盤執行 ➔ 內扣稅費 ➔ 累積報酬 <strong>+294,215% (翻 2,942 倍)</strong>！
           </div>
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.88rem' }}>
+          <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
             <thead>
               <tr>
                 <th style={{ textAlign: 'center', width: '65px' }}>年份</th>
-                <th style={{ textAlign: 'right', color: '#10B981', fontWeight: 'bold' }}>Calmar 冠軍 (Top 3 溫和階梯)</th>
+                <th style={{ textAlign: 'right', color: '#10B981', fontWeight: 'bold' }}>Calmar 冠軍 (Top 3 溫和階梯 40/30/30)</th>
                 <th style={{ textAlign: 'right', color: '#9CA3AF' }}>標普 500 (SPY 基準)</th>
                 <th style={{ textAlign: 'right', color: '#60A5FA' }}>超額報酬 (Alpha)</th>
-                <th style={{ textAlign: 'right' }}>年底資產淨值</th>
+                <th style={{ textAlign: 'right' }}>年底淨值</th>
               </tr>
             </thead>
             <tbody>
@@ -1071,243 +1399,158 @@ export default function GlobalSovereignDashboard() {
         </div>
       )}
 
-      {/* 區塊 3: 最近 24 個月調倉歷史 */}
-      {activeSubTab === 'recent_trades' && (
-        <div className="glass-card" style={{ padding: '1.2rem', overflowX: 'auto' }}>
-          <h4 style={{ margin: '0 0 1rem 0', color: '#F3F4F6', fontSize: '1.1rem' }}>
-            📜 最近調倉成交歷史明細 (最近 20 筆)
+      {/* 1,134 組 DOE 最佳化報告 */}
+      {activeMainTab === 'doe_audit' && (
+        <div className="glass-card" style={{ padding: '1.4rem', borderTop: '4px solid #8B5CF6' }}>
+          <h4 style={{ margin: '0 0 0.8rem 0', color: '#C4B5FD', fontSize: '1.15rem' }}>
+            🔬 1,134 組全覆蓋 DOE 出場策略與分配比例最佳化總結
           </h4>
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.86rem' }}>
-            <thead>
-              <tr>
-                <th>標的代碼</th>
-                <th>進場日期</th>
-                <th>出場日期</th>
-                <th style={{ textAlign: 'right' }}>進場價格</th>
-                <th style={{ textAlign: 'right' }}>出場價格</th>
-                <th style={{ textAlign: 'right' }}>單筆損益</th>
-                <th style={{ textAlign: 'right' }}>持倉天數</th>
-                <th>出場觸發原因</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentTrades.map((t, idx) => (
-                <tr key={idx}>
-                  <td style={{ fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>{t.ticker}</td>
-                  <td>{t.entry_date}</td>
-                  <td>{t.exit_date}</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>${t.entry_price?.toLocaleString()}</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>${t.exit_price?.toLocaleString()}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: t.return_pct >= 0 ? '#10B981' : '#EF4444', fontFamily: 'monospace' }}>
-                    {t.return_pct >= 0 ? `+${t.return_pct}%` : `${t.return_pct}%`}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>{t.holding_days} 天</td>
-                  <td style={{ color: 'var(--text-muted)' }}>{t.reason}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* 區塊 4: 1,134 組全覆蓋 DOE 出場策略與分配比例深度實驗報告 */}
-      {activeSubTab === 'doe_audit' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="glass-card" style={{ padding: '1.4rem', borderTop: '4px solid #8B5CF6', background: 'rgba(139, 92, 246, 0.05)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '0.8rem' }}>
-              <div>
-                <h3 style={{ margin: 0, color: '#C4B5FD', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🔬 1,134 組全因子 DOE 深度實驗：出場策略與分配比例全向最佳化
-                </h3>
-                <p style={{ margin: '0.4rem 0 0 0', color: '#CBD5E1', fontSize: '0.86rem', lineHeight: '1.5' }}>
-                  2004～2026 全歷史（5,720 交易日）全量實證：覆蓋 6 種均線/硬停損 x 7 種移動停利 x 3 種遞補模式 x 9 種持股檔數與配比風格。
-                </p>
-              </div>
-              <span style={{ fontSize: '0.8rem', background: 'rgba(139, 92, 246, 0.2)', color: '#DDD6FE', padding: '0.3rem 0.7rem', borderRadius: '4px', border: '1px solid rgba(139, 92, 246, 0.4)' }}>
-                全因子實驗總量：1,134 組完整回測
-              </span>
-            </div>
-
-            {/* 4 大核心主效應 ANOVA 矩陣看板 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-              {/* 1. 均線防守效應 */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#6EE7B7', marginBottom: '0.6rem' }}>
-                  🛡️ 因子 A：均線防守機制 (Exit MA)
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.6rem', lineHeight: '1.4' }}>
-                  <strong>40MA:</strong> 最抗跌但過敏 (MDD -43.3%, CAGR 25.3%, 1,085次交易)<br/>
-                  <strong>60MA 季線:</strong> 均衡防禦中樞 (MDD -45.9%, CAGR 28.6%)<br/>
-                  <strong>80MA:</strong> 波段與避險最佳平衡 (Calmar 0.66, CAGR 30.4%)<br/>
-                  <strong>None (無均線):</strong> 總收益最高 (CAGR 34.5%)，但月中無防守
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 'bold' }}>
-                  💡 結論：實戰防守推薦 60MA 或 80MA，切忌 40MA 頻繁洗盤。
-                </div>
-              </div>
-
-              {/* 2. 守住獲利移動停利效應 */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#FBBF24', marginBottom: '0.6rem' }}>
-                  🎯 因子 B：守住獲利移動停利 (Trailing Stop)
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.6rem', lineHeight: '1.4' }}>
-                  <strong>+10%回檔6%:</strong> 勝率衝上 <span style={{ color: '#FBBF24', fontWeight: 'bold' }}>53.2% (最高61.5%)</span>，絕不做白工<br/>
-                  <strong>+15%回檔10%:</strong> Calmar 0.65，CAGR 30.4%，鎖利波段兼備<br/>
-                  <strong>+20%回檔10%:</strong> 寬鬆型移動停利，CAGR 30.4%，MDD -47.0%<br/>
-                  <strong>None:</strong> CAGR 34.1%，但回吐心理壓力最大
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#FBBF24', fontWeight: 'bold' }}>
-                  💡 結論：追求勝率選「+10%回檔6%」；兼顧複利選「+15%回檔10%」。
-                </div>
-              </div>
-
-              {/* 3. 遞補時點效應 */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#60A5FA', marginBottom: '0.6rem' }}>
-                  ⚡ 因子 C：資金遞補時點 (Refill Mode)
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.6rem', lineHeight: '1.4' }}>
-                  <strong>次日立即遞補 (Next-day):</strong> CAGR <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>32.90% 全場第一</span> (資金零閒置)<br/>
-                  <strong>每週動態遞補 (Weekly):</strong> Calmar 0.67，MDD -46.5%，實戰操作最舒服<br/>
-                  <strong>月底才換股 (Monthly):</strong> CAGR 慘跌至 26.63% (現金閒置 2~4 週)
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#60A5FA', fontWeight: 'bold' }}>
-                  💡 結論：停損後絕對不能空手乾等月底！必須搭配每週或次日遞補。
-                </div>
-              </div>
-
-              {/* 4. 分配比例與檔數效應 */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#C084FC', marginBottom: '0.6rem' }}>
-                  ⚖️ 因子 D：檔數與分配比例 (Sizing Scheme)
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.6rem', lineHeight: '1.4' }}>
-                  <strong>Top 5 檔:</strong> MDD 僅 <span style={{ color: '#34D399', fontWeight: 'bold' }}>-41.35% (全場最穩)</span>，Calmar 0.70<br/>
-                  <strong>Top 4 檔:</strong> MDD -47.56%，CAGR 29.82%，階梯配比經典黃金平衡<br/>
-                  <strong>Top 3 檔:</strong> CAGR 衝上 31.38%，但 MDD 擴大至 -50.49%<br/>
-                  <strong>陡峭配置 (如 50/30/20):</strong> MDD 崩至 -52.9%，重壓風險過高
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#C084FC', fontWeight: 'bold' }}>
-                  💡 結論：等權 (如 25%x4 或 20%x5) 或溫和階梯最優，嚴禁單股超載 50%。
-                </div>
-              </div>
-            </div>
-
-            {/* 4 大維度全場冠軍榜單 */}
-            <h4 style={{ margin: '0 0 0.8rem 0', color: '#F3F4F6', fontSize: '1.05rem' }}>
-              🏆 全球泰坦 DOE 4 大維度實戰冠軍配置推薦
-            </h4>
-            <div style={{ overflowX: 'auto', marginBottom: '1.2rem' }}>
-              <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                    <th style={{ textAlign: 'left' }}>冠軍類別</th>
-                    <th style={{ textAlign: 'left' }}>最佳參數組合 (均線 / 停利 / 遞補 / 配比)</th>
-                    <th style={{ textAlign: 'right' }}>22年累積總報酬</th>
-                    <th style={{ textAlign: 'right' }}>年化 (CAGR)</th>
-                    <th style={{ textAlign: 'right' }}>最大回撤 (MDD)</th>
-                    <th style={{ textAlign: 'right' }}>卡瑪 Calmar</th>
-                    <th style={{ textAlign: 'right' }}>勝率 Win%</th>
-                    <th style={{ textAlign: 'right' }}>總交易數</th>
-                    <th style={{ textAlign: 'left' }}>實戰推薦適用場景</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ background: 'rgba(16, 185, 129, 0.08)', borderLeft: '3px solid #10B981' }}>
-                    <td style={{ fontWeight: 'bold', color: '#34D399' }}>🥇 最高 Calmar 冠軍</td>
-                    <td>
-                      <span style={{ fontWeight: 'bold', color: '#F1F5F9' }}>無均線 ＋ 無停利 ＋ 每週遞補 ＋ Top 3 階梯 (40/30/30)</span>
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+294,215%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>+42.38%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FBBF24', fontFamily: 'monospace' }}>-42.68%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>0.993</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>52.1%</td>
-                    <td style={{ textAlign: 'right', color: '#94A3B8' }}>311 筆</td>
-                    <td style={{ fontSize: '0.75rem', color: '#CBD5E1' }}>風險調整後效率最高，極限複利狂飆首選</td>
-                  </tr>
-
-                  <tr style={{ background: 'rgba(59, 130, 246, 0.08)', borderLeft: '3px solid #3B82F6' }}>
-                    <td style={{ fontWeight: 'bold', color: '#60A5FA' }}>🛡️ 最低回撤防守冠軍</td>
-                    <td>
-                      <span style={{ fontWeight: 'bold', color: '#F1F5F9' }}>40MA 停損 ＋ +15%回檔10% ＋ 月底換倉 ＋ Top 5 等權 (20%x5)</span>
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+3,391%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>+17.33%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>-29.50%</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>0.587</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>43.8%</td>
-                    <td style={{ textAlign: 'right', color: '#94A3B8' }}>751 筆</td>
-                    <td style={{ fontSize: '0.75rem', color: '#CBD5E1' }}>回撤壓破 30% 大關！極致厭惡風險型專用</td>
-                  </tr>
-
-                  <tr style={{ background: 'rgba(245, 158, 11, 0.08)', borderLeft: '3px solid #F59E0B' }}>
-                    <td style={{ fontWeight: 'bold', color: '#FBBF24' }}>🏆 最高勝率冠軍</td>
-                    <td>
-                      <span style={{ fontWeight: 'bold', color: '#F1F5F9' }}>無均線 ＋ +10%回檔6%停利 ＋ 月底換倉 ＋ Top 3 等權 (33%x3)</span>
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+35,630%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>+29.55%</td>
-                    <td style={{ textAlign: 'right', color: '#F87171', fontFamily: 'monospace' }}>-47.85%</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>0.618</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FBBF24', fontFamily: 'monospace' }}>61.48%</td>
-                    <td style={{ textAlign: 'right', color: '#94A3B8' }}>392 筆</td>
-                    <td style={{ fontSize: '0.75rem', color: '#CBD5E1' }}>勝率衝破 61%！快速鎖利入袋，絕不抱上抱下</td>
-                  </tr>
-
-                  <tr style={{ background: 'rgba(168, 85, 247, 0.08)', borderLeft: '3px solid #A855F7' }}>
-                    <td style={{ fontWeight: 'bold', color: '#C084FC' }}>⚖️ 實戰旗艦平衡推薦</td>
-                    <td>
-                      <span style={{ fontWeight: 'bold', color: '#F1F5F9' }}>60MA 季線 ＋ +10%回檔6% ＋ 次日立即遞補 ＋ Top 5 溫和階梯</span>
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+46,120%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>+30.76%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>-38.19%</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#A855F7', fontFamily: 'monospace' }}>0.805</td>
-                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FBBF24', fontFamily: 'monospace' }}>50.66%</td>
-                    <td style={{ textAlign: 'right', color: '#94A3B8' }}>1,064 筆</td>
-                    <td style={{ fontSize: '0.75rem', color: '#CBD5E1' }}>全面防守 (破季線出) + 鎖利 (回檔停利) + 零資金閒置，心安首選</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '1rem', borderRadius: '6px', fontSize: '0.84rem', color: '#CBD5E1', lineHeight: '1.6' }}>
-              📌 <strong>DOE 實證落地方案建議</strong>：
-              您選擇的「<strong>最高 Calmar 冠軍 (Top 3 溫和階梯 40/30/30)</strong>」在 22 年裡翻了 <strong>2,942 倍</strong>，Calmar 高達 0.993。當您放下短線得失心、給它時間慢慢跟他玩時，這套策略將以強大的複利幾何曲線為您創造超額收益！
-            </div>
+          <p style={{ color: '#CBD5E1', fontSize: '0.84rem', lineHeight: '1.5' }}>
+            經全歷史 5,720 交易日 1,134 組參數網格回測，您所採用的「<strong>最高 Calmar 冠軍（Top 3 溫和階梯 40/30/30 - 慢慢跟他玩）</strong>」以 <strong>Calmar 0.993、CAGR 42.38%、MDD -42.68%</strong> 奪得全場總冠軍。
+          </p>
+          <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '1rem', borderRadius: '6px', fontSize: '0.82rem', color: '#E2E8F0', marginTop: '1rem', lineHeight: '1.6' }}>
+            📌 <strong>核心風控要領</strong>：<br/>
+            1. 個股不設過敏短均線停損，讓真正的主升段主力狂飆；<br/>
+            2. 風險由系統宏觀安全氣囊統籌：當標普 500 (SPY) 跌破 200MA 年線時始判定空頭，全面清倉避險；<br/>
+            3. 平時部位由每月底動態更動建議進行權重平衡，確保資金效益極大化！
           </div>
         </div>
       )}
 
-      {/* 出場平倉確認彈窗 Modal */}
+      {/* 資金存入 / 調整彈窗 Modal */}
+      {cashModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100000, backdropFilter: 'blur(4px)', padding: '1rem'
+        }}>
+          <div className="glass-card" style={{
+            maxWidth: '420px', width: '100%',
+            background: 'linear-gradient(135deg, #1E293B, #0F172A)',
+            border: '1px solid #F59E0B', borderRadius: '10px', padding: '1.4rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.1rem' }}>
+                💵 記錄/存入閒置資金
+              </h4>
+              <button
+                onClick={() => setCashModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.8rem', color: '#CBD5E1', margin: '0 0 1rem 0' }}>
+              投入金額不一定需要立即買進股票，可記錄為當前閒置資金，系統將留待下次調倉時動態計算建議。
+            </p>
+
+            <form onSubmit={handleSaveCashChange}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.4rem' }}>操作模式</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setCashActionType('deposit')}
+                    style={{
+                      flex: 1, padding: '0.4rem', borderRadius: '4px', fontSize: '0.8rem',
+                      background: cashActionType === 'deposit' ? '#F59E0B' : 'rgba(255,255,255,0.06)',
+                      color: '#FFF', border: 'none', cursor: 'pointer', fontWeight: 'bold'
+                    }}
+                  >
+                    ➕ 追加存入金額
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCashActionType('set')}
+                    style={{
+                      flex: 1, padding: '0.4rem', borderRadius: '4px', fontSize: '0.8rem',
+                      background: cashActionType === 'set' ? '#F59E0B' : 'rgba(255,255,255,0.06)',
+                      color: '#FFF', border: 'none', cursor: 'pointer', fontWeight: 'bold'
+                    }}
+                  >
+                    ✏️ 直接重設閒置現金
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.2rem' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.3rem' }}>
+                  {cashActionType === 'deposit' ? '追加投入金額 (NT$)' : '新的閒置現金總額 (NT$)'}
+                </label>
+                <input
+                  type="number"
+                  step="1000"
+                  value={cashInputAmount}
+                  onChange={(e) => setCashInputAmount(e.target.value)}
+                  placeholder="例如 100000 或 500000"
+                  required
+                  style={{
+                    width: '100%', padding: '0.5rem', borderRadius: '6px',
+                    background: 'rgba(0,0,0,0.6)', border: '1px solid #F59E0B',
+                    color: '#FDE68A', fontSize: '1.1rem', fontWeight: 'bold', fontFamily: 'monospace'
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '0.3rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                  {[100000, 300000, 500000, 1000000].map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setCashInputAmount(String(amt))}
+                      style={{
+                        background: 'rgba(255,255,255,0.08)', border: 'none', color: '#CBD5E1',
+                        padding: '0.2rem 0.5rem', borderRadius: '3px', fontSize: '0.72rem', cursor: 'pointer'
+                      }}
+                    >
+                      +{amt >= 1000000 ? `${amt / 1000000}百萬` : `${amt / 10000}萬`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setCashModalOpen(false)}
+                  style={{ padding: '0.4rem 0.9rem', fontSize: '0.82rem' }}
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  className="btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                    color: '#FFF', fontWeight: 'bold', padding: '0.4rem 1.1rem', fontSize: '0.82rem'
+                  }}
+                >
+                  確認更新
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 手動出場平倉彈窗 Modal */}
       {exitModal.open && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          backdropFilter: 'blur(4px)',
-          padding: '1rem'
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 100000, backdropFilter: 'blur(4px)', padding: '1rem'
         }}>
           <div className="glass-card" style={{
-            maxWidth: '520px',
-            width: '100%',
+            maxWidth: '480px', width: '100%',
             background: 'linear-gradient(135deg, #1E293B, #0F172A)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.6)'
+            border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '10px', padding: '1.4rem'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.6rem' }}>
-              <h4 style={{ margin: 0, color: '#F87171', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h4 style={{ margin: 0, color: '#F87171', fontSize: '1.15rem' }}>
                 🚪 執行實戰持股出場平倉
               </h4>
               <button
@@ -1318,101 +1561,99 @@ export default function GlobalSovereignDashboard() {
               </button>
             </div>
 
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '6px', marginBottom: '1.2rem', fontSize: '0.84rem' }}>
-              <div style={{ color: '#F8FAFC', fontWeight: 'bold', fontSize: '1rem', marginBottom: '0.2rem' }}>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.7rem 0.9rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.82rem' }}>
+              <div style={{ color: '#F8FAFC', fontWeight: 'bold', fontSize: '0.95rem' }}>
                 {exitModal.name} <span style={{ fontFamily: 'monospace', color: '#94A3B8' }}>({exitModal.ticker})</span>
               </div>
-              <div style={{ color: '#CBD5E1' }}>
-                持有股數: <strong style={{ color: '#FDE68A' }}>{exitModal.shares?.toLocaleString()} 股</strong> | 買進成本: <strong style={{ color: '#FDE68A' }}>{exitModal.currency === 'USD' ? 'US$ ' : 'NT$ '}{exitModal.entry_price?.toLocaleString()}</strong>
-              </div>
-              <div style={{ color: '#94A3B8', fontSize: '0.78rem' }}>
-                建倉日期: {exitModal.entry_date} | 買進手續費: {exitModal.currency === 'USD' ? 'US$ ' : 'NT$ '}{exitModal.entry_fee}
+              <div style={{ color: '#CBD5E1', marginTop: '0.2rem' }}>
+                持有: <strong style={{ color: '#FDE68A' }}>{exitModal.shares?.toLocaleString()} 股</strong> | 成本: <strong style={{ color: '#FDE68A' }}>{exitModal.currency === 'USD' ? 'US$ ' : 'NT$ '}{exitModal.entry_price?.toLocaleString()}</strong>
               </div>
             </div>
 
             <form onSubmit={handleConfirmExit}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.7rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>出場成交價格 ({exitModal.currency})</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>出場成交價格 ({exitModal.currency})</label>
                   <input
                     type="number"
                     step="0.01"
                     value={exitModal.exit_price}
                     onChange={(e) => setExitModal({ ...exitModal, exit_price: e.target.value })}
                     required
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid #F87171', color: '#F87171', fontWeight: 'bold', fontFamily: 'monospace' }}
+                    style={{ width: '100%', padding: '0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid #F87171', color: '#F87171', fontWeight: 'bold', fontFamily: 'monospace' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>出場稅金與手續費 ({exitModal.currency})</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>出場稅金/手續費 ({exitModal.currency})</label>
                   <input
                     type="number"
                     step="0.01"
                     value={exitModal.exit_tax_fee}
                     onChange={(e) => setExitModal({ ...exitModal, exit_tax_fee: e.target.value })}
-                    placeholder="證交稅+手續費"
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', fontFamily: 'monospace' }}
+                    style={{ width: '100%', padding: '0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF', fontFamily: 'monospace' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>出場日期</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>出場日期</label>
                   <input
                     type="date"
                     value={exitModal.exit_date}
                     onChange={(e) => setExitModal({ ...exitModal, exit_date: e.target.value })}
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
+                    style={{ width: '100%', padding: '0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', color: '#94A3B8', marginBottom: '0.25rem' }}>出場原因</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>出場原因</label>
                   <select
                     value={exitModal.reason}
                     onChange={(e) => setExitModal({ ...exitModal, reason: e.target.value })}
-                    style={{ width: '100%', padding: '0.45rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
+                    style={{ width: '100%', padding: '0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#FFF' }}
                   >
                     <option value="依策略輪動換股">依策略輪動換股</option>
-                    <option value="大盤破年線避險出清">大盤破年線避險出清</option>
                     <option value="個人獲利了結">個人獲利了結</option>
-                    <option value="停損離場">停損離場</option>
+                    <option value="大盤破年線避險清倉">大盤破年線避險清倉</option>
+                    <option value="停損出場">停損出場</option>
                   </select>
                 </div>
               </div>
 
-              {/* 實時預估淨損益 */}
+              {/* 實時預估淨額 */}
               {(() => {
                 const ep = parseFloat(exitModal.exit_price) || 0;
                 const tf = parseFloat(exitModal.exit_tax_fee) || 0;
-                const gross = (ep - exitModal.entry_price) * exitModal.shares;
-                const net = gross - exitModal.entry_fee - tf;
-                const cost = exitModal.entry_price * exitModal.shares + exitModal.entry_fee;
-                const ret = cost > 0 ? (net / cost) * 100 : 0;
-                const curr = exitModal.currency === 'USD' ? 'US$ ' : 'NT$ ';
+                const isUsd = exitModal.currency === 'USD';
+                const fx = isUsd ? usdFx : 1.0;
+                const netProceedsTwd = (exitModal.shares * ep * fx) - (isUsd ? tf * fx : tf);
+                const grossPnl = (ep - exitModal.entry_price) * exitModal.shares;
+                const netPnlCurrency = grossPnl - exitModal.entry_fee - tf;
+                const netPnlTwd = netPnlCurrency * fx;
                 return (
-                  <div style={{ background: 'rgba(0,0,0,0.4)', padding: '0.7rem 0.9rem', borderRadius: '6px', marginBottom: '1.2rem', fontSize: '0.84rem' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.4)', padding: '0.6rem 0.8rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.8rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                      <span style={{ color: '#94A3B8' }}>扣除稅費後實現淨損益:</span>
-                      <strong style={{ color: net >= 0 ? '#34D399' : '#F87171', fontSize: '1rem', fontFamily: 'monospace' }}>
-                        {net >= 0 ? '+' : ''}{curr}{Math.round(net).toLocaleString()} ({net >= 0 ? '+' : ''}{ret.toFixed(2)}%)
+                      <span style={{ color: '#94A3B8' }}>回流閒置現金:</span>
+                      <strong style={{ color: '#FDE68A', fontFamily: 'monospace' }}>
+                        +NT$ {Math.round(netProceedsTwd).toLocaleString()}
                       </strong>
                     </div>
-                    {exitModal.currency === 'USD' && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#67E8F9', fontSize: '0.78rem' }}>
-                        <span>折合台幣淨損益:</span>
-                        <span>{net >= 0 ? '+' : ''}NT$ {Math.round(net * usdFx).toLocaleString()}</span>
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#94A3B8' }}>實現淨損益 (扣稅費):</span>
+                      <strong style={{ color: netPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
+                        {netPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(netPnlTwd).toLocaleString()}
+                      </strong>
+                    </div>
                   </div>
                 );
               })()}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.8rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setExitModal({ ...exitModal, open: false })}
+                  style={{ padding: '0.4rem 0.9rem', fontSize: '0.82rem' }}
                 >
                   取消
                 </button>
@@ -1421,12 +1662,10 @@ export default function GlobalSovereignDashboard() {
                   className="btn"
                   style={{
                     background: 'linear-gradient(135deg, #EF4444, #B91C1C)',
-                    color: '#FFF',
-                    fontWeight: 'bold',
-                    padding: '0.5rem 1.4rem'
+                    color: '#FFF', fontWeight: 'bold', padding: '0.4rem 1.1rem', fontSize: '0.82rem'
                   }}
                 >
-                  確認出場平倉並記入帳簿
+                  確認出場並入帳
                 </button>
               </div>
             </form>
