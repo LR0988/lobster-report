@@ -5244,7 +5244,7 @@ function StockDashboard() {
                       ? [
                           { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1主力 (40%)', weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, unrealized_return_pct: 20.57, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
                           { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 1195.0, latest_price: 1270.0, unrealized_return_pct: 6.28, holding_days: 8, ma60_stop_price: 1026.38, dist_to_stop_pct: 23.8, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 8040.0, latest_price: 8360.0, unrealized_return_pct: 3.98, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' }
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 8031.0, latest_price: 8360.0, unrealized_return_pct: 4.10, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' }
                         ]
                       : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
 
@@ -6821,7 +6821,7 @@ function StockDashboard() {
                             role: '🥉 第3主力 (30%)',
                             target_pct: 0.30,
                             currency: 'TWD',
-                            default_entry_price: 8040.0,
+                            default_entry_price: 8031.0,
                             current_price: 8360.0,
                             entry_date: '2026-10-01',
                             entry_fee_twd: 400,
@@ -6853,22 +6853,43 @@ function StockDashboard() {
 
                         const ledgerPositions = baseConfig.map(cfg => {
                           const targetCapitalTwd = totalDeposit * cfg.target_pct;
-                          const effectiveEntryPrice = (userCustomEntryPrices[cfg.stock_id] !== undefined && userCustomEntryPrices[cfg.stock_id] > 0)
-                            ? userCustomEntryPrices[cfg.stock_id]
-                            : cfg.default_entry_price;
 
-                          const isCustomized = userCustomEntryPrices[cfg.stock_id] !== undefined && userCustomEntryPrices[cfg.stock_id] > 0 && userCustomEntryPrices[cfg.stock_id] !== cfg.default_entry_price;
+                          // 1. 優先從歷史交易紀錄 (global_titan_all_tx_v2 / taiwan_titan_tx_history_v1) 取得真實買入成交價
+                          let txMatch = null;
+                          try {
+                            const txStorageKey = isGlobal ? 'global_titan_all_tx_v2' : 'taiwan_titan_tx_history_v1';
+                            const savedTxList = JSON.parse(localStorage.getItem(txStorageKey) || '[]');
+                            txMatch = savedTxList.find(t => 
+                              (t.action === '買入' || t.action === '加碼') && 
+                              (t.ticker === cfg.stock_id || t.stock_id === cfg.stock_id || 
+                               (t.ticker && cfg.stock_id && t.ticker.split('.')[0] === cfg.stock_id.split('.')[0]) ||
+                               (t.stock_id && cfg.stock_id && t.stock_id.split('.')[0] === cfg.stock_id.split('.')[0]) ||
+                               (t.name && cfg.stock_name && (t.name.includes(cfg.stock_name.slice(0, 2)) || cfg.stock_name.includes(t.name.slice(0, 2)))))
+                            );
+                          } catch (e) {}
+
+                          let effectiveEntryPrice = cfg.default_entry_price;
+                          if (txMatch && txMatch.price > 0) {
+                            effectiveEntryPrice = txMatch.price;
+                          } else if (userCustomEntryPrices[cfg.stock_id] !== undefined && userCustomEntryPrices[cfg.stock_id] > 0) {
+                            effectiveEntryPrice = userCustomEntryPrices[cfg.stock_id];
+                          }
+
+                          const isCustomized = (txMatch && txMatch.price > 0 && txMatch.price !== cfg.default_entry_price) || 
+                            (userCustomEntryPrices[cfg.stock_id] !== undefined && userCustomEntryPrices[cfg.stock_id] > 0 && userCustomEntryPrices[cfg.stock_id] !== cfg.default_entry_price);
 
                           // 買入每股台幣單價與現價台幣單價
                           const entryPriceInTwd = cfg.currency === 'USD' ? effectiveEntryPrice * fx : effectiveEntryPrice;
                           const currentPriceInTwd = cfg.currency === 'USD' ? cfg.current_price * fx : cfg.current_price;
 
-                          // 依入金分配目標計算可買股數
-                          let shares = Math.floor(targetCapitalTwd / (entryPriceInTwd || 1));
+                          // 依歷史買入紀錄或入金目標計算成交股數
+                          let shares = (txMatch && txMatch.shares > 0) ? txMatch.shares : Math.floor(targetCapitalTwd / (entryPriceInTwd || 1));
                           if (shares <= 0) shares = 1;
 
+                          const actualFee = (txMatch && txMatch.tax_fee !== undefined) ? txMatch.tax_fee : (cfg.entry_fee_twd || 0);
+
                           // 投入金額 (買入流出資金成本，含微手續費)
-                          const costTwd = Math.round(shares * entryPriceInTwd + (cfg.entry_fee_twd || 0));
+                          const costTwd = Math.round(shares * entryPriceInTwd + actualFee);
                           // 當前市值
                           const currentValTwd = Math.round(shares * currentPriceInTwd);
                           // 未實現損益 (金額與百分比)
@@ -7126,6 +7147,34 @@ function StockDashboard() {
                                                     const nextP = { ...userCustomEntryPrices, [pos.stock_id]: num };
                                                     setUserCustomEntryPrices(nextP);
                                                     try { localStorage.setItem('user_custom_entry_prices', JSON.stringify(nextP)); } catch(e){}
+
+                                                    // 同步更新歷史交易流水帳 (txHistory)
+                                                    try {
+                                                      const txStorageKey = isGlobal ? 'global_titan_all_tx_v2' : 'taiwan_titan_tx_history_v1';
+                                                      const savedTxList = JSON.parse(localStorage.getItem(txStorageKey) || '[]');
+                                                      const updatedTxList = savedTxList.map(t => {
+                                                        if ((t.action === '買入' || t.action === '加碼') && (t.ticker === pos.stock_id || t.stock_id === pos.stock_id || (t.ticker && pos.stock_id && t.ticker.split('.')[0] === pos.stock_id.split('.')[0]))) {
+                                                          const fee = t.tax_fee || 0;
+                                                          const newFlow = -Math.round(t.shares * num * (pos.currency === 'USD' ? fx : 1) + fee);
+                                                          return { ...t, price: num, cash_flow_twd: newFlow };
+                                                        }
+                                                        return t;
+                                                      });
+                                                      localStorage.setItem(txStorageKey, JSON.stringify(updatedTxList));
+                                                    } catch(e) {}
+
+                                                    // 同步更新實戰部位
+                                                    try {
+                                                      const posKey = isGlobal ? 'global_titan_user_positions_v2' : 'taiwan_titan_user_positions_v1';
+                                                      const savedPosList = JSON.parse(localStorage.getItem(posKey) || '[]');
+                                                      const updatedPosList = savedPosList.map(p => {
+                                                        if (p.ticker === pos.stock_id || p.stock_id === pos.stock_id || (p.ticker && pos.stock_id && p.ticker.split('.')[0] === pos.stock_id.split('.')[0])) {
+                                                          return { ...p, entry_price: num };
+                                                        }
+                                                        return p;
+                                                      });
+                                                      localStorage.setItem(posKey, JSON.stringify(updatedPosList));
+                                                    } catch(e) {}
                                                   }
                                                 }
                                               }}

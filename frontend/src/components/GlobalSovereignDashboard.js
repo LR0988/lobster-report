@@ -43,7 +43,7 @@ const DEFAULT_POSITIONS = [
     market: '台股 (TWSE)',
     currency: 'TWD',
     shares: 35,
-    entry_price: 8040.0,
+    entry_price: 8031.0,
     current_price: 8360.0,
     entry_date: '2026-10-01',
     entry_fee: 400,
@@ -106,9 +106,9 @@ const DEFAULT_TX_HISTORY = [
     name: '創意 (Global Unichip)',
     currency: 'TWD',
     shares: 35,
-    price: 8040.0,
+    price: 8031.0,
     tax_fee: 400,
-    cash_flow_twd: -281800,
+    cash_flow_twd: -281485,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10月初策略建倉 第3主力 (30%)'
@@ -260,6 +260,40 @@ export default function GlobalSovereignDashboard() {
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY_ALL_TX, JSON.stringify(txHistory)); } catch {}
+  }, [txHistory]);
+
+  // 自動將「當前持股部位」的成本均價、股數與費用，100% 嚴格綁定對齊「歷史交易流水帳」最新買入明細！
+  useEffect(() => {
+    if (!Array.isArray(txHistory) || txHistory.length === 0) return;
+    setUserPositions(prev => {
+      let changed = false;
+      const next = prev.map(p => {
+        const matchTx = txHistory.find(tx => 
+          (tx.action === '買入' || tx.action === '加碼') && 
+          (tx.ticker === p.ticker || 
+           (tx.ticker && p.ticker && tx.ticker.split('.')[0] === p.ticker.split('.')[0]) || 
+           (tx.name && p.name && (tx.name.includes(p.name.slice(0, 2)) || p.name.includes(tx.name.slice(0, 2)))))
+        );
+        if (matchTx && matchTx.price > 0) {
+          const nextPrice = matchTx.price;
+          const nextShares = matchTx.shares > 0 ? matchTx.shares : p.shares;
+          const nextFee = matchTx.tax_fee !== undefined ? matchTx.tax_fee : p.entry_fee;
+          const nextDate = matchTx.date || p.entry_date;
+          if (p.entry_price !== nextPrice || p.shares !== nextShares || p.entry_fee !== nextFee || p.entry_date !== nextDate) {
+            changed = true;
+            return {
+              ...p,
+              entry_price: nextPrice,
+              shares: nextShares,
+              entry_fee: nextFee,
+              entry_date: nextDate
+            };
+          }
+        }
+        return p;
+      });
+      return changed ? next : prev;
+    });
   }, [txHistory]);
 
   useEffect(() => {
@@ -937,8 +971,34 @@ export default function GlobalSovereignDashboard() {
       }
     });
 
+    // 若是買入/加碼動作，立即同步更新對應實戰持股部位成本均價與股數
+    if (updatedTx.action === '買入' || updatedTx.action === '加碼') {
+      setUserPositions(prevPos => prevPos.map(p => {
+        if (p.ticker === updatedTx.ticker || (p.ticker && updatedTx.ticker && p.ticker.split('.')[0] === updatedTx.ticker.split('.')[0]) || p.name === updatedTx.name) {
+          return {
+            ...p,
+            entry_price: updatedTx.price,
+            shares: updatedTx.shares > 0 ? updatedTx.shares : p.shares,
+            entry_fee: updatedTx.tax_fee,
+            entry_date: updatedTx.date
+          };
+        }
+        return p;
+      }));
+
+      // 同步更新跨頁面共用的買入價格快取
+      try {
+        const customSaved = JSON.parse(localStorage.getItem('user_custom_entry_prices') || '{}');
+        customSaved[updatedTx.ticker] = updatedTx.price;
+        if (updatedTx.ticker.includes('.')) {
+          customSaved[updatedTx.ticker.split('.')[0]] = updatedTx.price;
+        }
+        localStorage.setItem('user_custom_entry_prices', JSON.stringify(customSaved));
+      } catch {}
+    }
+
     setEditTxModal(prev => ({ ...prev, open: false }));
-    triggerNotice(`✅ 已成功${editTxModal.isNew ? '新增' : '更新修正'}「${updatedTx.name}」歷史交易明細！`);
+    triggerNotice(`✅ 已成功${editTxModal.isNew ? '新增' : '更新修正'}「${updatedTx.name}」歷史交易明細！實戰成本已自動對齊。`);
   };
 
   const handleOpenAddPosition = () => {
