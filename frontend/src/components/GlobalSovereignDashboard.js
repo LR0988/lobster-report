@@ -31,7 +31,7 @@ const DEFAULT_POSITIONS = [
     currency: 'TWD',
     shares: 236,
     entry_price: 1195.0,
-    current_price: 1270.0,
+    current_price: 1255.0,
     entry_date: '2026-10-01',
     entry_fee: 400,
     stop_loss_price: 1026.38,
@@ -46,7 +46,7 @@ const DEFAULT_POSITIONS = [
     currency: 'TWD',
     shares: 35,
     entry_price: 8031.0,
-    current_price: 8360.0,
+    current_price: 8100.0,
     entry_date: '2026-10-01',
     entry_fee: 400,
     stop_loss_price: 5985.17,
@@ -327,6 +327,27 @@ export default function GlobalSovereignDashboard() {
   const macro = data?.macro_status || {};
   const currentPicks = data?.current_picks || [];
   const yearly = data?.yearly_performance || [];
+
+  // 自動將「當前持股部位」的最新現價 (current_price)，依據模型最新演算 currentPicks 行情動態同步對齊！
+  // 注意：只更新 current_price，嚴格保留使用者的進場成本 entry_price、股數與進場時間！
+  useEffect(() => {
+    if (!currentPicks || currentPicks.length === 0) return;
+    setUserPositions(prev => {
+      let changed = false;
+      const next = prev.map(p => {
+        const matchPick = currentPicks.find(cp => 
+          cp.ticker === p.ticker || 
+          (cp.ticker && p.ticker && cp.ticker.split('.')[0] === p.ticker.split('.')[0])
+        );
+        if (matchPick && matchPick.price > 0 && p.current_price !== matchPick.price) {
+          changed = true;
+          return { ...p, current_price: matchPick.price };
+        }
+        return p;
+      });
+      return changed ? next : prev;
+    });
+  }, [currentPicks]);
 
   // 1. 計算持股現值與整體統計
   const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
