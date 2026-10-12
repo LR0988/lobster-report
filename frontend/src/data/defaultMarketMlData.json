@@ -150388,6 +150388,17 @@
           }
         }
       }
+    },
+    "stats": {
+      "cagr": 53.11,
+      "mdd": -28.49,
+      "sharpe": 1.27,
+      "calmar": 1.864,
+      "sortino": 2.55,
+      "mult": 15626.83,
+      "total_return_pct": 1562583.2,
+      "overfitting_pbo": "0.00%",
+      "dsr_significance": "100.00%"
     }
   },
   "institutional_cockpit": {

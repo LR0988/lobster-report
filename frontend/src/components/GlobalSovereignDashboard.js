@@ -390,7 +390,7 @@ export default function GlobalSovereignDashboard() {
     };
   }, [txHistory, usdFx]);
 
-  // 3. 月底持倉更動建議演算法 (以當前總資金計算)
+  // 3. 月底持倉更動建議演算法 (以當前總資金計算，含 DOE ±5% 容差帶與前 5 名保護帶)
   const rebalanceSuggestions = useMemo(() => {
     if (totalNetAssetsTwd <= 0) return [];
 
@@ -414,10 +414,13 @@ export default function GlobalSovereignDashboard() {
         targetShares = Math.floor(targetTwd / price);
       }
 
-      // 檢查目前持有股數
+      // 檢查目前持有股數與權重偏差 (DOE ±5% 容差帶檢查)
       const heldPos = userPositions.find(p => p.ticker === pick.ticker);
       const heldShares = heldPos ? heldPos.shares : 0;
       const diffShares = targetShares - heldShares;
+      const curWeightPct = totalNetAssetsTwd > 0 ? (((heldShares * price * fx) / totalNetAssetsTwd) * 100) : 0;
+      const targetWeightPct = pick.weight_pct || 30;
+      const weightDiffPct = Math.abs(curWeightPct - targetWeightPct);
 
       const suggKey = `sugg_${pick.ticker}`;
       if (dismissedSuggestions.includes(suggKey)) return;
@@ -443,8 +446,8 @@ export default function GlobalSovereignDashboard() {
           role: pick.rank === 1 ? '👑 第1王者 (40%)' : (pick.rank === 2 ? '🥈 第2主力 (30%)' : '🥉 第3主力 (30%)'),
           heldPos: null
         });
-      } else if (diffShares > 0 && Math.abs(diffShares * price * fx) > 5000) {
-        // 加碼
+      } else if (heldShares > 0 && weightDiffPct > 5.0 && diffShares > 0 && Math.abs(diffShares * price * fx) > 5000) {
+        // 權重偏差超出 5% 容差帶且金額 > 5000: 加碼
         const estFee = isUsd ? 15 : Math.max(20, Math.round(diffShares * price * 0.001425));
         suggestions.push({
           key: suggKey,
@@ -464,8 +467,8 @@ export default function GlobalSovereignDashboard() {
           role: heldPos?.role || '主力加碼',
           heldPos: heldPos
         });
-      } else if (diffShares < 0 && Math.abs(diffShares * price * fx) > 5000) {
-        // 減持 (保留部分)
+      } else if (heldShares > 0 && weightDiffPct > 5.0 && diffShares < 0 && Math.abs(diffShares * price * fx) > 5000) {
+        // 權重偏差超出 5% 容差帶且金額 > 5000: 減持
         const reduceShares = Math.abs(diffShares);
         const estTaxFee = isUsd ? 15 : Math.round(reduceShares * price * (0.003 + 0.001425));
         suggestions.push({
@@ -489,11 +492,17 @@ export default function GlobalSovereignDashboard() {
       }
     });
 
-    // B. 針對目前持倉中、但已不在 Top 3 的股票 (或跌破標準) -> 建議全部賣出
+    // B. 針對目前持倉中、但不在 Top 3 的股票:
+    // 檢查是否在「前 5 名保護緩衝帶 (Rank <= 5)」且未達 4 個月老化換血上限
     userPositions.forEach(heldPos => {
       const isInTarget = activeTopPicks.some(p => p.ticker === heldPos.ticker);
+      const pickInfo = currentPicks.find(p => p.ticker === heldPos.ticker);
+      const rank = pickInfo ? pickInfo.rank : 999;
+      // 若排名在前 5 名內，且未達 4 個月換血上限 -> 緩衝保護中，不強制賣出！
+      const isBufferProtected = rank <= 5 && (!heldPos.tenure_months || heldPos.tenure_months < 4);
+
       const suggKey = `sugg_exit_${heldPos.ticker}`;
-      if (!isInTarget && !dismissedSuggestions.includes(suggKey)) {
+      if (!isInTarget && !isBufferProtected && !dismissedSuggestions.includes(suggKey)) {
         const isUsd = heldPos.currency === 'USD';
         const curPrice = heldPos.current_price || heldPos.entry_price;
         const estTaxFee = isUsd ? 15 : Math.round(heldPos.shares * curPrice * (0.003 + 0.001425));
@@ -1214,11 +1223,11 @@ export default function GlobalSovereignDashboard() {
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               👑 全球高流動性泰坦旗艦
             </h3>
-            <span style={{ fontSize: '0.74rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              最高 Calmar 冠軍 (Top 3 階梯 40/30/30)
+            <span style={{ fontSize: '0.74rem', background: 'rgba(99, 102, 241, 0.2)', color: '#A5B4FC', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
+              🏆 DOE 最佳化旗艦版 (偏態凸性 + 4月換血 + Top 5保護帶 + 5%容差)
             </span>
             <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22年累積 +294,215% (2,942倍) | CAGR 42.4% | MDD -42.7% | Calmar 0.993
+              22年貫穿 CAGR {data?.kpi?.scheme_a?.cagr || 53.11}% | MDD {data?.kpi?.scheme_a?.mdd || -28.49}% | Sharpe {data?.kpi?.scheme_a?.sharpe || 1.27} | Calmar {data?.kpi?.scheme_a?.calmar || 1.864} | 7.8年盲測 CAGR 82.67% (PBO 0.0%)
             </span>
           </div>
 
@@ -1380,13 +1389,16 @@ export default function GlobalSovereignDashboard() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
                 <span style={{ fontSize: '1.15rem' }}>🛡️</span>
-                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【月中抱牢紀律與警示原則】</span>
+                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【DOE 旗艦抱牢紀律與風控原則】</span>
                 <span style={{ color: '#CBD5E1' }}>
-                  依量化動能紀律「<strong>不到月底絕不隨意換股</strong>」（杜絕假突破洗盤與手續費摩擦）；當前 3 檔持股全數在 60MA 季線上狂奔（安全邊界 +23% ~ +78%）。下次定期調倉日為 <strong>2026-10-31 盤後</strong>。若月中不幸跌破季線，將<strong>立即跳車變現為防禦現金</strong>！
+                  ① <strong>4 個月動能老化換血</strong>（持股滿 4 個月強制輪動換血，避開主升段末期長震盪）；
+                  ② <strong>前 5 名保護緩衝帶（Rank ≤ 5）</strong>（在手股票滑落至第 4~5 名不換出，避免頻繁洗盤摩擦）；
+                  ③ <strong>±5% 權重容差免調倉</strong>（節省手續費與證交稅）；
+                  ④ <strong>季線 MA60 動態風控</strong>：月中若跌破 60MA 次日開盤即刻出清轉現金。下次定期調倉日為 <strong>2026-10-31 盤後</strong>。
                 </span>
               </div>
               <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                ● 風控監控中：全數安全續抱
+                ● 風控監控中：全數安全續抱 (MRNA / 欣興 / 創意 全在 60MA 季線上狂奔)
               </span>
             </div>
 

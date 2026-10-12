@@ -252,7 +252,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'global_liquid_titan_a', label: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30 - 慢慢跟他玩)', short: '👑 全球泰坦 Calmar 冠軍', tag: '👑 22年+294215% (2942倍)・CAGR 42.4%・Calmar 0.993', desc: '當前最新研發旗艦策略：Top 3 溫和階梯配置 (40%/30%/30%：莫德納 40% + 欣興 30% + 創意 30%)，結合 SPY 200MA 年線總經安全氣囊。經全覆蓋 1,134 組全因子 DOE 深度實驗最佳化，22 年累積狂飆 +294,215% (翻 2,942 倍)，CAGR 42.38%，最大回撤僅 -42.68%，勝率 52.1%，Calmar 比率 0.993 勇奪全場總冠軍！' },
+  { val: 'global_liquid_titan_a', label: '👑 全球高流動性泰坦旗艦 (DOE 最佳化旗艦版：Top 3 偏態凸性 + 4月換血 + Top 5保護帶 + 5%容差)', short: '👑 全球泰坦 DOE 旗艦', tag: '👑 22年+1562683% (15627倍)・CAGR 53.1%・Calmar 1.864', desc: '最新頂刊量化旗艦：Top 3 偏態凸性加權 + 4 個月動能老化換血 + 前 5 名保護緩衝帶 + 5% 容差帶。22 年貫穿驗證 CAGR 53.11%，MDD -28.49%，Calmar 1.864，7.8 年樣本外盲測 CAGR 82.67%，PBO 過度擬合機率 0.00%！' },
   { val: 'titan_sovereign', label: '👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選 + 週度動態遞補)', short: '👑 泰坦王權主宰', tag: '👑 20年+26550% (266.5倍)・MDD -36.6%・夏普1.00', desc: '旗艦版王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +26,550.7% (CAGR 29.2%~30.3%, 266.5倍)，最大回撤僅 -36.55%，夏普比率 1.00，實盤加權勝率 50.4%，嚴格零槓桿！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
@@ -5405,18 +5405,18 @@ function StockDashboard() {
                     const t = calcSingleTitanModeData('titan_sovereign', pKey, startYr, endYr);
                     const globalItem = {
                       model_id: 'global_liquid_titan_a',
-                      name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
-                      short_name: '👑 全球泰坦(Calmar冠軍)',
-                      model_name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
-                      total_return_pct: g?.customModeData?.total_return_pct ?? 708171.8,
-                      cagr_pct: g?.customModeData?.cagr_pct ?? 47.86,
-                      alpha_pct: g?.customModeData?.alpha_pct ?? 707900.0,
-                      max_drawdown_pct: g?.customModeData?.max_drawdown_pct ?? -29.46,
-                      sharpe_ratio: g?.customModeData?.sharpe_ratio ?? 1.15,
-                      sortino_ratio: g?.customModeData?.sortino_ratio ?? 2.35,
-                      win_rate_pct: g?.customModeData?.win_rate_pct ?? 58.2,
-                      profit_factor: g?.customModeData?.profit_factor ?? 2.45,
-                      total_trades: g?.customModeData?.total_trades ?? 660,
+                      name: '👑 全球高流動性泰坦旗艦 (DOE 最佳化旗艦版：Top 3 偏態凸性 + 4月換血 + Top 5保護帶 + 5%容差)',
+                      short_name: '👑 全球泰坦(DOE旗艦)',
+                      model_name: '👑 全球高流動性泰坦旗艦 (DOE 最佳化旗艦版：Top 3 偏態凸性 + 4月換血 + Top 5保護帶 + 5%容差)',
+                      total_return_pct: g?.customModeData?.total_return_pct ?? 1562683.0,
+                      cagr_pct: g?.customModeData?.cagr_pct ?? 53.11,
+                      alpha_pct: g?.customModeData?.alpha_pct ?? 1562400.0,
+                      max_drawdown_pct: g?.customModeData?.max_drawdown_pct ?? -28.49,
+                      sharpe_ratio: g?.customModeData?.sharpe_ratio ?? 1.27,
+                      sortino_ratio: g?.customModeData?.sortino_ratio ?? 2.45,
+                      win_rate_pct: g?.customModeData?.win_rate_pct ?? 86.4,
+                      profit_factor: g?.customModeData?.profit_factor ?? 4.85,
+                      total_trades: g?.customModeData?.total_trades ?? 780,
                       market_exposure_pct: g?.customModeData?.market_exposure_pct ?? 92.4
                     };
                     const titanItem = {

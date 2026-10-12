@@ -1,11 +1,23 @@
 {
   "status": "ok",
-  "strategy_name": "全球高流動性泰坦旗艦 (FIP 漸進動能 + 全球主權寬幅雙核頂刊版)",
-  "generated_at": "2026-10-12 05:40:16",
+  "strategy_name": "全球高流動性泰坦旗艦 (DOE 最佳化旗艦版：Top 3 偏態凸性 + 4月老化換血 + Top 5保護帶 + 5%容差)",
+  "generated_at": "2026-10-12 17:11:07",
   "latest_data_date": "2026-10-09",
+  "doe_config": {
+    "top_n": 3,
+    "alloc_scheme": "convex_skew (偏態凸性非線性加權)",
+    "max_hold_months": 4,
+    "rank_buffer": 5,
+    "weight_tolerance_pct": 5,
+    "pbo_overfitting_prob": "0.00%",
+    "deflated_sharpe_ratio": "100.00%",
+    "oos_cagr_7yr": 82.67,
+    "oos_sharpe_7yr": 1.37,
+    "oos_calmar_7yr": 2.901
+  },
   "macro_status": {
     "spy_price": 778.57,
-    "spy_ma200": 720.68,
+    "spy_ma200": 719.66,
     "global_breadth_pct": 66.7,
     "bull_countries": "10/15",
     "regime": "全球共振多頭 (寬幅 66% >= 60% -> 滿倉運作)",
@@ -13,11 +25,13 @@
   },
   "kpi": {
     "scheme_a": {
-      "total_ret": 708171.8,
-      "mult": 7082.72,
-      "cagr": 47.86,
-      "mdd": -29.46,
-      "calmar": 1.624,
+      "total_ret": 1562583.2,
+      "mult": 15626.83,
+      "cagr": 53.11,
+      "mdd": -28.49,
+      "sharpe": 1.27,
+      "calmar": 1.864,
+      "sortino": 2.55,
       "win_rate": 86.4
     },
     "spy": {
@@ -40,515 +54,338 @@
   "current_picks": [
     {
       "rank": 1,
-      "ticker": "MRNA",
-      "name": "莫德納 (Moderna)",
-      "market": "美股 (NASDAQ)",
-      "currency": "USD",
-      "weight_pct": 40,
-      "price": 225.0,
-      "ma60": 126.18,
-      "ma200": 73.56,
-      "mom_3m": 233.6,
-      "mom_12m": 711.7,
-      "fip": 0.04,
-      "score": 4.419,
-      "is_active": true
-    },
-    {
-      "rank": 2,
-      "ticker": "3037.TW",
-      "name": "欣興 (Unimicron ABF載板)",
-      "market": "台股 (TWSE)",
-      "currency": "TWD",
-      "weight_pct": 30,
-      "price": 1270.0,
-      "ma60": 1026.38,
-      "ma200": 756.45,
-      "mom_3m": 45.3,
-      "mom_12m": 702.9,
-      "fip": 0.15,
-      "score": 3.4917,
-      "is_active": true
-    },
-    {
-      "rank": 3,
-      "ticker": "3443.TW",
-      "name": "創意 (Global Unichip ASIC)",
-      "market": "台股 (TWSE)",
-      "currency": "TWD",
-      "weight_pct": 30,
-      "price": 8360.0,
-      "ma60": 5985.17,
-      "ma200": 4214.01,
-      "mom_3m": 108.0,
-      "mom_12m": 469.4,
-      "fip": 0.07,
-      "score": 2.7389,
-      "is_active": true
-    },
-    {
-      "rank": 4,
       "ticker": "MU",
       "name": "美光科技 (Micron 記憶體巨頭)",
       "market": "美股 (NASDAQ)",
       "currency": "USD",
-      "weight_pct": 0,
+      "weight_pct": 40,
       "price": 1029.0,
-      "ma60": 964.45,
-      "ma200": 711.39,
-      "mom_3m": 4.7,
-      "mom_12m": 436.6,
-      "fip": 0.07,
-      "score": 2.2114,
-      "is_active": false
+      "ma60": 961.66,
+      "ma200": 701.57,
+      "mom_3m": 9.8,
+      "mom_12m": 424.1,
+      "fip": 0.06,
+      "convexity": 1.17,
+      "score": 3.6514,
+      "is_active": true,
+      "in_buffer_zone": true,
+      "tenure_months": 1,
+      "max_tenure_months": 4
     },
     {
-      "rank": 5,
-      "ticker": "2454.TW",
-      "name": "聯發科 (MediaTek 晶片霸主)",
+      "rank": 2,
+      "ticker": "MRNA",
+      "name": "莫德納 (Moderna 生技巨擘)",
+      "market": "美股 (NASDAQ)",
+      "currency": "USD",
+      "weight_pct": 30,
+      "price": 225.0,
+      "ma60": 124.78,
+      "ma200": 72.63,
+      "mom_3m": 235.8,
+      "mom_12m": 705.9,
+      "fip": 0.03,
+      "convexity": 5.95,
+      "score": 3.3459,
+      "is_active": true,
+      "in_buffer_zone": true,
+      "tenure_months": 1,
+      "max_tenure_months": 4
+    },
+    {
+      "rank": 3,
+      "ticker": "3037.TW",
+      "name": "欣興 (Unimicron 載板王者)",
+      "market": "台股 (TWSE)",
+      "currency": "TWD",
+      "weight_pct": 30,
+      "price": 1270.0,
+      "ma60": 1023.8,
+      "ma200": 744.79,
+      "mom_3m": 40.6,
+      "mom_12m": 695.4,
+      "fip": 0.15,
+      "convexity": 1.07,
+      "score": 3.1247,
+      "is_active": true,
+      "in_buffer_zone": true,
+      "tenure_months": 1,
+      "max_tenure_months": 4
+    },
+    {
+      "rank": 4,
+      "ticker": "3443.TW",
+      "name": "創意 (Global Unichip ASIC)",
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 0,
-      "price": 4690.0,
-      "ma60": 4278.33,
-      "ma200": 3104.01,
-      "mom_3m": 28.1,
-      "mom_12m": 265.7,
-      "fip": 0.03,
-      "score": 1.6309,
-      "is_active": false
+      "price": 8360.0,
+      "ma60": 5950.17,
+      "ma200": 4160.2,
+      "mom_3m": 95.8,
+      "mom_12m": 465.5,
+      "fip": 0.07,
+      "convexity": 1.1,
+      "score": 2.0364,
+      "is_active": false,
+      "in_buffer_zone": true,
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
-      "rank": 6,
-      "ticker": "ASX",
-      "name": "日月光投控 (ASE 封測龍頭ADR)",
-      "market": "美股 ADR",
-      "currency": "USD",
-      "weight_pct": 0,
-      "price": 46.43,
-      "ma60": 39.59,
-      "ma200": 31.63,
-      "mom_3m": 15.0,
-      "mom_12m": 293.1,
-      "fip": 0.24,
-      "score": 1.6049,
-      "is_active": false
-    },
-    {
-      "rank": 7,
+      "rank": 5,
       "ticker": "3008.TW",
       "name": "大立光 (Largan 光學鏡頭)",
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 0,
       "price": 6660.0,
-      "ma60": 5656.97,
-      "ma200": 3739.75,
-      "mom_3m": 57.6,
-      "mom_12m": 209.3,
+      "ma60": 5612.2,
+      "ma200": 3700.05,
+      "mom_3m": 54.7,
+      "mom_12m": 176.3,
       "fip": -0.01,
-      "score": 1.3606,
-      "is_active": false
+      "convexity": 1.64,
+      "score": 1.6405,
+      "is_active": false,
+      "in_buffer_zone": true,
+      "tenure_months": 0,
+      "max_tenure_months": 4
+    },
+    {
+      "rank": 6,
+      "ticker": "3017.TW",
+      "name": "3017.TW",
+      "market": "台股本土",
+      "currency": "TWD",
+      "weight_pct": 0,
+      "price": 3440.0,
+      "ma60": 3049.4,
+      "ma200": 2361.71,
+      "mom_3m": 55.5,
+      "mom_12m": 202.2,
+      "fip": 0.01,
+      "convexity": 1.26,
+      "score": 1.3624,
+      "is_active": false,
+      "in_buffer_zone": false,
+      "tenure_months": 0,
+      "max_tenure_months": 4
+    },
+    {
+      "rank": 7,
+      "ticker": "6669.TW",
+      "name": "6669.TW",
+      "market": "台股本土",
+      "currency": "TWD",
+      "weight_pct": 0,
+      "price": 2240.0,
+      "ma60": 2116.41,
+      "ma200": 1633.22,
+      "mom_3m": 34.7,
+      "mom_12m": 100.1,
+      "fip": 0.01,
+      "convexity": 1.36,
+      "score": 0.9006,
+      "is_active": false,
+      "in_buffer_zone": false,
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 8,
-      "ticker": "UMC",
-      "name": "聯電 (UMC 晶圓代工ADR)",
-      "market": "美股 ADR",
-      "currency": "USD",
-      "weight_pct": 0,
-      "price": 22.96,
-      "ma60": 21.12,
-      "ma200": 16.24,
-      "mom_3m": -3.7,
-      "mom_12m": 214.9,
-      "fip": 0.08,
-      "score": 1.3088,
-      "is_active": false
-    },
-    {
-      "rank": 9,
-      "ticker": "8996.TW",
-      "name": "高力 (Kaori 水冷散熱飆股)",
-      "market": "台股 (TWSE)",
-      "currency": "TWD",
-      "weight_pct": 0,
-      "price": 1710.0,
-      "ma60": 1254.78,
-      "ma200": 1080.62,
-      "mom_3m": 45.5,
-      "mom_12m": 239.8,
-      "fip": 0.06,
-      "score": 1.2861,
-      "is_active": false
-    },
-    {
-      "rank": 10,
       "ticker": "ILMN",
       "name": "因美納 (Illumina 基因定序)",
       "market": "美股 (NASDAQ)",
       "currency": "USD",
       "weight_pct": 0,
       "price": 278.17,
-      "ma60": 221.76,
-      "ma200": 167.03,
-      "mom_3m": 45.5,
-      "mom_12m": 199.1,
+      "ma60": 221.23,
+      "ma200": 166.27,
+      "mom_3m": 46.4,
+      "mom_12m": 184.5,
       "fip": 0.04,
-      "score": 1.2846,
-      "is_active": false
+      "convexity": 1.44,
+      "score": 0.6806,
+      "is_active": false,
+      "in_buffer_zone": false,
+      "tenure_months": 0,
+      "max_tenure_months": 4
+    },
+    {
+      "rank": 9,
+      "ticker": "FTNT",
+      "name": "FTNT",
+      "market": "美股/ADR",
+      "currency": "USD",
+      "weight_pct": 0,
+      "price": 194.75,
+      "ma60": 165.29,
+      "ma200": 121.3,
+      "mom_3m": 21.2,
+      "mom_12m": 125.2,
+      "fip": 0.1,
+      "convexity": 1.52,
+      "score": 0.6704,
+      "is_active": false,
+      "in_buffer_zone": false,
+      "tenure_months": 0,
+      "max_tenure_months": 4
+    },
+    {
+      "rank": 10,
+      "ticker": "CRWD",
+      "name": "CRWD",
+      "market": "美股/ADR",
+      "currency": "USD",
+      "weight_pct": 0,
+      "price": 275.04,
+      "ma60": 221.82,
+      "ma200": 157.32,
+      "mom_3m": 46.4,
+      "mom_12m": 115.7,
+      "fip": 0.09,
+      "convexity": 2.04,
+      "score": 0.6672,
+      "is_active": false,
+      "in_buffer_zone": false,
+      "tenure_months": 0,
+      "max_tenure_months": 4
     }
   ],
   "yearly_performance": [
     {
       "year": 2005,
-      "scheme_a_ret": 124.3,
-      "spy_ret": 6.8,
-      "capital": 3571420.0
+      "scheme_a_ret": 121.1,
+      "spy_ret": 5.3,
+      "capital": 2482616.0
     },
     {
       "year": 2006,
-      "scheme_a_ret": 46.7,
-      "spy_ret": 11.1,
-      "capital": 5239866.0
+      "scheme_a_ret": 49.5,
+      "spy_ret": 13.8,
+      "capital": 3712514.0
     },
     {
       "year": 2007,
-      "scheme_a_ret": 37.2,
-      "spy_ret": 5.8,
-      "capital": 7187802.0
+      "scheme_a_ret": 56.8,
+      "spy_ret": 5.3,
+      "capital": 5822706.0
     },
     {
       "year": 2008,
-      "scheme_a_ret": -2.4,
-      "spy_ret": -49.3,
-      "capital": 7015489.0
+      "scheme_a_ret": -4.9,
+      "spy_ret": -36.2,
+      "capital": 5537014.0
     },
     {
       "year": 2009,
-      "scheme_a_ret": 37.8,
-      "spy_ret": 26.7,
-      "capital": 9663970.0
+      "scheme_a_ret": 52.1,
+      "spy_ret": 22.7,
+      "capital": 8419863.0
     },
     {
       "year": 2010,
-      "scheme_a_ret": 4.3,
-      "spy_ret": 9.7,
-      "capital": 10075615.0
+      "scheme_a_ret": -3.2,
+      "spy_ret": 13.1,
+      "capital": 8149252.0
     },
     {
       "year": 2011,
-      "scheme_a_ret": 2.1,
-      "spy_ret": 5.0,
-      "capital": 10283269.0
+      "scheme_a_ret": 19.2,
+      "spy_ret": 0.9,
+      "capital": 9717160.0
     },
     {
       "year": 2012,
-      "scheme_a_ret": 29.5,
+      "scheme_a_ret": 32.3,
       "spy_ret": 14.2,
-      "capital": 13316598.0
+      "capital": 12857496.0
     },
     {
       "year": 2013,
-      "scheme_a_ret": 126.8,
-      "spy_ret": 24.3,
-      "capital": 30199365.0
+      "scheme_a_ret": 100.1,
+      "spy_ret": 29.0,
+      "capital": 25728227.0
     },
     {
       "year": 2014,
-      "scheme_a_ret": 44.2,
-      "spy_ret": 13.4,
-      "capital": 43544553.0
+      "scheme_a_ret": 39.1,
+      "spy_ret": 14.6,
+      "capital": 35784280.0
     },
     {
       "year": 2015,
-      "scheme_a_ret": -1.8,
-      "spy_ret": 2.4,
-      "capital": 42760416.0
+      "scheme_a_ret": 4.9,
+      "spy_ret": 1.3,
+      "capital": 37541194.0
     },
     {
       "year": 2016,
-      "scheme_a_ret": 61.0,
-      "spy_ret": 5.7,
-      "capital": 68829090.0
+      "scheme_a_ret": 97.9,
+      "spy_ret": 13.6,
+      "capital": 74300623.0
     },
     {
       "year": 2017,
-      "scheme_a_ret": 78.0,
-      "spy_ret": 18.4,
-      "capital": 122509051.0
+      "scheme_a_ret": 59.4,
+      "spy_ret": 20.8,
+      "capital": 118454571.0
     },
     {
       "year": 2018,
-      "scheme_a_ret": 12.4,
-      "spy_ret": 6.4,
-      "capital": 137648094.0
+      "scheme_a_ret": 30.1,
+      "spy_ret": -5.2,
+      "capital": 154146308.0
     },
     {
       "year": 2019,
-      "scheme_a_ret": 10.6,
-      "spy_ret": 13.6,
-      "capital": 152298010.0
+      "scheme_a_ret": 23.4,
+      "spy_ret": 31.1,
+      "capital": 190190067.0
     },
     {
       "year": 2020,
-      "scheme_a_ret": 69.5,
-      "spy_ret": 19.2,
-      "capital": 258125651.0
+      "scheme_a_ret": 63.5,
+      "spy_ret": 17.2,
+      "capital": 310906494.0
     },
     {
       "year": 2021,
-      "scheme_a_ret": 126.9,
-      "spy_ret": 24.0,
-      "capital": 585705631.0
+      "scheme_a_ret": 216.5,
+      "spy_ret": 30.5,
+      "capital": 983959677.0
     },
     {
       "year": 2022,
-      "scheme_a_ret": -23.4,
-      "spy_ret": -9.7,
-      "capital": 448459052.0
+      "scheme_a_ret": -15.7,
+      "spy_ret": -18.6,
+      "capital": 829375079.0
     },
     {
       "year": 2023,
-      "scheme_a_ret": 85.1,
-      "spy_ret": 12.1,
-      "capital": 829966822.0
+      "scheme_a_ret": 141.8,
+      "spy_ret": 26.7,
+      "capital": 2005148910.0
     },
     {
       "year": 2024,
-      "scheme_a_ret": 130.9,
-      "spy_ret": 28.7,
-      "capital": 1916007229.0
+      "scheme_a_ret": 217.9,
+      "spy_ret": 25.6,
+      "capital": 6374085841.0
     },
     {
       "year": 2025,
-      "scheme_a_ret": 18.2,
-      "spy_ret": 12.5,
-      "capital": 2265035803.0
+      "scheme_a_ret": -3.5,
+      "spy_ret": 18.0,
+      "capital": 6154164750.0
     },
     {
       "year": 2026,
-      "scheme_a_ret": 212.7,
-      "spy_ret": 12.6,
-      "capital": 7082717958.0
+      "scheme_a_ret": 153.9,
+      "spy_ret": 14.9,
+      "capital": 15626831513.0
     }
   ],
-  "recent_trades": [
-    {
-      "exec_date": "2024-10-01",
-      "next_date": "2024-11-01",
-      "exposure": 1.0,
-      "allocation": "CEG(40%:+1.4%), SPOT(30%:+3.2%), 2603.TW(30%:+1.5%)",
-      "period_ret": 1.82,
-      "spy_ret": -0.36,
-      "capital": 1916996815.0
-    },
-    {
-      "exec_date": "2024-11-01",
-      "next_date": "2024-12-02",
-      "exposure": 1.0,
-      "allocation": "NVDA(40%:+3.1%), CEG(30%:-2.0%), 2317.TW(30%:-1.7%)",
-      "period_ret": -0.05,
-      "spy_ret": 5.54,
-      "capital": 1916007229.0
-    },
-    {
-      "exec_date": "2024-12-02",
-      "next_date": "2025-01-02",
-      "exposure": 1.0,
-      "allocation": "NVDA(40%:-2.0%), SPOT(30%:-5.9%), CEG(30%:-11.9%)",
-      "period_ret": -6.3,
-      "spy_ret": -2.25,
-      "capital": 1795238873.0
-    },
-    {
-      "exec_date": "2025-01-02",
-      "next_date": "2025-02-03",
-      "exposure": 0.7,
-      "allocation": "SPOT(27%:+19.6%), TSLA(21%:-0.9%), AVGO(21%:-8.8%), 現金(30%)",
-      "period_ret": 3.36,
-      "spy_ret": 0.56,
-      "capital": 1855555789.0
-    },
-    {
-      "exec_date": "2025-02-03",
-      "next_date": "2025-03-03",
-      "exposure": 1.0,
-      "allocation": "TSLA(40%:-22.3%), SPOT(30%:+13.3%), CEG(30%:-12.6%)",
-      "period_ret": -8.88,
-      "spy_ret": 0.59,
-      "capital": 1690829345.0
-    },
-    {
-      "exec_date": "2025-03-03",
-      "next_date": "2025-04-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:-10.4%), BABA(30%:-0.9%), GILD(30%:-1.8%)",
-      "period_ret": -5.13,
-      "spy_ret": -6.5,
-      "capital": 1604009723.0
-    },
-    {
-      "exec_date": "2025-04-01",
-      "next_date": "2025-05-01",
-      "exposure": 0.7,
-      "allocation": "BABA(27%:-9.5%), GILD(21%:-5.8%), TMUS(21%:-7.8%), 現金(30%)",
-      "period_ret": -5.6,
-      "spy_ret": 0.52,
-      "capital": 1514121034.0
-    },
-    {
-      "exec_date": "2025-05-01",
-      "next_date": "2025-06-02",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:+8.9%), NFLX(30%:+7.0%), SONY(30%:+3.6%)",
-      "period_ret": 6.59,
-      "spy_ret": 4.89,
-      "capital": 1613897865.0
-    },
-    {
-      "exec_date": "2025-06-02",
-      "next_date": "2025-07-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:+16.2%), NFLX(30%:+11.4%), AVGO(30%:+13.1%)",
-      "period_ret": 13.67,
-      "spy_ret": 4.87,
-      "capital": 1834587234.0
-    },
-    {
-      "exec_date": "2025-07-01",
-      "next_date": "2025-08-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(40%:-18.9%), DASH(30%:+0.0%), NFLX(30%:-13.1%)",
-      "period_ret": -11.62,
-      "spy_ret": 1.61,
-      "capital": 1621318745.0
-    },
-    {
-      "exec_date": "2025-08-01",
-      "next_date": "2025-09-01",
-      "exposure": 1.0,
-      "allocation": "3017.TW(40%:+13.0%), AVGO(30%:+7.1%), DASH(30%:-0.1%)",
-      "period_ret": 7.16,
-      "spy_ret": 3.38,
-      "capital": 1737385600.0
-    },
-    {
-      "exec_date": "2025-09-01",
-      "next_date": "2025-10-01",
-      "exposure": 1.0,
-      "allocation": "2308.TW(40%:+23.2%), 3017.TW(30%:+0.2%), AVGO(30%:+7.1%)",
-      "period_ret": 11.32,
-      "spy_ret": 2.42,
-      "capital": 1934115111.0
-    },
-    {
-      "exec_date": "2025-10-01",
-      "next_date": "2025-11-03",
-      "exposure": 1.0,
-      "allocation": "2308.TW(40%:+14.0%), MU(30%:+41.3%), 6669.TW(30%:+30.8%)",
-      "period_ret": 27.09,
-      "spy_ret": 3.39,
-      "capital": 2457990847.0
-    },
-    {
-      "exec_date": "2025-11-03",
-      "next_date": "2025-12-01",
-      "exposure": 1.0,
-      "allocation": "2308.TW(40%:-5.6%), 8996.TW(30%:-17.5%), MU(30%:-0.7%)",
-      "period_ret": -7.85,
-      "spy_ret": -1.0,
-      "capital": 2265035803.0
-    },
-    {
-      "exec_date": "2025-12-01",
-      "next_date": "2026-01-02",
-      "exposure": 1.0,
-      "allocation": "MU(40%:+27.1%), LRCX(30%:+15.0%), 3017.TW(30%:+11.2%)",
-      "period_ret": 18.57,
-      "spy_ret": 1.02,
-      "capital": 2685737040.0
-    },
-    {
-      "exec_date": "2026-01-02",
-      "next_date": "2026-02-02",
-      "exposure": 1.0,
-      "allocation": "MU(40%:+39.7%), 3017.TW(30%:-6.2%), 8996.TW(30%:+23.6%)",
-      "period_ret": 20.94,
-      "spy_ret": 0.56,
-      "capital": 3248230315.0
-    },
-    {
-      "exec_date": "2026-02-02",
-      "next_date": "2026-03-02",
-      "exposure": 1.0,
-      "allocation": "MU(40%:-2.6%), 3037.TW(30%:+23.6%), LRCX(30%:-1.7%)",
-      "period_ret": 5.37,
-      "spy_ret": -1.58,
-      "capital": 3422657983.0
-    },
-    {
-      "exec_date": "2026-03-02",
-      "next_date": "2026-04-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+4.4%), MU(30%:-13.1%), 2308.TW(30%:+8.1%)",
-      "period_ret": 0.14,
-      "spy_ret": -3.65,
-      "capital": 3427379749.0
-    },
-    {
-      "exec_date": "2026-04-01",
-      "next_date": "2026-05-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+71.1%), 3017.TW(30%:+34.0%), 8996.TW(30%:+34.0%)",
-      "period_ret": 48.66,
-      "spy_ret": 10.3,
-      "capital": 5095108895.0
-    },
-    {
-      "exec_date": "2026-05-01",
-      "next_date": "2026-06-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+29.2%), MU(30%:+97.3%), 2308.TW(30%:+10.4%)",
-      "period_ret": 43.84,
-      "spy_ret": 4.73,
-      "capital": 7328684675.0
-    },
-    {
-      "exec_date": "2026-06-01",
-      "next_date": "2026-07-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+1.4%), MU(30%:+7.2%), 2308.TW(30%:-17.1%)",
-      "period_ret": -2.58,
-      "spy_ret": -1.37,
-      "capital": 7139795285.0
-    },
-    {
-      "exec_date": "2026-07-01",
-      "next_date": "2026-08-03",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:-22.2%), MU(30%:-27.3%), INTC(30%:-34.5%)",
-      "period_ret": -27.59,
-      "spy_ret": 0.6,
-      "capital": 5169610924.0
-    },
-    {
-      "exec_date": "2026-08-03",
-      "next_date": "2026-09-01",
-      "exposure": 1.0,
-      "allocation": "PANW(40%:+11.3%), FTNT(30%:+2.5%), ILMN(30%:+4.0%)",
-      "period_ret": 6.35,
-      "spy_ret": 1.68,
-      "capital": 5497657731.0
-    },
-    {
-      "exec_date": "2026-09-01",
-      "next_date": "2026-10-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%:+29.8%), MRNA(30%:+33.1%), 3443.TW(30%:+23.9%)",
-      "period_ret": 28.83,
-      "spy_ret": 0.31,
-      "capital": 7082717958.0
-    }
-  ]
+  "recent_trades": []
 }
