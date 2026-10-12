@@ -320,3 +320,37 @@ export async function apiSaveGlobalTitanPortfolio(portfolioData) {
   return await res.json();
 }
 
+// 台股泰坦實作策略：依登入使用者取得雲端個人投資組合與交易紀錄 (以歷史交易為主)
+export async function apiGetTaiwanTitanPortfolio(username) {
+  const token = getAuthToken();
+  const url = `${API_URL}/api/taiwan_titan/portfolio${username ? `?username=${encodeURIComponent(username)}` : ''}`;
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+  if (!res.ok) {
+    throw new Error('無法取得台股雲端投資組合');
+  }
+  return await res.json();
+}
+
+// 台股泰坦實作策略：儲存個人投資組合與交易紀錄至雲端
+export async function apiSaveTaiwanTitanPortfolio(portfolioData) {
+  const token = getAuthToken();
+  const res = await fetch(`${API_URL}/api/taiwan_titan/portfolio`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(portfolioData)
+  });
+  if (!res.ok) {
+    throw new Error('無法儲存台股雲端投資組合');
+  }
+  return await res.json();
+}
+
+

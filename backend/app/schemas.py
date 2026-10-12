@@ -175,4 +175,20 @@ class TitanPortfolioResponse(BaseModel):
     dismissed_suggestions: List[str]
     updated_at: Optional[datetime] = None
 
+# 台股泰坦實作策略 使用者個人化投資組合與交易紀錄 Schema
+class TaiwanTitanPortfolioSaveRequest(BaseModel):
+    username: Optional[str] = None
+    positions: List[dict]
+    tx_history: List[dict]
+    dismissed_suggestions: Optional[List[str]] = []
+
+class TaiwanTitanPortfolioResponse(BaseModel):
+    status: str
+    username: str
+    positions: List[dict]
+    tx_history: List[dict]
+    dismissed_suggestions: List[str]
+    updated_at: Optional[datetime] = None
+
+
 

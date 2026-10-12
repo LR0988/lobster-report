@@ -109,4 +109,18 @@ class UserTitanPortfolio(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+# 台股泰坦實作策略：使用者個人化投資組合與交易紀錄模型 (歷史交易導向)
+class UserTaiwanTitanPortfolio(Base):
+    __tablename__ = "user_taiwan_titan_portfolios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    positions = Column(Text, nullable=False, default="[]")  # JSON 字串存放台股持股
+    tx_history = Column(Text, nullable=False, default="[]")  # JSON 字串存放台股歷史全進出流水帳
+    dismissed_suggestions = Column(Text, nullable=False, default="[]")  # 已略過的再平衡建議
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 

@@ -1,10 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import titanOpenPositionsData from '../data/titan_open_positions.json';
+import { getCurrentUser, apiGetTaiwanTitanPortfolio, apiSaveTaiwanTitanPortfolio } from '../api';
 
 const STORAGE_KEY_POSITIONS = 'taiwan_titan_user_positions_v1';
 const STORAGE_KEY_IDLE_CASH = 'taiwan_titan_idle_cash_v1';
 const STORAGE_KEY_ALL_TX = 'taiwan_titan_tx_history_v1';
 const STORAGE_KEY_DISMISSED_SUGG = 'taiwan_titan_dismissed_sugg_v1';
+
+const getTaiwanTitanStorageKeys = (username) => ({
+  positions: `taiwan_titan_user_positions_v2_${username}`,
+  idleCash: `taiwan_titan_idle_cash_v2_${username}`,
+  allTx: `taiwan_titan_tx_history_v2_${username}`,
+  dismissedSugg: `taiwan_titan_dismissed_sugg_v2_${username}`
+});
 
 // 預設台股泰坦持股部位 (70% 王者 + 15% 雙衛星)
 const DEFAULT_POSITIONS = [
@@ -15,7 +23,7 @@ const DEFAULT_POSITIONS = [
     role: '👑 王者泰坦 (70%)',
     shares: 1000,
     entry_price: 550.0,
-    current_price: 568.0,
+    current_price: 527.0,
     entry_date: '2026-10-01',
     entry_fee: 783,
     stop_loss_price: 498.0,
@@ -28,7 +36,7 @@ const DEFAULT_POSITIONS = [
     role: '🚀 革命衛星 (15%)',
     shares: 500,
     entry_price: 225.0,
-    current_price: 238.0,
+    current_price: 149.0,
     entry_date: '2026-10-01',
     entry_fee: 160,
     stop_loss_price: 205.0,
@@ -41,7 +49,7 @@ const DEFAULT_POSITIONS = [
     role: '🚀 革命衛星 (15%)',
     shares: 100,
     entry_price: 1195.0,
-    current_price: 1270.0,
+    current_price: 1255.0,
     entry_date: '2026-10-01',
     entry_fee: 170,
     stop_loss_price: 1026.0,
@@ -112,10 +120,22 @@ export default function TitanLiveDashboard() {
   const [loading, setLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
+  // 登入使用者身分與帳本歸屬 (以歷史交易為唯一真實核心)
+  const currentUser = getCurrentUser();
+  const currentUsername = currentUser?.username || 'guest';
+  const storageKeys = useMemo(() => getTaiwanTitanStorageKeys(currentUsername), [currentUsername]);
+
+  // 雲端同步狀態: 'idle' | 'syncing' | 'synced' | 'saving' | 'saved' | 'error'
+  const [cloudSyncStatus, setCloudSyncStatus] = useState('syncing');
+  const [lastSyncTime, setLastSyncTime] = useState(null);
+  const isInitialCloudLoad = useRef(true);
+  const autoSaveTimerRef = useRef(null);
+  const fileInputRef = useRef(null);
+
   // 當前持股部位
   const [userPositions, setUserPositions] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_POSITIONS);
+      const saved = localStorage.getItem(storageKeys.positions) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_POSITIONS) : null);
       return saved ? JSON.parse(saved) : DEFAULT_POSITIONS;
     } catch { return DEFAULT_POSITIONS; }
   });
@@ -123,14 +143,14 @@ export default function TitanLiveDashboard() {
   // 歷史交易流水帳 (全進出紀錄) - 唯一真實來源
   const [txHistory, setTxHistory] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_ALL_TX);
+      const saved = localStorage.getItem(storageKeys.allTx) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_ALL_TX) : null);
       let list = saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
       if (!Array.isArray(list) || list.length === 0) list = DEFAULT_TX_HISTORY;
       // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/1 初始入金 100 萬)
       const hasDeposit = list.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')));
       if (!hasDeposit) {
         list = [DEFAULT_TX_HISTORY[0], ...list];
-        try { localStorage.setItem(STORAGE_KEY_ALL_TX, JSON.stringify(list)); } catch {}
+        try { localStorage.setItem(storageKeys.allTx, JSON.stringify(list)); } catch {}
       }
       return list;
     } catch { return DEFAULT_TX_HISTORY; }
@@ -154,7 +174,7 @@ export default function TitanLiveDashboard() {
   // 已送出/消掉的更動建議 key
   const [dismissedSuggestions, setDismissedSuggestions] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_DISMISSED_SUGG);
+      const saved = localStorage.getItem(storageKeys.dismissedSugg) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_DISMISSED_SUGG) : null);
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
@@ -233,18 +253,100 @@ export default function TitanLiveDashboard() {
     setTimeout(() => setFeedbackMsg(''), 4500);
   };
 
-  // 持久化儲存
+  // 1. 當切換登入使用者或載入組件時，自動從 Supabase PostgreSQL 雲端資料庫撈取該使用者的台股專屬帳本
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY_IDLE_CASH, String(idleCash)); } catch {}
-  }, [idleCash]);
+    let isMounted = true;
+    isInitialCloudLoad.current = true;
+    setCloudSyncStatus('syncing');
 
-  useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY_POSITIONS, JSON.stringify(userPositions)); } catch {}
-  }, [userPositions]);
+    const fetchCloudPortfolio = async () => {
+      try {
+        const res = await apiGetTaiwanTitanPortfolio(currentUsername);
+        if (!isMounted) return;
+        if (res && res.status === 'ok') {
+          if (Array.isArray(res.positions) && res.positions.length > 0) {
+            setUserPositions(res.positions);
+            try { localStorage.setItem(storageKeys.positions, JSON.stringify(res.positions)); } catch {}
+          }
+          if (Array.isArray(res.tx_history) && res.tx_history.length > 0) {
+            setTxHistory(res.tx_history);
+            try { localStorage.setItem(storageKeys.allTx, JSON.stringify(res.tx_history)); } catch {}
+          }
+          if (Array.isArray(res.dismissed_suggestions)) {
+            setDismissedSuggestions(res.dismissed_suggestions);
+            try { localStorage.setItem(storageKeys.dismissedSugg, JSON.stringify(res.dismissed_suggestions)); } catch {}
+          }
+          setCloudSyncStatus('synced');
+          setLastSyncTime(new Date());
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        console.warn('台股雲端帳本讀取失敗，使用本機快取:', err);
+        setCloudSyncStatus('error');
+      } finally {
+        setTimeout(() => {
+          if (isMounted) isInitialCloudLoad.current = false;
+        }, 600);
+      }
+    };
 
+    fetchCloudPortfolio();
+    return () => { isMounted = false; };
+  }, [currentUsername, storageKeys]);
+
+  // 2. 本地持久化儲存與防抖雲端同步 (任何更動皆自動寫入本機與 Supabase 雲端資料庫)
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY_ALL_TX, JSON.stringify(txHistory)); } catch {}
-  }, [txHistory]);
+    try { localStorage.setItem(storageKeys.idleCash, String(idleCash)); } catch {}
+    try { localStorage.setItem(storageKeys.positions, JSON.stringify(userPositions)); } catch {}
+    try { localStorage.setItem(storageKeys.allTx, JSON.stringify(txHistory)); } catch {}
+    try { localStorage.setItem(storageKeys.dismissedSugg, JSON.stringify(dismissedSuggestions)); } catch {}
+
+    // 初始雲端加載期間，避免用預設值反向覆蓋雲端已有數據
+    if (isInitialCloudLoad.current) return;
+
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setCloudSyncStatus('saving');
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        await apiSaveTaiwanTitanPortfolio({
+          username: currentUsername,
+          positions: userPositions,
+          tx_history: txHistory,
+          dismissed_suggestions: dismissedSuggestions
+        });
+        setCloudSyncStatus('saved');
+        setLastSyncTime(new Date());
+        setTimeout(() => setCloudSyncStatus('synced'), 2500);
+      } catch (err) {
+        console.warn('台股自動雲端儲存失敗:', err);
+        setCloudSyncStatus('error');
+      }
+    }, 1000);
+
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [idleCash, userPositions, txHistory, dismissedSuggestions, storageKeys, currentUsername]);
+
+  // 3. 自動將「當前持股部位」的現價 (current_price)，依據最新市場行情動態對齊！
+  // 嚴格保留使用者的進場成本 entry_price、股數與進場時間！
+  useEffect(() => {
+    const picks = titanOpenPositionsData?.open_positions || [];
+    if (!picks || picks.length === 0) return;
+    setUserPositions(prev => {
+      let changed = false;
+      const next = prev.map(p => {
+        const match = picks.find(cp => cp.stock_id === p.stock_id || cp.stock_name === p.stock_name);
+        const newPrice = match ? (match.current_price || match.latest_price) : null;
+        if (newPrice && newPrice > 0 && p.current_price !== newPrice) {
+          changed = true;
+          return { ...p, current_price: newPrice };
+        }
+        return p;
+      });
+      return changed ? next : prev;
+    });
+  }, []);
 
   // 自動將「當前持股部位」的成本均價、股數與費用，100% 嚴格綁定對齊「歷史交易流水帳」最新買入明細！
   useEffect(() => {
@@ -279,10 +381,6 @@ export default function TitanLiveDashboard() {
       return changed ? next : prev;
     });
   }, [txHistory]);
-
-  useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY_DISMISSED_SUGG, JSON.stringify(dismissedSuggestions)); } catch {}
-  }, [dismissedSuggestions]);
 
   // 1. 計算持股現值與整體統計
   const { totalStockMarketVal, totalCost, unrealizedPnl, unrealizedReturnPct } = useMemo(() => {
@@ -1062,29 +1160,79 @@ export default function TitanLiveDashboard() {
   };
 
   const syncToDatabase = async () => {
+    setCloudSyncStatus('saving');
     try {
-      const res = await fetch('/api/titan/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          positions: userPositions,
-          trades: txHistory,
-          account: {
-            current_cash: idleCash,
-            initial_capital: 1000000.0,
-            updated_at: new Date().toISOString()
-          }
-        })
+      const res = await apiSaveTaiwanTitanPortfolio({
+        username: currentUsername,
+        positions: userPositions,
+        tx_history: txHistory,
+        dismissed_suggestions: dismissedSuggestions
       });
-      if (res.ok) {
-        triggerNotice('💾 已成功將台股泰坦持股與歷史帳簿持久化至資料庫！');
+      if (res && res.status === 'ok') {
+        setCloudSyncStatus('saved');
+        setLastSyncTime(new Date());
+        triggerNotice(`☁️ 已成功將「${currentUsername}」台股專屬帳本同步儲存至 Supabase 雲端資料庫！`);
+        setTimeout(() => setCloudSyncStatus('synced'), 2500);
       } else {
-        triggerNotice('⚠️ 資料庫同步回應異常，已妥善保存在本機快取');
+        triggerNotice('⚠️ 雲端同步回應異常，已妥善保存在本機快取');
       }
     } catch (e) {
-      console.warn('同步至後端資料庫跳過:', e);
-      triggerNotice('💾 目前離線模式，持股與交易已妥善保存在本機');
+      console.warn('同步至後端資料庫失敗:', e);
+      setCloudSyncStatus('error');
+      triggerNotice('⚠️ 雲端連線失敗，目前已妥善保存在本機快取');
     }
+  };
+
+  const handleExportBackup = () => {
+    const exportData = {
+      app: 'Lobster Report Taiwan Titan',
+      version: '2.0',
+      username: currentUsername,
+      exported_at: new Date().toISOString(),
+      positions: userPositions,
+      tx_history: txHistory,
+      dismissed_suggestions: dismissedSuggestions
+    };
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `taiwan_titan_portfolio_${currentUsername}_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    triggerNotice(`📤 已成功匯出「${currentUsername}」台股專屬帳本備份檔！`);
+  };
+
+  const handleImportBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported.positions) && Array.isArray(imported.tx_history)) {
+          setUserPositions(imported.positions);
+          setTxHistory(imported.tx_history);
+          if (Array.isArray(imported.dismissed_suggestions)) setDismissedSuggestions(imported.dismissed_suggestions);
+
+          await apiSaveTaiwanTitanPortfolio({
+            username: currentUsername,
+            positions: imported.positions,
+            tx_history: imported.tx_history,
+            dismissed_suggestions: imported.dismissed_suggestions || []
+          });
+          setCloudSyncStatus('synced');
+          setLastSyncTime(new Date());
+          triggerNotice(`📥 已成功匯入台股帳本備份並同步更新至雲端！共 ${imported.positions.length} 檔持股，${imported.tx_history.length} 筆流水帳。`);
+        } else {
+          alert('備份檔案格式不正確，需包含 positions 與 tx_history 陣列。');
+        }
+      } catch (err) {
+        alert('解析備份檔案失敗：' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleDeleteTx = (id, stockName, action, stockId) => {
@@ -1152,7 +1300,29 @@ export default function TitanLiveDashboard() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+            {/* 登入身分與雲端帳本標籤 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              background: 'rgba(30, 41, 59, 0.9)',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
+              padding: '0.22rem 0.65rem',
+              borderRadius: '6px',
+              fontSize: '0.78rem'
+            }}>
+              <span style={{ color: '#94A3B8' }}>👤 帳本所屬:</span>
+              <strong style={{ color: '#FCD34D' }}>{currentUsername}</strong>
+              <span style={{
+                color: cloudSyncStatus === 'synced' || cloudSyncStatus === 'saved' ? '#34D399' : cloudSyncStatus === 'saving' || cloudSyncStatus === 'syncing' ? '#FBBF24' : '#F87171',
+                fontWeight: 'bold',
+                fontSize: '0.74rem'
+              }}>
+                {cloudSyncStatus === 'syncing' ? '🔄 雲端讀取中...' : cloudSyncStatus === 'saving' ? '☁️ 雲端儲存中...' : cloudSyncStatus === 'saved' ? '✅ 雲端已儲存' : cloudSyncStatus === 'error' ? '⚠️ 本機快取模式' : '☁️ 雲端已同步'}
+              </span>
+            </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: '#CBD5E1' }}>
               <span>加權指數:</span>
               <strong style={{ color: '#34D399', fontFamily: 'monospace' }}>{taiex.close.toLocaleString()}</strong>
@@ -1160,7 +1330,10 @@ export default function TitanLiveDashboard() {
             </div>
             <button
               className="btn btn-secondary"
-              onClick={() => triggerNotice('已同步最新市場價格與籌碼狀態！')}
+              onClick={() => {
+                triggerNotice('🔄 正在手動重新對齊雲端資料庫...');
+                syncToDatabase();
+              }}
               style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem' }}
             >
               🔄 重新整理
@@ -1282,10 +1455,55 @@ export default function TitanLiveDashboard() {
                   alignItems: 'center',
                   gap: '0.3rem'
                 }}
-                title="立即將持股部位與交易歷史持久化寫入本地 SQLite 資料庫與 Supabase 快照"
+                title="立即將台股泰坦持股部位與交易歷史持久化寫入 Supabase 雲端資料庫"
               >
-                💾 存入資料庫
+                ☁️ 存入雲端
               </button>
+              <button
+                onClick={handleExportBackup}
+                style={{
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  color: '#7DD3FC',
+                  padding: '0.3rem 0.65rem',
+                  borderRadius: '5px',
+                  fontSize: '0.78rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem'
+                }}
+                title="將目前台股帳本的全部持股與流水帳匯出為 JSON 備份檔"
+              >
+                📤 匯出備份
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  background: 'rgba(234, 179, 8, 0.15)',
+                  border: '1px solid rgba(234, 179, 8, 0.4)',
+                  color: '#FDE047',
+                  padding: '0.3rem 0.65rem',
+                  borderRadius: '5px',
+                  fontSize: '0.78rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem'
+                }}
+                title="從電腦中選擇先前的台股 JSON 備份檔匯入並同步至雲端"
+              >
+                📥 匯入備份
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImportBackup}
+                accept=".json"
+                style={{ display: 'none' }}
+              />
             </div>
           </div>
 
