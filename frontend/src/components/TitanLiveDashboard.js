@@ -51,6 +51,20 @@ const DEFAULT_POSITIONS = [
 
 const DEFAULT_TX_HISTORY = [
   {
+    id: 'tx_tw_init_deposit',
+    date: '2026-10-01',
+    action: '投入現金',
+    stock_id: '-',
+    stock_name: '初始本金入金',
+    shares: 0,
+    price: 0,
+    tax_fee: 0,
+    cash_flow_twd: 1000000,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '台股王者泰坦策略 初始開倉本金'
+  },
+  {
     id: 'tx_tw_1',
     date: '2026-10-01',
     action: '買入',
@@ -98,14 +112,6 @@ export default function TitanLiveDashboard() {
   const [loading, setLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
-  // 閒置現金 (TWD) - 記錄投入但尚未買進的資金
-  const [idleCash, setIdleCash] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_IDLE_CASH);
-      return saved !== null ? parseFloat(saved) : 216887;
-    } catch { return 216887; }
-  });
-
   // 當前持股部位
   const [userPositions, setUserPositions] = useState(() => {
     try {
@@ -114,13 +120,36 @@ export default function TitanLiveDashboard() {
     } catch { return DEFAULT_POSITIONS; }
   });
 
-  // 歷史交易流水帳 (全進出紀錄)
+  // 歷史交易流水帳 (全進出紀錄) - 唯一真實來源
   const [txHistory, setTxHistory] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_ALL_TX);
-      return saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
+      let list = saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
+      if (!Array.isArray(list) || list.length === 0) list = DEFAULT_TX_HISTORY;
+      // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/1 初始入金 100 萬)
+      const hasDeposit = list.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')));
+      if (!hasDeposit) {
+        list = [DEFAULT_TX_HISTORY[0], ...list];
+        try { localStorage.setItem(STORAGE_KEY_ALL_TX, JSON.stringify(list)); } catch {}
+      }
+      return list;
     } catch { return DEFAULT_TX_HISTORY; }
   });
+
+  // 閒置現金 (TWD) - 100% 由歷史全進出與入金流水帳 (txHistory) 的現金流動態加總推導！
+  const idleCash = useMemo(() => {
+    return txHistory.reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
+  }, [txHistory]);
+
+  // 累計入金本金 (TWD) - 100% 由歷史紀錄推導
+  const totalDepositsTwd = useMemo(() => {
+    const sum = txHistory
+      .filter(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')))
+      .reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
+    return sum > 0 ? sum : 1000000;
+  }, [txHistory]);
+
+  const setIdleCash = () => {}; // 保持相容性，閒置現金已全面自動化由 txHistory 計算
 
   // 已送出/消掉的更動建議 key
   const [dismissedSuggestions, setDismissedSuggestions] = useState(() => {
@@ -244,6 +273,15 @@ export default function TitanLiveDashboard() {
   const totalNetAssets = useMemo(() => {
     return Math.max(0, idleCash + totalStockMarketVal);
   }, [idleCash, totalStockMarketVal]);
+
+  // 帳戶真實總淨利 (總資產淨值 - 累計總入金，全依歷史流水帳計算)
+  const totalNetProfitTwd = useMemo(() => {
+    return totalNetAssets - totalDepositsTwd;
+  }, [totalNetAssets, totalDepositsTwd]);
+
+  const totalNetProfitPct = useMemo(() => {
+    return totalDepositsTwd > 0 ? (totalNetProfitTwd / totalDepositsTwd) * 100 : 0;
+  }, [totalNetProfitTwd, totalDepositsTwd]);
 
   // 2. 歷史全進出紀錄統計 (已實現損益、勝率、總稅費)
   const { totalRealizedPnl, totalTaxesPaid, closedTradesCount, winningTradesCount, winRate } = useMemo(() => {
@@ -1079,12 +1117,15 @@ export default function TitanLiveDashboard() {
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
               NT$ {Math.round(totalNetAssets).toLocaleString()}
             </div>
+            <div style={{ fontSize: '0.68rem', color: totalNetProfitTwd >= 0 ? '#34D399' : '#F87171', marginTop: '0.2rem' }}>
+              本金: NT$ {Math.round(totalDepositsTwd).toLocaleString()} | 總淨利: {totalNetProfitTwd >= 0 ? '+' : ''}{totalNetProfitPct.toFixed(2)}%
+            </div>
           </div>
 
           {/* 當前閒置現金 */}
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
-              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💵 台股閒置現金 (待命加碼)</span>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💵 台股閒置現金 (歷史紀錄推導)</span>
               <button
                 onClick={() => { setCashActionType('deposit'); setCashModalOpen(true); }}
                 style={{ background: 'rgba(245, 158, 11, 0.2)', border: 'none', color: '#FBBF24', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '3px', cursor: 'pointer' }}
@@ -1094,6 +1135,9 @@ export default function TitanLiveDashboard() {
             </div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>
               NT$ {Math.round(idleCash).toLocaleString()}
+            </div>
+            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.2rem' }}>
+              流水帳現金流即時加總
             </div>
           </div>
 
