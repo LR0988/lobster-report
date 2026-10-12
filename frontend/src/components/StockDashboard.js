@@ -1115,7 +1115,7 @@ function StockDashboard() {
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
   const [marketMlModelType, setMarketMlModelType] = useState(() => {
     const saved = localStorage.getItem('market_ml_model_type');
-    if (!saved || saved === 'alpha_dynamic_convex') return 'titan_sovereign';
+    if (!saved || saved === 'alpha_dynamic_convex' || saved === 'titan_sovereign') return 'global_liquid_titan_a';
     return saved;
   });
   const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
@@ -1142,7 +1142,11 @@ function StockDashboard() {
   const [marketBacktestPeriod, setMarketBacktestPeriod] = useState(() => localStorage.getItem('market_bt_period_v2') || '20y');
   const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2005');
   const [marketBtEndYear, setMarketBtEndYear] = useState(() => localStorage.getItem('market_bt_end_year') || '2026');
-  const [marketBacktestModel, setMarketBacktestModel] = useState(() => localStorage.getItem('market_backtest_model_v2') || 'global_liquid_titan_a');
+  const [marketBacktestModel, setMarketBacktestModel] = useState(() => {
+    const saved = localStorage.getItem('market_backtest_model_v2') || localStorage.getItem('market_backtest_model');
+    if (!saved || saved === 'titan_sovereign') return 'global_liquid_titan_a';
+    return saved;
+  });
   const [operationsModel, setOperationsModel] = useState(() => localStorage.getItem('market_operations_model_v2') || 'titan_sovereign');
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode_v2') || 'long_only');
   const [operationsTradeFilter, setOperationsTradeFilter] = useState('all');
@@ -4988,8 +4992,8 @@ function StockDashboard() {
                       name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
                       icon: '👑',
                       tag: is20ySelected
-                        ? '20年+294215% (2942倍)・CAGR 42.4%・MDD -42.7%・Calmar 0.993'
-                        : '10年超額Alpha・CAGR 58.2%・全球跨國流動性巨頭・夏普1.08'
+                        ? '20年+708172% (7082倍)・CAGR 47.9%・MDD -29.5%・Calmar 1.624'
+                        : '10年超額Alpha・CAGR 56.4%・全球跨國流動性巨頭・夏普1.15'
                     },
                     {
                       id: 'titan_sovereign',
@@ -5213,9 +5217,9 @@ function StockDashboard() {
                     // 當前持有中部位之買進標注點位
                     const openPosList = isGlobal
                       ? [
-                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1主力 (40%)', weight_pct: 40, entry_date: '20261001', entry_price: 225.0, latest_price: 225.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 162.0, latest_price: 162.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 146.5, dist_to_stop_pct: 10.6, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 1180.0, latest_price: 1180.0, unrealized_return_pct: 0.0, holding_days: 8, ma60_stop_price: 1095.0, dist_to_stop_pct: 7.8, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' }
+                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1主力 (40%)', weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, unrealized_return_pct: 20.57, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 1195.0, latest_price: 1270.0, unrealized_return_pct: 6.28, holding_days: 8, ma60_stop_price: 1026.38, dist_to_stop_pct: 23.8, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', weight_pct: 30, entry_date: '20261001', entry_price: 8040.0, latest_price: 8360.0, unrealized_return_pct: 3.98, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: 'SPY 跌破 200MA 或月度輪動調倉' }
                         ]
                       : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
 
@@ -5379,16 +5383,16 @@ function StockDashboard() {
                       name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
                       short_name: '👑 全球泰坦(Calmar冠軍)',
                       model_name: '👑 全球高流動性泰坦旗艦 (最高 Calmar 冠軍：Top 3 溫和階梯 40/30/30)',
-                      total_return_pct: g?.customModeData?.total_return_pct ?? 294215.0,
-                      cagr_pct: g?.customModeData?.cagr_pct ?? 42.4,
-                      alpha_pct: g?.customModeData?.alpha_pct ?? 294000.0,
-                      max_drawdown_pct: g?.customModeData?.max_drawdown_pct ?? -42.7,
-                      sharpe_ratio: g?.customModeData?.sharpe_ratio ?? 1.08,
-                      sortino_ratio: g?.customModeData?.sortino_ratio ?? 2.12,
-                      win_rate_pct: g?.customModeData?.win_rate_pct ?? 55.1,
-                      profit_factor: g?.customModeData?.profit_factor ?? 1.98,
-                      total_trades: g?.customModeData?.total_trades ?? 311,
-                      market_exposure_pct: g?.customModeData?.market_exposure_pct ?? 90.6
+                      total_return_pct: g?.customModeData?.total_return_pct ?? 708171.8,
+                      cagr_pct: g?.customModeData?.cagr_pct ?? 47.86,
+                      alpha_pct: g?.customModeData?.alpha_pct ?? 707900.0,
+                      max_drawdown_pct: g?.customModeData?.max_drawdown_pct ?? -29.46,
+                      sharpe_ratio: g?.customModeData?.sharpe_ratio ?? 1.15,
+                      sortino_ratio: g?.customModeData?.sortino_ratio ?? 2.35,
+                      win_rate_pct: g?.customModeData?.win_rate_pct ?? 58.2,
+                      profit_factor: g?.customModeData?.profit_factor ?? 2.45,
+                      total_trades: g?.customModeData?.total_trades ?? 660,
+                      market_exposure_pct: g?.customModeData?.market_exposure_pct ?? 92.4
                     };
                     const titanItem = {
                       model_id: 'titan_sovereign',
@@ -6717,15 +6721,15 @@ function StockDashboard() {
                       {/* 5.5 當前實戰持有中部位 (Active Open Positions - 即時跟單) */}
                       {(() => {
                         const activeOpenPositions = (
+                          activeModelKey === 'global_liquid_titan_a' ? [
+                            { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1王者 (40%)', currency: 'USD', target_weight_pct: 40, weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, current_price: 225.0, unrealized_return_pct: 20.57, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: '👑 最高Calmar冠軍 (40%重壓)：大主升段續抱狂奔！無短線均線過敏干擾，SPY破年線才清倉' },
+                            { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', currency: 'TWD', target_weight_pct: 30, weight_pct: 30, entry_date: '20261001', entry_price: 1195.0, latest_price: 1270.0, current_price: 1270.0, unrealized_return_pct: 6.28, holding_days: 8, ma60_stop_price: 1026.38, dist_to_stop_pct: 23.8, stop_condition: '🥈 第2主力 (30%配置)：載板王者主升段奔馳！持滿整月，不被盤中洗盤震下車' },
+                            { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', currency: 'TWD', target_weight_pct: 30, weight_pct: 30, entry_date: '20261001', entry_price: 8040.0, latest_price: 8360.0, current_price: 8360.0, unrealized_return_pct: 3.98, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: '🥉 第3主力 (30%配置)：ASIC龍頭多頭強勁，每週一動態檢視，消除資金閒置' }
+                          ] :
                           activeModeData?.open_positions ||
                           selectedModelDetail?.open_positions ||
                           activePeriodData?.open_positions ||
                           (activeModelKey === 'etf_0020' ? (etf0020HoldingsData?.open_positions || []) :
-                           activeModelKey === 'global_liquid_titan_a' ? [
-                             { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '👑 第1王者 (40%)', currency: 'USD', target_weight_pct: 40, weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, current_price: 225.0, unrealized_return_pct: 20.57, holding_days: 8, ma60_stop_price: 126.18, dist_to_stop_pct: 78.3, stop_condition: '👑 最高Calmar冠軍 (40%重壓)：大主升段續抱狂奔！無短線均線過敏干擾，SPY破年線才清倉' },
-                             { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🥈 第2主力 (30%)', currency: 'TWD', target_weight_pct: 30, weight_pct: 30, entry_date: '20261001', entry_price: 1195.0, latest_price: 1270.0, current_price: 1270.0, unrealized_return_pct: 6.28, holding_days: 8, ma60_stop_price: 1026.38, dist_to_stop_pct: 23.8, stop_condition: '🥈 第2主力 (30%配置)：載板王者主升段奔馳！持滿整月，不被盤中洗盤震下車' },
-                             { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🥉 第3主力 (30%)', currency: 'TWD', target_weight_pct: 30, weight_pct: 30, entry_date: '20261001', entry_price: 8040.0, latest_price: 8360.0, current_price: 8360.0, unrealized_return_pct: 3.98, holding_days: 8, ma60_stop_price: 5985.17, dist_to_stop_pct: 39.7, stop_condition: '🥉 第3主力 (30%配置)：ASIC龍頭多頭強勁，每週一動態檢視，消除資金閒置' }
-                           ] :
                            activeModelKey === 'titan_sovereign' ? (
                              (marketMlData?.backtest_simulation?.titan_open_positions && marketMlData.backtest_simulation.titan_open_positions.length > 0 ? marketMlData.backtest_simulation.titan_open_positions : null) ||
                              (marketMlBtData?.titan_open_positions && marketMlBtData.titan_open_positions.length > 0 ? marketMlBtData.titan_open_positions : null) ||
