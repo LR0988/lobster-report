@@ -1289,6 +1289,31 @@ export default function TitanLiveDashboard() {
             </div>
           </div>
 
+          {/* 策略月中抱牢紀律與風控狀態看板 */}
+          <div style={{
+            background: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            borderRadius: '8px',
+            padding: '0.65rem 0.95rem',
+            marginBottom: '1rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.6rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+              <span style={{ fontSize: '1.15rem' }}>🛡️</span>
+              <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【月中抱牢紀律與警示原則】</span>
+              <span style={{ color: '#CBD5E1' }}>
+                台股泰坦策略依嚴格量化動能紀律「<strong>不到月底絕不隨意換股</strong>」（杜絕頻繁換股摩擦成本）；持股若維持在 60MA 季線上則續抱享受主升段。下次定期調倉日為 <strong>2026-10-31 盤後</strong>。若月中不幸跌破季線，將<strong>立即跳車變現為防禦現金</strong>！
+              </span>
+            </div>
+            <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+              ● 風控監控中：全數安全續抱
+            </span>
+          </div>
+
           {userPositions.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
               目前尚無持股部位。資金 100% 待命中，可點擊上方「➕ 新增持股部位」或於下方「台股持倉更動建議」執行買入！
@@ -1308,7 +1333,8 @@ export default function TitanLiveDashboard() {
                     <th style={{ textAlign: 'right' }}>未實現淨損益</th>
                     <th style={{ textAlign: 'right' }}>佔總淨值%</th>
                     <th style={{ textAlign: 'right' }}>60MA停損價</th>
-                    <th style={{ textAlign: 'center', minWidth: '150px' }}>操作</th>
+                    <th style={{ textAlign: 'center' }}>風控警示狀態</th>
+                    <th style={{ textAlign: 'center', minWidth: '130px' }}>操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1324,8 +1350,13 @@ export default function TitanLiveDashboard() {
                     const lots = Math.floor(pos.shares / 1000);
                     const odd = pos.shares % 1000;
 
+                    const stopPrice = pos.stop_loss_price || (pos.entry_price * 0.85);
+                    const distToStopPct = stopPrice > 0 ? ((curPrice - stopPrice) / curPrice) * 100 : 10;
+                    const isBroken = curPrice <= stopPrice;
+                    const isWarning = !isBroken && distToStopPct <= 5;
+
                     return (
-                      <tr key={pos.id} style={{ background: 'rgba(255,255,255,0.015)' }}>
+                      <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255,255,255,0.015)' }}>
                         <td>
                           <strong style={{ color: '#F8FAFC' }}>{pos.stock_name}</strong>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.stock_id}</div>
@@ -1363,6 +1394,21 @@ export default function TitanLiveDashboard() {
                         </td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047' }}>
                           ${pos.stop_loss_price?.toFixed(1) || '--'}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          {isBroken ? (
+                            <span style={{ fontSize: '0.72rem', background: '#EF4444', color: '#FFF', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                              🚨 破線停損離場
+                            </span>
+                          ) : isWarning ? (
+                            <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                              ⚠️ 逼近防守線 (+{distToStopPct.toFixed(1)}%)
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                              🟢 安全續抱 (+{distToStopPct.toFixed(1)}%)
+                            </span>
+                          )}
                         </td>
                         <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                           <button

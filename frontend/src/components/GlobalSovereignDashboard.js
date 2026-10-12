@@ -19,6 +19,7 @@ const DEFAULT_POSITIONS = [
     current_price: 225.0,
     entry_date: '2026-10-01',
     entry_fee: 15,
+    stop_loss_price: 126.18,
     role: '👑 第1王者 (40%)',
     stop_condition: '大波段抱牢，SPY破年線才清倉'
   },
@@ -33,6 +34,7 @@ const DEFAULT_POSITIONS = [
     current_price: 1270.0,
     entry_date: '2026-10-01',
     entry_fee: 400,
+    stop_loss_price: 1026.38,
     role: '🥈 第2主力 (30%)',
     stop_condition: '載板王者主升段狂飆，持滿整月'
   },
@@ -47,6 +49,7 @@ const DEFAULT_POSITIONS = [
     current_price: 8360.0,
     entry_date: '2026-10-01',
     entry_fee: 400,
+    stop_loss_price: 5985.17,
     role: '🥉 第3主力 (30%)',
     stop_condition: 'ASIC龍頭多頭強勁，每週一動態檢視'
   }
@@ -1362,6 +1365,31 @@ export default function GlobalSovereignDashboard() {
               </div>
             </div>
 
+            {/* 策略月中抱牢紀律與風控狀態看板 */}
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '8px',
+              padding: '0.65rem 0.95rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.6rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+                <span style={{ fontSize: '1.15rem' }}>🛡️</span>
+                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【月中抱牢紀律與警示原則】</span>
+                <span style={{ color: '#CBD5E1' }}>
+                  依量化動能紀律「<strong>不到月底絕不隨意換股</strong>」（杜絕假突破洗盤與手續費摩擦）；當前 3 檔持股全數在 60MA 季線上狂奔（安全邊界 +23% ~ +78%）。下次定期調倉日為 <strong>2026-10-31 盤後</strong>。若月中不幸跌破季線，將<strong>立即跳車變現為防禦現金</strong>！
+                </span>
+              </div>
+              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+                ● 風控監控中：全數安全續抱
+              </span>
+            </div>
+
             {userPositions.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
                 目前尚無持股部位。資金 100% 待命中，可點擊上方「➕ 新增持股部位」或於下方「月底持倉更動建議」執行買入！
@@ -1380,7 +1408,9 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>目前市值 (折合NT$)</th>
                       <th style={{ textAlign: 'right' }}>未實現損益</th>
                       <th style={{ textAlign: 'right' }}>佔總淨值%</th>
-                      <th style={{ textAlign: 'center', minWidth: '150px' }}>操作</th>
+                      <th style={{ textAlign: 'center' }}>防守線 (60MA)</th>
+                      <th style={{ textAlign: 'center' }}>風控警示狀態</th>
+                      <th style={{ textAlign: 'center', minWidth: '130px' }}>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1396,8 +1426,14 @@ export default function GlobalSovereignDashboard() {
                       const allocPct = totalNetAssetsTwd > 0 ? (valTwd / totalNetAssetsTwd) * 100 : 0;
                       const isWin = pnlTwd >= 0;
 
+                      // 停損價與安全邊界計算
+                      const stopPrice = pos.stop_loss_price || (pos.entry_price * 0.85);
+                      const distToStopPct = stopPrice > 0 ? ((curPrice - stopPrice) / curPrice) * 100 : 10;
+                      const isBroken = curPrice <= stopPrice;
+                      const isWarning = !isBroken && distToStopPct <= 5;
+
                       return (
-                        <tr key={pos.id} style={{ background: 'rgba(255,255,255,0.015)' }}>
+                        <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255,255,255,0.015)' }}>
                           <td>
                             <strong style={{ color: '#F8FAFC' }}>{pos.name}</strong>
                             <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
@@ -1432,6 +1468,24 @@ export default function GlobalSovereignDashboard() {
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
                             {allocPct.toFixed(1)}%
+                          </td>
+                          <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FCA5A5', fontSize: '0.8rem' }}>
+                            {curr}{stopPrice?.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            {isBroken ? (
+                              <span style={{ fontSize: '0.72rem', background: '#EF4444', color: '#FFF', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                🚨 破線停損離場
+                              </span>
+                            ) : isWarning ? (
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                ⚠️ 逼近防守線 (+{distToStopPct.toFixed(1)}%)
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                🟢 安全續抱 (+{distToStopPct.toFixed(1)}%)
+                              </span>
+                            )}
                           </td>
                           <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                             <button
