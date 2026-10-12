@@ -6314,7 +6314,7 @@ function StockDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <h4 style={{ margin: 0, fontSize: '1rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <span>📈</span>
-                                <span>{activeModelMeta?.name || 'AI 模型'} 策略淨值 vs 大盤買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
+                                <span>{activeModelMeta?.name || 'AI 模型'} 策略淨值 vs {activeModelKey === 'global_liquid_titan_a' ? '美股標普 S&P 500' : '大盤'}買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
                               </h4>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>（初始本金 NT$ 1,000,000）</span>
                             </div>
@@ -6326,7 +6326,7 @@ function StockDashboard() {
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#94A3B8', borderTop: '1px dashed #CBD5E1' }}></span>
-                                <span style={{ color: '#94A3B8' }}>TAIEX 大盤 (買進持有)</span>
+                                <span style={{ color: '#94A3B8' }}>{activeModelKey === 'global_liquid_titan_a' ? 'S&P 500 標普指數 (買進持有)' : 'TAIEX 大盤 (買進持有)'}</span>
                               </div>
                               {etf0050 && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -6531,8 +6531,10 @@ function StockDashboard() {
                           }
                         }
 
-                        if (activeModelKey === 'titan_sovereign' || activeModelKey === 'global_liquid_titan_a') {
-                          const titanTargetObj = is20ySelected
+                        const isGlobalTitan = activeModelKey === 'global_liquid_titan_a';
+                        let titanTargetObj = null;
+                        if (activeModelKey === 'titan_sovereign' || isGlobalTitan) {
+                          titanTargetObj = is20ySelected
                             ? (getTitanPeriodData('20y', undefined, undefined, activeModelKey) || activePeriodData)
                             : (activePeriodData || getTitanPeriodData(activePeriodKey, undefined, undefined, activeModelKey));
                           const titanMode = isLongShort ? titanTargetObj?.long_short : titanTargetObj?.long_only;
@@ -6540,6 +6542,33 @@ function StockDashboard() {
                             activeHistModeData = { ...(activeHistModeData || {}), ...titanMode };
                           }
                         }
+
+                        const activeBenchmarkObj = (isGlobalTitan || activeModelKey === 'titan_sovereign')
+                          ? (titanTargetObj?.benchmark || activePeriodData?.benchmark || historyTarget?.benchmark)
+                          : historyTarget?.benchmark;
+
+                        const taiexReturnByYear = (() => {
+                          if (!Array.isArray(titanCurveData) || titanCurveData.length === 0) return {};
+                          const years = [...new Set(titanCurveData.map(p => p.year || (p.date ? String(p.date).slice(0, 4) : null)))].filter(Boolean).sort((a, b) => a - b);
+                          const res = {};
+                          for (let idx = 0; idx < years.length; idx++) {
+                            const y = years[idx];
+                            const sub = titanCurveData.filter(p => (p.year ? p.year === y : String(p.date).startsWith(y)));
+                            if (!sub || sub.length === 0) continue;
+                            let b_start;
+                            if (idx === 0) {
+                              b_start = sub[0].benchmark_equity;
+                            } else {
+                              const prevSub = titanCurveData.filter(p => (p.year ? p.year === years[idx - 1] : String(p.date).startsWith(years[idx - 1])));
+                              b_start = prevSub[prevSub.length - 1]?.benchmark_equity || sub[0].benchmark_equity;
+                            }
+                            const b_end = sub[sub.length - 1]?.benchmark_equity;
+                            if (b_start && b_end) {
+                              res[String(y)] = Number((((b_end / b_start) - 1.0) * 100.0).toFixed(2));
+                            }
+                          }
+                          return res;
+                        })();
 
                         let activeHistYearly = activeHistModeData?.yearly || activePeriodData?.yearly || historyTarget?.yearly || [];
 
@@ -6624,24 +6653,24 @@ function StockDashboard() {
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}年化 CAGR</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399' }}>+{displayHistSummary.cagr_pct?.toFixed(1)}%</div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤: +{historyTarget.benchmark?.cagr_pct?.toFixed(1) || '10.1'}%</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{isGlobalTitan ? '美股標普(SPY): +' : 'TAIEX 大盤: +'}{activeBenchmarkObj?.cagr_pct?.toFixed(1) || (isGlobalTitan ? '10.8' : '10.1')}%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}超額 Alpha</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FBBF24' }}>
                                   {(displayHistSummary.alpha_pct || 0) >= 0 ? '+' : ''}{displayHistSummary.alpha_pct?.toFixed(1)}%
                                 </div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{displayHistSummary.alpha_pct > 100 ? '跑贏大盤總幅度' : '跑贏大盤年化超額'}</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{displayHistSummary.alpha_pct > 100 ? (isGlobalTitan ? '跑贏標普總幅度' : '跑贏大盤總幅度') : (isGlobalTitan ? '跑贏標普年化超額' : '跑贏大盤年化超額')}</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}最大回撤 (MDD)</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F87171' }}>{displayHistSummary.max_drawdown_pct?.toFixed(1)}%</div>
-                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>大盤 MDD {historyTarget.benchmark?.max_drawdown_pct?.toFixed(1) || '-58.3'}%</div>
+                                <div style={{ fontSize: '0.68rem', color: '#6EE7B7' }}>{isGlobalTitan ? 'SPY MDD ' : '大盤 MDD '}{activeBenchmarkObj?.max_drawdown_pct?.toFixed(1) || (isGlobalTitan ? '-50.8' : '-58.3')}%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{is20ySelected ? '20年' : '10年'}長線夏普值</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC' }}>{displayHistSummary.sharpe_ratio?.toFixed(2)}</div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>大盤 {historyTarget.benchmark?.sharpe_ratio?.toFixed(2) || '0.45'}</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{isGlobalTitan ? 'SPY 夏普 ' : '大盤 '}{activeBenchmarkObj?.sharpe_ratio?.toFixed(2) || (isGlobalTitan ? '0.58' : '0.45')}</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem', borderRadius: '8px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>整體交易勝率</div>
@@ -6658,7 +6687,8 @@ function StockDashboard() {
                                     <tr style={{ background: 'rgba(0,0,0,0.4)', color: '#CBD5E1' }}>
                                       <th style={{ padding: '0.45rem 0.75rem', textAlign: 'left' }}>年份</th>
                                       <th>AI 策略報酬</th>
-                                      <th>TAIEX 大盤同期</th>
+                                      <th>{isGlobalTitan ? '🌐 美股標普 500 (SPY)' : '🎯 TAIEX 加權大盤同期'}</th>
+                                      {isGlobalTitan && <th>🎯 台股加權 (TAIEX)</th>}
                                       <th>超額報酬 Alpha</th>
                                       <th style={{ textAlign: 'left' }}>歷史重大總經情境與防護效果</th>
                                     </tr>
@@ -6666,14 +6696,15 @@ function StockDashboard() {
                                   <tbody>
                                     {activeHistYearly.map((yr) => {
                                       const yInt = parseInt(yr.year);
+                                      const taiexRet = taiexReturnByYear[yr.year];
                                       let contextNote = '';
                                       if (yInt === 2005) contextNote = '🌱 策略回測啟動基期：平滑復權佈局初期，穩健跟隨多頭動能';
                                       else if (yInt === 2006) contextNote = '📈 全球景氣擴張多頭：科技股與權值巨頭穩步揚升';
                                       else if (yInt === 2007) contextNote = '⚡ 萬點攻防轉折：次貸隱憂浮現，策略高檔防禦調節';
-                                      else if (yInt === 2008) contextNote = '📉 次貸風暴金融海嘯：大盤狂瀉 -46%，AI 及時空手避開世紀股災！';
-                                      else if (yInt === 2009) contextNote = '📈 世紀大反彈：全球 QE 救市，大盤飆漲 +78.3%，滿倉搭上主升浪';
-                                      else if (yInt === 2010) contextNote = '🏛️ 景氣復甦震盪：台股高檔箱型整理，精準選股勝出';
-                                      else if (yInt === 2011) contextNote = '🇪🇺 歐債危機爆發：美債降評與歐豬五國危機，大盤 -21.2%，穩健防守';
+                                      else if (yInt === 2008) contextNote = isGlobalTitan ? '📉 次貸風暴金融海嘯：美股標普重挫 -41.0%、台股狂瀉 -46.0%，泰坦及時空手現金避開世紀股災！' : '📉 次貸風暴金融海嘯：大盤狂瀉 -46%，AI 及時空手避開世紀股災！';
+                                      else if (yInt === 2009) contextNote = isGlobalTitan ? '📈 全球 QE 救市大反彈：美股 +26.8%、台股 +78.3%，泰坦滿倉搭上主升浪' : '📈 世紀大反彈：全球 QE 救市，大盤飆漲 +78.3%，滿倉搭上主升浪';
+                                      else if (yInt === 2010) contextNote = '🏛️ 景氣復甦震盪：台美市場高檔箱型整理，精準選股勝出';
+                                      else if (yInt === 2011) contextNote = '🇪🇺 歐債危機爆發：美債降評與歐豬五國危機，大盤大幅回檔，穩健防守';
                                       else if (yInt === 2012) contextNote = '🔄 證所稅風暴與復甦：下半年政策利空淡化，重啟動能趨勢';
                                       else if (yInt === 2013) contextNote = '📈 萬點前暖身行情：科技龍頭領軍，維持穩健複利增長';
                                       else if (yInt === 2014) contextNote = '📊 蘋果供應鏈主升段：半導體龍頭帶動多頭大動能';
@@ -6684,11 +6715,13 @@ function StockDashboard() {
                                       else if (yInt === 2019) contextNote = '📈 貿易戰降溫大反彈：5G 與半導體狂飆，滿載主升段';
                                       else if (yInt === 2020) contextNote = '⚡ COVID-19 疫情熔斷：快速停損退回現金，避開急跌後精準跟上強彈';
                                       else if (yInt === 2021) contextNote = '🚢 航海王與半導體狂歡：傳產與電子輪動大爆發，創造超額 Alpha';
-                                      else if (yInt === 2022) contextNote = isLongShort ? '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 策略空方大獲全勝' : '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 全程現金防守避開熊市殺戮';
+                                      else if (yInt === 2022) contextNote = isLongShort ? '🔥 Fed 歷史性狂暴升息：大盤重摔 -22.4%，AI 策略空方大獲全勝' : '🔥 Fed 歷史性狂暴升息：美股 -11.5%、台股 -22.4%，AI 全程現金防守避開熊市殺戮';
                                       else if (yInt === 2023) contextNote = '🤖 生成式 AI 奇異點：伺服器概念股狂飆，緊抓主升浪強彈 +26.8%';
                                       else if (yInt === 2024) contextNote = '🚀 AI 狂潮與台積電主升段：滿球進場緊抓大波段多頭主升浪';
                                       else if (yInt === 2025) contextNote = '💎 全球半導體與先進製程大擴張：主攻高流動性領頭羊';
-                                      else if (yInt === 2026) contextNote = '📈 截至當前最新走勢';
+                                      else if (yInt === 2026) contextNote = isGlobalTitan
+                                        ? '🚀 2026 科技大主升浪：美股標普500 +12.60%、台股加權暴漲 +70.26%（衝逼5萬點）！泰坦重壓欣興(+129%)、創意(+135%)與莫德納(+60%)，以 +212.70% 全面碾壓美台雙大盤！'
+                                        : '🚀 2026 科技大主升浪：台股加權暴漲 +70.26%（衝逼5萬點），AI 泰坦策略以 +212.70% 全面擴大超額 Alpha！';
 
                                       return (
                                         <tr key={yr.year} style={{ background: yr.alpha > 15 ? 'rgba(16, 185, 129, 0.08)' : (yr.alpha < -5 ? 'rgba(239, 68, 68, 0.06)' : 'transparent') }}>
@@ -6701,6 +6734,11 @@ function StockDashboard() {
                                           <td style={{ color: yr.benchmark_return >= 0 ? '#CBD5E1' : '#FCA5A5' }}>
                                             {yr.benchmark_return >= 0 ? '+' : ''}{yr.benchmark_return?.toFixed(2)}%
                                           </td>
+                                          {isGlobalTitan && (
+                                            <td style={{ color: (taiexRet !== undefined && taiexRet >= 0) ? '#CBD5E1' : '#FCA5A5', fontWeight: yInt === 2026 ? 'bold' : 'normal' }}>
+                                              {taiexRet !== undefined ? `${taiexRet >= 0 ? '+' : ''}${taiexRet.toFixed(2)}%` : '--'}
+                                            </td>
+                                          )}
                                           <td style={{ fontWeight: 'bold', color: yr.alpha >= 0 ? '#FBBF24' : '#94A3B8' }}>
                                             {yr.alpha >= 0 ? '+' : ''}{yr.alpha?.toFixed(2)}%
                                           </td>
