@@ -286,3 +286,37 @@ export async function apiUpdateTitanCash(data) {
   }
   return await res.json();
 }
+
+// 全球泰坦旗艦策略：依登入使用者取得雲端個人投資組合與交易紀錄
+export async function apiGetGlobalTitanPortfolio(username) {
+  const token = getAuthToken();
+  const url = `${API_URL}/api/global_sovereign/portfolio${username ? `?username=${encodeURIComponent(username)}` : ''}`;
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+  if (!res.ok) {
+    throw new Error('無法取得雲端投資組合');
+  }
+  return await res.json();
+}
+
+// 全球泰坦旗艦策略：儲存個人投資組合與交易紀錄至雲端
+export async function apiSaveGlobalTitanPortfolio(portfolioData) {
+  const token = getAuthToken();
+  const res = await fetch(`${API_URL}/api/global_sovereign/portfolio`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(portfolioData)
+  });
+  if (!res.ok) {
+    throw new Error('無法儲存雲端投資組合');
+  }
+  return await res.json();
+}
+

@@ -158,3 +158,21 @@ class Token(BaseModel):
     token_type: str
     user: UserResponse
 
+# 全球泰坦策略 使用者個人化投資組合與交易紀錄 Schema
+class TitanPortfolioSaveRequest(BaseModel):
+    username: Optional[str] = None
+    positions: List[dict]
+    tx_history: List[dict]
+    usd_fx: Optional[float] = 32.5
+    dismissed_suggestions: Optional[List[str]] = []
+
+class TitanPortfolioResponse(BaseModel):
+    status: str
+    username: str
+    positions: List[dict]
+    tx_history: List[dict]
+    usd_fx: float
+    dismissed_suggestions: List[str]
+    updated_at: Optional[datetime] = None
+
+

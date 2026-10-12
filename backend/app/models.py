@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, Float
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -94,4 +94,19 @@ class User(Base):
     role = Column(String(20), default="admin")  # admin, editor, viewer
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+# 全球泰坦旗艦策略：使用者個人化投資組合與交易紀錄模型
+class UserTitanPortfolio(Base):
+    __tablename__ = "user_titan_portfolios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    positions = Column(Text, nullable=False, default="[]")  # JSON 字串存放當前持股
+    tx_history = Column(Text, nullable=False, default="[]")  # JSON 字串存放歷史全進出流水帳
+    usd_fx = Column(Float, default=32.5)  # 自訂美元匯率
+    dismissed_suggestions = Column(Text, nullable=False, default="[]")  # 已略過的再平衡建議
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 
