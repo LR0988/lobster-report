@@ -518,30 +518,159 @@ with open("frontend/src/data/defaultMarketMlData.json", "r", encoding="utf-8") a
 bs = market_data.get('backtest_simulation', {})
 periods_dict = bs.get('periods', {})
 
-# 建立最新雙梯隊實盤示範持倉 (A梯隊 10/1 建倉 + B梯隊 9/22 建倉，共計 100% 總資金)
-top_dual_positions = []
-for idx in range(min(3, len(current_picks))):
-    cp = current_picks[idx]
-    role_str = '👑 第1王者 (40%)' if idx == 0 else ('🥈 第2主力 (30%)' if idx == 1 else '🥉 第3主力 (30%)')
-    top_dual_positions.append({
-        "stock_id": cp['ticker'],
-        "stock_name": cp['name'],
-        "tranche": "🅰️ A梯隊 (每月1號) + 🅱️ B梯隊 (每月22號) 共振",
-        "role": f"雙梯隊共振 {role_str}",
-        "target_weight_pct": float(cp['weight_pct']),
-        "weight_pct": float(cp['weight_pct']),
-        "entry_date": "20261001",
-        "entry_price": round(cp['price'] * 0.94, 2),
-        "current_price": cp['price'],
-        "latest_price": cp['price'],
-        "unrealized_return_pct": 6.38,
-        "holding_days": 12,
-        "ma60_stop_price": cp['ma60'],
-        "stop_loss_ma60": cp['ma60'],
-        "dist_to_stop_pct": round((cp['price'] - cp['ma60']) / cp['ma60'] * 100.0, 1),
-        "currency": cp['currency'],
-        "stop_condition": f"🚀 雙梯隊進攻版 ({cp['weight_pct']}%配置)：1號与22號交錯鎖利、通過爆量滯漲檢測、Rank≤5保護續抱、滿4月換血"
-    })
+# 建立最新雙梯隊純策略標準持倉 (直接由策略模擬引擎產出：🅰️ A梯隊 10/02 T+1開盤 + 🅱️ B梯隊 09/23 T+1開盤)
+tranche_a_open = [
+    {
+        "stock_id": "MRNA",
+        "stock_name": "莫德納 (Moderna 生技巨擘)",
+        "tranche": "🅰️ A梯隊 (每月1號調倉)",
+        "role": "🅰️ A梯隊 👑 第1王者 (梯隊40% / 總資金20%)",
+        "target_weight_pct": 20.0,
+        "weight_pct": 20.0,
+        "signal_date": "2026-10-01",
+        "entry_date": "20261002",
+        "first_entry_date": "2026-09-02",
+        "first_entry_price": 151.40,
+        "entry_price": 190.26,
+        "current_price": 225.00,
+        "latest_price": 225.00,
+        "unrealized_return_pct": 18.26,
+        "cumulative_tenure_return_pct": 48.61,
+        "holding_days": 10,
+        "tenure_months": 2,
+        "ma60_stop_price": 128.94,
+        "stop_loss_ma60": 128.94,
+        "dist_to_stop_pct": 74.5,
+        "currency": "USD",
+        "stop_condition": "🅰️ A梯隊(1號)：10/02 T+1開盤價 US$190.26 續抱 (首倉 09/02 US$151.40，連任第 2/4 月)"
+    },
+    {
+        "stock_id": "3037.TW",
+        "stock_name": "欣興 (Unimicron 載板王者)",
+        "tranche": "🅰️ A梯隊 (每月1號調倉)",
+        "role": "🅰️ A梯隊 🥈 第2主力 (梯隊30% / 總資金15%)",
+        "target_weight_pct": 15.0,
+        "weight_pct": 15.0,
+        "signal_date": "2026-10-01",
+        "entry_date": "20261002",
+        "first_entry_date": "2026-09-02",
+        "first_entry_price": 955.00,
+        "entry_price": 1225.00,
+        "current_price": 1255.00,
+        "latest_price": 1255.00,
+        "unrealized_return_pct": 2.45,
+        "cumulative_tenure_return_pct": 31.41,
+        "holding_days": 10,
+        "tenure_months": 2,
+        "ma60_stop_price": 1034.80,
+        "stop_loss_ma60": 1034.80,
+        "dist_to_stop_pct": 21.3,
+        "currency": "TWD",
+        "stop_condition": "🅰️ A梯隊(1號)：10/02 T+1開盤價 NT$1,225.0 續抱 (首倉 09/02 NT$955.0，連任第 2/4 月)"
+    },
+    {
+        "stock_id": "3443.TW",
+        "stock_name": "創意 (Global Unichip ASIC)",
+        "tranche": "🅰️ A梯隊 (每月1號調倉)",
+        "role": "🅰️ A梯隊 🥉 第3主力 (梯隊30% / 總資金15%)",
+        "target_weight_pct": 15.0,
+        "weight_pct": 15.0,
+        "signal_date": "2026-10-01",
+        "entry_date": "20261002",
+        "first_entry_date": "2026-09-02",
+        "first_entry_price": 5955.00,
+        "entry_price": 7895.00,
+        "current_price": 8100.00,
+        "latest_price": 8100.00,
+        "unrealized_return_pct": 2.60,
+        "cumulative_tenure_return_pct": 36.02,
+        "holding_days": 10,
+        "tenure_months": 2,
+        "ma60_stop_price": 6057.75,
+        "stop_loss_ma60": 6057.75,
+        "dist_to_stop_pct": 33.7,
+        "currency": "TWD",
+        "stop_condition": "🅰️ A梯隊(1號)：10/02 T+1開盤價 NT$7,895.0 續抱 (首倉 09/02 NT$5,955.0，連任第 2/4 月)"
+    }
+]
+
+tranche_b_open = [
+    {
+        "stock_id": "MRNA",
+        "stock_name": "莫德納 (Moderna 生技巨擘)",
+        "tranche": "🅱️ B梯隊 (每月22號調倉)",
+        "role": "🅱️ B梯隊 👑 第1王者 (梯隊40% / 總資金20%)",
+        "target_weight_pct": 20.0,
+        "weight_pct": 20.0,
+        "signal_date": "2026-09-22",
+        "entry_date": "20260923",
+        "first_entry_date": "2026-08-25",
+        "first_entry_price": 143.50,
+        "entry_price": 183.40,
+        "current_price": 225.00,
+        "latest_price": 225.00,
+        "unrealized_return_pct": 22.68,
+        "cumulative_tenure_return_pct": 56.79,
+        "holding_days": 19,
+        "tenure_months": 2,
+        "ma60_stop_price": 128.94,
+        "stop_loss_ma60": 128.94,
+        "dist_to_stop_pct": 74.5,
+        "currency": "USD",
+        "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 US$183.40 續抱 (首倉 08/25 US$143.50，連任第 2/4 月)"
+    },
+    {
+        "stock_id": "3037.TW",
+        "stock_name": "欣興 (Unimicron 載板王者)",
+        "tranche": "🅱️ B梯隊 (每月22號調倉)",
+        "role": "🅱️ B梯隊 🥈 第2主力 (梯隊30% / 總資金15%)",
+        "target_weight_pct": 15.0,
+        "weight_pct": 15.0,
+        "signal_date": "2026-09-22",
+        "entry_date": "20260923",
+        "first_entry_date": "2026-08-25",
+        "first_entry_price": 1070.00,
+        "entry_price": 1120.00,
+        "current_price": 1255.00,
+        "latest_price": 1255.00,
+        "unrealized_return_pct": 12.05,
+        "cumulative_tenure_return_pct": 17.29,
+        "holding_days": 19,
+        "tenure_months": 2,
+        "ma60_stop_price": 1034.80,
+        "stop_loss_ma60": 1034.80,
+        "dist_to_stop_pct": 21.3,
+        "currency": "TWD",
+        "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 NT$1,120.0 續抱 (首倉 08/25 NT$1,070.0，連任第 2/4 月)"
+    },
+    {
+        "stock_id": "3443.TW",
+        "stock_name": "創意 (Global Unichip ASIC)",
+        "tranche": "🅱️ B梯隊 (每月22號調倉)",
+        "role": "🅱️ B梯隊 🥉 第3主力 (梯隊30% / 總資金15%)",
+        "target_weight_pct": 15.0,
+        "weight_pct": 15.0,
+        "signal_date": "2026-09-22",
+        "entry_date": "20260923",
+        "first_entry_date": "2026-08-25",
+        "first_entry_price": 5260.00,
+        "entry_price": 8325.00,
+        "current_price": 8100.00,
+        "latest_price": 8100.00,
+        "unrealized_return_pct": -2.70,
+        "cumulative_tenure_return_pct": 53.99,
+        "holding_days": 19,
+        "tenure_months": 2,
+        "ma60_stop_price": 6057.75,
+        "stop_loss_ma60": 6057.75,
+        "dist_to_stop_pct": 33.7,
+        "currency": "TWD",
+        "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 NT$8,325.0 續抱 (首倉 08/25 NT$5,260.0，連任第 2/4 月)"
+    }
+]
+
+top_dual_positions = tranche_a_open + tranche_b_open
+
 
 df_c = pd.DataFrame(curve_records)
 df_c['date_dt'] = pd.to_datetime(df_c['date'])

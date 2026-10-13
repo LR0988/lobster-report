@@ -5239,12 +5239,15 @@ function StockDashboard() {
                       }
                     });
 
-                    // 當前持有中部位之買進標注點位
+                    // 當前持有中部位之買進標注點位 (100% 純策略回測產出價格，不混入現貨個人帳本)
                     const openPosList = isGlobal
                       ? [
-                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🔥 A+B雙隊共振 王者(40%)', weight_pct: 40, entry_date: '20261001', entry_price: 186.61, latest_price: 225.0, unrealized_return_pct: 20.57, holding_days: 12, ma60_stop_price: 128.94, dist_to_stop_pct: 74.5, stop_condition: '1號+22號雙梯隊交錯輪動、爆量滯漲過濾' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🔥 A+B雙隊共振 主力(30%)', weight_pct: 30, entry_date: '20261001', entry_price: 1195.0, latest_price: 1255.0, unrealized_return_pct: 5.02, holding_days: 12, ma60_stop_price: 1034.80, dist_to_stop_pct: 21.3, stop_condition: '1號+22號雙梯隊交錯輪動、爆量滯漲過濾' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🔥 A+B雙隊共振 主力(30%)', weight_pct: 30, entry_date: '20261001', entry_price: 8031.0, latest_price: 8100.0, unrealized_return_pct: 0.86, holding_days: 12, ma60_stop_price: 6057.75, dist_to_stop_pct: 33.7, stop_condition: '1號+22號雙梯隊交錯輪動、爆量滯漲過濾' }
+                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅰️ A梯隊(1號) 王者(20%)', weight_pct: 20, entry_date: '20261002', entry_price: 190.26, latest_price: 225.0, unrealized_return_pct: 18.26, holding_days: 10, ma60_stop_price: 128.94, dist_to_stop_pct: 74.5, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 US$151.40)' },
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 1225.0, latest_price: 1255.0, unrealized_return_pct: 2.45, holding_days: 10, ma60_stop_price: 1034.80, dist_to_stop_pct: 21.3, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$955.0)' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 7895.0, latest_price: 8100.0, unrealized_return_pct: 2.60, holding_days: 10, ma60_stop_price: 6057.75, dist_to_stop_pct: 33.7, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$5,955.0)' },
+                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅱️ B梯隊(22號) 王者(20%)', weight_pct: 20, entry_date: '20260923', entry_price: 183.40, latest_price: 225.0, unrealized_return_pct: 22.68, holding_days: 19, ma60_stop_price: 128.94, dist_to_stop_pct: 74.5, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 US$143.50)' },
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 1120.0, latest_price: 1255.0, unrealized_return_pct: 12.05, holding_days: 19, ma60_stop_price: 1034.80, dist_to_stop_pct: 21.3, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$1,070.0)' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 8325.0, latest_price: 8100.0, unrealized_return_pct: -2.70, holding_days: 19, ma60_stop_price: 6057.75, dist_to_stop_pct: 33.7, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$5,260.0)' }
                         ]
                       : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
 
@@ -6781,65 +6784,127 @@ function StockDashboard() {
                         );
                       })()}
 
-                      {/* 5.5 實戰進出與入金統一對帳總簿 (Unified Cash Flow & Trade Ledger System) */}
+                      {/* 5.5 純策略標準模擬持倉與參考配置表 (Pure Strategy Simulated Open Positions Reference) */}
                       {(() => {
                         const isGlobal = activeModelKey === 'global_liquid_titan_a';
-                        const fx = userUsdFx || 32.5;
-                        const totalDeposit = userDepositCapital || 1000000;
+                        const fx = 32.5;
+                        const totalDeposit = 1000000;
 
-                        // 基準部位設定 (以 40/30/30 比例配置入金)
+                        // 100% 純策略回測引擎產出之標準持倉 (不讀取任何現貨個人帳本 localStorage)
                         const baseConfig = isGlobal ? [
+                          // 🅰️ A梯隊 (每月 1 號定錨 -> 10/02 T+1開盤價建倉，佔總資金 50%：20% / 15% / 15%)
                           {
                             stock_id: 'MRNA',
                             stock_name: '莫德納 (Moderna)',
-                            role: '👑 第1王者 (40%)',
-                            target_pct: 0.40,
+                            tranche_badge: '🅰️ A梯隊 (1號・佔50%)',
+                            role: '👑 A隊第1王者 (梯隊40% / 總資金20%)',
+                            target_pct: 0.20,
                             currency: 'USD',
-                            default_entry_price: 186.61,
-                            current_price: 225.0,
-                            entry_date: '2026-10-01',
+                            signal_date: '2026-10-01',
+                            entry_date: '2026-10-02',
+                            first_entry_info: '首倉 2026-09-02 @ US$ 151.40 (連任第2/4月・累漲 +48.61%)',
+                            strategy_entry_price: 190.26,
+                            strategy_current_price: 225.00,
                             entry_fee_twd: 15,
-                            ma60_stop_price: 126.18,
-                            stop_condition: '👑 最高Calmar冠軍 (40%重壓)：大主升段續抱狂奔！無短線均線過敏干擾，SPY破年線才清倉'
+                            ma60_stop_price: 128.94,
+                            stop_condition: '🅰️ 1號A梯隊 (20%總資金)：10/01定錨、10/02 T+1開盤 US$190.26 續抱，Rank #2 保護中'
                           },
                           {
                             stock_id: '3037.TW',
                             stock_name: '欣興 (Unimicron)',
-                            role: '🥈 第2主力 (30%)',
-                            target_pct: 0.30,
+                            tranche_badge: '🅰️ A梯隊 (1號・佔50%)',
+                            role: '🥈 A隊第2主力 (梯隊30% / 總資金15%)',
+                            target_pct: 0.15,
                             currency: 'TWD',
-                            default_entry_price: 1195.0,
-                            current_price: 1270.0,
-                            entry_date: '2026-10-01',
-                            entry_fee_twd: 400,
-                            ma60_stop_price: 1026.38,
-                            stop_condition: '🥈 第2主力 (30%配置)：載板王者主升段奔馳！持滿整月，不被盤中洗盤震下車'
+                            signal_date: '2026-10-01',
+                            entry_date: '2026-10-02',
+                            first_entry_info: '首倉 2026-09-02 @ NT$ 955.0 (連任第2/4月・累漲 +31.41%)',
+                            strategy_entry_price: 1225.00,
+                            strategy_current_price: 1255.00,
+                            entry_fee_twd: 200,
+                            ma60_stop_price: 1034.80,
+                            stop_condition: '🅰️ 1號A梯隊 (15%總資金)：10/01定錨、10/02 T+1開盤 NT$1,225.0 續抱，Rank #1 保護中'
                           },
                           {
                             stock_id: '3443.TW',
                             stock_name: '創意 (Creative Tech)',
-                            role: '🥉 第3主力 (30%)',
-                            target_pct: 0.30,
+                            tranche_badge: '🅰️ A梯隊 (1號・佔50%)',
+                            role: '🥉 A隊第3主力 (梯隊30% / 總資金15%)',
+                            target_pct: 0.15,
                             currency: 'TWD',
-                            default_entry_price: 8031.0,
-                            current_price: 8360.0,
-                            entry_date: '2026-10-01',
-                            entry_fee_twd: 400,
-                            ma60_stop_price: 5985.17,
-                            stop_condition: '🥉 第3主力 (30%配置)：ASIC龍頭多頭強勁，每週一動態檢視，消除資金閒置'
+                            signal_date: '2026-10-01',
+                            entry_date: '2026-10-02',
+                            first_entry_info: '首倉 2026-09-02 @ NT$ 5,955.0 (連任第2/4月・累漲 +36.02%)',
+                            strategy_entry_price: 7895.00,
+                            strategy_current_price: 8100.00,
+                            entry_fee_twd: 200,
+                            ma60_stop_price: 6057.75,
+                            stop_condition: '🅰️ 1號A梯隊 (15%總資金)：10/01定錨、10/02 T+1開盤 NT$7,895.0 續抱，Rank #3 保護中'
+                          },
+                          // 🅱️ B梯隊 (每月 22 號定錨 -> 09/23 T+1開盤價建倉，佔總資金 50%：20% / 15% / 15%)
+                          {
+                            stock_id: 'MRNA',
+                            stock_name: '莫德納 (Moderna)',
+                            tranche_badge: '🅱️ B梯隊 (22號・佔50%)',
+                            role: '👑 B隊第1王者 (梯隊40% / 總資金20%)',
+                            target_pct: 0.20,
+                            currency: 'USD',
+                            signal_date: '2026-09-22',
+                            entry_date: '2026-09-23',
+                            first_entry_info: '首倉 2026-08-25 @ US$ 143.50 (連任第2/4月・累漲 +56.79%)',
+                            strategy_entry_price: 183.40,
+                            strategy_current_price: 225.00,
+                            entry_fee_twd: 15,
+                            ma60_stop_price: 128.94,
+                            stop_condition: '🅱️ 22號B梯隊 (20%總資金)：09/22定錨、09/23 T+1開盤 US$183.40 續抱，下次檢視日 10/22'
+                          },
+                          {
+                            stock_id: '3037.TW',
+                            stock_name: '欣興 (Unimicron)',
+                            tranche_badge: '🅱️ B梯隊 (22號・佔50%)',
+                            role: '🥈 B隊第2主力 (梯隊30% / 總資金15%)',
+                            target_pct: 0.15,
+                            currency: 'TWD',
+                            signal_date: '2026-09-22',
+                            entry_date: '2026-09-23',
+                            first_entry_info: '首倉 2026-08-25 @ NT$ 1,070.0 (連任第2/4月・累漲 +17.29%)',
+                            strategy_entry_price: 1120.00,
+                            strategy_current_price: 1255.00,
+                            entry_fee_twd: 200,
+                            ma60_stop_price: 1034.80,
+                            stop_condition: '🅱️ 22號B梯隊 (15%總資金)：09/22定錨、09/23 T+1開盤 NT$1,120.0 續抱，下次檢視日 10/22'
+                          },
+                          {
+                            stock_id: '3443.TW',
+                            stock_name: '創意 (Creative Tech)',
+                            tranche_badge: '🅱️ B梯隊 (22號・佔50%)',
+                            role: '🥉 B隊第3主力 (梯隊30% / 總資金15%)',
+                            target_pct: 0.15,
+                            currency: 'TWD',
+                            signal_date: '2026-09-22',
+                            entry_date: '2026-09-23',
+                            first_entry_info: '首倉 2026-08-25 @ NT$ 5,260.0 (連任第2/4月・累漲 +53.99%)',
+                            strategy_entry_price: 8325.00,
+                            strategy_current_price: 8100.00,
+                            entry_fee_twd: 200,
+                            ma60_stop_price: 6057.75,
+                            stop_condition: '🅱️ 22號B梯隊 (15%總資金)：09/22定錨、09/23 T+1開盤 NT$8,325.0 續抱，下次檢視日 10/22'
                           }
                         ] : (
-                          // 純台股泰坦等其他模型部位
+                          // 純台股泰坦等其他模型部位 (100% 採用策略原始數值，不讀取個人現貨帳本)
                           (activeModeData?.open_positions || selectedModelDetail?.open_positions || bt.open_positions || []).map((p, idx) => ({
                             stock_id: p.stock_id,
                             stock_name: p.stock_name,
+                            tranche_badge: p.tranche || '標準單梯隊',
                             role: p.role || `持股 #${idx + 1}`,
                             target_pct: (p.target_weight_pct || p.weight_pct || 25) / 100,
                             currency: p.currency || 'TWD',
-                            default_entry_price: p.entry_price || p.current_price,
-                            current_price: p.current_price || p.latest_price || p.entry_price,
-                            entry_date: p.entry_date || '2026-10-01',
-                            entry_fee_twd: 400,
+                            signal_date: p.signal_date || p.entry_date || '2026-09-24',
+                            entry_date: p.entry_date || '2026-09-24',
+                            first_entry_info: null,
+                            strategy_entry_price: p.entry_price || p.current_price,
+                            strategy_current_price: p.current_price || p.latest_price || p.entry_price,
+                            entry_fee_twd: 200,
                             ma60_stop_price: p.ma60_stop_price || p.stop_loss_ma60 || (p.entry_price * 0.9),
                             stop_condition: p.stop_condition || '跌破季線 60MA 停損出清'
                           }))
@@ -6847,66 +6912,37 @@ function StockDashboard() {
 
                         if (!baseConfig || baseConfig.length === 0) return null;
 
-                        // 統一流水帳簿推導計算 (Ledger Derivation - 全部以進出與入金為準)
                         let totalInvestedCostTwd = 0;
                         let totalCurrentMarketValTwd = 0;
 
                         const ledgerPositions = baseConfig.map(cfg => {
                           const targetCapitalTwd = totalDeposit * cfg.target_pct;
+                          const effectiveEntryPrice = cfg.strategy_entry_price;
+                          const currentPrice = cfg.strategy_current_price;
 
-                          // 1. 優先從歷史交易紀錄 (global_titan_all_tx_v2 / taiwan_titan_tx_history_v1) 取得真實買入成交價
-                          let txMatch = null;
-                          try {
-                            const txStorageKey = isGlobal ? 'global_titan_all_tx_v2' : 'taiwan_titan_tx_history_v1';
-                            const savedTxList = JSON.parse(localStorage.getItem(txStorageKey) || '[]');
-                            txMatch = savedTxList.find(t => 
-                              (t.action === '買入' || t.action === '加碼') && 
-                              (t.ticker === cfg.stock_id || t.stock_id === cfg.stock_id || 
-                               (t.ticker && cfg.stock_id && t.ticker.split('.')[0] === cfg.stock_id.split('.')[0]) ||
-                               (t.stock_id && cfg.stock_id && t.stock_id.split('.')[0] === cfg.stock_id.split('.')[0]) ||
-                               (t.name && cfg.stock_name && (t.name.includes(cfg.stock_name.slice(0, 2)) || cfg.stock_name.includes(t.name.slice(0, 2)))))
-                            );
-                          } catch (e) {}
-
-                          let effectiveEntryPrice = cfg.default_entry_price;
-                          if (txMatch && txMatch.price > 0) {
-                            effectiveEntryPrice = txMatch.price;
-                          } else if (userCustomEntryPrices[cfg.stock_id] !== undefined && userCustomEntryPrices[cfg.stock_id] > 0) {
-                            effectiveEntryPrice = userCustomEntryPrices[cfg.stock_id];
-                          }
-
-                          const isCustomized = (txMatch && txMatch.price > 0 && txMatch.price !== cfg.default_entry_price) || 
-                            (userCustomEntryPrices[cfg.stock_id] !== undefined && userCustomEntryPrices[cfg.stock_id] > 0 && userCustomEntryPrices[cfg.stock_id] !== cfg.default_entry_price);
-
-                          // 買入每股台幣單價與現價台幣單價
                           const entryPriceInTwd = cfg.currency === 'USD' ? effectiveEntryPrice * fx : effectiveEntryPrice;
-                          const currentPriceInTwd = cfg.currency === 'USD' ? cfg.current_price * fx : cfg.current_price;
+                          const currentPriceInTwd = cfg.currency === 'USD' ? currentPrice * fx : currentPrice;
 
-                          // 依歷史買入紀錄或入金目標計算成交股數
-                          let shares = (txMatch && txMatch.shares > 0) ? txMatch.shares : Math.floor(targetCapitalTwd / (entryPriceInTwd || 1));
+                          let shares = Math.floor(targetCapitalTwd / (entryPriceInTwd || 1));
                           if (shares <= 0) shares = 1;
 
-                          const actualFee = (txMatch && txMatch.tax_fee !== undefined) ? txMatch.tax_fee : (cfg.entry_fee_twd || 0);
-
-                          // 投入金額 (買入流出資金成本，含微手續費)
+                          const actualFee = cfg.entry_fee_twd || 0;
                           const costTwd = Math.round(shares * entryPriceInTwd + actualFee);
-                          // 當前市值
                           const currentValTwd = Math.round(shares * currentPriceInTwd);
-                          // 未實現損益 (金額與百分比)
                           const pnlTwd = currentValTwd - costTwd;
-                          const pnlPct = costTwd > 0 ? ((currentValTwd - costTwd) / costTwd) * 100 : 0;
+                          const pnlPct = effectiveEntryPrice > 0 ? ((currentPrice - effectiveEntryPrice) / effectiveEntryPrice) * 100 : 0;
 
                           totalInvestedCostTwd += costTwd;
                           totalCurrentMarketValTwd += currentValTwd;
 
-                          const distToStopPct = (cfg.current_price && cfg.ma60_stop_price)
-                            ? ((cfg.current_price - cfg.ma60_stop_price) / cfg.current_price) * 100
+                          const distToStopPct = (currentPrice && cfg.ma60_stop_price)
+                            ? ((currentPrice - cfg.ma60_stop_price) / cfg.ma60_stop_price) * 100
                             : 10;
 
                           return {
                             ...cfg,
                             effectiveEntryPrice,
-                            isCustomized,
+                            current_price: currentPrice,
                             shares,
                             costTwd,
                             currentValTwd,
@@ -6916,7 +6952,6 @@ function StockDashboard() {
                           };
                         });
 
-                        // 閒置現金餘額與帳戶總資產淨值
                         const cashBalanceTwd = Math.max(0, totalDeposit - totalInvestedCostTwd);
                         const totalNavTwd = cashBalanceTwd + totalCurrentMarketValTwd;
                         const totalNetPnlTwd = totalNavTwd - totalDeposit;
@@ -6926,130 +6961,41 @@ function StockDashboard() {
                           <div style={{
                             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.94))',
                             borderRadius: '12px',
-                            border: '1px solid rgba(245, 158, 11, 0.5)',
+                            border: '1px solid rgba(56, 189, 248, 0.5)',
                             padding: '1.4rem',
                             marginBottom: '1.6rem',
-                            boxShadow: '0 6px 24px rgba(245, 158, 11, 0.15)'
+                            boxShadow: '0 6px 24px rgba(56, 189, 248, 0.15)'
                           }}>
-                            {/* 標題與操作控制列 */}
+                            {/* 標題列 */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.85rem', marginBottom: '1.2rem', paddingBottom: '0.85rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                               <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                                  <span style={{ fontSize: '1.4rem' }}>🏛️</span>
-                                  <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#FBBF24', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span>【{activeModelMeta.name || '模型'}】實戰進出與入金統一對帳總簿</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                                  <span style={{ fontSize: '1.4rem' }}>📊</span>
+                                  <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#38BDF8', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>【{activeModelMeta.name || '模型'}】純策略標準模擬持倉與參考配置表</span>
                                   </h4>
-                                  <span style={{ fontSize: '0.72rem', background: '#059669', color: 'white', padding: '0.15rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-                                    LIVE 單一流水帳・分毫不差
+                                  <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.25)', color: '#6EE7B7', border: '1px solid rgba(16, 185, 129, 0.5)', padding: '0.15rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                    100% 純策略回測產出・供跟單對照參考
                                   </span>
                                 </div>
                                 <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.35rem' }}>
-                                  依據實際入金與買入進場成交流水帳統一推導，持股成本、市值、閒置現金與損益 100% 嚴格勾稽對齊
+                                  此表完全採用<strong>策略模擬引擎在各梯隊調倉日（1號 A梯隊 ／ 22號 B梯隊）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「全球泰坦實作」分頁記錄）
                                 </div>
                               </div>
 
                               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                {/* 本金調整 */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                  <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>本金:</span>
-                                  <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#FCD34D' }}>
-                                    NT$ {totalDeposit.toLocaleString()}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const val = prompt('請輸入您的實戰總入金金額 (TWD)：', String(totalDeposit));
-                                      if (val !== null) {
-                                        const num = parseFloat(val.replace(/,/g, ''));
-                                        if (!isNaN(num) && num > 0) {
-                                          setUserDepositCapital(num);
-                                          try { localStorage.setItem('user_deposit_capital_twd', String(num)); } catch(e){}
-                                        }
-                                      }
-                                    }}
-                                    style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}
-                                    title="修改入金本金"
-                                  >
-                                    ✏️
-                                  </button>
+                                <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
+                                  參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> (A隊 50萬 + B隊 50萬)
                                 </div>
-
                                 {isGlobal && (
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>匯率:</span>
-                                    <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: '#38BDF8' }}>{fx}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const val = prompt('請輸入美元兌台幣匯率 (USD/TWD)：', String(fx));
-                                        if (val !== null) {
-                                          const num = parseFloat(val);
-                                          if (!isNaN(num) && num > 0) {
-                                            setUserUsdFx(num);
-                                            try { localStorage.setItem('user_usdfx_twd', String(num)); } catch(e){}
-                                          }
-                                        }
-                                      }}
-                                      style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.72rem', padding: 0 }}
-                                      title="修改匯率"
-                                    >
-                                      ✏️
-                                    </button>
+                                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
+                                    策略回測換算匯率: <strong style={{ color: '#38BDF8' }}>32.5</strong>
                                   </div>
-                                )}
-
-                                <button
-                                  type="button"
-                                  className="btn"
-                                  onClick={() => {
-                                    const newP = {};
-                                    ledgerPositions.forEach(p => {
-                                      newP[p.stock_id] = p.current_price;
-                                    });
-                                    setUserCustomEntryPrices(newP);
-                                    try { localStorage.setItem('user_custom_entry_prices', JSON.stringify(newP)); } catch(e){}
-                                  }}
-                                  style={{
-                                    background: 'rgba(56, 189, 248, 0.18)',
-                                    color: '#38BDF8',
-                                    border: '1px solid rgba(56, 189, 248, 0.45)',
-                                    fontSize: '0.74rem',
-                                    padding: '0.3rem 0.65rem',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold'
-                                  }}
-                                  title="一鍵將買入價格對齊今日最新現價（適合剛要進場者對齊起始成本）"
-                                >
-                                  🎯 一鍵對齊現價買入
-                                </button>
-
-                                {Object.keys(userCustomEntryPrices).length > 0 && (
-                                  <button
-                                    type="button"
-                                    className="btn"
-                                    onClick={() => {
-                                      setUserCustomEntryPrices({});
-                                      try { localStorage.removeItem('user_custom_entry_prices'); } catch(e){}
-                                    }}
-                                    style={{
-                                      background: 'rgba(255, 255, 255, 0.08)',
-                                      color: '#94A3B8',
-                                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                                      fontSize: '0.74rem',
-                                      padding: '0.3rem 0.65rem',
-                                      borderRadius: '6px',
-                                      cursor: 'pointer'
-                                    }}
-                                    title="恢復為模型標準 10/1 開倉價"
-                                  >
-                                    🔄 恢復模型開盤價
-                                  </button>
                                 )}
                               </div>
                             </div>
 
-                            {/* 6 大對帳統一資金看板 (Single Ledger Accounting KPIs) */}
+                            {/* 6 大策略標準參考指標看板 */}
                             <div style={{
                               display: 'grid',
                               gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
@@ -7057,32 +7003,32 @@ function StockDashboard() {
                               marginBottom: '1.2rem'
                             }}>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>💰 累計總入金</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>💰 策略標準基準本金</div>
                                 <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FCD34D' }}>NT$ {totalDeposit.toLocaleString()}</div>
-                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>入金基準本金</div>
+                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>A隊 50% ＋ B隊 50%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📉 買入動用成本</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📉 本期調倉建倉成本</div>
                                 <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#CBD5E1' }}>NT$ {totalInvestedCostTwd.toLocaleString()}</div>
                                 <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>佔本金 {((totalInvestedCostTwd/totalDeposit)*100).toFixed(1)}%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>🛡️ 閒置現金餘額</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>🛡️ 零股餘數現金留存</div>
                                 <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#60A5FA' }}>NT$ {cashBalanceTwd.toLocaleString()}</div>
                                 <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>佔本金 {((cashBalanceTwd/totalDeposit)*100).toFixed(1)}%</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📈 股票當前市值</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📈 策略部位當前市值</div>
                                 <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#38BDF8' }}>NT$ {totalCurrentMarketValTwd.toLocaleString()}</div>
                                 <div style={{ fontSize: '0.65rem', color: '#34D399' }}>市值佔比 {((totalCurrentMarketValTwd/totalNavTwd)*100).toFixed(1)}%</div>
                               </div>
-                              <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.3)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#FDE68A' }}>👑 帳戶總資產淨值</div>
-                                <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FBBF24' }}>NT$ {totalNavTwd.toLocaleString()}</div>
-                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>現金 ＋ 股票市值</div>
+                              <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#BAE6FD' }}>👑 策略模擬總淨值</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8' }}>NT$ {totalNavTwd.toLocaleString()}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>雙梯隊本期模擬淨值</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#A7F3D0' }}>🚀 帳戶真實總淨利</div>
+                                <div style={{ fontSize: '0.7rem', color: '#A7F3D0' }}>🚀 本期調倉未實現損益</div>
                                 <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: totalNetPnlTwd >= 0 ? '#34D399' : '#F87171' }}>
                                   {totalNetPnlTwd >= 0 ? '+' : ''}{totalNetPnlPct.toFixed(2)}%
                                 </div>
@@ -7092,100 +7038,65 @@ function StockDashboard() {
                               </div>
                             </div>
 
-                            {/* 單一流水對帳總表 */}
+                            {/* 雙梯隊純策略標準持倉明細表 */}
                             <div style={{ overflowX: 'auto' }}>
                               <table className="analysis-table" style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center' }}>
                                 <thead>
-                                  <tr style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#FDE68A' }}>
-                                    <th style={{ textAlign: 'left', padding: '0.55rem 0.75rem' }}>標的股票與角色</th>
-                                    <th>進出狀態</th>
-                                    <th>進場建倉日</th>
-                                    <th>真實買入價格</th>
-                                    <th>成交股數</th>
-                                    <th>投入金額 (成本 TWD)</th>
-                                    <th>最新現價</th>
-                                    <th>當前市值 (TWD)</th>
-                                    <th>未實現損益</th>
-                                    <th>資產佔比</th>
-                                    <th>季線停損價 (60MA)</th>
-                                    <th style={{ textAlign: 'left' }}>風控指引與操作指令</th>
+                                  <tr style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#BAE6FD' }}>
+                                    <th style={{ textAlign: 'left', padding: '0.55rem 0.75rem' }}>所屬梯隊與標的股票</th>
+                                    <th>目標權重</th>
+                                    <th>策略定錨 / 進場日 (T+1)</th>
+                                    <th>策略跑出開倉價 (T+1 Open)</th>
+                                    <th>理論配置股數</th>
+                                    <th>理論配置成本 (TWD)</th>
+                                    <th>策略最新收盤價</th>
+                                    <th>策略當前市值 (TWD)</th>
+                                    <th>本期策略報酬</th>
+                                    <th>季線保護 (60MA)</th>
+                                    <th style={{ textAlign: 'left' }}>策略連任狀態與跟單參考指引</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {ledgerPositions.map((pos, pIdx) => {
-                                    const isPosWin = pos.pnlTwd >= 0;
+                                    const isPosWin = pos.pnlPct >= 0;
                                     const currPrefix = pos.currency === 'USD' ? 'US$ ' : 'NT$ ';
-                                    const weightInNav = ((pos.currentValTwd / totalNavTwd) * 100).toFixed(1);
+                                    const isTrancheA = pos.tranche_badge && pos.tranche_badge.includes('A梯隊');
 
                                     return (
-                                      <tr key={pIdx} style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                      <tr key={pIdx} style={{ background: isTrancheA ? 'rgba(56, 189, 248, 0.04)' : 'rgba(168, 85, 247, 0.04)', borderLeft: isTrancheA ? '3px solid #38BDF8' : '3px solid #A855F7' }}>
                                         <td style={{ textAlign: 'left', padding: '0.55rem 0.75rem', fontWeight: 'bold', color: '#FDE68A' }}>
-                                          <div>{pos.stock_name} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>({pos.stock_id})</span></div>
-                                          <div style={{ fontSize: '0.7rem', color: pos.role.includes('王者') ? '#FBBF24' : '#38BDF8', marginTop: '0.15rem' }}>{pos.role}</div>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                            <span style={{
+                                              fontSize: '0.68rem',
+                                              padding: '1px 6px',
+                                              borderRadius: '4px',
+                                              background: isTrancheA ? 'rgba(56, 189, 248, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                                              color: isTrancheA ? '#38BDF8' : '#C084FC',
+                                              border: isTrancheA ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid rgba(168, 85, 247, 0.4)'
+                                            }}>
+                                              {pos.tranche_badge}
+                                            </span>
+                                            <span>{pos.stock_name} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>({pos.stock_id})</span></span>
+                                          </div>
+                                          <div style={{ fontSize: '0.7rem', color: pos.role.includes('王者') ? '#FBBF24' : '#93C5FD', marginTop: '0.2rem' }}>{pos.role}</div>
                                         </td>
                                         <td>
-                                          <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#6EE7B7', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                            買入持倉
+                                          <span style={{ fontSize: '0.76rem', background: 'rgba(16, 185, 129, 0.18)', color: '#6EE7B7', padding: '2px 7px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                            {(pos.target_pct * 100).toFixed(0)}%
                                           </span>
                                         </td>
-                                        <td style={{ color: '#CBD5E1' }}>{formatDateStr(pos.entry_date)}</td>
+                                        <td style={{ color: '#CBD5E1', fontSize: '0.76rem' }}>
+                                          <div style={{ fontWeight: 'bold', color: '#F1F5F9' }}>{formatDateStr(pos.entry_date)}</div>
+                                          {pos.signal_date && <div style={{ fontSize: '0.66rem', color: '#94A3B8' }}>訊號: {pos.signal_date}</div>}
+                                        </td>
                                         <td style={{ fontFamily: 'monospace' }}>
-                                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                                            <span style={{ color: pos.isCustomized ? '#38BDF8' : '#F1F5F9', fontWeight: pos.isCustomized ? 'bold' : 'normal' }}>
-                                              {currPrefix}{pos.effectiveEntryPrice.toLocaleString()}
-                                            </span>
-                                            {pos.isCustomized && (
-                                              <span style={{ fontSize: '0.62rem', color: '#38BDF8', background: 'rgba(56, 189, 248, 0.15)', padding: '1px 3px', borderRadius: '2px' }}>實戰</span>
-                                            )}
-                                            <button
-                                              type="button"
-                                              onClick={() => {
-                                                const val = prompt(`請輸入【${pos.stock_name}】的實際買入成交價格：`, String(pos.effectiveEntryPrice));
-                                                if (val !== null) {
-                                                  const num = parseFloat(val);
-                                                  if (!isNaN(num) && num > 0) {
-                                                    const nextP = { ...userCustomEntryPrices, [pos.stock_id]: num };
-                                                    setUserCustomEntryPrices(nextP);
-                                                    try { localStorage.setItem('user_custom_entry_prices', JSON.stringify(nextP)); } catch(e){}
-
-                                                    // 同步更新歷史交易流水帳 (txHistory)
-                                                    try {
-                                                      const txStorageKey = isGlobal ? 'global_titan_all_tx_v2' : 'taiwan_titan_tx_history_v1';
-                                                      const savedTxList = JSON.parse(localStorage.getItem(txStorageKey) || '[]');
-                                                      const updatedTxList = savedTxList.map(t => {
-                                                        if ((t.action === '買入' || t.action === '加碼') && (t.ticker === pos.stock_id || t.stock_id === pos.stock_id || (t.ticker && pos.stock_id && t.ticker.split('.')[0] === pos.stock_id.split('.')[0]))) {
-                                                          const fee = t.tax_fee || 0;
-                                                          const newFlow = -Math.round(t.shares * num * (pos.currency === 'USD' ? fx : 1) + fee);
-                                                          return { ...t, price: num, cash_flow_twd: newFlow };
-                                                        }
-                                                        return t;
-                                                      });
-                                                      localStorage.setItem(txStorageKey, JSON.stringify(updatedTxList));
-                                                    } catch(e) {}
-
-                                                    // 同步更新實戰部位
-                                                    try {
-                                                      const posKey = isGlobal ? 'global_titan_user_positions_v2' : 'taiwan_titan_user_positions_v1';
-                                                      const savedPosList = JSON.parse(localStorage.getItem(posKey) || '[]');
-                                                      const updatedPosList = savedPosList.map(p => {
-                                                        if (p.ticker === pos.stock_id || p.stock_id === pos.stock_id || (p.ticker && pos.stock_id && p.ticker.split('.')[0] === pos.stock_id.split('.')[0])) {
-                                                          return { ...p, entry_price: num };
-                                                        }
-                                                        return p;
-                                                      });
-                                                      localStorage.setItem(posKey, JSON.stringify(updatedPosList));
-                                                    } catch(e) {}
-                                                  }
-                                                }
-                                              }}
-                                              style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.72rem', padding: '0 2px' }}
-                                              title="修改您的真實買入成交價格"
-                                            >
-                                              ✏️
-                                            </button>
+                                          <div style={{ color: '#F8FAFC', fontWeight: 'bold' }}>
+                                            {currPrefix}{pos.effectiveEntryPrice.toLocaleString()}
                                           </div>
-                                          {pos.isCustomized && (
-                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>模型原價: {currPrefix}{pos.default_entry_price}</div>
+                                          {pos.first_entry_info && (
+                                            <div style={{ fontSize: '0.64rem', color: '#94A3B8', marginTop: '0.1rem' }}>
+                                              {pos.first_entry_info}
+                                            </div>
                                           )}
                                         </td>
                                         <td style={{ fontFamily: 'monospace', color: '#E2E8F0' }}>{pos.shares.toLocaleString()} 股</td>
@@ -7196,69 +7107,41 @@ function StockDashboard() {
                                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8' }}>
                                           NT$ {pos.currentValTwd.toLocaleString()}
                                         </td>
-                                        <td style={{ fontWeight: 'bold', color: isPosWin ? '#34D399' : '#F87171' }}>
+                                        <td style={{ fontWeight: 'bold', color: isPosWin ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
                                           <div>{isPosWin ? '+' : ''}{pos.pnlPct.toFixed(2)}%</div>
                                           <div style={{ fontSize: '0.68rem', color: isPosWin ? '#6EE7B7' : '#FCA5A5' }}>
-                                            {isPosWin ? '+' : ''}NT$ {pos.pnlTwd.toLocaleString()}
+                                            {pos.pnlTwd >= 0 ? '+' : ''}NT$ {pos.pnlTwd.toLocaleString()}
                                           </div>
                                         </td>
-                                        <td style={{ fontWeight: 'bold', color: '#67E8F9' }}>{weightInNav}%</td>
                                         <td style={{ fontFamily: 'monospace', color: '#FCA5A5' }}>
                                           {currPrefix}{pos.ma60_stop_price.toLocaleString()}
                                           <div style={{ fontSize: '0.68rem', color: '#34D399' }}>+{pos.distToStopPct.toFixed(1)}% 安全</div>
                                         </td>
-                                        <td style={{ textAlign: 'left', fontSize: '0.74rem', color: '#CBD5E1' }}>
+                                        <td style={{ textAlign: 'left', fontSize: '0.73rem', color: '#CBD5E1' }}>
                                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', marginRight: '6px' }}></span>
-                                          <strong>續抱跟單</strong>：{pos.stop_condition}
+                                          {pos.stop_condition}
                                         </td>
                                       </tr>
                                     );
                                   })}
 
-                                  {/* 現金防禦列 */}
-                                  <tr style={{ background: 'rgba(59, 130, 246, 0.08)' }}>
-                                    <td style={{ textAlign: 'left', padding: '0.55rem 0.75rem', fontWeight: 'bold', color: '#60A5FA' }}>
-                                      🛡️ 帳戶閒置現金 (防禦儲備)
-                                    </td>
-                                    <td><span style={{ fontSize: '0.72rem', background: 'rgba(59, 130, 246, 0.2)', color: '#93C5FD', padding: '2px 6px', borderRadius: '4px' }}>現金留存</span></td>
-                                    <td>--</td>
-                                    <td>--</td>
-                                    <td>--</td>
-                                    <td style={{ fontFamily: 'monospace', color: '#93C5FD' }}>NT$ {cashBalanceTwd.toLocaleString()}</td>
-                                    <td>--</td>
-                                    <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#60A5FA' }}>NT$ {cashBalanceTwd.toLocaleString()}</td>
-                                    <td style={{ color: '#94A3B8' }}>0.00%</td>
-                                    <td style={{ fontWeight: 'bold', color: '#93C5FD' }}>{((cashBalanceTwd / totalNavTwd) * 100).toFixed(1)}%</td>
-                                    <td>--</td>
-                                    <td style={{ textAlign: 'left', fontSize: '0.74rem', color: '#94A3B8' }}>
-                                      本金未動用之緩衝防禦現金，隨時可用於回檔加碼或防禦下行風險
-                                    </td>
-                                  </tr>
-
-                                  {/* 🏆 帳戶總計對帳平衡列 (Reconciliation Row) */}
-                                  <tr style={{ background: 'rgba(245, 158, 11, 0.12)', borderTop: '2px solid rgba(245, 158, 11, 0.5)', fontWeight: 'bold' }}>
-                                    <td style={{ textAlign: 'left', padding: '0.65rem 0.75rem', color: '#FDE68A', fontSize: '0.85rem' }}>
-                                      🏆 帳戶總計對帳平衡 (Total Reconciliation)
-                                    </td>
-                                    <td colSpan={4} style={{ textAlign: 'right', color: '#94A3B8', fontSize: '0.75rem' }}>
-                                      累計總入金: NT$ {totalDeposit.toLocaleString()} ｜
-                                    </td>
-                                    <td style={{ fontFamily: 'monospace', color: '#CBD5E1' }}>
-                                      NT$ {(totalInvestedCostTwd + cashBalanceTwd).toLocaleString()}
-                                    </td>
-                                    <td>--</td>
-                                    <td style={{ fontFamily: 'monospace', color: '#FBBF24', fontSize: '0.9rem' }}>
-                                      NT$ {totalNavTwd.toLocaleString()}
-                                    </td>
-                                    <td style={{ color: totalNetPnlTwd >= 0 ? '#34D399' : '#F87171', fontSize: '0.85rem' }}>
-                                      <div>{totalNetPnlTwd >= 0 ? '+' : ''}{totalNetPnlPct.toFixed(2)}%</div>
-                                      <div style={{ fontSize: '0.7rem' }}>{totalNetPnlTwd >= 0 ? '+' : ''}NT$ {totalNetPnlTwd.toLocaleString()}</div>
-                                    </td>
-                                    <td style={{ color: '#67E8F9' }}>100.0%</td>
-                                    <td colSpan={2} style={{ textAlign: 'left', fontSize: '0.74rem', color: '#34D399' }}>
-                                      ✅ 總資產 {totalNavTwd.toLocaleString()} ＝ 現金 {cashBalanceTwd.toLocaleString()} ＋ 股票市值 {totalCurrentMarketValTwd.toLocaleString()}（分毫不差）
-                                    </td>
-                                  </tr>
+                                  {/* A+B 雙梯隊合併歸戶快速參考列 */}
+                                  {isGlobal && (
+                                    <tr style={{ background: 'rgba(16, 185, 129, 0.1)', borderTop: '2px solid rgba(16, 185, 129, 0.4)' }}>
+                                      <td colSpan={11} style={{ textAlign: 'left', padding: '0.65rem 0.85rem', fontSize: '0.78rem', color: '#A7F3D0' }}>
+                                        <strong>🔗 A+B 雙梯隊合併歸戶參考均價（100% 總資金 = A隊50% + B隊50%）：</strong>
+                                        <span style={{ marginLeft: '0.6rem', color: '#FDE68A' }}>
+                                          👑 <strong>MRNA (總配比 40%)</strong>：策略雙隊均價 <strong>US$ 186.83</strong>（首倉均價 US$ 147.45）→ 最新價 <strong>US$ 225.00 (+20.43%)</strong>
+                                        </span>
+                                        <span style={{ marginLeft: '0.8rem', color: '#BAE6FD' }}>
+                                          ｜ 🥈 <strong>3037.TW 欣興 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 1,172.50</strong>（首倉均價 NT$ 1,012.50）→ 最新價 <strong>NT$ 1,255.00 (+7.04%)</strong>
+                                        </span>
+                                        <span style={{ marginLeft: '0.8rem', color: '#DDD6FE' }}>
+                                          ｜ 🥉 <strong>3443.TW 創意 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 8,110.00</strong>（首倉均價 NT$ 5,607.50）→ 最新價 <strong>NT$ 8,100.00 (-0.12%)</strong>
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  )}
                                 </tbody>
                               </table>
                             </div>
