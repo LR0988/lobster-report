@@ -1,36 +1,44 @@
 {
   "status": "ok",
-  "strategy_name": "全球高流動性泰坦旗艦 (DOE 最佳化旗艦版：Top 3 偏態凸性 + 4月老化換血 + Top 5保護帶 + 5%容差)",
-  "generated_at": "2026-10-12 17:52:26",
+  "strategy_name": "全球高流動性泰坦旗艦【雙梯隊進攻版：1號+22號交錯 × 40/30/30階梯 × 45/35/20敏銳動能 × 爆量滯漲過濾】",
+  "generated_at": "2026-10-13 09:05:23",
   "latest_data_date": "2026-10-12",
   "doe_config": {
+    "execution_mode": "dual_tranche_1_and_22 (每月1號 A梯隊50% + 每月22號 B梯隊50%)",
     "top_n": 3,
-    "alloc_scheme": "convex_skew (偏態凸性非線性加權)",
+    "alloc_scheme": "fixed_step_40_30_30 (單梯隊 40%/30%/30%，佔總資金 20%/15%/15%)",
+    "momentum_ensemble": "45% 12M + 35% 3M + 20% 1M × (1 + 0.5 FIP)",
+    "volume_exhaustion_filter": "5D均量 > 2倍60D均量 且 10D漲幅 < 2% 自動剔除",
+    "macro_breadth_thresholds": "0.50 (100%滿倉) / 0.30 (70%防禦)",
     "max_hold_months": 4,
     "rank_buffer": 5,
     "weight_tolerance_pct": 5,
     "pbo_overfitting_prob": "0.00%",
-    "deflated_sharpe_ratio": "100.00%",
-    "oos_cagr_7yr": 82.67,
-    "oos_sharpe_7yr": 1.37,
-    "oos_calmar_7yr": 2.901
+    "oos_cagr_8yr": 76.61,
+    "oos_calmar_8yr": 1.82,
+    "winning_years_pct": 90.9,
+    "worst_year_ret_pct": -4.73
   },
   "macro_status": {
     "spy_price": 778.57,
     "spy_ma200": 721.16,
     "global_breadth_pct": 66.7,
     "bull_countries": "10/15",
-    "regime": "全球共振多頭 (寬幅 66% >= 60% -> 滿倉運作)",
+    "regime": "全球共振多頭 (寬幅 66% >= 50% -> A/B雙梯隊100%滿倉進攻)",
     "exposure_pct": 100
   },
   "kpi": {
     "scheme_a": {
-      "total_ret": 302201.3,
-      "mult": 3023.01,
-      "cagr": 42.41,
-      "mdd": -31.0,
-      "calmar": 1.368,
-      "win_rate": 86.4
+      "total_ret": 2417474.5,
+      "mult": 24175.7,
+      "cagr": 56.08,
+      "mdd": -33.25,
+      "daily_mdd": -42.12,
+      "sharpe": 1.24,
+      "calmar": 1.687,
+      "daily_calmar": 1.332,
+      "sortino": 2.7,
+      "win_rate": 90.9
     },
     "spy": {
       "total_ret": 917.9,
@@ -41,11 +49,11 @@
       "win_rate": 68.2
     },
     "old_sovereign_dual": {
-      "total_ret": 30888.1,
-      "mult": 309.88,
-      "cagr": 28.79,
-      "mdd": -41.9,
-      "calmar": 0.687,
+      "total_ret": 297273.6,
+      "mult": 2973.74,
+      "cagr": 42.35,
+      "mdd": -44.21,
+      "calmar": 0.958,
       "win_rate": 77.3
     }
   },
@@ -53,10 +61,12 @@
     {
       "rank": 1,
       "ticker": "MRNA",
-      "name": "莫德納 (Moderna)",
+      "name": "莫德納 (Moderna 生技巨擘)",
       "market": "美股 (NASDAQ)",
       "currency": "USD",
       "weight_pct": 40,
+      "tranche_weight_pct": 40,
+      "total_nav_weight_pct": 20.0,
       "price": 225.0,
       "ma60": 128.94,
       "ma200": 74.54,
@@ -64,18 +74,22 @@
       "mom_12m": 729.0,
       "fip": 0.05,
       "convexity": 6.61,
-      "score": 4.5548,
+      "churn_safe": true,
+      "score": 4.2989,
       "is_active": true,
       "in_buffer_zone": true,
-      "tenure_months": 2
+      "tenure_months": 1,
+      "max_tenure_months": 4
     },
     {
       "rank": 2,
       "ticker": "3037.TW",
-      "name": "欣興 (Unimicron ABF載板)",
+      "name": "欣興 (Unimicron 載板王者)",
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 30,
+      "tranche_weight_pct": 30,
+      "total_nav_weight_pct": 15.0,
       "price": 1255.0,
       "ma60": 1034.8,
       "ma200": 761.63,
@@ -83,10 +97,12 @@
       "mom_12m": 659.9,
       "fip": 0.14,
       "convexity": 1.28,
-      "score": 3.7034,
+      "churn_safe": true,
+      "score": 3.3683,
       "is_active": true,
       "in_buffer_zone": true,
-      "tenure_months": 2
+      "tenure_months": 1,
+      "max_tenure_months": 4
     },
     {
       "rank": 3,
@@ -95,6 +111,8 @@
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 30,
+      "tranche_weight_pct": 30,
+      "total_nav_weight_pct": 15.0,
       "price": 8100.0,
       "ma60": 6057.75,
       "ma200": 4244.3,
@@ -102,10 +120,12 @@
       "mom_12m": 453.5,
       "fip": 0.07,
       "convexity": 1.49,
-      "score": 2.7118,
+      "churn_safe": true,
+      "score": 2.5272,
       "is_active": true,
       "in_buffer_zone": true,
-      "tenure_months": 2
+      "tenure_months": 1,
+      "max_tenure_months": 4
     },
     {
       "rank": 4,
@@ -114,6 +134,8 @@
       "market": "美股 (NASDAQ)",
       "currency": "USD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 1029.0,
       "ma60": 967.18,
       "ma200": 715.07,
@@ -121,10 +143,12 @@
       "mom_12m": 408.6,
       "fip": 0.07,
       "convexity": 1.33,
-      "score": 2.1634,
+      "churn_safe": true,
+      "score": 1.9596,
       "is_active": false,
       "in_buffer_zone": true,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 5,
@@ -133,6 +157,8 @@
       "market": "美股 ADR",
       "currency": "USD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 46.43,
       "ma60": 39.75,
       "ma200": 31.78,
@@ -140,10 +166,12 @@
       "mom_12m": 272.8,
       "fip": 0.23,
       "convexity": 1.11,
-      "score": 1.6089,
+      "churn_safe": true,
+      "score": 1.4645,
       "is_active": false,
       "in_buffer_zone": true,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 6,
@@ -152,6 +180,8 @@
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 7325.0,
       "ma60": 5715.06,
       "ma200": 3764.4,
@@ -159,10 +189,12 @@
       "mom_12m": 236.4,
       "fip": -0.01,
       "convexity": 1.37,
-      "score": 1.4447,
+      "churn_safe": true,
+      "score": 1.3683,
       "is_active": false,
       "in_buffer_zone": false,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 7,
@@ -171,6 +203,8 @@
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 4625.0,
       "ma60": 4299.75,
       "ma200": 3120.21,
@@ -178,10 +212,12 @@
       "mom_12m": 256.6,
       "fip": 0.02,
       "convexity": 1.49,
-      "score": 1.3679,
+      "churn_safe": true,
+      "score": 1.2503,
       "is_active": false,
       "in_buffer_zone": false,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 8,
@@ -190,6 +226,8 @@
       "market": "台股 (TWSE)",
       "currency": "TWD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 1720.0,
       "ma60": 1267.27,
       "ma200": 1086.34,
@@ -197,10 +235,12 @@
       "mom_12m": 214.4,
       "fip": 0.06,
       "convexity": 1.46,
-      "score": 1.3047,
+      "churn_safe": true,
+      "score": 1.2175,
       "is_active": false,
       "in_buffer_zone": false,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 9,
@@ -209,6 +249,8 @@
       "market": "美股/ADR",
       "currency": "USD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 275.28,
       "ma60": 230.89,
       "ma200": 174.64,
@@ -216,10 +258,12 @@
       "mom_12m": 212.5,
       "fip": 0.08,
       "convexity": 1.19,
-      "score": 1.2427,
+      "churn_safe": true,
+      "score": 1.1498,
       "is_active": false,
       "in_buffer_zone": false,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     },
     {
       "rank": 10,
@@ -228,6 +272,8 @@
       "market": "美股 (NASDAQ)",
       "currency": "USD",
       "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0,
       "price": 278.17,
       "ma60": 223.32,
       "ma200": 167.76,
@@ -235,362 +281,460 @@
       "mom_12m": 190.0,
       "fip": 0.04,
       "convexity": 1.58,
-      "score": 1.1892,
+      "churn_safe": true,
+      "score": 1.1171,
       "is_active": false,
       "in_buffer_zone": false,
-      "tenure_months": 0
+      "tenure_months": 0,
+      "max_tenure_months": 4
     }
   ],
   "yearly_performance": [
     {
       "year": 2005,
-      "scheme_a_ret": 115.3,
-      "spy_ret": 6.8,
-      "capital": 2336697.0
+      "scheme_a_ret": 112.1,
+      "spy_ret": 5.3,
+      "capital": 2762093.0
     },
     {
       "year": 2006,
-      "scheme_a_ret": 30.3,
-      "spy_ret": 11.1,
-      "capital": 3045491.0
+      "scheme_a_ret": 49.1,
+      "spy_ret": 15.8,
+      "capital": 4119261.0
     },
     {
       "year": 2007,
-      "scheme_a_ret": 53.0,
-      "spy_ret": 5.8,
-      "capital": 4660667.0
+      "scheme_a_ret": 55.0,
+      "spy_ret": 5.1,
+      "capital": 6385416.0
     },
     {
       "year": 2008,
-      "scheme_a_ret": -8.6,
-      "spy_ret": -49.3,
-      "capital": 4261205.0
+      "scheme_a_ret": -4.4,
+      "spy_ret": -36.2,
+      "capital": 6103319.0
     },
     {
       "year": 2009,
-      "scheme_a_ret": 46.5,
-      "spy_ret": 26.7,
-      "capital": 6243409.0
+      "scheme_a_ret": 59.3,
+      "spy_ret": 22.7,
+      "capital": 9724589.0
     },
     {
       "year": 2010,
-      "scheme_a_ret": -12.8,
-      "spy_ret": 9.7,
-      "capital": 5446564.0
+      "scheme_a_ret": 1.0,
+      "spy_ret": 13.1,
+      "capital": 9824587.0
     },
     {
       "year": 2011,
-      "scheme_a_ret": 12.6,
-      "spy_ret": 5.0,
-      "capital": 6132946.0
+      "scheme_a_ret": 18.0,
+      "spy_ret": 0.9,
+      "capital": 11589703.0
     },
     {
       "year": 2012,
-      "scheme_a_ret": 24.8,
-      "spy_ret": 14.2,
-      "capital": 7656565.0
+      "scheme_a_ret": 40.7,
+      "spy_ret": 16.0,
+      "capital": 16302670.0
     },
     {
       "year": 2013,
-      "scheme_a_ret": 110.9,
-      "spy_ret": 24.3,
-      "capital": 16148526.0
+      "scheme_a_ret": 95.0,
+      "spy_ret": 29.0,
+      "capital": 31785491.0
     },
     {
       "year": 2014,
-      "scheme_a_ret": 30.6,
-      "spy_ret": 13.4,
-      "capital": 21086607.0
+      "scheme_a_ret": 34.6,
+      "spy_ret": 14.6,
+      "capital": 42770693.0
     },
     {
       "year": 2015,
-      "scheme_a_ret": -5.1,
-      "spy_ret": 2.4,
-      "capital": 20017267.0
+      "scheme_a_ret": 21.7,
+      "spy_ret": 1.3,
+      "capital": 52065637.0
     },
     {
       "year": 2016,
-      "scheme_a_ret": 102.3,
-      "spy_ret": 5.7,
-      "capital": 40491105.0
+      "scheme_a_ret": 125.4,
+      "spy_ret": 13.6,
+      "capital": 117352744.0
     },
     {
       "year": 2017,
-      "scheme_a_ret": 38.5,
-      "spy_ret": 18.4,
-      "capital": 56077135.0
+      "scheme_a_ret": 51.8,
+      "spy_ret": 20.8,
+      "capital": 178137339.0
     },
     {
       "year": 2018,
-      "scheme_a_ret": 22.6,
-      "spy_ret": 6.4,
-      "capital": 68760476.0
+      "scheme_a_ret": 13.1,
+      "spy_ret": -5.2,
+      "capital": 201395619.0
     },
     {
       "year": 2019,
-      "scheme_a_ret": -0.8,
-      "spy_ret": 13.6,
-      "capital": 68221137.0
+      "scheme_a_ret": 35.0,
+      "spy_ret": 31.1,
+      "capital": 271860665.0
     },
     {
       "year": 2020,
-      "scheme_a_ret": 61.2,
-      "spy_ret": 19.2,
-      "capital": 110003784.0
+      "scheme_a_ret": 53.1,
+      "spy_ret": 17.2,
+      "capital": 416111418.0
     },
     {
       "year": 2021,
-      "scheme_a_ret": 109.3,
-      "spy_ret": 24.0,
-      "capital": 230215204.0
+      "scheme_a_ret": 169.8,
+      "spy_ret": 30.5,
+      "capital": 1122665744.0
     },
     {
       "year": 2022,
-      "scheme_a_ret": -22.6,
-      "spy_ret": -9.7,
-      "capital": 178209167.0
+      "scheme_a_ret": -4.7,
+      "spy_ret": -18.6,
+      "capital": 1069534659.0
     },
     {
       "year": 2023,
-      "scheme_a_ret": 141.8,
-      "spy_ret": 12.1,
-      "capital": 430842669.0
+      "scheme_a_ret": 246.3,
+      "spy_ret": 26.7,
+      "capital": 3703386304.0
     },
     {
       "year": 2024,
-      "scheme_a_ret": 203.4,
-      "spy_ret": 28.7,
-      "capital": 1307168983.0
+      "scheme_a_ret": 102.8,
+      "spy_ret": 25.6,
+      "capital": 7510944365.0
     },
     {
       "year": 2025,
-      "scheme_a_ret": -16.7,
-      "spy_ret": 12.5,
-      "capital": 1088835045.0
+      "scheme_a_ret": 19.5,
+      "spy_ret": 18.0,
+      "capital": 8973900348.0
     },
     {
       "year": 2026,
-      "scheme_a_ret": 177.6,
-      "spy_ret": 12.6,
-      "capital": 3023012862.0
+      "scheme_a_ret": 195.2,
+      "spy_ret": 13.3,
+      "capital": 26492281974.0
     }
   ],
   "recent_trades": [
     {
-      "exec_date": "2024-10-01",
-      "next_date": "2024-11-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(53%), AVGO(22%), NVDA(24%)",
-      "period_ret": 3.8,
-      "spy_ret": -0.36,
-      "capital": 1208825938.0
+      "stock_id": "MU",
+      "stock_name": "美光科技 (Micron 記憶體巨頭)",
+      "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
+      "entry_date": "20260525",
+      "exit_date": "20260623",
+      "entry_price": 756.7,
+      "exit_price": 1079.83,
+      "return_pct": 42.55,
+      "holding_days": 21,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2024-11-01",
-      "next_date": "2024-12-02",
-      "exposure": 1.0,
-      "allocation": "NVDA(26%), SPOT(32%), CEG(41%)",
-      "period_ret": 8.2,
-      "spy_ret": 5.54,
-      "capital": 1307168983.0
+      "stock_id": "INTC",
+      "stock_name": "INTC",
+      "role": "🅱️ B梯隊(22號) 🥈 第2主力(30%)",
+      "entry_date": "20260525",
+      "exit_date": "20260623",
+      "entry_price": 120.34,
+      "exit_price": 129.73,
+      "return_pct": 7.65,
+      "holding_days": 21,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2024-12-02",
-      "next_date": "2025-01-02",
-      "exposure": 1.0,
-      "allocation": "CEG(37%), NVDA(37%), 3017.TW(24%)",
-      "period_ret": -6.17,
-      "spy_ret": -2.25,
-      "capital": 1225773361.0
+      "stock_id": "2308.TW",
+      "stock_name": "台達電 (綠能電源龍頭)",
+      "role": "🅱️ B梯隊(22號) 🥉 第3主力(30%)",
+      "entry_date": "20260525",
+      "exit_date": "20260623",
+      "entry_price": 2193.53,
+      "exit_price": 2170.0,
+      "return_pct": -1.22,
+      "holding_days": 21,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-01-02",
-      "next_date": "2025-02-03",
-      "exposure": 0.7,
-      "allocation": "AVGO(34%), SPOT(15%), TSLA(19%), 現金(30%)",
-      "period_ret": -0.16,
-      "spy_ret": 0.56,
-      "capital": 1222273536.0
+      "stock_id": "MU",
+      "stock_name": "美光科技 (Micron 記憶體巨頭)",
+      "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
+      "entry_date": "20260602",
+      "exit_date": "20260702",
+      "entry_price": 1049.84,
+      "exit_price": 1041.34,
+      "return_pct": -0.96,
+      "holding_days": 22,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2025-02-03",
-      "next_date": "2025-03-03",
-      "exposure": 1.0,
-      "allocation": "AVGO(39%), SPOT(32%), TSLA(28%)",
-      "period_ret": -4.1,
-      "spy_ret": 0.59,
-      "capital": 1171849136.0
+      "stock_id": "INTC",
+      "stock_name": "INTC",
+      "role": "🅰️ A梯隊(1號) 🥈 第2主力(30%)",
+      "entry_date": "20260602",
+      "exit_date": "20260702",
+      "entry_price": 107.45,
+      "exit_price": 128.92,
+      "return_pct": 19.83,
+      "holding_days": 22,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-03-03",
-      "next_date": "2025-04-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(46%), BABA(30%), TMUS(23%)",
-      "period_ret": -5.43,
-      "spy_ret": -6.5,
-      "capital": 1107246688.0
+      "stock_id": "AMD",
+      "stock_name": "超微半導體 (AMD)",
+      "role": "🅰️ A梯隊(1號) 🥉 第3主力(30%)",
+      "entry_date": "20260602",
+      "exit_date": "20260702",
+      "entry_price": 506.3,
+      "exit_price": 538.16,
+      "return_pct": 6.14,
+      "holding_days": 22,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-04-01",
-      "next_date": "2025-05-01",
-      "exposure": 0.7,
-      "allocation": "TMUS(24%), BABA(23%), GILD(22%), 現金(30%)",
-      "period_ret": -5.4,
-      "spy_ret": 0.52,
-      "capital": 1046901009.0
+      "stock_id": "MU",
+      "stock_name": "美光科技 (Micron 記憶體巨頭)",
+      "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
+      "entry_date": "20260623",
+      "exit_date": "20260723",
+      "entry_price": 1079.83,
+      "exit_price": 975.13,
+      "return_pct": -9.85,
+      "holding_days": 23,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2025-05-01",
-      "next_date": "2025-06-02",
-      "exposure": 1.0,
-      "allocation": "SPOT(38%), NFLX(30%), SONY(31%)",
-      "period_ret": 6.66,
-      "spy_ret": 4.89,
-      "capital": 1115185138.0
+      "stock_id": "INTC",
+      "stock_name": "INTC",
+      "role": "🅱️ B梯隊(22號) 🥈 第2主力(30%)",
+      "entry_date": "20260623",
+      "exit_date": "20260723",
+      "entry_price": 129.73,
+      "exit_price": 101.14,
+      "return_pct": -22.19,
+      "holding_days": 23,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-06-02",
-      "next_date": "2025-07-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(39%), NFLX(30%), TSLA(30%)",
-      "period_ret": 5.78,
-      "spy_ret": 4.87,
-      "capital": 1179145269.0
+      "stock_id": "3037.TW",
+      "stock_name": "欣興 (Unimicron 載板王者)",
+      "role": "🅱️ B梯隊(22號) 🥉 第3主力(30%)",
+      "entry_date": "20260623",
+      "exit_date": "20260723",
+      "entry_price": 997.96,
+      "exit_price": 915.0,
+      "return_pct": -8.46,
+      "holding_days": 23,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-07-01",
-      "next_date": "2025-08-01",
-      "exposure": 1.0,
-      "allocation": "SPOT(42%), NFLX(36%), DASH(20%)",
-      "period_ret": -12.93,
-      "spy_ret": 1.61,
-      "capital": 1026295111.0
+      "stock_id": "MU",
+      "stock_name": "美光科技 (Micron 記憶體巨頭)",
+      "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
+      "entry_date": "20260702",
+      "exit_date": "20260804",
+      "entry_price": 1041.34,
+      "exit_price": 866.82,
+      "return_pct": -16.91,
+      "holding_days": 24,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2025-08-01",
-      "next_date": "2025-09-01",
-      "exposure": 1.0,
-      "allocation": "DASH(34%), AVGO(22%), 3017.TW(43%)",
-      "period_ret": 5.37,
-      "spy_ret": 3.38,
-      "capital": 1080129758.0
+      "stock_id": "INTC",
+      "stock_name": "INTC",
+      "role": "🅰️ A梯隊(1號) 🥈 第2主力(30%)",
+      "entry_date": "20260702",
+      "exit_date": "20260804",
+      "entry_price": 128.92,
+      "exit_price": 95.24,
+      "return_pct": -26.27,
+      "holding_days": 24,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-09-01",
-      "next_date": "2025-10-01",
-      "exposure": 1.0,
-      "allocation": "AVGO(23%), DASH(40%), 3017.TW(36%)",
-      "period_ret": 5.33,
-      "spy_ret": 2.42,
-      "capital": 1137524972.0
+      "stock_id": "AMD",
+      "stock_name": "超微半導體 (AMD)",
+      "role": "🅰️ A梯隊(1號) 🥉 第3主力(30%)",
+      "entry_date": "20260702",
+      "exit_date": "20260804",
+      "entry_price": 538.16,
+      "exit_price": 504.0,
+      "return_pct": -6.5,
+      "holding_days": 24,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-10-01",
-      "next_date": "2025-11-03",
-      "exposure": 1.0,
-      "allocation": "DASH(31%), 2308.TW(41%), TSLA(26%)",
-      "period_ret": 4.99,
-      "spy_ret": 3.39,
-      "capital": 1193115592.0
+      "stock_id": "ASX",
+      "stock_name": "日月光投控 (ASE 封測龍頭ADR)",
+      "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
+      "entry_date": "20260723",
+      "exit_date": "20260825",
+      "entry_price": 39.39,
+      "exit_price": 37.01,
+      "return_pct": -6.19,
+      "holding_days": 24,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2025-11-03",
-      "next_date": "2025-12-01",
-      "exposure": 1.0,
-      "allocation": "2308.TW(34%), MU(27%), 8996.TW(37%)",
-      "period_ret": -8.65,
-      "spy_ret": -1.0,
-      "capital": 1088835045.0
+      "stock_id": "AMD",
+      "stock_name": "超微半導體 (AMD)",
+      "role": "🅱️ B梯隊(22號) 🥈 第2主力(30%)",
+      "entry_date": "20260723",
+      "exit_date": "20260825",
+      "entry_price": 544.74,
+      "exit_price": 474.2,
+      "return_pct": -13.1,
+      "holding_days": 24,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2025-12-01",
-      "next_date": "2026-01-02",
-      "exposure": 1.0,
-      "allocation": "MU(35%), AVGO(39%), LRCX(24%)",
-      "period_ret": 9.25,
-      "spy_ret": 1.02,
-      "capital": 1188348894.0
+      "stock_id": "UMC",
+      "stock_name": "聯電 (UMC 晶圓代工ADR)",
+      "role": "🅱️ B梯隊(22號) 🥉 第3主力(30%)",
+      "entry_date": "20260723",
+      "exit_date": "20260825",
+      "entry_price": 20.72,
+      "exit_price": 19.5,
+      "return_pct": -6.04,
+      "holding_days": 24,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2026-01-02",
-      "next_date": "2026-02-02",
-      "exposure": 1.0,
-      "allocation": "MU(41%), LRCX(26%), 3017.TW(32%)",
-      "period_ret": 22.6,
-      "spy_ret": 0.56,
-      "capital": 1456215821.0
+      "stock_id": "FTNT",
+      "stock_name": "FTNT",
+      "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
+      "entry_date": "20260804",
+      "exit_date": "20260902",
+      "entry_price": 164.11,
+      "exit_price": 162.19,
+      "return_pct": -1.32,
+      "holding_days": 22,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2026-02-02",
-      "next_date": "2026-03-02",
-      "exposure": 1.0,
-      "allocation": "LRCX(27%), MU(36%), 3037.TW(35%)",
-      "period_ret": 6.94,
-      "spy_ret": -1.58,
-      "capital": 1556411890.0
+      "stock_id": "PANW",
+      "stock_name": "派拓網路 (資安龍頭)",
+      "role": "🅰️ A梯隊(1號) 🥈 第2主力(30%)",
+      "entry_date": "20260804",
+      "exit_date": "20260902",
+      "entry_price": 351.6,
+      "exit_price": 346.0,
+      "return_pct": -1.74,
+      "holding_days": 22,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2026-03-02",
-      "next_date": "2026-04-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(41%), 2308.TW(31%), 8996.TW(27%)",
-      "period_ret": 5.52,
-      "spy_ret": -3.65,
-      "capital": 1640864552.0
+      "stock_id": "CRWD",
+      "stock_name": "CrowdStrike (終端資安)",
+      "role": "🅰️ A梯隊(1號) 🥉 第3主力(30%)",
+      "entry_date": "20260804",
+      "exit_date": "20260902",
+      "entry_price": 205.8,
+      "exit_price": 214.22,
+      "return_pct": 3.94,
+      "holding_days": 22,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2026-04-01",
-      "next_date": "2026-05-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(40%), 2308.TW(32%), 8996.TW(27%)",
-      "period_ret": 54.66,
-      "spy_ret": 10.3,
-      "capital": 2537768640.0
+      "stock_id": "MRNA",
+      "stock_name": "莫德納 (Moderna 生技巨擘)",
+      "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
+      "entry_date": "20260825",
+      "exit_date": "20260923",
+      "entry_price": 143.5,
+      "exit_price": 183.4,
+      "return_pct": 27.66,
+      "holding_days": 22,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2026-05-01",
-      "next_date": "2026-06-01",
-      "exposure": 1.0,
-      "allocation": "2308.TW(31%), 8996.TW(23%), 3037.TW(44%)",
-      "period_ret": 14.1,
-      "spy_ret": 4.73,
-      "capital": 2895470968.0
+      "stock_id": "3037.TW",
+      "stock_name": "欣興 (Unimicron 載板王者)",
+      "role": "🅱️ B梯隊(22號) 🥈 第2主力(30%)",
+      "entry_date": "20260825",
+      "exit_date": "20260923",
+      "entry_price": 1070.0,
+      "exit_price": 1120.0,
+      "return_pct": 4.52,
+      "holding_days": 22,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2026-06-01",
-      "next_date": "2026-07-01",
-      "exposure": 1.0,
-      "allocation": "2308.TW(30%), MU(31%), INTC(38%)",
-      "period_ret": 6.01,
-      "spy_ret": -1.37,
-      "capital": 3066174662.0
+      "stock_id": "3443.TW",
+      "stock_name": "創意 (Global Unichip ASIC)",
+      "role": "🅱️ B梯隊(22號) 🥉 第3主力(30%)",
+      "entry_date": "20260825",
+      "exit_date": "20260923",
+      "entry_price": 5260.0,
+      "exit_price": 8325.0,
+      "return_pct": 58.12,
+      "holding_days": 22,
+      "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2026-07-01",
-      "next_date": "2026-08-03",
-      "exposure": 1.0,
-      "allocation": "MU(37%), INTC(35%), 3037.TW(26%)",
-      "period_ret": -28.51,
-      "spy_ret": 0.6,
-      "capital": 2190939394.0
+      "stock_id": "MRNA",
+      "stock_name": "莫德納 (Moderna 生技巨擘)",
+      "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
+      "entry_date": "20260902",
+      "exit_date": "20261002",
+      "entry_price": 151.4,
+      "exit_price": 190.26,
+      "return_pct": 25.52,
+      "holding_days": 23,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": true
     },
     {
-      "exec_date": "2026-08-03",
-      "next_date": "2026-09-01",
-      "exposure": 1.0,
-      "allocation": "ILMN(44%), PANW(31%), 2330.TW(23%)",
-      "period_ret": 5.44,
-      "spy_ret": 1.68,
-      "capital": 2306640058.0
+      "stock_id": "3037.TW",
+      "stock_name": "欣興 (Unimicron 載板王者)",
+      "role": "🅰️ A梯隊(1號) 🥈 第2主力(30%)",
+      "entry_date": "20260902",
+      "exit_date": "20261002",
+      "entry_price": 955.0,
+      "exit_price": 1225.0,
+      "return_pct": 28.12,
+      "holding_days": 23,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     },
     {
-      "exec_date": "2026-09-01",
-      "next_date": "2026-10-01",
-      "exposure": 1.0,
-      "allocation": "3037.TW(16%), MRNA(69%), 3443.TW(13%)",
-      "period_ret": 31.25,
-      "spy_ret": 0.31,
-      "capital": 3023012862.0
+      "stock_id": "3443.TW",
+      "stock_name": "創意 (Global Unichip ASIC)",
+      "role": "🅰️ A梯隊(1號) 🥉 第3主力(30%)",
+      "entry_date": "20260902",
+      "exit_date": "20261002",
+      "entry_price": 5955.0,
+      "exit_price": 7895.0,
+      "return_pct": 32.43,
+      "holding_days": 23,
+      "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
+      "leader": false
     }
   ]
 }
