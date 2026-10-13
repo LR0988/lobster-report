@@ -30,6 +30,8 @@ def sync_to_supabase():
         bt_macro['selected_model_id'] = 'global_liquid_titan_a'
         bt_macro['open_positions'] = bt_def['open_positions']
         bt_macro['titan_open_positions'] = bt_def['titan_open_positions']
+        if 'stats' in bt_def:
+            bt_macro['stats'] = bt_def['stats']
 
         if 'periods' not in bt_macro:
             bt_macro['periods'] = {}
@@ -70,6 +72,8 @@ def sync_to_supabase():
         bt_sim['selected_model_id'] = 'global_liquid_titan_a'
         bt_sim['open_positions'] = def_data['backtest_simulation']['open_positions']
         bt_sim['titan_open_positions'] = def_data['backtest_simulation']['titan_open_positions']
+        if 'stats' in def_data['backtest_simulation']:
+            bt_sim['stats'] = def_data['backtest_simulation']['stats']
 
         if 'periods' in bt_sim:
             for p_key, p_val in def_data['backtest_simulation'].get('periods', {}).items():
