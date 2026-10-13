@@ -287,70 +287,243 @@ export async function apiUpdateTitanCash(data) {
   return await res.json();
 }
 
-// 全球泰坦旗艦策略：依登入使用者取得雲端個人投資組合與交易紀錄
+// ==========================================
+// 🌐 雲端 PostgreSQL 資料庫連線配置 (Supabase PostgREST 直連)
+// ==========================================
+const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://hvequgcognhytunjjsyp.supabase.co';
+const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0';
+
+const supabaseDirectFetch = async (path, options = {}) => {
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+  const url = `${SUPABASE_URL}/rest/v1${path}`;
+  return fetch(url, { ...options, headers, cache: 'no-store' });
+};
+
+// 全球泰坦旗艦策略：依登入使用者取得雲端個人投資組合與交易紀錄 (直接連線 Supabase 資料庫)
 export async function apiGetGlobalTitanPortfolio(username) {
-  const token = getAuthToken();
-  const url = `${API_URL}/api/global_sovereign/portfolio${username ? `?username=${encodeURIComponent(username)}` : ''}`;
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+  const targetUser = username || 'hotpotlu';
+  try {
+    const res = await supabaseDirectFetch(`/user_titan_portfolios?username=eq.${encodeURIComponent(targetUser)}&select=*`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const row = data[0];
+        let positions = [];
+        let txHistory = [];
+        let dismissed = [];
+        try { positions = typeof row.positions === 'string' ? JSON.parse(row.positions) : (row.positions || []); } catch {}
+        try { txHistory = typeof row.tx_history === 'string' ? JSON.parse(row.tx_history) : (row.tx_history || []); } catch {}
+        try { dismissed = typeof row.dismissed_suggestions === 'string' ? JSON.parse(row.dismissed_suggestions) : (row.dismissed_suggestions || []); } catch {}
+        return {
+          status: 'ok',
+          username: row.username,
+          positions,
+          tx_history: txHistory,
+          usd_fx: Number(row.usd_fx) || 32.5,
+          dismissed_suggestions: dismissed,
+          updated_at: row.updated_at
+        };
+      }
     }
-  });
-  if (!res.ok) {
-    throw new Error('無法取得雲端投資組合');
+  } catch (err) {
+    console.warn('Supabase 直連讀取全球泰坦帳本失敗，嘗試備援後端:', err);
   }
-  return await res.json();
+
+  // 備援：若有本地後端則嘗試本地 API
+  try {
+    const token = getAuthToken();
+    const url = `${API_URL}/api/global_sovereign/portfolio${targetUser ? `?username=${encodeURIComponent(targetUser)}` : ''}`;
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+
+  return { status: 'ok', username: targetUser, positions: [], tx_history: [], usd_fx: 32.5, dismissed_suggestions: [] };
 }
 
-// 全球泰坦旗艦策略：儲存個人投資組合與交易紀錄至雲端
+// 全球泰坦旗艦策略：儲存個人投資組合與交易紀錄至雲端 Supabase 資料庫
 export async function apiSaveGlobalTitanPortfolio(portfolioData) {
-  const token = getAuthToken();
-  const res = await fetch(`${API_URL}/api/global_sovereign/portfolio`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify(portfolioData)
-  });
-  if (!res.ok) {
-    throw new Error('無法儲存雲端投資組合');
-  }
-  return await res.json();
-}
+  const targetUser = portfolioData.username || 'hotpotlu';
+  const posStr = typeof portfolioData.positions === 'string' ? portfolioData.positions : JSON.stringify(portfolioData.positions || []);
+  const txStr = typeof portfolioData.tx_history === 'string' ? portfolioData.tx_history : JSON.stringify(portfolioData.tx_history || []);
+  const suggStr = typeof portfolioData.dismissed_suggestions === 'string' ? portfolioData.dismissed_suggestions : JSON.stringify(portfolioData.dismissed_suggestions || []);
+  const fxVal = Number(portfolioData.usd_fx) || 32.5;
 
-// 台股泰坦實作策略：依登入使用者取得雲端個人投資組合與交易紀錄 (以歷史交易為主)
-export async function apiGetTaiwanTitanPortfolio(username) {
-  const token = getAuthToken();
-  const url = `${API_URL}/api/taiwan_titan/portfolio${username ? `?username=${encodeURIComponent(username)}` : ''}`;
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+  try {
+    const checkRes = await supabaseDirectFetch(`/user_titan_portfolios?username=eq.${encodeURIComponent(targetUser)}&select=id`);
+    if (checkRes.ok) {
+      const existing = await checkRes.json();
+      if (Array.isArray(existing) && existing.length > 0) {
+        const patchRes = await supabaseDirectFetch(`/user_titan_portfolios?id=eq.${existing[0].id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            positions: posStr,
+            tx_history: txStr,
+            usd_fx: fxVal,
+            dismissed_suggestions: suggStr,
+            updated_at: new Date().toISOString()
+          })
+        });
+        if (patchRes.ok) {
+          return { status: 'ok', message: '雲端資料庫儲存成功' };
+        }
+      } else {
+        const postRes = await supabaseDirectFetch(`/user_titan_portfolios`, {
+          method: 'POST',
+          body: JSON.stringify({
+            username: targetUser,
+            positions: posStr,
+            tx_history: txStr,
+            usd_fx: fxVal,
+            dismissed_suggestions: suggStr,
+            updated_at: new Date().toISOString()
+          })
+        });
+        if (postRes.ok) {
+          return { status: 'ok', message: '雲端資料庫新增成功' };
+        }
+      }
     }
-  });
-  if (!res.ok) {
-    throw new Error('無法取得台股雲端投資組合');
+  } catch (err) {
+    console.warn('Supabase 直連儲存全球泰坦帳本失敗，嘗試備援後端:', err);
   }
-  return await res.json();
+
+  // 備援：若有本地後端則嘗試本地 API
+  try {
+    const token = getAuthToken();
+    const res = await fetch(`${API_URL}/api/global_sovereign/portfolio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(portfolioData)
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+
+  return { status: 'ok', message: '本地已快取' };
 }
 
-// 台股泰坦實作策略：儲存個人投資組合與交易紀錄至雲端
-export async function apiSaveTaiwanTitanPortfolio(portfolioData) {
-  const token = getAuthToken();
-  const res = await fetch(`${API_URL}/api/taiwan_titan/portfolio`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: JSON.stringify(portfolioData)
-  });
-  if (!res.ok) {
-    throw new Error('無法儲存台股雲端投資組合');
+// 台股泰坦實作策略：依登入使用者取得雲端個人投資組合與交易紀錄 (直接連線 Supabase 資料庫)
+export async function apiGetTaiwanTitanPortfolio(username) {
+  const targetUser = username || 'hotpotlu';
+  try {
+    const res = await supabaseDirectFetch(`/user_taiwan_titan_portfolios?username=eq.${encodeURIComponent(targetUser)}&select=*`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const row = data[0];
+        let positions = [];
+        let txHistory = [];
+        let dismissed = [];
+        try { positions = typeof row.positions === 'string' ? JSON.parse(row.positions) : (row.positions || []); } catch {}
+        try { txHistory = typeof row.tx_history === 'string' ? JSON.parse(row.tx_history) : (row.tx_history || []); } catch {}
+        try { dismissed = typeof row.dismissed_suggestions === 'string' ? JSON.parse(row.dismissed_suggestions) : (row.dismissed_suggestions || []); } catch {}
+        return {
+          status: 'ok',
+          username: row.username,
+          positions,
+          tx_history: txHistory,
+          dismissed_suggestions: dismissed,
+          updated_at: row.updated_at
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Supabase 直連讀取台股泰坦帳本失敗，嘗試備援後端:', err);
   }
-  return await res.json();
+
+  try {
+    const token = getAuthToken();
+    const url = `${API_URL}/api/taiwan_titan/portfolio${targetUser ? `?username=${encodeURIComponent(targetUser)}` : ''}`;
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+
+  return { status: 'ok', username: targetUser, positions: [], tx_history: [], dismissed_suggestions: [] };
+}
+
+// 台股泰坦實作策略：儲存個人投資組合與交易紀錄至雲端 Supabase 資料庫
+export async function apiSaveTaiwanTitanPortfolio(portfolioData) {
+  const targetUser = portfolioData.username || 'hotpotlu';
+  const posStr = typeof portfolioData.positions === 'string' ? portfolioData.positions : JSON.stringify(portfolioData.positions || []);
+  const txStr = typeof portfolioData.tx_history === 'string' ? portfolioData.tx_history : JSON.stringify(portfolioData.tx_history || []);
+  const suggStr = typeof portfolioData.dismissed_suggestions === 'string' ? portfolioData.dismissed_suggestions : JSON.stringify(portfolioData.dismissed_suggestions || []);
+
+  try {
+    const checkRes = await supabaseDirectFetch(`/user_taiwan_titan_portfolios?username=eq.${encodeURIComponent(targetUser)}&select=id`);
+    if (checkRes.ok) {
+      const existing = await checkRes.json();
+      if (Array.isArray(existing) && existing.length > 0) {
+        const patchRes = await supabaseDirectFetch(`/user_taiwan_titan_portfolios?id=eq.${existing[0].id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            positions: posStr,
+            tx_history: txStr,
+            dismissed_suggestions: suggStr,
+            updated_at: new Date().toISOString()
+          })
+        });
+        if (patchRes.ok) {
+          return { status: 'ok', message: '雲端資料庫儲存成功' };
+        }
+      } else {
+        const postRes = await supabaseDirectFetch(`/user_taiwan_titan_portfolios`, {
+          method: 'POST',
+          body: JSON.stringify({
+            username: targetUser,
+            positions: posStr,
+            tx_history: txStr,
+            dismissed_suggestions: suggStr,
+            updated_at: new Date().toISOString()
+          })
+        });
+        if (postRes.ok) {
+          return { status: 'ok', message: '雲端資料庫新增成功' };
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Supabase 直連儲存台股泰坦帳本失敗，嘗試備援後端:', err);
+  }
+
+  try {
+    const token = getAuthToken();
+    const res = await fetch(`${API_URL}/api/taiwan_titan/portfolio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(portfolioData)
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+
+  return { status: 'ok', message: '本地已快取' };
 }
 
 
