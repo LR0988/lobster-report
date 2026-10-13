@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import defaultData from '../data/defaultGlobalSovereignData.json';
-import { getCurrentUser, apiGetGlobalTitanPortfolio, apiSaveGlobalTitanPortfolio, supabaseDirectFetch } from '../api';
+import { getCurrentUser, apiGetGlobalTitanPortfolio, apiSaveGlobalTitanPortfolio, apiGetGlobalSovereignDashboard, supabaseDirectFetch } from '../api';
 
 const STORAGE_KEY_POSITIONS = 'global_titan_user_positions_v2';
 const STORAGE_KEY_IDLE_CASH = 'global_titan_idle_cash_v2';
@@ -388,27 +388,13 @@ export default function GlobalSovereignDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. 優先直接從 Supabase 雲端資料庫 stock_ml_cache 讀取最新全球主權演算數據 (杜絕本地暫存)
-      const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.global_sovereign_dashboard&select=payload');
-      if (supRes.ok) {
-        const rows = await supRes.json();
-        if (rows && rows.length > 0 && rows[0].payload) {
-          const payloadData = typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
-          setData(payloadData);
-          return;
-        }
-      }
-
-      // 2. 備援嘗試本地後端
-      const res = await fetch('/api/global_sovereign/dashboard');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.status === 'ok') {
-          setData(json);
-        }
+      // 1. 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新全球主權演算數據
+      const json = await apiGetGlobalSovereignDashboard();
+      if (json && json.status === 'ok') {
+        setData(json);
       }
     } catch (err) {
-      console.warn('無法從資料庫獲取最新全球主權數據，使用備援展示:', err);
+      console.warn('無法從筆電資料庫獲取最新全球主權數據，使用備援展示:', err);
     } finally {
       setLoading(false);
     }
@@ -1321,7 +1307,7 @@ export default function GlobalSovereignDashboard() {
       if (res && res.status === 'ok') {
         setCloudSyncStatus('saved');
         setLastSyncTime(new Date());
-        triggerNotice(`☁️ 已成功將「${currentUsername}」專屬帳本同步儲存至 Supabase 雲端資料庫！`);
+        triggerNotice(`💾 已成功將「${currentUsername}」專屬帳本儲存至筆電本機資料庫 (tw_stock.db)！`);
         setTimeout(() => setCloudSyncStatus('synced'), 2500);
       } else {
         triggerNotice('⚠️ 雲端同步回應異常，已妥善保存在本機快取');
@@ -1707,9 +1693,9 @@ export default function GlobalSovereignDashboard() {
                     alignItems: 'center',
                     gap: '0.3rem'
                   }}
-                  title="立即將全球泰坦持股部位與交易歷史持久化寫入 Supabase 雲端資料庫"
+                  title="立即將全球泰坦持股部位與交易歷史持久化寫入筆電本機資料庫 (tw_stock.db)"
                 >
-                  ☁️ 存入雲端
+                  💾 儲存帳本
                 </button>
                 <button
                   onClick={handleExportBackup}
