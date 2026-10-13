@@ -3703,9 +3703,77 @@ function StockDashboard() {
             return updated;
           });
         }
+      } else {
+        // 2. 備援直接從 Supabase 資料庫 stock_database_preview 讀取真實資料表即時狀態
+        const supRes = await supabaseFetch('/stock_database_preview?select=table_name,data,row_count,updated_at');
+        if (supRes.ok) {
+          const rows = await supRes.json();
+          if (rows && rows.length > 0) {
+            setDbTablesList(prev => {
+              const remoteMap = new Map();
+              rows.forEach(r => {
+                const dataArr = Array.isArray(r.data) ? r.data : [];
+                let rawDate = dataArr[0]?.date ? String(dataArr[0].date) : '';
+                let latestDate = rawDate ? (rawDate.includes('-') ? rawDate.replace(/-/g, '/') : rawDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3')) : (r.updated_at ? r.updated_at.split('T')[0].replace(/-/g, '/') : '-');
+                remoteMap.set(r.table_name, {
+                  row_count: r.row_count || dataArr.length || 0,
+                  latest_date: latestDate,
+                  updated_at: r.updated_at
+                });
+              });
+              return prev.map(item => {
+                const remote = remoteMap.get(item.id);
+                if (remote) {
+                  return {
+                    ...item,
+                    row_count: remote.row_count !== undefined ? remote.row_count : item.row_count,
+                    latest_date: (remote.latest_date && remote.latest_date !== '-') ? remote.latest_date : item.latest_date,
+                    status: 'active'
+                  };
+                }
+                return item;
+              });
+            });
+          }
+        }
       }
     } catch (e) {
-      console.warn('載入資料庫狀態即時數據跳過，使用本地快照:', e);
+      // 若後端無法連線，嘗試直接連線 Supabase
+      try {
+        const supRes = await supabaseFetch('/stock_database_preview?select=table_name,data,row_count,updated_at');
+        if (supRes.ok) {
+          const rows = await supRes.json();
+          if (rows && rows.length > 0) {
+            setDbTablesList(prev => {
+              const remoteMap = new Map();
+              rows.forEach(r => {
+                const dataArr = Array.isArray(r.data) ? r.data : [];
+                let rawDate = dataArr[0]?.date ? String(dataArr[0].date) : '';
+                let latestDate = rawDate ? (rawDate.includes('-') ? rawDate.replace(/-/g, '/') : rawDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3')) : (r.updated_at ? r.updated_at.split('T')[0].replace(/-/g, '/') : '-');
+                remoteMap.set(r.table_name, {
+                  row_count: r.row_count || dataArr.length || 0,
+                  latest_date: latestDate,
+                  updated_at: r.updated_at
+                });
+              });
+              return prev.map(item => {
+                const remote = remoteMap.get(item.id);
+                if (remote) {
+                  return {
+                    ...item,
+                    row_count: remote.row_count !== undefined ? remote.row_count : item.row_count,
+                    latest_date: (remote.latest_date && remote.latest_date !== '-') ? remote.latest_date : item.latest_date,
+                    status: 'active'
+                  };
+                }
+                return item;
+              });
+            });
+          }
+        }
+      } catch (errSup) {
+        console.warn('載入資料庫狀態即時數據跳過，使用本地快照:', errSup);
+      }
     }
 
     try {
