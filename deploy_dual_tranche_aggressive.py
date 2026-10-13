@@ -17,10 +17,12 @@ conn.close()
 df['date'] = pd.to_datetime(df['date'])
 sov_df['date'] = pd.to_datetime(sov_df['date'])
 valid_tickers = [t for t in df['ticker'].unique() if not any(t.endswith(ext) for ext in ['.KS', '.T', '.DE', '.SA'])]
-df = df[df['ticker'].isin(valid_tickers)]
+df = df[df['ticker'].isin(valid_tickers)].copy()
+df['adj_factor'] = np.where(df['close'] > 0, df['adj_close'] / df['close'], 1.0)
+df['open_adj'] = df['open'] * df['adj_factor']
 
 px_adj = df.pivot(index='date', columns='ticker', values='adj_close').sort_index()
-px_open = df.pivot(index='date', columns='ticker', values='open').sort_index()
+px_open = df.pivot(index='date', columns='ticker', values='open_adj').sort_index()
 px_vol = df.pivot(index='date', columns='ticker', values='volume').sort_index()
 sov_adj = sov_df.pivot(index='date', columns='ticker', values='adj_close').sort_index()
 
@@ -29,6 +31,19 @@ px_adj = px_adj.reindex(common_dates).ffill()
 px_open = px_open.reindex(common_dates).ffill()
 px_vol = px_vol.reindex(common_dates).fillna(0)
 sov_adj = sov_adj.reindex(common_dates).ffill()
+
+# 嚴格清洗單日未還原誤植跳空針 (Bad Ticks: 單日跳空 >20% 且隔日立即反向還原 >20%) 與異常隔夜開盤跳空
+ret_1d = px_adj.pct_change(fill_method=None)
+ret_next = px_adj.pct_change(-1, fill_method=None)
+spike_mask = (ret_1d.abs() > 0.20) & (ret_next.abs() > 0.20) & ((ret_1d * ret_next) > 0)
+px_adj[spike_mask] = np.nan
+px_open[spike_mask] = np.nan
+px_adj = px_adj.ffill()
+px_open = px_open.ffill()
+
+overnight_gap = (px_open / px_adj.shift(1)) - 1.0
+bad_open_mask = overnight_gap.abs() > 0.25
+px_open[bad_open_mask] = px_adj.shift(1)[bad_open_mask]
 
 stock_tickers = [t for t in px_adj.columns if t not in ['SPY', 'QQQ', '0050.TW']]
 
