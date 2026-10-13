@@ -5383,8 +5383,9 @@ function StockDashboard() {
                       loss_trades: lossTrades.length,
                       total_trades: slicedTrades.length,
                       profit_factor: Number(profitFactor.toFixed(2)),
-                      market_exposure_pct: avgExposure || (isGlobal ? 92.4 : 68.4),
-                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 92.4 : 68.4)),
+                      market_exposure_pct: avgExposure || (isGlobal ? 92.4 : 53.0),
+                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 92.4 : 53.0)),
+                      open_positions: openPosList,
                       curve: rebasedCurve,
                       trades: slicedTrades,
                       action_markers: actionMarkers,
@@ -5438,14 +5439,14 @@ function StockDashboard() {
                       model_name: '👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)',
                       total_return_pct: t?.customModeData?.total_return_pct ?? 26550.7,
                       cagr_pct: t?.customModeData?.cagr_pct ?? 30.3,
-                      alpha_pct: t?.customModeData?.alpha_pct ?? 26335.7,
+                      alpha_pct: t?.customModeData?.alpha_pct ?? 25824.6,
                       max_drawdown_pct: t?.customModeData?.max_drawdown_pct ?? -36.6,
                       sharpe_ratio: t?.customModeData?.sharpe_ratio ?? 1.00,
-                      sortino_ratio: t?.customModeData?.sortino_ratio ?? 1.68,
-                      win_rate_pct: t?.customModeData?.win_rate_pct ?? 65.3,
-                      profit_factor: t?.customModeData?.profit_factor ?? 3.85,
-                      total_trades: t?.customModeData?.total_trades ?? 391,
-                      market_exposure_pct: t?.customModeData?.market_exposure_pct ?? 68.4
+                      sortino_ratio: t?.customModeData?.sortino_ratio ?? 1.55,
+                      win_rate_pct: t?.customModeData?.win_rate_pct ?? 45.5,
+                      profit_factor: t?.customModeData?.profit_factor ?? 2.49,
+                      total_trades: t?.customModeData?.total_trades ?? 303,
+                      market_exposure_pct: t?.customModeData?.market_exposure_pct ?? 53.0
                     };
                     return { globalItem, titanItem, globalCalc: g, titanCalc: t };
                   };
@@ -6988,13 +6989,17 @@ function StockDashboard() {
                                   </span>
                                 </div>
                                 <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.35rem' }}>
-                                  此表完全採用<strong>策略模擬引擎在各梯隊調倉日（1號 A梯隊 ／ 22號 B梯隊）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「全球泰坦實作」分頁記錄）
+                                  {isGlobal ? (
+                                    <>此表完全採用<strong>策略模擬引擎在各梯隊調倉日（1號 A梯隊 ／ 22號 B梯隊）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「全球泰坦實作」分頁記錄）</>
+                                  ) : (
+                                    <>此表完全採用<strong>台股泰坦 FIP 旗艦引擎（70% 王者 + 15% 雙衛星）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「台股泰坦實作」分頁記錄）</>
+                                  )}
                                 </div>
                               </div>
 
                               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
                                 <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
-                                  參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> (A隊 50萬 + B隊 50萬)
+                                  參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> {isGlobal ? '(A隊 50萬 + B隊 50萬)' : '(70% 王者 + 15%×2 雙衛星)'}
                                 </div>
                                 {isGlobal && (
                                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
@@ -7014,7 +7019,7 @@ function StockDashboard() {
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>💰 策略標準基準本金</div>
                                 <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FCD34D' }}>NT$ {totalDeposit.toLocaleString()}</div>
-                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>A隊 50% ＋ B隊 50%</div>
+                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{isGlobal ? 'A隊 50% ＋ B隊 50%' : '70% 王者 ＋ 15%×2 衛星'}</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📉 本期調倉建倉成本</div>
@@ -7034,7 +7039,7 @@ function StockDashboard() {
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.7rem', color: '#BAE6FD' }}>👑 策略模擬總淨值</div>
                                 <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8' }}>NT$ {totalNavTwd.toLocaleString()}</div>
-                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>雙梯隊本期模擬淨值</div>
+                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{isGlobal ? '雙梯隊本期模擬淨值' : '台股泰坦本期模擬淨值'}</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.7rem', color: '#A7F3D0' }}>🚀 本期調倉未實現損益</div>

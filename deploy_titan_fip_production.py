@@ -298,7 +298,7 @@ for s, p in pos.items():
         'role': '👑 王者泰坦 (70%)' if p['leader'] else '🚀 革命衛星 (15%)',
         'target_weight_pct': 70.0 if p['leader'] else 15.0,
         'weight_pct': round(w_pct, 1),
-        'entry_date': p.get('entry_date', str(latest_dt)),
+        'entry_date': p.get('entry_date', str(dates[p['ei']])),
         'entry_price': round(float(ep), 2),
         'current_price': round(float(c_px), 2),
         'latest_price': round(float(c_px), 2),
