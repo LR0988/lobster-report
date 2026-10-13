@@ -1,16 +1,40 @@
 # 蝦報專案 - Git 忽略檔案
 
-# 環境變數
+# 環境變數與金鑰
 .env
 .env.local
 .env.production
+.env*.local
 
-# Python
-__pycache__/
+# Python 暫存與快取
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# 私有量化演算法、研究、回測與同步腳本 (100% 留在本機，不外流至 Git)
+*.py
+!backend/**/*.py
+
+# 量化參數、網格搜尋、DOE 與回測數據檔 (100% 留在本機，不外流至 Git)
+*.csv
+*doe*.json
+*results*.json
+*comparison*.json
+*experiment*.json
+*tranche*.json
+titan_trades.json
+titan_open_positions.json
+live_portfolio_state.json
+etf_0020_holdings.json
+pit_clean_verified.pkl
+*.pkl
+
+# 資料庫與機器學習模型權重 (100% 留在本機)
 *.db
+*.joblib
+*.sqlite
+*.sqlite3
 .Python
 build/
 develop-eggs/
