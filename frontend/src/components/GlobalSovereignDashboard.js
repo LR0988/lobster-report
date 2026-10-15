@@ -422,7 +422,7 @@ export default function GlobalSovereignDashboard() {
           cp.ticker === p.ticker || 
           (cp.ticker && p.ticker && cp.ticker.split('.')[0] === p.ticker.split('.')[0])
         );
-        const pickDate = matchPick?.price_date || data?.latest_data_date || '2026-10-14';
+        const pickDate = matchPick?.price_date || (p.currency === 'USD' ? '2026-10-14' : '2026-10-15');
         if (matchPick && matchPick.price > 0 && (p.current_price !== matchPick.price || p.price_date !== pickDate)) {
           changed = true;
           return { ...p, current_price: matchPick.price, price_date: pickDate };
@@ -1435,6 +1435,20 @@ export default function GlobalSovereignDashboard() {
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               👑 全球高流動性泰坦旗艦
             </h3>
+            <span style={{
+              fontSize: '0.78rem',
+              background: 'rgba(56, 189, 248, 0.18)',
+              border: '1px solid rgba(56, 189, 248, 0.45)',
+              color: '#38BDF8',
+              padding: '0.2rem 0.65rem',
+              borderRadius: '5px',
+              fontWeight: 'bold',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+              🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-15'}</strong> (台股 10/15・美股 10/14)
+            </span>
             <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
               🚀 雙梯隊進攻版 (1號+22號交錯 × 40/30/30階梯 × 45/35/20敏銳動能 × 爆量滯漲過濾)
             </span>
@@ -1661,6 +1675,20 @@ export default function GlobalSovereignDashboard() {
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{
+                  fontSize: '0.78rem',
+                  color: '#38BDF8',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  padding: '0.28rem 0.65rem',
+                  borderRadius: '5px',
+                  fontWeight: 'bold',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem'
+                }}>
+                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-15'}</strong> (台股 10/15・美股 10/14)
+                </div>
                 <div style={{ fontSize: '0.78rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.1)', padding: '0.28rem 0.6rem', borderRadius: '4px' }}>
                   當前持股市值合計: <strong>NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
                 </div>
@@ -1793,7 +1821,8 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'center' }}>建倉日期</th>
                       <th style={{ textAlign: 'right' }}>持有股數</th>
                       <th style={{ textAlign: 'right' }}>成本均價</th>
-                      <th style={{ textAlign: 'right' }}>最新現價 (更新日期)</th>
+                      <th style={{ textAlign: 'right' }}>最新現價</th>
+                      <th style={{ textAlign: 'center' }}>最新報價日期</th>
                       <th style={{ textAlign: 'right' }}>目前市值 (折合NT$)</th>
                       <th style={{ textAlign: 'right' }}>未實現損益</th>
                       <th style={{ textAlign: 'right' }}>佔總淨值%</th>
@@ -1883,10 +1912,24 @@ export default function GlobalSovereignDashboard() {
                             {curr}{pos.entry_price?.toLocaleString()}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            <div>{curr}{curPrice?.toLocaleString()}</div>
-                            <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontWeight: 'normal', marginTop: '2px' }} title={`價格更新日期：${pos.price_date || pickMatch?.price_date || data?.latest_data_date || '2026-10-14'}`}>
-                              📅 {pos.price_date || pickMatch?.price_date || data?.latest_data_date || '2026-10-14'}
-                            </div>
+                            {curr}{curPrice?.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              fontSize: '0.78rem',
+                              color: '#FCD34D',
+                              background: 'rgba(245, 158, 11, 0.15)',
+                              border: '1px solid rgba(245, 158, 11, 0.35)',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontFamily: 'monospace',
+                              fontWeight: 'bold',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}>
+                              📅 {pos.price_date || pickMatch?.price_date || (pos.currency === 'USD' ? '2026-10-14' : '2026-10-15')}
+                            </span>
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#67E8F9' }}>
                             NT$ {Math.round(valTwd).toLocaleString()}
@@ -2273,8 +2316,8 @@ export default function GlobalSovereignDashboard() {
                     採用 <strong>45% 12M + 35% 3M + 20% 1M 複合動能 × (1 + 0.5 FIP)</strong> 排序，並通過「<strong>爆量滯漲濾網</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除）」。第 1~3 名為當期正選，第 4~5 名為在手續抱保護緩衝帶！
                   </p>
                 </div>
-                <span style={{ fontSize: '0.74rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.15)', padding: '0.22rem 0.6rem', borderRadius: '4px', fontFamily: 'monospace' }}>
-                  最新行情基準日：{data?.latest_data_date || '2026-10-12'}
+                <span style={{ fontSize: '0.78rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                  🗓️ 最新行情基準日：{data?.latest_data_date || '2026-10-15'} (台股 10/15・美股 10/14)
                 </span>
               </div>
 
@@ -2285,7 +2328,8 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'center', width: '115px' }}>順位與保護帶</th>
                       <th>標的名稱 (代碼 / 市場)</th>
                       <th style={{ textAlign: 'center' }}>單梯隊配比 (總資金佔比)</th>
-                      <th style={{ textAlign: 'right' }}>最新現價 (更新日期)</th>
+                      <th style={{ textAlign: 'right' }}>最新現價</th>
+                      <th style={{ textAlign: 'center' }}>最新報價日期</th>
                       <th style={{ textAlign: 'right' }}>防守季線 (60MA)</th>
                       <th style={{ textAlign: 'right' }}>3M 短期爆發</th>
                       <th style={{ textAlign: 'right' }}>12M 長期主升</th>
@@ -2343,10 +2387,24 @@ export default function GlobalSovereignDashboard() {
                             )}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            <div>{curr}{pick.price?.toLocaleString()}</div>
-                            <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontWeight: 'normal', marginTop: '2px' }} title={`價格更新日期：${pick.price_date || data?.latest_data_date || '2026-10-14'}`}>
-                              📅 {pick.price_date || data?.latest_data_date || '2026-10-14'}
-                            </div>
+                            {curr}{pick.price?.toLocaleString()}
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              fontSize: '0.76rem',
+                              color: '#FCD34D',
+                              background: 'rgba(245, 158, 11, 0.15)',
+                              border: '1px solid rgba(245, 158, 11, 0.35)',
+                              padding: '2px 7px',
+                              borderRadius: '4px',
+                              fontFamily: 'monospace',
+                              fontWeight: 'bold',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}>
+                              📅 {pick.price_date || (pick.currency === 'USD' ? '2026-10-14' : '2026-10-15')}
+                            </span>
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
                             {curr}{pick.ma60?.toLocaleString()}

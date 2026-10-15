@@ -5422,11 +5422,11 @@ function StockDashboard() {
                     const openPosList = isGlobal
                       ? [
                           { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅰️ A梯隊(1號) 王者(20%)', weight_pct: 20, entry_date: '20261002', entry_price: 190.26, latest_price: 226.3, price_date: '2026-10-14', unrealized_return_pct: 18.94, holding_days: 10, ma60_stop_price: 128.94, dist_to_stop_pct: 75.5, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 US$151.40)' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 1225.0, latest_price: 1185.0, price_date: '2026-10-14', unrealized_return_pct: -3.27, holding_days: 10, ma60_stop_price: 1034.80, dist_to_stop_pct: 14.5, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$955.0)' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 7895.0, latest_price: 8245.0, price_date: '2026-10-14', unrealized_return_pct: 4.43, holding_days: 10, ma60_stop_price: 6057.75, dist_to_stop_pct: 36.1, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$5,955.0)' },
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 1225.0, latest_price: 1075.0, price_date: '2026-10-15', unrealized_return_pct: -12.24, holding_days: 10, ma60_stop_price: 1026.05, dist_to_stop_pct: 4.8, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$955.0)' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 7895.0, latest_price: 7670.0, price_date: '2026-10-15', unrealized_return_pct: -2.85, holding_days: 10, ma60_stop_price: 5969.00, dist_to_stop_pct: 28.5, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$5,955.0)' },
                           { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅱️ B梯隊(22號) 王者(20%)', weight_pct: 20, entry_date: '20260923', entry_price: 183.40, latest_price: 226.3, price_date: '2026-10-14', unrealized_return_pct: 23.39, holding_days: 19, ma60_stop_price: 128.94, dist_to_stop_pct: 75.5, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 US$143.50)' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 1120.0, latest_price: 1185.0, price_date: '2026-10-14', unrealized_return_pct: 5.80, holding_days: 19, ma60_stop_price: 1034.80, dist_to_stop_pct: 14.5, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$1,070.0)' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 8325.0, latest_price: 8245.0, price_date: '2026-10-14', unrealized_return_pct: -0.96, holding_days: 19, ma60_stop_price: 6057.75, dist_to_stop_pct: 36.1, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$5,260.0)' }
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 1120.0, latest_price: 1075.0, price_date: '2026-10-15', unrealized_return_pct: -4.02, holding_days: 19, ma60_stop_price: 1026.05, dist_to_stop_pct: 4.8, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$1,070.0)' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 8325.0, latest_price: 7670.0, price_date: '2026-10-15', unrealized_return_pct: -7.87, holding_days: 19, ma60_stop_price: 5969.00, dist_to_stop_pct: 28.5, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$5,260.0)' }
                         ]
                       : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
 
@@ -7009,8 +7009,8 @@ function StockDashboard() {
                             entry_date: '2026-10-02',
                             first_entry_info: '首倉 2026-09-02 @ NT$ 955.0 (連任第2/4月・累漲 +24.08%)',
                             strategy_entry_price: 1225.00,
-                            strategy_current_price: 1185.00,
-                            price_date: '2026-10-14',
+                            strategy_current_price: 1075.00,
+                            price_date: '2026-10-15',
                             entry_fee_twd: 200,
                             ma60_stop_price: 1026.05,
                             stop_condition: '🅰️ 1號A梯隊 (15%總資金)：10/01定錨、10/02 T+1開盤 NT$1,225.0 續抱，Rank #2 保護中'
@@ -7026,8 +7026,8 @@ function StockDashboard() {
                             entry_date: '2026-10-02',
                             first_entry_info: '首倉 2026-09-02 @ NT$ 5,955.0 (連任第2/4月・累漲 +38.45%)',
                             strategy_entry_price: 7895.00,
-                            strategy_current_price: 8245.00,
-                            price_date: '2026-10-14',
+                            strategy_current_price: 7670.00,
+                            price_date: '2026-10-15',
                             entry_fee_twd: 200,
                             ma60_stop_price: 5969.00,
                             stop_condition: '🅰️ 1號A梯隊 (15%總資金)：10/01定錨、10/02 T+1開盤 NT$7,895.0 續抱，Rank #3 保護中'
@@ -7061,8 +7061,8 @@ function StockDashboard() {
                             entry_date: '2026-09-23',
                             first_entry_info: '首倉 2026-08-25 @ NT$ 1,070.0 (連任第2/4月・累漲 +10.75%)',
                             strategy_entry_price: 1120.00,
-                            strategy_current_price: 1185.00,
-                            price_date: '2026-10-14',
+                            strategy_current_price: 1075.00,
+                            price_date: '2026-10-15',
                             entry_fee_twd: 200,
                             ma60_stop_price: 1026.05,
                             stop_condition: '🅱️ 22號B梯隊 (15%總資金)：09/22定錨、09/23 T+1開盤 NT$1,120.0 續抱，下次檢視日 10/22'
@@ -7078,8 +7078,8 @@ function StockDashboard() {
                             entry_date: '2026-09-23',
                             first_entry_info: '首倉 2026-08-25 @ NT$ 5,260.0 (連任第2/4月・累漲 +56.75%)',
                             strategy_entry_price: 8325.00,
-                            strategy_current_price: 8245.00,
-                            price_date: '2026-10-14',
+                            strategy_current_price: 7670.00,
+                            price_date: '2026-10-15',
                             entry_fee_twd: 200,
                             ma60_stop_price: 5969.00,
                             stop_condition: '🅱️ 22號B梯隊 (15%總資金)：09/22定錨、09/23 T+1開盤 NT$8,325.0 續抱，下次檢視日 10/22'
@@ -7182,6 +7182,20 @@ function StockDashboard() {
                               </div>
 
                               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <div style={{
+                                  background: 'rgba(56, 189, 248, 0.18)',
+                                  border: '1px solid rgba(56, 189, 248, 0.45)',
+                                  padding: '0.3rem 0.75rem',
+                                  borderRadius: '6px',
+                                  fontSize: '0.78rem',
+                                  color: '#38BDF8',
+                                  fontWeight: 'bold',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem'
+                                }}>
+                                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>2026-10-15</strong> (台股 10/15・美股 10/14)
+                                </div>
                                 <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
                                   參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> {isGlobal ? '(A隊 50萬 + B隊 50萬)' : '(70% 王者 + 15%×2 雙衛星)'}
                                 </div>
@@ -7247,7 +7261,8 @@ function StockDashboard() {
                                     <th>策略跑出開倉價 (T+1 Open)</th>
                                     <th>理論配置股數</th>
                                     <th>理論配置成本 (TWD)</th>
-                                    <th>策略最新收盤價 (更新日期)</th>
+                                    <th>策略最新收盤價</th>
+                                    <th>最新報價日期</th>
                                     <th>策略當前市值 (TWD)</th>
                                     <th>本期策略報酬</th>
                                     <th>季線保護 (60MA)</th>
@@ -7300,10 +7315,24 @@ function StockDashboard() {
                                         <td style={{ fontFamily: 'monospace', color: '#E2E8F0' }}>{pos.shares.toLocaleString()} 股</td>
                                         <td style={{ fontFamily: 'monospace', color: '#CBD5E1' }}>NT$ {pos.costTwd.toLocaleString()}</td>
                                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                                          <div>{currPrefix}{pos.current_price.toLocaleString()}</div>
-                                          <div style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 'normal', marginTop: '2px' }} title={`價格更新日期：${pos.price_date || '2026-10-14'}`}>
-                                            📅 {pos.price_date || '2026-10-14'}
-                                          </div>
+                                          {currPrefix}{pos.current_price.toLocaleString()}
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                          <span style={{
+                                            fontSize: '0.76rem',
+                                            color: '#FCD34D',
+                                            background: 'rgba(245, 158, 11, 0.15)',
+                                            border: '1px solid rgba(245, 158, 11, 0.35)',
+                                            padding: '2px 7px',
+                                            borderRadius: '4px',
+                                            fontFamily: 'monospace',
+                                            fontWeight: 'bold',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '3px'
+                                          }}>
+                                            📅 {pos.price_date || (pos.currency === 'USD' ? '2026-10-14' : '2026-10-15')}
+                                          </span>
                                         </td>
                                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8' }}>
                                           NT$ {pos.currentValTwd.toLocaleString()}
@@ -7329,16 +7358,16 @@ function StockDashboard() {
                                   {/* A+B 雙梯隊合併歸戶快速參考列 */}
                                   {isGlobal && (
                                     <tr style={{ background: 'rgba(16, 185, 129, 0.1)', borderTop: '2px solid rgba(16, 185, 129, 0.4)' }}>
-                                      <td colSpan={11} style={{ textAlign: 'left', padding: '0.65rem 0.85rem', fontSize: '0.78rem', color: '#A7F3D0' }}>
+                                      <td colSpan={12} style={{ textAlign: 'left', padding: '0.65rem 0.85rem', fontSize: '0.78rem', color: '#A7F3D0' }}>
                                         <strong>🔗 A+B 雙梯隊合併歸戶參考均價（100% 總資金 = A隊50% + B隊50%）：</strong>
                                         <span style={{ marginLeft: '0.6rem', color: '#FDE68A' }}>
                                           👑 <strong>MRNA (總配比 40%)</strong>：策略雙隊均價 <strong>US$ 186.83</strong>（首倉均價 US$ 147.45）→ 最新價 <strong>US$ 226.30 (+21.13%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/14)</span>
                                         </span>
                                         <span style={{ marginLeft: '0.8rem', color: '#BAE6FD' }}>
-                                          ｜ 🥈 <strong>3037.TW 欣興 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 1,172.50</strong>（首倉均價 NT$ 1,012.50）→ 最新價 <strong>NT$ 1,185.00 (+1.07%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/14)</span>
+                                          ｜ 🥈 <strong>3037.TW 欣興 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 1,172.50</strong>（首倉均價 NT$ 1,012.50）→ 最新價 <strong>NT$ 1,075.00 (-8.32%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/15)</span>
                                         </span>
                                         <span style={{ marginLeft: '0.8rem', color: '#DDD6FE' }}>
-                                          ｜ 🥉 <strong>3443.TW 創意 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 8,110.00</strong>（首倉均價 NT$ 5,607.50）→ 最新價 <strong>NT$ 8,245.00 (+1.66%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/14)</span>
+                                          ｜ 🥉 <strong>3443.TW 創意 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 8,110.00</strong>（首倉均價 NT$ 5,607.50）→ 最新價 <strong>NT$ 7,670.00 (-5.43%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/15)</span>
                                         </span>
                                       </td>
                                     </tr>
