@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../api';
 import defaultMarketMlData from '../data/defaultMarketMlData.json';
@@ -92,6 +92,8 @@ const stockFetch = async (url, opts = {}) => {
   }
 };
 
+const STORAGE_KEY = 'stock_screener_config';
+const PROMPT_KEY = 'stock_screener_prompt';
 
 // 簡單處理 **粗體**
 function parseBold(text) {
@@ -929,6 +931,7 @@ function StockDashboard() {
   const [dbBackfillStatus, setDbBackfillStatus] = useState(null);
   const [scraperLiveStatus, setScraperLiveStatus] = useState(null);
   const [showScraperLogs, setShowScraperLogs] = useState(false);
+  const [showScraperBanner, setShowScraperBanner] = useState(false);
   const [portfolioList, setPortfolioList] = useState([]);
   const [portfolioInput, setPortfolioInput] = useState({ stock_id: '', buy_price: '', notes: '', auto_analyze: true });
   const [geminiApiKey, setGeminiApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
@@ -3024,30 +3027,50 @@ function StockDashboard() {
 
   useEffect(() => {
     let interval = null;
+    let isMounted = true;
+
     if (activeTab === 'database' || activeTab === 'scraper') {
-      interval = setInterval(async () => {
-        try {
-          const res = await stockFetch('/api/scraper/status');
-          if (res.ok) {
-            const status = await res.json();
-            setScraperLiveStatus(prev => {
-              if (prev && prev.is_running && !status.is_running) {
-                // 任務剛完成，觸發資料表刷新
-                fetchDbStatus();
-                if (activeDbTable) {
-                  loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
+      // 僅在任務處於執行中 (is_running === true) 時，才啟用每 2 秒輪詢；其餘時間保持靜止避免無謂效能開銷
+      if (scraperLiveStatus && scraperLiveStatus.is_running) {
+        interval = setInterval(async () => {
+          try {
+            const res = await stockFetch('/api/scraper/status');
+            if (res.ok && isMounted) {
+              const status = await res.json();
+              setScraperLiveStatus(prev => {
+                // 若內容沒有變更，返回原物件避免巨型儀表板重新渲染
+                if (
+                  prev?.is_running === status.is_running &&
+                  prev?.progress_percent === status.progress_percent &&
+                  prev?.current_step === status.current_step &&
+                  prev?.status === status.status &&
+                  (prev?.logs?.length || 0) === (status?.logs?.length || 0)
+                ) {
+                  return prev;
                 }
+                return status;
+              });
+
+              if (!status.is_running) {
+                // 任務甫完成，延遲 300ms 刷新資料庫總量與最新資料
+                setTimeout(() => {
+                  fetchDbStatus();
+                  if (activeDbTable) {
+                    loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
+                  }
+                }, 300);
               }
-              return status;
-            });
-          }
-        } catch (e) {}
-      }, 1500);
+            }
+          } catch (e) {}
+        }, 2000);
+      }
     }
+
     return () => {
+      isMounted = false;
       if (interval) clearInterval(interval);
     };
-  }, [activeTab, activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir]);
+  }, [activeTab, scraperLiveStatus?.is_running, activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir]);
 
   const handleStockIdChange = (val) => {
     const cleaned = val.trim();
@@ -3947,6 +3970,7 @@ function StockDashboard() {
     setDbUpdatingTableId(tableId || 'global_daily');
     const targetDbName = 'tw_stock.db (本機主資料庫)';
     setDbActionBanner(`⏳ 正在啟動「${tableName || '最新市場資料'}」更新任務... 目標資料庫：${targetDbName}`);
+    setShowScraperBanner(true);
     
     try {
       const res = await stockFetch(`/api/scraper/${taskType || 'daily'}`, { method: 'POST' });
@@ -7853,7 +7877,7 @@ function StockDashboard() {
             </div>
 
             {/* 3. 即時爬蟲與資料庫同步進度看板 (清楚標明正在更新的資料庫、資料表與具體進度) */}
-            {(scraperLiveStatus && (scraperLiveStatus.is_running || scraperLiveStatus.status === 'success' || scraperLiveStatus.status === 'error')) && (
+            {(scraperLiveStatus && (scraperLiveStatus.is_running || (showScraperBanner && (scraperLiveStatus.status === 'success' || scraperLiveStatus.status === 'error')))) && (
               <div style={{
                 background: scraperLiveStatus.is_running 
                   ? 'linear-gradient(135deg, rgba(30, 58, 138, 0.45), rgba(15, 23, 42, 0.75))'
@@ -7933,7 +7957,10 @@ function StockDashboard() {
                     </button>
                     {!scraperLiveStatus.is_running && (
                       <button
-                        onClick={() => setScraperLiveStatus(null)}
+                        onClick={() => {
+                          setShowScraperBanner(false);
+                          setScraperLiveStatus(null);
+                        }}
                         style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '1.2rem', padding: '0 0.3rem' }}
                         title="關閉看板"
                       >×</button>
@@ -8210,7 +8237,7 @@ function StockDashboard() {
                           {dbIsRemoteLoaded ? '📁 tw_stock.db (本機 SQLite 全量主庫)' : '☁️ Supabase (雲端快照)'}
                         </span>
                         <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>
-                          資料表總容量：<strong style={{ color: '#34D399', fontFamily: 'monospace' }}>{dbTotalCount.toLocaleString()} 筆</strong>
+                          資料表總容量：<strong style={{ color: '#34D399', fontFamily: 'monospace' }}>{(Number(dbTotalCount) || 0).toLocaleString()} 筆</strong>
                         </span>
                       </div>
                     </div>
@@ -8321,11 +8348,11 @@ function StockDashboard() {
                 {/* 分頁導航控制器 (完整全量資料導覽) */}
                 <div className="db-pagination-bar">
                   <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-                    當前第 <strong style={{ color: '#FCD34D' }}>{dbPage}</strong> / <strong>{dbTotalPages.toLocaleString()}</strong> 頁
+                    當前第 <strong style={{ color: '#FCD34D' }}>{dbPage}</strong> / <strong>{(Number(dbTotalPages) || 1).toLocaleString()}</strong> 頁
                     <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>|</span>
-                    顯示第 <strong>{dbTotalCount > 0 ? (dbPage - 1) * dbPageSize + 1 : 0}</strong> ～ <strong>{Math.min(dbPage * dbPageSize, dbTotalCount).toLocaleString()}</strong> 筆
+                    顯示第 <strong>{dbTotalCount > 0 ? (dbPage - 1) * dbPageSize + 1 : 0}</strong> ～ <strong>{Math.min(dbPage * dbPageSize, Number(dbTotalCount) || 0).toLocaleString()}</strong> 筆
                     <span style={{ margin: '0 0.5rem', opacity: 0.5 }}>|</span>
-                    資料庫總數據量：<strong style={{ color: '#34D399', fontSize: '0.98rem' }}>{dbTotalCount.toLocaleString()}</strong> 筆
+                    資料庫總數據量：<strong style={{ color: '#34D399', fontSize: '0.98rem' }}>{(Number(dbTotalCount) || 0).toLocaleString()}</strong> 筆
                     {dbSearchQuery && <span style={{ color: '#60A5FA', marginLeft: '6px' }}>(已套用搜尋篩選)</span>}
                     {!dbIsRemoteLoaded && <span style={{ color: '#F59E0B', marginLeft: '6px' }}>(雲端快照模式：顯示前 100 筆樣本)</span>}
                   </div>
@@ -8405,6 +8432,7 @@ function StockDashboard() {
                       disabled={dbPage >= dbTotalPages || dbTableLoading}
                       title="最後一頁"
                     >
+                      末頁 ⏭
                     </button>
                   </div>
                 </div>
