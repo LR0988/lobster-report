@@ -25,10 +25,11 @@ const DEFAULT_POSITIONS = [
     currency: 'USD',
     shares: 54,
     entry_price: 186.61,
-    current_price: 213.74,
+    current_price: 226.30,
+    price_date: '2026-10-14',
     entry_date: '2026-10-01',
     entry_fee: 15,
-    stop_loss_price: 126.18,
+    stop_loss_price: 165.0,
     role: '👑 第1王者 (40%)',
     stop_condition: '大波段抱牢，SPY破年線才清倉'
   },
@@ -40,7 +41,8 @@ const DEFAULT_POSITIONS = [
     currency: 'TWD',
     shares: 236,
     entry_price: 1195.0,
-    current_price: 1180.0,
+    current_price: 1185.0,
+    price_date: '2026-10-14',
     entry_date: '2026-10-01',
     entry_fee: 400,
     stop_loss_price: 1026.38,
@@ -55,10 +57,11 @@ const DEFAULT_POSITIONS = [
     currency: 'TWD',
     shares: 35,
     entry_price: 8031.0,
-    current_price: 8095.0,
+    current_price: 8245.0,
+    price_date: '2026-10-14',
     entry_date: '2026-10-01',
     entry_fee: 400,
-    stop_loss_price: 5985.17,
+    stop_loss_price: 7150.0,
     role: '🥉 第3主力 (30%)',
     stop_condition: 'ASIC龍頭多頭強勁，每週一動態檢視'
   }
@@ -419,15 +422,16 @@ export default function GlobalSovereignDashboard() {
           cp.ticker === p.ticker || 
           (cp.ticker && p.ticker && cp.ticker.split('.')[0] === p.ticker.split('.')[0])
         );
-        if (matchPick && matchPick.price > 0 && p.current_price !== matchPick.price) {
+        const pickDate = matchPick?.price_date || data?.latest_data_date || '2026-10-14';
+        if (matchPick && matchPick.price > 0 && (p.current_price !== matchPick.price || p.price_date !== pickDate)) {
           changed = true;
-          return { ...p, current_price: matchPick.price };
+          return { ...p, current_price: matchPick.price, price_date: pickDate };
         }
         return p;
       });
       return changed ? next : prev;
     });
-  }, [currentPicks]);
+  }, [currentPicks, data?.latest_data_date]);
 
   // 1. 計算持股現值與整體統計
   const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
@@ -1789,7 +1793,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'center' }}>建倉日期</th>
                       <th style={{ textAlign: 'right' }}>持有股數</th>
                       <th style={{ textAlign: 'right' }}>成本均價</th>
-                      <th style={{ textAlign: 'right' }}>最新現價</th>
+                      <th style={{ textAlign: 'right' }}>最新現價 (更新日期)</th>
                       <th style={{ textAlign: 'right' }}>目前市值 (折合NT$)</th>
                       <th style={{ textAlign: 'right' }}>未實現損益</th>
                       <th style={{ textAlign: 'right' }}>佔總淨值%</th>
@@ -1879,7 +1883,10 @@ export default function GlobalSovereignDashboard() {
                             {curr}{pos.entry_price?.toLocaleString()}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            {curr}{curPrice?.toLocaleString()}
+                            <div>{curr}{curPrice?.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontWeight: 'normal', marginTop: '2px' }} title={`價格更新日期：${pos.price_date || pickMatch?.price_date || data?.latest_data_date || '2026-10-14'}`}>
+                              📅 {pos.price_date || pickMatch?.price_date || data?.latest_data_date || '2026-10-14'}
+                            </div>
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#67E8F9' }}>
                             NT$ {Math.round(valTwd).toLocaleString()}
@@ -2278,7 +2285,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'center', width: '115px' }}>順位與保護帶</th>
                       <th>標的名稱 (代碼 / 市場)</th>
                       <th style={{ textAlign: 'center' }}>單梯隊配比 (總資金佔比)</th>
-                      <th style={{ textAlign: 'right' }}>最新現價</th>
+                      <th style={{ textAlign: 'right' }}>最新現價 (更新日期)</th>
                       <th style={{ textAlign: 'right' }}>防守季線 (60MA)</th>
                       <th style={{ textAlign: 'right' }}>3M 短期爆發</th>
                       <th style={{ textAlign: 'right' }}>12M 長期主升</th>
@@ -2336,7 +2343,10 @@ export default function GlobalSovereignDashboard() {
                             )}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            {curr}{pick.price?.toLocaleString()}
+                            <div>{curr}{pick.price?.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontWeight: 'normal', marginTop: '2px' }} title={`價格更新日期：${pick.price_date || data?.latest_data_date || '2026-10-14'}`}>
+                              📅 {pick.price_date || data?.latest_data_date || '2026-10-14'}
+                            </div>
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
                             {curr}{pick.ma60?.toLocaleString()}

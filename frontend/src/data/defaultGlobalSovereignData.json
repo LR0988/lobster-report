@@ -79,7 +79,8 @@
       "is_active": true,
       "in_buffer_zone": true,
       "tenure_months": 1,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 2,
@@ -102,7 +103,8 @@
       "is_active": true,
       "in_buffer_zone": true,
       "tenure_months": 1,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 3,
@@ -125,7 +127,8 @@
       "is_active": true,
       "in_buffer_zone": true,
       "tenure_months": 1,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 4,
@@ -148,7 +151,8 @@
       "is_active": false,
       "in_buffer_zone": true,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 5,
@@ -171,7 +175,8 @@
       "is_active": false,
       "in_buffer_zone": true,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 6,
@@ -194,7 +199,8 @@
       "is_active": false,
       "in_buffer_zone": false,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 7,
@@ -217,7 +223,8 @@
       "is_active": false,
       "in_buffer_zone": false,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 8,
@@ -240,7 +247,8 @@
       "is_active": false,
       "in_buffer_zone": false,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 9,
@@ -263,7 +271,8 @@
       "is_active": false,
       "in_buffer_zone": false,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     },
     {
       "rank": 10,
@@ -286,7 +295,8 @@
       "is_active": false,
       "in_buffer_zone": false,
       "tenure_months": 0,
-      "max_tenure_months": 4
+      "max_tenure_months": 4,
+      "price_date": "2026-10-14"
     }
   ],
   "yearly_performance": [
