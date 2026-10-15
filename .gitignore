@@ -20,21 +20,32 @@
 *.csv
 *doe*.json
 *results*.json
+*result*.json
 *comparison*.json
 *experiment*.json
 *tranche*.json
+*predictions*.json
+*metrics*.json
+screener_settings.json
+research_notebooks/
+web-frontend/
 titan_trades.json
 titan_open_positions.json
 live_portfolio_state.json
 etf_0020_holdings.json
 pit_clean_verified.pkl
 *.pkl
+*.bak
+*.old_small
 
 # 資料庫與機器學習模型權重 (100% 留在本機)
 *.db
 *.joblib
 *.sqlite
 *.sqlite3
+venv/
+.venv/
+env/
 .Python
 build/
 develop-eggs/
