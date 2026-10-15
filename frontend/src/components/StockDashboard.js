@@ -3059,47 +3059,62 @@ function StockDashboard() {
     let isMounted = true;
 
     if (activeTab === 'database' || activeTab === 'scraper') {
-      // 僅在任務處於執行中 (is_running === true) 時，才啟用每 2 秒輪詢；其餘時間保持靜止避免無謂效能開銷
-      if (scraperLiveStatus && scraperLiveStatus.is_running) {
-        interval = setInterval(async () => {
-          try {
-            const res = await stockFetch('/api/scraper/status');
-            if (res.ok && isMounted) {
-              const status = await res.json();
-              setScraperLiveStatus(prev => {
-                // 若內容沒有變更，返回原物件避免巨型儀表板重新渲染
-                if (
-                  prev?.is_running === status.is_running &&
-                  prev?.progress_percent === status.progress_percent &&
-                  prev?.current_step === status.current_step &&
-                  prev?.status === status.status &&
-                  (prev?.logs?.length || 0) === (status?.logs?.length || 0)
-                ) {
-                  return prev;
-                }
-                return status;
-              });
-
-              if (!status.is_running) {
-                // 任務甫完成，延遲 300ms 刷新資料庫總量與最新資料
-                setTimeout(() => {
-                  fetchDbStatus();
-                  if (activeDbTable) {
-                    loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
-                  }
-                }, 300);
-              }
+      // 1. 切換至資料庫分頁時，立即向後端拉取一次最新爬蟲與同步狀態
+      const checkInitialStatus = async () => {
+        try {
+          const res = await stockFetch('/api/scraper/status');
+          if (res.ok && isMounted) {
+            const status = await res.json();
+            if (status.is_running || status.status === 'running') {
+              setShowScraperBanner(true);
             }
-          } catch (e) {}
-        }, 2000);
-      }
+            setScraperLiveStatus(status);
+          }
+        } catch (e) {}
+      };
+      checkInitialStatus();
+
+      // 2. 設定輪詢：若任務執行中或 Banner 開啟，以 1.5 秒密集輪詢；若閒置則以 8 秒輕量輪詢監聽
+      const pollFreq = (scraperLiveStatus?.is_running || showScraperBanner) ? 1500 : 8000;
+      interval = setInterval(async () => {
+        try {
+          const res = await stockFetch('/api/scraper/status');
+          if (res.ok && isMounted) {
+            const status = await res.json();
+            setScraperLiveStatus(prev => {
+              if (
+                prev?.is_running === status.is_running &&
+                prev?.progress_percent === status.progress_percent &&
+                prev?.current_step === status.current_step &&
+                prev?.status === status.status &&
+                (prev?.logs?.length || 0) === (status?.logs?.length || 0)
+              ) {
+                return prev;
+              }
+              return status;
+            });
+
+            if (status.is_running || status.status === 'running') {
+              setShowScraperBanner(true);
+            } else if (scraperLiveStatus?.is_running && !status.is_running) {
+              // 任務甫完成，延遲 300ms 刷新資料庫總量與最新資料
+              setTimeout(() => {
+                fetchDbStatus();
+                if (activeDbTable) {
+                  loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
+                }
+              }, 300);
+            }
+          }
+        } catch (e) {}
+      }, pollFreq);
     }
 
     return () => {
       isMounted = false;
       if (interval) clearInterval(interval);
     };
-  }, [activeTab, scraperLiveStatus?.is_running, activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir]);
+  }, [activeTab, scraperLiveStatus?.is_running, showScraperBanner, activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir]);
 
   const handleStockIdChange = (val) => {
     const cleaned = val.trim();
@@ -3512,36 +3527,54 @@ function StockDashboard() {
       setLoading(true);
       const taskLabel = taskType === 'daily' ? '每日股價與大盤' : '最新月營收';
       setScraperStatus(`⏳ 正在啟動「${taskLabel}」爬蟲任務...`);
+      setShowScraperBanner(true);
+      setScraperLiveStatus({
+        is_running: true,
+        task_type: taskType,
+        target_db: 'tw_stock.db (本機 SQLite 主資料庫)',
+        target_table: taskType === 'daily' ? 'daily_stock' : 'monthly_revenue',
+        target_table_name: taskLabel,
+        current_step: `🚀 正在連線啟動「${taskLabel}」爬蟲任務...`,
+        step_index: 1,
+        total_steps: 5,
+        progress_percent: 5,
+        status: 'running',
+        started_at: new Date().toLocaleTimeString(),
+        logs: [`► [${new Date().toLocaleTimeString()}] 收到爬蟲啟動指令...`]
+      });
       
       let backendStarted = false;
       try {
         const res = await stockFetch(`/api/scraper/${taskType}`, { method: 'POST' });
         if (res.ok) {
           backendStarted = true;
+          await fetchScraperLiveStatus();
         }
       } catch (e) {
         console.warn('本地後端爬蟲 API 呼叫跳過，轉由雲端派工:', e);
       }
 
       let cloudDispatched = false;
-      try {
-        const createRes = await supabaseFetch('/stock_screener_jobs', {
-          method: 'POST',
-          headers: { 'Prefer': 'return=representation' },
-          body: JSON.stringify({
-            username: user?.username || 'hotpotlu',
-            status: 'pending',
-            config: {
-              job_type: 'scraper',
-              task_type: taskType
-            }
-          })
-        });
-        if (createRes.ok) {
-          cloudDispatched = true;
+      if (!backendStarted) {
+        try {
+          const createRes = await supabaseFetch('/stock_screener_jobs', {
+            method: 'POST',
+            headers: { 'Prefer': 'return=representation' },
+            body: JSON.stringify({
+              username: user?.username || 'hotpotlu',
+              status: 'pending',
+              config: {
+                job_type: 'scraper',
+                task_type: taskType
+              }
+            })
+          });
+          if (createRes.ok) {
+            cloudDispatched = true;
+          }
+        } catch (e) {
+          console.warn('雲端任務派工警告:', e);
         }
-      } catch (e) {
-        console.warn('雲端任務派工警告:', e);
       }
 
       if (backendStarted) {
@@ -3996,16 +4029,34 @@ function StockDashboard() {
   };
 
   const handleTriggerDbScraper = async (taskType, tableName, tableId) => {
-    setDbUpdatingTableId(tableId || 'global_daily');
+    const actualTaskType = taskType || 'daily';
+    const displayTableName = tableName || '市場資料';
     const targetDbName = 'tw_stock.db (本機主資料庫)';
-    setDbActionBanner(`⏳ 正在啟動「${tableName || '最新市場資料'}」更新任務... 目標資料庫：${targetDbName}`);
+
+    setDbUpdatingTableId(tableId || 'global_daily');
     setShowScraperBanner(true);
+    // 立即將狀態設為執行中，確保前端毫秒級即時跳出進度看板，不漏掉任何細節
+    setScraperLiveStatus({
+      is_running: true,
+      task_type: actualTaskType,
+      target_db: targetDbName,
+      target_table: tableId || actualTaskType,
+      target_table_name: displayTableName,
+      current_step: `🚀 正在連線啟動「${displayTableName}」更新作業...`,
+      step_index: 1,
+      total_steps: 5,
+      progress_percent: 5,
+      status: 'running',
+      started_at: new Date().toLocaleTimeString(),
+      logs: [`► [${new Date().toLocaleTimeString()}] 收到更新指令，準備執行「${displayTableName}」...`]
+    });
+    setDbActionBanner(`⏳ 正在啟動「${displayTableName}」更新任務... 目標資料庫：${targetDbName}`);
     
     try {
-      const res = await stockFetch(`/api/scraper/${taskType || 'daily'}`, { method: 'POST' });
+      const res = await stockFetch(`/api/scraper/${actualTaskType}`, { method: 'POST' });
       if (res.ok) {
         const json = await res.json();
-        setDbActionBanner(`🚀 已成功啟動「${json.target_table_name || tableName}」更新作業！正在更新資料庫：${json.target_db || targetDbName}`);
+        setDbActionBanner(`🚀 已成功啟動「${json.target_table_name || displayTableName}」更新作業！正在更新資料庫：${json.target_db || targetDbName}`);
       }
       await fetchScraperLiveStatus();
     } catch (err) {
@@ -4017,12 +4068,36 @@ function StockDashboard() {
           body: JSON.stringify({
             username: user?.username || 'hotpotlu',
             status: 'pending',
-            config: { job_type: 'scraper', task_type: taskType || 'daily' }
+            config: { job_type: 'scraper', task_type: actualTaskType }
           })
         });
-        setDbActionBanner(`✅「${tableName || '最新市場資料'}」已派送至雲端 Worker 任務隊列，正在排程更新！`);
+        setDbActionBanner(`✅「${displayTableName}」已派送至雲端 Worker 任務隊列，正在排程更新！`);
+        setScraperLiveStatus({
+          is_running: true,
+          task_type: actualTaskType,
+          target_db: 'Supabase 雲端任務隊列 -> 本機 tw_stock.db',
+          target_table: tableId || actualTaskType,
+          target_table_name: displayTableName,
+          current_step: `☁️ 任務已排入雲端隊列，等待本機 Worker 接收並執行...`,
+          step_index: 1,
+          total_steps: 3,
+          progress_percent: 25,
+          status: 'running',
+          started_at: new Date().toLocaleTimeString(),
+          logs: [
+            `► [${new Date().toLocaleTimeString()}] 任務指令已下發至 Supabase stock_screener_jobs`,
+            `► 本機後端將自動排程處理並將最新資料同步回雲端快照`
+          ]
+        });
       } catch (cloudErr) {
         setDbActionBanner(`❌ 啟動更新失敗: ${err.message}`);
+        setScraperLiveStatus(prev => ({
+          ...(prev || {}),
+          is_running: false,
+          status: 'error',
+          current_step: `❌ 啟動失敗: ${err.message}`,
+          logs: [...(prev?.logs || []), `❌ 錯誤: ${err.message}`]
+        }));
       }
     } finally {
       setTimeout(() => {
@@ -7944,7 +8019,7 @@ function StockDashboard() {
             </div>
 
             {/* 3. 即時爬蟲與資料庫同步進度看板 (清楚標明正在更新的資料庫、資料表與具體進度) */}
-            {(scraperLiveStatus && (scraperLiveStatus.is_running || (showScraperBanner && (scraperLiveStatus.status === 'success' || scraperLiveStatus.status === 'error')))) && (
+            {(scraperLiveStatus && (scraperLiveStatus.is_running || showScraperBanner || scraperLiveStatus.status === 'running' || scraperLiveStatus.status === 'success' || scraperLiveStatus.status === 'error')) && (
               <div style={{
                 background: scraperLiveStatus.is_running 
                   ? 'linear-gradient(135deg, rgba(30, 58, 138, 0.45), rgba(15, 23, 42, 0.75))'
@@ -8022,7 +8097,7 @@ function StockDashboard() {
                     >
                       {showScraperLogs ? '▲ 收起詳細日誌' : `▼ 展開動作紀錄 (${scraperLiveStatus.logs?.length || 0})`}
                     </button>
-                    {!scraperLiveStatus.is_running && (
+                    {(!scraperLiveStatus.is_running && scraperLiveStatus.status !== 'running') && (
                       <button
                         onClick={() => {
                           setShowScraperBanner(false);
