@@ -95,3 +95,6 @@ market_ml_prediction.json
 .env*.local
 *.log
 backfill_twse_progress.json
+
+*.db-shm
+*.db-wal
