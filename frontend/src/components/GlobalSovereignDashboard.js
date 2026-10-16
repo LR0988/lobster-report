@@ -25,8 +25,8 @@ const DEFAULT_POSITIONS = [
     currency: 'USD',
     shares: 54,
     entry_price: 186.61,
-    current_price: 226.30,
-    price_date: '2026-10-14',
+    current_price: 236.50,
+    price_date: '2026-10-15',
     entry_date: '2026-10-01',
     entry_fee: 15,
     stop_loss_price: 165.0,
@@ -41,8 +41,8 @@ const DEFAULT_POSITIONS = [
     currency: 'TWD',
     shares: 236,
     entry_price: 1195.0,
-    current_price: 1075.0,
-    price_date: '2026-10-15',
+    current_price: 1090.0,
+    price_date: '2026-10-16',
     entry_date: '2026-10-01',
     entry_fee: 400,
     stop_loss_price: 1026.38,
@@ -57,8 +57,8 @@ const DEFAULT_POSITIONS = [
     currency: 'TWD',
     shares: 35,
     entry_price: 8031.0,
-    current_price: 7670.0,
-    price_date: '2026-10-15',
+    current_price: 7480.0,
+    price_date: '2026-10-16',
     entry_date: '2026-10-01',
     entry_fee: 400,
     stop_loss_price: 7150.0,
@@ -393,10 +393,26 @@ export default function GlobalSovereignDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新全球主權演算數據
-      const json = await apiGetGlobalSovereignDashboard();
+      // 1. 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新全球主權演算數據與實盤報價
+      const [json, portRes] = await Promise.all([
+        apiGetGlobalSovereignDashboard(),
+        apiGetGlobalTitanPortfolio(currentUsername).catch(() => null)
+      ]);
       if (json && json.status === 'ok') {
         setData(json);
+      }
+      if (portRes && portRes.status === 'ok' && Array.isArray(portRes.positions) && portRes.positions.length > 0) {
+        setUserPositions(prev => prev.map(p => {
+          const matchLive = portRes.positions.find(lp => lp.ticker === p.ticker || (lp.ticker && p.ticker && lp.ticker.split('.')[0] === p.ticker.split('.')[0]));
+          if (matchLive && matchLive.current_price > 0) {
+            return {
+              ...p,
+              current_price: matchLive.current_price,
+              price_date: matchLive.price_date || p.price_date
+            };
+          }
+          return p;
+        }));
       }
     } catch (err) {
       console.warn('無法從筆電資料庫獲取最新全球主權數據，使用備援展示:', err);
@@ -412,28 +428,34 @@ export default function GlobalSovereignDashboard() {
   const macro = data?.macro_status || {};
   const currentPicks = data?.current_picks || [];
   const yearly = data?.yearly_performance || [];
+  const shortTwDate = (data?.latest_tw_date || data?.latest_data_date || '2026-10-16').slice(5).replace('-', '/');
+  const shortUsDate = (data?.latest_us_date || '2026-10-15').slice(5).replace('-', '/');
 
-  // 自動將「當前持股部位」的最新現價 (current_price)，依據模型最新演算 currentPicks 行情動態同步對齊！
-  // 注意：只更新 current_price，嚴格保留使用者的進場成本 entry_price、股數與進場時間！
+  // 自動將「當前持股部位」的最新現價 (current_price) 與報價日期 (price_date)，依據資料庫最新 live_prices 與 currentPicks 行情動態同步對齊！
+  // 注意：只更新 current_price 與 price_date，嚴格保留使用者的進場成本 entry_price、股數與進場時間！
   useEffect(() => {
-    if (!currentPicks || currentPicks.length === 0) return;
+    const liveMap = data?.live_prices || {};
+    if ((!currentPicks || currentPicks.length === 0) && Object.keys(liveMap).length === 0) return;
     setUserPositions(prev => {
       let changed = false;
       const next = prev.map(p => {
+        const baseTicker = p.ticker ? p.ticker.split('.')[0] : '';
+        const liveItem = liveMap[p.ticker] || liveMap[baseTicker];
         const matchPick = currentPicks.find(cp => 
           cp.ticker === p.ticker || 
-          (cp.ticker && p.ticker && cp.ticker.split('.')[0] === p.ticker.split('.')[0])
+          (cp.ticker && p.ticker && cp.ticker.split('.')[0] === baseTicker)
         );
-        const pickDate = matchPick?.price_date || (p.currency === 'USD' ? '2026-10-14' : '2026-10-15');
-        if (matchPick && matchPick.price > 0 && (p.current_price !== matchPick.price || p.price_date !== pickDate)) {
+        const latestPx = liveItem?.price || matchPick?.price;
+        const pickDate = liveItem?.price_date || matchPick?.price_date || (p.currency === 'USD' ? (data?.latest_us_date || '2026-10-15') : (data?.latest_tw_date || '2026-10-16'));
+        if (latestPx && latestPx > 0 && (p.current_price !== latestPx || p.price_date !== pickDate)) {
           changed = true;
-          return { ...p, current_price: matchPick.price, price_date: pickDate };
+          return { ...p, current_price: latestPx, price_date: pickDate };
         }
         return p;
       });
       return changed ? next : prev;
     });
-  }, [currentPicks, data?.latest_data_date]);
+  }, [currentPicks, data?.latest_data_date, data?.live_prices]);
 
   // 1. 計算持股現值與整體統計
   const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
@@ -1449,7 +1471,7 @@ export default function GlobalSovereignDashboard() {
               alignItems: 'center',
               gap: '0.3rem'
             }}>
-              🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-15'}</strong> (台股 10/15・美股 10/14)
+              🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
             </span>
             <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
               🚀 雙梯隊進攻版 (1號+22號交錯 × 40/30/30階梯 × 45/35/20敏銳動能 × 爆量滯漲過濾)
@@ -1689,7 +1711,7 @@ export default function GlobalSovereignDashboard() {
                   alignItems: 'center',
                   gap: '0.3rem'
                 }}>
-                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-15'}</strong> (台股 10/15・美股 10/14)
+                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.1)', padding: '0.28rem 0.6rem', borderRadius: '4px' }}>
                   當前持股市值合計: <strong>NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
@@ -2319,7 +2341,7 @@ export default function GlobalSovereignDashboard() {
                   </p>
                 </div>
                 <span style={{ fontSize: '0.78rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                  🗓️ 最新行情基準日：{data?.latest_data_date || '2026-10-15'} (台股 10/15・美股 10/14)
+                  🗓️ 最新行情基準日：{data?.latest_data_date || '2026-10-16'} (台股 {shortTwDate}・美股 {shortUsDate})
                 </span>
               </div>
 

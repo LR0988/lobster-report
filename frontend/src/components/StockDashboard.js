@@ -1114,6 +1114,7 @@ function StockDashboard() {
 
   // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
   const [marketMlData, setMarketMlData] = useState(() => defaultMarketMlData);
+  const [globalSovereignLive, setGlobalSovereignLive] = useState(() => defaultGlobalSovereignData);
   const [marketMlBtData, setMarketMlBtData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
   const [fetchingMarketMlBt, setFetchingMarketMlBt] = useState(false);
@@ -2194,6 +2195,26 @@ function StockDashboard() {
   const fetchMarketMlData = async () => {
     try {
       setFetchingMarketMl(true);
+      // 同步拉取全球泰坦最新實盤價格 (直接連線資料庫 API 或 Supabase 快取)
+      try {
+        const gsRes = await stockFetch('/api/global_sovereign/dashboard', { timeout: 6000 });
+        if (gsRes && gsRes.ok) {
+          const gsJson = await gsRes.json();
+          if (gsJson && gsJson.status === 'ok') {
+            setGlobalSovereignLive(gsJson);
+          }
+        } else {
+          const sbGsRes = await supabaseFetch('/stock_ml_cache?model_type=eq.global_sovereign_dashboard&select=payload');
+          if (sbGsRes.ok) {
+            const sbRows = await sbGsRes.json();
+            if (sbRows && sbRows.length > 0 && sbRows[0].payload) {
+              const pGs = typeof sbRows[0].payload === 'string' ? JSON.parse(sbRows[0].payload) : sbRows[0].payload;
+              if (pGs && pGs.status === 'ok') setGlobalSovereignLive(pGs);
+            }
+          }
+        }
+      } catch (gsErr) {}
+
       const res = await supabaseFetch('/stock_ml_cache?model_type=eq.taiex_macro&select=payload,updated_at');
       if (res.ok) {
         const rows = await res.json();
@@ -3097,9 +3118,11 @@ function StockDashboard() {
             if (status.is_running || status.status === 'running') {
               setShowScraperBanner(true);
             } else if (scraperLiveStatus?.is_running && !status.is_running) {
-              // 任務甫完成，延遲 300ms 刷新資料庫總量與最新資料
+              // 任務甫完成，延遲 300ms 刷新資料庫總量、全球泰坦與最新資料
               setTimeout(() => {
                 fetchDbStatus();
+                fetchMarketMlData();
+                fetchPortfolio();
                 if (activeDbTable) {
                   loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
                 }
@@ -5493,15 +5516,25 @@ function StockDashboard() {
                       }
                     });
 
-                    // 當前持有中部位之買進標注點位 (100% 純策略回測產出價格，不混入現貨個人帳本)
+                    // 當前持有中部位之買進標注點位 (100% 純策略回測產出價格，結合資料庫最新收盤價與日期)
+                    const gsLiveMap = globalSovereignLive?.live_prices || {};
+                    const mrnaLiveP = gsLiveMap['MRNA']?.price || 236.50;
+                    const mrnaLiveD = gsLiveMap['MRNA']?.price_date || '2026-10-15';
+                    const mrnaMa60 = gsLiveMap['MRNA']?.ma60 || 136.44;
+                    const u3037LiveP = gsLiveMap['3037.TW']?.price || 1090.0;
+                    const u3037LiveD = gsLiveMap['3037.TW']?.price_date || '2026-10-16';
+                    const u3037Ma60 = gsLiveMap['3037.TW']?.ma60 || 1035.58;
+                    const c3443LiveP = gsLiveMap['3443.TW']?.price || 7480.0;
+                    const c3443LiveD = gsLiveMap['3443.TW']?.price_date || '2026-10-16';
+                    const c3443Ma60 = gsLiveMap['3443.TW']?.ma60 || 6102.75;
                     const openPosList = isGlobal
                       ? [
-                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅰️ A梯隊(1號) 王者(20%)', weight_pct: 20, entry_date: '20261002', entry_price: 190.26, latest_price: 226.3, price_date: '2026-10-14', unrealized_return_pct: 18.94, holding_days: 10, ma60_stop_price: 128.94, dist_to_stop_pct: 75.5, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 US$151.40)' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 1225.0, latest_price: 1075.0, price_date: '2026-10-15', unrealized_return_pct: -12.24, holding_days: 10, ma60_stop_price: 1026.05, dist_to_stop_pct: 4.8, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$955.0)' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 7895.0, latest_price: 7670.0, price_date: '2026-10-15', unrealized_return_pct: -2.85, holding_days: 10, ma60_stop_price: 5969.00, dist_to_stop_pct: 28.5, stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$5,955.0)' },
-                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅱️ B梯隊(22號) 王者(20%)', weight_pct: 20, entry_date: '20260923', entry_price: 183.40, latest_price: 226.3, price_date: '2026-10-14', unrealized_return_pct: 23.39, holding_days: 19, ma60_stop_price: 128.94, dist_to_stop_pct: 75.5, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 US$143.50)' },
-                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 1120.0, latest_price: 1075.0, price_date: '2026-10-15', unrealized_return_pct: -4.02, holding_days: 19, ma60_stop_price: 1026.05, dist_to_stop_pct: 4.8, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$1,070.0)' },
-                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 8325.0, latest_price: 7670.0, price_date: '2026-10-15', unrealized_return_pct: -7.87, holding_days: 19, ma60_stop_price: 5969.00, dist_to_stop_pct: 28.5, stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$5,260.0)' }
+                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅰️ A梯隊(1號) 王者(20%)', weight_pct: 20, entry_date: '20261002', entry_price: 190.26, latest_price: mrnaLiveP, price_date: mrnaLiveD, unrealized_return_pct: Number(((mrnaLiveP - 190.26) / 190.26 * 100).toFixed(2)), holding_days: 11, ma60_stop_price: mrnaMa60, dist_to_stop_pct: Number(((mrnaLiveP - mrnaMa60) / mrnaMa60 * 100).toFixed(1)), stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 US$151.40)' },
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 1225.0, latest_price: u3037LiveP, price_date: u3037LiveD, unrealized_return_pct: Number(((u3037LiveP - 1225.0) / 1225.0 * 100).toFixed(2)), holding_days: 11, ma60_stop_price: u3037Ma60, dist_to_stop_pct: Number(((u3037LiveP - u3037Ma60) / u3037Ma60 * 100).toFixed(1)), stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$955.0)' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅰️ A梯隊(1號) 主力(15%)', weight_pct: 15, entry_date: '20261002', entry_price: 7895.0, latest_price: c3443LiveP, price_date: c3443LiveD, unrealized_return_pct: Number(((c3443LiveP - 7895.0) / 7895.0 * 100).toFixed(2)), holding_days: 11, ma60_stop_price: c3443Ma60, dist_to_stop_pct: Number(((c3443LiveP - c3443Ma60) / c3443Ma60 * 100).toFixed(1)), stop_condition: '🅰️ A梯隊 10/02 T+1開盤價續抱 (首倉 09/02 NT$5,955.0)' },
+                          { stock_id: 'MRNA', stock_name: '莫德納 (Moderna)', role: '🅱️ B梯隊(22號) 王者(20%)', weight_pct: 20, entry_date: '20260923', entry_price: 183.40, latest_price: mrnaLiveP, price_date: mrnaLiveD, unrealized_return_pct: Number(((mrnaLiveP - 183.40) / 183.40 * 100).toFixed(2)), holding_days: 20, ma60_stop_price: mrnaMa60, dist_to_stop_pct: Number(((mrnaLiveP - mrnaMa60) / mrnaMa60 * 100).toFixed(1)), stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 US$143.50)' },
+                          { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 1120.0, latest_price: u3037LiveP, price_date: u3037LiveD, unrealized_return_pct: Number(((u3037LiveP - 1120.0) / 1120.0 * 100).toFixed(2)), holding_days: 20, ma60_stop_price: u3037Ma60, dist_to_stop_pct: Number(((u3037LiveP - u3037Ma60) / u3037Ma60 * 100).toFixed(1)), stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$1,070.0)' },
+                          { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 8325.0, latest_price: c3443LiveP, price_date: c3443LiveD, unrealized_return_pct: Number(((c3443LiveP - 8325.0) / 8325.0 * 100).toFixed(2)), holding_days: 20, ma60_stop_price: c3443Ma60, dist_to_stop_pct: Number(((c3443LiveP - c3443Ma60) / c3443Ma60 * 100).toFixed(1)), stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$5,260.0)' }
                         ]
                       : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
 
@@ -7052,8 +7085,20 @@ function StockDashboard() {
                         const isGlobal = activeModelKey === 'global_liquid_titan_a';
                         const fx = 32.5;
                         const totalDeposit = 1000000;
+                        const gsLiveMap = globalSovereignLive?.live_prices || {};
+                        const mrnaLiveP = gsLiveMap['MRNA']?.price || 236.50;
+                        const mrnaLiveD = gsLiveMap['MRNA']?.price_date || '2026-10-15';
+                        const mrnaMa60 = gsLiveMap['MRNA']?.ma60 || 136.44;
+                        const u3037LiveP = gsLiveMap['3037.TW']?.price || 1090.00;
+                        const u3037LiveD = gsLiveMap['3037.TW']?.price_date || '2026-10-16';
+                        const u3037Ma60 = gsLiveMap['3037.TW']?.ma60 || 1035.58;
+                        const c3443LiveP = gsLiveMap['3443.TW']?.price || 7480.00;
+                        const c3443LiveD = gsLiveMap['3443.TW']?.price_date || '2026-10-16';
+                        const c3443Ma60 = gsLiveMap['3443.TW']?.ma60 || 6102.75;
+                        const latestTwShort = (globalSovereignLive?.latest_tw_date || u3037LiveD || '2026-10-16').slice(5).replace('-', '/');
+                        const latestUsShort = (globalSovereignLive?.latest_us_date || mrnaLiveD || '2026-10-15').slice(5).replace('-', '/');
 
-                        // 100% 純策略回測引擎產出之標準持倉 (不讀取任何現貨個人帳本 localStorage)
+                        // 100% 純策略回測引擎產出之標準持倉 (不讀取任何現貨個人帳本 localStorage，最新價直接連資料庫)
                         const baseConfig = isGlobal ? [
                           // 🅰️ A梯隊 (每月 1 號定錨 -> 10/02 T+1開盤價建倉，佔總資金 50%：20% / 15% / 15%)
                           {
@@ -7065,12 +7110,12 @@ function StockDashboard() {
                             currency: 'USD',
                             signal_date: '2026-10-01',
                             entry_date: '2026-10-02',
-                            first_entry_info: '首倉 2026-09-02 @ US$ 151.40 (連任第2/4月・累漲 +49.47%)',
+                            first_entry_info: `首倉 2026-09-02 @ US$ 151.40 (連任第2/4月・累漲 +${((mrnaLiveP - 151.40) / 151.40 * 100).toFixed(2)}%)`,
                             strategy_entry_price: 190.26,
-                            strategy_current_price: 226.30,
-                            price_date: '2026-10-14',
+                            strategy_current_price: mrnaLiveP,
+                            price_date: mrnaLiveD,
                             entry_fee_twd: 15,
-                            ma60_stop_price: 132.70,
+                            ma60_stop_price: mrnaMa60,
                             stop_condition: '🅰️ 1號A梯隊 (20%總資金)：10/01定錨、10/02 T+1開盤 US$190.26 續抱，Rank #1 正選保護中'
                           },
                           {
@@ -7082,12 +7127,12 @@ function StockDashboard() {
                             currency: 'TWD',
                             signal_date: '2026-10-01',
                             entry_date: '2026-10-02',
-                            first_entry_info: '首倉 2026-09-02 @ NT$ 955.0 (連任第2/4月・累漲 +24.08%)',
+                            first_entry_info: `首倉 2026-09-02 @ NT$ 955.0 (連任第2/4月・累漲 +${((u3037LiveP - 955.0) / 955.0 * 100).toFixed(2)}%)`,
                             strategy_entry_price: 1225.00,
-                            strategy_current_price: 1075.00,
-                            price_date: '2026-10-15',
+                            strategy_current_price: u3037LiveP,
+                            price_date: u3037LiveD,
                             entry_fee_twd: 200,
-                            ma60_stop_price: 1026.05,
+                            ma60_stop_price: u3037Ma60,
                             stop_condition: '🅰️ 1號A梯隊 (15%總資金)：10/01定錨、10/02 T+1開盤 NT$1,225.0 續抱，Rank #2 保護中'
                           },
                           {
@@ -7099,12 +7144,12 @@ function StockDashboard() {
                             currency: 'TWD',
                             signal_date: '2026-10-01',
                             entry_date: '2026-10-02',
-                            first_entry_info: '首倉 2026-09-02 @ NT$ 5,955.0 (連任第2/4月・累漲 +38.45%)',
+                            first_entry_info: `首倉 2026-09-02 @ NT$ 5,955.0 (連任第2/4月・累漲 +${((c3443LiveP - 5955.0) / 5955.0 * 100).toFixed(2)}%)`,
                             strategy_entry_price: 7895.00,
-                            strategy_current_price: 7670.00,
-                            price_date: '2026-10-15',
+                            strategy_current_price: c3443LiveP,
+                            price_date: c3443LiveD,
                             entry_fee_twd: 200,
-                            ma60_stop_price: 5969.00,
+                            ma60_stop_price: c3443Ma60,
                             stop_condition: '🅰️ 1號A梯隊 (15%總資金)：10/01定錨、10/02 T+1開盤 NT$7,895.0 續抱，Rank #3 保護中'
                           },
                           // 🅱️ B梯隊 (每月 22 號定錨 -> 09/23 T+1開盤價建倉，佔總資金 50%：20% / 15% / 15%)
@@ -7117,12 +7162,12 @@ function StockDashboard() {
                             currency: 'USD',
                             signal_date: '2026-09-22',
                             entry_date: '2026-09-23',
-                            first_entry_info: '首倉 2026-08-25 @ US$ 143.50 (連任第2/4月・累漲 +57.70%)',
+                            first_entry_info: `首倉 2026-08-25 @ US$ 143.50 (連任第2/4月・累漲 +${((mrnaLiveP - 143.50) / 143.50 * 100).toFixed(2)}%)`,
                             strategy_entry_price: 183.40,
-                            strategy_current_price: 226.30,
-                            price_date: '2026-10-14',
+                            strategy_current_price: mrnaLiveP,
+                            price_date: mrnaLiveD,
                             entry_fee_twd: 15,
-                            ma60_stop_price: 132.70,
+                            ma60_stop_price: mrnaMa60,
                             stop_condition: '🅱️ 22號B梯隊 (20%總資金)：09/22定錨、09/23 T+1開盤 US$183.40 續抱，下次檢視日 10/22'
                           },
                           {
@@ -7134,12 +7179,12 @@ function StockDashboard() {
                             currency: 'TWD',
                             signal_date: '2026-09-22',
                             entry_date: '2026-09-23',
-                            first_entry_info: '首倉 2026-08-25 @ NT$ 1,070.0 (連任第2/4月・累漲 +10.75%)',
+                            first_entry_info: `首倉 2026-08-25 @ NT$ 1,070.0 (連任第2/4月・累漲 +${((u3037LiveP - 1070.0) / 1070.0 * 100).toFixed(2)}%)`,
                             strategy_entry_price: 1120.00,
-                            strategy_current_price: 1075.00,
-                            price_date: '2026-10-15',
+                            strategy_current_price: u3037LiveP,
+                            price_date: u3037LiveD,
                             entry_fee_twd: 200,
-                            ma60_stop_price: 1026.05,
+                            ma60_stop_price: u3037Ma60,
                             stop_condition: '🅱️ 22號B梯隊 (15%總資金)：09/22定錨、09/23 T+1開盤 NT$1,120.0 續抱，下次檢視日 10/22'
                           },
                           {
@@ -7151,32 +7196,36 @@ function StockDashboard() {
                             currency: 'TWD',
                             signal_date: '2026-09-22',
                             entry_date: '2026-09-23',
-                            first_entry_info: '首倉 2026-08-25 @ NT$ 5,260.0 (連任第2/4月・累漲 +56.75%)',
+                            first_entry_info: `首倉 2026-08-25 @ NT$ 5,260.0 (連任第2/4月・累漲 +${((c3443LiveP - 5260.0) / 5260.0 * 100).toFixed(2)}%)`,
                             strategy_entry_price: 8325.00,
-                            strategy_current_price: 7670.00,
-                            price_date: '2026-10-15',
+                            strategy_current_price: c3443LiveP,
+                            price_date: c3443LiveD,
                             entry_fee_twd: 200,
-                            ma60_stop_price: 5969.00,
+                            ma60_stop_price: c3443Ma60,
                             stop_condition: '🅱️ 22號B梯隊 (15%總資金)：09/22定錨、09/23 T+1開盤 NT$8,325.0 續抱，下次檢視日 10/22'
                           }
                         ] : (
                           // 純台股泰坦等其他模型部位 (100% 採用策略原始數值，不讀取個人現貨帳本)
-                          (activeModeData?.open_positions || selectedModelDetail?.open_positions || bt.open_positions || []).map((p, idx) => ({
-                            stock_id: p.stock_id,
-                            stock_name: p.stock_name,
-                            tranche_badge: p.tranche || '標準單梯隊',
-                            role: p.role || `持股 #${idx + 1}`,
-                            target_pct: (p.target_weight_pct || p.weight_pct || 25) / 100,
-                            currency: p.currency || 'TWD',
-                            signal_date: p.signal_date || p.entry_date || '2026-09-24',
-                            entry_date: p.entry_date || '2026-09-24',
-                            first_entry_info: null,
-                            strategy_entry_price: p.entry_price || p.current_price,
-                            strategy_current_price: p.current_price || p.latest_price || p.entry_price,
-                            entry_fee_twd: 200,
-                            ma60_stop_price: p.ma60_stop_price || p.stop_loss_ma60 || (p.entry_price * 0.9),
-                            stop_condition: p.stop_condition || '跌破季線 60MA 停損出清'
-                          }))
+                          (activeModeData?.open_positions || selectedModelDetail?.open_positions || bt.open_positions || []).map((p, idx) => {
+                            const twLiveObj = gsLiveMap[`${p.stock_id}.TW`] || gsLiveMap[p.stock_id];
+                            return {
+                              stock_id: p.stock_id,
+                              stock_name: p.stock_name,
+                              tranche_badge: p.tranche || '標準單梯隊',
+                              role: p.role || `持股 #${idx + 1}`,
+                              target_pct: (p.target_weight_pct || p.weight_pct || 25) / 100,
+                              currency: p.currency || 'TWD',
+                              signal_date: p.signal_date || p.entry_date || '2026-09-24',
+                              entry_date: p.entry_date || '2026-09-24',
+                              first_entry_info: null,
+                              strategy_entry_price: p.entry_price || p.current_price,
+                              strategy_current_price: twLiveObj?.price || p.current_price || p.latest_price || p.entry_price,
+                              price_date: twLiveObj?.price_date || p.price_date || (globalSovereignLive?.latest_tw_date || '2026-10-16'),
+                              entry_fee_twd: 200,
+                              ma60_stop_price: twLiveObj?.ma60 || p.ma60_stop_price || p.stop_loss_ma60 || (p.entry_price * 0.9),
+                              stop_condition: p.stop_condition || '跌破季線 60MA 停損出清'
+                            };
+                          })
                         );
 
                         if (!baseConfig || baseConfig.length === 0) return null;
@@ -7269,7 +7318,7 @@ function StockDashboard() {
                                   alignItems: 'center',
                                   gap: '0.3rem'
                                 }}>
-                                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>2026-10-15</strong> (台股 10/15・美股 10/14)
+                                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{globalSovereignLive?.latest_data_date || '2026-10-16'}</strong> (台股 {latestTwShort}・美股 {latestUsShort})
                                 </div>
                                 <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
                                   參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> {isGlobal ? '(A隊 50萬 + B隊 50萬)' : '(70% 王者 + 15%×2 雙衛星)'}
@@ -7406,7 +7455,7 @@ function StockDashboard() {
                                             alignItems: 'center',
                                             gap: '3px'
                                           }}>
-                                            📅 {pos.price_date || (pos.currency === 'USD' ? '2026-10-14' : '2026-10-15')}
+                                            📅 {pos.price_date || (pos.currency === 'USD' ? mrnaLiveD : u3037LiveD)}
                                           </span>
                                         </td>
                                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8' }}>
@@ -7436,13 +7485,13 @@ function StockDashboard() {
                                       <td colSpan={12} style={{ textAlign: 'left', padding: '0.65rem 0.85rem', fontSize: '0.78rem', color: '#A7F3D0' }}>
                                         <strong>🔗 A+B 雙梯隊合併歸戶參考均價（100% 總資金 = A隊50% + B隊50%）：</strong>
                                         <span style={{ marginLeft: '0.6rem', color: '#FDE68A' }}>
-                                          👑 <strong>MRNA (總配比 40%)</strong>：策略雙隊均價 <strong>US$ 186.83</strong>（首倉均價 US$ 147.45）→ 最新價 <strong>US$ 226.30 (+21.13%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/14)</span>
+                                          👑 <strong>MRNA (總配比 40%)</strong>：策略雙隊均價 <strong>US$ 186.83</strong>（首倉均價 US$ 147.45）→ 最新價 <strong>US$ {mrnaLiveP.toFixed(2)} ({((mrnaLiveP - 186.83) / 186.83 * 100 >= 0 ? '+' : '') + ((mrnaLiveP - 186.83) / 186.83 * 100).toFixed(2)}%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>({mrnaLiveD.slice(5).replace('-', '/')})</span>
                                         </span>
                                         <span style={{ marginLeft: '0.8rem', color: '#BAE6FD' }}>
-                                          ｜ 🥈 <strong>3037.TW 欣興 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 1,172.50</strong>（首倉均價 NT$ 1,012.50）→ 最新價 <strong>NT$ 1,075.00 (-8.32%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/15)</span>
+                                          ｜ 🥈 <strong>3037.TW 欣興 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 1,172.50</strong>（首倉均價 NT$ 1,012.50）→ 最新價 <strong>NT$ {u3037LiveP.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({((u3037LiveP - 1172.50) / 1172.50 * 100 >= 0 ? '+' : '') + ((u3037LiveP - 1172.50) / 1172.50 * 100).toFixed(2)}%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>({u3037LiveD.slice(5).replace('-', '/')})</span>
                                         </span>
                                         <span style={{ marginLeft: '0.8rem', color: '#DDD6FE' }}>
-                                          ｜ 🥉 <strong>3443.TW 創意 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 8,110.00</strong>（首倉均價 NT$ 5,607.50）→ 最新價 <strong>NT$ 7,670.00 (-5.43%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>(10/15)</span>
+                                          ｜ 🥉 <strong>3443.TW 創意 (總配比 30%)</strong>：策略雙隊均價 <strong>NT$ 8,110.00</strong>（首倉均價 NT$ 5,607.50）→ 最新價 <strong>NT$ {c3443LiveP.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({((c3443LiveP - 8110.00) / 8110.00 * 100 >= 0 ? '+' : '') + ((c3443LiveP - 8110.00) / 8110.00 * 100).toFixed(2)}%)</strong> <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>({c3443LiveD.slice(5).replace('-', '/')})</span>
                                         </span>
                                       </td>
                                     </tr>
@@ -7976,17 +8025,34 @@ function StockDashboard() {
               <div className="db-quick-buttons">
                 <button
                   className="db-btn-update"
-                  onClick={() => handleTriggerDbScraper('daily', '全市場今日最新行情 (股價+三大法人+大盤)', 'daily_stock')}
+                  onClick={() => handleTriggerDbScraper('daily', '全市場所有數據 (台股+法人+大盤+總經+期權+全球泰坦)', 'daily_stock')}
                   disabled={dbUpdatingTableId !== null}
                 >
                   {dbUpdatingTableId === 'daily_stock' || dbUpdatingTableId === 'global_daily' ? (
                     <>
                       <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
-                      <span>抓取更新中...</span>
+                      <span>全市場更新中...</span>
                     </>
                   ) : (
                     <>
-                      <span>📅 立即更新今日全市場 (股價/法人/大盤)</span>
+                      <span>🌐 立即更新全市場所有數據 (台股/法人/期權/全球泰坦/總經)</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  className="db-btn-update"
+                  style={{ background: 'linear-gradient(135deg, #2563EB, #3B82F6)' }}
+                  onClick={() => handleTriggerDbScraper('global_sovereign', '全球泰坦 18 國主權 ETF 與 228 檔旗艦個股', 'global_stock_daily')}
+                  disabled={dbUpdatingTableId !== null}
+                >
+                  {dbUpdatingTableId === 'global_stock_daily' || dbUpdatingTableId === 'global_sovereign_daily' ? (
+                    <>
+                      <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
+                      <span>更新全球泰坦中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🌍 立即更新全球泰坦 (主權ETF+跨國個股)</span>
                     </>
                   )}
                 </button>
