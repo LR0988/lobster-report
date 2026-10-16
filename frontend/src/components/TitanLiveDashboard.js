@@ -269,8 +269,10 @@ export default function TitanLiveDashboard() {
             try { localStorage.setItem(storageKeys.positions, JSON.stringify(res.positions)); } catch {}
           }
           if (Array.isArray(res.tx_history) && res.tx_history.length > 0) {
-            setTxHistory(res.tx_history);
-            try { localStorage.setItem(storageKeys.allTx, JSON.stringify(res.tx_history)); } catch {}
+            const hasDeposit = res.tx_history.some(t => t.action === '投入現金' || t.id === 'tx_tw_init_deposit');
+            const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_INITIAL_ALL_TX[0]];
+            setTxHistory(normalizedTx);
+            try { localStorage.setItem(storageKeys.allTx, JSON.stringify(normalizedTx)); } catch {}
           }
           if (Array.isArray(res.dismissed_suggestions)) {
             setDismissedSuggestions(res.dismissed_suggestions);
