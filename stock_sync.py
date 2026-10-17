@@ -137,6 +137,25 @@ def sync_ml_cache(sb_conn):
     except Exception as e:
         print(f"  ✗ 同步全球主權泰坦失敗: {e}")
 
+    # 上傳台股事件與ETF吃豆腐 & 可轉債主力與急跌狙擊最新數據
+    try:
+        import tw_special_strategies_service
+        sp_out = tw_special_strategies_service.compute_tw_special_strategies(save_json=True)
+        for cache_key, payload_obj in [
+            ("tw_event_radar_dashboard", sp_out.get("tw_event_radar")),
+            ("tw_asymmetric_alpha_dashboard", sp_out.get("tw_asymmetric_alpha")),
+        ]:
+            if payload_obj and payload_obj.get("status") == "ok":
+                cur.execute("""
+                    INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                    VALUES (%s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT (model_type) DO UPDATE
+                    SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+                """, (cache_key, json.dumps(payload_obj, ensure_ascii=False)))
+        print("  ✓ 台股事件吃豆腐與可轉債/RSI(2)急跌狙擊同步至 stock_ml_cache 完成")
+    except Exception as e:
+        print(f"  ✗ 同步台股特殊策略失敗: {e}")
+
     sb_conn.commit()
 
 def sync_portfolio(sb_conn, local_conn):

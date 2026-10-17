@@ -635,3 +635,64 @@ export async function apiSaveTaiwanTitanPortfolio(portfolioData) {
     message: localSaved ? '已成功儲存至筆電本機資料庫 (tw_stock.db)' : '已成功儲存至雲端備份'
   };
 }
+
+// ==========================================
+// 🎯 台股事件與ETF吃豆腐策略 Dashboard API (優先直連本機 tw_stock.db)
+// ==========================================
+export async function apiGetTwEventRadarDashboard() {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/tw_event_radar/dashboard`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.status === 'ok') {
+        return json;
+      }
+    }
+  } catch (err) {
+    console.warn(`本機 ${base}/api/tw_event_radar/dashboard 未連線，嘗試雲端備援:`, err.message);
+  }
+
+  try {
+    const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.tw_event_radar_dashboard&select=payload');
+    if (supRes.ok) {
+      const rows = await supRes.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        return typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+// ==========================================
+// ⚡ 台股可轉債主力與急跌狙擊 Dashboard API (優先直連本機 tw_stock.db)
+// ==========================================
+export async function apiGetTwAsymmetricAlphaDashboard() {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/tw_asymmetric_alpha/dashboard`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.status === 'ok') {
+        return json;
+      }
+    }
+  } catch (err) {
+    console.warn(`本機 ${base}/api/tw_asymmetric_alpha/dashboard 未連線，嘗試雲端備援:`, err.message);
+  }
+
+  try {
+    const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.tw_asymmetric_alpha_dashboard&select=payload');
+    if (supRes.ok) {
+      const rows = await supRes.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        return typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+

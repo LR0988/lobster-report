@@ -4133,6 +4133,18 @@ def get_global_sovereign_dashboard():
     import global_sovereign_service
     return global_sovereign_service.get_global_sovereign_dashboard_data()
 
+@app.get("/api/tw_event_radar/dashboard")
+def get_tw_event_radar_dashboard():
+    """台股事件與ETF吃豆腐看板：高股息ETF換股提前卡位預測 + 個股期貨逆價差與軋空事件掃描"""
+    import tw_special_strategies_service
+    return tw_special_strategies_service.get_tw_event_radar_data()
+
+@app.get("/api/tw_asymmetric_alpha/dashboard")
+def get_tw_asymmetric_alpha_dashboard():
+    """台股可轉債主力與急跌狙擊看板：CB/CBAS千張大戶鎖碼雷達 + 強勢股Connors RSI(2)極端急跌反彈"""
+    import tw_special_strategies_service
+    return tw_special_strategies_service.get_tw_asymmetric_alpha_data()
+
 @app.get("/api/market_ml/status")
 @app.get("/api/market_ml/predict")
 def get_market_ml_status():

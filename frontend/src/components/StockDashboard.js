@@ -11,6 +11,8 @@ import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import defaultPodcastData from '../data/defaultPodcastData.json';
 import TitanLiveDashboard from './TitanLiveDashboard';
 import GlobalSovereignDashboard from './GlobalSovereignDashboard';
+import TwEventArbitrageDashboard from './TwEventArbitrageDashboard';
+import TwAsymmetricAlphaDashboard from './TwAsymmetricAlphaDashboard';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
 
@@ -4182,6 +4184,8 @@ function StockDashboard() {
             { id: 'market_ml', label: '📊 股市策略總覽' },
             { id: 'titan_live', label: '👑 台股泰坦實作' },
             { id: 'global_sovereign', label: '🌍 全球主權泰坦' },
+            { id: 'tw_event_radar', label: '🎯 台股事件與ETF吃豆腐' },
+            { id: 'tw_asymmetric_alpha', label: '⚡ 可轉債主力與急跌狙擊' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '🗄️ 資料庫與爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
             { id: 'schedule', label: '⏰ 排程管理' },
@@ -7973,6 +7977,16 @@ function StockDashboard() {
         {/* ===== 🌍 全球主權泰坦動能看板 ===== */}
         {activeTab === 'global_sovereign' && (
           <GlobalSovereignDashboard key={scraperLiveStatus?.finished_at || 'init'} />
+        )}
+
+        {/* ===== 🎯 台股事件與ETF吃豆腐雷達 ===== */}
+        {activeTab === 'tw_event_radar' && (
+          <TwEventArbitrageDashboard key={scraperLiveStatus?.finished_at || 'init'} />
+        )}
+
+        {/* ===== ⚡ 可轉債主力與急跌狙擊雷達 ===== */}
+        {activeTab === 'tw_asymmetric_alpha' && (
+          <TwAsymmetricAlphaDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
 
