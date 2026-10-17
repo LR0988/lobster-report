@@ -1,0 +1,1298 @@
+{
+  "backtest_period": "2016-01-01 ~ 2026-10-16 (10.8 年完整台股實盤歷史)",
+  "strategies": {
+    "etf_front_running": {
+      "strategy_name": "🥟 兆元級高股息 ETF 換股提前吃豆腐",
+      "total_trades": 177,
+      "win_rate_pct": 50.85,
+      "avg_win_pct": 5.92,
+      "avg_loss_pct": -4.71,
+      "payoff_ratio": 1.26,
+      "expectancy_per_trade_pct": 0.69,
+      "avg_hold_days": 12.7,
+      "cagr_pct": 2.93,
+      "total_return_pct": 36.6,
+      "max_drawdown_pct": -17.83,
+      "calmar_ratio": 0.16,
+      "yearly_performance": [
+        {
+          "year": "2016",
+          "trades": 4,
+          "win_rate_pct": 50.0,
+          "avg_trade_ret_pct": -0.26,
+          "annual_ret_pct": -0.3,
+          "top_trade": "2382 廣達 (+4.2%)",
+          "taiex_ret_pct": 14.04
+        },
+        {
+          "year": "2017",
+          "trades": 9,
+          "win_rate_pct": 44.4,
+          "avg_trade_ret_pct": -0.81,
+          "annual_ret_pct": -2.07,
+          "top_trade": "2382 廣達 (+5.0%)",
+          "taiex_ret_pct": 14.77
+        },
+        {
+          "year": "2018",
+          "trades": 11,
+          "win_rate_pct": 36.4,
+          "avg_trade_ret_pct": -2.25,
+          "annual_ret_pct": -6.76,
+          "top_trade": "2347 聯強 (+2.5%)",
+          "taiex_ret_pct": -9.18
+        },
+        {
+          "year": "2019",
+          "trades": 20,
+          "win_rate_pct": 50.0,
+          "avg_trade_ret_pct": -0.34,
+          "annual_ret_pct": -2.19,
+          "top_trade": "3227 原相 (+13.8%)",
+          "taiex_ret_pct": 25.57
+        },
+        {
+          "year": "2020",
+          "trades": 26,
+          "win_rate_pct": 73.1,
+          "avg_trade_ret_pct": 5.62,
+          "annual_ret_pct": 49.25,
+          "top_trade": "2603 長榮 (+19.1%)",
+          "taiex_ret_pct": 21.75
+        },
+        {
+          "year": "2021",
+          "trades": 15,
+          "win_rate_pct": 53.3,
+          "avg_trade_ret_pct": 2.47,
+          "annual_ret_pct": 10.37,
+          "top_trade": "2603 長榮 (+19.1%)",
+          "taiex_ret_pct": 22.26
+        },
+        {
+          "year": "2022",
+          "trades": 17,
+          "win_rate_pct": 47.1,
+          "avg_trade_ret_pct": -0.56,
+          "annual_ret_pct": -2.84,
+          "top_trade": "5871 中租-KY (+11.9%)",
+          "taiex_ret_pct": -22.62
+        },
+        {
+          "year": "2023",
+          "trades": 25,
+          "win_rate_pct": 60.0,
+          "avg_trade_ret_pct": 1.91,
+          "annual_ret_pct": 13.63,
+          "top_trade": "5371 中光電 (+16.6%)",
+          "taiex_ret_pct": 26.06
+        },
+        {
+          "year": "2024",
+          "trades": 25,
+          "win_rate_pct": 48.0,
+          "avg_trade_ret_pct": -0.75,
+          "annual_ret_pct": -5.36,
+          "top_trade": "2618 長榮航 (+7.8%)",
+          "taiex_ret_pct": 29.02
+        },
+        {
+          "year": "2025",
+          "trades": 17,
+          "win_rate_pct": 35.3,
+          "avg_trade_ret_pct": -1.44,
+          "annual_ret_pct": -6.82,
+          "top_trade": "3260 威剛 (+12.2%)",
+          "taiex_ret_pct": 26.85
+        },
+        {
+          "year": "2026",
+          "trades": 8,
+          "win_rate_pct": 25.0,
+          "avg_trade_ret_pct": -1.95,
+          "annual_ret_pct": -4.33,
+          "top_trade": "2357 華碩 (+5.5%)",
+          "taiex_ret_pct": 60.52
+        }
+      ],
+      "recent_trades": [
+        {
+          "year": "2026",
+          "entry_date": "20260910",
+          "exit_date": "20261005",
+          "stock_id": "2382",
+          "stock_name": "廣達",
+          "entry_price": 336.0,
+          "exit_price": 331.0,
+          "hold_days": 15,
+          "net_ret_pct": -1.87
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260904",
+          "exit_date": "20260929",
+          "stock_id": "1102",
+          "stock_name": "亞泥",
+          "entry_price": 35.1,
+          "exit_price": 35.3,
+          "hold_days": 15,
+          "net_ret_pct": 0.19
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260904",
+          "exit_date": "20260929",
+          "stock_id": "2474",
+          "stock_name": "可成",
+          "entry_price": 209.5,
+          "exit_price": 205.5,
+          "hold_days": 15,
+          "net_ret_pct": -2.29
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260904",
+          "exit_date": "20260929",
+          "stock_id": "2618",
+          "stock_name": "長榮航",
+          "entry_price": 42.5,
+          "exit_price": 41.5,
+          "hold_days": 15,
+          "net_ret_pct": -2.73
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260819",
+          "exit_date": "20260909",
+          "stock_id": "2357",
+          "stock_name": "華碩",
+          "entry_price": 925.0,
+          "exit_price": 979.0,
+          "hold_days": 15,
+          "net_ret_pct": 5.46
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260819",
+          "exit_date": "20260909",
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "entry_price": 240.5,
+          "exit_price": 234.0,
+          "hold_days": 15,
+          "net_ret_pct": -3.08
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260514",
+          "exit_date": "20260515",
+          "stock_id": "2382",
+          "stock_name": "廣達",
+          "entry_price": 334.5,
+          "exit_price": 306.0,
+          "hold_days": 1,
+          "net_ret_pct": -8.9
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260421",
+          "exit_date": "20260513",
+          "stock_id": "2347",
+          "stock_name": "聯強",
+          "entry_price": 84.8,
+          "exit_price": 83.1,
+          "hold_days": 15,
+          "net_ret_pct": -2.38
+        },
+        {
+          "year": "2025",
+          "entry_date": "20251202",
+          "exit_date": "20251217",
+          "stock_id": "2382",
+          "stock_name": "廣達",
+          "entry_price": 288.5,
+          "exit_price": 265.0,
+          "hold_days": 11,
+          "net_ret_pct": -8.53
+        },
+        {
+          "year": "2025",
+          "entry_date": "20251202",
+          "exit_date": "20251217",
+          "stock_id": "2347",
+          "stock_name": "聯強",
+          "entry_price": 61.9,
+          "exit_price": 57.3,
+          "hold_days": 11,
+          "net_ret_pct": -7.81
+        },
+        {
+          "year": "2025",
+          "entry_date": "20251120",
+          "exit_date": "20251211",
+          "stock_id": "2458",
+          "stock_name": "義隆",
+          "entry_price": 129.0,
+          "exit_price": 128.0,
+          "hold_days": 15,
+          "net_ret_pct": -1.16
+        },
+        {
+          "year": "2025",
+          "entry_date": "20251120",
+          "exit_date": "20251211",
+          "stock_id": "1102",
+          "stock_name": "亞泥",
+          "entry_price": 37.65,
+          "exit_price": 38.2,
+          "hold_days": 15,
+          "net_ret_pct": 1.08
+        },
+        {
+          "year": "2025",
+          "entry_date": "20251022",
+          "exit_date": "20251030",
+          "stock_id": "1477",
+          "stock_name": "聚陽",
+          "entry_price": 291.0,
+          "exit_price": 271.5,
+          "hold_days": 5,
+          "net_ret_pct": -7.08
+        },
+        {
+          "year": "2025",
+          "entry_date": "20250909",
+          "exit_date": "20251001",
+          "stock_id": "3264",
+          "stock_name": "欣銓",
+          "entry_price": 85.9,
+          "exit_price": 84.3,
+          "hold_days": 15,
+          "net_ret_pct": -2.24
+        },
+        {
+          "year": "2025",
+          "entry_date": "20250903",
+          "exit_date": "20250924",
+          "stock_id": "1477",
+          "stock_name": "聚陽",
+          "entry_price": 281.0,
+          "exit_price": 294.5,
+          "hold_days": 15,
+          "net_ret_pct": 4.42
+        }
+      ]
+    },
+    "futures_arbitrage": {
+      "strategy_name": "🔥 個股期貨稅盾逆價差 ＆ 法人軋空事件",
+      "total_trades": 598,
+      "win_rate_pct": 56.52,
+      "avg_win_pct": 12.32,
+      "avg_loss_pct": -10.09,
+      "payoff_ratio": 1.22,
+      "expectancy_per_trade_pct": 2.58,
+      "avg_hold_days": 10.1,
+      "cagr_pct": 38.69,
+      "total_return_pct": 3321.6,
+      "max_drawdown_pct": -32.31,
+      "calmar_ratio": 1.2,
+      "yearly_performance": [
+        {
+          "year": "2016",
+          "trades": 35,
+          "win_rate_pct": 45.7,
+          "avg_trade_ret_pct": 0.72,
+          "annual_ret_pct": 5.43,
+          "top_trade": "2105 正新 (+17.0%)",
+          "taiex_ret_pct": 14.04
+        },
+        {
+          "year": "2017",
+          "trades": 49,
+          "win_rate_pct": 57.1,
+          "avg_trade_ret_pct": 0.36,
+          "annual_ret_pct": 2.67,
+          "top_trade": "2345 智邦 (+17.0%)",
+          "taiex_ret_pct": 14.77
+        },
+        {
+          "year": "2018",
+          "trades": 42,
+          "win_rate_pct": 45.2,
+          "avg_trade_ret_pct": 0.87,
+          "annual_ret_pct": 7.66,
+          "top_trade": "1102 亞泥 (+18.2%)",
+          "taiex_ret_pct": -9.18
+        },
+        {
+          "year": "2019",
+          "trades": 71,
+          "win_rate_pct": 60.6,
+          "avg_trade_ret_pct": 4.42,
+          "annual_ret_pct": 113.3,
+          "top_trade": "2345 智邦 (+17.0%)",
+          "taiex_ret_pct": 25.57
+        },
+        {
+          "year": "2020",
+          "trades": 60,
+          "win_rate_pct": 63.3,
+          "avg_trade_ret_pct": 4.98,
+          "annual_ret_pct": 102.44,
+          "top_trade": "2458 義隆 (+18.2%)",
+          "taiex_ret_pct": 21.75
+        },
+        {
+          "year": "2021",
+          "trades": 56,
+          "win_rate_pct": 53.6,
+          "avg_trade_ret_pct": 2.99,
+          "annual_ret_pct": 46.97,
+          "top_trade": "3037 欣興 (+17.0%)",
+          "taiex_ret_pct": 22.26
+        },
+        {
+          "year": "2022",
+          "trades": 32,
+          "win_rate_pct": 40.6,
+          "avg_trade_ret_pct": -3.41,
+          "annual_ret_pct": -24.96,
+          "top_trade": "2886 兆豐金 (+17.0%)",
+          "taiex_ret_pct": -22.62
+        },
+        {
+          "year": "2023",
+          "trades": 65,
+          "win_rate_pct": 58.5,
+          "avg_trade_ret_pct": 2.71,
+          "annual_ret_pct": 49.98,
+          "top_trade": "2382 廣達 (+18.2%)",
+          "taiex_ret_pct": 26.06
+        },
+        {
+          "year": "2024",
+          "trades": 65,
+          "win_rate_pct": 47.7,
+          "avg_trade_ret_pct": -0.44,
+          "annual_ret_pct": -9.92,
+          "top_trade": "3017 奇鋐 (+17.0%)",
+          "taiex_ret_pct": 29.02
+        },
+        {
+          "year": "2025",
+          "trades": 60,
+          "win_rate_pct": 68.3,
+          "avg_trade_ret_pct": 6.02,
+          "annual_ret_pct": 137.75,
+          "top_trade": "3706 神達 (+18.2%)",
+          "taiex_ret_pct": 26.85
+        },
+        {
+          "year": "2026",
+          "trades": 63,
+          "win_rate_pct": 65.1,
+          "avg_trade_ret_pct": 4.5,
+          "annual_ret_pct": 91.92,
+          "top_trade": "1303 南亞 (+18.2%)",
+          "taiex_ret_pct": 60.52
+        }
+      ],
+      "recent_trades": [
+        {
+          "year": "2026",
+          "entry_date": "20260917",
+          "exit_date": "20260930",
+          "stock_id": "2891",
+          "stock_name": "中信金",
+          "entry_price": 71.2,
+          "exit_price": 68.4,
+          "hold_days": 7,
+          "stock_ret_pct": -3.93,
+          "net_ret_pct": -7.15
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260917",
+          "exit_date": "20261001",
+          "stock_id": "2892",
+          "stock_name": "第一金",
+          "entry_price": 40.75,
+          "exit_price": 38.7,
+          "hold_days": 8,
+          "stock_ret_pct": -5.03,
+          "net_ret_pct": -9.13
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260910",
+          "exit_date": "20261005",
+          "stock_id": "1102",
+          "stock_name": "亞泥",
+          "entry_price": 35.45,
+          "exit_price": 35.15,
+          "hold_days": 15,
+          "stock_ret_pct": -0.85,
+          "net_ret_pct": -1.6
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260910",
+          "exit_date": "20261005",
+          "stock_id": "3045",
+          "stock_name": "台灣大",
+          "entry_price": 120.0,
+          "exit_price": 122.5,
+          "hold_days": 15,
+          "stock_ret_pct": 2.08,
+          "net_ret_pct": 3.68
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260903",
+          "exit_date": "20260924",
+          "stock_id": "2887",
+          "stock_name": "台新新光金",
+          "entry_price": 41.45,
+          "exit_price": 42.5,
+          "hold_days": 15,
+          "stock_ret_pct": 2.53,
+          "net_ret_pct": 4.49
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260903",
+          "exit_date": "20260915",
+          "stock_id": "2892",
+          "stock_name": "第一金",
+          "entry_price": 36.85,
+          "exit_price": 40.35,
+          "hold_days": 8,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260827",
+          "exit_date": "20260902",
+          "stock_id": "1301",
+          "stock_name": "台塑",
+          "entry_price": 63.1,
+          "exit_price": 69.09,
+          "hold_days": 4,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260827",
+          "exit_date": "20260907",
+          "stock_id": "2881",
+          "stock_name": "富邦金",
+          "entry_price": 141.5,
+          "exit_price": 154.94,
+          "hold_days": 7,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260820",
+          "exit_date": "20260907",
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "entry_price": 246.0,
+          "exit_price": 233.0,
+          "hold_days": 12,
+          "stock_ret_pct": -5.28,
+          "net_ret_pct": -8.41
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260820",
+          "exit_date": "20260824",
+          "stock_id": "2609",
+          "stock_name": "陽明",
+          "entry_price": 60.3,
+          "exit_price": 66.03,
+          "hold_days": 2,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260813",
+          "exit_date": "20260828",
+          "stock_id": "2408",
+          "stock_name": "南亞科",
+          "entry_price": 514.0,
+          "exit_price": 562.83,
+          "hold_days": 11,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260813",
+          "exit_date": "20260901",
+          "stock_id": "2887",
+          "stock_name": "台新新光金",
+          "entry_price": 36.2,
+          "exit_price": 39.64,
+          "hold_days": 13,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260806",
+          "exit_date": "20260813",
+          "stock_id": "2324",
+          "stock_name": "仁寶",
+          "entry_price": 37.3,
+          "exit_price": 40.84,
+          "hold_days": 5,
+          "stock_ret_pct": 9.5,
+          "net_ret_pct": 17.03
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260723",
+          "exit_date": "20260730",
+          "stock_id": "6505",
+          "stock_name": "台塑化",
+          "entry_price": 93.2,
+          "exit_price": 71.6,
+          "hold_days": 5,
+          "stock_ret_pct": -23.18,
+          "net_ret_pct": -41.79
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260723",
+          "exit_date": "20260728",
+          "stock_id": "1301",
+          "stock_name": "台塑",
+          "entry_price": 66.2,
+          "exit_price": 57.5,
+          "hold_days": 3,
+          "stock_ret_pct": -13.14,
+          "net_ret_pct": -23.73
+        }
+      ]
+    },
+    "cbas_asymmetric": {
+      "strategy_name": "💎 可轉債 (CB/CBAS) 主力鎖碼不對稱突破",
+      "total_trades": 171,
+      "win_rate_pct": 52.63,
+      "avg_win_pct": 29.43,
+      "avg_loss_pct": -15.45,
+      "payoff_ratio": 1.9,
+      "expectancy_per_trade_pct": 8.17,
+      "avg_hold_days": 15.3,
+      "cagr_pct": 18.24,
+      "total_return_pct": 510.7,
+      "max_drawdown_pct": -19.87,
+      "calmar_ratio": 0.92,
+      "yearly_performance": [
+        {
+          "year": "2016",
+          "trades": 45,
+          "win_rate_pct": 55.6,
+          "avg_trade_ret_pct": 6.01,
+          "annual_ret_pct": 42.81,
+          "top_trade": "3450 聯鈞 (+66.4%)",
+          "taiex_ret_pct": 14.04
+        },
+        {
+          "year": "2017",
+          "trades": 46,
+          "win_rate_pct": 56.5,
+          "avg_trade_ret_pct": 10.8,
+          "annual_ret_pct": 92.55,
+          "top_trade": "8112 至上 (+66.7%)",
+          "taiex_ret_pct": 14.77
+        },
+        {
+          "year": "2018",
+          "trades": 5,
+          "win_rate_pct": 40.0,
+          "avg_trade_ret_pct": 7.72,
+          "annual_ret_pct": 5.06,
+          "top_trade": "6488 環球晶 (+64.8%)",
+          "taiex_ret_pct": -9.18
+        },
+        {
+          "year": "2019",
+          "trades": 19,
+          "win_rate_pct": 63.2,
+          "avg_trade_ret_pct": 10.98,
+          "annual_ret_pct": 31.87,
+          "top_trade": "1795 美時 (+66.7%)",
+          "taiex_ret_pct": 25.57
+        },
+        {
+          "year": "2020",
+          "trades": 13,
+          "win_rate_pct": 53.8,
+          "avg_trade_ret_pct": 8.17,
+          "annual_ret_pct": 14.13,
+          "top_trade": "3131 弘塑 (+66.6%)",
+          "taiex_ret_pct": 21.75
+        },
+        {
+          "year": "2021",
+          "trades": 10,
+          "win_rate_pct": 50.0,
+          "avg_trade_ret_pct": 14.65,
+          "annual_ret_pct": 21.01,
+          "top_trade": "3105 穩懋 (+66.4%)",
+          "taiex_ret_pct": 22.26
+        },
+        {
+          "year": "2022",
+          "trades": 6,
+          "win_rate_pct": 33.3,
+          "avg_trade_ret_pct": -14.96,
+          "annual_ret_pct": -12.02,
+          "top_trade": "6147 頎邦 (+3.2%)",
+          "taiex_ret_pct": -22.62
+        },
+        {
+          "year": "2023",
+          "trades": 16,
+          "win_rate_pct": 50.0,
+          "avg_trade_ret_pct": 10.46,
+          "annual_ret_pct": 24.46,
+          "top_trade": "3293 鈊象 (+65.9%)",
+          "taiex_ret_pct": 26.06
+        },
+        {
+          "year": "2024",
+          "trades": 8,
+          "win_rate_pct": 25.0,
+          "avg_trade_ret_pct": 2.59,
+          "annual_ret_pct": 1.89,
+          "top_trade": "3081 聯亞 (+66.7%)",
+          "taiex_ret_pct": 29.02
+        },
+        {
+          "year": "2025",
+          "trades": 2,
+          "win_rate_pct": 50.0,
+          "avg_trade_ret_pct": 25.09,
+          "annual_ret_pct": 6.81,
+          "top_trade": "1815 富喬 (+66.7%)",
+          "taiex_ret_pct": 26.85
+        },
+        {
+          "year": "2026",
+          "trades": 1,
+          "win_rate_pct": 0.0,
+          "avg_trade_ret_pct": -18.72,
+          "annual_ret_pct": -2.62,
+          "top_trade": "3264 欣銓 (+-18.7%)",
+          "taiex_ret_pct": 60.52
+        }
+      ],
+      "recent_trades": [
+        {
+          "year": "2026",
+          "entry_date": "20260910",
+          "exit_date": "20260916",
+          "stock_id": "3264",
+          "stock_name": "欣銓",
+          "entry_price": 240.0,
+          "exit_price": 223.0,
+          "hold_days": 2,
+          "stock_ret_pct": -7.08,
+          "net_ret_pct": -18.72
+        },
+        {
+          "year": "2025",
+          "entry_date": "20250616",
+          "exit_date": "20250708",
+          "stock_id": "3163",
+          "stock_name": "波若威",
+          "entry_price": 184.0,
+          "exit_price": 174.0,
+          "hold_days": 16,
+          "stock_ret_pct": -5.43,
+          "net_ret_pct": -16.53
+        },
+        {
+          "year": "2025",
+          "entry_date": "20250203",
+          "exit_date": "20250207",
+          "stock_id": "1815",
+          "stock_name": "富喬",
+          "entry_price": 29.55,
+          "exit_price": 34.28,
+          "hold_days": 4,
+          "stock_ret_pct": 16.0,
+          "net_ret_pct": 66.72
+        },
+        {
+          "year": "2024",
+          "entry_date": "20241225",
+          "exit_date": "20250109",
+          "stock_id": "8086",
+          "stock_name": "宏捷科",
+          "entry_price": 110.5,
+          "exit_price": 101.0,
+          "hold_days": 10,
+          "stock_ret_pct": -8.6,
+          "net_ret_pct": -23.85
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240715",
+          "exit_date": "20240722",
+          "stock_id": "5439",
+          "stock_name": "高技",
+          "entry_price": 104.0,
+          "exit_price": 97.0,
+          "hold_days": 5,
+          "stock_ret_pct": -6.73,
+          "net_ret_pct": -18.25
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240701",
+          "exit_date": "20240722",
+          "stock_id": "6488",
+          "stock_name": "環球晶",
+          "entry_price": 565.0,
+          "exit_price": 519.0,
+          "hold_days": 15,
+          "stock_ret_pct": -8.14,
+          "net_ret_pct": -23.42
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240624",
+          "exit_date": "20240626",
+          "stock_id": "5351",
+          "stock_name": "鈺創",
+          "entry_price": 53.4,
+          "exit_price": 50.4,
+          "hold_days": 2,
+          "stock_ret_pct": -5.62,
+          "net_ret_pct": -14.91
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240617",
+          "exit_date": "20240621",
+          "stock_id": "3081",
+          "stock_name": "聯亞",
+          "entry_price": 147.5,
+          "exit_price": 171.1,
+          "hold_days": 4,
+          "stock_ret_pct": 16.0,
+          "net_ret_pct": 66.72
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240607",
+          "exit_date": "20240619",
+          "stock_id": "5425",
+          "stock_name": "台半",
+          "entry_price": 80.3,
+          "exit_price": 75.4,
+          "hold_days": 7,
+          "stock_ret_pct": -6.1,
+          "net_ret_pct": -16.92
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240524",
+          "exit_date": "20240530",
+          "stock_id": "3163",
+          "stock_name": "波若威",
+          "entry_price": 114.0,
+          "exit_price": 108.0,
+          "hold_days": 4,
+          "stock_ret_pct": -5.26,
+          "net_ret_pct": -14.28
+        },
+        {
+          "year": "2024",
+          "entry_date": "20240418",
+          "exit_date": "20240508",
+          "stock_id": "3491",
+          "stock_name": "昇達科",
+          "entry_price": 180.5,
+          "exit_price": 209.38,
+          "hold_days": 13,
+          "stock_ret_pct": 16.0,
+          "net_ret_pct": 65.64
+        },
+        {
+          "year": "2023",
+          "entry_date": "20231227",
+          "exit_date": "20240103",
+          "stock_id": "3260",
+          "stock_name": "威剛",
+          "entry_price": 104.5,
+          "exit_price": 98.3,
+          "hold_days": 4,
+          "stock_ret_pct": -5.93,
+          "net_ret_pct": -16.03
+        },
+        {
+          "year": "2023",
+          "entry_date": "20231213",
+          "exit_date": "20240111",
+          "stock_id": "6147",
+          "stock_name": "頎邦",
+          "entry_price": 73.8,
+          "exit_price": 72.2,
+          "hold_days": 20,
+          "stock_ret_pct": -2.17,
+          "net_ret_pct": -8.64
+        },
+        {
+          "year": "2023",
+          "entry_date": "20231206",
+          "exit_date": "20240104",
+          "stock_id": "8299",
+          "stock_name": "群聯",
+          "entry_price": 505.0,
+          "exit_price": 498.5,
+          "hold_days": 20,
+          "stock_ret_pct": -1.29,
+          "net_ret_pct": -6.35
+        },
+        {
+          "year": "2023",
+          "entry_date": "20231129",
+          "exit_date": "20231214",
+          "stock_id": "3293",
+          "stock_name": "鈊象",
+          "entry_price": 669.0,
+          "exit_price": 776.04,
+          "hold_days": 11,
+          "stock_ret_pct": 16.0,
+          "net_ret_pct": 65.88
+        }
+      ]
+    },
+    "rsi2_sniper": {
+      "strategy_name": "⚡ 強勢領頭羊 Connors RSI(2) 急跌反彈狙擊",
+      "total_trades": 1773,
+      "win_rate_pct": 67.51,
+      "avg_win_pct": 3.27,
+      "avg_loss_pct": -4.73,
+      "payoff_ratio": 0.69,
+      "expectancy_per_trade_pct": 0.67,
+      "avg_hold_days": 3.1,
+      "cagr_pct": 29.99,
+      "total_return_pct": 1599.1,
+      "max_drawdown_pct": -21.42,
+      "calmar_ratio": 1.4,
+      "yearly_performance": [
+        {
+          "year": "2016",
+          "trades": 85,
+          "win_rate_pct": 72.9,
+          "avg_trade_ret_pct": 1.17,
+          "annual_ret_pct": 27.76,
+          "top_trade": "6451 訊芯-KY (+12.2%)",
+          "taiex_ret_pct": 14.04
+        },
+        {
+          "year": "2017",
+          "trades": 143,
+          "win_rate_pct": 72.0,
+          "avg_trade_ret_pct": 1.3,
+          "annual_ret_pct": 58.01,
+          "top_trade": "2337 旺宏 (+11.7%)",
+          "taiex_ret_pct": 14.77
+        },
+        {
+          "year": "2018",
+          "trades": 101,
+          "win_rate_pct": 56.4,
+          "avg_trade_ret_pct": -0.2,
+          "annual_ret_pct": -5.61,
+          "top_trade": "2492 華新科 (+10.2%)",
+          "taiex_ret_pct": -9.18
+        },
+        {
+          "year": "2019",
+          "trades": 162,
+          "win_rate_pct": 66.7,
+          "avg_trade_ret_pct": 0.69,
+          "annual_ret_pct": 31.21,
+          "top_trade": "3653 健策 (+10.8%)",
+          "taiex_ret_pct": 25.57
+        },
+        {
+          "year": "2020",
+          "trades": 156,
+          "win_rate_pct": 70.5,
+          "avg_trade_ret_pct": 0.9,
+          "annual_ret_pct": 40.86,
+          "top_trade": "3661 世芯-KY (+9.6%)",
+          "taiex_ret_pct": 21.75
+        },
+        {
+          "year": "2021",
+          "trades": 181,
+          "win_rate_pct": 70.2,
+          "avg_trade_ret_pct": 0.93,
+          "annual_ret_pct": 50.35,
+          "top_trade": "3042 晶技 (+9.6%)",
+          "taiex_ret_pct": 22.26
+        },
+        {
+          "year": "2022",
+          "trades": 78,
+          "win_rate_pct": 64.1,
+          "avg_trade_ret_pct": 0.06,
+          "annual_ret_pct": 0.6,
+          "top_trade": "3324 雙鴻 (+7.3%)",
+          "taiex_ret_pct": -22.62
+        },
+        {
+          "year": "2023",
+          "trades": 228,
+          "win_rate_pct": 67.5,
+          "avg_trade_ret_pct": 0.64,
+          "annual_ret_pct": 41.61,
+          "top_trade": "2356 英業達 (+9.6%)",
+          "taiex_ret_pct": 26.06
+        },
+        {
+          "year": "2024",
+          "trades": 243,
+          "win_rate_pct": 64.6,
+          "avg_trade_ret_pct": 0.3,
+          "annual_ret_pct": 17.87,
+          "top_trade": "1503 士電 (+9.6%)",
+          "taiex_ret_pct": 29.02
+        },
+        {
+          "year": "2025",
+          "trades": 187,
+          "win_rate_pct": 67.4,
+          "avg_trade_ret_pct": 0.77,
+          "annual_ret_pct": 41.37,
+          "top_trade": "6274 台燿 (+9.6%)",
+          "taiex_ret_pct": 26.85
+        },
+        {
+          "year": "2026",
+          "trades": 209,
+          "win_rate_pct": 68.4,
+          "avg_trade_ret_pct": 0.63,
+          "annual_ret_pct": 35.19,
+          "top_trade": "5289 宜鼎 (+11.1%)",
+          "taiex_ret_pct": 60.52
+        }
+      ],
+      "recent_trades": [
+        {
+          "year": "2026",
+          "entry_date": "20261006",
+          "exit_date": "20261015",
+          "stock_id": "2303",
+          "stock_name": "聯電",
+          "entry_price": 147.5,
+          "exit_price": 133.5,
+          "hold_days": 6,
+          "net_ret_pct": -9.87,
+          "exit_reason": "6日期滿出場"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20261006",
+          "exit_date": "20261007",
+          "stock_id": "2464",
+          "stock_name": "盟立",
+          "entry_price": 182.5,
+          "exit_price": 193.0,
+          "hold_days": 1,
+          "net_ret_pct": 5.37,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20261002",
+          "exit_date": "20261006",
+          "stock_id": "2887",
+          "stock_name": "台新新光金",
+          "entry_price": 40.55,
+          "exit_price": 41.45,
+          "hold_days": 2,
+          "net_ret_pct": 1.84,
+          "exit_reason": "收盤站回5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20261001",
+          "exit_date": "20261005",
+          "stock_id": "6805",
+          "stock_name": "富世達",
+          "entry_price": 2390.0,
+          "exit_price": 2473.65,
+          "hold_days": 2,
+          "net_ret_pct": 3.12,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20261001",
+          "exit_date": "20261006",
+          "stock_id": "2883",
+          "stock_name": "凱基金",
+          "entry_price": 36.9,
+          "exit_price": 37.65,
+          "hold_days": 3,
+          "net_ret_pct": 1.65,
+          "exit_reason": "收盤站回5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260929",
+          "exit_date": "20261002",
+          "stock_id": "2637",
+          "stock_name": "慧洋-KY",
+          "entry_price": 95.0,
+          "exit_price": 98.8,
+          "hold_days": 3,
+          "net_ret_pct": 3.62,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260929",
+          "exit_date": "20261002",
+          "stock_id": "2606",
+          "stock_name": "裕民",
+          "entry_price": 73.4,
+          "exit_price": 75.9,
+          "hold_days": 3,
+          "net_ret_pct": 3.03,
+          "exit_reason": "收盤站回5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260924",
+          "exit_date": "20260929",
+          "stock_id": "6187",
+          "stock_name": "萬潤",
+          "entry_price": 1195.0,
+          "exit_price": 1310.0,
+          "hold_days": 1,
+          "net_ret_pct": 9.24,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260923",
+          "exit_date": "20261001",
+          "stock_id": "3406",
+          "stock_name": "玉晶光",
+          "entry_price": 905.0,
+          "exit_price": 950.0,
+          "hold_days": 4,
+          "net_ret_pct": 4.59,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260923",
+          "exit_date": "20261005",
+          "stock_id": "2880",
+          "stock_name": "華南金",
+          "entry_price": 45.8,
+          "exit_price": 44.6,
+          "hold_days": 6,
+          "net_ret_pct": -3.0,
+          "exit_reason": "6日期滿出場"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260922",
+          "exit_date": "20260924",
+          "stock_id": "3231",
+          "stock_name": "緯創",
+          "entry_price": 180.5,
+          "exit_price": 184.5,
+          "hold_days": 2,
+          "net_ret_pct": 1.84,
+          "exit_reason": "收盤站回5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260922",
+          "exit_date": "20261002",
+          "stock_id": "3141",
+          "stock_name": "晶宏",
+          "entry_price": 89.2,
+          "exit_price": 87.1,
+          "hold_days": 6,
+          "net_ret_pct": -2.73,
+          "exit_reason": "收盤站回5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260916",
+          "exit_date": "20260917",
+          "stock_id": "3653",
+          "stock_name": "健策",
+          "entry_price": 5240.0,
+          "exit_price": 5498.0,
+          "hold_days": 1,
+          "net_ret_pct": 4.54,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260916",
+          "exit_date": "20260917",
+          "stock_id": "6187",
+          "stock_name": "萬潤",
+          "entry_price": 1220.0,
+          "exit_price": 1262.7,
+          "hold_days": 1,
+          "net_ret_pct": 3.12,
+          "exit_reason": "觸及5MA停利"
+        },
+        {
+          "year": "2026",
+          "entry_date": "20260915",
+          "exit_date": "20260917",
+          "stock_id": "2421",
+          "stock_name": "建準",
+          "entry_price": 158.0,
+          "exit_price": 163.53,
+          "hold_days": 2,
+          "net_ret_pct": 3.12,
+          "exit_reason": "觸及5MA停利"
+        }
+      ]
+    }
+  },
+  "combined_portfolio": {
+    "cagr_pct": 24.58,
+    "total_return_pct": 973.2,
+    "multiple": 10.73,
+    "max_drawdown_pct": -9.8,
+    "positive_years": 10,
+    "total_years": 11,
+    "yearly_breakdown": [
+      {
+        "year": "2016",
+        "etf_ret_pct": -0.3,
+        "fut_ret_pct": 5.43,
+        "cbas_ret_pct": 42.81,
+        "rsi2_ret_pct": 27.76,
+        "combo_ret_pct": 18.92,
+        "taiex_ret_pct": 14.04,
+        "alpha_vs_taiex_pct": 4.89
+      },
+      {
+        "year": "2017",
+        "etf_ret_pct": -2.07,
+        "fut_ret_pct": 2.67,
+        "cbas_ret_pct": 92.55,
+        "rsi2_ret_pct": 58.01,
+        "combo_ret_pct": 37.79,
+        "taiex_ret_pct": 14.77,
+        "alpha_vs_taiex_pct": 23.02
+      },
+      {
+        "year": "2018",
+        "etf_ret_pct": -6.76,
+        "fut_ret_pct": 7.66,
+        "cbas_ret_pct": 5.06,
+        "rsi2_ret_pct": -5.61,
+        "combo_ret_pct": 0.09,
+        "taiex_ret_pct": -9.18,
+        "alpha_vs_taiex_pct": 9.27
+      },
+      {
+        "year": "2019",
+        "etf_ret_pct": -2.19,
+        "fut_ret_pct": 113.3,
+        "cbas_ret_pct": 31.87,
+        "rsi2_ret_pct": 31.21,
+        "combo_ret_pct": 43.55,
+        "taiex_ret_pct": 25.57,
+        "alpha_vs_taiex_pct": 17.98
+      },
+      {
+        "year": "2020",
+        "etf_ret_pct": 49.25,
+        "fut_ret_pct": 102.44,
+        "cbas_ret_pct": 14.13,
+        "rsi2_ret_pct": 40.86,
+        "combo_ret_pct": 51.67,
+        "taiex_ret_pct": 21.75,
+        "alpha_vs_taiex_pct": 29.92
+      },
+      {
+        "year": "2021",
+        "etf_ret_pct": 10.37,
+        "fut_ret_pct": 46.97,
+        "cbas_ret_pct": 21.01,
+        "rsi2_ret_pct": 50.35,
+        "combo_ret_pct": 32.17,
+        "taiex_ret_pct": 22.26,
+        "alpha_vs_taiex_pct": 9.91
+      },
+      {
+        "year": "2022",
+        "etf_ret_pct": -2.84,
+        "fut_ret_pct": -24.96,
+        "cbas_ret_pct": -12.02,
+        "rsi2_ret_pct": 0.6,
+        "combo_ret_pct": -9.8,
+        "taiex_ret_pct": -22.62,
+        "alpha_vs_taiex_pct": 12.82
+      },
+      {
+        "year": "2023",
+        "etf_ret_pct": 13.63,
+        "fut_ret_pct": 49.98,
+        "cbas_ret_pct": 24.46,
+        "rsi2_ret_pct": 41.61,
+        "combo_ret_pct": 32.42,
+        "taiex_ret_pct": 26.06,
+        "alpha_vs_taiex_pct": 6.36
+      },
+      {
+        "year": "2024",
+        "etf_ret_pct": -5.36,
+        "fut_ret_pct": -9.92,
+        "cbas_ret_pct": 1.89,
+        "rsi2_ret_pct": 17.87,
+        "combo_ret_pct": 1.12,
+        "taiex_ret_pct": 29.02,
+        "alpha_vs_taiex_pct": -27.9
+      },
+      {
+        "year": "2025",
+        "etf_ret_pct": -6.82,
+        "fut_ret_pct": 137.75,
+        "cbas_ret_pct": 6.81,
+        "rsi2_ret_pct": 41.37,
+        "combo_ret_pct": 44.78,
+        "taiex_ret_pct": 26.85,
+        "alpha_vs_taiex_pct": 17.93
+      },
+      {
+        "year": "2026",
+        "etf_ret_pct": -4.33,
+        "fut_ret_pct": 91.92,
+        "cbas_ret_pct": -2.62,
+        "rsi2_ret_pct": 35.19,
+        "combo_ret_pct": 30.04,
+        "taiex_ret_pct": 60.52,
+        "alpha_vs_taiex_pct": -30.48
+      }
+    ]
+  }
+}

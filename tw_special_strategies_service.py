@@ -559,25 +559,43 @@ def compute_tw_special_strategies(save_json: bool = True):
     cbas_radar_list.sort(key=lambda x: x['lock_score'], reverse=True)
     rsi2_sniper_list.sort(key=lambda x: (x['rsi2'], -x['est_win_rate_pct']))
 
+    # 讀取 2016~2026 實盤歷史回測結果 (tw_special_backtest_results.json)
+    bt_path = os.path.join(os.path.dirname(__file__), "tw_special_backtest_results.json")
+    bt_data = {}
+    if os.path.exists(bt_path):
+        try:
+            with open(bt_path, "r", encoding="utf-8") as f:
+                bt_data = json.load(f)
+        except Exception:
+            bt_data = {}
+
+    bt_strats = bt_data.get("strategies", {})
+    bt_combo = bt_data.get("combined_portfolio", {})
+
     # 組裝分頁一 Payload
     event_radar_payload = {
         'status': 'ok',
         'strategy_group': '🎯 台股高勝率事件與兆元級 ETF 換股吃豆腐雷達',
         'latest_data_date': latest_dt_fmt,
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'data_source': 'tw_stock.db (SQLite 實盤日線 × 三大法人 × 月營收 × 集保大戶直連運算)',
+        'data_source': 'tw_stock.db (2016~2026 實盤日線 × 三大法人 × 月營收 × 集保大戶直連運算)',
         'summary_kpi': {
-            'etf_backtest_cagr_pct': 28.4,
-            'etf_backtest_win_rate_pct': 78.6,
-            'etf_backtest_mdd_pct': -8.4,
-            'etf_avg_hold_days': 16,
-            'fut_arb_cagr_pct': 21.8,
-            'fut_arb_win_rate_pct': 83.2,
-            'fut_arb_mdd_pct': -5.2,
+            'etf_backtest_cagr_pct': bt_strats.get('etf_front_running', {}).get('cagr_pct', 2.93),
+            'etf_backtest_win_rate_pct': bt_strats.get('etf_front_running', {}).get('win_rate_pct', 50.85),
+            'etf_backtest_mdd_pct': bt_strats.get('etf_front_running', {}).get('max_drawdown_pct', -17.83),
+            'etf_avg_hold_days': bt_strats.get('etf_front_running', {}).get('avg_hold_days', 12.7),
+            'fut_arb_cagr_pct': bt_strats.get('futures_arbitrage', {}).get('cagr_pct', 38.69),
+            'fut_arb_win_rate_pct': bt_strats.get('futures_arbitrage', {}).get('win_rate_pct', 56.52),
+            'fut_arb_mdd_pct': bt_strats.get('futures_arbitrage', {}).get('max_drawdown_pct', -32.31),
             'next_major_window': '2026年11月中旬 ~ 12月初 (00878 / 00940 / 00919 / 0056 年度換股潮)'
         },
         'etf_front_running_picks': etf_front_run_list[:18],
         'futures_arbitrage_picks': futures_arb_list[:18],
+        'backtest_2016_2026': {
+            'etf_front_running': bt_strats.get('etf_front_running', {}),
+            'futures_arbitrage': bt_strats.get('futures_arbitrage', {}),
+            'combined_portfolio': bt_combo
+        },
         'historical_event_windows': [
             {'window': '2026-05 (00919/00940 換股)', 'picks_count': 5, 'win_rate_pct': 80.0, 'avg_return_pct': 9.8, 'top_winner': '長榮 (2603) +16.4%', 'benchmark_ret_pct': 2.1},
             {'window': '2025-11~12 (0056/00878/00919 換股)', 'picks_count': 6, 'win_rate_pct': 83.3, 'avg_return_pct': 11.2, 'top_winner': '瑞儀 (6176) +18.7%', 'benchmark_ret_pct': 1.8},
@@ -594,19 +612,24 @@ def compute_tw_special_strategies(save_json: bool = True):
         'strategy_group': '⚡ 台股可轉債 (CB/CBAS) 主力鎖碼 × 強勢股 RSI(2) 急跌反彈狙擊',
         'latest_data_date': latest_dt_fmt,
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'data_source': 'tw_stock.db (SQLite 集保千張大戶 × 自營商避險買盤 × Connors RSI(2) 即時運算)',
+        'data_source': 'tw_stock.db (2016~2026 集保千張大戶 × 自營商避險買盤 × Connors RSI(2) 即時運算)',
         'summary_kpi': {
-            'cbas_backtest_cagr_pct': 52.6,
-            'cbas_win_rate_pct': 64.5,
-            'cbas_payoff_ratio': 3.85,
+            'cbas_backtest_cagr_pct': bt_strats.get('cbas_asymmetric', {}).get('cagr_pct', 18.24),
+            'cbas_win_rate_pct': bt_strats.get('cbas_asymmetric', {}).get('win_rate_pct', 52.63),
+            'cbas_payoff_ratio': bt_strats.get('cbas_asymmetric', {}).get('payoff_ratio', 1.90),
             'cbas_max_loss_rule': '單筆最大虧損鎖死於權利金 (佔總資金 2%~3%，絕不斷頭)',
-            'rsi2_backtest_cagr_pct': 31.8,
-            'rsi2_win_rate_pct': 72.4,
-            'rsi2_mdd_pct': -11.6,
-            'rsi2_avg_hold_days': 4.2
+            'rsi2_backtest_cagr_pct': bt_strats.get('rsi2_sniper', {}).get('cagr_pct', 29.99),
+            'rsi2_win_rate_pct': bt_strats.get('rsi2_sniper', {}).get('win_rate_pct', 67.51),
+            'rsi2_mdd_pct': bt_strats.get('rsi2_sniper', {}).get('max_drawdown_pct', -21.42),
+            'rsi2_avg_hold_days': bt_strats.get('rsi2_sniper', {}).get('avg_hold_days', 3.1)
         },
         'cbas_boom_picks': cbas_radar_list[:18],
         'rsi2_sniper_picks': rsi2_sniper_list[:18],
+        'backtest_2016_2026': {
+            'cbas_asymmetric': bt_strats.get('cbas_asymmetric', {}),
+            'rsi2_sniper': bt_strats.get('rsi2_sniper', {}),
+            'combined_portfolio': bt_combo
+        },
         'strategy_complement_note': '當【全球主權泰坦】或【台股波段策略】遇大盤震盪整理時，【RSI(2) 強勢股急跌反彈】專吃 3~5 天恐慌錯殺反彈，兩者呈現負相關互補；而【CBAS 可轉債選擇權】只需動用 5%~10% 小資金即可鎖死下檔風險、博取主力發債拉抬的 3~5 倍不對稱爆發！'
     }
 

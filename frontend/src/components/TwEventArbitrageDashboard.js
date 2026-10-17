@@ -620,6 +620,59 @@ export default function TwEventArbitrageDashboard() {
               </table>
             </div>
           </div>
+
+          {/* 2016–2026 11年 tw_stock.db 實盤回測歷年績效表 */}
+          {data?.backtest_2016_2026?.combined_portfolio?.yearly_breakdown && (
+            <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8' }}>
+              <h4 style={{ margin: '0 0 0.7rem 0', color: '#38BDF8', fontSize: '1.05rem' }}>
+                📊 2016–2026 (11年) tw_stock.db 無未來函數歷年回測報酬率對照表
+              </h4>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                      <th>年份</th>
+                      <th style={{ textAlign: 'right' }}>🥟 ETF換股吃豆腐</th>
+                      <th style={{ textAlign: 'right' }}>🔥 股期稅盾與軋空</th>
+                      <th style={{ textAlign: 'right' }}>💎 CBAS主力鎖碼</th>
+                      <th style={{ textAlign: 'right' }}>⚡ RSI(2)急跌狙擊</th>
+                      <th style={{ textAlign: 'right' }}>🏆 四合一小資金組合</th>
+                      <th style={{ textAlign: 'right' }}>📊 加權指數 (TAIEX)</th>
+                      <th style={{ textAlign: 'right' }}>超額 Alpha</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.backtest_2016_2026.combined_portfolio.yearly_breakdown.map((yr) => (
+                      <tr key={yr.year}>
+                        <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>{yr.year}</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.etf_ret_pct >= 0 ? '#34D399' : '#F87171' }}>
+                          {yr.etf_ret_pct >= 0 ? '+' : ''}{yr.etf_ret_pct}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.fut_ret_pct >= 0 ? '#38BDF8' : '#F87171' }}>
+                          {yr.fut_ret_pct >= 0 ? '+' : ''}{yr.fut_ret_pct}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.cbas_ret_pct >= 0 ? '#FBBF24' : '#F87171' }}>
+                          {yr.cbas_ret_pct >= 0 ? '+' : ''}{yr.cbas_ret_pct}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.rsi2_ret_pct >= 0 ? '#34D399' : '#F87171' }}>
+                          {yr.rsi2_ret_pct >= 0 ? '+' : ''}{yr.rsi2_ret_pct}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.combo_ret_pct >= 0 ? '#10B981' : '#F87171' }}>
+                          {yr.combo_ret_pct >= 0 ? '+' : ''}{yr.combo_ret_pct}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
+                          {yr.taiex_ret_pct >= 0 ? '+' : ''}{yr.taiex_ret_pct}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.alpha_vs_taiex_pct >= 0 ? '#FDE68A' : '#94A3B8' }}>
+                          {yr.alpha_vs_taiex_pct >= 0 ? '+' : ''}{yr.alpha_vs_taiex_pct}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
