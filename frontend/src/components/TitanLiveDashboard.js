@@ -239,21 +239,33 @@ export default function TitanLiveDashboard() {
     syncBuyTx: true
   });
 
-  // 加權指數大盤現況
-  const taiex = {
-    close: 24150,
-    ma20: 23620,
-    ma60: 22890,
-    bullish: true,
-    statusText: '加權指數穩站 60MA 季線與 20MA 月線之上，安全氣囊判定多頭有效 ➔ 100% 滿倉重壓台股王者！'
-  };
+  // 加權指數大盤現況與即時個股報價表 (直連 /api/titan/live 動態更新)
+  const [liveTaiex, setLiveTaiex] = useState(null);
+  const [livePricesMap, setLivePricesMap] = useState({});
+
+  const taiex = useMemo(() => {
+    const close = liveTaiex?.close || 24150;
+    const ma20 = liveTaiex?.ma20 || 23620;
+    const ma60 = liveTaiex?.ma60 || 22890;
+    const bullish = liveTaiex?.bullish !== undefined ? liveTaiex.bullish : (close >= ma20 && close >= ma60);
+    return {
+      date: liveTaiex?.date || '2026-10-16',
+      close,
+      ma20,
+      ma60,
+      bullish,
+      statusText: bullish
+        ? '加權指數穩站 60MA 季線與 20MA 月線之上，安全氣囊判定多頭有效 ➔ 100% 滿倉重壓台股王者！'
+        : '加權指數跌破均線防護網，啟動安全氣囊防禦機制 ➔ 提高現金水位保護本金！'
+    };
+  }, [liveTaiex]);
 
   const triggerNotice = (msg) => {
     setFeedbackMsg(msg);
     setTimeout(() => setFeedbackMsg(''), 4500);
   };
 
-  // 1. 當切換登入使用者或載入組件時，自動從 Supabase PostgreSQL 雲端資料庫撈取該使用者的台股專屬帳本
+  // 1. 當切換登入使用者或載入組件時，自動從本機 tw_stock.db (/api/titan/live) 或雲端撈取該使用者的台股專屬帳本與最新報價
   useEffect(() => {
     let isMounted = true;
     isInitialCloudLoad.current = true;
@@ -264,13 +276,22 @@ export default function TitanLiveDashboard() {
         const res = await apiGetTaiwanTitanPortfolio(currentUsername);
         if (!isMounted) return;
         if (res && res.status === 'ok') {
+          if (res.taiex) setLiveTaiex(res.taiex);
+          if (res.live_prices) setLivePricesMap(res.live_prices);
           if (Array.isArray(res.positions) && res.positions.length > 0) {
-            setUserPositions(res.positions);
-            try { localStorage.setItem(storageKeys.positions, JSON.stringify(res.positions)); } catch {}
+            const lpMap = res.live_prices || {};
+            const updatedPos = res.positions.map(p => {
+              const liveItem = lpMap[p.stock_id];
+              return liveItem && liveItem.price > 0
+                ? { ...p, current_price: liveItem.price, price_date: liveItem.price_date || p.price_date }
+                : p;
+            });
+            setUserPositions(updatedPos);
+            try { localStorage.setItem(storageKeys.positions, JSON.stringify(updatedPos)); } catch {}
           }
           if (Array.isArray(res.tx_history) && res.tx_history.length > 0) {
             const hasDeposit = res.tx_history.some(t => t.action === '投入現金' || t.id === 'tx_tw_init_deposit');
-            const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_INITIAL_ALL_TX[0]];
+            const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_TX_HISTORY[0]];
             setTxHistory(normalizedTx);
             try { localStorage.setItem(storageKeys.allTx, JSON.stringify(normalizedTx)); } catch {}
           }
@@ -330,25 +351,27 @@ export default function TitanLiveDashboard() {
     };
   }, [idleCash, userPositions, txHistory, dismissedSuggestions, storageKeys, currentUsername]);
 
-  // 3. 自動將「當前持股部位」的現價 (current_price)，依據最新市場行情動態對齊！
+  // 3. 自動將「當前持股部位」的現價 (current_price)，依據資料庫 livePricesMap 與最新市場行情動態對齊！
   // 嚴格保留使用者的進場成本 entry_price、股數與進場時間！
   useEffect(() => {
     const picks = titanOpenPositionsData?.open_positions || [];
-    if (!picks || picks.length === 0) return;
+    if ((!picks || picks.length === 0) && Object.keys(livePricesMap).length === 0) return;
     setUserPositions(prev => {
       let changed = false;
       const next = prev.map(p => {
+        const liveItem = livePricesMap[p.stock_id];
         const match = picks.find(cp => cp.stock_id === p.stock_id || cp.stock_name === p.stock_name);
-        const newPrice = match ? (match.current_price || match.latest_price) : null;
-        if (newPrice && newPrice > 0 && p.current_price !== newPrice) {
+        const newPrice = liveItem?.price || (match ? (match.latest_price || match.current_price) : null);
+        const newDate = liveItem?.price_date || match?.price_date || p.price_date;
+        if (newPrice && newPrice > 0 && (p.current_price !== newPrice || (newDate && p.price_date !== newDate))) {
           changed = true;
-          return { ...p, current_price: newPrice };
+          return { ...p, current_price: newPrice, price_date: newDate };
         }
         return p;
       });
       return changed ? next : prev;
     });
-  }, []);
+  }, [livePricesMap, cloudSyncStatus]);
 
   // 自動將「當前持股部位」的成本均價、股數與費用，100% 嚴格綁定對齊「歷史交易流水帳」最新買入明細！
   useEffect(() => {
@@ -475,18 +498,25 @@ export default function TitanLiveDashboard() {
     ];
 
     if (titanOpenPositionsData?.open_positions && titanOpenPositionsData.open_positions.length > 0) {
-      return titanOpenPositionsData.open_positions.map((p, idx) => ({
-        stock_id: p.stock_id,
-        stock_name: p.stock_name,
-        role: p.role || (idx === 0 ? '👑 王者泰坦 (70%)' : '🚀 革命衛星 (15%)'),
-        target_weight_pct: idx === 0 ? 70 : 15,
-        price: p.current_price || p.entry_price || 100,
-        ma60: p.ma60_stop_price || 90,
-        stop_condition: p.stop_condition || '破60MA季線停損'
-      }));
+      return titanOpenPositionsData.open_positions.map((p, idx) => {
+        const liveItem = livePricesMap[p.stock_id];
+        return {
+          stock_id: p.stock_id,
+          stock_name: p.stock_name,
+          role: p.role || (idx === 0 ? '👑 王者泰坦 (70%)' : '🚀 革命衛星 (15%)'),
+          target_weight_pct: idx === 0 ? 70 : 15,
+          price: liveItem?.price || p.latest_price || p.current_price || p.entry_price || 100,
+          ma60: liveItem?.ma60 || p.stop_loss_ma60 || p.ma60_stop_price || 90,
+          stop_condition: p.stop_condition || '破60MA季線停損'
+        };
+      });
     }
-    return defaultCandidates;
-  }, []);
+    return defaultCandidates.map(c => ({
+      ...c,
+      price: livePricesMap[c.stock_id]?.price || c.price,
+      ma60: livePricesMap[c.stock_id]?.ma60 || c.ma60
+    }));
+  }, [livePricesMap]);
 
   // 4. 台股持倉更動建議演算法 (以當前總資金計算)
   const rebalanceSuggestions = useMemo(() => {

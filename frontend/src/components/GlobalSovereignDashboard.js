@@ -401,14 +401,21 @@ export default function GlobalSovereignDashboard() {
       if (json && json.status === 'ok') {
         setData(json);
       }
+      const liveMap = json?.live_prices || data?.live_prices || {};
+      const picksArr = json?.current_picks || data?.current_picks || [];
       if (portRes && portRes.status === 'ok' && Array.isArray(portRes.positions) && portRes.positions.length > 0) {
         setUserPositions(prev => prev.map(p => {
-          const matchLive = portRes.positions.find(lp => lp.ticker === p.ticker || (lp.ticker && p.ticker && lp.ticker.split('.')[0] === p.ticker.split('.')[0]));
-          if (matchLive && matchLive.current_price > 0) {
+          const baseTicker = p.ticker ? p.ticker.split('.')[0] : '';
+          const matchLive = portRes.positions.find(lp => lp.ticker === p.ticker || (lp.ticker && p.ticker && lp.ticker.split('.')[0] === baseTicker));
+          const liveItem = liveMap[p.ticker] || liveMap[baseTicker];
+          const matchPick = picksArr.find(cp => cp.ticker === p.ticker || (cp.ticker && p.ticker && cp.ticker.split('.')[0] === baseTicker));
+          const bestPrice = liveItem?.price || matchPick?.price || matchLive?.current_price;
+          const bestDate = liveItem?.price_date || matchPick?.price_date || matchLive?.price_date || p.price_date;
+          if (bestPrice && bestPrice > 0) {
             return {
               ...p,
-              current_price: matchLive.current_price,
-              price_date: matchLive.price_date || p.price_date
+              current_price: bestPrice,
+              price_date: bestDate
             };
           }
           return p;
@@ -429,7 +436,7 @@ export default function GlobalSovereignDashboard() {
   const currentPicks = data?.current_picks || [];
   const yearly = data?.yearly_performance || [];
   const shortTwDate = (data?.latest_tw_date || data?.latest_data_date || '2026-10-16').slice(5).replace('-', '/');
-  const shortUsDate = (data?.latest_us_date || '2026-10-15').slice(5).replace('-', '/');
+  const shortUsDate = (data?.latest_us_date || '2026-10-16').slice(5).replace('-', '/');
 
   // 自動將「當前持股部位」的最新現價 (current_price) 與報價日期 (price_date)，依據資料庫最新 live_prices 與 currentPicks 行情動態同步對齊！
   // 注意：只更新 current_price 與 price_date，嚴格保留使用者的進場成本 entry_price、股數與進場時間！
@@ -446,7 +453,7 @@ export default function GlobalSovereignDashboard() {
           (cp.ticker && p.ticker && cp.ticker.split('.')[0] === baseTicker)
         );
         const latestPx = liveItem?.price || matchPick?.price;
-        const pickDate = liveItem?.price_date || matchPick?.price_date || (p.currency === 'USD' ? (data?.latest_us_date || '2026-10-15') : (data?.latest_tw_date || '2026-10-16'));
+        const pickDate = liveItem?.price_date || matchPick?.price_date || (p.currency === 'USD' ? (data?.latest_us_date || '2026-10-16') : (data?.latest_tw_date || '2026-10-16'));
         if (latestPx && latestPx > 0 && (p.current_price !== latestPx || p.price_date !== pickDate)) {
           changed = true;
           return { ...p, current_price: latestPx, price_date: pickDate };
@@ -455,7 +462,7 @@ export default function GlobalSovereignDashboard() {
       });
       return changed ? next : prev;
     });
-  }, [currentPicks, data?.latest_data_date, data?.live_prices]);
+  }, [currentPicks, data?.latest_data_date, data?.live_prices, cloudSyncStatus]);
 
   // 1. 計算持股現值與整體統計
   const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {

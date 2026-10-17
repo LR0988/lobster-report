@@ -7967,12 +7967,12 @@ function StockDashboard() {
 
         {/* ===== 👑 泰坦實盤每日監控與對帳系統 ===== */}
         {activeTab === 'titan_live' && (
-          <TitanLiveDashboard />
+          <TitanLiveDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
         {/* ===== 🌍 全球主權泰坦動能看板 ===== */}
         {activeTab === 'global_sovereign' && (
-          <GlobalSovereignDashboard />
+          <GlobalSovereignDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
 

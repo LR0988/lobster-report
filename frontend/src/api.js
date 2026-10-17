@@ -529,6 +529,8 @@ export async function apiGetTaiwanTitanPortfolio(username) {
           positions: live.positions || [],
           tx_history: live.trades || [],
           account: live.account || {},
+          taiex: live.taiex || null,
+          live_prices: live.live_prices || {},
           dismissed_suggestions: []
         };
       }
