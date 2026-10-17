@@ -1481,10 +1481,10 @@ export default function GlobalSovereignDashboard() {
               🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
             </span>
             <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              🚀 雙梯隊進攻版 (1號+22號交錯 × 40/30/30階梯 × 45/35/20敏銳動能 × 爆量滯漲過濾)
+              🚀 雙梯隊 DOE 終極冠軍版 (1號+22號交錯 × 40/30/30 × 凸性動能 Conv=0.20 × 殘差 Res=0.15 × 雙頻寬幅 wBr60=0.25)
             </span>
             <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22.8年 CAGR <strong style={{ color: '#34D399' }}>56.68% (24,176倍)</strong> | 月頻MDD <strong style={{ color: '#FBBF24' }}>-33.25%</strong> | Calmar <strong style={{ color: '#60A5FA' }}>1.705</strong> | Sharpe 1.24 | Sortino 2.70 | 年度勝率 <strong style={{ color: '#34D399' }}>90.9% (22年贏20年)</strong>
+              22.8年 CAGR <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.cagr || 60.63}% ({Math.round(data?.kpi?.scheme_a?.mult || 48165).toLocaleString()}倍)</strong> | 月頻MDD <strong style={{ color: '#FBBF24' }}>{data?.kpi?.scheme_a?.mdd || -28.37}%</strong> | Calmar <strong style={{ color: '#60A5FA' }}>{data?.kpi?.scheme_a?.calmar || 2.137}</strong> | Sharpe {data?.kpi?.scheme_a?.sharpe || 1.33} | Sortino {data?.kpi?.scheme_a?.sortino || 3.08} | 年度勝率 <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.win_rate || 90.9}% (22年贏20年)</strong>
             </span>
           </div>
 
@@ -2341,10 +2341,10 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📡 全球泰坦 Top 10 即時敏銳動能與爆量滯漲雷達（1號 / 22號 選股順位的唯一依據）
+                    📡 全球泰坦 Top 10 即時敏銳動能與非對稱凸性雷達（1號 / 22號 選股順位的唯一依據）
                   </h4>
                   <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    採用 <strong>45% 12M + 35% 3M + 20% 1M 複合動能 × (1 + 0.5 FIP)</strong> 排序，並通過「<strong>爆量滯漲濾網</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除）」。第 1~3 名為當期正選，第 4~5 名為在手續抱保護緩衝帶！
+                    採用 <strong>(85% Raw + 15% 殘差 Alpha) × (45% 12M + 35% 3M + 20% 1M) × (1 + 0.5 FIP) × (1 + 0.20 凸性比)</strong> 排序，並通過「<strong>爆量滯漲濾網</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除）」。第 1~3 名為當期正選，第 4~5 名為在手續抱保護緩衝帶！
                   </p>
                 </div>
                 <span style={{ fontSize: '0.78rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
@@ -2365,6 +2365,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>3M 短期爆發</th>
                       <th style={{ textAlign: 'right' }}>12M 長期主升</th>
                       <th style={{ textAlign: 'right' }}>FIP 品質</th>
+                      <th style={{ textAlign: 'right' }}>凸性比 (Conv)</th>
                       <th style={{ textAlign: 'right', color: '#FBBF24' }}>複合動能總分</th>
                       <th style={{ textAlign: 'center' }}>爆量滯漲濾網</th>
                     </tr>
@@ -2434,7 +2435,7 @@ export default function GlobalSovereignDashboard() {
                               alignItems: 'center',
                               gap: '3px'
                             }}>
-                              📅 {pick.price_date || (pick.currency === 'USD' ? '2026-10-14' : '2026-10-15')}
+                              📅 {pick.price_date || (pick.currency === 'USD' ? '2026-10-16' : '2026-10-16')}
                             </span>
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
@@ -2448,6 +2449,9 @@ export default function GlobalSovereignDashboard() {
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#A5B4FC' }}>
                             {pick.fip}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>
+                            {pick.convexity !== undefined ? `${Number(pick.convexity).toFixed(2)}x` : '1.00x'}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24' }}>
                             {pick.score?.toFixed(3)}
