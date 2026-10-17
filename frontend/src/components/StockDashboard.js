@@ -5,6 +5,10 @@ import defaultMarketMlData from '../data/defaultMarketMlData.json';
 import titanOpenPositionsData from '../data/titan_open_positions.json';
 import titanTradesData from '../data/titan_trades.json';
 import titanCurveData from '../data/titan_curve.json';
+import titanProTradesData from '../data/titan_pro_trades.json';
+import titanProCurveData from '../data/titan_pro_curve.json';
+import futuresSqueezeTradesData from '../data/futures_squeeze_trades.json';
+import futuresSqueezeCurveData from '../data/futures_squeeze_curve.json';
 import globalTitanTradesData from '../data/global_titan_trades.json';
 import globalTitanCurveData from '../data/global_titan_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
@@ -4184,7 +4188,7 @@ function StockDashboard() {
             { id: 'market_ml', label: '📊 股市策略總覽' },
             { id: 'titan_live', label: '👑 台股泰坦實作' },
             { id: 'global_sovereign', label: '🌍 全球主權泰坦' },
-            { id: 'tw_event_radar', label: '🎯 台股事件與ETF吃豆腐' },
+            { id: 'tw_event_radar', label: '🔥 泰坦Pro與期貨軋空' },
             { id: 'tw_asymmetric_alpha', label: '⚡ 可轉債主力與急跌狙擊' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '🗄️ 資料庫與爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
@@ -5301,12 +5305,28 @@ function StockDashboard() {
                         : '10年超額Alpha・CAGR 69.0%・雙梯隊交錯進攻・夏普1.24'
                     },
                     {
+                      id: 'titan_pro_hybrid',
+                      name: '🚀 台股泰坦 Pro 全武裝融合版 (核心股期免稅 × 衛星CBAS鎖損 × 47%閒置金RSI2快打)',
+                      icon: '🚀',
+                      tag: is20ySelected
+                        ? '20年+163295.0% (1633.9倍)・CAGR 41.3%・賺賠比6.05x・夏普1.35'
+                        : '11年+40147.0% (402.5倍)・CAGR 74.25%・年度MDD僅-11.95%・全面超越原版泰坦3倍'
+                    },
+                    {
                       id: 'titan_sovereign',
                       name: '👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)',
                       icon: '👑',
                       tag: is20ySelected
                         ? '20年+26550.7% (266.5倍)・CAGR 30.3%・MDD -36.6%・夏普1.00'
                         : '10年超額Alpha・王者勝率45.5%・2026年+111.8%・夏普1.00'
+                    },
+                    {
+                      id: 'futures_short_squeeze',
+                      name: '🔥 台股個股期貨高券資比法人軋空與稅盾策略 (券資比>20% + 法人連買 + 35%保證金)',
+                      icon: '🔥',
+                      tag: is20ySelected
+                        ? '20年+10382.7% (104.8倍)・CAGR 24.4%・賺賠比2.84x・夏普1.18'
+                        : '11年+3322.0% (34.2倍)・CAGR 38.69%・年度MDD -13.80%・勝率56.5%'
                     },
                     {
                       id: 'etf_0020',
@@ -5330,11 +5350,25 @@ function StockDashboard() {
                     { id: 'elliott', name: '波浪理論策略', icon: '🌊', tag: is20ySelected ? '20年+375%・幾何推動階梯' : '幾何推動與斐波階梯' }
                   ];
 
-                  // 動態計算單一泰坦模型所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
+                  // 動態計算單一泰坦/Pro/期貨軋空模型所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
                   const calcSingleTitanModeData = (targetKey, pKey, startYr, endYr) => {
                     const isGlobal = targetKey === 'global_liquid_titan_a';
-                    const sourceCurve = isGlobal ? (globalTitanCurveData || []) : (titanCurveData || []);
-                    const sourceTrades = isGlobal ? (globalTitanTradesData || []) : (titanTradesData || []);
+                    const isTitanPro = targetKey === 'titan_pro_hybrid';
+                    const isFuturesSqueeze = targetKey === 'futures_short_squeeze';
+                    const sourceCurve = isGlobal
+                      ? (globalTitanCurveData || [])
+                      : isTitanPro
+                        ? (titanProCurveData || [])
+                        : isFuturesSqueeze
+                          ? (futuresSqueezeCurveData || [])
+                          : (titanCurveData || []);
+                    const sourceTrades = isGlobal
+                      ? (globalTitanTradesData || [])
+                      : isTitanPro
+                        ? (titanProTradesData || [])
+                        : isFuturesSqueeze
+                          ? (futuresSqueezeTradesData || [])
+                          : (titanTradesData || []);
                     if (!sourceCurve || sourceCurve.length === 0) return null;
 
                     let sDate = '20160101';
@@ -5617,8 +5651,8 @@ function StockDashboard() {
                     const pointsPerYear = yearsElapsed > 0.08 ? (rebasedCurve.length / yearsElapsed) : (isGlobal ? 24 : 12);
                     const annualizeFactor = pointsPerYear <= 15 ? Math.sqrt(12) : (pointsPerYear <= 36 ? Math.sqrt(24) : Math.sqrt(242));
 
-                    let stratSharpe = isGlobal ? 1.24 : 1.0;
-                    let stratSortino = isGlobal ? 2.75 : 1.68;
+                    let stratSharpe = isGlobal ? 1.24 : (isTitanPro ? 1.35 : (isFuturesSqueeze ? 1.18 : 1.0));
+                    let stratSortino = isGlobal ? 2.75 : (isTitanPro ? 2.48 : (isFuturesSqueeze ? 2.15 : 1.68));
                     if (rebasedCurve.length > 5) {
                       const dailyRets = [];
                       for (let i = 1; i < rebasedCurve.length; i++) {
@@ -5673,8 +5707,8 @@ function StockDashboard() {
                       loss_trades: lossTrades.length,
                       total_trades: slicedTrades.length,
                       profit_factor: Number(profitFactor.toFixed(2)),
-                      market_exposure_pct: avgExposure || (isGlobal ? 92.4 : 53.0),
-                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 92.4 : 53.0)),
+                      market_exposure_pct: avgExposure || (isGlobal ? 92.4 : (isTitanPro ? 76.5 : (isFuturesSqueeze ? 35.0 : 53.0))),
+                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 92.4 : (isTitanPro ? 76.5 : (isFuturesSqueeze ? 35.0 : 53.0)))),
                       open_positions: openPosList,
                       curve: rebasedCurve,
                       trades: slicedTrades,
@@ -5702,10 +5736,12 @@ function StockDashboard() {
                     };
                   };
 
-                  // 取得當前區間下雙泰坦旗艦模型的 Leaderboard 完整物件
+                  // 取得當前區間下四大旗艦模型的 Leaderboard 完整物件
                   const getTitanLeaderboardItems = (pKey, startYr, endYr) => {
                     const g = calcSingleTitanModeData('global_liquid_titan_a', pKey, startYr, endYr);
+                    const tp = calcSingleTitanModeData('titan_pro_hybrid', pKey, startYr, endYr);
                     const t = calcSingleTitanModeData('titan_sovereign', pKey, startYr, endYr);
+                    const fs = calcSingleTitanModeData('futures_short_squeeze', pKey, startYr, endYr);
                     const globalItem = {
                       model_id: 'global_liquid_titan_a',
                       name: '👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 45/35/20敏銳動能 × 爆量滯漲過濾)',
@@ -5721,6 +5757,22 @@ function StockDashboard() {
                       profit_factor: g?.customModeData?.profit_factor ?? 3.29,
                       total_trades: g?.customModeData?.total_trades ?? 1359,
                       market_exposure_pct: g?.customModeData?.market_exposure_pct ?? 92.4
+                    };
+                    const titanProItem = {
+                      model_id: 'titan_pro_hybrid',
+                      name: '🚀 台股泰坦 Pro 全武裝融合版 (核心股期免稅 × 衛星CBAS鎖損 × 47%閒置金RSI2快打)',
+                      short_name: '🚀 台股泰坦 Pro (股期+CBAS+快打)',
+                      model_name: '🚀 台股泰坦 Pro 全武裝融合版 (核心股期免稅 × 衛星CBAS鎖損 × 47%閒置金RSI2快打)',
+                      total_return_pct: tp?.customModeData?.total_return_pct ?? 163295.0,
+                      cagr_pct: tp?.customModeData?.cagr_pct ?? 41.32,
+                      alpha_pct: tp?.customModeData?.alpha_pct ?? 162568.9,
+                      max_drawdown_pct: tp?.customModeData?.max_drawdown_pct ?? -24.8,
+                      sharpe_ratio: tp?.customModeData?.sharpe_ratio ?? 1.35,
+                      sortino_ratio: tp?.customModeData?.sortino_ratio ?? 2.48,
+                      win_rate_pct: tp?.customModeData?.win_rate_pct ?? 55.66,
+                      profit_factor: tp?.customModeData?.profit_factor ?? 4.92,
+                      total_trades: tp?.customModeData?.total_trades ?? 318,
+                      market_exposure_pct: tp?.customModeData?.market_exposure_pct ?? 76.5
                     };
                     const titanItem = {
                       model_id: 'titan_sovereign',
@@ -5738,29 +5790,58 @@ function StockDashboard() {
                       total_trades: t?.customModeData?.total_trades ?? 303,
                       market_exposure_pct: t?.customModeData?.market_exposure_pct ?? 53.0
                     };
-                    return { globalItem, titanItem, globalCalc: g, titanCalc: t };
+                    const futuresSqueezeItem = {
+                      model_id: 'futures_short_squeeze',
+                      name: '🔥 台股個股期貨高券資比法人軋空與稅盾策略 (券資比>20% + 法人連買 + 35%保證金)',
+                      short_name: '🔥 個股期貨軋空與稅盾',
+                      model_name: '🔥 台股個股期貨高券資比法人軋空與稅盾策略 (券資比>20% + 法人連買 + 35%保證金)',
+                      total_return_pct: fs?.customModeData?.total_return_pct ?? 10382.7,
+                      cagr_pct: fs?.customModeData?.cagr_pct ?? 24.42,
+                      alpha_pct: fs?.customModeData?.alpha_pct ?? 9656.6,
+                      max_drawdown_pct: fs?.customModeData?.max_drawdown_pct ?? -21.5,
+                      sharpe_ratio: fs?.customModeData?.sharpe_ratio ?? 1.18,
+                      sortino_ratio: fs?.customModeData?.sortino_ratio ?? 2.15,
+                      win_rate_pct: fs?.customModeData?.win_rate_pct ?? 56.49,
+                      profit_factor: fs?.customModeData?.profit_factor ?? 2.84,
+                      total_trades: fs?.customModeData?.total_trades ?? 871,
+                      market_exposure_pct: fs?.customModeData?.market_exposure_pct ?? 35.0
+                    };
+                    return {
+                      globalItem,
+                      titanProItem,
+                      titanItem,
+                      futuresSqueezeItem,
+                      globalCalc: g,
+                      titanProCalc: tp,
+                      titanCalc: t,
+                      futuresSqueezeCalc: fs
+                    };
                   };
 
-                  // 確保 Leaderboard 排行榜頂部永遠完整列入雙泰坦旗艦，並去除重複項目
+                  // 確保 Leaderboard 排行榜頂部永遠完整列入四大旗艦，並去除重複項目
                   const buildCompleteLeaderboard = (baseList, pKey, startYr, endYr) => {
-                    const { globalItem, titanItem } = getTitanLeaderboardItems(pKey, startYr, endYr);
-                    const seen = new Set(['global_liquid_titan_a', 'titan_sovereign']);
+                    const { globalItem, titanProItem, titanItem, futuresSqueezeItem } = getTitanLeaderboardItems(pKey, startYr, endYr);
+                    const seen = new Set(['global_liquid_titan_a', 'titan_pro_hybrid', 'titan_sovereign', 'futures_short_squeeze']);
                     const otherModels = [];
                     (baseList || []).forEach(m => {
                       if (!m || !m.model_id) return;
-                      if (m.model_id === 'global_liquid_titan_a' || m.model_id === 'titan_sovereign') return;
                       if (seen.has(m.model_id)) return;
                       seen.add(m.model_id);
                       otherModels.push(m);
                     });
-                    return [globalItem, titanItem, ...otherModels];
+                    return [globalItem, titanProItem, titanItem, futuresSqueezeItem, ...otherModels];
                   };
 
                   // 動態計算所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
                   const getTitanPeriodData = (pKey, startYr, endYr, targetModelKey = activeModelKey) => {
-                    const isGlobalTitan = targetModelKey === 'global_liquid_titan_a';
-                    const { globalItem, titanItem, globalCalc, titanCalc } = getTitanLeaderboardItems(pKey, startYr, endYr);
-                    const activeCalc = isGlobalTitan ? globalCalc : titanCalc;
+                    const { globalCalc, titanProCalc, titanCalc, futuresSqueezeCalc } = getTitanLeaderboardItems(pKey, startYr, endYr);
+                    const activeCalc = targetModelKey === 'global_liquid_titan_a'
+                      ? globalCalc
+                      : targetModelKey === 'titan_pro_hybrid'
+                        ? titanProCalc
+                        : targetModelKey === 'futures_short_squeeze'
+                          ? futuresSqueezeCalc
+                          : titanCalc;
                     if (!activeCalc) return null;
 
                     const is20y = pKey === '20y' || pKey === 'all';
@@ -5796,6 +5877,16 @@ function StockDashboard() {
                           long_only: titanCalc?.customModeData,
                           long_short: titanCalc?.customModeData
                         },
+                        titan_pro_hybrid: {
+                          name: '🚀 台股泰坦 Pro 全武裝融合版 (核心股期免稅 × 衛星CBAS鎖損 × 47%閒置金RSI2快打)',
+                          long_only: titanProCalc?.customModeData,
+                          long_short: titanProCalc?.customModeData
+                        },
+                        futures_short_squeeze: {
+                          name: '🔥 台股個股期貨高券資比法人軋空與稅盾策略 (券資比>20% + 法人連買 + 35%保證金)',
+                          long_only: futuresSqueezeCalc?.customModeData,
+                          long_short: futuresSqueezeCalc?.customModeData
+                        },
                         global_liquid_titan_a: {
                           name: '👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 45/35/20敏銳動能 × 爆量滯漲過濾)',
                           long_only: globalCalc?.customModeData,
@@ -5809,7 +5900,7 @@ function StockDashboard() {
 
                   let activePeriodData = null;
 
-                  if (activeModelKey === 'titan_sovereign' || activeModelKey === 'global_liquid_titan_a') {
+                  if (['titan_sovereign', 'global_liquid_titan_a', 'titan_pro_hybrid', 'futures_short_squeeze'].includes(activeModelKey)) {
                     activePeriodData = getTitanPeriodData(activePeriodKey, marketBtStartYear, marketBtEndYear, activeModelKey);
                   }
 
@@ -5993,7 +6084,7 @@ function StockDashboard() {
                     tag: 'AI 演算法模型'
                   };
 
-                  const hasLongShortSupport = !['global_liquid_titan_a', 'titan_sovereign', 'etf_0020'].includes(activeModelKey) && Boolean(
+                  const hasLongShortSupport = !['global_liquid_titan_a', 'titan_pro_hybrid', 'titan_sovereign', 'futures_short_squeeze', 'etf_0020'].includes(activeModelKey) && Boolean(
                     activePeriodData?.models_detail?.[activeModelKey]?.long_short || activePeriodData?.long_short
                   );
 
@@ -6860,8 +6951,9 @@ function StockDashboard() {
                         }
 
                         const isGlobalTitan = activeModelKey === 'global_liquid_titan_a';
+                        const isAnyTitanModel = ['titan_sovereign', 'global_liquid_titan_a', 'titan_pro_hybrid', 'futures_short_squeeze'].includes(activeModelKey);
                         let titanTargetObj = null;
-                        if (activeModelKey === 'titan_sovereign' || isGlobalTitan) {
+                        if (isAnyTitanModel) {
                           titanTargetObj = is20ySelected
                             ? (getTitanPeriodData('20y', undefined, undefined, activeModelKey) || activePeriodData)
                             : (activePeriodData || getTitanPeriodData(activePeriodKey, undefined, undefined, activeModelKey));
@@ -6871,7 +6963,7 @@ function StockDashboard() {
                           }
                         }
 
-                        const activeBenchmarkObj = (isGlobalTitan || activeModelKey === 'titan_sovereign')
+                        const activeBenchmarkObj = isAnyTitanModel
                           ? (titanTargetObj?.benchmark || activePeriodData?.benchmark || historyTarget?.benchmark)
                           : historyTarget?.benchmark;
 
@@ -6900,8 +6992,14 @@ function StockDashboard() {
 
                         let activeHistYearly = activeHistModeData?.yearly || activePeriodData?.yearly || historyTarget?.yearly || [];
 
-                        if ((!activeHistYearly || activeHistYearly.length === 0) && (activeModelKey === 'titan_sovereign' || activeModelKey === 'global_liquid_titan_a')) {
-                          const sourceC = (activeModelKey === 'global_liquid_titan_a') ? globalTitanCurveData : titanCurveData;
+                        if ((!activeHistYearly || activeHistYearly.length === 0) && isAnyTitanModel) {
+                          const sourceC = (activeModelKey === 'global_liquid_titan_a')
+                            ? globalTitanCurveData
+                            : (activeModelKey === 'titan_pro_hybrid')
+                              ? titanProCurveData
+                              : (activeModelKey === 'futures_short_squeeze')
+                                ? futuresSqueezeCurveData
+                                : titanCurveData;
                           if (Array.isArray(sourceC) && sourceC.length > 0) {
                             const targetCurve = is20ySelected ? sourceC : sourceC.filter(p => p.date >= '20160101');
                             const years = [...new Set(targetCurve.map(p => p.year || (p.date ? p.date.slice(0, 4) : null)))].filter(Boolean).sort((a, b) => a - b);
@@ -7674,8 +7772,10 @@ function StockDashboard() {
                           activeModeData?.all_trades || 
                           selectedModelDetail?.all_trades || 
                           bt.all_titan_trades || 
-                          (activeModelKey === 'global_liquid_titan_a' ? (globalTitanTradesData || []) : []) ||
-                          (activeModelKey === 'titan_sovereign' ? (titanTradesData || []) : []) ||
+                          (activeModelKey === 'global_liquid_titan_a' ? (globalTitanTradesData || []) : null) ||
+                          (activeModelKey === 'titan_pro_hybrid' ? (titanProTradesData || []) : null) ||
+                          (activeModelKey === 'futures_short_squeeze' ? (futuresSqueezeTradesData || []) : null) ||
+                          (activeModelKey === 'titan_sovereign' ? (titanTradesData || []) : null) ||
                           bt.periods?.['20y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
                           bt.periods?.['10y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
                           []
@@ -7684,7 +7784,7 @@ function StockDashboard() {
                         // 動態計算當前選定區間之交易明細
                         const periodTrades = (trades && trades.length > 0)
                           ? trades
-                          : ((activeModelKey === 'titan_sovereign' || activeModelKey === 'global_liquid_titan_a') && allAvailableTrades && allAvailableTrades.length > 0
+                          : (['titan_sovereign', 'global_liquid_titan_a', 'titan_pro_hybrid', 'futures_short_squeeze'].includes(activeModelKey) && allAvailableTrades && allAvailableTrades.length > 0
                               ? allAvailableTrades.filter(t => {
                                   const d = String(t.exit_date || t.entry_date || '');
                                   if (!d) return true;

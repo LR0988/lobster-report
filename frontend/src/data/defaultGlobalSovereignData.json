@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "strategy_name": "全球高流動性泰坦旗艦【雙梯隊進攻版 DOE 終極冠軍：1號+22號交錯 × 40/30/30階梯 × 凸性動能(Conv=0.20) × 殘差Alpha(Res=0.15) × 雙頻寬幅(wBr60=0.25) × 爆量滯漲過濾】",
-  "generated_at": "2026-10-17 11:01:32",
+  "generated_at": "2026-10-17 13:54:45",
   "latest_data_date": "2026-10-16",
   "doe_config": {
     "execution_mode": "dual_tranche_1_and_22 (每月1號 A梯隊50% + 每月22號 B梯隊50%)",

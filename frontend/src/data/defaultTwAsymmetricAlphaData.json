@@ -2,7 +2,7 @@
   "status": "ok",
   "strategy_group": "⚡ 台股可轉債 (CB/CBAS) 主力鎖碼 × 強勢股 RSI(2) 急跌反彈狙擊",
   "latest_data_date": "2026-10-16",
-  "generated_at": "2026-10-17 11:27:17",
+  "generated_at": "2026-10-17 13:54:46",
   "data_source": "tw_stock.db (2016~2026 集保千張大戶 × 自營商避險買盤 × Connors RSI(2) 即時運算)",
   "summary_kpi": {
     "cbas_backtest_cagr_pct": 18.24,
@@ -304,6 +304,30 @@
       "signal_tag": "🔥 剛過轉換價・主力鎖碼"
     },
     {
+      "stock_id": "3443",
+      "stock_name": "創意",
+      "cb_code": "34432",
+      "cb_name": "創意二",
+      "industry": "半導體業",
+      "close": 7480.0,
+      "conv_price": 5907.78,
+      "parity": 126.61,
+      "cb_price": 132.26,
+      "premium_rate_pct": 4.46,
+      "cbas_quote": 33.46,
+      "cbas_cost_twd": 33460,
+      "effective_leverage": 3.0,
+      "est_cbas_roi_30pct": 104.9,
+      "whale_pct": 55.0,
+      "whale_diff_3w": 0.0,
+      "retail_diff_3w": 0.0,
+      "dealer_5d_lots": 0,
+      "inst_5d_lots": 826,
+      "rev_yoy_pct": 97.8,
+      "lock_score": 64.8,
+      "signal_tag": "🚀 主升段價內奔馳"
+    },
+    {
       "stock_id": "3711",
       "stock_name": "日月光投控",
       "cb_code": "37111",
@@ -422,30 +446,6 @@
       "rev_yoy_pct": 39.6,
       "lock_score": 62.9,
       "signal_tag": "🔥 剛過轉換價・主力鎖碼"
-    },
-    {
-      "stock_id": "6274",
-      "stock_name": "台燿",
-      "cb_code": "62741",
-      "cb_name": "台燿CB",
-      "industry": "電子零組件業",
-      "close": 1615.0,
-      "conv_price": 1404.08,
-      "parity": 115.02,
-      "cb_price": 123.22,
-      "premium_rate_pct": 7.13,
-      "cbas_quote": 24.42,
-      "cbas_cost_twd": 24420,
-      "effective_leverage": 4.1,
-      "est_cbas_roi_30pct": 126.3,
-      "whale_pct": 55.0,
-      "whale_diff_3w": 0.0,
-      "retail_diff_3w": 0.0,
-      "dealer_5d_lots": -607,
-      "inst_5d_lots": 1803,
-      "rev_yoy_pct": 114.8,
-      "lock_score": 62.0,
-      "signal_tag": "🔥 剛過轉換價・主力鎖碼"
     }
   ],
   "rsi2_sniper_picks": [
@@ -465,10 +465,10 @@
       "inst_5d_lots": 59,
       "entry_price": 874.0,
       "target_ma5_price": 935.0,
-      "stop_loss_price": 756.14,
+      "stop_loss_price": 748.35,
       "expected_rebound_pct": 6.98,
       "est_win_rate_pct": 82.9,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -486,11 +486,11 @@
       "rev_yoy_pct": 73.1,
       "inst_5d_lots": -398,
       "entry_price": 685.0,
-      "target_ma5_price": 715.82,
-      "stop_loss_price": 647.32,
-      "expected_rebound_pct": 4.5,
+      "target_ma5_price": 713.77,
+      "stop_loss_price": 616.5,
+      "expected_rebound_pct": 4.2,
       "est_win_rate_pct": 79.4,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -509,10 +509,10 @@
       "inst_5d_lots": -2687,
       "entry_price": 252.0,
       "target_ma5_price": 270.6,
-      "stop_loss_price": 216.2,
+      "stop_loss_price": 213.97,
       "expected_rebound_pct": 7.38,
       "est_win_rate_pct": 78.2,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -531,10 +531,10 @@
       "inst_5d_lots": -14304,
       "entry_price": 105.5,
       "target_ma5_price": 113.4,
-      "stop_loss_price": 93.03,
+      "stop_loss_price": 92.07,
       "expected_rebound_pct": 7.49,
       "est_win_rate_pct": 78.0,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -553,10 +553,10 @@
       "inst_5d_lots": 4700,
       "entry_price": 154.0,
       "target_ma5_price": 165.4,
-      "stop_loss_price": 115.68,
+      "stop_loss_price": 114.49,
       "expected_rebound_pct": 7.4,
       "est_win_rate_pct": 81.3,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -575,10 +575,10 @@
       "inst_5d_lots": -847,
       "entry_price": 277.5,
       "target_ma5_price": 297.9,
-      "stop_loss_price": 262.24,
+      "stop_loss_price": 249.75,
       "expected_rebound_pct": 7.35,
       "est_win_rate_pct": 77.7,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -596,11 +596,11 @@
       "rev_yoy_pct": 26.4,
       "inst_5d_lots": -60,
       "entry_price": 576.0,
-      "target_ma5_price": 601.92,
-      "stop_loss_price": 523.93,
-      "expected_rebound_pct": 4.5,
+      "target_ma5_price": 600.19,
+      "stop_loss_price": 518.4,
+      "expected_rebound_pct": 4.2,
       "est_win_rate_pct": 77.4,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -619,10 +619,10 @@
       "inst_5d_lots": -8500,
       "entry_price": 149.5,
       "target_ma5_price": 160.0,
-      "stop_loss_price": 102.63,
+      "stop_loss_price": 101.57,
       "expected_rebound_pct": 7.02,
       "est_win_rate_pct": 77.1,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -641,10 +641,10 @@
       "inst_5d_lots": -1058,
       "entry_price": 40.75,
       "target_ma5_price": 44.26,
-      "stop_loss_price": 31.06,
+      "stop_loss_price": 30.74,
       "expected_rebound_pct": 8.61,
       "est_win_rate_pct": 74.6,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -663,10 +663,10 @@
       "inst_5d_lots": -16303,
       "entry_price": 671.0,
       "target_ma5_price": 718.6,
-      "stop_loss_price": 614.22,
+      "stop_loss_price": 603.9,
       "expected_rebound_pct": 7.09,
       "est_win_rate_pct": 76.9,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -685,10 +685,10 @@
       "inst_5d_lots": 826,
       "entry_price": 7480.0,
       "target_ma5_price": 7918.0,
-      "stop_loss_price": 5907.78,
+      "stop_loss_price": 5846.88,
       "expected_rebound_pct": 5.86,
       "est_win_rate_pct": 80.3,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -707,10 +707,10 @@
       "inst_5d_lots": -769,
       "entry_price": 6400.0,
       "target_ma5_price": 6897.0,
-      "stop_loss_price": 5619.05,
+      "stop_loss_price": 5561.12,
       "expected_rebound_pct": 7.77,
       "est_win_rate_pct": 73.8,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "🎯 極端超賣 (RSI2 < 10) 強烈狙擊"
     },
     {
@@ -728,11 +728,11 @@
       "rev_yoy_pct": 88.5,
       "inst_5d_lots": -557,
       "entry_price": 609.0,
-      "target_ma5_price": 636.4,
-      "stop_loss_price": 518.2,
-      "expected_rebound_pct": 4.5,
+      "target_ma5_price": 635.2,
+      "stop_loss_price": 512.86,
+      "expected_rebound_pct": 4.3,
       "est_win_rate_pct": 75.0,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "⚡ 多頭急回縮量洗盤"
     },
     {
@@ -750,11 +750,11 @@
       "rev_yoy_pct": 80.0,
       "inst_5d_lots": 54,
       "entry_price": 6730.0,
-      "target_ma5_price": 7032.85,
-      "stop_loss_price": 5259.42,
-      "expected_rebound_pct": 4.5,
+      "target_ma5_price": 7012.66,
+      "stop_loss_price": 5205.2,
+      "expected_rebound_pct": 4.2,
       "est_win_rate_pct": 78.3,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "⚡ 多頭急回縮量洗盤"
     },
     {
@@ -773,10 +773,10 @@
       "inst_5d_lots": -19,
       "entry_price": 285.0,
       "target_ma5_price": 304.8,
-      "stop_loss_price": 239.71,
+      "stop_loss_price": 237.24,
       "expected_rebound_pct": 6.95,
       "est_win_rate_pct": 74.4,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "⚡ 多頭急回縮量洗盤"
     },
     {
@@ -794,11 +794,11 @@
       "rev_yoy_pct": 26.1,
       "inst_5d_lots": 1397,
       "entry_price": 349.0,
-      "target_ma5_price": 364.7,
-      "stop_loss_price": 305.33,
-      "expected_rebound_pct": 4.5,
+      "target_ma5_price": 364.4,
+      "stop_loss_price": 302.18,
+      "expected_rebound_pct": 4.41,
       "est_win_rate_pct": 77.7,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "⚡ 多頭急回縮量洗盤"
     },
     {
@@ -816,11 +816,11 @@
       "rev_yoy_pct": 25.7,
       "inst_5d_lots": 4906,
       "entry_price": 75.2,
-      "target_ma5_price": 78.58,
-      "stop_loss_price": 69.78,
-      "expected_rebound_pct": 4.49,
+      "target_ma5_price": 78.36,
+      "stop_loss_price": 67.68,
+      "expected_rebound_pct": 4.2,
       "est_win_rate_pct": 77.6,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "⚡ 多頭急回縮量洗盤"
     },
     {
@@ -839,10 +839,10 @@
       "inst_5d_lots": 4125,
       "entry_price": 54.9,
       "target_ma5_price": 59.2,
-      "stop_loss_price": 36.9,
+      "stop_loss_price": 36.52,
       "expected_rebound_pct": 7.83,
       "est_win_rate_pct": 75.1,
-      "hold_days_est": "3 ~ 5 個交易日 (觸及 5MA 停利)",
+      "hold_days_est": "平均 3.1 天 (站回 5MA 立即停利歸還泰坦現金池)",
       "urgency_tag": "⚡ 多頭急回縮量洗盤"
     }
   ],
@@ -1562,5 +1562,128 @@
       ]
     }
   },
-  "strategy_complement_note": "當【全球主權泰坦】或【台股波段策略】遇大盤震盪整理時，【RSI(2) 強勢股急跌反彈】專吃 3~5 天恐慌錯殺反彈，兩者呈現負相關互補；而【CBAS 可轉債選擇權】只需動用 5%~10% 小資金即可鎖死下檔風險、博取主力發債拉抬的 3~5 倍不對稱爆發！"
+  "titan_pro_yearly_comparison": [
+    {
+      "year": "2016",
+      "idle_cash_pct": 46.0,
+      "titan_orig_pct": -11.81,
+      "fut_sqz_pct": 5.43,
+      "rsi2_pct": 27.76,
+      "titan_pro_pct": 1.49,
+      "alpha_gain_pct": 13.3,
+      "gs_orig_pct": 114.0,
+      "gs_pro_pct": 122.13
+    },
+    {
+      "year": "2017",
+      "idle_cash_pct": 27.0,
+      "titan_orig_pct": 124.43,
+      "fut_sqz_pct": 2.67,
+      "rsi2_pct": 58.01,
+      "titan_pro_pct": 160.59,
+      "alpha_gain_pct": 36.16,
+      "gs_orig_pct": 80.4,
+      "gs_pro_pct": 96.77
+    },
+    {
+      "year": "2018",
+      "idle_cash_pct": 75.0,
+      "titan_orig_pct": -0.78,
+      "fut_sqz_pct": 7.66,
+      "rsi2_pct": -5.61,
+      "titan_pro_pct": -2.0,
+      "alpha_gain_pct": -1.22,
+      "gs_orig_pct": 29.1,
+      "gs_pro_pct": 29.43
+    },
+    {
+      "year": "2019",
+      "idle_cash_pct": 30.0,
+      "titan_orig_pct": 18.56,
+      "fut_sqz_pct": 113.3,
+      "rsi2_pct": 31.21,
+      "titan_pro_pct": 30.09,
+      "alpha_gain_pct": 11.53,
+      "gs_orig_pct": 28.0,
+      "gs_pro_pct": 46.56
+    },
+    {
+      "year": "2020",
+      "idle_cash_pct": 39.0,
+      "titan_orig_pct": 168.0,
+      "fut_sqz_pct": 102.44,
+      "rsi2_pct": 40.86,
+      "titan_pro_pct": 204.98,
+      "alpha_gain_pct": 36.98,
+      "gs_orig_pct": 85.4,
+      "gs_pro_pct": 102.9
+    },
+    {
+      "year": "2021",
+      "idle_cash_pct": 32.0,
+      "titan_orig_pct": 111.33,
+      "fut_sqz_pct": 46.97,
+      "rsi2_pct": 50.35,
+      "titan_pro_pct": 139.87,
+      "alpha_gain_pct": 28.54,
+      "gs_orig_pct": 218.0,
+      "gs_pro_pct": 231.93
+    },
+    {
+      "year": "2022",
+      "idle_cash_pct": 80.0,
+      "titan_orig_pct": -17.23,
+      "fut_sqz_pct": -24.96,
+      "rsi2_pct": 0.6,
+      "titan_pro_pct": -11.95,
+      "alpha_gain_pct": 5.28,
+      "gs_orig_pct": -13.7,
+      "gs_pro_pct": -13.58
+    },
+    {
+      "year": "2023",
+      "idle_cash_pct": 35.0,
+      "titan_orig_pct": 136.25,
+      "fut_sqz_pct": 49.98,
+      "rsi2_pct": 41.61,
+      "titan_pro_pct": 168.36,
+      "alpha_gain_pct": 32.11,
+      "gs_orig_pct": 242.0,
+      "gs_pro_pct": 255.2
+    },
+    {
+      "year": "2024",
+      "idle_cash_pct": 29.0,
+      "titan_orig_pct": 59.62,
+      "fut_sqz_pct": -9.92,
+      "rsi2_pct": 17.87,
+      "titan_pro_pct": 73.44,
+      "alpha_gain_pct": 13.82,
+      "gs_orig_pct": 101.7,
+      "gs_pro_pct": 103.73
+    },
+    {
+      "year": "2025",
+      "idle_cash_pct": 38.0,
+      "titan_orig_pct": 51.31,
+      "fut_sqz_pct": 137.75,
+      "rsi2_pct": 41.37,
+      "titan_pro_pct": 68.94,
+      "alpha_gain_pct": 17.63,
+      "gs_orig_pct": 9.2,
+      "gs_pro_pct": 29.73
+    },
+    {
+      "year": "2026",
+      "idle_cash_pct": 28.0,
+      "titan_orig_pct": 111.76,
+      "fut_sqz_pct": 91.92,
+      "rsi2_pct": 35.19,
+      "titan_pro_pct": 135.67,
+      "alpha_gain_pct": 23.91,
+      "gs_orig_pct": 220.4,
+      "gs_pro_pct": 234.66
+    }
+  ],
+  "strategy_complement_note": "當【台股泰坦 / 全球泰坦】帳上有 47% 閒置現金或遇大盤震盪時，【RSI(2) 強勢股急跌反彈】平均僅抱 3.1 天即站回 5MA 停利歸還現金池；而【CBAS 可轉債選擇權】則將衛星倉位下檔最大停損鎖死在 -4.8%，使泰坦 Pro 11年年化從 57.15% 躍升至 74.25% (402.5倍)！"
 }
