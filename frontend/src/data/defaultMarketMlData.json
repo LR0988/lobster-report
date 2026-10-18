@@ -6211,14 +6211,14 @@
         }
       }
     },
-    "global_liquid_titan_a": {
-      "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+    "global_liquid_titan_base": {
+      "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
       "description": "雙梯隊交錯(1號50%+22號50%) + 40/30/30固定階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 主權寬幅0.50/0.30",
       "metrics": {
-        "model_id": "global_liquid_titan_a",
-        "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+        "model_id": "global_liquid_titan_base",
+        "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
         "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-        "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+        "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
         "total_return_pct": 4816402.2,
         "cagr_pct": 60.63,
         "alpha_pct": 49.85,
@@ -13747,7 +13747,7 @@
       "importance_pct": 2.9
     }
   ],
-  "best_model_id": "global_liquid_titan_a",
+  "best_model_id": "global_liquid_titan_base",
   "labeling_info": {
     "tag": "👑 頂級量化標準",
     "method_id": "triple_barrier",
@@ -19792,7 +19792,7 @@
     "vol_term_ratio_5d_20d": 0.72,
     "nasdaq_sp500_ratio_chg20": 2.96
   },
-  "selected_model": "global_liquid_titan_a",
+  "selected_model": "global_liquid_titan_base",
   "support_resistance": {
     "r1": {
       "desc": "近 5 日震盪高點",
@@ -20157,10 +20157,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 227.05,
             "cagr_pct": 226.26,
             "alpha_pct": 215.48,
@@ -20401,10 +20401,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 227.05,
             "cagr_pct": 226.26,
             "alpha_pct": 215.48,
@@ -20645,9 +20645,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -20795,10 +20795,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 227.05,
               "cagr_pct": 226.26,
               "alpha_pct": 215.48,
@@ -20957,10 +20957,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 227.05,
               "cagr_pct": 226.26,
               "alpha_pct": 215.48,
@@ -21148,10 +21148,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 669.69,
             "cagr_pct": 97.41,
             "alpha_pct": 86.63,
@@ -21392,10 +21392,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 669.69,
             "cagr_pct": 97.41,
             "alpha_pct": 86.63,
@@ -21636,9 +21636,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -21786,10 +21786,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 669.69,
               "cagr_pct": 97.41,
               "alpha_pct": 86.63,
@@ -21948,10 +21948,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 669.69,
               "cagr_pct": 97.41,
               "alpha_pct": 86.63,
@@ -22139,10 +22139,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 1907.23,
             "cagr_pct": 82.14,
             "alpha_pct": 71.36,
@@ -22383,10 +22383,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 1907.23,
             "cagr_pct": 82.14,
             "alpha_pct": 71.36,
@@ -22627,9 +22627,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -22777,10 +22777,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 1907.23,
               "cagr_pct": 82.14,
               "alpha_pct": 71.36,
@@ -22939,10 +22939,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 1907.23,
               "cagr_pct": 82.14,
               "alpha_pct": 71.36,
@@ -23130,10 +23130,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 79824.98,
             "cagr_pct": 86.29,
             "alpha_pct": 75.51,
@@ -23374,10 +23374,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 79824.98,
             "cagr_pct": 86.29,
             "alpha_pct": 75.51,
@@ -52357,9 +52357,9 @@
               ]
             }
           },
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -52507,10 +52507,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 79824.98,
               "cagr_pct": 86.29,
               "alpha_pct": 75.51,
@@ -52669,10 +52669,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 79824.98,
               "cagr_pct": 86.29,
               "alpha_pct": 75.51,
@@ -56972,10 +56972,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 4816402.2,
             "cagr_pct": 60.63,
             "alpha_pct": 49.85,
@@ -57216,10 +57216,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 4816402.2,
             "cagr_pct": 60.63,
             "alpha_pct": 49.85,
@@ -87649,9 +87649,9 @@
               ]
             }
           },
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -87799,10 +87799,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 4816402.2,
               "cagr_pct": 60.63,
               "alpha_pct": 49.85,
@@ -87961,10 +87961,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 4816402.2,
               "cagr_pct": 60.63,
               "alpha_pct": 49.85,
@@ -95364,10 +95364,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 96.14,
             "cagr_pct": 97.7,
             "alpha_pct": 86.92,
@@ -95608,10 +95608,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 96.14,
             "cagr_pct": 97.7,
             "alpha_pct": 86.92,
@@ -95852,9 +95852,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -96002,10 +96002,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 96.14,
               "cagr_pct": 97.7,
               "alpha_pct": 86.92,
@@ -96164,10 +96164,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 96.14,
               "cagr_pct": 97.7,
               "alpha_pct": 86.92,
@@ -96355,10 +96355,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 39.5,
             "cagr_pct": 40.05,
             "alpha_pct": 29.27,
@@ -96599,10 +96599,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 39.5,
             "cagr_pct": 40.05,
             "alpha_pct": 29.27,
@@ -96843,9 +96843,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -96993,10 +96993,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 39.5,
               "cagr_pct": 40.05,
               "alpha_pct": 29.27,
@@ -97155,10 +97155,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 39.5,
               "cagr_pct": 40.05,
               "alpha_pct": 29.27,
@@ -97346,10 +97346,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 63.02,
             "cagr_pct": 63.51,
             "alpha_pct": 52.73,
@@ -97590,10 +97590,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 63.02,
             "cagr_pct": 63.51,
             "alpha_pct": 52.73,
@@ -97834,9 +97834,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -97984,10 +97984,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 63.02,
               "cagr_pct": 63.51,
               "alpha_pct": 52.73,
@@ -98146,10 +98146,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 63.02,
               "cagr_pct": 63.51,
               "alpha_pct": 52.73,
@@ -98337,10 +98337,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": -4.74,
             "cagr_pct": -4.75,
             "alpha_pct": -15.53,
@@ -98581,10 +98581,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": -4.74,
             "cagr_pct": -4.75,
             "alpha_pct": -15.53,
@@ -98825,9 +98825,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -98975,10 +98975,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": -4.74,
               "cagr_pct": -4.75,
               "alpha_pct": -15.53,
@@ -99137,10 +99137,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": -4.74,
               "cagr_pct": -4.75,
               "alpha_pct": -15.53,
@@ -99328,10 +99328,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 91.1,
             "cagr_pct": 91.87,
             "alpha_pct": 81.09,
@@ -99572,10 +99572,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 91.1,
             "cagr_pct": 91.87,
             "alpha_pct": 81.09,
@@ -99816,9 +99816,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -99966,10 +99966,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 91.1,
               "cagr_pct": 91.87,
               "alpha_pct": 81.09,
@@ -100128,10 +100128,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 91.1,
               "cagr_pct": 91.87,
               "alpha_pct": 81.09,
@@ -100319,10 +100319,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 14.74,
             "cagr_pct": 14.93,
             "alpha_pct": 4.15,
@@ -100563,10 +100563,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 14.74,
             "cagr_pct": 14.93,
             "alpha_pct": 4.15,
@@ -100807,9 +100807,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -100957,10 +100957,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 14.74,
               "cagr_pct": 14.93,
               "alpha_pct": 4.15,
@@ -101119,10 +101119,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 14.74,
               "cagr_pct": 14.93,
               "alpha_pct": 4.15,
@@ -101310,10 +101310,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 1.16,
             "cagr_pct": 1.17,
             "alpha_pct": -9.61,
@@ -101554,10 +101554,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 1.16,
             "cagr_pct": 1.17,
             "alpha_pct": -9.61,
@@ -101798,9 +101798,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -101948,10 +101948,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 1.16,
               "cagr_pct": 1.17,
               "alpha_pct": -9.61,
@@ -102110,10 +102110,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 1.16,
               "cagr_pct": 1.17,
               "alpha_pct": -9.61,
@@ -102301,10 +102301,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 40.23,
             "cagr_pct": 40.4,
             "alpha_pct": 29.62,
@@ -102545,10 +102545,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 40.23,
             "cagr_pct": 40.4,
             "alpha_pct": 29.62,
@@ -102789,9 +102789,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -102939,10 +102939,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 40.23,
               "cagr_pct": 40.4,
               "alpha_pct": 29.62,
@@ -103101,10 +103101,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 40.23,
               "cagr_pct": 40.4,
               "alpha_pct": 29.62,
@@ -103292,10 +103292,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 74.37,
             "cagr_pct": 74.98,
             "alpha_pct": 64.2,
@@ -103536,10 +103536,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 74.37,
             "cagr_pct": 74.98,
             "alpha_pct": 64.2,
@@ -103780,9 +103780,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -103930,10 +103930,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 74.37,
               "cagr_pct": 74.98,
               "alpha_pct": 64.2,
@@ -104092,10 +104092,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 74.37,
               "cagr_pct": 74.98,
               "alpha_pct": 64.2,
@@ -104283,10 +104283,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 47.46,
             "cagr_pct": 47.81,
             "alpha_pct": 37.03,
@@ -104527,10 +104527,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 47.46,
             "cagr_pct": 47.81,
             "alpha_pct": 37.03,
@@ -104771,9 +104771,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -104921,10 +104921,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 47.46,
               "cagr_pct": 47.81,
               "alpha_pct": 37.03,
@@ -105083,10 +105083,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 47.46,
               "cagr_pct": 47.81,
               "alpha_pct": 37.03,
@@ -105274,10 +105274,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 27.92,
             "cagr_pct": 28.12,
             "alpha_pct": 17.34,
@@ -105518,10 +105518,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 27.92,
             "cagr_pct": 28.12,
             "alpha_pct": 17.34,
@@ -105762,9 +105762,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -105912,10 +105912,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 27.92,
               "cagr_pct": 28.12,
               "alpha_pct": 17.34,
@@ -106074,10 +106074,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 27.92,
               "cagr_pct": 28.12,
               "alpha_pct": 17.34,
@@ -106265,10 +106265,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 118.25,
             "cagr_pct": 120.26,
             "alpha_pct": 109.48,
@@ -106509,10 +106509,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 118.25,
             "cagr_pct": 120.26,
             "alpha_pct": 109.48,
@@ -106753,9 +106753,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -106903,10 +106903,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 118.25,
               "cagr_pct": 120.26,
               "alpha_pct": 109.48,
@@ -107065,10 +107065,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 118.25,
               "cagr_pct": 120.26,
               "alpha_pct": 109.48,
@@ -107256,10 +107256,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 78.18,
             "cagr_pct": 79.68,
             "alpha_pct": 68.9,
@@ -107500,10 +107500,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 78.18,
             "cagr_pct": 79.68,
             "alpha_pct": 68.9,
@@ -107744,9 +107744,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -107894,10 +107894,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 78.18,
               "cagr_pct": 79.68,
               "alpha_pct": 68.9,
@@ -108056,10 +108056,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 78.18,
               "cagr_pct": 79.68,
               "alpha_pct": 68.9,
@@ -108247,10 +108247,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 23.64,
             "cagr_pct": 23.8,
             "alpha_pct": 13.02,
@@ -108491,10 +108491,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 23.64,
             "cagr_pct": 23.8,
             "alpha_pct": 13.02,
@@ -108735,9 +108735,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -108885,10 +108885,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 23.64,
               "cagr_pct": 23.8,
               "alpha_pct": 13.02,
@@ -109047,10 +109047,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 23.64,
               "cagr_pct": 23.8,
               "alpha_pct": 13.02,
@@ -109238,10 +109238,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 28.02,
             "cagr_pct": 28.22,
             "alpha_pct": 17.44,
@@ -109482,10 +109482,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 28.02,
             "cagr_pct": 28.22,
             "alpha_pct": 17.44,
@@ -109726,9 +109726,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -109876,10 +109876,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 28.02,
               "cagr_pct": 28.22,
               "alpha_pct": 17.44,
@@ -110038,10 +110038,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 28.02,
               "cagr_pct": 28.22,
               "alpha_pct": 17.44,
@@ -110229,10 +110229,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 81.19,
             "cagr_pct": 81.56,
             "alpha_pct": 70.78,
@@ -110473,10 +110473,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 81.19,
             "cagr_pct": 81.56,
             "alpha_pct": 70.78,
@@ -110717,9 +110717,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -110867,10 +110867,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 81.19,
               "cagr_pct": 81.56,
               "alpha_pct": 70.78,
@@ -111029,10 +111029,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 81.19,
               "cagr_pct": 81.56,
               "alpha_pct": 70.78,
@@ -111220,10 +111220,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 216.5,
             "cagr_pct": 220.82,
             "alpha_pct": 210.04,
@@ -111464,10 +111464,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 216.5,
             "cagr_pct": 220.82,
             "alpha_pct": 210.04,
@@ -111708,9 +111708,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -111858,10 +111858,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 216.5,
               "cagr_pct": 220.82,
               "alpha_pct": 210.04,
@@ -112020,10 +112020,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 216.5,
               "cagr_pct": 220.82,
               "alpha_pct": 210.04,
@@ -112211,10 +112211,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": -13.35,
             "cagr_pct": -13.5,
             "alpha_pct": -24.28,
@@ -112455,10 +112455,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": -13.35,
             "cagr_pct": -13.5,
             "alpha_pct": -24.28,
@@ -112699,9 +112699,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -112849,10 +112849,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": -13.35,
               "cagr_pct": -13.5,
               "alpha_pct": -24.28,
@@ -113011,10 +113011,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": -13.35,
               "cagr_pct": -13.5,
               "alpha_pct": -24.28,
@@ -113202,10 +113202,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 238.36,
             "cagr_pct": 244.42,
             "alpha_pct": 233.64,
@@ -113446,10 +113446,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 238.36,
             "cagr_pct": 244.42,
             "alpha_pct": 233.64,
@@ -113690,9 +113690,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -113840,10 +113840,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 238.36,
               "cagr_pct": 244.42,
               "alpha_pct": 233.64,
@@ -114002,10 +114002,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 238.36,
               "cagr_pct": 244.42,
               "alpha_pct": 233.64,
@@ -114193,10 +114193,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 96.08,
             "cagr_pct": 96.53,
             "alpha_pct": 85.75,
@@ -114437,10 +114437,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 96.08,
             "cagr_pct": 96.53,
             "alpha_pct": 85.75,
@@ -114681,9 +114681,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -114831,10 +114831,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 96.08,
               "cagr_pct": 96.53,
               "alpha_pct": 85.75,
@@ -114993,10 +114993,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 96.08,
               "cagr_pct": 96.53,
               "alpha_pct": 85.75,
@@ -115184,10 +115184,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 5.51,
             "cagr_pct": 5.54,
             "alpha_pct": -5.24,
@@ -115428,10 +115428,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 5.51,
             "cagr_pct": 5.54,
             "alpha_pct": -5.24,
@@ -115672,9 +115672,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -115822,10 +115822,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 5.51,
               "cagr_pct": 5.54,
               "alpha_pct": -5.24,
@@ -115984,10 +115984,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 5.51,
               "cagr_pct": 5.54,
               "alpha_pct": -5.24,
@@ -116175,10 +116175,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 199.11,
             "cagr_pct": 333.13,
             "alpha_pct": 322.35,
@@ -116419,10 +116419,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 199.11,
             "cagr_pct": 333.13,
             "alpha_pct": 322.35,
@@ -116663,9 +116663,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -116813,10 +116813,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 199.11,
               "cagr_pct": 333.13,
               "alpha_pct": 322.35,
@@ -116975,10 +116975,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 199.11,
               "cagr_pct": 333.13,
               "alpha_pct": 322.35,
@@ -117166,10 +117166,10 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 586.21,
             "cagr_pct": 101.51,
             "alpha_pct": 90.73,
@@ -117410,10 +117410,10 @@
         ],
         "comparison_long_short": [
           {
-            "model_id": "global_liquid_titan_a",
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_id": "global_liquid_titan_base",
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-            "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+            "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "total_return_pct": 586.21,
             "cagr_pct": 101.51,
             "alpha_pct": 90.73,
@@ -117654,9 +117654,9 @@
         ],
         "benchmark_max_drawdown_pct": null,
         "models_detail": {
-          "global_liquid_titan_a": {
-            "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
-            "model_id": "global_liquid_titan_a",
+          "global_liquid_titan_base": {
+            "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
+            "model_id": "global_liquid_titan_base",
             "open_positions": [
               {
                 "stock_id": "MRNA",
@@ -117804,10 +117804,10 @@
               }
             ],
             "long_only": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 586.21,
               "cagr_pct": 101.51,
               "alpha_pct": 90.73,
@@ -117966,10 +117966,10 @@
               ]
             },
             "long_short": {
-              "model_id": "global_liquid_titan_a",
-              "name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_id": "global_liquid_titan_base",
+              "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "short_name": "👑 全球泰坦(雙梯隊進攻版)",
-              "model_name": "👑 全球高流動性泰坦旗艦 (雙梯隊進攻版：1號+22號交錯 × 40/30/30 × 爆量滯漲過濾)",
+              "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
               "total_return_pct": 586.21,
               "cagr_pct": 101.51,
               "alpha_pct": 90.73,
@@ -120646,7 +120646,7 @@
         "trading_days": 247
       }
     ],
-    "selected_model_id": "global_liquid_titan_a",
+    "selected_model_id": "global_liquid_titan_base",
     "default_period_key": "10y",
     "titan_open_positions": [
       {

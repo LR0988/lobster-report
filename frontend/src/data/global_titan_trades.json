@@ -1209,19 +1209,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20250602",
-    "exit_date": "20250701",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "SPOT",
     "stock_name": "SPOT",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -1298,19 +1285,6 @@
     "holding_days": 23,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20250501",
-    "exit_date": "20250602",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "SPOT",
@@ -2639,32 +2613,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20231101",
-    "exit_date": "20231201",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20231002",
-    "exit_date": "20231101",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "2382.TW",
     "stock_name": "廣達 (AI 伺服器代工)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -2741,19 +2689,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230901",
-    "exit_date": "20231002",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "3231.TW",
@@ -2990,19 +2925,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230601",
-    "exit_date": "20230703",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "SMCI",
     "stock_name": "美超微 (Supermicro)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -3079,19 +3001,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230501",
-    "exit_date": "20230601",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "1513.TW",
@@ -3172,19 +3081,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230403",
-    "exit_date": "20230501",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "1513.TW",
     "stock_name": "1513.TW",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -3261,19 +3157,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230301",
-    "exit_date": "20230403",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "8996.TW",
@@ -3354,19 +3237,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230201",
-    "exit_date": "20230301",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "8996.TW",
     "stock_name": "高力 (Kaori 水冷散熱飆股)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -3443,19 +3313,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20230103",
-    "exit_date": "20230201",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "8996.TW",
@@ -3536,19 +3393,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20221201",
-    "exit_date": "20230103",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "8996.TW",
     "stock_name": "高力 (Kaori 水冷散熱飆股)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -3586,97 +3430,6 @@
     "holding_days": 23,
     "exit_reason": "🛡️ 🅱️ B梯隊(22號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20221101",
-    "exit_date": "20221201",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20221003",
-    "exit_date": "20221101",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20220901",
-    "exit_date": "20221003",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20220801",
-    "exit_date": "20220901",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20220701",
-    "exit_date": "20220801",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20220601",
-    "exit_date": "20220701",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20220502",
-    "exit_date": "20220601",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "2609.TW",
@@ -3755,19 +3508,6 @@
     "holding_days": 24,
     "exit_reason": "🛡️ 🅱️ B梯隊(22號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20220301",
-    "exit_date": "20220401",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "2603.TW",
@@ -5330,32 +5070,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20200501",
-    "exit_date": "20200601",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20200401",
-    "exit_date": "20200501",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "AMD",
     "stock_name": "超微半導體 (AMD)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -6292,19 +6006,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20190301",
-    "exit_date": "20190401",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "6669.TW",
     "stock_name": "緯穎 (AI 伺服器巨頭)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -6383,19 +6084,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20190201",
-    "exit_date": "20190301",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "6669.TW",
     "stock_name": "緯穎 (AI 伺服器巨頭)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -6433,45 +6121,6 @@
     "holding_days": 24,
     "exit_reason": "🛡️ 🅱️ B梯隊(22號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20190102",
-    "exit_date": "20190201",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20181203",
-    "exit_date": "20190102",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20181101",
-    "exit_date": "20181203",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "LULU",
@@ -6940,19 +6589,6 @@
     "holding_days": 22,
     "exit_reason": "🛡️ 🅰️ A梯隊(1號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20180402",
-    "exit_date": "20180501",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "3443.TW",
@@ -8593,19 +8229,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160701",
-    "exit_date": "20160801",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "NVDA",
     "stock_name": "輝達 (NVIDIA AI算力之王)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -8682,19 +8305,6 @@
     "holding_days": 23,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160601",
-    "exit_date": "20160701",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "NVDA",
@@ -8775,19 +8385,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160502",
-    "exit_date": "20160601",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "NVDA",
     "stock_name": "輝達 (NVIDIA AI算力之王)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -8866,19 +8463,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160401",
-    "exit_date": "20160502",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "NVDA",
     "stock_name": "輝達 (NVIDIA AI算力之王)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -8918,45 +8502,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160301",
-    "exit_date": "20160401",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160201",
-    "exit_date": "20160301",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20160104",
-    "exit_date": "20160201",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "AMZN",
     "stock_name": "亞馬遜 (Amazon)",
     "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
@@ -8994,19 +8539,6 @@
     "holding_days": 24,
     "exit_reason": "🛡️ 🅰️ A梯隊(1號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20151201",
-    "exit_date": "20160104",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "NVDA",
@@ -9087,19 +8619,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20151102",
-    "exit_date": "20151201",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "NVDA",
     "stock_name": "輝達 (NVIDIA AI算力之王)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -9139,32 +8658,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20151001",
-    "exit_date": "20151102",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20150901",
-    "exit_date": "20151001",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "NFLX",
     "stock_name": "NFLX",
     "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
@@ -9202,19 +8695,6 @@
     "holding_days": 22,
     "exit_reason": "🛡️ 🅰️ A梯隊(1號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20150803",
-    "exit_date": "20150901",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "PANW",
@@ -11089,19 +10569,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20130603",
-    "exit_date": "20130701",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "GILD",
     "stock_name": "GILD",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -11178,19 +10645,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20130501",
-    "exit_date": "20130603",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "CHTR",
@@ -11271,19 +10725,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20130401",
-    "exit_date": "20130501",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "NFLX",
     "stock_name": "NFLX",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -11360,19 +10801,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20130301",
-    "exit_date": "20130401",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "ABEV",
@@ -11453,19 +10881,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20130201",
-    "exit_date": "20130301",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "GILD",
     "stock_name": "GILD",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -11542,19 +10957,6 @@
     "holding_days": 23,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20130102",
-    "exit_date": "20130201",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "CX",
@@ -11635,19 +11037,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20121203",
-    "exit_date": "20130102",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "REGN",
     "stock_name": "REGN",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -11724,19 +11113,6 @@
     "holding_days": 23,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20121101",
-    "exit_date": "20121203",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "REGN",
@@ -11817,19 +11193,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20121001",
-    "exit_date": "20121101",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "REGN",
     "stock_name": "REGN",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -11906,19 +11269,6 @@
     "holding_days": 21,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120903",
-    "exit_date": "20121001",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "ROST",
@@ -11999,19 +11349,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120801",
-    "exit_date": "20120903",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "ROST",
     "stock_name": "ROST",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -12090,32 +11427,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120702",
-    "exit_date": "20120801",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120601",
-    "exit_date": "20120702",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "REGN",
     "stock_name": "REGN",
     "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
@@ -12153,19 +11464,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120501",
-    "exit_date": "20120601",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "MNST",
@@ -12246,19 +11544,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120402",
-    "exit_date": "20120501",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "REGN",
     "stock_name": "REGN",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -12335,19 +11620,6 @@
     "holding_days": 23,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120301",
-    "exit_date": "20120402",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "REGN",
@@ -12428,19 +11700,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120201",
-    "exit_date": "20120301",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "REGN",
     "stock_name": "REGN",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -12478,71 +11737,6 @@
     "holding_days": 23,
     "exit_reason": "🅱️ B梯隊(22號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20120102",
-    "exit_date": "20120201",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20111201",
-    "exit_date": "20120102",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20111101",
-    "exit_date": "20111201",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20111003",
-    "exit_date": "20111101",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20110901",
-    "exit_date": "20111003",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "BIIB",
@@ -13442,19 +12636,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100901",
-    "exit_date": "20101001",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "2609.TW",
     "stock_name": "陽明海運 (貨櫃航運)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -13533,19 +12714,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100802",
-    "exit_date": "20100901",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "2609.TW",
     "stock_name": "陽明海運 (貨櫃航運)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -13585,32 +12753,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100701",
-    "exit_date": "20100802",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100601",
-    "exit_date": "20100701",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "LULU",
     "stock_name": "LULU",
     "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
@@ -13648,19 +12790,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100503",
-    "exit_date": "20100601",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "SMCI",
@@ -13741,19 +12870,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100401",
-    "exit_date": "20100503",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "8996.TW",
     "stock_name": "高力 (Kaori 水冷散熱飆股)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -13830,19 +12946,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100301",
-    "exit_date": "20100401",
-    "entry_price": 100.0,
-    "exit_price": 107.5,
-    "return_pct": 7.5,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "8996.TW",
@@ -13923,19 +13026,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100201",
-    "exit_date": "20100301",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "LULU",
     "stock_name": "LULU",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -14012,19 +13102,6 @@
     "holding_days": 21,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20100104",
-    "exit_date": "20100201",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "AMD",
@@ -14105,19 +13182,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20091201",
-    "exit_date": "20100104",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "3017.TW",
     "stock_name": "奇鋐 (AI 水冷散熱龍頭)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -14194,19 +13258,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20091102",
-    "exit_date": "20091201",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "3017.TW",
@@ -14287,19 +13338,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20091001",
-    "exit_date": "20091102",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "2382.TW",
     "stock_name": "廣達 (AI 伺服器代工)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -14376,19 +13414,6 @@
     "holding_days": 23,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090901",
-    "exit_date": "20091001",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "MU",
@@ -14469,19 +13494,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090803",
-    "exit_date": "20090901",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "8996.TW",
     "stock_name": "高力 (Kaori 水冷散熱飆股)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -14558,19 +13570,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090701",
-    "exit_date": "20090803",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "8996.TW",
@@ -14651,19 +13650,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090601",
-    "exit_date": "20090701",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "8996.TW",
     "stock_name": "高力 (Kaori 水冷散熱飆股)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -14742,19 +13728,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090501",
-    "exit_date": "20090601",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
     "stock_id": "8996.TW",
     "stock_name": "高力 (Kaori 水冷散熱飆股)",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -14794,136 +13767,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090401",
-    "exit_date": "20090501",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090302",
-    "exit_date": "20090401",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090202",
-    "exit_date": "20090302",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20090102",
-    "exit_date": "20090202",
-    "entry_price": 100.0,
-    "exit_price": 109.8,
-    "return_pct": 9.8,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20081201",
-    "exit_date": "20090102",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20081103",
-    "exit_date": "20081201",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20081001",
-    "exit_date": "20081103",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080901",
-    "exit_date": "20081001",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080801",
-    "exit_date": "20080901",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 3 極端黑天鵝 (回檔>22%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080701",
-    "exit_date": "20080801",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
     "stock_id": "MA",
     "stock_name": "MA",
     "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
@@ -14961,19 +13804,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080602",
-    "exit_date": "20080701",
-    "entry_price": 100.0,
-    "exit_price": 95.0,
-    "return_pct": -5.0,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
   },
   {
     "stock_id": "PBR",
@@ -15054,19 +13884,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080501",
-    "exit_date": "20080602",
-    "entry_price": 100.0,
-    "exit_price": 95.0,
-    "return_pct": -5.0,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
     "stock_id": "PBR",
     "stock_name": "PBR",
     "role": "🅱️ B梯隊(22號) 👑 第1王者(40%)",
@@ -15145,45 +13962,6 @@
     "leader": false
   },
   {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080401",
-    "exit_date": "20080501",
-    "entry_price": 100.0,
-    "exit_price": 95.0,
-    "return_pct": -5.0,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080303",
-    "exit_date": "20080401",
-    "entry_price": 100.0,
-    "exit_price": 95.0,
-    "return_pct": -5.0,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 2 大幅修正 (回檔>15%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080201",
-    "exit_date": "20080303",
-    "entry_price": 100.0,
-    "exit_price": 94.5,
-    "return_pct": -5.5,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
-  },
-  {
     "stock_id": "MA",
     "stock_name": "MA",
     "role": "🅰️ A梯隊(1號) 👑 第1王者(40%)",
@@ -15221,19 +13999,6 @@
     "holding_days": 23,
     "exit_reason": "🛡️ 🅰️ A梯隊(1號) 寬幅預警 (70% 倉位)",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20080102",
-    "exit_date": "20080201",
-    "entry_price": 100.0,
-    "exit_price": 95.0,
-    "return_pct": -5.0,
-    "holding_days": 15,
-    "exit_reason": "觸及-5.5%停損防禦",
-    "leader": true
   },
   {
     "stock_id": "PBR",
@@ -15312,19 +14077,6 @@
     "holding_days": 22,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20071203",
-    "exit_date": "20080102",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "VALE",
@@ -16573,19 +15325,6 @@
     "holding_days": 24,
     "exit_reason": "🅰️ A梯隊(1號) 滿月輪動調倉",
     "leader": false
-  },
-  {
-    "stock_id": "0050.TW / SPY",
-    "stock_name": "🎯 階梯乾粉抄底 (Tier 1 正常波段拉回 (回檔>8%))",
-    "role": "🎯 乾粉特價收割",
-    "entry_date": "20060801",
-    "exit_date": "20060901",
-    "entry_price": 100.0,
-    "exit_price": 105.2,
-    "return_pct": 5.2,
-    "holding_days": 15,
-    "exit_reason": "站回均線或達標(+7%)獲利了結",
-    "leader": true
   },
   {
     "stock_id": "ILMN",

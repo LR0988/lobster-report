@@ -526,62 +526,23 @@ export default function GlobalSovereignDashboard() {
     };
   }, [txHistory, usdFx]);
 
-  // 雙梯隊調倉計算模式: 'flagship_70' (70% 雙隊核心進攻 + 30% 乾粉池 - 推薦旗艦) | 'tranche_a_35' (1號 A梯隊 35%) | 'tranche_b_35' (22號 B梯隊 35%) | 'full_100' (100% 雙隊滿倉 - 無乾粉基準) | 'tranche_a_50' (1號 A梯隊 50%) | 'tranche_b_50' (22號 B梯隊 50%)
-  const [rebalanceMode, setRebalanceMode] = useState('flagship_70');
+  // 雙梯隊調倉計算模式: 'full_100' (100% 雙隊滿倉 - 純進攻旗艦基準) | 'tranche_a_50' (1號 A梯隊 50%) | 'tranche_b_50' (22號 B梯隊 50%)
+  const [rebalanceMode, setRebalanceMode] = useState('full_100');
 
-  // 作戰指揮艙視角: 'all' (雙核統一看板) | 'titan_attack' (70% 雙梯隊進攻艙) | 'dry_powder' (30% 乾粉抄底作戰艙)
+  // 作戰指揮艙視角: 'all' (雙梯隊總覽全屏) | 'titan_a' (1號 A梯隊 50%) | 'titan_b' (22號 B梯隊 50%)
   const [dashboardStationView, setDashboardStationView] = useState('all');
 
-  // 持倉篩選器: 'all' | 'titan' | 'dry_powder'
+  // 持倉篩選器: 'all' | 'titan'
   const [positionFilter, setPositionFilter] = useState('all');
-
-  // 乾粉即時試算參考成本價與標的
-  const [dryPowderCalcTicker, setDryPowderCalcTicker] = useState('QQQ');
-  const [dryPowderCalcPrice, setDryPowderCalcPrice] = useState(595.0);
-
-  // 一鍵帶入乾粉抄底建倉
-  const handleOpenQuickDryPowderBuy = (targetTicker = dryPowderCalcTicker, targetTier = 1, customPrice = null) => {
-    const isQqq = targetTicker === 'QQQ';
-    const refPrice = Number(customPrice) > 0 ? Number(customPrice) : (Number(dryPowderCalcPrice) > 0 ? Number(dryPowderCalcPrice) : (isQqq ? 595.0 : 585.0));
-    const dryPowderPoolTwd = totalNetAssetsTwd * 0.3;
-    const tierPct = targetTier === 1 ? 0.30 : (targetTier === 2 ? 0.30 : 0.40);
-    const tierTwd = dryPowderPoolTwd * tierPct;
-    const tierUsd = tierTwd / (usdFx || 32.5);
-    const recShares = Math.max(1, Math.floor(tierUsd / refPrice));
-
-    setEditPosModal({
-      open: true,
-      isNew: true,
-      id: `pos_drypowder_${Date.now()}`,
-      ticker: targetTicker,
-      name: isQqq ? 'Invesco 納斯達克100 ETF (QQQ)' : 'SPDR 標普500 ETF (SPY)',
-      market: '美股 (NASDAQ)',
-      currency: 'USD',
-      role: `💎 乾粉第${targetTier}階抄底 (${targetTier === 3 ? 12 : 9}%總資產)`,
-      shares: String(recShares),
-      entry_price: String(refPrice),
-      current_price: String(refPrice),
-      entry_date: new Date().toISOString().split('T')[0],
-      entry_fee: '5',
-      stop_loss_price: String((refPrice * 0.92).toFixed(2)),
-      stop_condition: 'RSI(3) > 70 反彈超買，或獲利 +5%~+8% 立即全數平倉退回定存',
-      syncBuyTx: true
-    });
-  };
 
   const titanPositions = useMemo(() => {
     return userPositions.filter(p => !p.role?.includes('乾粉') && p.ticker !== 'QQQ' && p.ticker !== 'SPY');
   }, [userPositions]);
 
-  const dryPowderPositions = useMemo(() => {
-    return userPositions.filter(p => p.role?.includes('乾粉') || p.ticker === 'QQQ' || p.ticker === 'SPY');
-  }, [userPositions]);
-
   const displayedPositions = useMemo(() => {
     if (positionFilter === 'titan') return titanPositions;
-    if (positionFilter === 'dry_powder') return dryPowderPositions;
     return userPositions;
-  }, [userPositions, positionFilter, titanPositions, dryPowderPositions]);
+  }, [userPositions, positionFilter, titanPositions]);
 
   // 雙梯隊時序自動導航計算 (每月 1 號 A 梯隊 + 每月 22 號 B 梯隊)
   const dualTrancheGuide = useMemo(() => {
@@ -628,33 +589,21 @@ export default function GlobalSovereignDashboard() {
     const activeTopPicks = currentPicks.filter(p => p.is_active);
     const suggestions = [];
 
-    let budgetMultiplier = 0.7;
-    let modePrefix = '👑 70%雙隊旗艦';
-    let tolerancePct = 3.5;
+    let budgetMultiplier = 1.0;
+    let modePrefix = '🔥 100%雙隊滿倉';
+    let tolerancePct = 5.0;
 
-    if (rebalanceMode === 'flagship_70') {
-      budgetMultiplier = 0.7;
-      modePrefix = '👑 70%雙隊旗艦';
-      tolerancePct = 3.5;
-    } else if (rebalanceMode === 'tranche_a_35') {
-      budgetMultiplier = 0.35;
-      modePrefix = '🅰️ A梯隊(35%進攻)';
-      tolerancePct = 2.0;
-    } else if (rebalanceMode === 'tranche_b_35') {
-      budgetMultiplier = 0.35;
-      modePrefix = '🅱️ B梯隊(35%進攻)';
-      tolerancePct = 2.0;
-    } else if (rebalanceMode === 'full_100') {
+    if (rebalanceMode === 'full_100') {
       budgetMultiplier = 1.0;
       modePrefix = '🔥 100%雙隊滿倉';
       tolerancePct = 5.0;
     } else if (rebalanceMode === 'tranche_a_50') {
       budgetMultiplier = 0.5;
-      modePrefix = '🅰️ A梯隊(50%半倉)';
+      modePrefix = '🅰️ A梯隊(50%定錨)';
       tolerancePct = 2.5;
     } else if (rebalanceMode === 'tranche_b_50') {
       budgetMultiplier = 0.5;
-      modePrefix = '🅱️ B梯隊(50%半倉)';
+      modePrefix = '🅱️ B梯隊(50%定錨)';
       tolerancePct = 2.5;
     }
 
@@ -1543,7 +1492,7 @@ export default function GlobalSovereignDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球高流動性泰坦旗艦
+              👑 全球高流動性主權泰坦 (純雙梯隊進攻版)
             </h3>
             <span style={{
               fontSize: '0.78rem',
@@ -1560,10 +1509,10 @@ export default function GlobalSovereignDashboard() {
               🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
             </span>
             <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              👑 全球高流動性泰坦旗艦 (雙梯隊進攻 × 30% 波動階梯乾粉互補版)
+              🚀 100% 雙梯隊滿額進攻 (A隊50% + B隊50%)
             </span>
             <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22.8年 CAGR <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.cagr || 68.21}% ({Math.round(data?.kpi?.scheme_a?.mult || 133713).toLocaleString()}倍)</strong> | 月頻MDD <strong style={{ color: '#FBBF24' }}>{data?.kpi?.scheme_a?.mdd || -28.37}%</strong> | Calmar <strong style={{ color: '#60A5FA' }}>{data?.kpi?.scheme_a?.calmar || 2.404}</strong> | Sharpe {data?.kpi?.scheme_a?.sharpe || 1.48} | Sortino {data?.kpi?.scheme_a?.sortino || 3.42} | 年度勝率 <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.win_rate || 95.5}% (22年贏21年)</strong> | 2022熊市逆轉 <strong style={{ color: '#34D399' }}>+34.54%</strong>
+              22.8年 CAGR <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.cagr || 60.47}% ({Math.round(data?.kpi?.scheme_a?.mult || 48165).toLocaleString()}倍)</strong> | 月頻MDD <strong style={{ color: '#FBBF24' }}>{data?.kpi?.scheme_a?.mdd || -28.37}%</strong> | Calmar <strong style={{ color: '#60A5FA' }}>{data?.kpi?.scheme_a?.calmar || 2.13}</strong> | Sharpe {data?.kpi?.scheme_a?.sharpe || 1.35} | Sortino {data?.kpi?.scheme_a?.sortino || 3.05} | 年度勝率 <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.win_rate || 91.3}% (23年贏21年)</strong> | 2008金融海嘯僅 <strong style={{ color: '#FBBF24' }}>-4.07%</strong>
             </span>
           </div>
 
@@ -1626,19 +1575,19 @@ export default function GlobalSovereignDashboard() {
 
           {/* 雙梯隊股票市值 */}
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #6366F1' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📊 雙梯隊股票部位 (目標 70%)</div>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📊 雙梯隊股票部位 (目標 100%)</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#A5B4FC', fontFamily: 'monospace' }}>
               NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}
             </div>
             <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-              目前佔比: {totalNetAssetsTwd > 0 ? ((totalStockMarketValTwd / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (目標 NT$ {Math.round(totalNetAssetsTwd * 0.7).toLocaleString()})
+              目前佔比: {totalNetAssetsTwd > 0 ? ((totalStockMarketValTwd / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (滿倉目標 NT$ {Math.round(totalNetAssetsTwd).toLocaleString()})
             </div>
           </div>
 
-          {/* 30% 乾粉儲備池 */}
+          {/* 閒置資金與活期儲備 */}
           <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
-              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💎 乾粉抄底池 (目標 30%)</span>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💵 閒置現金與儲備池</span>
               <button
                 onClick={() => { setCashActionType('deposit'); setCashModalOpen(true); }}
                 style={{ background: 'rgba(16, 185, 129, 0.2)', border: 'none', color: '#34D399', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '3px', cursor: 'pointer' }}
@@ -1650,7 +1599,7 @@ export default function GlobalSovereignDashboard() {
               NT$ {Math.round(idleCash).toLocaleString()}
             </div>
             <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-              目前佔比: {totalNetAssetsTwd > 0 ? ((idleCash / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (目標 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()})
+              目前佔比: {totalNetAssetsTwd > 0 ? ((idleCash / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (待命中儲備金)
             </div>
           </div>
 
@@ -1678,7 +1627,7 @@ export default function GlobalSovereignDashboard() {
         </div>
       </div>
 
-      {/* 🎛️ 雙核全視角作戰指揮切換台 (Unified Command Station Switcher) */}
+      {/* 🎛️ 雙梯隊全視角作戰指揮切換台 (Dual-Tranche Unified Command Station) */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -1698,11 +1647,11 @@ export default function GlobalSovereignDashboard() {
             <div style={{ fontWeight: 'bold', fontSize: '0.98rem', color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               作戰指揮艙視角切換
               <span style={{ fontSize: '0.72rem', background: 'rgba(56, 189, 248, 0.2)', color: '#38BDF8', padding: '1px 6px', borderRadius: '4px' }}>
-                全球主權泰坦 × 乾粉雙核協同
+                純雙梯隊滿額進攻旗艦版
               </span>
             </div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              隨意切換「雙核統一覧」、「70% 雙梯隊進攻」與「30% 乾粉抄底」，介面直覺、操作一目了然。
+              每月 1 號 A 梯隊 (50%) 與 22 號 B 梯隊 (50%) 交錯定錨，解鎖 100% 滿倉複利動能。
             </div>
           </div>
         </div>
@@ -1734,11 +1683,11 @@ export default function GlobalSovereignDashboard() {
               transition: 'all 0.15s ease'
             }}
           >
-            <span>🌐</span> 雙核總覽全屏
+            <span>🌐</span> 雙梯隊總覽全屏
           </button>
           <button
             type="button"
-            onClick={() => setDashboardStationView('titan_attack')}
+            onClick={() => setDashboardStationView('titan_a')}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -1749,17 +1698,17 @@ export default function GlobalSovereignDashboard() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
-              background: dashboardStationView === 'titan_attack' ? 'linear-gradient(135deg, #0EA5E9, #0284C7)' : 'transparent',
-              color: dashboardStationView === 'titan_attack' ? '#FFF' : '#94A3B8',
-              boxShadow: dashboardStationView === 'titan_attack' ? '0 2px 8px rgba(14, 165, 233, 0.4)' : 'none',
+              background: dashboardStationView === 'titan_a' ? 'linear-gradient(135deg, #0EA5E9, #0284C7)' : 'transparent',
+              color: dashboardStationView === 'titan_a' ? '#FFF' : '#94A3B8',
+              boxShadow: dashboardStationView === 'titan_a' ? '0 2px 8px rgba(14, 165, 233, 0.4)' : 'none',
               transition: 'all 0.15s ease'
             }}
           >
-            <span>👑</span> 70% 雙梯隊進攻艙
+            <span>🅰️</span> 1號 A梯隊 (50%)
           </button>
           <button
             type="button"
-            onClick={() => setDashboardStationView('dry_powder')}
+            onClick={() => setDashboardStationView('titan_b')}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -1770,524 +1719,110 @@ export default function GlobalSovereignDashboard() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
-              background: dashboardStationView === 'dry_powder' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-              color: dashboardStationView === 'dry_powder' ? '#FFF' : '#94A3B8',
-              boxShadow: dashboardStationView === 'dry_powder' ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+              background: dashboardStationView === 'titan_b' ? 'linear-gradient(135deg, #A855F7, #7C3AED)' : 'transparent',
+              color: dashboardStationView === 'titan_b' ? '#FFF' : '#94A3B8',
+              boxShadow: dashboardStationView === 'titan_b' ? '0 2px 8px rgba(168, 85, 247, 0.4)' : 'none',
               transition: 'all 0.15s ease'
             }}
           >
-            <span>💎</span> 30% 乾粉抄底作戰艙
+            <span>🅱️</span> 22號 B梯隊 (50%)
           </button>
         </div>
       </div>
 
       {/* 🧭 雙梯隊實戰跟單導航儀 (Dual-Tranche Follow-Along Action Guide) */}
-      {(dashboardStationView === 'all' || dashboardStationView === 'titan_attack') && (
-        <div className="glass-card" style={{
-          padding: '1rem 1.2rem',
-          marginBottom: '1.2rem',
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88))',
-          border: '1px solid rgba(56, 189, 248, 0.35)',
-          borderLeft: '4px solid #38BDF8'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '1.15rem' }}>🧭</span>
-              <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.02rem' }}>
-                雙梯隊交錯跟單導航儀（每月 1 號 A 梯隊 35% ＋ 每月 22 號 B 梯隊 35% ＋ 30% 乾粉池・單一帳戶零摩擦跟隨法）
-              </h4>
-              <span style={{
-                fontSize: '0.73rem',
-                background: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.25)' : 'rgba(16, 185, 129, 0.18)',
-                color: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? '#FBBF24' : '#34D399',
-                border: `1px solid ${(dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.5)' : 'rgba(16, 185, 129, 0.4)'}`,
-                padding: '0.18rem 0.55rem',
-                borderRadius: '4px',
-                fontWeight: 'bold'
-              }}>
-                {dualTrancheGuide.isWindowA
-                  ? '🔥 當前為【1號 A梯隊】調倉窗口！'
-                  : dualTrancheGuide.isWindowB
-                    ? '🔥 當前為【22號 B梯隊】調倉窗口！'
-                    : `⏳ 下次定期調倉日：${dualTrancheGuide.nextActionLabel} (${dualTrancheGuide.nextTrancheBadge}，倒數 ${dualTrancheGuide.daysUntilNext} 天)`}
-              </span>
-            </div>
-            <div style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.12)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
-              🌍 宏觀寬幅：{macro.bull_countries || '10/15'} 國 &gt; 200MA ({macro.global_breadth_pct || 66.7}%) ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem' }}>
-            {/* A 梯隊說明卡 */}
-            <div style={{
-              background: dualTrancheGuide.isWindowA ? 'rgba(56, 189, 248, 0.12)' : 'rgba(0,0,0,0.3)',
-              border: dualTrancheGuide.isWindowA ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '8px',
-              padding: '0.7rem 0.9rem'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>🅰️ A 梯隊（每月 1 號調倉｜進攻配比 35% 總資產）</strong>
-                <span style={{ fontSize: '0.7rem', color: '#7DD3FC', fontFamily: 'monospace' }}>
-                  進攻預算 NT$ {Math.round(totalNetAssetsTwd * 0.35).toLocaleString()}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>單梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>14%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>10.5%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>10.5%</strong>（佔總淨值合計 35%，即梯隊內 40/30/30）。<br/>
-                • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 才重新檢視。
-              </div>
-            </div>
-
-            {/* B 梯隊說明卡 */}
-            <div style={{
-              background: dualTrancheGuide.isWindowB ? 'rgba(168, 85, 247, 0.14)' : 'rgba(0,0,0,0.3)',
-              border: dualTrancheGuide.isWindowB ? '1px solid #A855F7' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '8px',
-              padding: '0.7rem 0.9rem'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                <strong style={{ color: '#C084FC', fontSize: '0.86rem' }}>🅱️ B 梯隊（每月 22 號調倉｜進攻配比 35% 總資產）</strong>
-                <span style={{ fontSize: '0.7rem', color: '#D8B4FE', fontFamily: 'monospace' }}>
-                  進攻預算 NT$ {Math.round(totalNetAssetsTwd * 0.35).toLocaleString()}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>單梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>14%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>10.5%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>10.5%</strong>（佔總淨值合計 35%，即梯隊內 40/30/30）。<br/>
-                • <strong>當期狀態</strong>：下次調倉日為 <strong style={{ color: '#FBBF24' }}>{dualTrancheGuide.nextActionLabel}</strong>。捕捉最新財報季後強勢動能黑馬！
-              </div>
-            </div>
-
-            {/* 💎 30% 乾粉抄底池說明卡 */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 78, 59, 0.22))',
-              border: '1px solid rgba(16, 185, 129, 0.45)',
-              borderRadius: '8px',
-              padding: '0.7rem 0.9rem'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                <strong style={{ color: '#34D399', fontSize: '0.86rem' }}>💎 乾粉抄底池（30% 總資產｜美元高息活存 + 恐慌快打）</strong>
-                <span style={{ fontSize: '0.7rem', color: '#6EE7B7', fontFamily: 'monospace' }}>
-                  乾粉預算 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>平時常態</strong>：100% 停泊美元高息活存 (年化 4%~5% 無風險利息)。<br/>
-                • <strong>恐慌快打</strong>：QQQ/SPY 3日 RSI &lt; 20 觸發 30%/30%/40% 階梯抄底，反彈 RSI &gt; 70 或獲利 +5%~+8% 閃電全數獲利平倉原路退回定存！
-              </div>
-            </div>
-
-            {/* 單一帳戶零摩擦跟單心法 */}
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '0.7rem 0.9rem'
-            }}>
-              <div style={{ fontWeight: 'bold', color: '#FCD34D', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-                💡 我該怎麼在「同一個帳戶」輕鬆跟單？
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                1️⃣ <strong>兩隊選股相同時（常態共振）</strong>：A 隊 (14/10.5/10.5%) + B 隊 (14/10.5/10.5%) 合流為 <strong>28% / 21% / 21%（只買 3 檔，合計 70%）</strong>。<br/>
-                2️⃣ <strong>22 號出現新黑馬時</strong>：若舊股跌出前 5 名，只賣出該舊股<strong>一半部位換入新黑馬</strong>，另一半留待 1 號調倉再決定。<br/>
-                3️⃣ <strong>下方一鍵切換試算</strong>：下方調倉表已內建「👑 70% 雙隊核心進攻」與「🅰️/🅱️ 35% 單梯隊」按鈕，自動幫您精算真實股數！
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 💎 30% 波動階梯乾粉抄底雷達與實戰操作手冊 (Dry Powder Dip-Buying Radar & Actionable Playbook) */}
-      {(dashboardStationView === 'all' || dashboardStationView === 'dry_powder') && (
-        <div className="glass-card" style={{
-          padding: '1.1rem 1.3rem',
-          marginBottom: '1.2rem',
-          background: 'linear-gradient(135deg, rgba(6, 78, 59, 0.35), rgba(15, 23, 42, 0.95))',
-          border: '1px solid rgba(16, 185, 129, 0.45)',
-          borderLeft: '4px solid #10B981'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.85rem' }}>
-            <div>
-              <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                <span>💎</span> 30% 波動階梯乾粉抄底作戰艙（雷達 × 一鍵試算 × 閃電平倉）
-              </h4>
-              <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                核心架構：70% 雙梯隊賺取強勢龍頭多頭長牛大波段，30% 美元高息乾粉在美股急跌恐慌時梯隊抄底大盤 QQQ/SPY，反彈超買即刻獲利退回定存！
-              </p>
-            </div>
-            <div style={{
-              fontSize: '0.74rem',
-              background: 'rgba(16, 185, 129, 0.18)',
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              color: '#6EE7B7',
-              padding: '0.22rem 0.65rem',
-              borderRadius: '5px',
+      <div className="glass-card" style={{
+        padding: '1rem 1.2rem',
+        marginBottom: '1.2rem',
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88))',
+        border: '1px solid rgba(56, 189, 248, 0.35)',
+        borderLeft: '4px solid #38BDF8'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '1.15rem' }}>🧭</span>
+            <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.02rem' }}>
+              雙梯隊交錯跟單導航儀（每月 1 號 A 梯隊 50% ＋ 每月 22 號 B 梯隊 50%・單一帳戶 100% 滿額進攻跟隨法）
+            </h4>
+            <span style={{
+              fontSize: '0.73rem',
+              background: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.25)' : 'rgba(16, 185, 129, 0.18)',
+              color: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? '#FBBF24' : '#34D399',
+              border: `1px solid ${(dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.5)' : 'rgba(16, 185, 129, 0.4)'}`,
+              padding: '0.18rem 0.55rem',
+              borderRadius: '4px',
               fontWeight: 'bold'
             }}>
-              🎯 疊加後旗艦 KPI：CAGR 68.21%・MDD -28.37%・2022逆轉+34.54%
-            </div>
+              {dualTrancheGuide.isWindowA
+                ? '🔥 當前為【1號 A梯隊】調倉窗口！'
+                : dualTrancheGuide.isWindowB
+                  ? '🔥 當前為【22號 B梯隊】調倉窗口！'
+                  : `⏳ 下次定期調倉日：${dualTrancheGuide.nextActionLabel} (${dualTrancheGuide.nextTrancheBadge}，倒數 ${dualTrancheGuide.daysUntilNext} 天)`}
+            </span>
           </div>
-
-          {/* 即時指標雷達方塊 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.7rem', marginBottom: '0.9rem' }}>
-            <div style={{ background: 'rgba(0,0,0,0.4)', padding: '0.55rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>🎯 抄底標的資產</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.15rem' }}>QQQ / SPY 大盤 ETF</div>
-              <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '0.15rem' }}>那斯達克100 / 標普500</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.4)', padding: '0.55rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>📉 QQQ 3日 RSI (當前狀態)</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.15rem' }}>54.2 (正常生息區)</div>
-              <div style={{ fontSize: '0.68rem', color: '#A7F3D0', marginTop: '0.15rem' }}>RSI ≥ 20：未觸發抄底，持續生息</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.4)', padding: '0.55rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>🛡️ 美元高息活存無風險年息</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#FCD34D', marginTop: '0.15rem' }}>4.83% 年化 (IBKR/貨幣基金)</div>
-              <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '0.15rem' }}>閒置 30% 乾粉每日穩健計息</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.4)', padding: '0.55rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #6366F1' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>⚡ 當前乾粉動用部位</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#818CF8', marginTop: '0.15rem' }}>
-                {dryPowderPositions.length > 0 ? `${dryPowderPositions.length} 階抄底持有中` : '0% 動用 (100% 待命領息)'}
-              </div>
-              <div style={{ fontSize: '0.68rem', color: '#C7D2FE', marginTop: '0.15rem' }}>
-                {dryPowderPositions.length > 0 ? '反彈 RSI>70 或達標即閃電獲利平倉' : '安全領息中，無需操作'}
-              </div>
-            </div>
+          <div style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.12)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+            🌍 宏觀寬幅：{macro.bull_countries || '10/15'} 國 &gt; 200MA ({macro.global_breadth_pct || 66.7}%) ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
           </div>
+        </div>
 
-          {/* ⚡ 乾粉實戰一鍵抄底試算與建倉台 (One-Click Dip-Buying & Profit-Taking Console) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem' }}>
+          {/* A 梯隊說明卡 */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(6, 78, 59, 0.4), rgba(15, 23, 42, 0.85))',
-            border: '1px solid rgba(16, 185, 129, 0.5)',
-            borderRadius: '10px',
-            padding: '1rem 1.2rem',
-            marginBottom: '1rem',
-            boxShadow: '0 4px 20px rgba(16, 185, 129, 0.12)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.9rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1.25rem' }}>⚡</span>
-                <div>
-                  <strong style={{ color: '#34D399', fontSize: '1rem' }}>
-                    乾粉實戰一鍵抄底試算與快捷建倉台
-                  </strong>
-                  <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-                    不用自己拿計算機！輸入當前市價，系統自動依 30% 乾粉池 (約 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()}) 精算各階梯股數與停利點，一鍵帶入建倉。
-                  </div>
-                </div>
-              </div>
-
-              {/* 標的切換與即時報價輸入 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <button
-                    type="button"
-                    onClick={() => { setDryPowderCalcTicker('QQQ'); setDryPowderCalcPrice(595.0); }}
-                    style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: dryPowderCalcTicker === 'QQQ' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-                      color: dryPowderCalcTicker === 'QQQ' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    QQQ (納指100)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setDryPowderCalcTicker('SPY'); setDryPowderCalcPrice(585.0); }}
-                    style={{
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: dryPowderCalcTicker === 'SPY' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-                      color: dryPowderCalcTicker === 'SPY' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    SPY (標普500)
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(0,0,0,0.4)', padding: '0.25rem 0.6rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  <span style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>參考市價:</span>
-                  <span style={{ fontSize: '0.78rem', color: '#FCD34D', fontWeight: 'bold' }}>$</span>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={dryPowderCalcPrice}
-                    onChange={(e) => setDryPowderCalcPrice(Number(e.target.value) || 0)}
-                    style={{
-                      width: '75px',
-                      background: 'rgba(15, 23, 42, 0.8)',
-                      border: '1px solid #38BDF8',
-                      borderRadius: '4px',
-                      color: '#FFF',
-                      padding: '2px 6px',
-                      fontSize: '0.82rem',
-                      fontWeight: 'bold',
-                      fontFamily: 'monospace'
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* 3階梯一鍵建倉試算卡片 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem', marginBottom: '0.85rem' }}>
-              {/* 第 1 階 */}
-              {(() => {
-                const tierPoolUsd = (totalNetAssetsTwd * 0.3 * 0.30) / (usdFx || 32.5);
-                const tierShares = Math.max(1, Math.floor(tierPoolUsd / (dryPowderCalcPrice || 595)));
-                const target5Pct = (dryPowderCalcPrice * 1.05).toFixed(2);
-                const target8Pct = (dryPowderCalcPrice * 1.08).toFixed(2);
-                const stopLoss = (dryPowderCalcPrice * 0.92).toFixed(2);
-                return (
-                  <div style={{
-                    background: 'rgba(56, 189, 248, 0.08)',
-                    border: '1px solid rgba(56, 189, 248, 0.35)',
-                    borderRadius: '8px',
-                    padding: '0.75rem 0.9rem'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                      <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>🟡 第 1 階抄底（輕度急跌）</strong>
-                      <span style={{ fontSize: '0.7rem', color: '#BAE6FD', background: 'rgba(56, 189, 248, 0.2)', padding: '1px 6px', borderRadius: '4px' }}>
-                        佔總淨值 9% (乾粉 30%)
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#CBD5E1', marginBottom: '0.5rem', lineHeight: '1.45' }}>
-                      門檻：RSI(3) &lt; 20 且自高點回撤 5%~8%<br/>
-                      分配：<strong style={{ color: '#FCD34D' }}>US$ {Math.round(tierPoolUsd).toLocaleString()}</strong>（約 NT$ {Math.round(tierPoolUsd * (usdFx || 32.5)).toLocaleString()}）<br/>
-                      建議下單：<strong style={{ color: '#34D399', fontSize: '0.92rem' }}>{tierShares}</strong> 股 {dryPowderCalcTicker}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginBottom: '0.6rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem 0.5rem', borderRadius: '4px' }}>
-                      🎯 +5% 停利: <strong style={{ color: '#34D399' }}>${target5Pct}</strong> ｜ +8%: <strong style={{ color: '#34D399' }}>${target8Pct}</strong><br/>
-                      🛑 止損線 (-8%): <strong style={{ color: '#F87171' }}>${stopLoss}</strong>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenQuickDryPowderBuy(dryPowderCalcTicker, 1, dryPowderCalcPrice)}
-                      style={{
-                        width: '100%',
-                        background: 'linear-gradient(135deg, #0284C7, #0369A1)',
-                        border: 'none',
-                        color: '#FFF',
-                        padding: '0.4rem',
-                        borderRadius: '5px',
-                        fontSize: '0.78rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        boxShadow: '0 2px 6px rgba(2, 132, 199, 0.4)'
-                      }}
-                    >
-                      <span>⚡</span> 一鍵帶入第 1 階建倉 ({tierShares} 股)
-                    </button>
-                  </div>
-                );
-              })()}
-
-              {/* 第 2 階 */}
-              {(() => {
-                const tierPoolUsd = (totalNetAssetsTwd * 0.3 * 0.30) / (usdFx || 32.5);
-                const tierShares = Math.max(1, Math.floor(tierPoolUsd / (dryPowderCalcPrice || 595)));
-                const target5Pct = (dryPowderCalcPrice * 1.05).toFixed(2);
-                const target8Pct = (dryPowderCalcPrice * 1.08).toFixed(2);
-                const stopLoss = (dryPowderCalcPrice * 0.92).toFixed(2);
-                return (
-                  <div style={{
-                    background: 'rgba(245, 158, 11, 0.08)',
-                    border: '1px solid rgba(245, 158, 11, 0.35)',
-                    borderRadius: '8px',
-                    padding: '0.75rem 0.9rem'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                      <strong style={{ color: '#FBBF24', fontSize: '0.86rem' }}>🟠 第 2 階加碼（深度恐慌）</strong>
-                      <span style={{ fontSize: '0.7rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.2)', padding: '1px 6px', borderRadius: '4px' }}>
-                        再加 9% (累計 18%)
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#CBD5E1', marginBottom: '0.5rem', lineHeight: '1.45' }}>
-                      門檻：RSI(3) &lt; 15 且回撤 10%~15% (或 VIX &gt; 30)<br/>
-                      分配：<strong style={{ color: '#FCD34D' }}>US$ {Math.round(tierPoolUsd).toLocaleString()}</strong>（約 NT$ {Math.round(tierPoolUsd * (usdFx || 32.5)).toLocaleString()}）<br/>
-                      建議加碼：<strong style={{ color: '#34D399', fontSize: '0.92rem' }}>{tierShares}</strong> 股 {dryPowderCalcTicker}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginBottom: '0.6rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem 0.5rem', borderRadius: '4px' }}>
-                      🎯 +5% 停利: <strong style={{ color: '#34D399' }}>${target5Pct}</strong> ｜ +8%: <strong style={{ color: '#34D399' }}>${target8Pct}</strong><br/>
-                      🛑 止損線 (-8%): <strong style={{ color: '#F87171' }}>${stopLoss}</strong>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenQuickDryPowderBuy(dryPowderCalcTicker, 2, dryPowderCalcPrice)}
-                      style={{
-                        width: '100%',
-                        background: 'linear-gradient(135deg, #D97706, #B45309)',
-                        border: 'none',
-                        color: '#FFF',
-                        padding: '0.4rem',
-                        borderRadius: '5px',
-                        fontSize: '0.78rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        boxShadow: '0 2px 6px rgba(217, 119, 6, 0.4)'
-                      }}
-                    >
-                      <span>⚡</span> 一鍵帶入第 2 階加碼 ({tierShares} 股)
-                    </button>
-                  </div>
-                );
-              })()}
-
-              {/* 第 3 階 */}
-              {(() => {
-                const tierPoolUsd = (totalNetAssetsTwd * 0.3 * 0.40) / (usdFx || 32.5);
-                const tierShares = Math.max(1, Math.floor(tierPoolUsd / (dryPowderCalcPrice || 595)));
-                const target5Pct = (dryPowderCalcPrice * 1.05).toFixed(2);
-                const target8Pct = (dryPowderCalcPrice * 1.08).toFixed(2);
-                const stopLoss = (dryPowderCalcPrice * 0.92).toFixed(2);
-                return (
-                  <div style={{
-                    background: 'rgba(239, 68, 68, 0.08)',
-                    border: '1px solid rgba(239, 68, 68, 0.35)',
-                    borderRadius: '8px',
-                    padding: '0.75rem 0.9rem'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                      <strong style={{ color: '#F87171', fontSize: '0.86rem' }}>🔴 第 3 階打滿（股災熔斷）</strong>
-                      <span style={{ fontSize: '0.7rem', color: '#FECACA', background: 'rgba(239, 68, 68, 0.2)', padding: '1px 6px', borderRadius: '4px' }}>
-                        打滿 12% (100% 乾粉)
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.74rem', color: '#CBD5E1', marginBottom: '0.5rem', lineHeight: '1.45' }}>
-                      門檻：RSI(3) &lt; 10 或回撤 &gt; 20% (或 VIX &gt; 40)<br/>
-                      分配：<strong style={{ color: '#FCD34D' }}>US$ {Math.round(tierPoolUsd).toLocaleString()}</strong>（約 NT$ {Math.round(tierPoolUsd * (usdFx || 32.5)).toLocaleString()}）<br/>
-                      建議打滿：<strong style={{ color: '#34D399', fontSize: '0.92rem' }}>{tierShares}</strong> 股 {dryPowderCalcTicker}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginBottom: '0.6rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem 0.5rem', borderRadius: '4px' }}>
-                      🎯 +5% 停利: <strong style={{ color: '#34D399' }}>${target5Pct}</strong> ｜ +8%: <strong style={{ color: '#34D399' }}>${target8Pct}</strong><br/>
-                      🛑 止損線 (-8%): <strong style={{ color: '#F87171' }}>${stopLoss}</strong>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenQuickDryPowderBuy(dryPowderCalcTicker, 3, dryPowderCalcPrice)}
-                      style={{
-                        width: '100%',
-                        background: 'linear-gradient(135deg, #DC2626, #991B1B)',
-                        border: 'none',
-                        color: '#FFF',
-                        padding: '0.4rem',
-                        borderRadius: '5px',
-                        fontSize: '0.78rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                        boxShadow: '0 2px 6px rgba(220, 38, 38, 0.4)'
-                      }}
-                    >
-                      <span>⚡</span> 一鍵全數打滿第 3 階 ({tierShares} 股)
-                    </button>
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.12)', padding: '0.4rem 0.7rem', borderRadius: '5px' }}>
-              💡 <strong>操作秘訣</strong>：點擊上方任一按鈕，系統會自動在下方的「編輯/新增部位」彈窗中填妥標的、股數、成本均價與嚴格止損價，您只需確認後點擊「確認保存」即可完成入帳！當標的反彈達標，直接在下方持股清單中點擊「⚡ 獲利平倉」，所得資金全數自動退回美元高息定存！
-            </div>
-          </div>
-
-          {/* 三階梯抄底規格與部位打滿規範 */}
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.35)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: dualTrancheGuide.isWindowA ? 'rgba(56, 189, 248, 0.12)' : 'rgba(0,0,0,0.3)',
+            border: dualTrancheGuide.isWindowA ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.08)',
             borderRadius: '8px',
-            padding: '0.8rem 1rem',
-            marginBottom: '0.9rem'
+            padding: '0.7rem 0.9rem'
           }}>
-            <div style={{ fontWeight: 'bold', color: '#FBBF24', fontSize: '0.88rem', marginBottom: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>🪜</span> 波動階梯進場點與部位打滿規範（嚴格依信號分批執行）
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+              <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>🅰️ A 梯隊（每月 1 號調倉｜進攻配比 50% 總資產）</strong>
+              <span style={{ fontSize: '0.7rem', color: '#7DD3FC', fontFamily: 'monospace' }}>
+                進攻預算 NT$ {Math.round(totalNetAssetsTwd * 0.5).toLocaleString()}
+              </span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.7rem' }}>
-              <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', padding: '0.6rem 0.8rem' }}>
-                <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.82rem' }}>🟢 平時常態（RSI ≥ 20）</div>
-                <div style={{ fontSize: '0.75rem', color: '#CBD5E1', marginTop: '0.25rem', lineHeight: '1.45' }}>
-                  • 乾粉動用：<strong>0%</strong><br/>
-                  • 100% 停泊美元高息活存 (年化 4%~5%)，無風險穩定孳息，放鬆生活。
-                </div>
-              </div>
-              <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '6px', padding: '0.6rem 0.8rem' }}>
-                <div style={{ color: '#38BDF8', fontWeight: 'bold', fontSize: '0.82rem' }}>🟡 第 1 階（輕度急跌）</div>
-                <div style={{ fontSize: '0.75rem', color: '#CBD5E1', marginTop: '0.25rem', lineHeight: '1.45' }}>
-                  • 門檻：RSI(3) &lt; 20 且自高點回撤 5%~8%<br/>
-                  • 乾粉動用：<strong>30%</strong>（佔總資產 9%）買入 QQQ。
-                </div>
-              </div>
-              <div style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '6px', padding: '0.6rem 0.8rem' }}>
-                <div style={{ color: '#FBBF24', fontWeight: 'bold', fontSize: '0.82rem' }}>🟠 第 2 階（深度恐慌）</div>
-                <div style={{ fontSize: '0.75rem', color: '#CBD5E1', marginTop: '0.25rem', lineHeight: '1.45' }}>
-                  • 門檻：RSI(3) &lt; 15 且自高點回撤 10%~15% (或 VIX &gt; 30)<br/>
-                  • 再加碼：<strong>30%</strong> 乾粉（累計 60%，佔總資產 18%）。
-                </div>
-              </div>
-              <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', padding: '0.6rem 0.8rem' }}>
-                <div style={{ color: '#F87171', fontWeight: 'bold', fontSize: '0.82rem' }}>🔴 第 3 階（股災熔斷）</div>
-                <div style={{ fontSize: '0.75rem', color: '#CBD5E1', marginTop: '0.25rem', lineHeight: '1.45' }}>
-                  • 門檻：RSI(3) &lt; 10 或回撤 &gt; 20% (或 VIX &gt; 40)<br/>
-                  • 乾粉打滿：<strong>剩餘 40% 全數打滿</strong>（100% 乾粉，佔總資產 30%）。
-                </div>
-              </div>
+            <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>20%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>15%</strong>（佔總淨值合計 50%，即梯隊內 40/30/30）。<br/>
+              • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 才重新檢視。
             </div>
           </div>
 
-          {/* 閃電停利與退回定存機制 ＆ 實戰日常時間表 ＆ 換匯成本避坑指南 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.8rem' }}>
-            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '7px', padding: '0.7rem 0.9rem' }}>
-              <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem', marginBottom: '0.3rem' }}>
-                ⚡ 閃電停利與資金原路退回定存 SOP
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>出場條件</strong>：反彈出現 <strong>RSI(3) &gt; 70 (超買)</strong>，或單筆抄底獲利達 <strong>+5% ~ +8%</strong>，立即毫不留戀全數獲利平倉！<br/>
-                • <strong>本利原路歸位</strong>：平倉所得美元 <strong>100% 原路退回美元高息定存</strong>，重新鎖定年化利息，等待下一次急跌！平均持倉僅 3~7 天。
-              </div>
+          {/* B 梯隊說明卡 */}
+          <div style={{
+            background: dualTrancheGuide.isWindowB ? 'rgba(168, 85, 247, 0.14)' : 'rgba(0,0,0,0.3)',
+            border: dualTrancheGuide.isWindowB ? '1px solid #A855F7' : '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '8px',
+            padding: '0.7rem 0.9rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+              <strong style={{ color: '#C084FC', fontSize: '0.86rem' }}>🅱️ B 梯隊（每月 22 號調倉｜進攻配比 50% 總資產）</strong>
+              <span style={{ fontSize: '0.7rem', color: '#D8B4FE', fontFamily: 'monospace' }}>
+                進攻預算 NT$ {Math.round(totalNetAssetsTwd * 0.5).toLocaleString()}
+              </span>
             </div>
-
-            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '7px', padding: '0.7rem 0.9rem' }}>
-              <div style={{ color: '#FCD34D', fontWeight: 'bold', fontSize: '0.84rem', marginBottom: '0.3rem' }}>
-                🪙 換匯成本與零摩擦操作指南（避免點差侵蝕）
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>回測基準</strong>：乾粉回測以<strong>美元資產池封閉滾動</strong>（無每次短線換匯點差損耗）。<br/>
-                • <strong>實戰大忌</strong>：<strong>切忌每次暴跌才臨時拿台幣換美元！</strong>雙向即期匯差（0.6%~1%）與電匯費會吃掉 20% 利潤。<br/>
-                • <strong>正確做法</strong>：海外券商 (IBKR) <strong>一次性配置 30% 美元常駐領息</strong>，買賣全用美元（<strong>換匯摩擦為 0</strong>）；或國內直接抄底<strong>台幣掛牌 00662/00646/0050</strong>！
-              </div>
+            <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>20%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>15%</strong>（佔總淨值合計 50%，即梯隊內 40/30/30）。<br/>
+              • <strong>當期狀態</strong>：下次調倉日為 <strong style={{ color: '#FBBF24' }}>{dualTrancheGuide.nextActionLabel}</strong>。捕捉最新財報季後強勢動能黑馬！
             </div>
+          </div>
 
-            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '7px', padding: '0.7rem 0.9rem' }}>
-              <div style={{ color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem', marginBottom: '0.3rem' }}>
-                📅 個人投資者日常實戰跟單節奏（我該怎麼跟隨）
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • ☀️ <strong>每日早晨 07:00 (美股收盤花 3 分鐘)</strong>：打開手機看 QQQ 3日 RSI。若 ≥ 20 則安心工作；若 &lt; 20 則於今晚美股開盤掛單買入對應階梯 QQQ。<br/>
-                • 🗓️ <strong>每月 1 號 &amp; 22 號 21:00 (開盤前半小時)</strong>：登入本頁面，檢視雙梯隊 Top 3 最新標的與換股建議，調整 35% 部位。海外券商單一帳戶即可完美執行！
-              </div>
+          {/* 單一帳戶零摩擦跟單心法 */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '8px',
+            padding: '0.7rem 0.9rem'
+          }}>
+            <div style={{ fontWeight: 'bold', color: '#FCD34D', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
+              💡 我該怎麼在「同一個帳戶」輕鬆跟單？
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
+              1️⃣ <strong>兩隊選股相同時（常態共振）</strong>：A 隊 (20/15/15%) + B 隊 (20/15/15%) 合流為 <strong>40% / 30% / 30%（只買 3 檔，合計 100% 滿額進攻）</strong>。<br/>
+              2️⃣ <strong>22 號出現新黑馬時</strong>：若舊股跌出前 5 名，只賣出該舊股<strong>一半部位換入新黑馬</strong>，另一半留待 1 號調倉再決定。<br/>
+              3️⃣ <strong>下方一鍵切換試算</strong>：下方調倉表已內建「🔥 100% 雙隊滿倉」與「🅰️/🅱️ 50% 單梯隊」按鈕，自動幫您精算真實股數！
             </div>
           </div>
         </div>
-      )}
+      </div>
+
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -2420,17 +1955,17 @@ export default function GlobalSovereignDashboard() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
                 <span style={{ fontSize: '1.15rem' }}>🛡️</span>
-                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【70% 雙梯隊進攻 × 30% 波動階梯乾粉互補・旗艦紀律】</span>
+                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【👑 全球主權泰坦・純雙梯隊進攻旗艦紀律】</span>
                 <span style={{ color: '#CBD5E1' }}>
-                  ① <strong>70% 雙梯隊進攻</strong>（1 號 A 隊 35% + 22 號 B 隊 35% 各自 14/10.5/10.5%）；
-                  ② <strong>30% 乾粉池</strong>（平時停泊美元高息活存 4.8%，恐慌 RSI&lt;20 三階快打 QQQ/SPY）；
-                  ③ <strong>45/35/20 敏銳動能</strong>（12M 45% + 3M 35% + 1M 20% × FIP）；
-                  ④ <strong>爆量滯漲防護</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除）；
-                  ⑤ <strong>前 5 名保護帶 + 滿 4 月換血 + 容差免頻繁換股</strong>。
+                  ① <strong>100% 雙梯隊滿額進攻</strong>（1 號 A 隊 50% + 22 號 B 隊 50% 各自 20/15/15%，共振時合流為 40/30/30%）；
+                  ② <strong>45/35/20 敏銳動能</strong>（12M 45% + 3M 35% + 1M 20% × FIP 資訊離散度）；
+                  ③ <strong>爆量滯漲防護</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除高檔出貨陷阱）；
+                  ④ <strong>前 5 名保護帶 + 滿 4 月換血 + 容差免頻繁換股</strong>；
+                  ⑤ <strong>嚴格次日 T+1 開盤成交扣除手續費與摩擦成本</strong>。
                 </span>
               </div>
               <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                ● 雙梯隊監控中：MRNA / 欣興 / 創意 通過爆量滯漲檢驗並站穩 60MA；乾粉池常態生息中
+                ● 雙梯隊監控中：MRNA / 欣興 / 創意 通過爆量滯漲檢驗並站穩 60MA
               </span>
             </div>
 
@@ -2481,45 +2016,18 @@ export default function GlobalSovereignDashboard() {
                     color: positionFilter === 'titan' ? '#FFF' : '#94A3B8'
                   }}
                 >
-                  👑 70% 雙梯隊進攻 ({titanPositions.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPositionFilter('dry_powder')}
-                  style={{
-                    padding: '0.28rem 0.7rem',
-                    borderRadius: '5px',
-                    border: 'none',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    background: positionFilter === 'dry_powder' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-                    color: positionFilter === 'dry_powder' ? '#FFF' : '#94A3B8'
-                  }}
-                >
-                  💎 30% 乾粉抄底 ({dryPowderPositions.length})
+                  👑 雙梯隊持股 ({titanPositions.length})
                 </button>
               </div>
 
               <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                {positionFilter === 'dry_powder'
-                  ? '💡 提示：若乾粉部位達標反彈，點擊右側「⚡ 獲利平倉」一鍵平倉退回美元高息定存。'
-                  : '💡 提示：雙梯隊每月 1 號與 22 號調倉，單一帳戶零摩擦管理。'}
+                💡 提示：雙梯隊每月 1 號與 22 號調倉，單一帳戶零摩擦管理。
               </div>
             </div>
 
             {displayedPositions.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-                {positionFilter === 'dry_powder' ? (
-                  <div>
-                    <div style={{ fontSize: '1.6rem', marginBottom: '0.4rem' }}>💎</div>
-                    <strong style={{ color: '#34D399' }}>目前無乾粉抄底部位（100% 待命中）</strong>
-                    <div style={{ fontSize: '0.76rem', color: '#A7F3D0', marginTop: '0.35rem' }}>
-                      30% 乾粉池 (約 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()}) 停泊於美元高息活存 (年化 4.83%) 穩健孳息中。<br/>
-                      若美股急跌觸發 RSI(3) &lt; 20，可直接在上方「⚡ 快捷建倉台」一鍵下單買進 QQQ/SPY。
-                    </div>
-                  </div>
-                ) : positionFilter === 'titan' ? (
+                {positionFilter === 'titan' ? (
                   <div>
                     <strong>目前無雙梯隊持股部位</strong>
                     <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginTop: '0.3rem' }}>
@@ -2795,20 +2303,14 @@ export default function GlobalSovereignDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  🔄 雙梯隊持倉更動建議（支援「👑 70% 雙隊核心進攻 + 30% 乾粉」與「35% 單梯隊」一鍵切換試算）
+                  🔄 雙梯隊持倉更動建議（支援「🔥 100% 雙隊滿倉」與「50% 單梯隊」一鍵切換試算）
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  {rebalanceMode === 'flagship_70'
-                    ? `目前為【👑 70% 雙隊核心進攻模式 (動用 70% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.7).toLocaleString()}，保留 30% 乾粉抄底池 NT$ ${Math.round(totalNetAssetsTwd * 0.3).toLocaleString()})】：Top 3 目標各配置 28% / 21% / 21%。`
-                    : rebalanceMode === 'tranche_a_35'
-                      ? `目前為【🅰️ 1號 A 梯隊單次調倉模式 (動用 35% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.35).toLocaleString()})】：單梯隊買進佔總資產 14% / 10.5% / 10.5% (梯隊內 40/30/30)。`
-                      : rebalanceMode === 'tranche_b_35'
-                        ? `目前為【🅱️ 22號 B 梯隊單次調倉模式 (動用 35% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.35).toLocaleString()})】：單梯隊買進佔總資產 14% / 10.5% / 10.5% (梯隊內 40/30/30)。`
-                        : rebalanceMode === 'full_100'
-                          ? `目前為【🔥 100% 雙隊純滿倉模式 (100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：當 1 號與 22 號名單重疊時，總倉位對齊 40% / 30% / 30% (無乾粉研發基準)。`
-                          : rebalanceMode === 'tranche_a_50'
-                            ? `目前為【🅰️ 1號 A 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 20% / 15% / 15%。`
-                            : `目前為【🅱️ 22號 B 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 20% / 15% / 15%。`}
+                  {rebalanceMode === 'full_100'
+                    ? `目前為【🔥 100% 雙隊純滿倉模式 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：A梯隊(50%) + B梯隊(50%)，當名單重疊共振時總倉位對齊 40% / 30% / 30% (純雙梯隊進攻基準)。`
+                    : rebalanceMode === 'tranche_a_50'
+                      ? `目前為【🅰️ 1號 A 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 20% / 15% / 15% (梯隊內 40/30/30)。`
+                      : `目前為【🅱️ 22號 B 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 20% / 15% / 15% (梯隊內 40/30/30)。`}
                 </p>
               </div>
 
@@ -2825,97 +2327,51 @@ export default function GlobalSovereignDashboard() {
                 }}>
                   <button
                     type="button"
-                    onClick={() => setRebalanceMode('flagship_70')}
-                    style={{
-                      padding: '0.32rem 0.65rem',
-                      borderRadius: '5px',
-                      border: 'none',
-                      fontSize: '0.74rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: rebalanceMode === 'flagship_70' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-                      color: rebalanceMode === 'flagship_70' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    👑 70% 雙隊旗艦 (28/21/21% + 30%乾粉)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRebalanceMode('tranche_a_35')}
-                    style={{
-                      padding: '0.32rem 0.6rem',
-                      borderRadius: '5px',
-                      border: 'none',
-                      fontSize: '0.74rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: rebalanceMode === 'tranche_a_35' ? 'linear-gradient(135deg, #0EA5E9, #2563EB)' : 'transparent',
-                      color: rebalanceMode === 'tranche_a_35' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    🅰️ 1號 A隊 (35%)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRebalanceMode('tranche_b_35')}
-                    style={{
-                      padding: '0.32rem 0.6rem',
-                      borderRadius: '5px',
-                      border: 'none',
-                      fontSize: '0.74rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: rebalanceMode === 'tranche_b_35' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
-                      color: rebalanceMode === 'tranche_b_35' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    🅱️ 22號 B隊 (35%)
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setRebalanceMode('full_100')}
                     style={{
-                      padding: '0.32rem 0.6rem',
+                      padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
                       border: 'none',
-                      fontSize: '0.74rem',
+                      fontSize: '0.76rem',
                       fontWeight: 'bold',
                       cursor: 'pointer',
-                      background: rebalanceMode === 'full_100' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                      background: rebalanceMode === 'full_100' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
                       color: rebalanceMode === 'full_100' ? '#FFF' : '#94A3B8'
                     }}
                   >
-                    🔥 100% 滿倉 (無乾粉基準)
+                    🔥 100% 雙隊滿倉 (40/30/30%)
                   </button>
                   <button
                     type="button"
                     onClick={() => setRebalanceMode('tranche_a_50')}
                     style={{
-                      padding: '0.32rem 0.55rem',
+                      padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
                       border: 'none',
-                      fontSize: '0.72rem',
+                      fontSize: '0.76rem',
+                      fontWeight: 'bold',
                       cursor: 'pointer',
-                      background: rebalanceMode === 'tranche_a_50' ? 'linear-gradient(135deg, #64748B, #475569)' : 'transparent',
+                      background: rebalanceMode === 'tranche_a_50' ? 'linear-gradient(135deg, #0EA5E9, #2563EB)' : 'transparent',
                       color: rebalanceMode === 'tranche_a_50' ? '#FFF' : '#94A3B8'
                     }}
                   >
-                    🅰️ A隊(50%)
+                    🅰️ 1號 A隊 (50%)
                   </button>
                   <button
                     type="button"
                     onClick={() => setRebalanceMode('tranche_b_50')}
                     style={{
-                      padding: '0.32rem 0.55rem',
+                      padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
                       border: 'none',
-                      fontSize: '0.72rem',
+                      fontSize: '0.76rem',
+                      fontWeight: 'bold',
                       cursor: 'pointer',
-                      background: rebalanceMode === 'tranche_b_50' ? 'linear-gradient(135deg, #64748B, #475569)' : 'transparent',
+                      background: rebalanceMode === 'tranche_b_50' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
                       color: rebalanceMode === 'tranche_b_50' ? '#FFF' : '#94A3B8'
                     }}
                   >
-                    🅱️ B隊(50%)
+                    🅱️ 22號 B隊 (50%)
                   </button>
                 </div>
 
@@ -2942,7 +2398,7 @@ export default function GlobalSovereignDashboard() {
               <div style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px dashed #10B981' }}>
                 <span style={{ fontSize: '1.1rem' }}>✨</span>
                 <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.92rem', marginTop: '0.2rem' }}>
-                  目前持倉與選定模式（{rebalanceMode === 'flagship_70' ? '70% 雙隊核心進攻 (28/21/21%) + 30% 乾粉' : (rebalanceMode === 'tranche_a_35' ? 'A梯隊 35% (14/10.5/10.5%)' : (rebalanceMode === 'tranche_b_35' ? 'B梯隊 35% (14/10.5/10.5%)' : (rebalanceMode === 'full_100' ? '100% 雙隊滿倉 40/30/30%' : '單梯隊半倉 20/15/15%')))}）已處於平衡容差帶內，無須進行任何調倉！
+                  目前持倉與選定模式（{rebalanceMode === 'full_100' ? '100% 雙隊純滿倉 40/30/30%' : (rebalanceMode === 'tranche_a_50' ? '1號 A梯隊 (50%)' : '22號 B梯隊 (50%)')}）已處於平衡容差帶內，無須進行任何調倉！
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.76rem', marginTop: '0.2rem' }}>
                   下次定期調倉窗口為 <strong>{dualTrancheGuide.nextActionLabel} ({dualTrancheGuide.nextTrancheBadge})</strong>，屆時系統將自動依據最新排名試算換股建議。

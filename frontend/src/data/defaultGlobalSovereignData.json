@@ -1,27 +1,26 @@
 {
   "status": "ok",
-  "strategy_name": "👑 全球高流動性泰坦旗艦【雙梯隊進攻 × 30% 波動階梯乾粉互補版】(70% 雙梯隊核心進攻 + 30% 美元高息定存乾粉抄底池)",
+  "strategy_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
   "generated_at": "2026-10-18 21:00:00",
   "latest_data_date": "2026-10-16",
   "doe_config": {
-    "execution_mode": "dual_tranche_1_and_22 (每月1號 A梯隊35% + 每月22號 B梯隊35% ＋ 30% 波動階梯乾粉抄底池)",
+    "execution_mode": "dual_tranche_1_and_22 (每月1號 A梯隊50% + 每月22號 B梯隊50% 交錯調倉)",
     "top_n": 3,
-    "alloc_scheme": "flagship_70_30 (70% 雙梯隊進攻核心 40/30/30階梯 + 30% 美元高息活存乾粉池)",
+    "alloc_scheme": "flagship_dual_tranche (A梯隊50% + B梯隊50%，每梯隊 40/30/30 核心進攻階梯)",
     "momentum_ensemble": "(85% Raw + 15% Residual Alpha) × (45% 12M + 35% 3M + 20% 1M) × (1 + 0.5 FIP) × (1 + 0.20 Convexity)",
     "alpha_res": 0.15,
     "eta_convex": 0.2,
     "w_br60": 0.25,
     "volume_exhaustion_filter": "5D均量 > 2倍60D均量 且 10D漲幅 < 2% 自動剔除",
     "macro_breadth_thresholds": "雙頻複合寬幅 (75% 200MA + 25% 60MA) >= 0.50 (100%滿倉) / 0.30 (70%防禦)",
-    "dry_powder_step_in": "30% 閒置美金定存 (4%~5% 年息)；恐慌時依照 QQQ/SPY RSI(3) < 20/15/10 及回撤分 30%/30%/40% 快速抄底，反彈超買 RSI>70 即獲利回籠退回定存",
     "max_hold_months": 4,
     "rank_buffer": 5,
     "weight_tolerance_pct": 5,
     "pbo_overfitting_prob": "0.00%",
     "oos_cagr_8yr": 81.45,
     "oos_calmar_8yr": 2.042,
-    "winning_years_pct": 95.5,
-    "worst_year_ret_pct": -4.12
+    "winning_years_pct": 91.3,
+    "worst_year_ret_pct": -4.07
   },
   "macro_status": {
     "spy_price": 763.25,
@@ -33,16 +32,17 @@
   },
   "kpi": {
     "scheme_a": {
-      "total_ret": 13371300.0,
-      "mult": 133713.0,
-      "cagr": 68.21,
+      "total_ret": 4816500.0,
+      "mult": 48165.0,
+      "cagr": 60.47,
       "mdd": -28.37,
       "daily_mdd": -34.12,
-      "sharpe": 1.48,
-      "calmar": 2.404,
-      "daily_calmar": 1.999,
-      "sortino": 3.42,
-      "win_rate": 95.5
+      "calmar": 2.131,
+      "sharpe": 1.38,
+      "sortino": 3.12,
+      "win_rate": 91.3,
+      "profit_factor": 3.85,
+      "total_trades": 1365
     },
     "spy": {
       "total_ret": 917.9,
