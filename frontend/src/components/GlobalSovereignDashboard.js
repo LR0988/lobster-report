@@ -2253,8 +2253,8 @@ export default function GlobalSovereignDashboard() {
             </div>
           </div>
 
-          {/* 閃電停利與退回定存機制 ＆ 實戰日常時間表 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem' }}>
+          {/* 閃電停利與退回定存機制 ＆ 實戰日常時間表 ＆ 換匯成本避坑指南 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.8rem' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '7px', padding: '0.7rem 0.9rem' }}>
               <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem', marginBottom: '0.3rem' }}>
                 ⚡ 閃電停利與資金原路退回定存 SOP
@@ -2262,6 +2262,17 @@ export default function GlobalSovereignDashboard() {
               <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
                 • <strong>出場條件</strong>：反彈出現 <strong>RSI(3) &gt; 70 (超買)</strong>，或單筆抄底獲利達 <strong>+5% ~ +8%</strong>，立即毫不留戀全數獲利平倉！<br/>
                 • <strong>本利原路歸位</strong>：平倉所得美元 <strong>100% 原路退回美元高息定存</strong>，重新鎖定年化利息，等待下一次急跌！平均持倉僅 3~7 天。
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '7px', padding: '0.7rem 0.9rem' }}>
+              <div style={{ color: '#FCD34D', fontWeight: 'bold', fontSize: '0.84rem', marginBottom: '0.3rem' }}>
+                🪙 換匯成本與零摩擦操作指南（避免點差侵蝕）
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
+                • <strong>回測基準</strong>：乾粉回測以<strong>美元資產池封閉滾動</strong>（無每次短線換匯點差損耗）。<br/>
+                • <strong>實戰大忌</strong>：<strong>切忌每次暴跌才臨時拿台幣換美元！</strong>雙向即期匯差（0.6%~1%）與電匯費會吃掉 20% 利潤。<br/>
+                • <strong>正確做法</strong>：海外券商 (IBKR) <strong>一次性配置 30% 美元常駐領息</strong>，買賣全用美元（<strong>換匯摩擦為 0</strong>）；或國內直接抄底<strong>台幣掛牌 00662/00646/0050</strong>！
               </div>
             </div>
 
