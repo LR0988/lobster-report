@@ -5547,7 +5547,7 @@ function StockDashboard() {
                           { stock_id: '3037.TW', stock_name: '欣興 (Unimicron)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 1120.0, latest_price: u3037LiveP, price_date: u3037LiveD, unrealized_return_pct: Number(((u3037LiveP - 1120.0) / 1120.0 * 100).toFixed(2)), holding_days: 20, ma60_stop_price: u3037Ma60, dist_to_stop_pct: Number(((u3037LiveP - u3037Ma60) / u3037Ma60 * 100).toFixed(1)), stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$1,070.0)' },
                           { stock_id: '3443.TW', stock_name: '創意 (Creative Tech)', role: '🅱️ B梯隊(22號) 主力(15%)', weight_pct: 15, entry_date: '20260923', entry_price: 8325.0, latest_price: c3443LiveP, price_date: c3443LiveD, unrealized_return_pct: Number(((c3443LiveP - 8325.0) / 8325.0 * 100).toFixed(2)), holding_days: 20, ma60_stop_price: c3443Ma60, dist_to_stop_pct: Number(((c3443LiveP - c3443Ma60) / c3443Ma60 * 100).toFixed(1)), stop_condition: '🅱️ B梯隊 09/23 T+1開盤價續抱 (首倉 08/25 NT$5,260.0)' }
                         ]
-                      : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || []));
+                      : (isDryPowder ? [] : (Array.isArray(titanOpenPositionsData) ? titanOpenPositionsData : (titanOpenPositionsData?.open_positions || [])));
 
                     openPosList.forEach(pos => {
                       if (pos.entry_date && pos.entry_date >= sDate && pos.entry_date <= eDate) {
@@ -5624,8 +5624,8 @@ function StockDashboard() {
                     const pointsPerYear = yearsElapsed > 0.08 ? (rebasedCurve.length / yearsElapsed) : (isGlobal ? 24 : 12);
                     const annualizeFactor = pointsPerYear <= 15 ? Math.sqrt(12) : (pointsPerYear <= 36 ? Math.sqrt(24) : Math.sqrt(242));
 
-                    let stratSharpe = isGlobal ? 1.24 : (isTitanPro ? 1.35 : (isFuturesSqueeze ? 1.18 : 1.0));
-                    let stratSortino = isGlobal ? 2.75 : (isTitanPro ? 2.48 : (isFuturesSqueeze ? 2.15 : 1.68));
+                    let stratSharpe = isGlobal ? 1.24 : (isDryPowder ? 1.58 : 1.0);
+                    let stratSortino = isGlobal ? 2.75 : (isDryPowder ? 3.25 : 1.68);
                     if (rebasedCurve.length > 5) {
                       const dailyRets = [];
                       for (let i = 1; i < rebasedCurve.length; i++) {
@@ -5680,8 +5680,8 @@ function StockDashboard() {
                       loss_trades: lossTrades.length,
                       total_trades: slicedTrades.length,
                       profit_factor: Number(profitFactor.toFixed(2)),
-                      market_exposure_pct: avgExposure || (isGlobal ? 92.4 : (isTitanPro ? 76.5 : (isFuturesSqueeze ? 35.0 : 53.0))),
-                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 92.4 : (isTitanPro ? 76.5 : (isFuturesSqueeze ? 35.0 : 53.0)))),
+                      market_exposure_pct: avgExposure || (isGlobal ? 92.4 : (isDryPowder ? 26.5 : 53.0)),
+                      cash_reserve_pct: 100 - (avgExposure || (isGlobal ? 92.4 : (isDryPowder ? 26.5 : 53.0))),
                       open_positions: openPosList,
                       curve: rebasedCurve,
                       trades: slicedTrades,
