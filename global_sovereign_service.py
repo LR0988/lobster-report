@@ -30,7 +30,7 @@ def get_global_sovereign_dashboard_data():
     if not data:
         data = {
             "status": "ok",
-            "strategy_name": "全球高流動性泰坦旗艦【雙梯隊進攻版：1號+22號交錯 × 40/30/30階梯 × 45/35/20敏銳動能 × 爆量滯漲過濾】",
+            "strategy_name": "👑 全球高流動性泰坦旗艦【雙梯隊進攻 × 30% 波動階梯乾粉互補版】(70% 雙梯隊核心進攻 + 30% 美元高息定存乾粉抄底池)",
             "current_picks": [],
             "macro_status": {}
         }
