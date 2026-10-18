@@ -595,53 +595,6 @@ export default function TwAsymmetricAlphaDashboard() {
               </table>
             </div>
           )}
-
-          {/* 2016–2026 11年 tw_stock.db 實盤回測歷年績效表 */}
-          {data?.titan_pro_yearly_comparison && (
-            <div style={{ marginTop: '1.2rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <h4 style={{ margin: '0 0 0.7rem 0', color: '#FBBF24', fontSize: '1.0rem' }}>
-                📊 2016–2026 (11年) CBAS × RSI(2) × 股期軋空 融入【泰坦 Pro】歷年報酬率對照表
-              </h4>
-              <div style={{ overflowX: 'auto' }}>
-                <table className="custom-table" style={{ width: '100%', fontSize: '0.82rem' }}>
-                  <thead>
-                    <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                      <th>年份</th>
-                      <th style={{ textAlign: 'right' }}>泰坦平均閒置現金</th>
-                      <th style={{ textAlign: 'right' }}>⚡ 閒置金 RSI(2) 快打</th>
-                      <th style={{ textAlign: 'right' }}>🔥 個股期貨軋空</th>
-                      <th style={{ textAlign: 'right' }}>👑 當前台股泰坦 (現股)</th>
-                      <th style={{ textAlign: 'right' }}>🚀 台股泰坦 Pro (股期+CBAS+RSI2)</th>
-                      <th style={{ textAlign: 'right' }}>泰坦 Pro 淨增 Alpha</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.titan_pro_yearly_comparison.map((yr) => (
-                      <tr key={yr.year}>
-                        <td style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>{yr.year}</td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>{yr.idle_cash_pct}%</td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.rsi2_pct >= 0 ? '#34D399' : '#F87171' }}>
-                          {yr.rsi2_pct >= 0 ? '+' : ''}{yr.rsi2_pct}%
-                        </td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.fut_sqz_pct >= 0 ? '#FBBF24' : '#F87171' }}>
-                          {yr.fut_sqz_pct >= 0 ? '+' : ''}{yr.fut_sqz_pct}%
-                        </td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.titan_orig_pct >= 0 ? '#CBD5E1' : '#F87171' }}>
-                          {yr.titan_orig_pct >= 0 ? '+' : ''}{yr.titan_orig_pct}%
-                        </td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.titan_pro_pct >= 0 ? '#10B981' : '#F87171' }}>
-                          {yr.titan_pro_pct >= 0 ? '+' : ''}{yr.titan_pro_pct}%
-                        </td>
-                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.alpha_gain_pct >= 0 ? '#FDE68A' : '#94A3B8' }}>
-                          {yr.alpha_gain_pct >= 0 ? '+' : ''}{yr.alpha_gain_pct}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
