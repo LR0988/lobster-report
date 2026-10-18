@@ -5338,7 +5338,9 @@ function StockDashboard() {
                   // 動態計算單一泰坦模型所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
                   const calcSingleTitanModeData = (targetKey, pKey, startYr, endYr) => {
                     const isGlobalBase = targetKey === 'global_liquid_titan_base';
+                    const isGlobal = isGlobalBase;
                     const isTaiwanTitan = targetKey === 'titan_sovereign';
+                    const isDryPowder = false;
                     const sourceCurve = isGlobalBase
                       ? (globalTitanCurveBaseData || globalTitanCurveData || [])
                       : (titanCurveData || []);

@@ -289,7 +289,7 @@ export default function GlobalSovereignDashboard() {
           }
           if (Array.isArray(res.tx_history) && res.tx_history.length > 0) {
             const hasDeposit = res.tx_history.some(t => t.action === '投入現金' || t.id === 'tx_init_deposit');
-            const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_INITIAL_ALL_TX[0]];
+            const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_TX_HISTORY[0]];
             setTxHistory(normalizedTx);
             try { localStorage.setItem(storageKeys.allTx, JSON.stringify(normalizedTx)); } catch {}
           }
@@ -588,6 +588,7 @@ export default function GlobalSovereignDashboard() {
 
     const activeTopPicks = currentPicks.filter(p => p.is_active);
     const suggestions = [];
+    const isHalfTranche = rebalanceMode === 'tranche_a_50' || rebalanceMode === 'tranche_b_50';
 
     let budgetMultiplier = 1.0;
     let modePrefix = '🔥 100%雙隊滿倉';
