@@ -13,7 +13,6 @@ import dryPowderCurveData from '../data/dry_powder_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import defaultPodcastData from '../data/defaultPodcastData.json';
 import GlobalSovereignDashboard from './GlobalSovereignDashboard';
-import TwAsymmetricAlphaDashboard from './TwAsymmetricAlphaDashboard';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
 
@@ -910,7 +909,7 @@ function StockDashboard() {
 
   const [activeTab, setActiveTab] = useState(() => {
     const saved = localStorage.getItem('active_tab');
-    if (['ml', 'low_freq', 'portfolio', 'watchlist', 'titan_live', 'tw_event_radar'].includes(saved)) {
+    if (['ml', 'low_freq', 'portfolio', 'watchlist', 'titan_live', 'tw_event_radar', 'tw_asymmetric_alpha'].includes(saved)) {
       return 'global_sovereign';
     }
     return saved || 'market_ml';
@@ -1120,6 +1119,24 @@ function StockDashboard() {
   // ── 大盤 ML 多空波段預測與多模型評估狀態 ──
   const [marketMlData, setMarketMlData] = useState(() => defaultMarketMlData);
   const [globalSovereignLive, setGlobalSovereignLive] = useState(() => defaultGlobalSovereignData);
+
+  // 👑 全球泰坦旗艦版 (雙梯隊進攻 70% + 波動階梯乾粉抄底 30%) 全歷史合併交易紀錄 (1462 + 97 = 1559 筆)
+  const combinedTitanAndDryPowderTrades = useMemo(() => {
+    const gList = (globalTitanTradesData || []).map(t => ({
+      ...t,
+      strategy_source: '👑 雙梯隊核心進攻 (70%)'
+    }));
+    const dpList = (dryPowderTradesData || []).map(t => ({
+      ...t,
+      strategy_source: '💎 波動階梯乾粉抄底 (30%)',
+      role: t.role || '💎 乾粉抄底快打 (QQQ/SPY)'
+    }));
+    return [...gList, ...dpList].sort((a, b) => {
+      const da = String(a.exit_date || a.entry_date || '');
+      const db = String(b.exit_date || b.entry_date || '');
+      return db.localeCompare(da);
+    });
+  }, []);
   const [marketMlBtData, setMarketMlBtData] = useState(null);
   const [fetchingMarketMl, setFetchingMarketMl] = useState(false);
   const [fetchingMarketMlBt, setFetchingMarketMlBt] = useState(false);
@@ -4189,8 +4206,7 @@ function StockDashboard() {
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📊 股市策略總覽' },
-            { id: 'global_sovereign', label: '🌍 全球主權泰坦' },
-            { id: 'tw_asymmetric_alpha', label: '⚡ 可轉債主力與急跌狙擊' },
+            { id: 'global_sovereign', label: '🌍 全球主權泰坦 (含乾粉抄底)' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '🗄️ 資料庫與爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
             { id: 'schedule', label: '⏰ 排程管理' },
@@ -5362,9 +5378,11 @@ function StockDashboard() {
                       : (isGlobalBase
                           ? (globalTitanCurveBaseData || [])
                           : (isDryPowder ? (dryPowderCurveData || []) : (titanCurveData || [])));
-                    const sourceTrades = (isGlobal || isGlobalBase)
-                      ? (globalTitanTradesData || [])
-                      : (isDryPowder ? (dryPowderTradesData || []) : (titanTradesData || []));
+                    const sourceTrades = isGlobal
+                      ? (combinedTitanAndDryPowderTrades || [])
+                      : (isGlobalBase
+                          ? (globalTitanTradesData || [])
+                          : (isDryPowder ? (dryPowderTradesData || []) : (titanTradesData || [])));
                     if (!sourceCurve || sourceCurve.length === 0) return null;
 
                     let sDate = '20160101';
@@ -5761,7 +5779,7 @@ function StockDashboard() {
                       sortino_ratio: g?.customModeData?.sortino_ratio ?? 3.42,
                       win_rate_pct: g?.customModeData?.win_rate_pct ?? 95.5,
                       profit_factor: g?.customModeData?.profit_factor ?? 4.15,
-                      total_trades: g?.customModeData?.total_trades ?? 1456,
+                      total_trades: g?.customModeData?.total_trades ?? 1559,
                       market_exposure_pct: g?.customModeData?.market_exposure_pct ?? 94.2
                     };
                     const globalBaseItem = {
@@ -5777,7 +5795,7 @@ function StockDashboard() {
                       sortino_ratio: gb?.customModeData?.sortino_ratio ?? 2.75,
                       win_rate_pct: gb?.customModeData?.win_rate_pct ?? 90.9,
                       profit_factor: gb?.customModeData?.profit_factor ?? 3.52,
-                      total_trades: gb?.customModeData?.total_trades ?? 1359,
+                      total_trades: gb?.customModeData?.total_trades ?? 1462,
                       market_exposure_pct: gb?.customModeData?.market_exposure_pct ?? 92.4
                     };
                     const dryPowderItem = {
@@ -7893,7 +7911,8 @@ function StockDashboard() {
                           activeModeData?.all_trades || 
                           selectedModelDetail?.all_trades || 
                           bt.all_titan_trades || 
-                          (['global_liquid_titan_a', 'global_liquid_titan_base'].includes(activeModelKey) ? (globalTitanTradesData || []) : null) ||
+                          (activeModelKey === 'global_liquid_titan_a' ? combinedTitanAndDryPowderTrades : null) ||
+                          (activeModelKey === 'global_liquid_titan_base' ? (globalTitanTradesData || []) : null) ||
                           (activeModelKey === 'dry_powder_step_in' ? (dryPowderTradesData || []) : null) ||
                           (activeModelKey === 'titan_sovereign' ? (titanTradesData || []) : null) ||
                           bt.periods?.['20y']?.models_detail?.[activeModelKey]?.long_only?.trades || 
@@ -8132,9 +8151,15 @@ function StockDashboard() {
                                                 borderRadius: '4px',
                                                 fontSize: '0.72rem',
                                                 fontWeight: 'bold',
-                                                background: (t.role?.includes('王者') || t.role?.includes('第1主力')) ? 'rgba(245, 158, 11, 0.2)' : 'rgba(14, 165, 233, 0.2)',
-                                                color: (t.role?.includes('王者') || t.role?.includes('第1主力')) ? '#FBBF24' : '#38BDF8',
-                                                border: (t.role?.includes('王者') || t.role?.includes('第1主力')) ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(14, 165, 233, 0.4)'
+                                                background: (t.role?.includes('乾粉') || t.stock_id === 'QQQ' || t.stock_id === 'SPY')
+                                                  ? 'rgba(16, 185, 129, 0.2)'
+                                                  : ((t.role?.includes('王者') || t.role?.includes('第1主力')) ? 'rgba(245, 158, 11, 0.2)' : 'rgba(14, 165, 233, 0.2)'),
+                                                color: (t.role?.includes('乾粉') || t.stock_id === 'QQQ' || t.stock_id === 'SPY')
+                                                  ? '#34D399'
+                                                  : ((t.role?.includes('王者') || t.role?.includes('第1主力')) ? '#FBBF24' : '#38BDF8'),
+                                                border: (t.role?.includes('乾粉') || t.stock_id === 'QQQ' || t.stock_id === 'SPY')
+                                                  ? '1px solid rgba(16, 185, 129, 0.4)'
+                                                  : ((t.role?.includes('王者') || t.role?.includes('第1主力')) ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(14, 165, 233, 0.4)')
                                               }}>
                                                 {t.role || t.direction || '多方'}
                                               </span>
@@ -8195,12 +8220,6 @@ function StockDashboard() {
         {activeTab === 'global_sovereign' && (
           <GlobalSovereignDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
-
-        {/* ===== ⚡ 可轉債主力與急跌狙擊雷達 ===== */}
-        {activeTab === 'tw_asymmetric_alpha' && (
-          <TwAsymmetricAlphaDashboard key={scraperLiveStatus?.finished_at || 'init'} />
-        )}
-
 
         {/* ===== 🗄️ 資料庫與爬蟲戰情中心 (合併全新設計) ===== */}
         {(activeTab === 'database' || activeTab === 'scraper') && (
