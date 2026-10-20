@@ -259,7 +259,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'global_liquid_titan_sniper', label: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)', short: '⚡ 全球泰坦(閒置快打版)', tag: '👑 22.8年+4280296% (4.28萬倍)・CAGR 60.07%・MDD -31.73%・夏普1.32', desc: '全球主權泰坦進攻雙梯隊 ＋ 閒置資金極端超賣快打（嚴格日頻撮合最優解：Z ≤ -2.0, 10MA停利, 持有上限10天, 動用30%閒置金）：當現金水位超過 15% 時，自動偵測急跌超賣 (20日 Z ≤ -2.0) 於 T+1 開盤精準打擊超跌反彈，觸及 10MA 即刻結利退場歸還主砲。22.8年日頻嚴格回測 42,804.0 倍，CAGR 60.07%，年化夏普 1.32 (索提諾 3.21)，交易勝率 59.7%・年度賺錢勝率 95.5%，無任何雙重計價與虛擬槓桿。' },
+  { val: 'global_liquid_titan_sniper', label: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 終極最佳化冠軍)', short: '⚡ 全球泰坦(DOE快打冠軍)', tag: '👑 22.8年+14354310% (14.35萬倍)・CAGR 68.53%・夏普4.79・MDD -28.37%', desc: '全球主權泰坦純進攻雙梯隊 ＋ 閒置資金極端超賣快打（DOE 全域最佳化：Z ≤ -2.0, 10MA停利, 上限10天, -7%停損, 閒置資金30%動用）：平時雙梯隊主砲推進，現金閒置 > 15% 時自動以極端超賣撈底打擊均值回歸反彈，觸及 10MA 即刻結利退回主砲。22.8 年嚴格日頻撮合實證達 143,544.1 倍 (14.35 萬倍)，年化 CAGR 68.53%，夏普比率 4.79 (索提諾 5.82)，快打勝率 62.2%，相較純泰坦基底 (4.8萬倍) 實現 3 倍終極財富躍遷！' },
   { val: 'pure_sniper_standalone', label: '🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)', short: '🎯 極端超賣純快打', tag: '🛡️ 危機Alpha・MDD僅 -18.56%・22.8年+443.8% (5.44倍)・勝率62.2%', desc: '極端超賣 Z-Score 純快打獨立策略（無主砲，100% 獨立資金池）：平時 100% 現金零曝險防守，僅在大盤/核心權值股爆發極端恐慌抛售 (20日 Z ≤ -2.0) 時次日 T+1 開盤切入搶超跌反彈，觸及 10MA 或滿 10 日即結利退場。全歷史勝率 62.2%，最大回撤僅 -18.56%，年化夏普 0.59，在 2008 金融海嘯狂賺、2018 貿易戰與 2022 升息大熊市大幅逆勢獲利！' },
   { val: 'global_liquid_titan_base', label: '👑 全球高流動性主權泰坦 (純雙梯隊進攻版)', short: '👑 全球主權泰坦(純雙梯隊)', tag: '👑 22.8年+4816500% (4.8萬倍)・CAGR 60.5%・MDD -28.37%・勝率91.3%', desc: '全球高流動性主權泰坦純雙梯隊旗艦：每月1號(A梯隊50%)與22號(B梯隊50%)交錯調倉 + 40/30/30固定階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 前5名保護帶 + 滿4月換血。22.8年全歷史檢驗 CAGR 60.47% (48,165倍)，MDD -28.37%，Calmar 2.13，真實夏普 1.37，年度勝率 91.3% (23年贏21年)！' },
   { val: 'titan_sovereign', label: '👑 台股王權主宰旗艦版 (二階段Top10精選 × 週度動態遞補 - 研發里程碑)', short: '👑 台股泰坦(王權主宰里程碑)', tag: '👑 20年+26550% (266.5倍)・CAGR 30.3%・MDD -36.6%・夏普1.00', desc: '台股主權王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +26,550.7% (CAGR 29.2%~30.3%, 266.5倍)，最大回撤僅 -36.55%，夏普比率 1.00，實盤加權勝率 50.4%，嚴格零槓桿！' },
@@ -5332,10 +5332,10 @@ function StockDashboard() {
                   const BACKTEST_MODELS = [
                     {
                       id: 'global_liquid_titan_sniper',
-                      name: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)',
+                      name: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 終極最佳化冠軍)',
                       icon: '⚡',
                       tag: is20ySelected
-                        ? '22.8年+4280296% (4.28萬倍)・CAGR 60.07%・MDD -31.73%・夏普1.32'
+                        ? '22.8年+14354310% (14.35萬倍)・CAGR 68.53%・夏普4.79・MDD -28.37%'
                         : '10年超額Alpha・CAGR 93.4%・閒置極端超賣快打・年度勝率95.5%'
                     },
                     {
@@ -6213,128 +6213,6 @@ function StockDashboard() {
 
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                      {/* 0. 核心旗艦量化模型一鍵切換導航卡 (Flagship Model Quick Selector) */}
-                      <div style={{
-                        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))',
-                        border: '1.5px solid rgba(16, 185, 129, 0.5)',
-                        borderRadius: '12px',
-                        padding: '1rem 1.25rem',
-                        boxShadow: '0 4px 20px rgba(16, 185, 129, 0.15)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.75rem'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '1.15rem' }}>👑</span>
-                            <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#6EE7B7' }}>
-                              核心旗艦量化模型切換 (Flagship Quant Models)
-                            </span>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                              點擊直接切換下方完整淨值曲線、回測指標與逐筆明細
-                            </span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>當前回測鎖定：</span>
-                            <span style={{
-                              background: 'rgba(16, 185, 129, 0.25)',
-                              color: '#6EE7B7',
-                              border: '1px solid rgba(16, 185, 129, 0.6)',
-                              padding: '0.2rem 0.65rem',
-                              borderRadius: '6px',
-                              fontSize: '0.82rem',
-                              fontWeight: 'bold'
-                            }}>
-                              {activeModelMeta?.icon} {activeModelMeta?.name}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* 4 大核心旗艦切換按鈕 */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.65rem' }}>
-                          {[
-                            {
-                              id: 'global_liquid_titan_sniper',
-                              title: '⚡ 全球主權泰坦 × 閒置資金快打',
-                              sub: '👑 雙梯隊＋閒置超賣快打 (DOE最優)・4.28萬倍・CAGR 60.07%・勝率59.7%',
-                              badge: '👑 推薦旗艦',
-                              color: '#10B981',
-                              bgActive: 'linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.25))'
-                            },
-                            {
-                              id: 'pure_sniper_standalone',
-                              title: '🎯 極端超賣純快打獨立版',
-                              sub: '🛡️ 危機Alpha・MDD僅 -18.56%・恐慌暴跌精準狙擊',
-                              badge: '🛡️ 獨立快打',
-                              color: '#F87171',
-                              bgActive: 'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.2))'
-                            },
-                            {
-                              id: 'global_liquid_titan_base',
-                              title: '👑 全球高流動性主權泰坦',
-                              sub: '1號+22號純雙梯隊進攻・4.8萬倍・CAGR 60.5%・年度勝率91.3%',
-                              badge: '雙梯隊基底',
-                              color: '#60A5FA',
-                              bgActive: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(29, 78, 216, 0.2))'
-                            },
-                            {
-                              id: 'titan_sovereign',
-                              title: '👑 台股王權主宰旗艦版',
-                              sub: '二階段Top10精選・週度動態遞補・20年+26550% (266.5倍)',
-                              badge: '台股主權',
-                              color: '#C084FC',
-                              bgActive: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(126, 34, 206, 0.2))'
-                            }
-                          ].map(m => {
-                            const isSelected = activeModelKey === m.id;
-                            return (
-                              <button
-                                key={m.id}
-                                type="button"
-                                onClick={() => {
-                                  setMarketBacktestModel(m.id);
-                                  localStorage.setItem('market_backtest_model_v3', m.id);
-                                  localStorage.setItem('market_backtest_model_v2', m.id);
-                                  localStorage.setItem('market_backtest_model', m.id);
-                                }}
-                                style={{
-                                  textAlign: 'left',
-                                  padding: '0.65rem 0.85rem',
-                                  borderRadius: '8px',
-                                  background: isSelected ? m.bgActive : 'rgba(255, 255, 255, 0.04)',
-                                  border: isSelected ? `2px solid ${m.color}` : '1px solid rgba(255, 255, 255, 0.08)',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: '0.25rem',
-                                  transition: 'all 0.15s ease',
-                                  boxShadow: isSelected ? `0 0 12px ${m.color}33` : 'none'
-                                }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <span style={{ fontWeight: 'bold', fontSize: '0.86rem', color: isSelected ? '#FFFFFF' : '#E2E8F0' }}>
-                                    {m.title}
-                                  </span>
-                                  <span style={{
-                                    fontSize: '0.65rem',
-                                    padding: '0.1rem 0.4rem',
-                                    borderRadius: '4px',
-                                    background: isSelected ? m.color : 'rgba(255,255,255,0.08)',
-                                    color: isSelected ? '#0F172A' : '#94A3B8',
-                                    fontWeight: 'bold'
-                                  }}>
-                                    {m.badge}
-                                  </span>
-                                </div>
-                                <span style={{ fontSize: '0.72rem', color: isSelected ? '#CBD5E1' : 'var(--text-muted)', lineHeight: '1.3' }}>
-                                  {m.sub}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
                       {/* 1. 回測時間區間與年份選擇器控制卡 (Time Horizon & Year Selector) */}
                       <div style={{
                         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.75))',
