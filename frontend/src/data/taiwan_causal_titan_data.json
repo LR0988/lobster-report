@@ -1,0 +1,2102 @@
+{
+  "strategy_info": {
+    "name": "👑 台股因果量化泰坦旗艦版 (Causal ML & LLM Alphas)",
+    "subtitle": "全市場市值前 100 大滾動池 · 每月 11 號營收發布日調倉 · 60MA 季線動態風控",
+    "version": "v3.0.0 (2026 頂刊實盤升級)",
+    "rebalance_freq": "每月 11 號 (營收發布日 T+1)",
+    "next_rebalance_date": "2026-11-11",
+    "current_rebalance_date": "2026-10-12",
+    "holding_count": 5,
+    "allocation_type": "等權重 (各 20%)",
+    "exit_rule": "盤中逐日跌破 60MA 季線動態停損 · 剩餘天數停泊 1.5% 無風險現金",
+    "transaction_friction": "38.5 bps (0.3% 證交稅 + 0.085% 券商手續費)"
+  },
+  "kpis": {
+    "cagr": 39.83,
+    "sharpe": 1.16,
+    "max_drawdown": -36.46,
+    "calmar": 1.09,
+    "annual_vol": 32.23,
+    "win_rate": 59.53,
+    "total_multiple": 1312.03,
+    "taiex_cagr": 10.02,
+    "taiex_sharpe": 0.54,
+    "taiex_mdd": -54.07,
+    "taiex_multiple": 7.72,
+    "alpha_cagr": 29.81
+  },
+  "current_positions": [
+    {
+      "id": "pos_3105",
+      "stock_id": "3105",
+      "stock_name": "穩懋",
+      "industry": "PA 功率放大器 / 5G射頻王者",
+      "role": "👑 王者先鋒 (20%)",
+      "weight_pct": 20,
+      "entry_date": "2026-10-12",
+      "entry_price": 437.5,
+      "current_price": 455.0,
+      "pnl_pct": 4.0,
+      "stop_loss_price": 419.5,
+      "stop_loss_pct": -7.8,
+      "stop_condition": "逐日監控：若收盤跌破季線 60MA (419.5元) 則停損退場停泊現金",
+      "highlight": "全球砷化鎵晶圓代工龍頭，大單集中度激增突破整理區",
+      "causal_score": 0.9205
+    },
+    {
+      "id": "pos_8358",
+      "stock_id": "8358",
+      "stock_name": "金居",
+      "industry": "高頻高速銅箔龍頭",
+      "role": "🚀 核心主力 (20%)",
+      "weight_pct": 20,
+      "entry_date": "2026-10-12",
+      "entry_price": 485.0,
+      "current_price": 510.0,
+      "pnl_pct": 5.15,
+      "stop_loss_price": 459.5,
+      "stop_loss_pct": -9.9,
+      "stop_condition": "逐日監控：若收盤跌破季線 60MA (459.5元) 則停損退場停泊現金",
+      "highlight": "AI 伺服器主板高頻銅箔供不應求，連續資訊動能 FIP 強烈",
+      "causal_score": 0.4409
+    },
+    {
+      "id": "pos_3324",
+      "stock_id": "3324",
+      "stock_name": "雙鴻",
+      "industry": "AI 水冷散熱伺服器龍頭",
+      "role": "⚡ 動能旗艦 (20%)",
+      "weight_pct": 20,
+      "entry_date": "2026-10-12",
+      "entry_price": 1360.0,
+      "current_price": 1420.0,
+      "pnl_pct": 4.41,
+      "stop_loss_price": 1082.4,
+      "stop_loss_pct": -23.8,
+      "stop_condition": "逐日監控：若收盤跌破季線 60MA (1082.4元) 則停損退場停泊現金",
+      "highlight": "GB200 水冷快接頭與水冷板出貨放量，VWAP 主力主動吸收",
+      "causal_score": 0.4282
+    },
+    {
+      "id": "pos_1303",
+      "stock_id": "1303",
+      "stock_name": "南亞",
+      "industry": "電子材料 / 環氧樹脂龍頭",
+      "role": "🛡️ 結構支柱 (20%)",
+      "weight_pct": 20,
+      "entry_date": "2026-10-12",
+      "entry_price": 234.5,
+      "current_price": 240.0,
+      "pnl_pct": 2.35,
+      "stop_loss_price": 194.7,
+      "stop_loss_pct": -18.9,
+      "stop_condition": "逐日監控：若收盤跌破季線 60MA (194.7元) 則停損退場停泊現金",
+      "highlight": "CCL 銅箔基板原物料需求復甦，下影線支撐與非對稱偏度扎實",
+      "causal_score": 0.2311
+    },
+    {
+      "id": "pos_3026",
+      "stock_id": "3026",
+      "stock_name": "禾伸堂",
+      "industry": "車用陶瓷 / 特殊被動元件",
+      "role": "🎯 爆發突破 (20%)",
+      "weight_pct": 20,
+      "entry_date": "2026-10-12",
+      "entry_price": 744.0,
+      "current_price": 785.0,
+      "pnl_pct": 5.51,
+      "stop_loss_price": 712.9,
+      "stop_loss_pct": -9.2,
+      "stop_condition": "逐日監控：若收盤跌破季線 60MA (712.9元) 則停損退場停泊現金",
+      "highlight": "車用高壓 MLCC 出貨強勁，符號演化偏度動量衰減阻力突破",
+      "causal_score": 0.1545
+    }
+  ],
+  "curve": [
+    {
+      "date": "2005-04-11",
+      "strategy_nav": 0.987,
+      "taiex_nav": 0.99,
+      "monthly_ret": -1.31,
+      "taiex_ret": -1.04
+    },
+    {
+      "date": "2005-05-11",
+      "strategy_nav": 1.012,
+      "taiex_nav": 1.042,
+      "monthly_ret": 2.5,
+      "taiex_ret": 5.31
+    },
+    {
+      "date": "2005-06-13",
+      "strategy_nav": 1.02,
+      "taiex_nav": 1.053,
+      "monthly_ret": 0.79,
+      "taiex_ret": 1.09
+    },
+    {
+      "date": "2005-07-11",
+      "strategy_nav": 0.984,
+      "taiex_nav": 1.063,
+      "monthly_ret": -3.49,
+      "taiex_ret": 0.87
+    },
+    {
+      "date": "2005-08-11",
+      "strategy_nav": 0.875,
+      "taiex_nav": 1.031,
+      "monthly_ret": -11.13,
+      "taiex_ret": -2.97
+    },
+    {
+      "date": "2005-09-12",
+      "strategy_nav": 0.84,
+      "taiex_nav": 1.015,
+      "monthly_ret": -3.99,
+      "taiex_ret": -1.6
+    },
+    {
+      "date": "2005-10-11",
+      "strategy_nav": 0.799,
+      "taiex_nav": 1.016,
+      "monthly_ret": -4.89,
+      "taiex_ret": 0.14
+    },
+    {
+      "date": "2005-11-11",
+      "strategy_nav": 0.831,
+      "taiex_nav": 1.048,
+      "monthly_ret": 4.03,
+      "taiex_ret": 3.14
+    },
+    {
+      "date": "2005-12-12",
+      "strategy_nav": 0.962,
+      "taiex_nav": 1.127,
+      "monthly_ret": 15.76,
+      "taiex_ret": 7.49
+    },
+    {
+      "date": "2006-01-11",
+      "strategy_nav": 0.91,
+      "taiex_nav": 1.097,
+      "monthly_ret": -5.42,
+      "taiex_ret": -2.58
+    },
+    {
+      "date": "2006-02-13",
+      "strategy_nav": 0.896,
+      "taiex_nav": 1.095,
+      "monthly_ret": -1.48,
+      "taiex_ret": -0.27
+    },
+    {
+      "date": "2006-03-13",
+      "strategy_nav": 0.953,
+      "taiex_nav": 1.13,
+      "monthly_ret": 6.38,
+      "taiex_ret": 3.25
+    },
+    {
+      "date": "2006-04-11",
+      "strategy_nav": 1.16,
+      "taiex_nav": 1.231,
+      "monthly_ret": 21.72,
+      "taiex_ret": 8.94
+    },
+    {
+      "date": "2006-05-11",
+      "strategy_nav": 1.007,
+      "taiex_nav": 1.078,
+      "monthly_ret": -13.22,
+      "taiex_ret": -12.48
+    },
+    {
+      "date": "2006-06-12",
+      "strategy_nav": 1.038,
+      "taiex_nav": 1.11,
+      "monthly_ret": 3.05,
+      "taiex_ret": 3.05
+    },
+    {
+      "date": "2006-07-11",
+      "strategy_nav": 1.009,
+      "taiex_nav": 1.099,
+      "monthly_ret": -2.79,
+      "taiex_ret": -1.02
+    },
+    {
+      "date": "2006-08-11",
+      "strategy_nav": 0.932,
+      "taiex_nav": 1.119,
+      "monthly_ret": -7.57,
+      "taiex_ret": 1.87
+    },
+    {
+      "date": "2006-09-11",
+      "strategy_nav": 0.982,
+      "taiex_nav": 1.172,
+      "monthly_ret": 5.35,
+      "taiex_ret": 4.67
+    },
+    {
+      "date": "2006-10-11",
+      "strategy_nav": 1.025,
+      "taiex_nav": 1.193,
+      "monthly_ret": 4.37,
+      "taiex_ret": 1.85
+    },
+    {
+      "date": "2006-11-13",
+      "strategy_nav": 1.147,
+      "taiex_nav": 1.273,
+      "monthly_ret": 11.87,
+      "taiex_ret": 6.67
+    },
+    {
+      "date": "2006-12-11",
+      "strategy_nav": 1.104,
+      "taiex_nav": 1.274,
+      "monthly_ret": -3.75,
+      "taiex_ret": 0.08
+    },
+    {
+      "date": "2007-01-11",
+      "strategy_nav": 1.097,
+      "taiex_nav": 1.301,
+      "monthly_ret": -0.61,
+      "taiex_ret": 2.07
+    },
+    {
+      "date": "2007-02-12",
+      "strategy_nav": 1.081,
+      "taiex_nav": 1.276,
+      "monthly_ret": -1.47,
+      "taiex_ret": -1.89
+    },
+    {
+      "date": "2007-03-12",
+      "strategy_nav": 1.135,
+      "taiex_nav": 1.352,
+      "monthly_ret": 4.95,
+      "taiex_ret": 5.97
+    },
+    {
+      "date": "2007-04-11",
+      "strategy_nav": 1.064,
+      "taiex_nav": 1.343,
+      "monthly_ret": -6.2,
+      "taiex_ret": -0.65
+    },
+    {
+      "date": "2007-05-11",
+      "strategy_nav": 1.3,
+      "taiex_nav": 1.395,
+      "monthly_ret": 22.12,
+      "taiex_ret": 3.83
+    },
+    {
+      "date": "2007-06-11",
+      "strategy_nav": 1.433,
+      "taiex_nav": 1.554,
+      "monthly_ret": 10.24,
+      "taiex_ret": 11.42
+    },
+    {
+      "date": "2007-07-11",
+      "strategy_nav": 1.405,
+      "taiex_nav": 1.495,
+      "monthly_ret": -1.9,
+      "taiex_ret": -3.79
+    },
+    {
+      "date": "2007-08-13",
+      "strategy_nav": 1.373,
+      "taiex_nav": 1.506,
+      "monthly_ret": -2.3,
+      "taiex_ret": 0.72
+    },
+    {
+      "date": "2007-09-11",
+      "strategy_nav": 1.32,
+      "taiex_nav": 1.622,
+      "monthly_ret": -3.88,
+      "taiex_ret": 7.71
+    },
+    {
+      "date": "2007-10-11",
+      "strategy_nav": 1.194,
+      "taiex_nav": 1.45,
+      "monthly_ret": -9.53,
+      "taiex_ret": -10.59
+    },
+    {
+      "date": "2007-11-12",
+      "strategy_nav": 1.164,
+      "taiex_nav": 1.445,
+      "monthly_ret": -2.5,
+      "taiex_ret": -0.37
+    },
+    {
+      "date": "2007-12-11",
+      "strategy_nav": 1.061,
+      "taiex_nav": 1.343,
+      "monthly_ret": -8.85,
+      "taiex_ret": -7.05
+    },
+    {
+      "date": "2008-01-11",
+      "strategy_nav": 1.112,
+      "taiex_nav": 1.263,
+      "monthly_ret": 4.75,
+      "taiex_ret": -5.93
+    },
+    {
+      "date": "2008-02-12",
+      "strategy_nav": 1.225,
+      "taiex_nav": 1.402,
+      "monthly_ret": 10.18,
+      "taiex_ret": 10.97
+    },
+    {
+      "date": "2008-03-11",
+      "strategy_nav": 1.299,
+      "taiex_nav": 1.49,
+      "monthly_ret": 6.04,
+      "taiex_ret": 6.3
+    },
+    {
+      "date": "2008-04-11",
+      "strategy_nav": 1.363,
+      "taiex_nav": 1.477,
+      "monthly_ret": 4.97,
+      "taiex_ret": -0.89
+    },
+    {
+      "date": "2008-05-12",
+      "strategy_nav": 1.227,
+      "taiex_nav": 1.396,
+      "monthly_ret": -10.03,
+      "taiex_ret": -5.49
+    },
+    {
+      "date": "2008-06-11",
+      "strategy_nav": 1.178,
+      "taiex_nav": 1.212,
+      "monthly_ret": -3.96,
+      "taiex_ret": -13.19
+    },
+    {
+      "date": "2008-07-11",
+      "strategy_nav": 1.156,
+      "taiex_nav": 1.225,
+      "monthly_ret": -1.89,
+      "taiex_ret": 1.12
+    },
+    {
+      "date": "2008-08-11",
+      "strategy_nav": 1.068,
+      "taiex_nav": 1.046,
+      "monthly_ret": -7.58,
+      "taiex_ret": -14.66
+    },
+    {
+      "date": "2008-09-11",
+      "strategy_nav": 1.05,
+      "taiex_nav": 0.84,
+      "monthly_ret": -1.67,
+      "taiex_ret": -19.7
+    },
+    {
+      "date": "2008-10-13",
+      "strategy_nav": 1.117,
+      "taiex_nav": 0.776,
+      "monthly_ret": 6.38,
+      "taiex_ret": -7.61
+    },
+    {
+      "date": "2008-11-11",
+      "strategy_nav": 1.094,
+      "taiex_nav": 0.779,
+      "monthly_ret": -2.09,
+      "taiex_ret": 0.37
+    },
+    {
+      "date": "2008-12-11",
+      "strategy_nav": 1.021,
+      "taiex_nav": 0.745,
+      "monthly_ret": -6.64,
+      "taiex_ret": -4.33
+    },
+    {
+      "date": "2009-01-12",
+      "strategy_nav": 1.143,
+      "taiex_nav": 0.765,
+      "monthly_ret": 11.89,
+      "taiex_ret": 2.74
+    },
+    {
+      "date": "2009-02-11",
+      "strategy_nav": 1.201,
+      "taiex_nav": 0.796,
+      "monthly_ret": 5.12,
+      "taiex_ret": 4.02
+    },
+    {
+      "date": "2009-03-11",
+      "strategy_nav": 1.296,
+      "taiex_nav": 0.98,
+      "monthly_ret": 7.87,
+      "taiex_ret": 23.06
+    },
+    {
+      "date": "2009-04-13",
+      "strategy_nav": 1.45,
+      "taiex_nav": 1.112,
+      "monthly_ret": 11.91,
+      "taiex_ret": 13.48
+    },
+    {
+      "date": "2009-05-11",
+      "strategy_nav": 1.455,
+      "taiex_nav": 1.098,
+      "monthly_ret": 0.39,
+      "taiex_ret": -1.21
+    },
+    {
+      "date": "2009-06-11",
+      "strategy_nav": 1.404,
+      "taiex_nav": 1.092,
+      "monthly_ret": -3.56,
+      "taiex_ret": -0.56
+    },
+    {
+      "date": "2009-07-13",
+      "strategy_nav": 1.449,
+      "taiex_nav": 1.155,
+      "monthly_ret": 3.26,
+      "taiex_ret": 5.79
+    },
+    {
+      "date": "2009-08-11",
+      "strategy_nav": 1.56,
+      "taiex_nav": 1.227,
+      "monthly_ret": 7.66,
+      "taiex_ret": 6.2
+    },
+    {
+      "date": "2009-09-11",
+      "strategy_nav": 1.641,
+      "taiex_nav": 1.271,
+      "monthly_ret": 5.14,
+      "taiex_ret": 3.58
+    },
+    {
+      "date": "2009-10-12",
+      "strategy_nav": 1.564,
+      "taiex_nav": 1.282,
+      "monthly_ret": -4.67,
+      "taiex_ret": 0.9
+    },
+    {
+      "date": "2009-11-11",
+      "strategy_nav": 1.819,
+      "taiex_nav": 1.304,
+      "monthly_ret": 16.31,
+      "taiex_ret": 1.66
+    },
+    {
+      "date": "2009-12-11",
+      "strategy_nav": 1.846,
+      "taiex_nav": 1.392,
+      "monthly_ret": 1.48,
+      "taiex_ret": 6.78
+    },
+    {
+      "date": "2010-01-11",
+      "strategy_nav": 1.663,
+      "taiex_nav": 1.264,
+      "monthly_ret": -9.9,
+      "taiex_ret": -9.18
+    },
+    {
+      "date": "2010-02-22",
+      "strategy_nav": 1.616,
+      "taiex_nav": 1.296,
+      "monthly_ret": -2.82,
+      "taiex_ret": 2.51
+    },
+    {
+      "date": "2010-03-11",
+      "strategy_nav": 1.742,
+      "taiex_nav": 1.358,
+      "monthly_ret": 7.78,
+      "taiex_ret": 4.75
+    },
+    {
+      "date": "2010-04-12",
+      "strategy_nav": 1.622,
+      "taiex_nav": 1.272,
+      "monthly_ret": -6.91,
+      "taiex_ret": -6.27
+    },
+    {
+      "date": "2010-05-11",
+      "strategy_nav": 1.541,
+      "taiex_nav": 1.221,
+      "monthly_ret": -4.97,
+      "taiex_ret": -4.06
+    },
+    {
+      "date": "2010-06-11",
+      "strategy_nav": 1.801,
+      "taiex_nav": 1.278,
+      "monthly_ret": 16.85,
+      "taiex_ret": 4.66
+    },
+    {
+      "date": "2010-07-12",
+      "strategy_nav": 1.979,
+      "taiex_nav": 1.32,
+      "monthly_ret": 9.88,
+      "taiex_ret": 3.34
+    },
+    {
+      "date": "2010-08-11",
+      "strategy_nav": 2.168,
+      "taiex_nav": 1.353,
+      "monthly_ret": 9.55,
+      "taiex_ret": 2.49
+    },
+    {
+      "date": "2010-09-13",
+      "strategy_nav": 2.241,
+      "taiex_nav": 1.367,
+      "monthly_ret": 3.37,
+      "taiex_ret": 1.06
+    },
+    {
+      "date": "2010-10-11",
+      "strategy_nav": 2.043,
+      "taiex_nav": 1.411,
+      "monthly_ret": -8.82,
+      "taiex_ret": 3.18
+    },
+    {
+      "date": "2010-11-11",
+      "strategy_nav": 2.045,
+      "taiex_nav": 1.461,
+      "monthly_ret": 0.08,
+      "taiex_ret": 3.55
+    },
+    {
+      "date": "2010-12-13",
+      "strategy_nav": 2.03,
+      "taiex_nav": 1.494,
+      "monthly_ret": -0.75,
+      "taiex_ret": 2.23
+    },
+    {
+      "date": "2011-01-11",
+      "strategy_nav": 1.94,
+      "taiex_nav": 1.44,
+      "monthly_ret": -4.41,
+      "taiex_ret": -3.6
+    },
+    {
+      "date": "2011-02-11",
+      "strategy_nav": 2.067,
+      "taiex_nav": 1.433,
+      "monthly_ret": 6.55,
+      "taiex_ret": -0.49
+    },
+    {
+      "date": "2011-03-11",
+      "strategy_nav": 1.996,
+      "taiex_nav": 1.485,
+      "monthly_ret": -3.42,
+      "taiex_ret": 3.65
+    },
+    {
+      "date": "2011-04-11",
+      "strategy_nav": 2.18,
+      "taiex_nav": 1.509,
+      "monthly_ret": 9.2,
+      "taiex_ret": 1.58
+    },
+    {
+      "date": "2011-05-11",
+      "strategy_nav": 2.229,
+      "taiex_nav": 1.457,
+      "monthly_ret": 2.24,
+      "taiex_ret": -3.41
+    },
+    {
+      "date": "2011-06-13",
+      "strategy_nav": 2.251,
+      "taiex_nav": 1.449,
+      "monthly_ret": 0.98,
+      "taiex_ret": -0.54
+    },
+    {
+      "date": "2011-07-11",
+      "strategy_nav": 2.346,
+      "taiex_nav": 1.291,
+      "monthly_ret": 4.25,
+      "taiex_ret": -10.93
+    },
+    {
+      "date": "2011-08-11",
+      "strategy_nav": 2.129,
+      "taiex_nav": 1.236,
+      "monthly_ret": -9.25,
+      "taiex_ret": -4.25
+    },
+    {
+      "date": "2011-09-13",
+      "strategy_nav": 2.053,
+      "taiex_nav": 1.237,
+      "monthly_ret": -3.57,
+      "taiex_ret": 0.1
+    },
+    {
+      "date": "2011-10-11",
+      "strategy_nav": 2.008,
+      "taiex_nav": 1.232,
+      "monthly_ret": -2.23,
+      "taiex_ret": -0.42
+    },
+    {
+      "date": "2011-11-11",
+      "strategy_nav": 1.871,
+      "taiex_nav": 1.162,
+      "monthly_ret": -6.81,
+      "taiex_ret": -5.68
+    },
+    {
+      "date": "2011-12-12",
+      "strategy_nav": 1.882,
+      "taiex_nav": 1.202,
+      "monthly_ret": 0.57,
+      "taiex_ret": 3.44
+    },
+    {
+      "date": "2012-01-11",
+      "strategy_nav": 2.247,
+      "taiex_nav": 1.323,
+      "monthly_ret": 19.43,
+      "taiex_ret": 10.08
+    },
+    {
+      "date": "2012-02-13",
+      "strategy_nav": 2.269,
+      "taiex_nav": 1.326,
+      "monthly_ret": 0.99,
+      "taiex_ret": 0.19
+    },
+    {
+      "date": "2012-03-12",
+      "strategy_nav": 2.134,
+      "taiex_nav": 1.281,
+      "monthly_ret": -5.98,
+      "taiex_ret": -3.42
+    },
+    {
+      "date": "2012-04-11",
+      "strategy_nav": 2.126,
+      "taiex_nav": 1.238,
+      "monthly_ret": -0.35,
+      "taiex_ret": -3.33
+    },
+    {
+      "date": "2012-05-11",
+      "strategy_nav": 2.082,
+      "taiex_nav": 1.191,
+      "monthly_ret": -2.09,
+      "taiex_ret": -3.8
+    },
+    {
+      "date": "2012-06-11",
+      "strategy_nav": 2.18,
+      "taiex_nav": 1.214,
+      "monthly_ret": 4.72,
+      "taiex_ret": 1.93
+    },
+    {
+      "date": "2012-07-11",
+      "strategy_nav": 2.137,
+      "taiex_nav": 1.244,
+      "monthly_ret": -1.95,
+      "taiex_ret": 2.46
+    },
+    {
+      "date": "2012-08-13",
+      "strategy_nav": 2.088,
+      "taiex_nav": 1.252,
+      "monthly_ret": -2.3,
+      "taiex_ret": 0.66
+    },
+    {
+      "date": "2012-09-11",
+      "strategy_nav": 2.023,
+      "taiex_nav": 1.246,
+      "monthly_ret": -3.11,
+      "taiex_ret": -0.45
+    },
+    {
+      "date": "2012-10-11",
+      "strategy_nav": 1.987,
+      "taiex_nav": 1.215,
+      "monthly_ret": -1.78,
+      "taiex_ret": -2.47
+    },
+    {
+      "date": "2012-11-12",
+      "strategy_nav": 2.017,
+      "taiex_nav": 1.273,
+      "monthly_ret": 1.51,
+      "taiex_ret": 4.76
+    },
+    {
+      "date": "2012-12-11",
+      "strategy_nav": 2.078,
+      "taiex_nav": 1.308,
+      "monthly_ret": 3.04,
+      "taiex_ret": 2.7
+    },
+    {
+      "date": "2013-01-11",
+      "strategy_nav": 2.152,
+      "taiex_nav": 1.328,
+      "monthly_ret": 3.52,
+      "taiex_ret": 1.59
+    },
+    {
+      "date": "2013-02-18",
+      "strategy_nav": 2.532,
+      "taiex_nav": 1.344,
+      "monthly_ret": 17.67,
+      "taiex_ret": 1.2
+    },
+    {
+      "date": "2013-03-11",
+      "strategy_nav": 2.644,
+      "taiex_nav": 1.314,
+      "monthly_ret": 4.45,
+      "taiex_ret": -2.25
+    },
+    {
+      "date": "2013-04-11",
+      "strategy_nav": 2.84,
+      "taiex_nav": 1.379,
+      "monthly_ret": 7.42,
+      "taiex_ret": 4.97
+    },
+    {
+      "date": "2013-05-13",
+      "strategy_nav": 3.344,
+      "taiex_nav": 1.357,
+      "monthly_ret": 17.72,
+      "taiex_ret": -1.6
+    },
+    {
+      "date": "2013-06-11",
+      "strategy_nav": 3.482,
+      "taiex_nav": 1.368,
+      "monthly_ret": 4.12,
+      "taiex_ret": 0.78
+    },
+    {
+      "date": "2013-07-11",
+      "strategy_nav": 4.406,
+      "taiex_nav": 1.322,
+      "monthly_ret": 26.55,
+      "taiex_ret": -3.38
+    },
+    {
+      "date": "2013-08-12",
+      "strategy_nav": 4.618,
+      "taiex_nav": 1.373,
+      "monthly_ret": 4.82,
+      "taiex_ret": 3.87
+    },
+    {
+      "date": "2013-09-11",
+      "strategy_nav": 4.473,
+      "taiex_nav": 1.396,
+      "monthly_ret": -3.14,
+      "taiex_ret": 1.71
+    },
+    {
+      "date": "2013-10-11",
+      "strategy_nav": 4.58,
+      "taiex_nav": 1.368,
+      "monthly_ret": 2.39,
+      "taiex_ret": -2.0
+    },
+    {
+      "date": "2013-11-11",
+      "strategy_nav": 4.861,
+      "taiex_nav": 1.41,
+      "monthly_ret": 6.15,
+      "taiex_ret": 3.07
+    },
+    {
+      "date": "2013-12-11",
+      "strategy_nav": 5.296,
+      "taiex_nav": 1.433,
+      "monthly_ret": 8.94,
+      "taiex_ret": 1.57
+    },
+    {
+      "date": "2014-01-13",
+      "strategy_nav": 5.424,
+      "taiex_nav": 1.41,
+      "monthly_ret": 2.41,
+      "taiex_ret": -1.58
+    },
+    {
+      "date": "2014-02-11",
+      "strategy_nav": 6.092,
+      "taiex_nav": 1.455,
+      "monthly_ret": 12.32,
+      "taiex_ret": 3.22
+    },
+    {
+      "date": "2014-03-11",
+      "strategy_nav": 6.607,
+      "taiex_nav": 1.49,
+      "monthly_ret": 8.46,
+      "taiex_ret": 2.36
+    },
+    {
+      "date": "2014-04-11",
+      "strategy_nav": 7.278,
+      "taiex_nav": 1.473,
+      "monthly_ret": 10.15,
+      "taiex_ret": -1.12
+    },
+    {
+      "date": "2014-05-12",
+      "strategy_nav": 7.309,
+      "taiex_nav": 1.544,
+      "monthly_ret": 0.42,
+      "taiex_ret": 4.78
+    },
+    {
+      "date": "2014-06-11",
+      "strategy_nav": 7.104,
+      "taiex_nav": 1.588,
+      "monthly_ret": -2.8,
+      "taiex_ret": 2.88
+    },
+    {
+      "date": "2014-07-11",
+      "strategy_nav": 6.904,
+      "taiex_nav": 1.534,
+      "monthly_ret": -2.82,
+      "taiex_ret": -3.4
+    },
+    {
+      "date": "2014-08-11",
+      "strategy_nav": 7.141,
+      "taiex_nav": 1.559,
+      "monthly_ret": 3.43,
+      "taiex_ret": 1.64
+    },
+    {
+      "date": "2014-09-11",
+      "strategy_nav": 6.555,
+      "taiex_nav": 1.457,
+      "monthly_ret": -8.21,
+      "taiex_ret": -6.56
+    },
+    {
+      "date": "2014-10-13",
+      "strategy_nav": 6.54,
+      "taiex_nav": 1.511,
+      "monthly_ret": -0.23,
+      "taiex_ret": 3.7
+    },
+    {
+      "date": "2014-11-11",
+      "strategy_nav": 6.632,
+      "taiex_nav": 1.507,
+      "monthly_ret": 1.41,
+      "taiex_ret": -0.23
+    },
+    {
+      "date": "2014-12-11",
+      "strategy_nav": 6.499,
+      "taiex_nav": 1.535,
+      "monthly_ret": -2.0,
+      "taiex_ret": 1.83
+    },
+    {
+      "date": "2015-01-12",
+      "strategy_nav": 6.227,
+      "taiex_nav": 1.582,
+      "monthly_ret": -4.19,
+      "taiex_ret": 3.09
+    },
+    {
+      "date": "2015-02-11",
+      "strategy_nav": 6.59,
+      "taiex_nav": 1.593,
+      "monthly_ret": 5.83,
+      "taiex_ret": 0.64
+    },
+    {
+      "date": "2015-03-11",
+      "strategy_nav": 6.82,
+      "taiex_nav": 1.617,
+      "monthly_ret": 3.49,
+      "taiex_ret": 1.51
+    },
+    {
+      "date": "2015-04-13",
+      "strategy_nav": 6.86,
+      "taiex_nav": 1.616,
+      "monthly_ret": 0.6,
+      "taiex_ret": -0.03
+    },
+    {
+      "date": "2015-05-11",
+      "strategy_nav": 7.504,
+      "taiex_nav": 1.556,
+      "monthly_ret": 9.38,
+      "taiex_ret": -3.74
+    },
+    {
+      "date": "2015-06-11",
+      "strategy_nav": 6.773,
+      "taiex_nav": 1.511,
+      "monthly_ret": -9.74,
+      "taiex_ret": -2.89
+    },
+    {
+      "date": "2015-07-13",
+      "strategy_nav": 6.42,
+      "taiex_nav": 1.404,
+      "monthly_ret": -5.2,
+      "taiex_ret": -7.08
+    },
+    {
+      "date": "2015-08-11",
+      "strategy_nav": 6.447,
+      "taiex_nav": 1.389,
+      "monthly_ret": 0.41,
+      "taiex_ret": -1.05
+    },
+    {
+      "date": "2015-09-11",
+      "strategy_nav": 7.07,
+      "taiex_nav": 1.434,
+      "monthly_ret": 9.66,
+      "taiex_ret": 3.23
+    },
+    {
+      "date": "2015-10-12",
+      "strategy_nav": 7.667,
+      "taiex_nav": 1.407,
+      "monthly_ret": 8.44,
+      "taiex_ret": -1.85
+    },
+    {
+      "date": "2015-11-11",
+      "strategy_nav": 7.746,
+      "taiex_nav": 1.357,
+      "monthly_ret": 1.03,
+      "taiex_ret": -3.55
+    },
+    {
+      "date": "2015-12-11",
+      "strategy_nav": 7.998,
+      "taiex_nav": 1.303,
+      "monthly_ret": 3.25,
+      "taiex_ret": -4.03
+    },
+    {
+      "date": "2016-01-11",
+      "strategy_nav": 8.064,
+      "taiex_nav": 1.349,
+      "monthly_ret": 0.83,
+      "taiex_ret": 3.57
+    },
+    {
+      "date": "2016-02-15",
+      "strategy_nav": 7.782,
+      "taiex_nav": 1.456,
+      "monthly_ret": -3.49,
+      "taiex_ret": 7.93
+    },
+    {
+      "date": "2016-03-11",
+      "strategy_nav": 7.505,
+      "taiex_nav": 1.432,
+      "monthly_ret": -3.57,
+      "taiex_ret": -1.65
+    },
+    {
+      "date": "2016-04-11",
+      "strategy_nav": 7.603,
+      "taiex_nav": 1.361,
+      "monthly_ret": 1.31,
+      "taiex_ret": -4.99
+    },
+    {
+      "date": "2016-05-11",
+      "strategy_nav": 7.644,
+      "taiex_nav": 1.428,
+      "monthly_ret": 0.54,
+      "taiex_ret": 4.92
+    },
+    {
+      "date": "2016-06-13",
+      "strategy_nav": 8.135,
+      "taiex_nav": 1.469,
+      "monthly_ret": 6.42,
+      "taiex_ret": 2.93
+    },
+    {
+      "date": "2016-07-11",
+      "strategy_nav": 8.6,
+      "taiex_nav": 1.527,
+      "monthly_ret": 5.72,
+      "taiex_ret": 3.93
+    },
+    {
+      "date": "2016-08-11",
+      "strategy_nav": 8.618,
+      "taiex_nav": 1.496,
+      "monthly_ret": 0.2,
+      "taiex_ret": -2.02
+    },
+    {
+      "date": "2016-09-12",
+      "strategy_nav": 9.076,
+      "taiex_nav": 1.542,
+      "monthly_ret": 5.32,
+      "taiex_ret": 3.05
+    },
+    {
+      "date": "2016-10-11",
+      "strategy_nav": 8.346,
+      "taiex_nav": 1.498,
+      "monthly_ret": -8.04,
+      "taiex_ret": -2.84
+    },
+    {
+      "date": "2016-11-11",
+      "strategy_nav": 8.49,
+      "taiex_nav": 1.564,
+      "monthly_ret": 1.72,
+      "taiex_ret": 4.38
+    },
+    {
+      "date": "2016-12-12",
+      "strategy_nav": 8.307,
+      "taiex_nav": 1.563,
+      "monthly_ret": -2.15,
+      "taiex_ret": -0.04
+    },
+    {
+      "date": "2017-01-11",
+      "strategy_nav": 8.952,
+      "taiex_nav": 1.624,
+      "monthly_ret": 7.77,
+      "taiex_ret": 3.9
+    },
+    {
+      "date": "2017-02-13",
+      "strategy_nav": 9.552,
+      "taiex_nav": 1.622,
+      "monthly_ret": 6.7,
+      "taiex_ret": -0.13
+    },
+    {
+      "date": "2017-03-13",
+      "strategy_nav": 9.701,
+      "taiex_nav": 1.644,
+      "monthly_ret": 1.56,
+      "taiex_ret": 1.39
+    },
+    {
+      "date": "2017-04-11",
+      "strategy_nav": 10.393,
+      "taiex_nav": 1.673,
+      "monthly_ret": 7.14,
+      "taiex_ret": 1.72
+    },
+    {
+      "date": "2017-05-11",
+      "strategy_nav": 9.789,
+      "taiex_nav": 1.691,
+      "monthly_ret": -5.81,
+      "taiex_ret": 1.08
+    },
+    {
+      "date": "2017-06-12",
+      "strategy_nav": 9.421,
+      "taiex_nav": 1.742,
+      "monthly_ret": -3.76,
+      "taiex_ret": 3.02
+    },
+    {
+      "date": "2017-07-11",
+      "strategy_nav": 9.894,
+      "taiex_nav": 1.728,
+      "monthly_ret": 5.03,
+      "taiex_ret": -0.83
+    },
+    {
+      "date": "2017-08-11",
+      "strategy_nav": 11.314,
+      "taiex_nav": 1.768,
+      "monthly_ret": 14.35,
+      "taiex_ret": 2.35
+    },
+    {
+      "date": "2017-09-11",
+      "strategy_nav": 10.81,
+      "taiex_nav": 1.78,
+      "monthly_ret": -4.46,
+      "taiex_ret": 0.65
+    },
+    {
+      "date": "2017-10-11",
+      "strategy_nav": 11.023,
+      "taiex_nav": 1.787,
+      "monthly_ret": 1.97,
+      "taiex_ret": 0.4
+    },
+    {
+      "date": "2017-11-13",
+      "strategy_nav": 11.169,
+      "taiex_nav": 1.752,
+      "monthly_ret": 1.33,
+      "taiex_ret": -1.97
+    },
+    {
+      "date": "2017-12-11",
+      "strategy_nav": 12.124,
+      "taiex_nav": 1.808,
+      "monthly_ret": 8.54,
+      "taiex_ret": 3.22
+    },
+    {
+      "date": "2018-01-11",
+      "strategy_nav": 11.998,
+      "taiex_nav": 1.743,
+      "monthly_ret": -1.04,
+      "taiex_ret": -3.6
+    },
+    {
+      "date": "2018-02-12",
+      "strategy_nav": 14.151,
+      "taiex_nav": 1.84,
+      "monthly_ret": 17.95,
+      "taiex_ret": 5.58
+    },
+    {
+      "date": "2018-03-12",
+      "strategy_nav": 16.667,
+      "taiex_nav": 1.835,
+      "monthly_ret": 17.78,
+      "taiex_ret": -0.26
+    },
+    {
+      "date": "2018-04-11",
+      "strategy_nav": 21.156,
+      "taiex_nav": 1.816,
+      "monthly_ret": 26.93,
+      "taiex_ret": -1.05
+    },
+    {
+      "date": "2018-05-11",
+      "strategy_nav": 29.191,
+      "taiex_nav": 1.865,
+      "monthly_ret": 37.98,
+      "taiex_ret": 2.67
+    },
+    {
+      "date": "2018-06-11",
+      "strategy_nav": 28.906,
+      "taiex_nav": 1.786,
+      "monthly_ret": -0.98,
+      "taiex_ret": -4.24
+    },
+    {
+      "date": "2018-07-11",
+      "strategy_nav": 27.688,
+      "taiex_nav": 1.798,
+      "monthly_ret": -4.21,
+      "taiex_ret": 0.68
+    },
+    {
+      "date": "2018-08-13",
+      "strategy_nav": 27.099,
+      "taiex_nav": 1.798,
+      "monthly_ret": -2.13,
+      "taiex_ret": 0.03
+    },
+    {
+      "date": "2018-09-11",
+      "strategy_nav": 26.247,
+      "taiex_nav": 1.64,
+      "monthly_ret": -3.14,
+      "taiex_ret": -8.8
+    },
+    {
+      "date": "2018-10-11",
+      "strategy_nav": 26.692,
+      "taiex_nav": 1.644,
+      "monthly_ret": 1.7,
+      "taiex_ret": 0.26
+    },
+    {
+      "date": "2018-11-12",
+      "strategy_nav": 25.569,
+      "taiex_nav": 1.623,
+      "monthly_ret": -4.21,
+      "taiex_ret": -1.26
+    },
+    {
+      "date": "2018-12-11",
+      "strategy_nav": 23.956,
+      "taiex_nav": 1.632,
+      "monthly_ret": -6.31,
+      "taiex_ret": 0.54
+    },
+    {
+      "date": "2019-01-11",
+      "strategy_nav": 25.968,
+      "taiex_nav": 1.673,
+      "monthly_ret": 8.4,
+      "taiex_ret": 2.51
+    },
+    {
+      "date": "2019-02-11",
+      "strategy_nav": 28.123,
+      "taiex_nav": 1.714,
+      "monthly_ret": 8.3,
+      "taiex_ret": 2.46
+    },
+    {
+      "date": "2019-03-11",
+      "strategy_nav": 32.398,
+      "taiex_nav": 1.808,
+      "monthly_ret": 15.2,
+      "taiex_ret": 5.45
+    },
+    {
+      "date": "2019-04-11",
+      "strategy_nav": 30.429,
+      "taiex_nav": 1.766,
+      "monthly_ret": -6.08,
+      "taiex_ret": -2.32
+    },
+    {
+      "date": "2019-05-13",
+      "strategy_nav": 29.781,
+      "taiex_nav": 1.774,
+      "monthly_ret": -2.13,
+      "taiex_ret": 0.47
+    },
+    {
+      "date": "2019-06-11",
+      "strategy_nav": 31.02,
+      "taiex_nav": 1.813,
+      "monthly_ret": 4.16,
+      "taiex_ret": 2.22
+    },
+    {
+      "date": "2019-07-11",
+      "strategy_nav": 31.797,
+      "taiex_nav": 1.751,
+      "monthly_ret": 2.5,
+      "taiex_ret": -3.42
+    },
+    {
+      "date": "2019-08-12",
+      "strategy_nav": 33.87,
+      "taiex_nav": 1.805,
+      "monthly_ret": 6.52,
+      "taiex_ret": 3.04
+    },
+    {
+      "date": "2019-09-11",
+      "strategy_nav": 35.403,
+      "taiex_nav": 1.851,
+      "monthly_ret": 4.53,
+      "taiex_ret": 2.56
+    },
+    {
+      "date": "2019-10-14",
+      "strategy_nav": 35.102,
+      "taiex_nav": 1.911,
+      "monthly_ret": -0.85,
+      "taiex_ret": 3.26
+    },
+    {
+      "date": "2019-11-11",
+      "strategy_nav": 35.301,
+      "taiex_nav": 1.957,
+      "monthly_ret": 0.57,
+      "taiex_ret": 2.39
+    },
+    {
+      "date": "2019-12-11",
+      "strategy_nav": 38.365,
+      "taiex_nav": 2.026,
+      "monthly_ret": 8.68,
+      "taiex_ret": 3.53
+    },
+    {
+      "date": "2020-01-13",
+      "strategy_nav": 38.997,
+      "taiex_nav": 1.951,
+      "monthly_ret": 1.65,
+      "taiex_ret": -3.71
+    },
+    {
+      "date": "2020-02-11",
+      "strategy_nav": 39.693,
+      "taiex_nav": 1.822,
+      "monthly_ret": 1.79,
+      "taiex_ret": -6.6
+    },
+    {
+      "date": "2020-03-11",
+      "strategy_nav": 37.747,
+      "taiex_nav": 1.689,
+      "monthly_ret": -4.9,
+      "taiex_ret": -7.29
+    },
+    {
+      "date": "2020-04-13",
+      "strategy_nav": 49.0,
+      "taiex_nav": 1.842,
+      "monthly_ret": 29.81,
+      "taiex_ret": 9.05
+    },
+    {
+      "date": "2020-05-11",
+      "strategy_nav": 52.683,
+      "taiex_nav": 1.929,
+      "monthly_ret": 7.52,
+      "taiex_ret": 4.74
+    },
+    {
+      "date": "2020-06-11",
+      "strategy_nav": 54.213,
+      "taiex_nav": 2.042,
+      "monthly_ret": 2.9,
+      "taiex_ret": 5.86
+    },
+    {
+      "date": "2020-07-13",
+      "strategy_nav": 60.708,
+      "taiex_nav": 2.137,
+      "monthly_ret": 11.98,
+      "taiex_ret": 4.66
+    },
+    {
+      "date": "2020-08-11",
+      "strategy_nav": 66.424,
+      "taiex_nav": 2.12,
+      "monthly_ret": 9.41,
+      "taiex_ret": -0.82
+    },
+    {
+      "date": "2020-09-11",
+      "strategy_nav": 65.119,
+      "taiex_nav": 2.167,
+      "monthly_ret": -1.96,
+      "taiex_ret": 2.21
+    },
+    {
+      "date": "2020-10-12",
+      "strategy_nav": 69.098,
+      "taiex_nav": 2.218,
+      "monthly_ret": 6.11,
+      "taiex_ret": 2.36
+    },
+    {
+      "date": "2020-11-11",
+      "strategy_nav": 77.641,
+      "taiex_nav": 2.385,
+      "monthly_ret": 12.36,
+      "taiex_ret": 7.54
+    },
+    {
+      "date": "2020-12-11",
+      "strategy_nav": 84.241,
+      "taiex_nav": 2.602,
+      "monthly_ret": 8.5,
+      "taiex_ret": 9.08
+    },
+    {
+      "date": "2021-01-11",
+      "strategy_nav": 87.744,
+      "taiex_nav": 2.736,
+      "monthly_ret": 4.16,
+      "taiex_ret": 5.17
+    },
+    {
+      "date": "2021-02-17",
+      "strategy_nav": 93.731,
+      "taiex_nav": 2.706,
+      "monthly_ret": 6.82,
+      "taiex_ret": -1.12
+    },
+    {
+      "date": "2021-03-11",
+      "strategy_nav": 121.936,
+      "taiex_nav": 2.82,
+      "monthly_ret": 30.09,
+      "taiex_ret": 4.2
+    },
+    {
+      "date": "2021-04-12",
+      "strategy_nav": 115.59,
+      "taiex_nav": 2.773,
+      "monthly_ret": -5.2,
+      "taiex_ret": -1.64
+    },
+    {
+      "date": "2021-05-11",
+      "strategy_nav": 99.604,
+      "taiex_nav": 2.879,
+      "monthly_ret": -13.83,
+      "taiex_ret": 3.8
+    },
+    {
+      "date": "2021-06-11",
+      "strategy_nav": 120.1,
+      "taiex_nav": 2.979,
+      "monthly_ret": 20.58,
+      "taiex_ret": 3.49
+    },
+    {
+      "date": "2021-07-12",
+      "strategy_nav": 93.379,
+      "taiex_nav": 2.881,
+      "monthly_ret": -22.25,
+      "taiex_ret": -3.3
+    },
+    {
+      "date": "2021-08-11",
+      "strategy_nav": 100.81,
+      "taiex_nav": 2.918,
+      "monthly_ret": 7.96,
+      "taiex_ret": 1.27
+    },
+    {
+      "date": "2021-09-13",
+      "strategy_nav": 100.323,
+      "taiex_nav": 2.753,
+      "monthly_ret": -0.48,
+      "taiex_ret": -5.64
+    },
+    {
+      "date": "2021-10-12",
+      "strategy_nav": 115.386,
+      "taiex_nav": 2.919,
+      "monthly_ret": 15.01,
+      "taiex_ret": 6.01
+    },
+    {
+      "date": "2021-11-11",
+      "strategy_nav": 114.161,
+      "taiex_nav": 2.971,
+      "monthly_ret": -1.06,
+      "taiex_ret": 1.81
+    },
+    {
+      "date": "2021-12-13",
+      "strategy_nav": 104.158,
+      "taiex_nav": 3.059,
+      "monthly_ret": -8.76,
+      "taiex_ret": 2.93
+    },
+    {
+      "date": "2022-01-11",
+      "strategy_nav": 98.746,
+      "taiex_nav": 3.062,
+      "monthly_ret": -5.2,
+      "taiex_ret": 0.12
+    },
+    {
+      "date": "2022-02-11",
+      "strategy_nav": 95.601,
+      "taiex_nav": 2.887,
+      "monthly_ret": -3.19,
+      "taiex_ret": -5.71
+    },
+    {
+      "date": "2022-03-11",
+      "strategy_nav": 89.561,
+      "taiex_nav": 2.851,
+      "monthly_ret": -6.32,
+      "taiex_ret": -1.25
+    },
+    {
+      "date": "2022-04-11",
+      "strategy_nav": 81.678,
+      "taiex_nav": 2.677,
+      "monthly_ret": -8.8,
+      "taiex_ret": -6.11
+    },
+    {
+      "date": "2022-05-11",
+      "strategy_nav": 84.809,
+      "taiex_nav": 2.688,
+      "monthly_ret": 3.83,
+      "taiex_ret": 0.4
+    },
+    {
+      "date": "2022-06-13",
+      "strategy_nav": 80.575,
+      "taiex_nav": 2.398,
+      "monthly_ret": -4.99,
+      "taiex_ret": -10.77
+    },
+    {
+      "date": "2022-07-11",
+      "strategy_nav": 81.596,
+      "taiex_nav": 2.542,
+      "monthly_ret": 1.27,
+      "taiex_ret": 5.98
+    },
+    {
+      "date": "2022-08-11",
+      "strategy_nav": 80.917,
+      "taiex_nav": 2.476,
+      "monthly_ret": -0.83,
+      "taiex_ret": -2.57
+    },
+    {
+      "date": "2022-09-12",
+      "strategy_nav": 77.626,
+      "taiex_nav": 2.192,
+      "monthly_ret": -4.07,
+      "taiex_ret": -11.49
+    },
+    {
+      "date": "2022-10-11",
+      "strategy_nav": 77.482,
+      "taiex_nav": 2.343,
+      "monthly_ret": -0.19,
+      "taiex_ret": 6.88
+    },
+    {
+      "date": "2022-11-11",
+      "strategy_nav": 80.576,
+      "taiex_nav": 2.444,
+      "monthly_ret": 3.99,
+      "taiex_ret": 4.32
+    },
+    {
+      "date": "2022-12-12",
+      "strategy_nav": 80.721,
+      "taiex_nav": 2.467,
+      "monthly_ret": 0.18,
+      "taiex_ret": 0.95
+    },
+    {
+      "date": "2023-01-11",
+      "strategy_nav": 85.132,
+      "taiex_nav": 2.6,
+      "monthly_ret": 5.46,
+      "taiex_ret": 5.37
+    },
+    {
+      "date": "2023-02-13",
+      "strategy_nav": 84.279,
+      "taiex_nav": 2.602,
+      "monthly_ret": -1.0,
+      "taiex_ret": 0.1
+    },
+    {
+      "date": "2023-03-13",
+      "strategy_nav": 90.775,
+      "taiex_nav": 2.661,
+      "monthly_ret": 7.71,
+      "taiex_ret": 2.27
+    },
+    {
+      "date": "2023-04-11",
+      "strategy_nav": 86.516,
+      "taiex_nav": 2.595,
+      "monthly_ret": -4.69,
+      "taiex_ret": -2.51
+    },
+    {
+      "date": "2023-05-11",
+      "strategy_nav": 102.152,
+      "taiex_nav": 2.836,
+      "monthly_ret": 18.07,
+      "taiex_ret": 9.29
+    },
+    {
+      "date": "2023-06-12",
+      "strategy_nav": 119.65,
+      "taiex_nav": 2.826,
+      "monthly_ret": 17.13,
+      "taiex_ret": -0.33
+    },
+    {
+      "date": "2023-07-11",
+      "strategy_nav": 149.863,
+      "taiex_nav": 2.776,
+      "monthly_ret": 25.25,
+      "taiex_ret": -1.76
+    },
+    {
+      "date": "2023-08-11",
+      "strategy_nav": 171.779,
+      "taiex_nav": 2.748,
+      "monthly_ret": 14.62,
+      "taiex_ret": -1.01
+    },
+    {
+      "date": "2023-09-11",
+      "strategy_nav": 179.438,
+      "taiex_nav": 2.788,
+      "monthly_ret": 4.46,
+      "taiex_ret": 1.45
+    },
+    {
+      "date": "2023-10-11",
+      "strategy_nav": 168.85,
+      "taiex_nav": 2.816,
+      "monthly_ret": -5.9,
+      "taiex_ret": 1.0
+    },
+    {
+      "date": "2023-11-13",
+      "strategy_nav": 176.757,
+      "taiex_nav": 2.913,
+      "monthly_ret": 4.68,
+      "taiex_ret": 3.44
+    },
+    {
+      "date": "2023-12-11",
+      "strategy_nav": 170.91,
+      "taiex_nav": 2.934,
+      "monthly_ret": -3.31,
+      "taiex_ret": 0.73
+    },
+    {
+      "date": "2024-01-11",
+      "strategy_nav": 178.821,
+      "taiex_nav": 3.118,
+      "monthly_ret": 4.63,
+      "taiex_ret": 6.27
+    },
+    {
+      "date": "2024-02-15",
+      "strategy_nav": 174.328,
+      "taiex_nav": 3.299,
+      "monthly_ret": -2.51,
+      "taiex_ret": 5.8
+    },
+    {
+      "date": "2024-03-11",
+      "strategy_nav": 176.354,
+      "taiex_nav": 3.471,
+      "monthly_ret": 1.16,
+      "taiex_ret": 5.21
+    },
+    {
+      "date": "2024-04-11",
+      "strategy_nav": 156.836,
+      "taiex_nav": 3.488,
+      "monthly_ret": -11.07,
+      "taiex_ret": 0.5
+    },
+    {
+      "date": "2024-05-13",
+      "strategy_nav": 189.314,
+      "taiex_nav": 3.645,
+      "monthly_ret": 20.71,
+      "taiex_ret": 4.48
+    },
+    {
+      "date": "2024-06-11",
+      "strategy_nav": 235.744,
+      "taiex_nav": 4.079,
+      "monthly_ret": 24.53,
+      "taiex_ret": 11.92
+    },
+    {
+      "date": "2024-07-11",
+      "strategy_nav": 222.834,
+      "taiex_nav": 3.641,
+      "monthly_ret": -5.48,
+      "taiex_ret": -10.73
+    },
+    {
+      "date": "2024-08-12",
+      "strategy_nav": 233.869,
+      "taiex_nav": 3.517,
+      "monthly_ret": 4.95,
+      "taiex_ret": -3.41
+    },
+    {
+      "date": "2024-09-11",
+      "strategy_nav": 264.003,
+      "taiex_nav": 3.83,
+      "monthly_ret": 12.89,
+      "taiex_ret": 8.89
+    },
+    {
+      "date": "2024-10-11",
+      "strategy_nav": 278.181,
+      "taiex_nav": 3.935,
+      "monthly_ret": 5.37,
+      "taiex_ret": 2.74
+    },
+    {
+      "date": "2024-11-11",
+      "strategy_nav": 270.425,
+      "taiex_nav": 3.83,
+      "monthly_ret": -2.79,
+      "taiex_ret": -2.66
+    },
+    {
+      "date": "2024-12-11",
+      "strategy_nav": 262.559,
+      "taiex_nav": 3.761,
+      "monthly_ret": -2.91,
+      "taiex_ret": -1.81
+    },
+    {
+      "date": "2025-01-13",
+      "strategy_nav": 288.226,
+      "taiex_nav": 3.911,
+      "monthly_ret": 9.78,
+      "taiex_ret": 3.98
+    },
+    {
+      "date": "2025-02-11",
+      "strategy_nav": 264.405,
+      "taiex_nav": 3.691,
+      "monthly_ret": -8.26,
+      "taiex_ret": -5.61
+    },
+    {
+      "date": "2025-03-11",
+      "strategy_nav": 236.571,
+      "taiex_nav": 3.266,
+      "monthly_ret": -10.53,
+      "taiex_ret": -11.52
+    },
+    {
+      "date": "2025-04-11",
+      "strategy_nav": 248.922,
+      "taiex_nav": 3.534,
+      "monthly_ret": 5.22,
+      "taiex_ret": 8.2
+    },
+    {
+      "date": "2025-05-12",
+      "strategy_nav": 310.375,
+      "taiex_nav": 3.758,
+      "monthly_ret": 24.69,
+      "taiex_ret": 6.34
+    },
+    {
+      "date": "2025-06-11",
+      "strategy_nav": 321.812,
+      "taiex_nav": 3.805,
+      "monthly_ret": 3.68,
+      "taiex_ret": 1.25
+    },
+    {
+      "date": "2025-07-11",
+      "strategy_nav": 407.122,
+      "taiex_nav": 4.036,
+      "monthly_ret": 26.51,
+      "taiex_ret": 6.09
+    },
+    {
+      "date": "2025-08-11",
+      "strategy_nav": 434.289,
+      "taiex_nav": 4.217,
+      "monthly_ret": 6.67,
+      "taiex_ret": 4.48
+    },
+    {
+      "date": "2025-09-11",
+      "strategy_nav": 417.893,
+      "taiex_nav": 4.503,
+      "monthly_ret": -3.78,
+      "taiex_ret": 6.77
+    },
+    {
+      "date": "2025-10-13",
+      "strategy_nav": 469.447,
+      "taiex_nav": 4.647,
+      "monthly_ret": 12.34,
+      "taiex_ret": 3.2
+    },
+    {
+      "date": "2025-11-11",
+      "strategy_nav": 441.252,
+      "taiex_nav": 4.687,
+      "monthly_ret": -6.01,
+      "taiex_ret": 0.86
+    },
+    {
+      "date": "2025-12-11",
+      "strategy_nav": 550.684,
+      "taiex_nav": 5.112,
+      "monthly_ret": 24.8,
+      "taiex_ret": 9.07
+    },
+    {
+      "date": "2026-01-12",
+      "strategy_nav": 628.647,
+      "taiex_nav": 5.62,
+      "monthly_ret": 14.16,
+      "taiex_ret": 9.94
+    },
+    {
+      "date": "2026-02-11",
+      "strategy_nav": 699.525,
+      "taiex_nav": 5.705,
+      "monthly_ret": 11.27,
+      "taiex_ret": 1.51
+    },
+    {
+      "date": "2026-03-11",
+      "strategy_nav": 772.316,
+      "taiex_nav": 5.93,
+      "monthly_ret": 10.41,
+      "taiex_ret": 3.94
+    },
+    {
+      "date": "2026-04-13",
+      "strategy_nav": 961.376,
+      "taiex_nav": 6.989,
+      "monthly_ret": 24.48,
+      "taiex_ret": 17.86
+    },
+    {
+      "date": "2026-05-11",
+      "strategy_nav": 1361.797,
+      "taiex_nav": 7.216,
+      "monthly_ret": 41.65,
+      "taiex_ret": 3.25
+    },
+    {
+      "date": "2026-06-11",
+      "strategy_nav": 1551.601,
+      "taiex_nav": 7.589,
+      "monthly_ret": 13.94,
+      "taiex_ret": 5.17
+    },
+    {
+      "date": "2026-07-13",
+      "strategy_nav": 1302.518,
+      "taiex_nav": 7.546,
+      "monthly_ret": -16.05,
+      "taiex_ret": -0.57
+    },
+    {
+      "date": "2026-08-11",
+      "strategy_nav": 1312.028,
+      "taiex_nav": 7.724,
+      "monthly_ret": 0.73,
+      "taiex_ret": 2.36
+    }
+  ],
+  "yearly_stats": [
+    {
+      "year": 2005,
+      "strategy_ret": -3.83,
+      "taiex_ret": 12.65,
+      "alpha": -16.48,
+      "is_positive": false
+    },
+    {
+      "year": 2006,
+      "strategy_ret": 14.79,
+      "taiex_ret": 13.1,
+      "alpha": 1.69,
+      "is_positive": true
+    },
+    {
+      "year": 2007,
+      "strategy_ret": -3.88,
+      "taiex_ret": 5.39,
+      "alpha": -9.27,
+      "is_positive": false
+    },
+    {
+      "year": 2008,
+      "strategy_ret": -3.77,
+      "taiex_ret": -44.53,
+      "alpha": 40.76,
+      "is_positive": false
+    },
+    {
+      "year": 2009,
+      "strategy_ret": 80.79,
+      "taiex_ret": 86.89,
+      "alpha": -6.1,
+      "is_positive": true
+    },
+    {
+      "year": 2010,
+      "strategy_ret": 9.94,
+      "taiex_ret": 7.3,
+      "alpha": 2.64,
+      "is_positive": true
+    },
+    {
+      "year": 2011,
+      "strategy_ret": -7.29,
+      "taiex_ret": -19.52,
+      "alpha": 12.23,
+      "is_positive": false
+    },
+    {
+      "year": 2012,
+      "strategy_ret": 10.47,
+      "taiex_ret": 8.78,
+      "alpha": 1.69,
+      "is_positive": true
+    },
+    {
+      "year": 2013,
+      "strategy_ret": 154.81,
+      "taiex_ret": 9.55,
+      "alpha": 145.26,
+      "is_positive": true
+    },
+    {
+      "year": 2014,
+      "strategy_ret": 22.72,
+      "taiex_ret": 7.15,
+      "alpha": 15.57,
+      "is_positive": true
+    },
+    {
+      "year": 2015,
+      "strategy_ret": 23.06,
+      "taiex_ret": -15.14,
+      "alpha": 38.2,
+      "is_positive": true
+    },
+    {
+      "year": 2016,
+      "strategy_ret": 3.86,
+      "taiex_ret": 20.0,
+      "alpha": -16.14,
+      "is_positive": true
+    },
+    {
+      "year": 2017,
+      "strategy_ret": 45.95,
+      "taiex_ret": 15.67,
+      "alpha": 30.28,
+      "is_positive": true
+    },
+    {
+      "year": 2018,
+      "strategy_ret": 97.59,
+      "taiex_ret": -9.72,
+      "alpha": 107.31,
+      "is_positive": true
+    },
+    {
+      "year": 2019,
+      "strategy_ret": 60.15,
+      "taiex_ret": 24.12,
+      "alpha": 36.03,
+      "is_positive": true
+    },
+    {
+      "year": 2020,
+      "strategy_ret": 119.58,
+      "taiex_ret": 28.43,
+      "alpha": 91.15,
+      "is_positive": true
+    },
+    {
+      "year": 2021,
+      "strategy_ret": 23.64,
+      "taiex_ret": 17.55,
+      "alpha": 6.09,
+      "is_positive": true
+    },
+    {
+      "year": 2022,
+      "strategy_ret": -22.5,
+      "taiex_ret": -19.34,
+      "alpha": -3.16,
+      "is_positive": false
+    },
+    {
+      "year": 2023,
+      "strategy_ret": 111.73,
+      "taiex_ret": 18.94,
+      "alpha": 92.79,
+      "is_positive": true
+    },
+    {
+      "year": 2024,
+      "strategy_ret": 53.62,
+      "taiex_ret": 28.17,
+      "alpha": 25.45,
+      "is_positive": true
+    },
+    {
+      "year": 2025,
+      "strategy_ret": 109.74,
+      "taiex_ret": 35.93,
+      "alpha": 73.81,
+      "is_positive": true
+    },
+    {
+      "year": 2026,
+      "strategy_ret": 138.25,
+      "taiex_ret": 51.09,
+      "alpha": 87.16,
+      "is_positive": true
+    }
+  ],
+  "causal_alphas": [
+    {
+      "name": "大單集中度潛伏吸籌 (OrderFlow Concentration)",
+      "code": "llm_orderflow",
+      "invariance_ratio": 2.31,
+      "source": "LLM 微觀結構假設",
+      "desc": "主力大戶建倉會使每筆成交張數顯著放大，若同時乖離率小（未引發散戶追價），後續具爆發力。"
+    },
+    {
+      "name": "蛙跳效應資訊連續性 (Frog-in-the-Pan FIP)",
+      "code": "llm_fip",
+      "invariance_ratio": 1.47,
+      "source": "LLM 行為金融假設",
+      "desc": "散戶對單日大跳空過度反應，但對連續微幅上漲反應不足 (Underreaction)，資訊連續性高的股票超額收益強烈。"
+    },
+    {
+      "name": "下影線抗跌與非對稱波動偏度 (Asymmetric Vol Skew)",
+      "code": "llm_volskew",
+      "invariance_ratio": 3.17,
+      "source": "LLM 波動率偏度假設",
+      "desc": "下影線承接強烈且上行波動大於下行波動（正偏態），代表籌碼清洗乾淨，具備高勝率反轉動能。"
+    },
+    {
+      "name": "偏度動量衰減阻力因子 (Skewed Momentum Decay)",
+      "code": "ga_alpha_4",
+      "invariance_ratio": 1.25,
+      "source": "遺傳算法 (GA) 符號回歸",
+      "desc": "透過符號原語演化出的高點阻力穿透公式，有效過濾追高衰竭風險。"
+    }
+  ]
+}

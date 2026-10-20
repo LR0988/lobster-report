@@ -1697,6 +1697,15 @@ def get_titan_live_state():
         "trades": trade_rows
     }
 
+@app.get("/api/taiwan_causal_titan/live")
+def get_taiwan_causal_titan_live():
+    """取得台股因果量化泰坦旗艦版 (Causal ML & LLM) 實盤數據、持倉、曲線與績效"""
+    json_path = os.path.join(os.path.dirname(__file__), 'frontend', 'src', 'data', 'taiwan_causal_titan_data.json')
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {"status": "error", "message": "data not found"}
+
 @app.post("/api/titan/live/buy")
 def record_titan_buy(req: TitanBuyRequest):
     """買進成交紀錄 (存入本地 tw_stock.db)"""

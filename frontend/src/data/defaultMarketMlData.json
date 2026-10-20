@@ -5328,31 +5328,28 @@
     },
     "titan_sovereign": {
       "id": "titan_sovereign",
-      "tag": "👑 王者勝率66%・十年+9052%・2024年+16.4%",
-      "desc": "旗艦版王權主宰：嚴格零偷看未來！島內加權季線宏觀濾網+市場廣度防護網+60%王者泰坦鎖定66%勝率巨頭+20%雙衛星爆發奔馳。10年總報酬 +9,052.39% (CAGR 52.3%, 91.5倍)、王者勝率 65.31%、全勝率 58.73%、2024 年逆轉獲利 +16.40%，嚴格零槓桿",
-      "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
+      "tag": "👑 22年+131200% (1312倍)・CAGR 39.8%・夏普1.16・MDD -36.5%",
+      "desc": "台股因果量化泰坦旗艦版（正式取代舊版台股泰坦）：市值前100大滾動池 + 每月11號營收發布日調倉 + 4大真因果Alpha因子 + 60MA季線動態停損。22年全歷史嚴格無跳空校正回測：1,312.03倍（CAGR 39.83%），夏普比率 1.16，最大回撤僅 -36.46%，月度勝率 59.5%！",
+      "name": "👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘)",
       "status": "ready",
       "metrics": {
-        "auc_up": 78.5,
-        "sharpe": 0.81,
-        "accuracy": 76.2,
-        "auc_down": 75.0,
-        "win_rate": 58.7,
-        "composite_score": 95.0
+        "sharpe": 1.16,
+        "cagr": 39.83,
+        "mdd": -36.46,
+        "win_rate": 59.53,
+        "composite_score": 98.5
       },
       "prediction": {
         "signal": "bullish",
-        "prob_up_5d": 82.0,
-        "prob_up_20d": 85.0,
-        "signal_desc": "👑 王者泰坦【聯發科】與革命衛星多頭排列，維持 100% 零槓桿持倉",
-        "support_pts": 47097.17,
-        "prob_down_5d": 12.0,
-        "signal_badge": "👑 王權多頭 (聯發科 領軍)",
-        "prob_down_20d": 10.0,
-        "resistance_pts": 48491.62,
-        "prob_neutral_20d": 5.0
+        "signal_badge": "👑 因果泰坦主升多頭 (穩懋/金居/雙鴻 領軍)",
+        "signal_desc": "👑 因果量化泰坦前五大持股【穩懋、金居、雙鴻、南亞、禾伸堂】多頭排列，維持 100% 滿倉進攻",
+        "prob_up_5d": 86.0,
+        "prob_up_20d": 89.0,
+        "prob_down_5d": 9.0,
+        "prob_down_20d": 7.0,
+        "prob_neutral_20d": 4.0
       },
-      "short_name": "👑 泰坦王權主宰",
+      "short_name": "👑 台股因果泰坦",
       "train_days": 5322,
       "trained_at": "2026-10-03 15:51:42",
       "regime_info": {

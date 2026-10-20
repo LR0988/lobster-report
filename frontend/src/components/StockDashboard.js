@@ -15,6 +15,7 @@ import pureSniperCurveData from '../data/pure_sniper_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import defaultPodcastData from '../data/defaultPodcastData.json';
 import GlobalSovereignDashboard from './GlobalSovereignDashboard';
+import TaiwanCausalTitanDashboard from './TaiwanCausalTitanDashboard';
 import OversoldSniperDashboard from './OversoldSniperDashboard';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
@@ -262,7 +263,7 @@ const MARKET_ML_MODELS = [
   { val: 'global_liquid_titan_sniper', label: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 終極最佳化冠軍)', short: '⚡ 全球泰坦(DOE快打冠軍)', tag: '👑 22.8年+14354310% (14.35萬倍)・CAGR 68.53%・夏普1.49・MDD -28.37%', desc: '全球主權泰坦純進攻雙梯隊 ＋ 閒置資金極端超賣快打（DOE 全域最佳化：Z ≤ -2.0, 10MA停利, 上限10天, -7%停損, 閒置資金30%動用）：平時雙梯隊主砲推進，現金閒置 > 15% 時自動以極端超賣撈底打擊均值回歸反彈，觸及 10MA 即刻結利退回主砲。22.8 年嚴格日頻撮合實證達 143,544.1 倍 (14.35 萬倍)，年化 CAGR 68.53%，夏普比率 1.49 (索提諾 2.53)，快打勝率 62.2%，相較純泰坦基底 (4.8萬倍) 實現 3 倍終極財富躍遷！' },
   { val: 'pure_sniper_standalone', label: '🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)', short: '🎯 極端超賣純快打', tag: '🛡️ 危機Alpha・MDD僅 -18.56%・22.8年+443.8% (5.44倍)・勝率62.2%', desc: '極端超賣 Z-Score 純快打獨立策略（無主砲，100% 獨立資金池）：平時 100% 現金零曝險防守，僅在大盤/核心權值股爆發極端恐慌抛售 (20日 Z ≤ -2.0) 時次日 T+1 開盤切入搶超跌反彈，觸及 10MA 或滿 10 日即結利退場。全歷史勝率 62.2%，最大回撤僅 -18.56%，年化夏普 0.59，在 2008 金融海嘯狂賺、2018 貿易戰與 2022 升息大熊市大幅逆勢獲利！' },
   { val: 'global_liquid_titan_base', label: '👑 全球高流動性主權泰坦 (純雙梯隊進攻版)', short: '👑 全球主權泰坦(純雙梯隊)', tag: '👑 22.8年+4816500% (4.8萬倍)・CAGR 60.5%・MDD -28.37%・勝率91.3%', desc: '全球高流動性主權泰坦純雙梯隊旗艦：每月1號(A梯隊50%)與22號(B梯隊50%)交錯調倉 + 40/30/30固定階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 前5名保護帶 + 滿4月換血。22.8年全歷史檢驗 CAGR 60.47% (48,165倍)，MDD -28.37%，Calmar 2.13，真實夏普 1.37，年度勝率 91.3% (23年贏21年)！' },
-  { val: 'titan_sovereign', label: '👑 台股王權主宰旗艦版 (二階段Top10精選 × 週度動態遞補 - 研發里程碑)', short: '👑 台股泰坦(王權主宰里程碑)', tag: '👑 20年+26550% (266.5倍)・CAGR 30.3%・MDD -36.6%・夏普1.00', desc: '台股主權王權破局主宰：嚴格零偷看未來！加權季線宏觀濾網+市場廣度防護網+二階段Top10動能初篩與高勝率二次精選+週度動態遞補消除空窗期+在席贏家動態再平衡。20年累積 +26,550.7% (CAGR 29.2%~30.3%, 266.5倍)，最大回撤僅 -36.55%，夏普比率 1.00，實盤加權勝率 50.4%，嚴格零槓桿！' },
+  { val: 'titan_sovereign', label: '👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 × 22年 1312倍)', short: '👑 台股因果泰坦', tag: '👑 22年+131200% (1312倍)・CAGR 39.8%・夏普1.16・MDD -36.5%', desc: '台股因果量化泰坦旗艦版（正式取代舊版台股泰坦）：市值前100大滾動池 + 每月11號營收發布日調倉 + 4大真因果Alpha因子（大單吸籌、FIP資訊連續性、非對稱偏度、阻力衰減）+ 60MA季線動態停損。22年全歷史嚴格無跳空校正回測：1,312.03倍（CAGR 39.83%），夏普比率 1.16，最大回撤僅 -36.46%，月度勝率 59.5%！' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -4218,6 +4219,7 @@ function StockDashboard() {
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📊 股市策略總覽' },
+            { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦' },
             { id: 'global_sovereign', label: '👑 全球主權泰坦' },
             { id: 'oversold_sniper', label: '🎯 超賣快打' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
@@ -8283,6 +8285,11 @@ function StockDashboard() {
           );
         })()}
 
+
+        {/* ===== 👑 台股因果量化泰坦旗艦看板 ===== */}
+        {activeTab === 'taiwan_causal_titan' && (
+          <TaiwanCausalTitanDashboard />
+        )}
 
         {/* ===== 🌍 全球主權泰坦動能看板 ===== */}
         {activeTab === 'global_sovereign' && (
