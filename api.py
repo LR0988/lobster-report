@@ -4145,6 +4145,13 @@ def get_tw_asymmetric_alpha_dashboard():
     import tw_special_strategies_service
     return tw_special_strategies_service.get_tw_asymmetric_alpha_data()
 
+@app.get("/api/oversold_sniper/dashboard")
+@app.get("/api/oversold_sniper/radar")
+def get_oversold_sniper_dashboard():
+    """極端超賣快打專屬看板：20日 Z <= -2.0 即時雷達、10MA 停利目標與 352 筆嚴格日頻回測"""
+    import oversold_sniper_service
+    return oversold_sniper_service.get_oversold_sniper_dashboard_data()
+
 @app.get("/api/market_ml/status")
 @app.get("/api/market_ml/predict")
 def get_market_ml_status():
@@ -4208,10 +4215,20 @@ if os.path.exists(frontend_dist):
             
         file_path = os.path.join(frontend_dist, catchall)
         if os.path.exists(file_path) and os.path.isfile(file_path):
-            return FileResponse(file_path)
+            resp = FileResponse(file_path)
+            if file_path.endswith(".html"):
+                resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+                resp.headers["Pragma"] = "no-cache"
+                resp.headers["Expires"] = "0"
+            return resp
             
         # 如果找不到檔案 (例如前端路由)，一律回傳 index.html 讓 React Router 處理
-        return FileResponse(os.path.join(frontend_dist, "index.html"))
+        resp = FileResponse(os.path.join(frontend_dist, "index.html"))
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
 else:
     print(f"Warning: 前端打包資料夾 {frontend_dist} 不存在。請先執行 npm run build。")
+
 

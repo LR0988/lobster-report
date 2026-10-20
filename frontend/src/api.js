@@ -378,6 +378,25 @@ export async function apiGetGlobalSovereignDashboard() {
 }
 
 // ==========================================
+// 🎯 極端超賣快打專屬 Dashboard API (直連筆電本機 tw_stock.db)
+// ==========================================
+export async function apiGetOversoldSniperDashboard() {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/oversold_sniper/dashboard`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'ok') {
+        return json;
+      }
+    }
+  } catch (err) {
+    console.warn(`筆電本機 ${base}/api/oversold_sniper/dashboard 連線異常:`, err.message);
+  }
+  return null;
+}
+
+// ==========================================
 // 👑 全球泰坦實盤持倉與交易紀錄 (優先直連筆電本機 tw_stock.db)
 // ==========================================
 export async function apiGetGlobalTitanPortfolio(username) {

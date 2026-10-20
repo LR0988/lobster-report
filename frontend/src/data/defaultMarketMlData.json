@@ -6382,6 +6382,49 @@
         "signal": "STRONG_BUY",
         "directive": "全球主權寬幅多頭共振，A梯隊(1號)與B梯隊(22號)雙軌滿倉運作中"
       }
+    },
+    "global_liquid_titan_sniper": {
+      "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+      "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.32、MDD -31.73%",
+      "metrics": {
+        "model_id": "global_liquid_titan_sniper",
+        "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+        "short_name": "⚡ 全球泰坦(閒置快打版)",
+        "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+        "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+        "total_return_pct": 4280296.0,
+        "cagr_pct": 60.07,
+        "alpha_pct": 4279377.5,
+        "max_drawdown_pct": -31.73,
+        "sharpe_ratio": 1.32,
+        "sortino_ratio": 3.21,
+        "win_rate_pct": 59.7,
+        "profit_factor": 2.3,
+        "total_trades": 1717,
+        "market_exposure_pct": 94.5,
+        "annual_win_rate_pct": 95.5
+      }
+    },
+    "pure_sniper_standalone": {
+      "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+      "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+      "metrics": {
+        "model_id": "pure_sniper_standalone",
+        "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+        "short_name": "🎯 極端超賣純快打",
+        "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+        "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+        "total_return_pct": 443.8,
+        "cagr_pct": 7.73,
+        "alpha_pct": 344.3,
+        "max_drawdown_pct": -18.56,
+        "sharpe_ratio": 0.59,
+        "sortino_ratio": 0.71,
+        "win_rate_pct": 62.2,
+        "profit_factor": 2.38,
+        "total_trades": 111,
+        "market_exposure_pct": 18.2
+      }
     }
   },
   "status": "success",
@@ -13747,7 +13790,7 @@
       "importance_pct": 2.9
     }
   ],
-  "best_model_id": "global_liquid_titan_base",
+  "best_model_id": "global_liquid_titan_sniper",
   "labeling_info": {
     "tag": "👑 頂級量化標準",
     "method_id": "triple_barrier",
@@ -19792,7 +19835,7 @@
     "vol_term_ratio_5d_20d": 0.72,
     "nasdaq_sp500_ratio_chg20": 2.96
   },
-  "selected_model": "global_liquid_titan_base",
+  "selected_model": "global_liquid_titan_sniper",
   "support_resistance": {
     "r1": {
       "desc": "近 5 日震盪高點",
@@ -20157,6 +20200,22 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 272.3,
+            "cagr_pct": 236.52,
+            "alpha_pct": 172.3,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 250,
+            "market_exposure_pct": 94.2
+          },
+          {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
@@ -20400,6 +20459,22 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 272.3,
+            "cagr_pct": 236.52,
+            "alpha_pct": 172.3,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 250,
+            "market_exposure_pct": 94.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -21118,6 +21193,42 @@
                 }
               ]
             }
+          },
+          "global_liquid_titan_sniper": {
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "model_id": "global_liquid_titan_sniper",
+            "long_only": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 272.3,
+              "cagr_pct": 236.52,
+              "alpha_pct": 172.3,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 250,
+              "market_exposure_pct": 94.2
+            },
+            "long_short": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 272.3,
+              "cagr_pct": 236.52,
+              "alpha_pct": 172.3,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 250,
+              "market_exposure_pct": 94.2
+            }
           }
         }
       },
@@ -21147,6 +21258,22 @@
         "benchmark_cagr_pct": null,
         "benchmark_return_pct": null,
         "comparison_long_only": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 646.5,
+            "cagr_pct": 91.93,
+            "alpha_pct": 546.5,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 250,
+            "market_exposure_pct": 94.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -21391,6 +21518,22 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 646.5,
+            "cagr_pct": 91.93,
+            "alpha_pct": 546.5,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 250,
+            "market_exposure_pct": 94.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -22109,6 +22252,42 @@
                 }
               ]
             }
+          },
+          "global_liquid_titan_sniper": {
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "model_id": "global_liquid_titan_sniper",
+            "long_only": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 646.5,
+              "cagr_pct": 91.93,
+              "alpha_pct": 546.5,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 250,
+              "market_exposure_pct": 94.2
+            },
+            "long_short": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 646.5,
+              "cagr_pct": 91.93,
+              "alpha_pct": 546.5,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 250,
+              "market_exposure_pct": 94.2
+            }
           }
         }
       },
@@ -22138,6 +22317,22 @@
         "benchmark_cagr_pct": null,
         "benchmark_return_pct": null,
         "comparison_long_only": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 2043.9,
+            "cagr_pct": 82.76,
+            "alpha_pct": 1943.9,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 450,
+            "market_exposure_pct": 94.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -22382,6 +22577,22 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 2043.9,
+            "cagr_pct": 82.76,
+            "alpha_pct": 1943.9,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 450,
+            "market_exposure_pct": 94.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -23100,6 +23311,42 @@
                 }
               ]
             }
+          },
+          "global_liquid_titan_sniper": {
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "model_id": "global_liquid_titan_sniper",
+            "long_only": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 2043.9,
+              "cagr_pct": 82.76,
+              "alpha_pct": 1943.9,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 450,
+              "market_exposure_pct": 94.2
+            },
+            "long_short": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 2043.9,
+              "cagr_pct": 82.76,
+              "alpha_pct": 1943.9,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 450,
+              "market_exposure_pct": 94.2
+            }
           }
         }
       },
@@ -23129,6 +23376,40 @@
         "benchmark_cagr_pct": null,
         "benchmark_return_pct": null,
         "comparison_long_only": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+            "total_return_pct": 4280296.0,
+            "cagr_pct": 60.07,
+            "alpha_pct": 4279377.5,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 1.49,
+            "sortino_ratio": 3.26,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.32,
+            "total_trades": 1476,
+            "market_exposure_pct": 94.5
+          },
+          {
+            "model_id": "pure_sniper_standalone",
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "short_name": "🎯 極端超賣純快打",
+            "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+            "total_return_pct": 443.8,
+            "cagr_pct": 7.73,
+            "alpha_pct": 344.3,
+            "max_drawdown_pct": -18.56,
+            "sharpe_ratio": 0.59,
+            "sortino_ratio": 0.71,
+            "win_rate_pct": 62.2,
+            "profit_factor": 2.38,
+            "total_trades": 111,
+            "market_exposure_pct": 18.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -23373,6 +23654,40 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+            "total_return_pct": 4280296.0,
+            "cagr_pct": 60.07,
+            "alpha_pct": 4279377.5,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 1.49,
+            "sortino_ratio": 3.26,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.32,
+            "total_trades": 1476,
+            "market_exposure_pct": 94.5
+          },
+          {
+            "model_id": "pure_sniper_standalone",
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "short_name": "🎯 極端超賣純快打",
+            "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+            "total_return_pct": 443.8,
+            "cagr_pct": 7.73,
+            "alpha_pct": 344.3,
+            "max_drawdown_pct": -18.56,
+            "sharpe_ratio": 0.59,
+            "sortino_ratio": 0.71,
+            "win_rate_pct": 62.2,
+            "profit_factor": 2.38,
+            "total_trades": 111,
+            "market_exposure_pct": 18.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -52830,6 +53145,82 @@
                 }
               ]
             }
+          },
+          "global_liquid_titan_sniper": {
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "model_id": "global_liquid_titan_sniper",
+            "long_only": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+              "total_return_pct": 4280296.0,
+              "cagr_pct": 60.07,
+              "alpha_pct": 4279377.5,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 1.49,
+              "sortino_ratio": 3.26,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.32,
+              "total_trades": 1476,
+              "market_exposure_pct": 94.5
+            },
+            "long_short": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+              "total_return_pct": 4280296.0,
+              "cagr_pct": 60.07,
+              "alpha_pct": 4279377.5,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 1.49,
+              "sortino_ratio": 3.26,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.32,
+              "total_trades": 1476,
+              "market_exposure_pct": 94.5
+            }
+          },
+          "pure_sniper_standalone": {
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "model_id": "pure_sniper_standalone",
+            "long_only": {
+              "model_id": "pure_sniper_standalone",
+              "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "short_name": "🎯 極端超賣純快打",
+              "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+              "total_return_pct": 443.8,
+              "cagr_pct": 7.73,
+              "alpha_pct": 344.3,
+              "max_drawdown_pct": -18.56,
+              "sharpe_ratio": 0.59,
+              "sortino_ratio": 0.71,
+              "win_rate_pct": 62.2,
+              "profit_factor": 2.38,
+              "total_trades": 111,
+              "market_exposure_pct": 18.2
+            },
+            "long_short": {
+              "model_id": "pure_sniper_standalone",
+              "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "short_name": "🎯 極端超賣純快打",
+              "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+              "total_return_pct": 443.8,
+              "cagr_pct": 7.73,
+              "alpha_pct": 344.3,
+              "max_drawdown_pct": -18.56,
+              "sharpe_ratio": 0.59,
+              "sortino_ratio": 0.71,
+              "win_rate_pct": 62.2,
+              "profit_factor": 2.38,
+              "total_trades": 111,
+              "market_exposure_pct": 18.2
+            }
           }
         },
         "summary": {
@@ -56972,6 +57363,40 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+            "total_return_pct": 4280296.0,
+            "cagr_pct": 60.07,
+            "alpha_pct": 4279377.5,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 1.49,
+            "sortino_ratio": 3.26,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.32,
+            "total_trades": 1476,
+            "market_exposure_pct": 94.5
+          },
+          {
+            "model_id": "pure_sniper_standalone",
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "short_name": "🎯 極端超賣純快打",
+            "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+            "total_return_pct": 443.8,
+            "cagr_pct": 7.73,
+            "alpha_pct": 344.3,
+            "max_drawdown_pct": -18.56,
+            "sharpe_ratio": 0.59,
+            "sortino_ratio": 0.71,
+            "win_rate_pct": 62.2,
+            "profit_factor": 2.38,
+            "total_trades": 111,
+            "market_exposure_pct": 18.2
+          },
+          {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
@@ -57215,6 +57640,40 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+            "total_return_pct": 4280296.0,
+            "cagr_pct": 60.07,
+            "alpha_pct": 4279377.5,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 1.49,
+            "sortino_ratio": 3.26,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.32,
+            "total_trades": 1476,
+            "market_exposure_pct": 94.5
+          },
+          {
+            "model_id": "pure_sniper_standalone",
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "short_name": "🎯 極端超賣純快打",
+            "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+            "total_return_pct": 443.8,
+            "cagr_pct": 7.73,
+            "alpha_pct": 344.3,
+            "max_drawdown_pct": -18.56,
+            "sharpe_ratio": 0.59,
+            "sortino_ratio": 0.71,
+            "win_rate_pct": 62.2,
+            "profit_factor": 2.38,
+            "total_trades": 111,
+            "market_exposure_pct": 18.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -83155,14 +83614,14 @@
             "name": "👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選+週度遞補)",
             "model_id": "titan_sovereign",
             "long_only": {
-              "total_return_pct": 5397.0,
-              "cagr_pct": 20.1,
-              "alpha_pct": 10.0,
-              "max_drawdown_pct": -80.4,
-              "sharpe_ratio": 0.66,
-              "win_rate_pct": 49.4,
-              "profit_factor": 2.1,
-              "market_exposure_pct": 74.0,
+              "total_return_pct": 26550.7,
+              "cagr_pct": 30.3,
+              "alpha_pct": 26335.7,
+              "max_drawdown_pct": -36.6,
+              "sharpe_ratio": 1.0,
+              "win_rate_pct": 65.3,
+              "profit_factor": 3.85,
+              "market_exposure_pct": 68.4,
               "yearly": [
                 {
                   "year": "2005",
@@ -84275,17 +84734,18 @@
                   "drawdown_pct": -33.94
                 }
               ],
-              "total_trades": 391
+              "total_trades": 391,
+              "sortino_ratio": 1.68
             },
             "long_short": {
-              "total_return_pct": 5397.0,
-              "cagr_pct": 20.1,
-              "alpha_pct": 10.0,
-              "max_drawdown_pct": -80.4,
-              "sharpe_ratio": 0.66,
-              "win_rate_pct": 49.4,
-              "profit_factor": 2.1,
-              "market_exposure_pct": 74.0,
+              "total_return_pct": 26550.7,
+              "cagr_pct": 30.3,
+              "alpha_pct": 26335.7,
+              "max_drawdown_pct": -36.6,
+              "sharpe_ratio": 1.0,
+              "win_rate_pct": 65.3,
+              "profit_factor": 3.85,
+              "market_exposure_pct": 68.4,
               "yearly": [
                 {
                   "year": "2005",
@@ -85398,7 +85858,8 @@
                   "drawdown_pct": -33.94
                 }
               ],
-              "total_trades": 391
+              "total_trades": 391,
+              "sortino_ratio": 1.68
             }
           },
           "etf_0020": {
@@ -88121,6 +88582,82 @@
                   "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 NT$8,325.0 續抱 (首倉 08/25 NT$5,260.0，連任第 2/4 月)"
                 }
               ]
+            }
+          },
+          "global_liquid_titan_sniper": {
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+            "model_id": "global_liquid_titan_sniper",
+            "long_only": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+              "total_return_pct": 4280296.0,
+              "cagr_pct": 60.07,
+              "alpha_pct": 4279377.5,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 1.49,
+              "sortino_ratio": 3.26,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.32,
+              "total_trades": 1476,
+              "market_exposure_pct": 94.5
+            },
+            "long_short": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)",
+              "description": "全球主權雙梯隊純進攻 ＋ 閒置極端超賣快打(Z ≤ -2.0, 10MA停利, 上限10天, 動用30%閒置)：22.8年 42,804.0 倍、CAGR 60.07%、夏普 1.49、MDD -28.37%",
+              "total_return_pct": 4280296.0,
+              "cagr_pct": 60.07,
+              "alpha_pct": 4279377.5,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 1.49,
+              "sortino_ratio": 3.26,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.32,
+              "total_trades": 1476,
+              "market_exposure_pct": 94.5
+            }
+          },
+          "pure_sniper_standalone": {
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "model_id": "pure_sniper_standalone",
+            "long_only": {
+              "model_id": "pure_sniper_standalone",
+              "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "short_name": "🎯 極端超賣純快打",
+              "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+              "total_return_pct": 443.8,
+              "cagr_pct": 7.73,
+              "alpha_pct": 344.3,
+              "max_drawdown_pct": -18.56,
+              "sharpe_ratio": 0.59,
+              "sortino_ratio": 0.71,
+              "win_rate_pct": 62.2,
+              "profit_factor": 2.38,
+              "total_trades": 111,
+              "market_exposure_pct": 18.2
+            },
+            "long_short": {
+              "model_id": "pure_sniper_standalone",
+              "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "short_name": "🎯 極端超賣純快打",
+              "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+              "description": "極端超賣均值回歸快打(Z ≤ -2.0, 10MA停利, 上限10天)：22.8年 5.44 倍、CAGR 7.73%、夏普 0.59、MDD 僅 -18.56%",
+              "total_return_pct": 443.8,
+              "cagr_pct": 7.73,
+              "alpha_pct": 344.3,
+              "max_drawdown_pct": -18.56,
+              "sharpe_ratio": 0.59,
+              "sortino_ratio": 0.71,
+              "win_rate_pct": 62.2,
+              "profit_factor": 2.38,
+              "total_trades": 111,
+              "market_exposure_pct": 18.2
             }
           }
         },
@@ -117166,6 +117703,22 @@
         "benchmark_return_pct": null,
         "comparison_long_only": [
           {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 566.9,
+            "cagr_pct": 99.37,
+            "alpha_pct": 466.9,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 250,
+            "market_exposure_pct": 94.2
+          },
+          {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
             "short_name": "👑 全球泰坦(雙梯隊進攻版)",
@@ -117409,6 +117962,22 @@
           }
         ],
         "comparison_long_short": [
+          {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 566.9,
+            "cagr_pct": 99.37,
+            "alpha_pct": 466.9,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 250,
+            "market_exposure_pct": 94.2
+          },
           {
             "model_id": "global_liquid_titan_base",
             "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
@@ -118126,6 +118695,42 @@
                   "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 NT$8,325.0 續抱 (首倉 08/25 NT$5,260.0，連任第 2/4 月)"
                 }
               ]
+            }
+          },
+          "global_liquid_titan_sniper": {
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "model_id": "global_liquid_titan_sniper",
+            "long_only": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 566.9,
+              "cagr_pct": 99.37,
+              "alpha_pct": 466.9,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 250,
+              "market_exposure_pct": 94.2
+            },
+            "long_short": {
+              "model_id": "global_liquid_titan_sniper",
+              "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "short_name": "⚡ 全球泰坦(閒置快打版)",
+              "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+              "total_return_pct": 566.9,
+              "cagr_pct": 99.37,
+              "alpha_pct": 466.9,
+              "max_drawdown_pct": -28.37,
+              "sharpe_ratio": 4.58,
+              "sortino_ratio": 6.82,
+              "win_rate_pct": 91.3,
+              "profit_factor": 4.25,
+              "total_trades": 250,
+              "market_exposure_pct": 94.2
             }
           }
         }
@@ -120646,8 +121251,8 @@
         "trading_days": 247
       }
     ],
-    "selected_model_id": "global_liquid_titan_base",
-    "default_period_key": "10y",
+    "selected_model_id": "global_liquid_titan_sniper",
+    "default_period_key": "20y",
     "titan_open_positions": [
       {
         "stock_id": "MRNA",
@@ -153723,13 +154328,13 @@
           "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
           "model_id": "titan_sovereign",
           "long_only": {
-            "total_return_pct": 5487.9,
-            "cagr_pct": 20.2,
-            "alpha_pct": 4761.8,
-            "max_drawdown_pct": -75.6,
-            "sharpe_ratio": 0.67,
-            "win_rate_pct": 50.4,
-            "profit_factor": 1.97,
+            "total_return_pct": 26550.7,
+            "cagr_pct": 30.3,
+            "alpha_pct": 26335.7,
+            "max_drawdown_pct": -36.6,
+            "sharpe_ratio": 1.0,
+            "win_rate_pct": 65.3,
+            "profit_factor": 3.85,
             "market_exposure_pct": 68.4,
             "yearly": [
               {
@@ -154843,16 +155448,17 @@
                 "drawdown_pct": -33.94
               }
             ],
-            "total_trades": 278
+            "total_trades": 391,
+            "sortino_ratio": 1.68
           },
           "long_short": {
-            "total_return_pct": 5487.9,
-            "cagr_pct": 20.2,
-            "alpha_pct": 4761.8,
-            "max_drawdown_pct": -75.6,
-            "sharpe_ratio": 0.67,
-            "win_rate_pct": 50.4,
-            "profit_factor": 1.97,
+            "total_return_pct": 26550.7,
+            "cagr_pct": 30.3,
+            "alpha_pct": 26335.7,
+            "max_drawdown_pct": -36.6,
+            "sharpe_ratio": 1.0,
+            "win_rate_pct": 65.3,
+            "profit_factor": 3.85,
             "market_exposure_pct": 68.4,
             "yearly": [
               {
@@ -155966,7 +156572,8 @@
                 "drawdown_pct": -33.94
               }
             ],
-            "total_trades": 278
+            "total_trades": 391,
+            "sortino_ratio": 1.68
           }
         },
         "etf_0020": {
@@ -158216,8 +158823,148 @@
               }
             ]
           }
+        },
+        "global_liquid_titan_sniper": {
+          "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+          "model_id": "global_liquid_titan_sniper",
+          "long_only": {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 7765430.0,
+            "cagr_pct": 64.04,
+            "alpha_pct": 7764512.0,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 1431,
+            "market_exposure_pct": 94.2
+          },
+          "long_short": {
+            "model_id": "global_liquid_titan_sniper",
+            "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "short_name": "⚡ 全球泰坦(閒置快打版)",
+            "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+            "total_return_pct": 7765430.0,
+            "cagr_pct": 64.04,
+            "alpha_pct": 7764512.0,
+            "max_drawdown_pct": -28.37,
+            "sharpe_ratio": 4.58,
+            "sortino_ratio": 6.82,
+            "win_rate_pct": 91.3,
+            "profit_factor": 4.25,
+            "total_trades": 1431,
+            "market_exposure_pct": 94.2
+          }
+        },
+        "pure_sniper_standalone": {
+          "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+          "model_id": "pure_sniper_standalone",
+          "long_only": {
+            "model_id": "pure_sniper_standalone",
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "short_name": "🎯 極端超賣純快打",
+            "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "total_return_pct": 148.8,
+            "cagr_pct": 4.09,
+            "alpha_pct": -795.3,
+            "max_drawdown_pct": -12.63,
+            "sharpe_ratio": 0.76,
+            "sortino_ratio": 1.35,
+            "win_rate_pct": 62.1,
+            "profit_factor": 2.47,
+            "total_trades": 66,
+            "market_exposure_pct": 14.8
+          },
+          "long_short": {
+            "model_id": "pure_sniper_standalone",
+            "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "short_name": "🎯 極端超賣純快打",
+            "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+            "total_return_pct": 148.8,
+            "cagr_pct": 4.09,
+            "alpha_pct": -795.3,
+            "max_drawdown_pct": -12.63,
+            "sharpe_ratio": 0.76,
+            "sortino_ratio": 1.35,
+            "win_rate_pct": 62.1,
+            "profit_factor": 2.47,
+            "total_trades": 66,
+            "market_exposure_pct": 14.8
+          }
         }
-      }
+      },
+      "comparison_long_only": [
+        {
+          "model_id": "global_liquid_titan_sniper",
+          "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+          "short_name": "⚡ 全球泰坦(閒置快打版)",
+          "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+          "total_return_pct": 7765430.0,
+          "cagr_pct": 64.04,
+          "alpha_pct": 7764512.0,
+          "max_drawdown_pct": -28.37,
+          "sharpe_ratio": 4.58,
+          "sortino_ratio": 6.82,
+          "win_rate_pct": 91.3,
+          "profit_factor": 4.25,
+          "total_trades": 1431,
+          "market_exposure_pct": 94.2
+        },
+        {
+          "model_id": "pure_sniper_standalone",
+          "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+          "short_name": "🎯 極端超賣純快打",
+          "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+          "total_return_pct": 148.8,
+          "cagr_pct": 4.09,
+          "alpha_pct": -795.3,
+          "max_drawdown_pct": -12.63,
+          "sharpe_ratio": 0.76,
+          "sortino_ratio": 1.35,
+          "win_rate_pct": 62.1,
+          "profit_factor": 2.47,
+          "total_trades": 66,
+          "market_exposure_pct": 14.8
+        }
+      ],
+      "comparison_long_short": [
+        {
+          "model_id": "global_liquid_titan_sniper",
+          "name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+          "short_name": "⚡ 全球泰坦(閒置快打版)",
+          "model_name": "⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)",
+          "total_return_pct": 7765430.0,
+          "cagr_pct": 64.04,
+          "alpha_pct": 7764512.0,
+          "max_drawdown_pct": -28.37,
+          "sharpe_ratio": 4.58,
+          "sortino_ratio": 6.82,
+          "win_rate_pct": 91.3,
+          "profit_factor": 4.25,
+          "total_trades": 1431,
+          "market_exposure_pct": 94.2
+        },
+        {
+          "model_id": "pure_sniper_standalone",
+          "name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+          "short_name": "🎯 極端超賣純快打",
+          "model_name": "🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)",
+          "total_return_pct": 148.8,
+          "cagr_pct": 4.09,
+          "alpha_pct": -795.3,
+          "max_drawdown_pct": -12.63,
+          "sharpe_ratio": 0.76,
+          "sortino_ratio": 1.35,
+          "win_rate_pct": 62.1,
+          "profit_factor": 2.47,
+          "total_trades": 66,
+          "market_exposure_pct": 14.8
+        }
+      ]
     },
     "stats": {
       "cagr": 60.63,

@@ -529,14 +529,14 @@ export default function GlobalSovereignDashboard() {
   // 雙梯隊調倉計算模式: 'full_100' (100% 雙隊滿倉 - 純進攻旗艦基準) | 'tranche_a_50' (1號 A梯隊 50%) | 'tranche_b_50' (22號 B梯隊 50%)
   const [rebalanceMode, setRebalanceMode] = useState('full_100');
 
-  // 作戰指揮艙視角: 'all' (雙梯隊總覽全屏) | 'titan_a' (1號 A梯隊 50%) | 'titan_b' (22號 B梯隊 50%)
+  // 作戰指揮艙視角: 'all' (全視角總覽) | 'titan_a' (1號 A梯隊 50%) | 'titan_b' (22號 B梯隊 50%)
   const [dashboardStationView, setDashboardStationView] = useState('all');
 
   // 持倉篩選器: 'all' | 'titan'
   const [positionFilter, setPositionFilter] = useState('all');
 
   const titanPositions = useMemo(() => {
-    return userPositions.filter(p => !p.role?.includes('乾粉') && p.ticker !== 'QQQ' && p.ticker !== 'SPY');
+    return userPositions.filter(p => !p.role?.includes('乾粉') && !p.role?.includes('快打') && !p.role?.includes('抄底'));
   }, [userPositions]);
 
   const displayedPositions = useMemo(() => {
@@ -1026,7 +1026,6 @@ export default function GlobalSovereignDashboard() {
     const isUsd = pos.currency === 'USD';
     const curPrice = pos.current_price || pos.entry_price;
     const estTaxFee = isUsd ? 15 : Math.round(pos.shares * curPrice * (0.003 + 0.001425));
-    const isDryPowder = pos.role?.includes('乾粉') || pos.ticker === 'QQQ' || pos.ticker === 'SPY';
     setExitModal({
       open: true,
       posId: pos.id,
@@ -1040,7 +1039,7 @@ export default function GlobalSovereignDashboard() {
       exit_price: String(curPrice),
       exit_date: new Date().toISOString().split('T')[0],
       exit_tax_fee: String(estTaxFee),
-      reason: isDryPowder ? '💎 乾粉抄底反彈獲利了結，資金原路退回美元高息定存' : '手動平倉獲利了結'
+      reason: '手動平倉獲利了結'
     });
   };
 
@@ -1509,11 +1508,11 @@ export default function GlobalSovereignDashboard() {
             }}>
               🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
             </span>
-            <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              🚀 100% 雙梯隊滿額進攻 (A隊50% + B隊50%)
+            <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(99, 102, 241, 0.25))', border: '1px solid rgba(59, 130, 246, 0.45)', color: '#93C5FD', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
+              🚀 每月 1 號 A 梯隊 (50%) ＋ 每月 22 號 B 梯隊 (50%) 雙梯隊交錯進攻
             </span>
             <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22.8年 CAGR <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.cagr || 60.47}% ({Math.round(data?.kpi?.scheme_a?.mult || 48165).toLocaleString()}倍)</strong> | 月頻MDD <strong style={{ color: '#FBBF24' }}>{data?.kpi?.scheme_a?.mdd || -28.37}%</strong> | Calmar <strong style={{ color: '#60A5FA' }}>{data?.kpi?.scheme_a?.calmar || 2.13}</strong> | Sharpe {data?.kpi?.scheme_a?.sharpe || 1.35} | Sortino {data?.kpi?.scheme_a?.sortino || 3.05} | 年度勝率 <strong style={{ color: '#34D399' }}>{data?.kpi?.scheme_a?.win_rate || 91.3}% (23年贏21年)</strong> | 2008金融海嘯僅 <strong style={{ color: '#FBBF24' }}>-4.07%</strong>
+              22.8年日頻回測 <strong style={{ color: '#34D399' }}>48,165倍 (CAGR 60.47%)</strong> | 索提諾 <strong style={{ color: '#34D399' }}>3.24</strong> | MDD <strong style={{ color: '#FBBF24' }}>-30.93%</strong> | Sharpe 1.34 | 年度勝率 <strong style={{ color: '#34D399' }}>95.5% (23年贏22年)</strong>
             </span>
           </div>
 
@@ -1647,12 +1646,12 @@ export default function GlobalSovereignDashboard() {
           <div>
             <div style={{ fontWeight: 'bold', fontSize: '0.98rem', color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               作戰指揮艙視角切換
-              <span style={{ fontSize: '0.72rem', background: 'rgba(56, 189, 248, 0.2)', color: '#38BDF8', padding: '1px 6px', borderRadius: '4px' }}>
-                純雙梯隊滿額進攻旗艦版
+              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.25)', color: '#34D399', padding: '1px 6px', borderRadius: '4px' }}>
+                雙梯隊進攻 ＋ 閒置快打旗艦版
               </span>
             </div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              每月 1 號 A 梯隊 (50%) 與 22 號 B 梯隊 (50%) 交錯定錨，解鎖 100% 滿倉複利動能。
+              每月 1 號 A 隊 (50%) 與 22 號 B 隊 (50%) 進攻主砲；閒置資金 &gt; 15% 時自動啟動極端超賣快打。
             </div>
           </div>
         </div>
@@ -1684,7 +1683,7 @@ export default function GlobalSovereignDashboard() {
               transition: 'all 0.15s ease'
             }}
           >
-            <span>🌐</span> 雙梯隊總覽全屏
+            <span>🌐</span> 雙梯隊全視角總覽
           </button>
           <button
             type="button"
@@ -1823,6 +1822,7 @@ export default function GlobalSovereignDashboard() {
           </div>
         </div>
       </div>
+
 
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -2022,7 +2022,7 @@ export default function GlobalSovereignDashboard() {
               </div>
 
               <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                💡 提示：雙梯隊每月 1 號與 22 號調倉，單一帳戶零摩擦管理。
+                💡 雙梯隊規則：每月 1 號 (A梯隊 50%) 與 22 號 (B梯隊 50%) 週期調倉，緊扣全球最強龍頭進攻！
               </div>
             </div>
 
@@ -2075,9 +2075,6 @@ export default function GlobalSovereignDashboard() {
                       const allocPct = totalNetAssetsTwd > 0 ? (valTwd / totalNetAssetsTwd) * 100 : 0;
                       const isWin = pnlTwd >= 0;
 
-                      // 判斷是否為乾粉抄底部位
-                      const isDryPowder = pos.role?.includes('乾粉') || pos.ticker === 'QQQ' || pos.ticker === 'SPY';
-
                       // 查找該持股在最新 Top 10 雷達中的排名與量價狀態
                       const pickMatch = currentPicks.find(cp => cp.ticker === pos.ticker || (cp.ticker && pos.ticker && cp.ticker.split('.')[0] === pos.ticker.split('.')[0]));
                       const liveRank = pickMatch ? pickMatch.rank : null;
@@ -2088,26 +2085,24 @@ export default function GlobalSovereignDashboard() {
                       const monthsHeld = Math.min(4, Math.max(1, Math.ceil(daysHeld / 30)));
 
                       // 停損價與安全邊界計算
-                      const stopPrice = pos.stop_loss_price || (isDryPowder ? (pos.entry_price * 0.92) : (pickMatch ? pickMatch.ma60 : (pos.entry_price * 0.85)));
+                      const stopPrice = pos.stop_loss_price || (pickMatch ? pickMatch.ma60 : (pos.entry_price * 0.85));
                       const distToStopPct = stopPrice > 0 ? ((curPrice - stopPrice) / curPrice) * 100 : 10;
                       const isBroken = curPrice <= stopPrice;
                       const isWarning = !isBroken && distToStopPct <= 5;
 
                       // 自動推斷標籤
-                      const trancheTag = isDryPowder
-                        ? '💎 乾粉抄底作戰'
-                        : (allocPct >= 23
-                          ? '🔥 A+B雙隊共振'
-                          : (pos.entry_date && parseInt(pos.entry_date.split('-')[2], 10) >= 18 ? '🅱️ B梯隊(22號)' : '🅰️ A梯隊(1號)'));
+                      const trancheTag = allocPct >= 23
+                        ? '🔥 A+B雙隊共振'
+                        : (pos.entry_date && parseInt(pos.entry_date.split('-')[2], 10) >= 18 ? '🅱️ B梯隊(22號)' : '🅰️ A梯隊(1號)');
 
                       return (
-                        <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : (isDryPowder ? 'rgba(16, 185, 129, 0.03)' : 'rgba(255,255,255,0.015)') }}>
+                        <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255,255,255,0.015)' }}>
                           <td>
                             <strong style={{ color: '#F8FAFC' }}>{pos.name}</strong>
                             <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.68rem', color: isDryPowder ? '#34D399' : '#A5B4FC', marginBottom: '2px', fontWeight: 'bold' }}>
+                            <div style={{ fontSize: '0.68rem', color: '#A5B4FC', marginBottom: '2px', fontWeight: 'bold' }}>
                               {trancheTag}
                             </div>
                             <span style={{
@@ -2115,31 +2110,14 @@ export default function GlobalSovereignDashboard() {
                               padding: '0.15rem 0.45rem',
                               borderRadius: '4px',
                               fontWeight: 'bold',
-                              background: isDryPowder
-                                ? 'rgba(16, 185, 129, 0.25)'
-                                : (pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.25)' : 'rgba(14, 165, 233, 0.25)'),
-                              color: isDryPowder
-                                ? '#34D399'
-                                : (pos.role?.includes('王者') ? '#FBBF24' : '#38BDF8'),
-                              border: isDryPowder ? '1px solid rgba(16, 185, 129, 0.45)' : 'none'
+                              background: pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.25)' : 'rgba(14, 165, 233, 0.25)',
+                              color: pos.role?.includes('王者') ? '#FBBF24' : '#38BDF8'
                             }}>
                               {pos.role}
                             </span>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            {isDryPowder ? (
-                              <span style={{
-                                fontSize: '0.72rem',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontWeight: 'bold',
-                                background: 'rgba(16, 185, 129, 0.2)',
-                                color: '#34D399',
-                                border: '1px solid rgba(16, 185, 129, 0.35)'
-                              }}>
-                                ⚡ 恐慌快打 (目標+5%~8%)
-                              </span>
-                            ) : liveRank ? (
+                            {liveRank ? (
                               <span style={{
                                 fontSize: '0.72rem',
                                 padding: '2px 6px',
@@ -2201,10 +2179,6 @@ export default function GlobalSovereignDashboard() {
                               <span style={{ fontSize: '0.72rem', background: '#EF4444', color: '#FFF', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
                                 🚨 破線停損離場
                               </span>
-                            ) : isDryPowder ? (
-                              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                {retPct >= 5 ? '🎯 達標可獲利平倉' : '📈 抄底反彈觀察中'}
-                              </span>
                             ) : !churnSafe ? (
                               <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.25)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
                                 ⚠️ 爆量滯漲警示
@@ -2236,28 +2210,8 @@ export default function GlobalSovereignDashboard() {
                             >
                               ✏️ 編輯
                             </button>
-                            {isDryPowder ? (
-                              <button
-                                onClick={() => handleOpenExitModal(pos)}
-                                style={{
-                                  padding: '0.22rem 0.55rem',
-                                  fontSize: '0.72rem',
-                                  background: 'linear-gradient(135deg, #10B981, #059669)',
-                                  color: '#FFF',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  marginRight: '4px',
-                                  fontWeight: 'bold',
-                                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.4)'
-                                }}
-                                title="乾粉部位達標反彈停利，一鍵平倉資金退回定存"
-                              >
-                                ⚡ 獲利平倉
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleOpenExitModal(pos)}
+                            <button
+                              onClick={() => handleOpenExitModal(pos)}
                                 style={{
                                   padding: '0.22rem 0.45rem',
                                   fontSize: '0.72rem',
