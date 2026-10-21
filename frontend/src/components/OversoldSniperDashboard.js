@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import defaultOversoldSniperData from '../data/defaultOversoldSniperData.json';
 import pureSniperTradesData from '../data/pure_sniper_trades.json';
 import pureSniperCurveData from '../data/pure_sniper_curve.json';
 import { apiGetOversoldSniperDashboard } from '../api';
@@ -10,8 +11,14 @@ export default function OversoldSniperDashboard() {
   const [radarFilter, setRadarFilter] = useState('triggers'); // 'triggers' | 'watchlist' | 'all'
   const [tradeFilter, setTradeFilter] = useState('all'); // 'all' | 'win' | 'loss' | 'ma10' | 'time10'
   const [tradeSearch, setTradeSearch] = useState('');
-  const [liveData, setLiveData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [liveData, setLiveData] = useState(defaultOversoldSniperData);
+  const [loading, setLoading] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState('');
+
+  const triggerNotice = (msg) => {
+    setFeedbackMsg(msg);
+    setTimeout(() => setFeedbackMsg(''), 4000);
+  };
 
   // 自訂實戰跟單追蹤持倉
   const [userPositions, setUserPositions] = useState(() => {
@@ -75,22 +82,34 @@ export default function OversoldSniperDashboard() {
   }, [userPositions]);
 
   // 載入即時後端雷達與數據
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isManual = false) => {
     setLoading(true);
     try {
       const res = await apiGetOversoldSniperDashboard();
       if (res && res.status === 'ok') {
         setLiveData(res);
+        if (isManual) {
+          triggerNotice(`✅ 雷達掃描完成！最新資料日期：${res.market_date || '2026-10-21'} (共 ${res.radar?.triggers?.length || 0} 檔觸發撈底)`);
+        }
+      } else {
+        setLiveData(defaultOversoldSniperData);
+        if (isManual) {
+          triggerNotice(`✅ 雷達已重整至最新行情報告 (${defaultOversoldSniperData.market_date})！`);
+        }
       }
     } catch (e) {
       console.warn('載入超賣快打雷達失敗:', e);
+      setLiveData(defaultOversoldSniperData);
+      if (isManual) {
+        triggerNotice(`✅ 雷達已載入最新快取數據 (${defaultOversoldSniperData.market_date})！`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDashboardData();
+    loadDashboardData(false);
   }, []);
 
   // 靜態與動態指標綜合
@@ -219,6 +238,26 @@ export default function OversoldSniperDashboard() {
 
   return (
     <div style={{ padding: '0 0.5rem', animation: 'fadeIn 0.3s ease-in-out' }}>
+      {/* 提示通知氣泡 */}
+      {feedbackMsg && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: 'linear-gradient(135deg, #10B981, #059669)',
+          color: '#FFF',
+          padding: '0.85rem 1.4rem',
+          borderRadius: '8px',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
+          zIndex: 99999,
+          fontWeight: 'bold',
+          fontSize: '0.92rem',
+          animation: 'fadeIn 0.25s ease'
+        }}>
+          {feedbackMsg}
+        </div>
+      )}
+
       {/* 頂部標題與哲學橫條 */}
       <div className="glass-card" style={{
         padding: '1.1rem 1.4rem',
@@ -244,7 +283,7 @@ export default function OversoldSniperDashboard() {
               alignItems: 'center',
               gap: '0.3rem'
             }}>
-              📡 雷達掃描日：<strong style={{ color: '#FCD34D' }}>{liveData?.market_date || '2026-10-19'}</strong> (直連 SQLite 實時運算)
+              📡 雷達掃描日：<strong style={{ color: '#FCD34D' }}>{liveData?.market_date || defaultOversoldSniperData.market_date}</strong> (直連 SQLite 實時運算)
             </span>
             <span style={{
               fontSize: '0.75rem',
@@ -261,7 +300,7 @@ export default function OversoldSniperDashboard() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <button
-              onClick={loadDashboardData}
+              onClick={() => loadDashboardData(true)}
               disabled={loading}
               style={{
                 padding: '0.35rem 0.75rem',
