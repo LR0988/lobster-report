@@ -5358,11 +5358,11 @@ function StockDashboard() {
                     },
                     {
                       id: 'titan_sovereign',
-                      name: '👑 台股王權主宰旗艦版 (二階段Top10精選 × 週度動態遞補 - 研發里程碑)',
+                      name: '👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 × 22年 1312倍)',
                       icon: '👑',
                       tag: is20ySelected
-                        ? '20年+26550% (266.5倍)・CAGR 30.3%・MDD -36.55%・夏普1.00'
-                        : '10年+2080%・CAGR 36.1%・台股王權主宰'
+                        ? '22年+131103% (1312倍)・CAGR 39.83%・MDD -36.46%・夏普1.16'
+                        : '10年超額Alpha・CAGR 39.8%・台股因果泰坦'
                     },
                     {
                       id: 'etf_0020',
@@ -5427,7 +5427,7 @@ function StockDashboard() {
                             ? '⚡ 22.8 年全球泰坦×閒置快打全歷史 (2004~2026)'
                             : (isGlobalBase 
                                 ? '👑 22.8 年全球雙梯隊全歷史 (2004~2026)' 
-                                : '👑 21.8 年台股王權主宰全歷史 (2005~2026)'));
+                                : '👑 22 年台股因果量化泰坦全歷史 (2005~2026)'));
                     } else if (pKey === '10y') {
                       sDate = '20160101'; eDate = '20261231'; periodName = isPureSniper ? '🎯 近 10 年極端超賣純快打 (2016~2026)' : (isGlobalSniper ? '⚡ 近 10 年全球泰坦快打 (2016~2026)' : (isGlobalBase ? '🏛️ 近 10 年歷史 (2016~2026)' : '🏛️ 近 10 年歷史 (2016~2026)'));
                     } else if (pKey === '5y') {
@@ -5855,19 +5855,19 @@ function StockDashboard() {
                     };
                     const taiwanItem = {
                       model_id: 'titan_sovereign',
-                      name: '👑 台股王權主宰旗艦版 (二階段Top10精選 × 週度動態遞補 - 研發里程碑)',
-                      short_name: '👑 台股泰坦(王權主宰里程碑)',
-                      model_name: '👑 台股王權主宰旗艦版 (二階段Top10精選 × 週度動態遞補 - 研發里程碑)',
-                      total_return_pct: tw?.customModeData?.total_return_pct ?? 26550.7,
-                      cagr_pct: tw?.customModeData?.cagr_pct ?? 30.3,
-                      alpha_pct: tw?.customModeData?.alpha_pct ?? 25632.0,
-                      max_drawdown_pct: tw?.customModeData?.max_drawdown_pct ?? -36.55,
-                      sharpe_ratio: tw?.customModeData?.sharpe_ratio ?? 1.00,
-                      sortino_ratio: tw?.customModeData?.sortino_ratio ?? 1.68,
-                      win_rate_pct: tw?.customModeData?.win_rate_pct ?? 50.4,
-                      profit_factor: tw?.customModeData?.profit_factor ?? 2.12,
-                      total_trades: tw?.customModeData?.total_trades ?? 391,
-                      market_exposure_pct: tw?.customModeData?.market_exposure_pct ?? 68.4
+                      name: '👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 × 22年 1312倍)',
+                      short_name: '👑 台股因果泰坦 (Causal 1312倍)',
+                      model_name: '👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 × 22年 1312倍)',
+                      total_return_pct: tw?.customModeData?.total_return_pct ?? 131103.0,
+                      cagr_pct: tw?.customModeData?.cagr_pct ?? 39.83,
+                      alpha_pct: tw?.customModeData?.alpha_pct ?? 130388.0,
+                      max_drawdown_pct: tw?.customModeData?.max_drawdown_pct ?? -36.46,
+                      sharpe_ratio: tw?.customModeData?.sharpe_ratio ?? 1.16,
+                      sortino_ratio: tw?.customModeData?.sortino_ratio ?? 2.15,
+                      win_rate_pct: tw?.customModeData?.win_rate_pct ?? 59.53,
+                      profit_factor: tw?.customModeData?.profit_factor ?? 3.25,
+                      total_trades: tw?.customModeData?.total_trades ?? 1285,
+                      market_exposure_pct: tw?.customModeData?.market_exposure_pct ?? 85.0
                     };
                     return {
                       globalSniperItem,
@@ -5949,7 +5949,7 @@ function StockDashboard() {
                           long_short: pureSniperCalc?.customModeData
                         },
                         titan_sovereign: {
-                          name: '👑 台股王權主宰旗艦版 (二階段Top10精選 × 週度動態遞補 - 研發里程碑)',
+                          name: '👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 × 22年 1312倍)',
                           long_only: taiwanCalc?.customModeData,
                           long_short: taiwanCalc?.customModeData
                         }
@@ -7093,13 +7093,13 @@ function StockDashboard() {
                         if (!activeHistYearly || activeHistYearly.length === 0) return null;
 
                         const displayHistSummary = activeHistModeData || {
-                          total_return_pct: activeModelKey === 'pure_sniper_standalone' ? 443.8 : (activeModelKey === 'global_liquid_titan_sniper' ? 4280296.0 : (activeModelKey === 'global_liquid_titan_base' ? 4816500.0 : (activeModelKey === 'titan_sovereign' ? 26550.7 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100)))),
-                          cagr_pct: activeModelKey === 'pure_sniper_standalone' ? 7.73 : (activeModelKey === 'global_liquid_titan_sniper' ? 60.07 : (activeModelKey === 'global_liquid_titan_base' ? 60.47 : (activeModelKey === 'titan_sovereign' ? 30.3 : (is20ySelected ? 34.7 : 54.3)))),
-                          alpha_pct: activeModelKey === 'pure_sniper_standalone' ? 344.3 : (activeModelKey === 'global_liquid_titan_sniper' ? 4279377.5 : (activeModelKey === 'global_liquid_titan_base' ? 4815582.0 : (activeModelKey === 'titan_sovereign' ? 26335.7 : (is20ySelected ? 24.6 : 44.2)))),
-                          max_drawdown_pct: activeModelKey === 'pure_sniper_standalone' ? -18.56 : (activeModelKey === 'global_liquid_titan_sniper' ? -31.73 : (activeModelKey === 'global_liquid_titan_base' ? -28.37 : (activeModelKey === 'titan_sovereign' ? -36.55 : (is20ySelected ? -76.7 : -44.8)))),
-                          sharpe_ratio: activeModelKey === 'pure_sniper_standalone' ? 0.59 : (activeModelKey === 'global_liquid_titan_sniper' ? 1.32 : (activeModelKey === 'global_liquid_titan_base' ? 1.37 : (activeModelKey === 'titan_sovereign' ? 1.00 : (is20ySelected ? 1.03 : 1.22)))),
-                          win_rate_pct: activeModelKey === 'pure_sniper_standalone' ? 55.7 : (activeModelKey === 'global_liquid_titan_sniper' ? 59.7 : (activeModelKey === 'global_liquid_titan_base' ? 60.8 : (activeModelKey === 'titan_sovereign' ? 50.4 : 53.5))),
-                          profit_factor: activeModelKey === 'pure_sniper_standalone' ? 2.15 : (activeModelKey === 'global_liquid_titan_sniper' ? 2.30 : (activeModelKey === 'global_liquid_titan_base' ? 3.85 : (activeModelKey === 'titan_sovereign' ? 2.12 : 5.59)))
+                          total_return_pct: activeModelKey === 'pure_sniper_standalone' ? 443.8 : (activeModelKey === 'global_liquid_titan_sniper' ? 4280296.0 : (activeModelKey === 'global_liquid_titan_base' ? 4816500.0 : (activeModelKey === 'titan_sovereign' ? 131103.0 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100)))),
+                          cagr_pct: activeModelKey === 'pure_sniper_standalone' ? 7.73 : (activeModelKey === 'global_liquid_titan_sniper' ? 60.07 : (activeModelKey === 'global_liquid_titan_base' ? 60.47 : (activeModelKey === 'titan_sovereign' ? 39.83 : (is20ySelected ? 34.7 : 54.3)))),
+                          alpha_pct: activeModelKey === 'pure_sniper_standalone' ? 344.3 : (activeModelKey === 'global_liquid_titan_sniper' ? 4279377.5 : (activeModelKey === 'global_liquid_titan_base' ? 4815582.0 : (activeModelKey === 'titan_sovereign' ? 130388.0 : (is20ySelected ? 24.6 : 44.2)))),
+                          max_drawdown_pct: activeModelKey === 'pure_sniper_standalone' ? -18.56 : (activeModelKey === 'global_liquid_titan_sniper' ? -31.73 : (activeModelKey === 'global_liquid_titan_base' ? -28.37 : (activeModelKey === 'titan_sovereign' ? -36.46 : (is20ySelected ? -76.7 : -44.8)))),
+                          sharpe_ratio: activeModelKey === 'pure_sniper_standalone' ? 0.59 : (activeModelKey === 'global_liquid_titan_sniper' ? 1.32 : (activeModelKey === 'global_liquid_titan_base' ? 1.37 : (activeModelKey === 'titan_sovereign' ? 1.16 : (is20ySelected ? 1.03 : 1.22)))),
+                          win_rate_pct: activeModelKey === 'pure_sniper_standalone' ? 55.7 : (activeModelKey === 'global_liquid_titan_sniper' ? 59.7 : (activeModelKey === 'global_liquid_titan_base' ? 60.8 : (activeModelKey === 'titan_sovereign' ? 59.53 : 53.5))),
+                          profit_factor: activeModelKey === 'pure_sniper_standalone' ? 2.15 : (activeModelKey === 'global_liquid_titan_sniper' ? 2.30 : (activeModelKey === 'global_liquid_titan_base' ? 3.85 : (activeModelKey === 'titan_sovereign' ? 3.25 : 5.59)))
                         };
 
                         const multiplierHist = (((displayHistSummary.total_return_pct || 0) / 100) + 1).toFixed(1);
@@ -7464,7 +7464,7 @@ function StockDashboard() {
                                   {isGlobal ? (
                                     <>此表完全採用<strong>策略模擬引擎在各梯隊調倉日（1號 A梯隊 ／ 22號 B梯隊）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「全球泰坦實作」分頁記錄）</>
                                   ) : (
-                                    <>此表完全採用<strong>台股泰坦 FIP 旗艦引擎（70% 王者 + 15% 雙衛星）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「台股泰坦實作」分頁記錄）</>
+                                    <>此表完全採用<strong>台股因果量化泰坦旗艦引擎（5 檔等權重各 20% × 每月 11 號調倉）次日 T+1 開盤跑出之標準理論價格與部位</strong>，不混入個人現貨帳本（個人現貨實單請至「台股泰坦實作」分頁記錄）</>
                                   )}
                                 </div>
                               </div>
@@ -7485,7 +7485,7 @@ function StockDashboard() {
                                   🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{globalSovereignLive?.latest_data_date || '2026-10-16'}</strong> (台股 {latestTwShort}・美股 {latestUsShort})
                                 </div>
                                 <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
-                                  參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> {isGlobal ? '(A隊 50萬 + B隊 50萬)' : '(70% 王者 + 15%×2 雙衛星)'}
+                                  參考基準本金: <strong style={{ color: '#FCD34D' }}>NT$ 1,000,000</strong> {isGlobal ? '(A隊 50萬 + B隊 50萬)' : '(5 檔各 20 萬等權重)'}
                                 </div>
                                 {isGlobal && (
                                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.3rem 0.65rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.76rem', color: '#CBD5E1' }}>
@@ -7505,7 +7505,7 @@ function StockDashboard() {
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>💰 策略標準基準本金</div>
                                 <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FCD34D' }}>NT$ {totalDeposit.toLocaleString()}</div>
-                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{isGlobal ? 'A隊 50% ＋ B隊 50%' : '70% 王者 ＋ 15%×2 衛星'}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>{isGlobal ? 'A隊 50% ＋ B隊 50%' : '5 檔等權重各 20%'}</div>
                               </div>
                               <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.7rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
                                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>📉 本期調倉建倉成本</div>

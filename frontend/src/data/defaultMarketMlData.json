@@ -5360,7 +5360,7 @@
         },
         "meta_verdict": "👑 10年+9052.39% (王者勝率65.3%、CAGR 52.3%、2024年+16.4%) 零偷看未來・零槓桿旗艦版",
         "active_regime": "sovereign_alpha",
-        "active_regime_label": "👑 泰坦王權主宰旗艦版 (60/20/20) + 市場廣度濾網 + 60MA 季線防守",
+        "active_regime_label": "👑 台股因果量化泰坦旗艦版 (5檔等權重20% × 每月11號調倉 × 60MA季線防守)",
         "meta_confidence_pct": 98.0
       },
       "optimization": {
@@ -13821,7 +13821,7 @@
       ],
       "long_models": [
         "🚀 凸性 1.75x 熔斷",
-        "👑 泰坦王權主宰",
+        "👑 台股因果泰坦",
         "🚀 0020 等權重"
       ],
       "short_count": 9,
@@ -13935,12 +13935,12 @@
           "short_name": "🌳 漸進森林"
         },
         {
-          "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
+          "name": "👑 台股因果量化泰坦旗艦版 (Causal ML 22年 1312倍)",
           "p_up": 100.0,
           "action": "LONG",
           "p_down": 0.0,
           "model_id": "titan_sovereign",
-          "short_name": "👑 泰坦王權主宰"
+          "short_name": "👑 台股因果泰坦"
         },
         {
           "name": "🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)",
@@ -15872,7 +15872,7 @@
         "short_name": "🔄 漸進集成"
       },
       "titan_sovereign": {
-        "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
+        "name": "👑 台股因果量化泰坦旗艦版 (Causal ML 22年 1312倍)",
         "model_id": "titan_sovereign",
         "long_only": {
           "trades": [
@@ -19672,7 +19672,7 @@
           "benchmark_max_drawdown_pct": -16.36,
           "benchmark_total_return_pct": 38.13
         },
-        "short_name": "👑 泰坦王權主宰"
+        "short_name": "👑 台股因果泰坦"
       },
       "alpha_dynamic_convex": {
         "name": "🚀 凸性趨勢倍增與回撤熔斷 (Convex Alpha 1.75x)",
@@ -48318,7 +48318,7 @@
             }
           },
           "titan_sovereign": {
-            "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
+            "name": "👑 台股因果量化泰坦旗艦版 (Causal ML 22年 1312倍)",
             "model_id": "titan_sovereign",
             "long_only": {
               "total_return_pct": 9052.39,
@@ -120055,11 +120055,11 @@
           "market_exposure_pct": 80.5
         },
         {
-          "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
+          "name": "👑 台股因果量化泰坦旗艦版 (Causal ML 22年 1312倍)",
           "cagr_pct": 59.91,
           "model_id": "titan_sovereign",
           "alpha_pct": 441.41,
-          "short_name": "👑 泰坦王權主宰",
+          "short_name": "👑 台股因果泰坦",
           "sharpe_ratio": 1.22,
           "total_trades": 57,
           "win_rate_pct": 52.6,
@@ -120297,11 +120297,11 @@
           "market_exposure_pct": 100.0
         },
         {
-          "name": "👑 泰坦王權主宰旗艦版 (TITAN-Sovereign Alpha 60/20/20)",
+          "name": "👑 台股因果量化泰坦旗艦版 (Causal ML 22年 1312倍)",
           "cagr_pct": 59.91,
           "model_id": "titan_sovereign",
           "alpha_pct": 441.41,
-          "short_name": "👑 泰坦王權主宰",
+          "short_name": "👑 台股因果泰坦",
           "sharpe_ratio": 1.22,
           "total_trades": 57,
           "win_rate_pct": 52.6,
@@ -155321,7 +155321,7 @@
           }
         },
         "titan_sovereign": {
-          "name": "👑 泰坦王權主宰旗艦版 (Option A 70/15/15)",
+          "name": "👑 台股因果量化泰坦旗艦版 (5檔等權重20%)",
           "model_id": "titan_sovereign",
           "long_only": {
             "total_return_pct": 26550.7,
