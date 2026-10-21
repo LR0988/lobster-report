@@ -1,0 +1,13 @@
+tw_stock.db
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+venv/
+.venv/
+quant_weekly_system/
+research_notebooks/
+*.pkl
+frontend/build/
+frontend/node_modules/
+.git/
