@@ -23,12 +23,12 @@ const DEFAULT_POSITIONS = [
     name: '莫德納 (Moderna 生技巨擘)',
     market: '美股 (NASDAQ)',
     currency: 'USD',
-    shares: 68,
-    entry_price: 186.61,
-    current_price: 236.50,
-    price_date: '2026-10-15',
-    entry_date: '2026-10-01',
-    entry_fee: 15,
+    shares: 54,
+    entry_price: 210.21,
+    current_price: 242.72,
+    price_date: '2026-10-21',
+    entry_date: '2026-10-12',
+    entry_fee: 0,
     stop_loss_price: 165.0,
     role: '👑 第1王者 (50%)',
     stop_condition: '大波段抱牢，SPY破年線才清倉'
@@ -40,11 +40,11 @@ const DEFAULT_POSITIONS = [
     market: '台股 (TWSE)',
     currency: 'TWD',
     shares: 251,
-    entry_price: 1195.0,
-    current_price: 1090.0,
-    price_date: '2026-10-16',
-    entry_date: '2026-10-01',
-    entry_fee: 400,
+    entry_price: 1176.0,
+    current_price: 1100.0,
+    price_date: '2026-10-21',
+    entry_date: '2026-10-13',
+    entry_fee: 0,
     stop_loss_price: 1026.38,
     role: '🥈 第2主力 (30%)',
     stop_condition: '載板王者主升段狂飆，持滿整月'
@@ -55,12 +55,12 @@ const DEFAULT_POSITIONS = [
     name: '創意 (Global Unichip ASIC)',
     market: '台股 (TWSE)',
     currency: 'TWD',
-    shares: 25,
+    shares: 36,
     entry_price: 8031.0,
-    current_price: 7480.0,
-    price_date: '2026-10-16',
-    entry_date: '2026-10-01',
-    entry_fee: 400,
+    current_price: 8000.0,
+    price_date: '2026-10-21',
+    entry_date: '2026-10-12',
+    entry_fee: 0,
     stop_loss_price: 7150.0,
     role: '🥉 第3先鋒 (20%)',
     stop_condition: 'ASIC龍頭多頭強勁，每週一動態檢視'
@@ -70,7 +70,7 @@ const DEFAULT_POSITIONS = [
 const DEFAULT_TX_HISTORY = [
   {
     id: 'tx_init_deposit',
-    date: '2026-10-01',
+    date: '2026-10-12',
     action: '投入現金',
     ticker: '-',
     name: '初始本金入金',
@@ -85,45 +85,45 @@ const DEFAULT_TX_HISTORY = [
   },
   {
     id: 'tx_init_1',
-    date: '2026-10-01',
+    date: '2026-10-12',
     action: '買入',
     ticker: 'MRNA',
     name: '莫德納 (Moderna)',
     currency: 'USD',
-    shares: 68,
-    price: 186.61,
-    tax_fee: 15,
-    cash_flow_twd: -412408,
+    shares: 54,
+    price: 210.21,
+    tax_fee: 0,
+    cash_flow_twd: -327988,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10月初策略建倉 第1王者 (50%)'
   },
   {
     id: 'tx_init_2',
-    date: '2026-10-01',
+    date: '2026-10-13',
     action: '買入',
     ticker: '3037.TW',
     name: '欣興 (Unimicron)',
     currency: 'TWD',
     shares: 251,
-    price: 1195.0,
-    tax_fee: 400,
-    cash_flow_twd: -299945,
+    price: 1176.0,
+    tax_fee: 0,
+    cash_flow_twd: -282420,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10月初策略建倉 第2主力 (30%)'
   },
   {
     id: 'tx_init_3',
-    date: '2026-10-01',
+    date: '2026-10-12',
     action: '買入',
     ticker: '3443.TW',
     name: '創意 (Global Unichip)',
     currency: 'TWD',
-    shares: 25,
+    shares: 36,
     price: 8031.0,
-    tax_fee: 400,
-    cash_flow_twd: -200775,
+    tax_fee: 0,
+    cash_flow_twd: -281485,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10月初策略建倉 第3先鋒 (20%)'
@@ -154,37 +154,13 @@ export default function GlobalSovereignDashboard() {
     } catch { return 32.5; }
   });
 
-  // 當前持股部位
-  const [userPositions, setUserPositions] = useState(() => {
-    try {
-      const saved = localStorage.getItem(storageKeys.positions) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_POSITIONS) : null);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // 如果舊的緩存中還是舊的 40% 角色或舊持股數 (54 股)，自動升級遷移至最新的 50/30/20 黃金階梯基準！
-        const hasOld40 = Array.isArray(parsed) && parsed.some(p => p.role && (p.role.includes('40%') || p.shares === 54));
-        if (hasOld40) {
-          try { localStorage.setItem(storageKeys.positions, JSON.stringify(DEFAULT_POSITIONS)); } catch {}
-          return DEFAULT_POSITIONS;
-        }
-        return parsed;
-      }
-      return DEFAULT_POSITIONS;
-    } catch { return DEFAULT_POSITIONS; }
-  });
-
-  // 所有歷史進出紀錄流水帳 (全進出紀錄) - 唯一真實來源
+  // 1. 所有歷史進出紀錄流水帳 (全進出紀錄) - 唯一真實來源 (Single Source of Truth)
   const [txHistory, setTxHistory] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKeys.allTx) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_ALL_TX) : null);
       let list = saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
       if (!Array.isArray(list) || list.length === 0) list = DEFAULT_TX_HISTORY;
-      // 如果舊流水帳含有 40% 或 54 股，自動升級為 50/30/20 黃金階梯流水帳
-      const hasOld40 = list.some(tx => (tx.note && tx.note.includes('40%')) || (tx.ticker === 'MRNA' && tx.shares === 54));
-      if (hasOld40) {
-        list = DEFAULT_TX_HISTORY;
-        try { localStorage.setItem(storageKeys.allTx, JSON.stringify(list)); } catch {}
-      }
-      // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/1 初始入金 100 萬)
+      // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/12 初始入金 100 萬)
       const hasDeposit = list.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')));
       if (!hasDeposit) {
         list = [DEFAULT_TX_HISTORY[0], ...list];
@@ -194,12 +170,12 @@ export default function GlobalSovereignDashboard() {
     } catch { return DEFAULT_TX_HISTORY; }
   });
 
-  // 閒置現金 (TWD) - 100% 由歷史全進出與入金流水帳 (txHistory) 的現金流動態加總推導！
+  // 2. 閒置現金 (TWD) - 100% 由歷史全進出與入金流水帳 (txHistory) 的現金流動態加總推導！
   const idleCash = useMemo(() => {
     return txHistory.reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
   }, [txHistory]);
 
-  // 累計入金本金 (TWD) - 100% 由歷史紀錄推導
+  // 3. 累計入金本金 (TWD) - 100% 由歷史紀錄推導
   const totalDepositsTwd = useMemo(() => {
     const sum = txHistory
       .filter(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')))
@@ -208,6 +184,109 @@ export default function GlobalSovereignDashboard() {
   }, [txHistory]);
 
   const setIdleCash = () => {}; // 保持相容性，閒置現金已全面自動化由 txHistory 計算
+
+  // =========================================================================
+  // 4. 核心推導：所有持股部位 (userPositions) 100% 嚴格由歷史流水帳 (txHistory) 計算推導！
+  // 歷史流水帳中沒有買股票 -> 持股部位絕對為 0！徹底杜絕脫鉤與幽靈持股現象。
+  // =========================================================================
+  const userPositions = useMemo(() => {
+    if (!Array.isArray(txHistory) || txHistory.length === 0) return [];
+
+    // 依交易日期正序推算部位變化
+    const sortedTx = [...txHistory].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    const holdingsMap = {};
+
+    sortedTx.forEach(tx => {
+      const action = tx.action;
+      const ticker = String(tx.ticker || '').trim();
+      const name = tx.name || '';
+
+      // 跳過純資金進出與無效代碼
+      if (['投入現金', '提取本金', '入金', '出金'].includes(action) || !ticker || ticker === '-') {
+        return;
+      }
+
+      const key = ticker.split('.')[0] || ticker;
+
+      if (!holdingsMap[key]) {
+        const isUs = !ticker.includes('.TW') && !ticker.includes('.TWO') && tx.currency === 'USD';
+        holdingsMap[key] = {
+          ticker: ticker,
+          name: name.replace(/\s*\(\d+\)/, '').trim(),
+          market: isUs ? '美股 (NASDAQ)' : '台股 (TWSE)',
+          currency: tx.currency || (isUs ? 'USD' : 'TWD'),
+          shares: 0,
+          totalCost: 0,
+          totalFee: 0,
+          firstBuyDate: tx.date || '',
+          lastTxDate: tx.date || '',
+          originalRole: tx.note || ''
+        };
+      }
+
+      const h = holdingsMap[key];
+      const shares = parseInt(tx.shares, 10) || 0;
+      const price = parseFloat(tx.price) || 0;
+      const fee = parseFloat(tx.tax_fee) || 0;
+
+      if (action === '買入' || action === '加碼') {
+        h.shares += shares;
+        h.totalCost += (shares * price);
+        h.totalFee += fee;
+        h.lastTxDate = tx.date || h.lastTxDate;
+        if (!h.firstBuyDate) h.firstBuyDate = tx.date || '';
+      } else if (action === '賣出' || action === '減持') {
+        if (h.shares > 0) {
+          const avgCost = h.totalCost / h.shares;
+          const reduceShares = Math.min(shares, h.shares);
+          h.shares -= reduceShares;
+          h.totalCost -= (reduceShares * avgCost);
+        }
+        h.lastTxDate = tx.date || h.lastTxDate;
+      }
+    });
+
+    const liveMap = data?.live_prices || {};
+    const picksArr = data?.current_picks || [];
+    const activePositions = [];
+
+    Object.keys(holdingsMap).forEach(key => {
+      const h = holdingsMap[key];
+      if (h.shares > 0) {
+        const avgPrice = h.shares > 0 ? (h.totalCost / h.shares) : 0;
+        const baseTicker = h.ticker.split('.')[0];
+        const matchPick = picksArr.find(cp => cp.ticker === h.ticker || (cp.ticker && cp.ticker.split('.')[0] === baseTicker));
+        const liveItem = liveMap[h.ticker] || liveMap[baseTicker];
+
+        const curPrice = liveItem?.price || matchPick?.price || avgPrice;
+        const curDate = liveItem?.price_date || matchPick?.price_date || (h.currency === 'USD' ? (data?.latest_us_date || '2026-10-16') : (data?.latest_tw_date || '2026-10-16'));
+
+        const defaultPos = DEFAULT_POSITIONS.find(dp => dp.ticker === h.ticker || dp.ticker.split('.')[0] === baseTicker);
+        const stopLossPrice = defaultPos?.stop_loss_price || Math.round(curPrice * 0.9 * 100) / 100;
+        const role = defaultPos?.role || (h.originalRole ? (h.originalRole.match(/第[123][王者主力先鋒]+/)?.[0] || '👑 核心實盤持股') : '👑 核心實盤持股');
+        const stopCondition = defaultPos?.stop_condition || '全球泰坦動態風控監控';
+
+        activePositions.push({
+          id: `pos_${baseTicker}`,
+          ticker: h.ticker,
+          name: h.name,
+          market: h.market,
+          currency: h.currency,
+          shares: h.shares,
+          entry_price: parseFloat(avgPrice.toFixed(2)),
+          current_price: curPrice,
+          price_date: curDate,
+          entry_date: h.firstBuyDate,
+          entry_fee: Math.round(h.totalFee),
+          stop_loss_price: stopLossPrice,
+          role: role,
+          stop_condition: stopCondition
+        });
+      }
+    });
+
+    return activePositions;
+  }, [txHistory, data?.live_prices, data?.current_picks, data?.latest_us_date, data?.latest_tw_date]);
 
   // 已送出/消掉的更動建議 key
   const [dismissedSuggestions, setDismissedSuggestions] = useState(() => {
@@ -299,10 +378,6 @@ export default function GlobalSovereignDashboard() {
         const res = await apiGetGlobalTitanPortfolio(currentUsername);
         if (!isMounted) return;
         if (res && res.status === 'ok') {
-          if (Array.isArray(res.positions) && res.positions.length > 0) {
-            setUserPositions(res.positions);
-            try { localStorage.setItem(storageKeys.positions, JSON.stringify(res.positions)); } catch {}
-          }
           if (Array.isArray(res.tx_history) && res.tx_history.length > 0) {
             const hasDeposit = res.tx_history.some(t => t.action === '投入現金' || t.id === 'tx_init_deposit');
             const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_TX_HISTORY[0]];
@@ -371,71 +446,13 @@ export default function GlobalSovereignDashboard() {
     };
   }, [usdFx, idleCash, userPositions, txHistory, dismissedSuggestions, storageKeys, currentUsername]);
 
-  // 自動將「當前持股部位」的成本均價、股數與費用，100% 嚴格綁定對齊「歷史交易流水帳」最新買入明細！
-  useEffect(() => {
-    if (!Array.isArray(txHistory) || txHistory.length === 0) return;
-    setUserPositions(prev => {
-      let changed = false;
-      const next = prev.map(p => {
-        const matchTx = txHistory.find(tx => 
-          (tx.action === '買入' || tx.action === '加碼') && 
-          (tx.ticker === p.ticker || 
-           (tx.ticker && p.ticker && tx.ticker.split('.')[0] === p.ticker.split('.')[0]) || 
-           (tx.name && p.name && (tx.name.includes(p.name.slice(0, 2)) || p.name.includes(tx.name.slice(0, 2)))))
-        );
-        if (matchTx && matchTx.price > 0) {
-          const nextPrice = matchTx.price;
-          const nextShares = matchTx.shares > 0 ? matchTx.shares : p.shares;
-          const nextFee = matchTx.tax_fee !== undefined ? matchTx.tax_fee : p.entry_fee;
-          const nextDate = matchTx.date || p.entry_date;
-          if (p.entry_price !== nextPrice || p.shares !== nextShares || p.entry_fee !== nextFee || p.entry_date !== nextDate) {
-            changed = true;
-            return {
-              ...p,
-              entry_price: nextPrice,
-              shares: nextShares,
-              entry_fee: nextFee,
-              entry_date: nextDate
-            };
-          }
-        }
-        return p;
-      });
-      return changed ? next : prev;
-    });
-  }, [txHistory]);
-
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新全球主權演算數據與實盤報價
-      const [json, portRes] = await Promise.all([
-        apiGetGlobalSovereignDashboard(),
-        apiGetGlobalTitanPortfolio(currentUsername).catch(() => null)
-      ]);
+      // 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新全球主權演算數據與實盤報價
+      const json = await apiGetGlobalSovereignDashboard();
       if (json && json.status === 'ok') {
         setData(json);
-      }
-      const liveMap = json?.live_prices || data?.live_prices || {};
-      const picksArr = json?.current_picks || data?.current_picks || [];
-      if (portRes && portRes.status === 'ok' && Array.isArray(portRes.positions) && portRes.positions.length > 0) {
-        setUserPositions(prev => prev.map(p => {
-          const baseTicker = p.ticker ? p.ticker.split('.')[0] : '';
-          const matchLive = portRes.positions.find(lp => lp.ticker === p.ticker || (lp.ticker && p.ticker && lp.ticker.split('.')[0] === baseTicker));
-          const liveItem = liveMap[p.ticker] || liveMap[baseTicker];
-          const matchPick = picksArr.find(cp => cp.ticker === p.ticker || (cp.ticker && p.ticker && cp.ticker.split('.')[0] === baseTicker));
-          const bestPrice = liveItem?.price || matchPick?.price || matchLive?.current_price;
-          const bestDate = liveItem?.price_date || matchPick?.price_date || matchLive?.price_date || p.price_date;
-          if (bestPrice && bestPrice > 0) {
-            return {
-              ...p,
-              current_price: bestPrice,
-              price_date: bestDate
-            };
-          }
-          return p;
-        }));
       }
     } catch (err) {
       console.warn('無法從筆電資料庫獲取最新全球主權數據，使用備援展示:', err);
@@ -453,32 +470,6 @@ export default function GlobalSovereignDashboard() {
   const yearly = data?.yearly_performance || [];
   const shortTwDate = (data?.latest_tw_date || data?.latest_data_date || '2026-10-16').slice(5).replace('-', '/');
   const shortUsDate = (data?.latest_us_date || '2026-10-16').slice(5).replace('-', '/');
-
-  // 自動將「當前持股部位」的最新現價 (current_price) 與報價日期 (price_date)，依據資料庫最新 live_prices 與 currentPicks 行情動態同步對齊！
-  // 注意：只更新 current_price 與 price_date，嚴格保留使用者的進場成本 entry_price、股數與進場時間！
-  useEffect(() => {
-    const liveMap = data?.live_prices || {};
-    if ((!currentPicks || currentPicks.length === 0) && Object.keys(liveMap).length === 0) return;
-    setUserPositions(prev => {
-      let changed = false;
-      const next = prev.map(p => {
-        const baseTicker = p.ticker ? p.ticker.split('.')[0] : '';
-        const liveItem = liveMap[p.ticker] || liveMap[baseTicker];
-        const matchPick = currentPicks.find(cp => 
-          cp.ticker === p.ticker || 
-          (cp.ticker && p.ticker && cp.ticker.split('.')[0] === baseTicker)
-        );
-        const latestPx = liveItem?.price || matchPick?.price;
-        const pickDate = liveItem?.price_date || matchPick?.price_date || (p.currency === 'USD' ? (data?.latest_us_date || '2026-10-16') : (data?.latest_tw_date || '2026-10-16'));
-        if (latestPx && latestPx > 0 && (p.current_price !== latestPx || p.price_date !== pickDate)) {
-          changed = true;
-          return { ...p, current_price: latestPx, price_date: pickDate };
-        }
-        return p;
-      });
-      return changed ? next : prev;
-    });
-  }, [currentPicks, data?.latest_data_date, data?.live_prices, cloudSyncStatus]);
 
   // 1. 計算持股現值與整體統計
   const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
@@ -548,17 +539,8 @@ export default function GlobalSovereignDashboard() {
   // 作戰指揮艙視角: 'all' (全視角總覽) | 'titan_a' (1號 A梯隊 50%) | 'titan_b' (22號 B梯隊 50%)
   const [dashboardStationView, setDashboardStationView] = useState('all');
 
-  // 持倉篩選器: 'all' | 'titan'
-  const [positionFilter, setPositionFilter] = useState('all');
-
-  const titanPositions = useMemo(() => {
-    return userPositions.filter(p => !p.role?.includes('乾粉') && !p.role?.includes('快打') && !p.role?.includes('抄底'));
-  }, [userPositions]);
-
-  const displayedPositions = useMemo(() => {
-    if (positionFilter === 'titan') return titanPositions;
-    return userPositions;
-  }, [userPositions, positionFilter, titanPositions]);
+  // 當前顯示之實戰持股部位 (100% 由流水帳推導，無需額外篩選器)
+  const displayedPositions = userPositions;
 
   // 雙梯隊時序自動導航計算 (每月 1 號 A 梯隊 + 每月 22 號 B 梯隊)
   const dualTrancheGuide = useMemo(() => {
@@ -887,48 +869,7 @@ export default function GlobalSovereignDashboard() {
         if (!proceed) return;
       }
 
-      // 檢查是否已持有該標的 (例如單梯隊加碼或重複操作)
-      const existingPos = userPositions.find(p => p.ticker === sugg.ticker);
-      if (existingPos) {
-        setUserPositions(prev => prev.map(p => {
-          if (p.ticker === sugg.ticker) {
-            const oldCost = p.shares * p.entry_price;
-            const addCost = actualShares * actualPrice;
-            const totalShares = p.shares + actualShares;
-            const newAvgPrice = totalShares > 0 ? (oldCost + addCost) / totalShares : p.entry_price;
-            return {
-              ...p,
-              shares: totalShares,
-              entry_price: parseFloat(newAvgPrice.toFixed(2)),
-              current_price: actualPrice,
-              entry_fee: (p.entry_fee || 0) + actualTaxFee,
-              role: sugg.role
-            };
-          }
-          return p;
-        }));
-      } else {
-        // 全新新增至持股
-        const newPos = {
-          id: 'pos_' + Date.now(),
-          ticker: sugg.ticker,
-          name: sugg.name,
-          market: sugg.market,
-          currency: sugg.currency,
-          shares: actualShares,
-          entry_price: actualPrice,
-          current_price: actualPrice,
-          entry_date: today,
-          entry_fee: actualTaxFee,
-          role: sugg.role,
-          stop_condition: '大波段抱牢，SPY破年線才清倉'
-        };
-        setUserPositions(prev => [newPos, ...prev]);
-      }
-
-      setIdleCash(prev => prev - totalCostTwd);
-
-      // 記帳流水
+      // 記帳流水：寫入 txHistory 後，userPositions 與閒置現金將自動 100% 即時推導！
       const modeNotePrefix = rebalanceMode === 'full_100' ? '雙隊滿倉' : (rebalanceMode === 'tranche_a_50' ? '🅰️ 1號A隊調倉' : '🅱️ 22號B隊調倉');
       const newTx = {
         id: 'tx_' + Date.now(),
@@ -940,38 +881,18 @@ export default function GlobalSovereignDashboard() {
         shares: actualShares,
         price: actualPrice,
         tax_fee: actualTaxFee,
-        cash_flow_twd: -totalCostTwd,
+        cash_flow_twd: -Math.round(totalCostTwd),
         realized_pnl_twd: null,
         realized_return_pct: null,
         note: `${modeNotePrefix}：買入建倉 (${sugg.role})`
       };
       setTxHistory(prev => [newTx, ...prev]);
 
-      triggerNotice(`✅ 已成功【買入】${sugg.name} ${actualShares} 股！已扣除閒置現金 NT$ ${Math.round(totalCostTwd).toLocaleString()}`);
+      triggerNotice(`✅ 已成功【買入】${sugg.name} ${actualShares} 股！歷史流水帳已記錄，持股部位已自動更新。`);
 
     } else if (sugg.action === '加碼') {
       const grossValTwd = actualShares * actualPrice * fx;
       const totalCostTwd = grossValTwd + (isUsd ? actualTaxFee * fx : actualTaxFee);
-
-      // 更新持股 (加權平均成本)
-      setUserPositions(prev => prev.map(p => {
-        if (p.ticker === sugg.ticker) {
-          const oldCost = p.shares * p.entry_price;
-          const addCost = actualShares * actualPrice;
-          const totalShares = p.shares + actualShares;
-          const newAvgPrice = totalShares > 0 ? (oldCost + addCost) / totalShares : p.entry_price;
-          return {
-            ...p,
-            shares: totalShares,
-            entry_price: parseFloat(newAvgPrice.toFixed(2)),
-            current_price: actualPrice,
-            entry_fee: (p.entry_fee || 0) + actualTaxFee
-          };
-        }
-        return p;
-      }));
-
-      setIdleCash(prev => prev - totalCostTwd);
 
       const newTx = {
         id: 'tx_' + Date.now(),
@@ -983,14 +904,14 @@ export default function GlobalSovereignDashboard() {
         shares: actualShares,
         price: actualPrice,
         tax_fee: actualTaxFee,
-        cash_flow_twd: -totalCostTwd,
+        cash_flow_twd: -Math.round(totalCostTwd),
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: `月底調倉：加碼 ${actualShares} 股`
+        note: `梯隊調倉：加碼 ${actualShares} 股`
       };
       setTxHistory(prev => [newTx, ...prev]);
 
-      triggerNotice(`✅ 已成功【加碼】${sugg.name} ${actualShares} 股！已扣除閒置現金 NT$ ${Math.round(totalCostTwd).toLocaleString()}`);
+      triggerNotice(`✅ 已成功【加碼】${sugg.name} ${actualShares} 股！歷史流水帳已記錄，持股部位已自動更新。`);
 
     } else if (sugg.action === '減持') {
       const grossProceedsTwd = actualShares * actualPrice * fx;
@@ -1000,23 +921,9 @@ export default function GlobalSovereignDashboard() {
       const entryPrice = sugg.heldPos?.entry_price || actualPrice;
       const grossPnl = (actualPrice - entryPrice) * actualShares;
       const netPnlCurrency = grossPnl - actualTaxFee;
-      const netPnlTwd = netPnlCurrency * fx;
+      const netPnlTwd = Math.round(netPnlCurrency * fx);
       const costBasis = (entryPrice * actualShares) * fx;
       const netRetPct = costBasis > 0 ? (netPnlTwd / costBasis) * 100 : 0;
-
-      // 減少持股
-      setUserPositions(prev => prev.map(p => {
-        if (p.ticker === sugg.ticker) {
-          return {
-            ...p,
-            shares: Math.max(0, p.shares - actualShares)
-          };
-        }
-        return p;
-      }).filter(p => p.shares > 0));
-
-      // 現金回流閒置現金
-      setIdleCash(prev => prev + netProceedsTwd);
 
       const newTx = {
         id: 'tx_' + Date.now(),
@@ -1028,10 +935,10 @@ export default function GlobalSovereignDashboard() {
         shares: actualShares,
         price: actualPrice,
         tax_fee: actualTaxFee,
-        cash_flow_twd: netProceedsTwd,
+        cash_flow_twd: Math.round(netProceedsTwd),
         realized_pnl_twd: netPnlTwd,
-        realized_return_pct: netRetPct,
-        note: `月底調倉：減持部位 (實現淨利: NT$ ${Math.round(netPnlTwd).toLocaleString()})`
+        realized_return_pct: Math.round(netRetPct * 10) / 10,
+        note: `梯隊調倉：減持部位 (實現淨利: NT$ ${Math.round(netPnlTwd).toLocaleString()})`
       };
       setTxHistory(prev => [newTx, ...prev]);
 
@@ -1047,12 +954,9 @@ export default function GlobalSovereignDashboard() {
       const grossPnl = (actualPrice - entryPrice) * actualShares;
       const totalTaxFeeCurrency = entryFee + actualTaxFee;
       const netPnlCurrency = grossPnl - totalTaxFeeCurrency;
-      const netPnlTwd = netPnlCurrency * fx;
+      const netPnlTwd = Math.round(netPnlCurrency * fx);
       const totalCostBasis = (entryPrice * actualShares + entryFee) * fx;
       const netRetPct = totalCostBasis > 0 ? (netPnlTwd / totalCostBasis) * 100 : 0;
-
-      setUserPositions(prev => prev.filter(p => p.ticker !== sugg.ticker));
-      setIdleCash(prev => prev + netProceedsTwd);
 
       const newTx = {
         id: 'tx_' + Date.now(),
@@ -1177,9 +1081,6 @@ export default function GlobalSovereignDashboard() {
     const netPnlTwd = netPnlCurrency * fx;
     const totalCostBasis = (exitModal.entry_price * exitModal.shares + exitModal.entry_fee) * fx;
     const netRetPct = totalCostBasis > 0 ? (netPnlTwd / totalCostBasis) * 100 : 0;
-
-    setUserPositions(prev => prev.filter(p => p.id !== exitModal.posId));
-    setIdleCash(prev => prev + netProceedsTwd);
 
     const newTx = {
       id: 'tx_' + Date.now(),
@@ -1315,22 +1216,8 @@ export default function GlobalSovereignDashboard() {
       }
     });
 
-    // 若是買入/加碼動作，立即同步更新對應實戰持股部位成本均價與股數
+    // 同步更新跨頁面共用的買入價格快取
     if (updatedTx.action === '買入' || updatedTx.action === '加碼') {
-      setUserPositions(prevPos => prevPos.map(p => {
-        if (p.ticker === updatedTx.ticker || (p.ticker && updatedTx.ticker && p.ticker.split('.')[0] === updatedTx.ticker.split('.')[0]) || p.name === updatedTx.name) {
-          return {
-            ...p,
-            entry_price: updatedTx.price,
-            shares: updatedTx.shares > 0 ? updatedTx.shares : p.shares,
-            entry_fee: updatedTx.tax_fee,
-            entry_date: updatedTx.date
-          };
-        }
-        return p;
-      }));
-
-      // 同步更新跨頁面共用的買入價格快取
       try {
         const customSaved = JSON.parse(localStorage.getItem('user_custom_entry_prices') || '{}');
         customSaved[updatedTx.ticker] = updatedTx.price;
@@ -1342,7 +1229,7 @@ export default function GlobalSovereignDashboard() {
     }
 
     setEditTxModal(prev => ({ ...prev, open: false }));
-    triggerNotice(`✅ 已成功${editTxModal.isNew ? '新增' : '更新修正'}「${updatedTx.name}」歷史交易明細！實戰成本已自動對齊。`);
+    triggerNotice(`✅ 已成功${editTxModal.isNew ? '新增' : '更新修正'}「${updatedTx.name}」歷史交易明細！實戰部位已自動對齊。`);
   };
 
   const handleOpenAddPosition = () => {
@@ -1388,23 +1275,10 @@ export default function GlobalSovereignDashboard() {
   };
 
   const handleDeletePosition = (pos) => {
-    const matchingTx = txHistory.find(t => (t.ticker === pos.ticker || t.name === pos.name) && (t.action === '買入' || t.action === 'BUY'));
-    if (matchingTx) {
-      const confirmBoth = window.confirm(
-        `確定要自全球持股清單中刪除「${pos.name} (${pos.ticker})」部位嗎？\n\n💡 系統偵測到歷史流水帳中存在建倉買進紀錄 (${matchingTx.date} 買入 ${pos.name})。\n\n是否【同時刪除持股部位與其歷史買入紀錄】？\n• 點擊「確定」：同時刪除持股部位 + 歷史買進紀錄\n• 點擊「取消」：保留不作變更`
-      );
-      if (confirmBoth) {
-        setUserPositions(prev => prev.filter(p => p.id !== pos.id));
-        setTxHistory(prev => prev.filter(t => t.id !== matchingTx.id));
-        triggerNotice(`🗑️ 已同步移除「${pos.name}」全球持股部位與歷史買進紀錄！`);
-        return;
-      }
-      return;
-    }
-
-    if (window.confirm(`確定要從全球持股清單中刪除「${pos.name} (${pos.ticker})」部位嗎？\n刪除後該部位不再計入總淨值。`)) {
-      setUserPositions(prev => prev.filter(p => p.id !== pos.id));
-      triggerNotice(`🗑️ 已成功刪除持股「${pos.name}」！`);
+    if (window.confirm(`確定要自全球持股清單中刪除「${pos.name} (${pos.ticker})」部位嗎？\n\n系統將自歷史進出流水帳中移除該標的之買進紀錄，持股部位將隨即清空，現金流亦將自動回歸。`)) {
+      const baseTicker = pos.ticker.split('.')[0];
+      setTxHistory(prev => prev.filter(t => t.ticker !== pos.ticker && t.ticker?.split('.')[0] !== baseTicker && !t.name?.includes(baseTicker)));
+      triggerNotice(`🗑️ 已自歷史進出移除「${pos.name}」，持股部位已同步清空！`);
     }
   };
 
@@ -1420,53 +1294,50 @@ export default function GlobalSovereignDashboard() {
     const fx = isUsd ? usdFx : 1.0;
     const sharesNum = parseFloat(editPosModal.shares) || 0;
     const entryPx = parseFloat(editPosModal.entry_price) || 0;
-    const curPx = parseFloat(editPosModal.current_price) || entryPx;
     const feeNum = parseFloat(editPosModal.entry_fee) || 0;
-    const stopPx = parseFloat(editPosModal.stop_loss_price) || (entryPx * 0.9);
-
-    const posObj = {
-      id: editPosModal.id,
-      ticker: ticker,
-      name: name,
-      market: editPosModal.market,
-      currency: editPosModal.currency,
-      role: editPosModal.role,
-      shares: sharesNum,
-      entry_price: entryPx,
-      current_price: curPx,
-      entry_date: editPosModal.entry_date,
-      entry_fee: feeNum,
-      stop_loss_price: stopPx,
-      stop_condition: editPosModal.stop_condition || '依全球主權階梯輪動持有'
-    };
 
     if (editPosModal.isNew) {
-      setUserPositions(prev => [posObj, ...prev.filter(p => p.ticker !== ticker)]);
-      if (editPosModal.syncBuyTx) {
-        const costOrig = sharesNum * entryPx + feeNum;
-        const costTwd = costOrig * fx;
-        const newTx = {
-          id: `tx_global_add_${Date.now()}`,
-          date: editPosModal.entry_date,
-          action: '買入',
-          ticker: ticker,
-          name: name,
-          currency: editPosModal.currency,
-          shares: sharesNum,
-          price: entryPx,
-          tax_fee: feeNum,
-          cash_flow_twd: -Math.round(costTwd),
-          realized_pnl_twd: null,
-          realized_return_pct: null,
-          note: `手動新增全球建倉 ${editPosModal.role}`
-        };
-        setTxHistory(prev => [newTx, ...prev]);
-        setIdleCash(prev => Math.max(0, prev - Math.round(costTwd)));
-      }
-      triggerNotice(`✅ 已成功新增全球持股「${name} (${ticker})」！`);
+      const costOrig = sharesNum * entryPx + feeNum;
+      const costTwd = costOrig * fx;
+      const newTx = {
+        id: `tx_global_add_${Date.now()}`,
+        date: editPosModal.entry_date,
+        action: '買入',
+        ticker: ticker,
+        name: name,
+        currency: editPosModal.currency,
+        shares: sharesNum,
+        price: entryPx,
+        tax_fee: feeNum,
+        cash_flow_twd: -Math.round(costTwd),
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `手動新增全球建倉 (${editPosModal.role})`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+      triggerNotice(`✅ 已在歷史進出寫入買進「${name} (${ticker})」，持股部位已自動生成！`);
     } else {
-      setUserPositions(prev => prev.map(p => p.id === posObj.id ? posObj : p));
-      triggerNotice(`✏️ 已成功更新全球持股「${name} (${ticker})」明細！`);
+      const baseTicker = ticker.split('.')[0];
+      setTxHistory(prev => {
+        let updated = false;
+        return prev.map(tx => {
+          if (!updated && (tx.action === '買入' || tx.action === '加碼') && (tx.ticker === ticker || tx.ticker?.split('.')[0] === baseTicker)) {
+            updated = true;
+            const costOrig = sharesNum * entryPx + feeNum;
+            const costTwd = costOrig * fx;
+            return {
+              ...tx,
+              date: editPosModal.entry_date,
+              shares: sharesNum,
+              price: entryPx,
+              tax_fee: feeNum,
+              cash_flow_twd: -Math.round(costTwd)
+            };
+          }
+          return tx;
+        });
+      });
+      triggerNotice(`✏️ 已同步更新「${name}」歷史進出流水帳，持股均價與股數已動態重算！`);
     }
     setEditPosModal(prev => ({ ...prev, open: false }));
   };
@@ -1524,8 +1395,7 @@ export default function GlobalSovereignDashboard() {
     reader.onload = async (event) => {
       try {
         const imported = JSON.parse(event.target.result);
-        if (Array.isArray(imported.positions) && Array.isArray(imported.tx_history)) {
-          setUserPositions(imported.positions);
+        if (Array.isArray(imported.tx_history)) {
           setTxHistory(imported.tx_history);
           if (imported.usd_fx) setUsdFx(Number(imported.usd_fx));
           if (Array.isArray(imported.dismissed_suggestions)) setDismissedSuggestions(imported.dismissed_suggestions);
@@ -1539,9 +1409,9 @@ export default function GlobalSovereignDashboard() {
           });
           setCloudSyncStatus('synced');
           setLastSyncTime(new Date());
-          triggerNotice(`📥 已成功匯入帳本備份並同步更新至雲端！共 ${imported.positions.length} 檔持股，${imported.tx_history.length} 筆流水帳。`);
+          triggerNotice(`📥 已成功匯入帳本備份並同步更新至雲端！共 ${imported.tx_history.length} 筆流水帳，持股與損益已即時重算。`);
         } else {
-          alert('備份檔案格式不正確，需包含 positions 與 tx_history 陣列。');
+          alert('備份檔案格式不正確，需包含 tx_history 陣列。');
         }
       } catch (err) {
         alert('解析備份檔案失敗：' + err.message);
@@ -1552,23 +1422,9 @@ export default function GlobalSovereignDashboard() {
   };
 
   const handleDeleteTx = (id, ticker, name, action) => {
-    const matchingPos = userPositions.find(p => (ticker && p.ticker === ticker) || p.name === name);
-    if (matchingPos && (action === '買入' || action === 'BUY')) {
-      const confirmBoth = window.confirm(
-        `確定要刪除「${action} ${name} (${ticker})」這筆全球歷史交易紀錄嗎？\n\n⚠️ 系統偵測到您目前持有中部位亦包含「${name} (${matchingPos.shares} 股)」！\n\n是否【同步刪除持股部位】？\n• 點擊「確定」：同時刪除歷史交易紀錄 + 移除該持股部位\n• 點擊「取消」：保留兩者不作任何變更`
-      );
-      if (confirmBoth) {
-        setTxHistory(prev => prev.filter(item => item.id !== id));
-        setUserPositions(prev => prev.filter(p => p.id !== matchingPos.id));
-        triggerNotice(`🗑️ 已同步刪除「${name}」全球歷史交易紀錄與持股部位！`);
-        return;
-      }
-      return;
-    }
-
-    if (window.confirm(`確定要刪除「${action} ${name}」這筆全球歷史交易紀錄嗎？\n刪除後無法復原。`)) {
+    if (window.confirm(`確定要刪除「${action} ${name}」這筆全球歷史交易紀錄嗎？\n\n刪除後，當前持股部位與損益將自動依據剩餘流水帳即時動態重算。`)) {
       setTxHistory(prev => prev.filter(item => item.id !== id));
-      triggerNotice(`🗑️ 已成功刪除「${name}」該筆歷史交易紀錄！`);
+      triggerNotice(`🗑️ 已成功刪除「${name}」該筆歷史流水帳！持股部位與損益已即時重算。`);
     }
   };
 
@@ -2093,67 +1949,19 @@ export default function GlobalSovereignDashboard() {
               gap: '0.6rem',
               marginBottom: '0.85rem'
             }}>
-              <div style={{
-                display: 'flex',
-                background: 'rgba(0, 0, 0, 0.45)',
-                padding: '3px',
-                borderRadius: '7px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                gap: '3px'
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setPositionFilter('all')}
-                  style={{
-                    padding: '0.28rem 0.7rem',
-                    borderRadius: '5px',
-                    border: 'none',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    background: positionFilter === 'all' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
-                    color: positionFilter === 'all' ? '#FFF' : '#94A3B8'
-                  }}
-                >
-                  🌐 全部部位 ({userPositions.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPositionFilter('titan')}
-                  style={{
-                    padding: '0.28rem 0.7rem',
-                    borderRadius: '5px',
-                    border: 'none',
-                    fontSize: '0.76rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    background: positionFilter === 'titan' ? 'linear-gradient(135deg, #0EA5E9, #0284C7)' : 'transparent',
-                    color: positionFilter === 'titan' ? '#FFF' : '#94A3B8'
-                  }}
-                >
-                  👑 雙梯隊持股 ({titanPositions.length})
-                </button>
+              <div style={{ fontSize: '0.78rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', background: '#10B981' }}></span>
+                <span>📊 當前實戰持股部位（共 {userPositions.length} 檔，100% 嚴格由歷史交易流水帳即時推導）</span>
               </div>
 
               <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                💡 雙梯隊規則：每月 1 號 (A梯隊 50%) 與 22 號 (B梯隊 50%) 週期調倉，緊扣全球最強龍頭進攻！
+                💡 雙梯隊進攻：每月 1 號 (A梯隊 50%) 與 22 號 (B梯隊 50%) 週期調倉，緊扣全球最強龍頭進攻！
               </div>
             </div>
 
-            {displayedPositions.length === 0 ? (
+            {userPositions.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-                {positionFilter === 'titan' ? (
-                  <div>
-                    <strong>目前無雙梯隊持股部位</strong>
-                    <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginTop: '0.3rem' }}>
-                      資金待命中，可於下方「雙梯隊持倉更動建議」執行買入！
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    目前尚無任何持股部位。資金 100% 待命中，可點擊上方「➕ 新增持股部位」或於下方「雙梯隊持倉更動建議」執行買入！
-                  </div>
-                )}
+                目前尚無任何持股部位。資金 100% 待命中，可點擊上方「➕ 新增持股部位」或於下方「雙梯隊持倉更動建議」執行買入！
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -2375,73 +2183,25 @@ export default function GlobalSovereignDashboard() {
                   🔄 雙梯隊持倉更動建議（A隊優先補滿 ＋ B隊缺額買入補齊）
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  {rebalanceMode === 'full_100'
-                    ? `目前為【👑 雙梯隊交錯進攻總覽 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：同一標的優先以 🅰️ A隊(每月1號・50%預算) 為主補滿，🅱️ B隊(每月22號・50%預算) 不滿的部分即建議買入補齊！雙隊皆補滿時安心續抱。`
-                    : rebalanceMode === 'tranche_a_50'
-                      ? `目前為【🅰️ 1號 A 梯隊專屬調倉 (50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：梯隊內部配置 50% / 30% / 20% (佔總淨值 25% / 15% / 10%)。優先補滿 A 隊！`
-                      : `目前為【🅱️ 22號 B 梯隊專屬調倉 (50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：梯隊內部配置 50% / 30% / 20% (佔總淨值 25% / 15% / 10%)。建議買入補齊 B 隊缺額！`}
+                  目前為【👑 雙梯隊交錯進攻總覽 (動用 100% 總淨值 NT$ {Math.round(totalNetAssetsTwd).toLocaleString()})】：同一標的優先以 🅰️ A隊(每月1號・50%預算) 為主補滿，🅱️ B隊(每月22號・50%預算) 不滿的部分即建議買入補齊！雙隊皆補滿時安心續抱。
                 </p>
               </div>
 
-              {/* 🎛️ 跟單調倉模式切換器 */}
+              {/* 🎛️ 雙梯隊模式標籤與操作按鈕 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <div style={{
                   display: 'flex',
-                  background: 'rgba(15, 23, 42, 0.9)',
-                  padding: '3px',
-                  borderRadius: '7px',
-                  border: '1px solid rgba(56, 189, 248, 0.35)',
-                  gap: '3px',
-                  flexWrap: 'wrap'
+                  alignItems: 'center',
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  padding: '0.35rem 0.8rem',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(16, 185, 129, 0.45)',
+                  color: '#34D399',
+                  fontSize: '0.78rem',
+                  fontWeight: 'bold',
+                  gap: '5px'
                 }}>
-                  <button
-                    type="button"
-                    onClick={() => { setRebalanceMode('full_100'); setDashboardStationView('all'); setCustomEdits({}); }}
-                    style={{
-                      padding: '0.35rem 0.75rem',
-                      borderRadius: '5px',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: rebalanceMode === 'full_100' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-                      color: rebalanceMode === 'full_100' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    🔥 雙隊合流 (A隊補滿+B隊補齊)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setRebalanceMode('tranche_a_50'); setDashboardStationView('titan_a'); setCustomEdits({}); }}
-                    style={{
-                      padding: '0.35rem 0.75rem',
-                      borderRadius: '5px',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: rebalanceMode === 'tranche_a_50' ? 'linear-gradient(135deg, #0EA5E9, #2563EB)' : 'transparent',
-                      color: rebalanceMode === 'tranche_a_50' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    🅰️ 1號 A隊 (50%)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setRebalanceMode('tranche_b_50'); setDashboardStationView('titan_b'); setCustomEdits({}); }}
-                    style={{
-                      padding: '0.35rem 0.75rem',
-                      borderRadius: '5px',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      background: rebalanceMode === 'tranche_b_50' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
-                      color: rebalanceMode === 'tranche_b_50' ? '#FFF' : '#94A3B8'
-                    }}
-                  >
-                    🅱️ 22號 B隊 (50%)
-                  </button>
+                  🔥 雙隊合流 (A隊補滿 + B隊補齊)
                 </div>
 
                 <button
