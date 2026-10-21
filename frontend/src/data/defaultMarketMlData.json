@@ -5330,7 +5330,7 @@
       "id": "titan_sovereign",
       "tag": "👑 22年+131200% (1312倍)・CAGR 39.8%・夏普1.16・MDD -36.5%",
       "desc": "台股因果量化泰坦旗艦版（正式取代舊版台股泰坦）：市值前100大滾動池 + 每月11號營收發布日調倉 + 4大真因果Alpha因子 + 60MA季線動態停損。22年全歷史嚴格無跳空校正回測：1,312.03倍（CAGR 39.83%），夏普比率 1.16，最大回撤僅 -36.46%，月度勝率 59.5%！",
-      "name": "👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘)",
+      "name": "👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 · 22年 1312倍)",
       "status": "ready",
       "metrics": {
         "sharpe": 1.16,
@@ -57421,17 +57421,17 @@
             "model_id": "titan_sovereign",
             "name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)",
             "short_name": "👑 台股泰坦(FIP旗艦)",
-            "total_return_pct": 26550.7,
-            "cagr_pct": 30.3,
-            "alpha_pct": 26335.7,
-            "max_drawdown_pct": -36.6,
-            "sharpe_ratio": 1.0,
+            "total_return_pct": 131103.0,
+            "cagr_pct": 39.83,
+            "alpha_pct": 130331.0,
+            "max_drawdown_pct": -36.46,
+            "sharpe_ratio": 1.16,
             "sortino_ratio": 1.68,
-            "win_rate_pct": 65.3,
+            "win_rate_pct": 59.53,
             "profit_factor": 3.85,
             "total_trades": 391,
             "market_exposure_pct": 68.4,
-            "model_name": "👑 台股泰坦 FIP 頂刊旗艦版 (Option A 70/15/15 + 衛星移動停利)"
+            "model_name": "👑 台股因果量化泰坦 (1312倍・CAGR 39.8%・夏普1.16)"
           },
           {
             "model_id": "regime_moe",
@@ -83616,1131 +83616,2211 @@
             }
           },
           "titan_sovereign": {
-            "name": "👑 泰坦王權主宰旗艦版 (二階段Top10高勝率精選+週度遞補)",
+            "name": "👑 台股因果量化泰坦旗艦版 (Causal ML 22年 1312倍)",
             "model_id": "titan_sovereign",
             "long_only": {
-              "total_return_pct": 26550.7,
-              "cagr_pct": 30.3,
-              "alpha_pct": 26335.7,
-              "max_drawdown_pct": -36.6,
-              "sharpe_ratio": 1.0,
-              "win_rate_pct": 65.3,
-              "profit_factor": 3.85,
-              "market_exposure_pct": 68.4,
+              "total_return_pct": 131103.0,
+              "cagr_pct": 39.83,
+              "alpha_pct": 130331.0,
+              "max_drawdown_pct": -36.46,
+              "sharpe_ratio": 1.16,
+              "win_rate_pct": 59.53,
+              "profit_factor": 4.12,
+              "market_exposure_pct": 82.5,
               "yearly": [
                 {
                   "year": "2005",
-                  "strategy_return": 42.74,
-                  "benchmark_return": 8.62,
-                  "alpha": 34.12
+                  "strategy_return": -3.83,
+                  "benchmark_return": 12.65,
+                  "alpha": -16.48
                 },
                 {
                   "year": "2006",
-                  "strategy_return": 38.17,
-                  "benchmark_return": 19.48,
-                  "alpha": 18.7
+                  "strategy_return": 14.79,
+                  "benchmark_return": 13.1,
+                  "alpha": 1.69
                 },
                 {
                   "year": "2007",
-                  "strategy_return": -33.55,
-                  "benchmark_return": 8.72,
-                  "alpha": -42.27
+                  "strategy_return": -3.88,
+                  "benchmark_return": 5.39,
+                  "alpha": -9.27
                 },
                 {
                   "year": "2008",
-                  "strategy_return": -11.14,
-                  "benchmark_return": -46.03,
-                  "alpha": 34.89
+                  "strategy_return": -3.77,
+                  "benchmark_return": -44.53,
+                  "alpha": 40.76
                 },
                 {
                   "year": "2009",
-                  "strategy_return": 28.65,
-                  "benchmark_return": 78.34,
-                  "alpha": -49.7
+                  "strategy_return": 80.79,
+                  "benchmark_return": 86.89,
+                  "alpha": -6.1
                 },
                 {
                   "year": "2010",
-                  "strategy_return": -40.82,
-                  "benchmark_return": 9.58,
-                  "alpha": -50.4
+                  "strategy_return": 9.94,
+                  "benchmark_return": 7.3,
+                  "alpha": 2.64
                 },
                 {
                   "year": "2011",
-                  "strategy_return": -22.45,
-                  "benchmark_return": -21.18,
-                  "alpha": -1.27
+                  "strategy_return": -7.29,
+                  "benchmark_return": -19.52,
+                  "alpha": 12.23
                 },
                 {
                   "year": "2012",
-                  "strategy_return": -10.49,
-                  "benchmark_return": 8.87,
-                  "alpha": -19.36
+                  "strategy_return": 10.47,
+                  "benchmark_return": 8.78,
+                  "alpha": 1.69
                 },
                 {
                   "year": "2013",
-                  "strategy_return": 8.04,
-                  "benchmark_return": 11.85,
-                  "alpha": -3.8
+                  "strategy_return": 154.81,
+                  "benchmark_return": 9.55,
+                  "alpha": 145.26
                 },
                 {
                   "year": "2014",
-                  "strategy_return": -6.78,
-                  "benchmark_return": 8.08,
-                  "alpha": -14.86
+                  "strategy_return": 22.72,
+                  "benchmark_return": 7.15,
+                  "alpha": 15.57
                 },
                 {
                   "year": "2015",
-                  "strategy_return": -19.22,
-                  "benchmark_return": -10.41,
-                  "alpha": -8.8
+                  "strategy_return": 23.06,
+                  "benchmark_return": -15.14,
+                  "alpha": 38.2
                 },
                 {
                   "year": "2016",
-                  "strategy_return": -16.35,
-                  "benchmark_return": 10.98,
-                  "alpha": -27.32
+                  "strategy_return": 3.86,
+                  "benchmark_return": 20.0,
+                  "alpha": -16.14
                 },
                 {
                   "year": "2017",
-                  "strategy_return": 132.91,
-                  "benchmark_return": 15.01,
-                  "alpha": 117.89
+                  "strategy_return": 45.95,
+                  "benchmark_return": 15.67,
+                  "alpha": 30.28
                 },
                 {
                   "year": "2018",
-                  "strategy_return": -19.06,
-                  "benchmark_return": -8.6,
-                  "alpha": -10.45
+                  "strategy_return": 97.59,
+                  "benchmark_return": -9.72,
+                  "alpha": 107.31
                 },
                 {
                   "year": "2019",
-                  "strategy_return": 36.49,
-                  "benchmark_return": 23.33,
-                  "alpha": 13.15
+                  "strategy_return": 60.15,
+                  "benchmark_return": 24.12,
+                  "alpha": 36.03
                 },
                 {
                   "year": "2020",
-                  "strategy_return": 197.06,
-                  "benchmark_return": 22.8,
-                  "alpha": 174.26
+                  "strategy_return": 119.58,
+                  "benchmark_return": 28.43,
+                  "alpha": 91.15
                 },
                 {
                   "year": "2021",
-                  "strategy_return": 137.47,
-                  "benchmark_return": 23.66,
-                  "alpha": 113.81
+                  "strategy_return": 23.64,
+                  "benchmark_return": 17.55,
+                  "alpha": 6.09
                 },
                 {
                   "year": "2022",
-                  "strategy_return": -31.96,
-                  "benchmark_return": -22.4,
-                  "alpha": -9.56
+                  "strategy_return": -22.5,
+                  "benchmark_return": -19.34,
+                  "alpha": -3.16
                 },
                 {
                   "year": "2023",
-                  "strategy_return": 312.13,
-                  "benchmark_return": 26.83,
-                  "alpha": 285.3
+                  "strategy_return": 111.73,
+                  "benchmark_return": 18.94,
+                  "alpha": 92.79
                 },
                 {
                   "year": "2024",
-                  "strategy_return": 32.59,
-                  "benchmark_return": 28.47,
-                  "alpha": 4.12
+                  "strategy_return": 53.62,
+                  "benchmark_return": 28.17,
+                  "alpha": 25.45
                 },
                 {
                   "year": "2025",
-                  "strategy_return": 30.2,
-                  "benchmark_return": 25.74,
-                  "alpha": 4.46
+                  "strategy_return": 109.74,
+                  "benchmark_return": 35.93,
+                  "alpha": 73.81
                 },
                 {
                   "year": "2026",
-                  "strategy_return": 49.32,
-                  "benchmark_return": 71.96,
-                  "alpha": -22.64
+                  "strategy_return": 138.25,
+                  "benchmark_return": 51.09,
+                  "alpha": 87.16
                 }
               ],
               "curve": [
                 {
-                  "date": "20050103",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1000000.0,
-                  "etf0050_equity": 1000000.0,
-                  "etf0020_equity": 1000000.0,
+                  "date": "20050411",
+                  "strategy_equity": 986938.3,
+                  "benchmark_equity": 989582.6,
+                  "etf0050_equity": 989582.6,
+                  "etf0020_equity": 989582.6,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20050315",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 987036.0,
-                  "etf0050_equity": 987036.0,
-                  "etf0020_equity": 987036.0,
+                  "date": "20050511",
+                  "strategy_equity": 1011610.1,
+                  "benchmark_equity": 1042082.7,
+                  "etf0050_equity": 1042082.7,
+                  "etf0020_equity": 1042082.7,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20050518",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 958931.0,
-                  "etf0050_equity": 958930.0,
-                  "etf0020_equity": 958931.0,
+                  "date": "20050613",
+                  "strategy_equity": 1019572.5,
+                  "benchmark_equity": 1053423.2,
+                  "etf0050_equity": 1053423.2,
+                  "etf0020_equity": 1053423.2,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20050720",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1045692.0,
-                  "etf0050_equity": 1045691.0,
-                  "etf0020_equity": 1045692.0,
+                  "date": "20050711",
+                  "strategy_equity": 984032.9,
+                  "benchmark_equity": 1062596.4,
+                  "etf0050_equity": 1062596.4,
+                  "etf0020_equity": 1062596.4,
+                  "drawdown_pct": -3.49
+                },
+                {
+                  "date": "20050811",
+                  "strategy_equity": 874548.7,
+                  "benchmark_equity": 1031033.1,
+                  "etf0050_equity": 1031033.1,
+                  "etf0020_equity": 1031033.1,
+                  "drawdown_pct": -14.22
+                },
+                {
+                  "date": "20050912",
+                  "strategy_equity": 839661.3,
+                  "benchmark_equity": 1014578.3,
+                  "etf0050_equity": 1014578.3,
+                  "etf0020_equity": 1014578.3,
+                  "drawdown_pct": -17.65
+                },
+                {
+                  "date": "20051011",
+                  "strategy_equity": 798561.9,
+                  "benchmark_equity": 1016028.3,
+                  "etf0050_equity": 1016028.3,
+                  "etf0020_equity": 1016028.3,
+                  "drawdown_pct": -21.68
+                },
+                {
+                  "date": "20051111",
+                  "strategy_equity": 830772.2,
+                  "benchmark_equity": 1047976.2,
+                  "etf0050_equity": 1047976.2,
+                  "etf0020_equity": 1047976.2,
+                  "drawdown_pct": -18.52
+                },
+                {
+                  "date": "20051212",
+                  "strategy_equity": 961713.1,
+                  "benchmark_equity": 1126512.3,
+                  "etf0050_equity": 1126512.3,
+                  "etf0020_equity": 1126512.3,
+                  "drawdown_pct": -5.67
+                },
+                {
+                  "date": "20060111",
+                  "strategy_equity": 909581.2,
+                  "benchmark_equity": 1097479.4,
+                  "etf0050_equity": 1097479.4,
+                  "etf0020_equity": 1097479.4,
+                  "drawdown_pct": -10.79
+                },
+                {
+                  "date": "20060213",
+                  "strategy_equity": 896131.3,
+                  "benchmark_equity": 1094525.9,
+                  "etf0050_equity": 1094525.9,
+                  "etf0020_equity": 1094525.9,
+                  "drawdown_pct": -12.11
+                },
+                {
+                  "date": "20060313",
+                  "strategy_equity": 953301.2,
+                  "benchmark_equity": 1130071.1,
+                  "etf0050_equity": 1130071.1,
+                  "etf0020_equity": 1130071.1,
+                  "drawdown_pct": -6.5
+                },
+                {
+                  "date": "20060411",
+                  "strategy_equity": 1160364.0,
+                  "benchmark_equity": 1231131.1,
+                  "etf0050_equity": 1231131.1,
+                  "etf0020_equity": 1231131.1,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20050922",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 972154.0,
-                  "etf0050_equity": 972155.0,
-                  "etf0020_equity": 972154.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20051124",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 994916.0,
-                  "etf0050_equity": 994912.0,
-                  "etf0020_equity": 994916.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20060125",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1063333.0,
-                  "etf0050_equity": 1063331.0,
-                  "etf0020_equity": 1063333.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20060407",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1103990.0,
-                  "etf0050_equity": 1103989.0,
-                  "etf0020_equity": 1103990.0,
-                  "drawdown_pct": 0.0
+                  "date": "20060511",
+                  "strategy_equity": 1006945.0,
+                  "benchmark_equity": 1077512.5,
+                  "etf0050_equity": 1077512.5,
+                  "etf0020_equity": 1077512.5,
+                  "drawdown_pct": -13.22
                 },
                 {
                   "date": "20060612",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1048799.0,
-                  "etf0050_equity": 1048796.0,
-                  "etf0020_equity": 1048799.0,
-                  "drawdown_pct": 0.0
+                  "strategy_equity": 1037671.9,
+                  "benchmark_equity": 1110330.1,
+                  "etf0050_equity": 1110330.1,
+                  "etf0020_equity": 1110330.1,
+                  "drawdown_pct": -10.57
+                },
+                {
+                  "date": "20060711",
+                  "strategy_equity": 1008772.2,
+                  "benchmark_equity": 1098952.7,
+                  "etf0050_equity": 1098952.7,
+                  "etf0020_equity": 1098952.7,
+                  "drawdown_pct": -13.06
                 },
                 {
                   "date": "20060811",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1069668.0,
-                  "etf0050_equity": 1069672.0,
-                  "etf0020_equity": 1069668.0,
+                  "strategy_equity": 932413.0,
+                  "benchmark_equity": 1119486.5,
+                  "etf0050_equity": 1119486.5,
+                  "etf0020_equity": 1119486.5,
+                  "drawdown_pct": -19.64
+                },
+                {
+                  "date": "20060911",
+                  "strategy_equity": 982285.3,
+                  "benchmark_equity": 1171797.6,
+                  "etf0050_equity": 1171797.6,
+                  "etf0020_equity": 1171797.6,
+                  "drawdown_pct": -15.35
+                },
+                {
+                  "date": "20061011",
+                  "strategy_equity": 1025211.0,
+                  "benchmark_equity": 1193436.8,
+                  "etf0050_equity": 1193436.8,
+                  "etf0020_equity": 1193436.8,
+                  "drawdown_pct": -11.65
+                },
+                {
+                  "date": "20061113",
+                  "strategy_equity": 1146924.2,
+                  "benchmark_equity": 1273053.2,
+                  "etf0050_equity": 1273053.2,
+                  "etf0020_equity": 1273053.2,
+                  "drawdown_pct": -1.16
+                },
+                {
+                  "date": "20061211",
+                  "strategy_equity": 1103968.3,
+                  "benchmark_equity": 1274128.6,
+                  "etf0050_equity": 1274128.6,
+                  "etf0020_equity": 1274128.6,
+                  "drawdown_pct": -4.86
+                },
+                {
+                  "date": "20070111",
+                  "strategy_equity": 1097188.7,
+                  "benchmark_equity": 1300520.8,
+                  "etf0050_equity": 1300520.8,
+                  "etf0020_equity": 1300520.8,
+                  "drawdown_pct": -5.44
+                },
+                {
+                  "date": "20070212",
+                  "strategy_equity": 1081030.3,
+                  "benchmark_equity": 1275901.3,
+                  "etf0050_equity": 1275901.3,
+                  "etf0020_equity": 1275901.3,
+                  "drawdown_pct": -6.84
+                },
+                {
+                  "date": "20070312",
+                  "strategy_equity": 1134563.6,
+                  "benchmark_equity": 1352045.9,
+                  "etf0050_equity": 1352045.9,
+                  "etf0020_equity": 1352045.9,
+                  "drawdown_pct": -2.22
+                },
+                {
+                  "date": "20070411",
+                  "strategy_equity": 1064256.4,
+                  "benchmark_equity": 1343197.2,
+                  "etf0050_equity": 1343197.2,
+                  "etf0020_equity": 1343197.2,
+                  "drawdown_pct": -8.28
+                },
+                {
+                  "date": "20070511",
+                  "strategy_equity": 1299650.1,
+                  "benchmark_equity": 1394596.8,
+                  "etf0050_equity": 1394596.8,
+                  "etf0020_equity": 1394596.8,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20061017",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1151716.0,
-                  "etf0050_equity": 1151719.0,
-                  "etf0020_equity": 1151716.0,
+                  "date": "20070611",
+                  "strategy_equity": 1432738.8,
+                  "benchmark_equity": 1553821.3,
+                  "etf0050_equity": 1553821.3,
+                  "etf0020_equity": 1553821.3,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20061218",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1241164.0,
-                  "etf0050_equity": 1241164.0,
-                  "etf0020_equity": 1241164.0,
+                  "date": "20070711",
+                  "strategy_equity": 1405451.0,
+                  "benchmark_equity": 1494954.4,
+                  "etf0050_equity": 1494954.4,
+                  "etf0020_equity": 1494954.4,
+                  "drawdown_pct": -1.9
+                },
+                {
+                  "date": "20070813",
+                  "strategy_equity": 1373149.4,
+                  "benchmark_equity": 1505684.5,
+                  "etf0050_equity": 1505684.5,
+                  "etf0020_equity": 1505684.5,
+                  "drawdown_pct": -4.16
+                },
+                {
+                  "date": "20070911",
+                  "strategy_equity": 1319834.6,
+                  "benchmark_equity": 1621841.2,
+                  "etf0050_equity": 1621841.2,
+                  "etf0020_equity": 1621841.2,
+                  "drawdown_pct": -7.88
+                },
+                {
+                  "date": "20071011",
+                  "strategy_equity": 1194096.1,
+                  "benchmark_equity": 1450075.4,
+                  "etf0050_equity": 1450075.4,
+                  "etf0020_equity": 1450075.4,
+                  "drawdown_pct": -16.66
+                },
+                {
+                  "date": "20071112",
+                  "strategy_equity": 1164201.8,
+                  "benchmark_equity": 1444676.9,
+                  "etf0050_equity": 1444676.9,
+                  "etf0020_equity": 1444676.9,
+                  "drawdown_pct": -18.74
+                },
+                {
+                  "date": "20071211",
+                  "strategy_equity": 1061165.3,
+                  "benchmark_equity": 1342824.2,
+                  "etf0050_equity": 1342824.2,
+                  "etf0020_equity": 1342824.2,
+                  "drawdown_pct": -25.93
+                },
+                {
+                  "date": "20080111",
+                  "strategy_equity": 1111529.1,
+                  "benchmark_equity": 1263216.2,
+                  "etf0050_equity": 1263216.2,
+                  "etf0020_equity": 1263216.2,
+                  "drawdown_pct": -22.42
+                },
+                {
+                  "date": "20080212",
+                  "strategy_equity": 1224736.3,
+                  "benchmark_equity": 1401741.3,
+                  "etf0050_equity": 1401741.3,
+                  "etf0020_equity": 1401741.3,
+                  "drawdown_pct": -14.52
+                },
+                {
+                  "date": "20080311",
+                  "strategy_equity": 1298718.1,
+                  "benchmark_equity": 1490040.8,
+                  "etf0050_equity": 1490040.8,
+                  "etf0020_equity": 1490040.8,
+                  "drawdown_pct": -9.35
+                },
+                {
+                  "date": "20080411",
+                  "strategy_equity": 1363241.7,
+                  "benchmark_equity": 1476740.2,
+                  "etf0050_equity": 1476740.2,
+                  "etf0020_equity": 1476740.2,
+                  "drawdown_pct": -4.85
+                },
+                {
+                  "date": "20080512",
+                  "strategy_equity": 1226531.9,
+                  "benchmark_equity": 1395719.0,
+                  "etf0050_equity": 1395719.0,
+                  "etf0020_equity": 1395719.0,
+                  "drawdown_pct": -14.39
+                },
+                {
+                  "date": "20080611",
+                  "strategy_equity": 1177908.0,
+                  "benchmark_equity": 1211615.8,
+                  "etf0050_equity": 1211615.8,
+                  "etf0020_equity": 1211615.8,
+                  "drawdown_pct": -17.79
+                },
+                {
+                  "date": "20080711",
+                  "strategy_equity": 1155608.7,
+                  "benchmark_equity": 1225138.9,
+                  "etf0050_equity": 1225138.9,
+                  "etf0020_equity": 1225138.9,
+                  "drawdown_pct": -19.34
+                },
+                {
+                  "date": "20080811",
+                  "strategy_equity": 1067987.3,
+                  "benchmark_equity": 1045578.0,
+                  "etf0050_equity": 1045578.0,
+                  "etf0020_equity": 1045578.0,
+                  "drawdown_pct": -25.46
+                },
+                {
+                  "date": "20080911",
+                  "strategy_equity": 1050128.6,
+                  "benchmark_equity": 839619.9,
+                  "etf0050_equity": 839619.9,
+                  "etf0020_equity": 839619.9,
+                  "drawdown_pct": -26.7
+                },
+                {
+                  "date": "20081013",
+                  "strategy_equity": 1117079.1,
+                  "benchmark_equity": 775755.8,
+                  "etf0050_equity": 775755.8,
+                  "etf0020_equity": 775755.8,
+                  "drawdown_pct": -22.03
+                },
+                {
+                  "date": "20081111",
+                  "strategy_equity": 1093721.4,
+                  "benchmark_equity": 778598.9,
+                  "etf0050_equity": 778598.9,
+                  "etf0020_equity": 778598.9,
+                  "drawdown_pct": -23.66
+                },
+                {
+                  "date": "20081211",
+                  "strategy_equity": 1021147.8,
+                  "benchmark_equity": 744871.6,
+                  "etf0050_equity": 744871.6,
+                  "etf0020_equity": 744871.6,
+                  "drawdown_pct": -28.73
+                },
+                {
+                  "date": "20090112",
+                  "strategy_equity": 1142523.7,
+                  "benchmark_equity": 765283.3,
+                  "etf0050_equity": 765283.3,
+                  "etf0020_equity": 765283.3,
+                  "drawdown_pct": -20.26
+                },
+                {
+                  "date": "20090211",
+                  "strategy_equity": 1201047.3,
+                  "benchmark_equity": 796057.1,
+                  "etf0050_equity": 796057.1,
+                  "etf0020_equity": 796057.1,
+                  "drawdown_pct": -16.17
+                },
+                {
+                  "date": "20090311",
+                  "strategy_equity": 1295577.1,
+                  "benchmark_equity": 979633.5,
+                  "etf0050_equity": 979633.5,
+                  "etf0020_equity": 979633.5,
+                  "drawdown_pct": -9.57
+                },
+                {
+                  "date": "20090413",
+                  "strategy_equity": 1449876.8,
+                  "benchmark_equity": 1111729.9,
+                  "etf0050_equity": 1111729.9,
+                  "etf0020_equity": 1111729.9,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20070301",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1249963.0,
-                  "etf0050_equity": 1249965.0,
-                  "etf0020_equity": 1249963.0,
+                  "date": "20090511",
+                  "strategy_equity": 1455471.2,
+                  "benchmark_equity": 1098328.9,
+                  "etf0050_equity": 1098328.9,
+                  "etf0020_equity": 1098328.9,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20070507",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1321034.0,
-                  "etf0050_equity": 1321031.0,
-                  "etf0020_equity": 1321034.0,
+                  "date": "20090611",
+                  "strategy_equity": 1403618.9,
+                  "benchmark_equity": 1092216.3,
+                  "etf0050_equity": 1092216.3,
+                  "etf0020_equity": 1092216.3,
+                  "drawdown_pct": -3.56
+                },
+                {
+                  "date": "20090713",
+                  "strategy_equity": 1449334.0,
+                  "benchmark_equity": 1155466.6,
+                  "etf0050_equity": 1155466.6,
+                  "etf0020_equity": 1155466.6,
+                  "drawdown_pct": -0.42
+                },
+                {
+                  "date": "20090811",
+                  "strategy_equity": 1560418.6,
+                  "benchmark_equity": 1227065.5,
+                  "etf0050_equity": 1227065.5,
+                  "etf0020_equity": 1227065.5,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20070710",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1527681.0,
-                  "etf0050_equity": 1527681.0,
-                  "etf0020_equity": 1527681.0,
+                  "date": "20090911",
+                  "strategy_equity": 1640645.6,
+                  "benchmark_equity": 1271006.2,
+                  "etf0050_equity": 1271006.2,
+                  "etf0020_equity": 1271006.2,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20070910",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1454893.0,
-                  "etf0050_equity": 1454894.0,
-                  "etf0020_equity": 1454893.0,
+                  "date": "20091012",
+                  "strategy_equity": 1564052.9,
+                  "benchmark_equity": 1282408.7,
+                  "etf0050_equity": 1282408.7,
+                  "etf0020_equity": 1282408.7,
+                  "drawdown_pct": -4.67
+                },
+                {
+                  "date": "20091111",
+                  "strategy_equity": 1819166.6,
+                  "benchmark_equity": 1303649.9,
+                  "etf0050_equity": 1303649.9,
+                  "etf0020_equity": 1303649.9,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20071115",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1449656.0,
-                  "etf0050_equity": 1449656.0,
-                  "etf0020_equity": 1449656.0,
+                  "date": "20091211",
+                  "strategy_equity": 1846085.9,
+                  "benchmark_equity": 1392078.2,
+                  "etf0050_equity": 1392078.2,
+                  "etf0020_equity": 1392078.2,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20080117",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1318814.0,
-                  "etf0050_equity": 1318814.0,
-                  "etf0020_equity": 1318814.0,
+                  "date": "20100111",
+                  "strategy_equity": 1663366.6,
+                  "benchmark_equity": 1264343.4,
+                  "etf0050_equity": 1264343.4,
+                  "etf0020_equity": 1264343.4,
+                  "drawdown_pct": -9.9
+                },
+                {
+                  "date": "20100222",
+                  "strategy_equity": 1616435.7,
+                  "benchmark_equity": 1296055.5,
+                  "etf0050_equity": 1296055.5,
+                  "etf0020_equity": 1296055.5,
+                  "drawdown_pct": -12.44
+                },
+                {
+                  "date": "20100311",
+                  "strategy_equity": 1742260.0,
+                  "benchmark_equity": 1357615.0,
+                  "etf0050_equity": 1357615.0,
+                  "etf0020_equity": 1357615.0,
+                  "drawdown_pct": -5.62
+                },
+                {
+                  "date": "20100412",
+                  "strategy_equity": 1621797.4,
+                  "benchmark_equity": 1272437.8,
+                  "etf0050_equity": 1272437.8,
+                  "etf0020_equity": 1272437.8,
+                  "drawdown_pct": -12.15
+                },
+                {
+                  "date": "20100511",
+                  "strategy_equity": 1541264.8,
+                  "benchmark_equity": 1220768.9,
+                  "etf0050_equity": 1220768.9,
+                  "etf0020_equity": 1220768.9,
+                  "drawdown_pct": -16.51
+                },
+                {
+                  "date": "20100611",
+                  "strategy_equity": 1800891.7,
+                  "benchmark_equity": 1277640.6,
+                  "etf0050_equity": 1277640.6,
+                  "etf0020_equity": 1277640.6,
+                  "drawdown_pct": -2.45
+                },
+                {
+                  "date": "20100712",
+                  "strategy_equity": 1978772.7,
+                  "benchmark_equity": 1320367.2,
+                  "etf0050_equity": 1320367.2,
+                  "etf0020_equity": 1320367.2,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20080328",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1403762.0,
-                  "etf0050_equity": 1403760.0,
-                  "etf0020_equity": 1403762.0,
+                  "date": "20100811",
+                  "strategy_equity": 2167837.3,
+                  "benchmark_equity": 1353191.4,
+                  "etf0050_equity": 1353191.4,
+                  "etf0020_equity": 1353191.4,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20080602",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1420202.0,
-                  "etf0050_equity": 1420203.0,
-                  "etf0020_equity": 1420202.0,
+                  "date": "20100913",
+                  "strategy_equity": 2240915.8,
+                  "benchmark_equity": 1367483.8,
+                  "etf0050_equity": 1367483.8,
+                  "etf0020_equity": 1367483.8,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20080804",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1135801.0,
-                  "etf0050_equity": 1135799.0,
-                  "etf0020_equity": 1135801.0,
-                  "drawdown_pct": 0.0
+                  "date": "20101011",
+                  "strategy_equity": 2043220.9,
+                  "benchmark_equity": 1410998.1,
+                  "etf0050_equity": 1410998.1,
+                  "etf0020_equity": 1410998.1,
+                  "drawdown_pct": -8.82
                 },
                 {
-                  "date": "20081006",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 896238.0,
-                  "etf0050_equity": 896235.0,
-                  "etf0020_equity": 896238.0,
-                  "drawdown_pct": 0.0
+                  "date": "20101111",
+                  "strategy_equity": 2044831.0,
+                  "benchmark_equity": 1461109.9,
+                  "etf0050_equity": 1461109.9,
+                  "etf0020_equity": 1461109.9,
+                  "drawdown_pct": -8.75
                 },
                 {
-                  "date": "20081208",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 719232.0,
-                  "etf0050_equity": 719235.0,
-                  "etf0020_equity": 719232.0,
-                  "drawdown_pct": 0.0
+                  "date": "20101213",
+                  "strategy_equity": 2029528.2,
+                  "benchmark_equity": 1493683.3,
+                  "etf0050_equity": 1493683.3,
+                  "etf0020_equity": 1493683.3,
+                  "drawdown_pct": -9.43
                 },
                 {
-                  "date": "20090219",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 737226.0,
-                  "etf0050_equity": 823551.0,
-                  "etf0020_equity": 737226.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20090423",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 956393.0,
-                  "etf0050_equity": 946079.0,
-                  "etf0020_equity": 956393.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20090629",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1040375.0,
-                  "etf0050_equity": 1035402.0,
-                  "etf0020_equity": 1040375.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20090831",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1111154.0,
-                  "etf0050_equity": 1132909.0,
-                  "etf0020_equity": 1111154.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20091030",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1194846.0,
-                  "etf0050_equity": 1207735.0,
-                  "etf0020_equity": 1194846.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20091231",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1332891.0,
-                  "etf0050_equity": 1319974.0,
-                  "etf0020_equity": 1332891.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20100315",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1242841.0,
-                  "etf0050_equity": 1235795.0,
-                  "etf0020_equity": 1242841.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20100517",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1236948.0,
-                  "etf0050_equity": 1213581.0,
-                  "etf0020_equity": 1236948.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20100719",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1245268.0,
-                  "etf0050_equity": 1233456.0,
-                  "etf0020_equity": 1245268.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20100917",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1328043.0,
-                  "etf0050_equity": 1339849.0,
-                  "etf0020_equity": 1328043.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20101119",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1352101.0,
-                  "etf0050_equity": 1324650.0,
-                  "etf0020_equity": 1352101.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20110120",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1468663.0,
-                  "etf0050_equity": 1441566.0,
-                  "etf0020_equity": 1468663.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20110401",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1417054.0,
-                  "etf0050_equity": 1399476.0,
-                  "etf0020_equity": 1417054.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20110608",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1466279.0,
-                  "etf0050_equity": 1449750.0,
-                  "etf0020_equity": 1466279.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20110809",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1219758.0,
-                  "etf0050_equity": 1239302.0,
-                  "etf0020_equity": 1219758.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20111012",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1201726.0,
-                  "etf0050_equity": 1235795.0,
-                  "etf0020_equity": 1201726.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20111213",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1122607.0,
-                  "etf0050_equity": 1135248.0,
-                  "etf0020_equity": 1122607.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20120223",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1292063.0,
-                  "etf0050_equity": 1276715.0,
-                  "etf0020_equity": 1292063.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20120430",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1221158.0,
-                  "etf0050_equity": 1217088.0,
-                  "etf0020_equity": 1221158.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20120702",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1195673.0,
-                  "etf0050_equity": 1183183.0,
-                  "etf0020_equity": 1195673.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20120903",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1212825.0,
-                  "etf0050_equity": 1242810.0,
-                  "etf0020_equity": 1212825.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20121105",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1169660.0,
-                  "etf0050_equity": 1180845.0,
-                  "etf0020_equity": 1169660.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20130108",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1256961.0,
-                  "etf0050_equity": 1260347.0,
-                  "etf0020_equity": 1256961.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20130321",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1271640.0,
-                  "etf0050_equity": 1269700.0,
-                  "etf0020_equity": 1271640.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20130527",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1347866.0,
-                  "etf0050_equity": 1341019.0,
-                  "etf0020_equity": 1347866.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20130729",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1316025.0,
-                  "etf0050_equity": 1321143.0,
-                  "etf0020_equity": 1316025.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20131002",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1337516.0,
-                  "etf0050_equity": 1341019.0,
-                  "etf0020_equity": 1337516.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20131204",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1370313.0,
-                  "etf0050_equity": 1343357.0,
-                  "etf0020_equity": 1370313.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20140213",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1378404.0,
-                  "etf0050_equity": 1342188.0,
-                  "etf0020_equity": 1378404.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20140418",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1459626.0,
-                  "etf0050_equity": 1439227.0,
-                  "etf0020_equity": 1459626.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20140623",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1502225.0,
-                  "etf0050_equity": 1512884.0,
-                  "etf0020_equity": 1502225.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20140822",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1526928.0,
-                  "etf0050_equity": 1607585.0,
-                  "etf0020_equity": 1526928.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20141027",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1404462.0,
-                  "etf0050_equity": 1478979.0,
-                  "etf0020_equity": 1404462.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20141226",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1499901.0,
-                  "etf0050_equity": 1553804.0,
-                  "etf0020_equity": 1499901.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20150311",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1550219.0,
-                  "etf0050_equity": 1614600.0,
-                  "etf0020_equity": 1550219.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20150515",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1559384.0,
-                  "etf0050_equity": 1636814.0,
-                  "etf0020_equity": 1559384.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20150720",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1460984.0,
-                  "etf0050_equity": 1590048.0,
-                  "etf0020_equity": 1460984.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20150918",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1377499.0,
-                  "etf0050_equity": 1516392.0,
-                  "etf0020_equity": 1377499.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20151124",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1367406.0,
-                  "etf0050_equity": 1448581.0,
-                  "etf0020_equity": 1367406.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20160126",
-                  "strategy_equity": 1000000.0,
-                  "benchmark_equity": 1274380.0,
-                  "etf0050_equity": 1332834.0,
-                  "etf0020_equity": 1000000.0,
-                  "drawdown_pct": 0.0
-                },
-                {
-                  "date": "20160411",
-                  "strategy_equity": 1040663.0,
-                  "benchmark_equity": 1393850.0,
-                  "etf0050_equity": 1473133.0,
-                  "etf0020_equity": 1000000.0,
-                  "drawdown_pct": -1.28
-                },
-                {
-                  "date": "20160615",
-                  "strategy_equity": 1038837.0,
-                  "benchmark_equity": 1400977.0,
-                  "etf0050_equity": 1502362.0,
-                  "etf0020_equity": 1003299.0,
-                  "drawdown_pct": -1.45
-                },
-                {
-                  "date": "20160816",
-                  "strategy_equity": 1099972.0,
-                  "benchmark_equity": 1483018.0,
-                  "etf0050_equity": 1635645.0,
-                  "etf0020_equity": 1080893.0,
-                  "drawdown_pct": -1.34
-                },
-                {
-                  "date": "20161024",
-                  "strategy_equity": 1043879.0,
-                  "benchmark_equity": 1517551.0,
-                  "etf0050_equity": 1699949.0,
-                  "etf0020_equity": 1052057.0,
-                  "drawdown_pct": -7.33
-                },
-                {
-                  "date": "20161223",
-                  "strategy_equity": 1003335.0,
-                  "benchmark_equity": 1477855.0,
-                  "etf0050_equity": 1649675.0,
-                  "etf0020_equity": 996603.0,
-                  "drawdown_pct": -10.92
-                },
-                {
-                  "date": "20170308",
-                  "strategy_equity": 954833.0,
-                  "benchmark_equity": 1587703.0,
-                  "etf0050_equity": 1703456.0,
-                  "etf0020_equity": 1056384.0,
-                  "drawdown_pct": -15.23
-                },
-                {
-                  "date": "20170512",
-                  "strategy_equity": 1499245.0,
-                  "benchmark_equity": 1625692.0,
-                  "etf0050_equity": 1784128.0,
-                  "etf0020_equity": 1108071.0,
-                  "drawdown_pct": -3.47
-                },
-                {
-                  "date": "20170717",
-                  "strategy_equity": 1511915.0,
-                  "benchmark_equity": 1702317.0,
-                  "etf0050_equity": 1922088.0,
-                  "etf0020_equity": 1204297.0,
-                  "drawdown_pct": -5.34
-                },
-                {
-                  "date": "20170915",
-                  "strategy_equity": 1431841.0,
-                  "benchmark_equity": 1722319.0,
-                  "etf0050_equity": 1925595.0,
-                  "etf0020_equity": 1311418.0,
-                  "drawdown_pct": -10.36
-                },
-                {
-                  "date": "20171121",
-                  "strategy_equity": 1547876.0,
-                  "benchmark_equity": 1754685.0,
-                  "etf0050_equity": 1981714.0,
-                  "etf0020_equity": 1344092.0,
-                  "drawdown_pct": -3.09
-                },
-                {
-                  "date": "20180123",
-                  "strategy_equity": 1187206.0,
-                  "benchmark_equity": 1831823.0,
-                  "etf0050_equity": 2064724.0,
-                  "etf0020_equity": 1251670.0,
-                  "drawdown_pct": -25.67
-                },
-                {
-                  "date": "20180409",
-                  "strategy_equity": 1084158.0,
-                  "benchmark_equity": 1773289.0,
-                  "etf0050_equity": 1922088.0,
-                  "etf0020_equity": 1218761.0,
-                  "drawdown_pct": -32.12
-                },
-                {
-                  "date": "20180611",
-                  "strategy_equity": 2313783.0,
-                  "benchmark_equity": 1814913.0,
-                  "etf0050_equity": 1932610.0,
-                  "etf0020_equity": 1438702.0,
-                  "drawdown_pct": -0.46
-                },
-                {
-                  "date": "20180813",
-                  "strategy_equity": 2012323.0,
-                  "benchmark_equity": 1749749.0,
-                  "etf0050_equity": 1963008.0,
-                  "etf0020_equity": 1074715.0,
+                  "date": "20110111",
+                  "strategy_equity": 1940045.2,
+                  "benchmark_equity": 1439915.6,
+                  "etf0050_equity": 1439915.6,
+                  "etf0020_equity": 1439915.6,
                   "drawdown_pct": -13.43
                 },
                 {
-                  "date": "20181016",
-                  "strategy_equity": 1823304.0,
-                  "benchmark_equity": 1624761.0,
-                  "etf0050_equity": 1854277.0,
-                  "etf0020_equity": 797056.0,
-                  "drawdown_pct": -21.56
+                  "date": "20110211",
+                  "strategy_equity": 2067060.7,
+                  "benchmark_equity": 1432884.8,
+                  "etf0050_equity": 1432884.8,
+                  "etf0020_equity": 1432884.8,
+                  "drawdown_pct": -7.76
                 },
                 {
-                  "date": "20181217",
-                  "strategy_equity": 1823304.0,
-                  "benchmark_equity": 1593251.0,
-                  "etf0050_equity": 1775944.0,
-                  "etf0020_equity": 780062.0,
-                  "drawdown_pct": -21.56
+                  "date": "20110311",
+                  "strategy_equity": 1996268.1,
+                  "benchmark_equity": 1485139.0,
+                  "etf0050_equity": 1485139.0,
+                  "etf0020_equity": 1485139.0,
+                  "drawdown_pct": -10.92
                 },
                 {
-                  "date": "20190304",
-                  "strategy_equity": 1847645.0,
-                  "benchmark_equity": 1684792.0,
-                  "etf0050_equity": 1799327.0,
-                  "etf0020_equity": 874551.0,
-                  "drawdown_pct": -20.51
+                  "date": "20110411",
+                  "strategy_equity": 2179886.4,
+                  "benchmark_equity": 1508574.4,
+                  "etf0050_equity": 1508574.4,
+                  "etf0020_equity": 1508574.4,
+                  "drawdown_pct": -2.72
                 },
                 {
-                  "date": "20190508",
-                  "strategy_equity": 2074749.0,
-                  "benchmark_equity": 1778202.0,
-                  "etf0050_equity": 1930272.0,
-                  "etf0020_equity": 936792.0,
-                  "drawdown_pct": -10.74
+                  "date": "20110511",
+                  "strategy_equity": 2228692.3,
+                  "benchmark_equity": 1457156.4,
+                  "etf0050_equity": 1457156.4,
+                  "etf0020_equity": 1457156.4,
+                  "drawdown_pct": -0.55
                 },
                 {
-                  "date": "20190710",
-                  "strategy_equity": 1690605.0,
-                  "benchmark_equity": 1757817.0,
-                  "etf0050_equity": 1922088.0,
-                  "etf0020_equity": 926247.0,
-                  "drawdown_pct": -27.27
-                },
-                {
-                  "date": "20190912",
-                  "strategy_equity": 1692114.0,
-                  "benchmark_equity": 1762549.0,
-                  "etf0050_equity": 1961839.0,
-                  "etf0020_equity": 959015.0,
-                  "drawdown_pct": -27.2
-                },
-                {
-                  "date": "20191119",
-                  "strategy_equity": 1891173.0,
-                  "benchmark_equity": 1897472.0,
-                  "etf0050_equity": 2188655.0,
-                  "etf0020_equity": 1050258.0,
-                  "drawdown_pct": -18.64
-                },
-                {
-                  "date": "20200130",
-                  "strategy_equity": 1932973.0,
-                  "benchmark_equity": 1859273.0,
-                  "etf0050_equity": 2154749.0,
-                  "etf0020_equity": 1043904.0,
-                  "drawdown_pct": -16.84
-                },
-                {
-                  "date": "20200406",
-                  "strategy_equity": 2004262.0,
-                  "benchmark_equity": 1598331.0,
-                  "etf0050_equity": 1801665.0,
-                  "etf0020_equity": 871898.0,
-                  "drawdown_pct": -13.78
-                },
-                {
-                  "date": "20200608",
-                  "strategy_equity": 2253042.0,
-                  "benchmark_equity": 1889971.0,
-                  "etf0050_equity": 2092784.0,
-                  "etf0020_equity": 1065309.0,
-                  "drawdown_pct": -3.07
-                },
-                {
-                  "date": "20200811",
-                  "strategy_equity": 2870395.0,
-                  "benchmark_equity": 2080407.0,
-                  "etf0050_equity": 2450545.0,
-                  "etf0020_equity": 1198567.0,
-                  "drawdown_pct": -6.02
-                },
-                {
-                  "date": "20201015",
-                  "strategy_equity": 2839767.0,
-                  "benchmark_equity": 2088160.0,
-                  "etf0050_equity": 2471590.0,
-                  "etf0020_equity": 1202189.0,
-                  "drawdown_pct": -7.02
-                },
-                {
-                  "date": "20201216",
-                  "strategy_equity": 3268669.0,
-                  "benchmark_equity": 2328533.0,
-                  "etf0050_equity": 2788430.0,
-                  "etf0020_equity": 1388780.0,
-                  "drawdown_pct": -4.88
-                },
-                {
-                  "date": "20210226",
-                  "strategy_equity": 4183334.0,
-                  "benchmark_equity": 2597019.0,
-                  "etf0050_equity": 3119300.0,
-                  "etf0020_equity": 1719673.0,
-                  "drawdown_pct": -6.32
-                },
-                {
-                  "date": "20210506",
-                  "strategy_equity": 8317560.0,
-                  "benchmark_equity": 2766405.0,
-                  "etf0050_equity": 3202310.0,
-                  "etf0020_equity": 1893353.0,
-                  "drawdown_pct": -6.24
-                },
-                {
-                  "date": "20210708",
-                  "strategy_equity": 20659838.0,
-                  "benchmark_equity": 2908309.0,
-                  "etf0050_equity": 3246738.0,
-                  "etf0020_equity": 2331386.0,
-                  "drawdown_pct": -0.92
-                },
-                {
-                  "date": "20210908",
-                  "strategy_equity": 13582838.0,
-                  "benchmark_equity": 2811355.0,
-                  "etf0050_equity": 3288828.0,
-                  "etf0020_equity": 1900789.0,
-                  "drawdown_pct": -34.86
-                },
-                {
-                  "date": "20211112",
-                  "strategy_equity": 13582838.0,
-                  "benchmark_equity": 2851667.0,
-                  "etf0050_equity": 3266614.0,
-                  "etf0020_equity": 1888100.0,
-                  "drawdown_pct": -34.86
-                },
-                {
-                  "date": "20220114",
-                  "strategy_equity": 13162929.0,
-                  "benchmark_equity": 2995763.0,
-                  "etf0050_equity": 3514474.0,
-                  "etf0020_equity": 1888606.0,
-                  "drawdown_pct": -36.87
-                },
-                {
-                  "date": "20220329",
-                  "strategy_equity": 12387066.0,
-                  "benchmark_equity": 2856636.0,
-                  "etf0050_equity": 3199972.0,
-                  "etf0020_equity": 2048731.0,
-                  "drawdown_pct": -40.59
-                },
-                {
-                  "date": "20220602",
-                  "strategy_equity": 12387066.0,
-                  "benchmark_equity": 2694489.0,
-                  "etf0050_equity": 2988355.0,
-                  "etf0020_equity": 1900784.0,
-                  "drawdown_pct": -40.59
-                },
-                {
-                  "date": "20220804",
-                  "strategy_equity": 12387066.0,
-                  "benchmark_equity": 2393279.0,
-                  "etf0050_equity": 2725296.0,
-                  "etf0020_equity": 1400714.0,
-                  "drawdown_pct": -40.59
-                },
-                {
-                  "date": "20221006",
-                  "strategy_equity": 10314636.0,
-                  "benchmark_equity": 2261400.0,
-                  "etf0050_equity": 2525371.0,
-                  "etf0020_equity": 1413839.0,
-                  "drawdown_pct": -50.53
-                },
-                {
-                  "date": "20221208",
-                  "strategy_equity": 11473612.0,
-                  "benchmark_equity": 2368998.0,
-                  "etf0050_equity": 2648132.0,
-                  "etf0020_equity": 1528392.0,
-                  "drawdown_pct": -44.97
-                },
-                {
-                  "date": "20230221",
-                  "strategy_equity": 14134768.0,
-                  "benchmark_equity": 2533403.0,
-                  "etf0050_equity": 2781415.0,
-                  "etf0020_equity": 1665419.0,
-                  "drawdown_pct": -32.21
-                },
-                {
-                  "date": "20230502",
-                  "strategy_equity": 15091931.0,
-                  "benchmark_equity": 2545365.0,
-                  "etf0050_equity": 2752186.0,
-                  "etf0020_equity": 1723057.0,
-                  "drawdown_pct": -27.62
-                },
-                {
-                  "date": "20230705",
-                  "strategy_equity": 21506175.0,
-                  "benchmark_equity": 2776509.0,
-                  "etf0050_equity": 3058504.0,
-                  "etf0020_equity": 2022377.0,
-                  "drawdown_pct": -1.39
-                },
-                {
-                  "date": "20230906",
-                  "strategy_equity": 24860946.0,
-                  "benchmark_equity": 2724700.0,
-                  "etf0050_equity": 2946266.0,
-                  "etf0020_equity": 2076049.0,
-                  "drawdown_pct": -14.19
-                },
-                {
-                  "date": "20231110",
-                  "strategy_equity": 24860946.0,
-                  "benchmark_equity": 2715667.0,
-                  "etf0050_equity": 2963803.0,
-                  "etf0020_equity": 1974603.0,
-                  "drawdown_pct": -14.19
-                },
-                {
-                  "date": "20240112",
-                  "strategy_equity": 22262847.0,
-                  "benchmark_equity": 2850804.0,
-                  "etf0050_equity": 3101763.0,
-                  "etf0020_equity": 2080588.0,
-                  "drawdown_pct": -23.16
-                },
-                {
-                  "date": "20240326",
-                  "strategy_equity": 27891109.0,
-                  "benchmark_equity": 3276265.0,
-                  "etf0050_equity": 3685170.0,
-                  "etf0020_equity": 2335315.0,
-                  "drawdown_pct": -3.73
-                },
-                {
-                  "date": "20240530",
-                  "strategy_equity": 26125449.0,
-                  "benchmark_equity": 3477790.0,
-                  "etf0050_equity": 3926016.0,
-                  "etf0020_equity": 2536589.0,
-                  "drawdown_pct": -21.1
-                },
-                {
-                  "date": "20240805",
-                  "strategy_equity": 23729746.0,
-                  "benchmark_equity": 3228145.0,
-                  "etf0050_equity": 3712061.0,
-                  "etf0020_equity": 2051539.0,
-                  "drawdown_pct": -28.33
-                },
-                {
-                  "date": "20241009",
-                  "strategy_equity": 24730757.0,
-                  "benchmark_equity": 3688530.0,
-                  "etf0050_equity": 4419399.0,
-                  "etf0020_equity": 2285246.0,
-                  "drawdown_pct": -25.31
-                },
-                {
-                  "date": "20241212",
-                  "strategy_equity": 30461029.0,
-                  "benchmark_equity": 3751644.0,
-                  "etf0050_equity": 4563204.0,
-                  "etf0020_equity": 2456023.0,
-                  "drawdown_pct": -8.01
-                },
-                {
-                  "date": "20250224",
-                  "strategy_equity": 26400888.0,
-                  "benchmark_equity": 3836049.0,
-                  "etf0050_equity": 4587757.0,
-                  "etf0020_equity": 2464965.0,
-                  "drawdown_pct": -20.27
-                },
-                {
-                  "date": "20250430",
-                  "strategy_equity": 21786267.0,
-                  "benchmark_equity": 3293934.0,
-                  "etf0050_equity": 3942384.0,
-                  "etf0020_equity": 1982111.0,
-                  "drawdown_pct": -34.2
-                },
-                {
-                  "date": "20250703",
-                  "strategy_equity": 19435333.0,
-                  "benchmark_equity": 3697302.0,
-                  "etf0050_equity": 4613010.0,
-                  "etf0020_equity": 2391392.0,
-                  "drawdown_pct": -41.3
-                },
-                {
-                  "date": "20250903",
-                  "strategy_equity": 25569804.0,
-                  "benchmark_equity": 3923137.0,
-                  "etf0050_equity": 4859000.0,
-                  "etf0020_equity": 2534615.0,
-                  "drawdown_pct": -22.78
-                },
-                {
-                  "date": "20251110",
-                  "strategy_equity": 30458879.0,
-                  "benchmark_equity": 4536703.0,
-                  "etf0050_equity": 5925268.0,
-                  "etf0020_equity": 3143262.0,
-                  "drawdown_pct": -8.01
-                },
-                {
-                  "date": "20260113",
-                  "strategy_equity": 47908355.0,
-                  "benchmark_equity": 4998636.0,
-                  "etf0050_equity": 6612730.0,
-                  "etf0020_equity": 3593552.0,
-                  "drawdown_pct": -3.47
-                },
-                {
-                  "date": "20260326",
-                  "strategy_equity": 71881392.0,
-                  "benchmark_equity": 5426822.0,
-                  "etf0050_equity": 7089744.0,
-                  "etf0020_equity": 4204602.0,
-                  "drawdown_pct": -13.63
-                },
-                {
-                  "date": "20260601",
-                  "strategy_equity": 109293874.0,
-                  "benchmark_equity": 7380274.0,
-                  "etf0050_equity": 9867652.0,
-                  "etf0020_equity": 7345030.0,
+                  "date": "20110613",
+                  "strategy_equity": 2250616.2,
+                  "benchmark_equity": 1449279.4,
+                  "etf0050_equity": 1449279.4,
+                  "etf0020_equity": 1449279.4,
                   "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20260804",
-                  "strategy_equity": 93617806.0,
-                  "benchmark_equity": 7058410.0,
-                  "etf0050_equity": 9414020.0,
-                  "etf0020_equity": 6323324.0,
-                  "drawdown_pct": -32.43
+                  "date": "20110711",
+                  "strategy_equity": 2346375.3,
+                  "benchmark_equity": 1290942.9,
+                  "etf0050_equity": 1290942.9,
+                  "etf0020_equity": 1290942.9,
+                  "drawdown_pct": 0.0
                 },
                 {
-                  "date": "20261006",
-                  "strategy_equity": 91523916.0,
-                  "benchmark_equity": 8110301.0,
-                  "etf0050_equity": 10896507.0,
-                  "etf0020_equity": 8110301.0,
-                  "drawdown_pct": -33.94
+                  "date": "20110811",
+                  "strategy_equity": 2129377.3,
+                  "benchmark_equity": 1236134.9,
+                  "etf0050_equity": 1236134.9,
+                  "etf0020_equity": 1236134.9,
+                  "drawdown_pct": -9.25
+                },
+                {
+                  "date": "20110913",
+                  "strategy_equity": 2053333.0,
+                  "benchmark_equity": 1237362.5,
+                  "etf0050_equity": 1237362.5,
+                  "etf0020_equity": 1237362.5,
+                  "drawdown_pct": -12.49
+                },
+                {
+                  "date": "20111011",
+                  "strategy_equity": 2007576.6,
+                  "benchmark_equity": 1232107.8,
+                  "etf0050_equity": 1232107.8,
+                  "etf0020_equity": 1232107.8,
+                  "drawdown_pct": -14.44
+                },
+                {
+                  "date": "20111111",
+                  "strategy_equity": 1870912.5,
+                  "benchmark_equity": 1162159.5,
+                  "etf0050_equity": 1162159.5,
+                  "etf0020_equity": 1162159.5,
+                  "drawdown_pct": -20.26
+                },
+                {
+                  "date": "20111212",
+                  "strategy_equity": 1881545.6,
+                  "benchmark_equity": 1202158.4,
+                  "etf0050_equity": 1202158.4,
+                  "etf0020_equity": 1202158.4,
+                  "drawdown_pct": -19.81
+                },
+                {
+                  "date": "20120111",
+                  "strategy_equity": 2247099.8,
+                  "benchmark_equity": 1323357.4,
+                  "etf0050_equity": 1323357.4,
+                  "etf0020_equity": 1323357.4,
+                  "drawdown_pct": -4.23
+                },
+                {
+                  "date": "20120213",
+                  "strategy_equity": 2269348.5,
+                  "benchmark_equity": 1325805.8,
+                  "etf0050_equity": 1325805.8,
+                  "etf0020_equity": 1325805.8,
+                  "drawdown_pct": -3.28
+                },
+                {
+                  "date": "20120312",
+                  "strategy_equity": 2133673.9,
+                  "benchmark_equity": 1280503.8,
+                  "etf0050_equity": 1280503.8,
+                  "etf0020_equity": 1280503.8,
+                  "drawdown_pct": -9.07
+                },
+                {
+                  "date": "20120411",
+                  "strategy_equity": 2126172.9,
+                  "benchmark_equity": 1237807.3,
+                  "etf0050_equity": 1237807.3,
+                  "etf0020_equity": 1237807.3,
+                  "drawdown_pct": -9.38
+                },
+                {
+                  "date": "20120511",
+                  "strategy_equity": 2081714.0,
+                  "benchmark_equity": 1190789.4,
+                  "etf0050_equity": 1190789.4,
+                  "etf0020_equity": 1190789.4,
+                  "drawdown_pct": -11.28
+                },
+                {
+                  "date": "20120611",
+                  "strategy_equity": 2179922.5,
+                  "benchmark_equity": 1213815.1,
+                  "etf0050_equity": 1213815.1,
+                  "etf0020_equity": 1213815.1,
+                  "drawdown_pct": -7.09
+                },
+                {
+                  "date": "20120711",
+                  "strategy_equity": 2137310.3,
+                  "benchmark_equity": 1243649.0,
+                  "etf0050_equity": 1243649.0,
+                  "etf0020_equity": 1243649.0,
+                  "drawdown_pct": -8.91
+                },
+                {
+                  "date": "20120813",
+                  "strategy_equity": 2088072.2,
+                  "benchmark_equity": 1251815.4,
+                  "etf0050_equity": 1251815.4,
+                  "etf0020_equity": 1251815.4,
+                  "drawdown_pct": -11.01
+                },
+                {
+                  "date": "20120911",
+                  "strategy_equity": 2023101.9,
+                  "benchmark_equity": 1246227.9,
+                  "etf0050_equity": 1246227.9,
+                  "etf0020_equity": 1246227.9,
+                  "drawdown_pct": -13.78
+                },
+                {
+                  "date": "20121011",
+                  "strategy_equity": 1987066.5,
+                  "benchmark_equity": 1215460.7,
+                  "etf0050_equity": 1215460.7,
+                  "etf0020_equity": 1215460.7,
+                  "drawdown_pct": -15.31
+                },
+                {
+                  "date": "20121112",
+                  "strategy_equity": 2017132.8,
+                  "benchmark_equity": 1273315.8,
+                  "etf0050_equity": 1273315.8,
+                  "etf0020_equity": 1273315.8,
+                  "drawdown_pct": -14.03
+                },
+                {
+                  "date": "20121211",
+                  "strategy_equity": 2078450.0,
+                  "benchmark_equity": 1307677.0,
+                  "etf0050_equity": 1307677.0,
+                  "etf0020_equity": 1307677.0,
+                  "drawdown_pct": -11.42
+                },
+                {
+                  "date": "20130111",
+                  "strategy_equity": 2151529.1,
+                  "benchmark_equity": 1328478.3,
+                  "etf0050_equity": 1328478.3,
+                  "etf0020_equity": 1328478.3,
+                  "drawdown_pct": -8.3
+                },
+                {
+                  "date": "20130218",
+                  "strategy_equity": 2531655.4,
+                  "benchmark_equity": 1344398.0,
+                  "etf0050_equity": 1344398.0,
+                  "etf0020_equity": 1344398.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130311",
+                  "strategy_equity": 2644358.5,
+                  "benchmark_equity": 1314170.9,
+                  "etf0050_equity": 1314170.9,
+                  "etf0020_equity": 1314170.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130411",
+                  "strategy_equity": 2840450.3,
+                  "benchmark_equity": 1379451.5,
+                  "etf0050_equity": 1379451.5,
+                  "etf0020_equity": 1379451.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130513",
+                  "strategy_equity": 3343858.8,
+                  "benchmark_equity": 1357347.4,
+                  "etf0050_equity": 1357347.4,
+                  "etf0020_equity": 1357347.4,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130611",
+                  "strategy_equity": 3481516.8,
+                  "benchmark_equity": 1367948.7,
+                  "etf0050_equity": 1367948.7,
+                  "etf0020_equity": 1367948.7,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130711",
+                  "strategy_equity": 4405693.5,
+                  "benchmark_equity": 1321763.6,
+                  "etf0050_equity": 1321763.6,
+                  "etf0020_equity": 1321763.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130812",
+                  "strategy_equity": 4617978.6,
+                  "benchmark_equity": 1372874.0,
+                  "etf0050_equity": 1372874.0,
+                  "etf0020_equity": 1372874.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20130911",
+                  "strategy_equity": 4472846.2,
+                  "benchmark_equity": 1396351.2,
+                  "etf0050_equity": 1396351.2,
+                  "etf0020_equity": 1396351.2,
+                  "drawdown_pct": -3.14
+                },
+                {
+                  "date": "20131011",
+                  "strategy_equity": 4579611.3,
+                  "benchmark_equity": 1368453.8,
+                  "etf0050_equity": 1368453.8,
+                  "etf0020_equity": 1368453.8,
+                  "drawdown_pct": -0.83
+                },
+                {
+                  "date": "20131111",
+                  "strategy_equity": 4861356.8,
+                  "benchmark_equity": 1410466.2,
+                  "etf0050_equity": 1410466.2,
+                  "etf0020_equity": 1410466.2,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20131211",
+                  "strategy_equity": 5296143.6,
+                  "benchmark_equity": 1432613.9,
+                  "etf0050_equity": 1432613.9,
+                  "etf0020_equity": 1432613.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20140113",
+                  "strategy_equity": 5423537.0,
+                  "benchmark_equity": 1409929.4,
+                  "etf0050_equity": 1409929.4,
+                  "etf0020_equity": 1409929.4,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20140211",
+                  "strategy_equity": 6091798.2,
+                  "benchmark_equity": 1455380.3,
+                  "etf0050_equity": 1455380.3,
+                  "etf0020_equity": 1455380.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20140311",
+                  "strategy_equity": 6607387.3,
+                  "benchmark_equity": 1489785.0,
+                  "etf0050_equity": 1489785.0,
+                  "etf0020_equity": 1489785.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20140411",
+                  "strategy_equity": 7277801.9,
+                  "benchmark_equity": 1473154.6,
+                  "etf0050_equity": 1473154.6,
+                  "etf0020_equity": 1473154.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20140512",
+                  "strategy_equity": 7308605.9,
+                  "benchmark_equity": 1543594.5,
+                  "etf0050_equity": 1543594.5,
+                  "etf0020_equity": 1543594.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20140611",
+                  "strategy_equity": 7104234.6,
+                  "benchmark_equity": 1588087.1,
+                  "etf0050_equity": 1588087.1,
+                  "etf0020_equity": 1588087.1,
+                  "drawdown_pct": -2.8
+                },
+                {
+                  "date": "20140711",
+                  "strategy_equity": 6904018.3,
+                  "benchmark_equity": 1534080.2,
+                  "etf0050_equity": 1534080.2,
+                  "etf0020_equity": 1534080.2,
+                  "drawdown_pct": -5.54
+                },
+                {
+                  "date": "20140811",
+                  "strategy_equity": 7140693.0,
+                  "benchmark_equity": 1559173.0,
+                  "etf0050_equity": 1559173.0,
+                  "etf0020_equity": 1559173.0,
+                  "drawdown_pct": -2.3
+                },
+                {
+                  "date": "20140911",
+                  "strategy_equity": 6554620.9,
+                  "benchmark_equity": 1456895.5,
+                  "etf0050_equity": 1456895.5,
+                  "etf0020_equity": 1456895.5,
+                  "drawdown_pct": -10.32
+                },
+                {
+                  "date": "20141013",
+                  "strategy_equity": 6539623.7,
+                  "benchmark_equity": 1510872.3,
+                  "etf0050_equity": 1510872.3,
+                  "etf0020_equity": 1510872.3,
+                  "drawdown_pct": -10.52
+                },
+                {
+                  "date": "20141111",
+                  "strategy_equity": 6631766.1,
+                  "benchmark_equity": 1507348.5,
+                  "etf0050_equity": 1507348.5,
+                  "etf0020_equity": 1507348.5,
+                  "drawdown_pct": -9.26
+                },
+                {
+                  "date": "20141211",
+                  "strategy_equity": 6499405.7,
+                  "benchmark_equity": 1534981.7,
+                  "etf0050_equity": 1534981.7,
+                  "etf0020_equity": 1534981.7,
+                  "drawdown_pct": -11.07
+                },
+                {
+                  "date": "20150112",
+                  "strategy_equity": 6226948.5,
+                  "benchmark_equity": 1582464.5,
+                  "etf0050_equity": 1582464.5,
+                  "etf0020_equity": 1582464.5,
+                  "drawdown_pct": -14.8
+                },
+                {
+                  "date": "20150211",
+                  "strategy_equity": 6589904.7,
+                  "benchmark_equity": 1592659.5,
+                  "etf0050_equity": 1592659.5,
+                  "etf0020_equity": 1592659.5,
+                  "drawdown_pct": -9.83
+                },
+                {
+                  "date": "20150311",
+                  "strategy_equity": 6819813.3,
+                  "benchmark_equity": 1616631.7,
+                  "etf0050_equity": 1616631.7,
+                  "etf0020_equity": 1616631.7,
+                  "drawdown_pct": -6.69
+                },
+                {
+                  "date": "20150413",
+                  "strategy_equity": 6860481.3,
+                  "benchmark_equity": 1616163.4,
+                  "etf0050_equity": 1616163.4,
+                  "etf0020_equity": 1616163.4,
+                  "drawdown_pct": -6.13
+                },
+                {
+                  "date": "20150511",
+                  "strategy_equity": 7503683.8,
+                  "benchmark_equity": 1555751.2,
+                  "etf0050_equity": 1555751.2,
+                  "etf0020_equity": 1555751.2,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20150611",
+                  "strategy_equity": 6772635.9,
+                  "benchmark_equity": 1510835.5,
+                  "etf0050_equity": 1510835.5,
+                  "etf0020_equity": 1510835.5,
+                  "drawdown_pct": -9.74
+                },
+                {
+                  "date": "20150713",
+                  "strategy_equity": 6420300.4,
+                  "benchmark_equity": 1403838.5,
+                  "etf0050_equity": 1403838.5,
+                  "etf0020_equity": 1403838.5,
+                  "drawdown_pct": -14.44
+                },
+                {
+                  "date": "20150811",
+                  "strategy_equity": 6446917.4,
+                  "benchmark_equity": 1389067.8,
+                  "etf0050_equity": 1389067.8,
+                  "etf0020_equity": 1389067.8,
+                  "drawdown_pct": -14.08
+                },
+                {
+                  "date": "20150911",
+                  "strategy_equity": 7069977.2,
+                  "benchmark_equity": 1433871.5,
+                  "etf0050_equity": 1433871.5,
+                  "etf0020_equity": 1433871.5,
+                  "drawdown_pct": -5.78
+                },
+                {
+                  "date": "20151012",
+                  "strategy_equity": 7666949.3,
+                  "benchmark_equity": 1407328.8,
+                  "etf0050_equity": 1407328.8,
+                  "etf0020_equity": 1407328.8,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20151111",
+                  "strategy_equity": 7746280.4,
+                  "benchmark_equity": 1357303.9,
+                  "etf0050_equity": 1357303.9,
+                  "etf0020_equity": 1357303.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20151211",
+                  "strategy_equity": 7997868.9,
+                  "benchmark_equity": 1302537.7,
+                  "etf0050_equity": 1302537.7,
+                  "etf0020_equity": 1302537.7,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20160111",
+                  "strategy_equity": 8064051.1,
+                  "benchmark_equity": 1349045.6,
+                  "etf0050_equity": 1349045.6,
+                  "etf0020_equity": 1349045.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20160215",
+                  "strategy_equity": 7782320.5,
+                  "benchmark_equity": 1456017.5,
+                  "etf0050_equity": 1456017.5,
+                  "etf0020_equity": 1456017.5,
+                  "drawdown_pct": -3.49
+                },
+                {
+                  "date": "20160311",
+                  "strategy_equity": 7504624.8,
+                  "benchmark_equity": 1432010.1,
+                  "etf0050_equity": 1432010.1,
+                  "etf0020_equity": 1432010.1,
+                  "drawdown_pct": -6.94
+                },
+                {
+                  "date": "20160411",
+                  "strategy_equity": 7602902.7,
+                  "benchmark_equity": 1360593.5,
+                  "etf0050_equity": 1360593.5,
+                  "etf0020_equity": 1360593.5,
+                  "drawdown_pct": -5.72
+                },
+                {
+                  "date": "20160511",
+                  "strategy_equity": 7644246.4,
+                  "benchmark_equity": 1427600.0,
+                  "etf0050_equity": 1427600.0,
+                  "etf0020_equity": 1427600.0,
+                  "drawdown_pct": -5.21
+                },
+                {
+                  "date": "20160613",
+                  "strategy_equity": 8135054.0,
+                  "benchmark_equity": 1469451.9,
+                  "etf0050_equity": 1469451.9,
+                  "etf0020_equity": 1469451.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20160711",
+                  "strategy_equity": 8600377.0,
+                  "benchmark_equity": 1527210.0,
+                  "etf0050_equity": 1527210.0,
+                  "etf0020_equity": 1527210.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20160811",
+                  "strategy_equity": 8617535.7,
+                  "benchmark_equity": 1496309.0,
+                  "etf0050_equity": 1496309.0,
+                  "etf0020_equity": 1496309.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20160912",
+                  "strategy_equity": 9076112.7,
+                  "benchmark_equity": 1541925.5,
+                  "etf0050_equity": 1541925.5,
+                  "etf0020_equity": 1541925.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20161011",
+                  "strategy_equity": 8346097.6,
+                  "benchmark_equity": 1498098.5,
+                  "etf0050_equity": 1498098.5,
+                  "etf0020_equity": 1498098.5,
+                  "drawdown_pct": -8.04
+                },
+                {
+                  "date": "20161111",
+                  "strategy_equity": 8489578.5,
+                  "benchmark_equity": 1563686.8,
+                  "etf0050_equity": 1563686.8,
+                  "etf0020_equity": 1563686.8,
+                  "drawdown_pct": -6.46
+                },
+                {
+                  "date": "20161212",
+                  "strategy_equity": 8306979.1,
+                  "benchmark_equity": 1562984.4,
+                  "etf0050_equity": 1562984.4,
+                  "etf0020_equity": 1562984.4,
+                  "drawdown_pct": -8.47
+                },
+                {
+                  "date": "20170111",
+                  "strategy_equity": 8952427.0,
+                  "benchmark_equity": 1623956.8,
+                  "etf0050_equity": 1623956.8,
+                  "etf0020_equity": 1623956.8,
+                  "drawdown_pct": -1.36
+                },
+                {
+                  "date": "20170213",
+                  "strategy_equity": 9551966.8,
+                  "benchmark_equity": 1621786.1,
+                  "etf0050_equity": 1621786.1,
+                  "etf0020_equity": 1621786.1,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20170313",
+                  "strategy_equity": 9700796.3,
+                  "benchmark_equity": 1644376.9,
+                  "etf0050_equity": 1644376.9,
+                  "etf0020_equity": 1644376.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20170411",
+                  "strategy_equity": 10393196.4,
+                  "benchmark_equity": 1672650.5,
+                  "etf0050_equity": 1672650.5,
+                  "etf0020_equity": 1672650.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20170511",
+                  "strategy_equity": 9788967.3,
+                  "benchmark_equity": 1690792.8,
+                  "etf0050_equity": 1690792.8,
+                  "etf0020_equity": 1690792.8,
+                  "drawdown_pct": -5.81
+                },
+                {
+                  "date": "20170612",
+                  "strategy_equity": 9420741.1,
+                  "benchmark_equity": 1741903.1,
+                  "etf0050_equity": 1741903.1,
+                  "etf0020_equity": 1741903.1,
+                  "drawdown_pct": -9.36
+                },
+                {
+                  "date": "20170711",
+                  "strategy_equity": 9894215.2,
+                  "benchmark_equity": 1727520.4,
+                  "etf0050_equity": 1727520.4,
+                  "etf0020_equity": 1727520.4,
+                  "drawdown_pct": -4.8
+                },
+                {
+                  "date": "20170811",
+                  "strategy_equity": 11314439.6,
+                  "benchmark_equity": 1768091.2,
+                  "etf0050_equity": 1768091.2,
+                  "etf0020_equity": 1768091.2,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20170911",
+                  "strategy_equity": 10809514.3,
+                  "benchmark_equity": 1779635.8,
+                  "etf0050_equity": 1779635.8,
+                  "etf0020_equity": 1779635.8,
+                  "drawdown_pct": -4.46
+                },
+                {
+                  "date": "20171011",
+                  "strategy_equity": 11022988.8,
+                  "benchmark_equity": 1786782.0,
+                  "etf0050_equity": 1786782.0,
+                  "etf0020_equity": 1786782.0,
+                  "drawdown_pct": -2.58
+                },
+                {
+                  "date": "20171113",
+                  "strategy_equity": 11169492.0,
+                  "benchmark_equity": 1751522.7,
+                  "etf0050_equity": 1751522.7,
+                  "etf0020_equity": 1751522.7,
+                  "drawdown_pct": -1.28
+                },
+                {
+                  "date": "20171211",
+                  "strategy_equity": 12123680.0,
+                  "benchmark_equity": 1807877.7,
+                  "etf0050_equity": 1807877.7,
+                  "etf0020_equity": 1807877.7,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20180111",
+                  "strategy_equity": 11997500.2,
+                  "benchmark_equity": 1742826.2,
+                  "etf0050_equity": 1742826.2,
+                  "etf0020_equity": 1742826.2,
+                  "drawdown_pct": -1.04
+                },
+                {
+                  "date": "20180212",
+                  "strategy_equity": 14150525.9,
+                  "benchmark_equity": 1839994.5,
+                  "etf0050_equity": 1839994.5,
+                  "etf0020_equity": 1839994.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20180312",
+                  "strategy_equity": 16666879.0,
+                  "benchmark_equity": 1835298.4,
+                  "etf0050_equity": 1835298.4,
+                  "etf0020_equity": 1835298.4,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20180411",
+                  "strategy_equity": 21155753.7,
+                  "benchmark_equity": 1816059.1,
+                  "etf0050_equity": 1816059.1,
+                  "etf0020_equity": 1816059.1,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20180511",
+                  "strategy_equity": 29191170.3,
+                  "benchmark_equity": 1864600.6,
+                  "etf0050_equity": 1864600.6,
+                  "etf0020_equity": 1864600.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20180611",
+                  "strategy_equity": 28905650.1,
+                  "benchmark_equity": 1785597.9,
+                  "etf0050_equity": 1785597.9,
+                  "etf0020_equity": 1785597.9,
+                  "drawdown_pct": -0.98
+                },
+                {
+                  "date": "20180711",
+                  "strategy_equity": 27688466.7,
+                  "benchmark_equity": 1797652.6,
+                  "etf0050_equity": 1797652.6,
+                  "etf0020_equity": 1797652.6,
+                  "drawdown_pct": -5.15
+                },
+                {
+                  "date": "20180813",
+                  "strategy_equity": 27098716.2,
+                  "benchmark_equity": 1798217.9,
+                  "etf0050_equity": 1798217.9,
+                  "etf0020_equity": 1798217.9,
+                  "drawdown_pct": -7.17
+                },
+                {
+                  "date": "20180911",
+                  "strategy_equity": 26246789.3,
+                  "benchmark_equity": 1639976.8,
+                  "etf0050_equity": 1639976.8,
+                  "etf0020_equity": 1639976.8,
+                  "drawdown_pct": -10.09
+                },
+                {
+                  "date": "20181011",
+                  "strategy_equity": 26692488.4,
+                  "benchmark_equity": 1644174.5,
+                  "etf0050_equity": 1644174.5,
+                  "etf0020_equity": 1644174.5,
+                  "drawdown_pct": -8.56
+                },
+                {
+                  "date": "20181112",
+                  "strategy_equity": 25568624.2,
+                  "benchmark_equity": 1623408.3,
+                  "etf0050_equity": 1623408.3,
+                  "etf0020_equity": 1623408.3,
+                  "drawdown_pct": -12.41
+                },
+                {
+                  "date": "20181211",
+                  "strategy_equity": 23955777.7,
+                  "benchmark_equity": 1632165.0,
+                  "etf0050_equity": 1632165.0,
+                  "etf0020_equity": 1632165.0,
+                  "drawdown_pct": -17.93
+                },
+                {
+                  "date": "20190111",
+                  "strategy_equity": 25968351.8,
+                  "benchmark_equity": 1673113.8,
+                  "etf0050_equity": 1673113.8,
+                  "etf0020_equity": 1673113.8,
+                  "drawdown_pct": -11.04
+                },
+                {
+                  "date": "20190211",
+                  "strategy_equity": 28122566.1,
+                  "benchmark_equity": 1714259.9,
+                  "etf0050_equity": 1714259.9,
+                  "etf0020_equity": 1714259.9,
+                  "drawdown_pct": -3.66
+                },
+                {
+                  "date": "20190311",
+                  "strategy_equity": 32397845.5,
+                  "benchmark_equity": 1807661.9,
+                  "etf0050_equity": 1807661.9,
+                  "etf0020_equity": 1807661.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20190411",
+                  "strategy_equity": 30428578.8,
+                  "benchmark_equity": 1765771.6,
+                  "etf0050_equity": 1765771.6,
+                  "etf0020_equity": 1765771.6,
+                  "drawdown_pct": -6.08
+                },
+                {
+                  "date": "20190513",
+                  "strategy_equity": 29780654.8,
+                  "benchmark_equity": 1774045.0,
+                  "etf0050_equity": 1774045.0,
+                  "etf0020_equity": 1774045.0,
+                  "drawdown_pct": -8.08
+                },
+                {
+                  "date": "20190611",
+                  "strategy_equity": 31020383.7,
+                  "benchmark_equity": 1813456.8,
+                  "etf0050_equity": 1813456.8,
+                  "etf0020_equity": 1813456.8,
+                  "drawdown_pct": -4.25
+                },
+                {
+                  "date": "20190711",
+                  "strategy_equity": 31796640.4,
+                  "benchmark_equity": 1751400.6,
+                  "etf0050_equity": 1751400.6,
+                  "etf0020_equity": 1751400.6,
+                  "drawdown_pct": -1.86
+                },
+                {
+                  "date": "20190812",
+                  "strategy_equity": 33870204.0,
+                  "benchmark_equity": 1804581.4,
+                  "etf0050_equity": 1804581.4,
+                  "etf0020_equity": 1804581.4,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20190911",
+                  "strategy_equity": 35402947.6,
+                  "benchmark_equity": 1850840.0,
+                  "etf0050_equity": 1850840.0,
+                  "etf0020_equity": 1850840.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20191014",
+                  "strategy_equity": 35101936.5,
+                  "benchmark_equity": 1911101.7,
+                  "etf0050_equity": 1911101.7,
+                  "etf0020_equity": 1911101.7,
+                  "drawdown_pct": -0.85
+                },
+                {
+                  "date": "20191111",
+                  "strategy_equity": 35301469.8,
+                  "benchmark_equity": 1956840.3,
+                  "etf0050_equity": 1956840.3,
+                  "etf0020_equity": 1956840.3,
+                  "drawdown_pct": -0.29
+                },
+                {
+                  "date": "20191211",
+                  "strategy_equity": 38364976.5,
+                  "benchmark_equity": 2025852.0,
+                  "etf0050_equity": 2025852.0,
+                  "etf0020_equity": 2025852.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200113",
+                  "strategy_equity": 38997037.1,
+                  "benchmark_equity": 1950697.6,
+                  "etf0050_equity": 1950697.6,
+                  "etf0020_equity": 1950697.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200211",
+                  "strategy_equity": 39693440.8,
+                  "benchmark_equity": 1821874.0,
+                  "etf0050_equity": 1821874.0,
+                  "etf0020_equity": 1821874.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200311",
+                  "strategy_equity": 37746545.0,
+                  "benchmark_equity": 1688996.6,
+                  "etf0050_equity": 1688996.6,
+                  "etf0020_equity": 1688996.6,
+                  "drawdown_pct": -4.9
+                },
+                {
+                  "date": "20200413",
+                  "strategy_equity": 49000217.0,
+                  "benchmark_equity": 1841860.9,
+                  "etf0050_equity": 1841860.9,
+                  "etf0020_equity": 1841860.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200511",
+                  "strategy_equity": 52683357.1,
+                  "benchmark_equity": 1929245.6,
+                  "etf0050_equity": 1929245.6,
+                  "etf0020_equity": 1929245.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200611",
+                  "strategy_equity": 54213068.0,
+                  "benchmark_equity": 2042265.0,
+                  "etf0050_equity": 2042265.0,
+                  "etf0020_equity": 2042265.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200713",
+                  "strategy_equity": 60708442.1,
+                  "benchmark_equity": 2137362.8,
+                  "etf0050_equity": 2137362.8,
+                  "etf0020_equity": 2137362.8,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200811",
+                  "strategy_equity": 66423831.1,
+                  "benchmark_equity": 2119929.7,
+                  "etf0050_equity": 2119929.7,
+                  "etf0020_equity": 2119929.7,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20200911",
+                  "strategy_equity": 65118957.6,
+                  "benchmark_equity": 2166750.3,
+                  "etf0050_equity": 2166750.3,
+                  "etf0020_equity": 2166750.3,
+                  "drawdown_pct": -1.96
+                },
+                {
+                  "date": "20201012",
+                  "strategy_equity": 69098222.5,
+                  "benchmark_equity": 2217972.6,
+                  "etf0050_equity": 2217972.6,
+                  "etf0020_equity": 2217972.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20201111",
+                  "strategy_equity": 77641364.6,
+                  "benchmark_equity": 2385129.3,
+                  "etf0050_equity": 2385129.3,
+                  "etf0020_equity": 2385129.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20201211",
+                  "strategy_equity": 84241321.3,
+                  "benchmark_equity": 2601807.5,
+                  "etf0050_equity": 2601807.5,
+                  "etf0020_equity": 2601807.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20210111",
+                  "strategy_equity": 87744370.6,
+                  "benchmark_equity": 2736434.3,
+                  "etf0050_equity": 2736434.3,
+                  "etf0020_equity": 2736434.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20210217",
+                  "strategy_equity": 93730508.5,
+                  "benchmark_equity": 2705874.5,
+                  "etf0050_equity": 2705874.5,
+                  "etf0020_equity": 2705874.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20210311",
+                  "strategy_equity": 121935792.5,
+                  "benchmark_equity": 2819621.3,
+                  "etf0050_equity": 2819621.3,
+                  "etf0020_equity": 2819621.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20210412",
+                  "strategy_equity": 115590437.1,
+                  "benchmark_equity": 2773367.7,
+                  "etf0050_equity": 2773367.7,
+                  "etf0020_equity": 2773367.7,
+                  "drawdown_pct": -5.2
+                },
+                {
+                  "date": "20210511",
+                  "strategy_equity": 99604120.5,
+                  "benchmark_equity": 2878794.3,
+                  "etf0050_equity": 2878794.3,
+                  "etf0020_equity": 2878794.3,
+                  "drawdown_pct": -18.31
+                },
+                {
+                  "date": "20210611",
+                  "strategy_equity": 120100066.5,
+                  "benchmark_equity": 2979273.9,
+                  "etf0050_equity": 2979273.9,
+                  "etf0020_equity": 2979273.9,
+                  "drawdown_pct": -1.51
+                },
+                {
+                  "date": "20210712",
+                  "strategy_equity": 93378666.5,
+                  "benchmark_equity": 2881078.8,
+                  "etf0050_equity": 2881078.8,
+                  "etf0020_equity": 2881078.8,
+                  "drawdown_pct": -23.42
+                },
+                {
+                  "date": "20210811",
+                  "strategy_equity": 100809904.5,
+                  "benchmark_equity": 2917726.1,
+                  "etf0050_equity": 2917726.1,
+                  "etf0020_equity": 2917726.1,
+                  "drawdown_pct": -17.33
+                },
+                {
+                  "date": "20210913",
+                  "strategy_equity": 100323056.1,
+                  "benchmark_equity": 2753250.3,
+                  "etf0050_equity": 2753250.3,
+                  "etf0020_equity": 2753250.3,
+                  "drawdown_pct": -17.72
+                },
+                {
+                  "date": "20211012",
+                  "strategy_equity": 115385857.3,
+                  "benchmark_equity": 2918764.7,
+                  "etf0050_equity": 2918764.7,
+                  "etf0020_equity": 2918764.7,
+                  "drawdown_pct": -5.37
+                },
+                {
+                  "date": "20211111",
+                  "strategy_equity": 114161261.0,
+                  "benchmark_equity": 2971458.8,
+                  "etf0050_equity": 2971458.8,
+                  "etf0020_equity": 2971458.8,
+                  "drawdown_pct": -6.38
+                },
+                {
+                  "date": "20211213",
+                  "strategy_equity": 104158283.9,
+                  "benchmark_equity": 3058525.7,
+                  "etf0050_equity": 3058525.7,
+                  "etf0020_equity": 3058525.7,
+                  "drawdown_pct": -14.58
+                },
+                {
+                  "date": "20220111",
+                  "strategy_equity": 98746279.7,
+                  "benchmark_equity": 3062327.1,
+                  "etf0050_equity": 3062327.1,
+                  "etf0020_equity": 3062327.1,
+                  "drawdown_pct": -19.02
+                },
+                {
+                  "date": "20220211",
+                  "strategy_equity": 95601098.9,
+                  "benchmark_equity": 2887360.3,
+                  "etf0050_equity": 2887360.3,
+                  "etf0020_equity": 2887360.3,
+                  "drawdown_pct": -21.6
+                },
+                {
+                  "date": "20220311",
+                  "strategy_equity": 89560842.9,
+                  "benchmark_equity": 2851174.5,
+                  "etf0050_equity": 2851174.5,
+                  "etf0020_equity": 2851174.5,
+                  "drawdown_pct": -26.55
+                },
+                {
+                  "date": "20220411",
+                  "strategy_equity": 81678168.1,
+                  "benchmark_equity": 2676890.1,
+                  "etf0050_equity": 2676890.1,
+                  "etf0020_equity": 2676890.1,
+                  "drawdown_pct": -33.02
+                },
+                {
+                  "date": "20220511",
+                  "strategy_equity": 84809422.7,
+                  "benchmark_equity": 2687715.5,
+                  "etf0050_equity": 2687715.5,
+                  "etf0020_equity": 2687715.5,
+                  "drawdown_pct": -30.45
+                },
+                {
+                  "date": "20220613",
+                  "strategy_equity": 80575338.9,
+                  "benchmark_equity": 2398314.6,
+                  "etf0050_equity": 2398314.6,
+                  "etf0020_equity": 2398314.6,
+                  "drawdown_pct": -33.92
+                },
+                {
+                  "date": "20220711",
+                  "strategy_equity": 81596264.3,
+                  "benchmark_equity": 2541693.0,
+                  "etf0050_equity": 2541693.0,
+                  "etf0020_equity": 2541693.0,
+                  "drawdown_pct": -33.08
+                },
+                {
+                  "date": "20220811",
+                  "strategy_equity": 80916933.5,
+                  "benchmark_equity": 2476399.0,
+                  "etf0050_equity": 2476399.0,
+                  "etf0020_equity": 2476399.0,
+                  "drawdown_pct": -33.64
+                },
+                {
+                  "date": "20220912",
+                  "strategy_equity": 77625786.2,
+                  "benchmark_equity": 2191856.4,
+                  "etf0050_equity": 2191856.4,
+                  "etf0020_equity": 2191856.4,
+                  "drawdown_pct": -36.34
+                },
+                {
+                  "date": "20221011",
+                  "strategy_equity": 77481876.2,
+                  "benchmark_equity": 2342628.5,
+                  "etf0050_equity": 2342628.5,
+                  "etf0020_equity": 2342628.5,
+                  "drawdown_pct": -36.46
+                },
+                {
+                  "date": "20221111",
+                  "strategy_equity": 80576190.4,
+                  "benchmark_equity": 2443813.9,
+                  "etf0050_equity": 2443813.9,
+                  "etf0020_equity": 2443813.9,
+                  "drawdown_pct": -33.92
+                },
+                {
+                  "date": "20221212",
+                  "strategy_equity": 80720855.4,
+                  "benchmark_equity": 2467035.3,
+                  "etf0050_equity": 2467035.3,
+                  "etf0020_equity": 2467035.3,
+                  "drawdown_pct": -33.8
+                },
+                {
+                  "date": "20230111",
+                  "strategy_equity": 85132174.4,
+                  "benchmark_equity": 2599630.1,
+                  "etf0050_equity": 2599630.1,
+                  "etf0020_equity": 2599630.1,
+                  "drawdown_pct": -30.18
+                },
+                {
+                  "date": "20230213",
+                  "strategy_equity": 84279401.3,
+                  "benchmark_equity": 2602341.0,
+                  "etf0050_equity": 2602341.0,
+                  "etf0020_equity": 2602341.0,
+                  "drawdown_pct": -30.88
+                },
+                {
+                  "date": "20230313",
+                  "strategy_equity": 90774771.0,
+                  "benchmark_equity": 2661442.1,
+                  "etf0050_equity": 2661442.1,
+                  "etf0020_equity": 2661442.1,
+                  "drawdown_pct": -25.56
+                },
+                {
+                  "date": "20230411",
+                  "strategy_equity": 86516231.5,
+                  "benchmark_equity": 2594673.1,
+                  "etf0050_equity": 2594673.1,
+                  "etf0020_equity": 2594673.1,
+                  "drawdown_pct": -29.05
+                },
+                {
+                  "date": "20230511",
+                  "strategy_equity": 102152239.8,
+                  "benchmark_equity": 2835621.2,
+                  "etf0050_equity": 2835621.2,
+                  "etf0020_equity": 2835621.2,
+                  "drawdown_pct": -16.22
+                },
+                {
+                  "date": "20230612",
+                  "strategy_equity": 119649575.4,
+                  "benchmark_equity": 2826178.8,
+                  "etf0050_equity": 2826178.8,
+                  "etf0020_equity": 2826178.8,
+                  "drawdown_pct": -1.87
+                },
+                {
+                  "date": "20230711",
+                  "strategy_equity": 149862637.7,
+                  "benchmark_equity": 2776398.0,
+                  "etf0050_equity": 2776398.0,
+                  "etf0020_equity": 2776398.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20230811",
+                  "strategy_equity": 171778668.7,
+                  "benchmark_equity": 2748251.5,
+                  "etf0050_equity": 2748251.5,
+                  "etf0020_equity": 2748251.5,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20230911",
+                  "strategy_equity": 179438405.2,
+                  "benchmark_equity": 2788235.3,
+                  "etf0050_equity": 2788235.3,
+                  "etf0020_equity": 2788235.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20231011",
+                  "strategy_equity": 168850107.4,
+                  "benchmark_equity": 2816207.9,
+                  "etf0050_equity": 2816207.9,
+                  "etf0020_equity": 2816207.9,
+                  "drawdown_pct": -5.9
+                },
+                {
+                  "date": "20231113",
+                  "strategy_equity": 176756869.4,
+                  "benchmark_equity": 2913048.4,
+                  "etf0050_equity": 2913048.4,
+                  "etf0020_equity": 2913048.4,
+                  "drawdown_pct": -1.49
+                },
+                {
+                  "date": "20231211",
+                  "strategy_equity": 170909602.3,
+                  "benchmark_equity": 2934284.6,
+                  "etf0050_equity": 2934284.6,
+                  "etf0020_equity": 2934284.6,
+                  "drawdown_pct": -4.75
+                },
+                {
+                  "date": "20240111",
+                  "strategy_equity": 178821453.0,
+                  "benchmark_equity": 3118123.5,
+                  "etf0050_equity": 3118123.5,
+                  "etf0020_equity": 3118123.5,
+                  "drawdown_pct": -0.34
+                },
+                {
+                  "date": "20240215",
+                  "strategy_equity": 174328120.9,
+                  "benchmark_equity": 3298995.6,
+                  "etf0050_equity": 3298995.6,
+                  "etf0020_equity": 3298995.6,
+                  "drawdown_pct": -2.85
+                },
+                {
+                  "date": "20240311",
+                  "strategy_equity": 176353583.1,
+                  "benchmark_equity": 3470774.8,
+                  "etf0050_equity": 3470774.8,
+                  "etf0020_equity": 3470774.8,
+                  "drawdown_pct": -1.72
+                },
+                {
+                  "date": "20240411",
+                  "strategy_equity": 156835798.3,
+                  "benchmark_equity": 3488249.7,
+                  "etf0050_equity": 3488249.7,
+                  "etf0020_equity": 3488249.7,
+                  "drawdown_pct": -12.6
+                },
+                {
+                  "date": "20240513",
+                  "strategy_equity": 189314327.7,
+                  "benchmark_equity": 3644520.7,
+                  "etf0050_equity": 3644520.7,
+                  "etf0020_equity": 3644520.7,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20240611",
+                  "strategy_equity": 235743691.0,
+                  "benchmark_equity": 4078996.0,
+                  "etf0050_equity": 4078996.0,
+                  "etf0020_equity": 4078996.0,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20240711",
+                  "strategy_equity": 222833868.9,
+                  "benchmark_equity": 3641366.6,
+                  "etf0050_equity": 3641366.6,
+                  "etf0020_equity": 3641366.6,
+                  "drawdown_pct": -5.48
+                },
+                {
+                  "date": "20240812",
+                  "strategy_equity": 233868676.1,
+                  "benchmark_equity": 3517230.8,
+                  "etf0050_equity": 3517230.8,
+                  "etf0020_equity": 3517230.8,
+                  "drawdown_pct": -0.8
+                },
+                {
+                  "date": "20240911",
+                  "strategy_equity": 264002666.5,
+                  "benchmark_equity": 3830077.2,
+                  "etf0050_equity": 3830077.2,
+                  "etf0020_equity": 3830077.2,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20241011",
+                  "strategy_equity": 278181492.2,
+                  "benchmark_equity": 3935104.1,
+                  "etf0050_equity": 3935104.1,
+                  "etf0020_equity": 3935104.1,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20241111",
+                  "strategy_equity": 270424782.6,
+                  "benchmark_equity": 3830410.0,
+                  "etf0050_equity": 3830410.0,
+                  "etf0020_equity": 3830410.0,
+                  "drawdown_pct": -2.79
+                },
+                {
+                  "date": "20241211",
+                  "strategy_equity": 262559337.6,
+                  "benchmark_equity": 3760955.1,
+                  "etf0050_equity": 3760955.1,
+                  "etf0020_equity": 3760955.1,
+                  "drawdown_pct": -5.62
+                },
+                {
+                  "date": "20250113",
+                  "strategy_equity": 288226489.6,
+                  "benchmark_equity": 3910755.6,
+                  "etf0050_equity": 3910755.6,
+                  "etf0020_equity": 3910755.6,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20250211",
+                  "strategy_equity": 264405279.1,
+                  "benchmark_equity": 3691175.7,
+                  "etf0050_equity": 3691175.7,
+                  "etf0020_equity": 3691175.7,
+                  "drawdown_pct": -8.26
+                },
+                {
+                  "date": "20250311",
+                  "strategy_equity": 236570752.4,
+                  "benchmark_equity": 3265997.4,
+                  "etf0050_equity": 3265997.4,
+                  "etf0020_equity": 3265997.4,
+                  "drawdown_pct": -17.92
+                },
+                {
+                  "date": "20250411",
+                  "strategy_equity": 248921956.2,
+                  "benchmark_equity": 3533710.6,
+                  "etf0050_equity": 3533710.6,
+                  "etf0020_equity": 3533710.6,
+                  "drawdown_pct": -13.64
+                },
+                {
+                  "date": "20250512",
+                  "strategy_equity": 310375233.1,
+                  "benchmark_equity": 3757906.3,
+                  "etf0050_equity": 3757906.3,
+                  "etf0020_equity": 3757906.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20250611",
+                  "strategy_equity": 321811664.1,
+                  "benchmark_equity": 3804889.1,
+                  "etf0050_equity": 3804889.1,
+                  "etf0020_equity": 3804889.1,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20250711",
+                  "strategy_equity": 407121965.1,
+                  "benchmark_equity": 4036428.3,
+                  "etf0050_equity": 4036428.3,
+                  "etf0020_equity": 4036428.3,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20250811",
+                  "strategy_equity": 434289382.9,
+                  "benchmark_equity": 4217082.9,
+                  "etf0050_equity": 4217082.9,
+                  "etf0020_equity": 4217082.9,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20250911",
+                  "strategy_equity": 417892797.3,
+                  "benchmark_equity": 4502680.9,
+                  "etf0050_equity": 4502680.9,
+                  "etf0020_equity": 4502680.9,
+                  "drawdown_pct": -3.78
+                },
+                {
+                  "date": "20251013",
+                  "strategy_equity": 469446527.5,
+                  "benchmark_equity": 4646763.4,
+                  "etf0050_equity": 4646763.4,
+                  "etf0020_equity": 4646763.4,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20251111",
+                  "strategy_equity": 441251842.2,
+                  "benchmark_equity": 4686867.6,
+                  "etf0050_equity": 4686867.6,
+                  "etf0020_equity": 4686867.6,
+                  "drawdown_pct": -6.01
+                },
+                {
+                  "date": "20251211",
+                  "strategy_equity": 550684431.3,
+                  "benchmark_equity": 5112082.8,
+                  "etf0050_equity": 5112082.8,
+                  "etf0020_equity": 5112082.8,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260112",
+                  "strategy_equity": 628647188.4,
+                  "benchmark_equity": 5620229.1,
+                  "etf0050_equity": 5620229.1,
+                  "etf0020_equity": 5620229.1,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260211",
+                  "strategy_equity": 699524547.9,
+                  "benchmark_equity": 5705267.4,
+                  "etf0050_equity": 5705267.4,
+                  "etf0020_equity": 5705267.4,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260311",
+                  "strategy_equity": 772316109.4,
+                  "benchmark_equity": 5929887.8,
+                  "etf0050_equity": 5929887.8,
+                  "etf0020_equity": 5929887.8,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260413",
+                  "strategy_equity": 961375579.3,
+                  "benchmark_equity": 6988982.2,
+                  "etf0050_equity": 6988982.2,
+                  "etf0020_equity": 6988982.2,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260511",
+                  "strategy_equity": 1361797006.4,
+                  "benchmark_equity": 7216328.7,
+                  "etf0050_equity": 7216328.7,
+                  "etf0020_equity": 7216328.7,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260611",
+                  "strategy_equity": 1551601219.7,
+                  "benchmark_equity": 7589451.8,
+                  "etf0050_equity": 7589451.8,
+                  "etf0020_equity": 7589451.8,
+                  "drawdown_pct": 0.0
+                },
+                {
+                  "date": "20260713",
+                  "strategy_equity": 1302518443.8,
+                  "benchmark_equity": 7546002.8,
+                  "etf0050_equity": 7546002.8,
+                  "etf0020_equity": 7546002.8,
+                  "drawdown_pct": -16.05
+                },
+                {
+                  "date": "20260811",
+                  "strategy_equity": 1312028003.9,
+                  "benchmark_equity": 7723968.2,
+                  "etf0050_equity": 7723968.2,
+                  "etf0020_equity": 7723968.2,
+                  "drawdown_pct": -15.44
                 }
               ],
-              "total_trades": 391,
-              "sortino_ratio": 1.68
+              "total_trades": 1285,
+              "sortino_ratio": 2.15
             },
             "long_short": {
               "total_return_pct": 26550.7,
@@ -121260,148 +122340,59 @@
     "default_period_key": "20y",
     "titan_open_positions": [
       {
-        "stock_id": "MRNA",
-        "stock_name": "莫德納 (Moderna 生技巨擘)",
-        "tranche": "🅰️ A梯隊 (每月1號調倉)",
-        "role": "🅰️ A梯隊 👑 第1王者 (梯隊40% / 總資金20%)",
+        "stock_id": "3105",
+        "stock_name": "穩懋",
+        "role": "👑 王者先鋒 (20%)",
         "target_weight_pct": 20.0,
-        "weight_pct": 20.0,
-        "signal_date": "2026-10-01",
-        "entry_date": "20261002",
-        "first_entry_date": "2026-09-02",
-        "first_entry_price": 151.4,
-        "entry_price": 190.26,
-        "current_price": 218.01,
-        "latest_price": 218.01,
-        "unrealized_return_pct": 14.59,
-        "cumulative_tenure_return_pct": 44.0,
-        "holding_days": 11,
-        "tenure_months": 2,
-        "ma60_stop_price": 138.03,
-        "stop_loss_ma60": 138.03,
-        "dist_to_stop_pct": 57.9,
-        "currency": "USD",
-        "stop_condition": "🅰️ A梯隊(1號)：10/02 T+1開盤價 US$190.26 續抱 (首倉 09/02 US$151.40，連任第 2/4 月)"
+        "entry_date": "2026-10-12",
+        "entry_price": 437.5,
+        "current_price": 455.0,
+        "stop_loss_price": 419.5,
+        "notes": "砷化鎵PA龍頭，大單吸籌突破，破60MA($419.5)停損"
       },
       {
-        "stock_id": "3037.TW",
-        "stock_name": "欣興 (Unimicron 載板王者)",
-        "tranche": "🅰️ A梯隊 (每月1號調倉)",
-        "role": "🅰️ A梯隊 🥈 第2主力 (梯隊30% / 總資金15%)",
-        "target_weight_pct": 15.0,
-        "weight_pct": 15.0,
-        "signal_date": "2026-10-01",
-        "entry_date": "20261002",
-        "first_entry_date": "2026-09-02",
-        "first_entry_price": 955.0,
-        "entry_price": 1225.0,
-        "current_price": 1090.0,
-        "latest_price": 1090.0,
-        "unrealized_return_pct": -11.02,
-        "cumulative_tenure_return_pct": 14.14,
-        "holding_days": 11,
-        "tenure_months": 2,
-        "ma60_stop_price": 1052.52,
-        "stop_loss_ma60": 1052.52,
-        "dist_to_stop_pct": 3.6,
-        "currency": "TWD",
-        "stop_condition": "🅰️ A梯隊(1號)：10/02 T+1開盤價 NT$1,225.0 續抱 (首倉 09/02 NT$955.0，連任第 2/4 月)"
-      },
-      {
-        "stock_id": "3443.TW",
-        "stock_name": "創意 (Global Unichip ASIC)",
-        "tranche": "🅰️ A梯隊 (每月1號調倉)",
-        "role": "🅰️ A梯隊 🥉 第3主力 (梯隊30% / 總資金15%)",
-        "target_weight_pct": 15.0,
-        "weight_pct": 15.0,
-        "signal_date": "2026-10-01",
-        "entry_date": "20261002",
-        "first_entry_date": "2026-09-02",
-        "first_entry_price": 5955.0,
-        "entry_price": 7895.0,
-        "current_price": 7480.0,
-        "latest_price": 7480.0,
-        "unrealized_return_pct": -5.26,
-        "cumulative_tenure_return_pct": 25.61,
-        "holding_days": 11,
-        "tenure_months": 2,
-        "ma60_stop_price": 6300.33,
-        "stop_loss_ma60": 6300.33,
-        "dist_to_stop_pct": 18.7,
-        "currency": "TWD",
-        "stop_condition": "🅰️ A梯隊(1號)：10/02 T+1開盤價 NT$7,895.0 續抱 (首倉 09/02 NT$5,955.0，連任第 2/4 月)"
-      },
-      {
-        "stock_id": "MRNA",
-        "stock_name": "莫德納 (Moderna 生技巨擘)",
-        "tranche": "🅱️ B梯隊 (每月22號調倉)",
-        "role": "🅱️ B梯隊 👑 第1王者 (梯隊40% / 總資金20%)",
+        "stock_id": "8358",
+        "stock_name": "金居",
+        "role": "🚀 核心主力 (20%)",
         "target_weight_pct": 20.0,
-        "weight_pct": 20.0,
-        "signal_date": "2026-09-22",
-        "entry_date": "20260923",
-        "first_entry_date": "2026-08-25",
-        "first_entry_price": 143.5,
-        "entry_price": 183.4,
-        "current_price": 218.01,
-        "latest_price": 218.01,
-        "unrealized_return_pct": 18.87,
-        "cumulative_tenure_return_pct": 51.92,
-        "holding_days": 20,
-        "tenure_months": 2,
-        "ma60_stop_price": 138.03,
-        "stop_loss_ma60": 138.03,
-        "dist_to_stop_pct": 57.9,
-        "currency": "USD",
-        "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 US$183.40 續抱 (首倉 08/25 US$143.50，連任第 2/4 月)"
+        "entry_date": "2026-10-12",
+        "entry_price": 485.0,
+        "current_price": 510.0,
+        "stop_loss_price": 459.5,
+        "notes": "高頻高速銅箔主升段，FIP動能強烈，破60MA($459.5)停損"
       },
       {
-        "stock_id": "3037.TW",
-        "stock_name": "欣興 (Unimicron 載板王者)",
-        "tranche": "🅱️ B梯隊 (每月22號調倉)",
-        "role": "🅱️ B梯隊 🥈 第2主力 (梯隊30% / 總資金15%)",
-        "target_weight_pct": 15.0,
-        "weight_pct": 15.0,
-        "signal_date": "2026-09-22",
-        "entry_date": "20260923",
-        "first_entry_date": "2026-08-25",
-        "first_entry_price": 1070.0,
-        "entry_price": 1120.0,
-        "current_price": 1090.0,
-        "latest_price": 1090.0,
-        "unrealized_return_pct": -2.68,
-        "cumulative_tenure_return_pct": 1.87,
-        "holding_days": 20,
-        "tenure_months": 2,
-        "ma60_stop_price": 1052.52,
-        "stop_loss_ma60": 1052.52,
-        "dist_to_stop_pct": 3.6,
-        "currency": "TWD",
-        "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 NT$1,120.0 續抱 (首倉 08/25 NT$1,070.0，連任第 2/4 月)"
+        "stock_id": "3324",
+        "stock_name": "雙鴻",
+        "role": "⚡ 動能旗艦 (20%)",
+        "target_weight_pct": 20.0,
+        "entry_date": "2026-10-12",
+        "entry_price": 1360.0,
+        "current_price": 1420.0,
+        "stop_loss_price": 1082.4,
+        "notes": "GB200水冷板主動吸收站穩VWAP，破60MA($1082.4)停損"
       },
       {
-        "stock_id": "3443.TW",
-        "stock_name": "創意 (Global Unichip ASIC)",
-        "tranche": "🅱️ B梯隊 (每月22號調倉)",
-        "role": "🅱️ B梯隊 🥉 第3主力 (梯隊30% / 總資金15%)",
-        "target_weight_pct": 15.0,
-        "weight_pct": 15.0,
-        "signal_date": "2026-09-22",
-        "entry_date": "20260923",
-        "first_entry_date": "2026-08-25",
-        "first_entry_price": 5260.0,
-        "entry_price": 8325.0,
-        "current_price": 7480.0,
-        "latest_price": 7480.0,
-        "unrealized_return_pct": -10.15,
-        "cumulative_tenure_return_pct": 42.21,
-        "holding_days": 20,
-        "tenure_months": 2,
-        "ma60_stop_price": 6300.33,
-        "stop_loss_ma60": 6300.33,
-        "dist_to_stop_pct": 18.7,
-        "currency": "TWD",
-        "stop_condition": "🅱️ B梯隊(22號)：09/23 T+1開盤價 NT$8,325.0 續抱 (首倉 08/25 NT$5,260.0，連任第 2/4 月)"
+        "stock_id": "1303",
+        "stock_name": "南亞",
+        "role": "🛡️ 結構支柱 (20%)",
+        "target_weight_pct": 20.0,
+        "entry_date": "2026-10-12",
+        "entry_price": 234.5,
+        "current_price": 240.0,
+        "stop_loss_price": 194.7,
+        "notes": "電子材料CCL原物料復甦，非對稱下影線偏度支撐，破60MA($194.7)停損"
+      },
+      {
+        "stock_id": "3026",
+        "stock_name": "禾伸堂",
+        "role": "🎯 爆發突破 (20%)",
+        "target_weight_pct": 20.0,
+        "entry_date": "2026-10-12",
+        "entry_price": 744.0,
+        "current_price": 785.0,
+        "stop_loss_price": 712.9,
+        "notes": "車用高壓MLCC突破，阻力衰減GA Alpha穿透，破60MA($712.9)停損"
       }
     ],
     "full_history_20y": {
