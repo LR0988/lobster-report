@@ -615,120 +615,125 @@ export default function GlobalSovereignDashboard() {
 
     // A. 針對目標 Top 3 標的
     activeTopPicks.forEach(pick => {
-      // 梯隊內標準黃金階梯配置: 50% / 30% / 20%
-      const trancheWeightPct = pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : (pick.rank === 3 ? 20 : 0));
-      // 佔總淨值目標比例: 滿倉模式為 50/30/20%，單梯隊模式為 25/15/10%
-      const totalWeightPct = isHalfTranche ? (trancheWeightPct * 0.5) : trancheWeightPct;
-      const targetTwd = totalNetAssetsTwd * (totalWeightPct / 100.0);
+      // 雙梯隊權重設計：各隊佔 50% 總資金，梯隊內部為 50/30/20 黃金階梯
+      const weightTranchePct = pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : 20); // 梯隊內比例 50%, 30%, 20%
+      const weightTeamPct = weightTranchePct * 0.5; // 各隊佔總資產 25%, 15%, 10%
+      const totalWeightPct = weightTranchePct;       // 雙隊合併佔總資產 50%, 30%, 20%
+
+      const targetTwdA = totalNetAssetsTwd * (weightTeamPct / 100.0);
+      const targetTwdB = totalNetAssetsTwd * (weightTeamPct / 100.0);
+      const targetTwdTotal = totalNetAssetsTwd * (totalWeightPct / 100.0);
+
       const isUsd = pick.currency === 'USD';
       const price = pick.price || 1;
       const fx = isUsd ? usdFx : 1.0;
 
-      // 目標股數 (該模式下對應目標額度所換算之理論股數)
-      let targetShares = 0;
-      if (isUsd) {
-        const targetUsd = targetTwd / fx;
-        targetShares = Math.floor(targetUsd / price);
-      } else {
-        targetShares = Math.floor(targetTwd / price);
-      }
+      const targetSharesA = isUsd ? Math.floor((targetTwdA / fx) / price) : Math.floor(targetTwdA / price);
+      const targetSharesB = isUsd ? Math.floor((targetTwdB / fx) / price) : Math.floor(targetTwdB / price);
+      const targetSharesTotal = targetSharesA + targetSharesB;
 
-      // 檢查目前持有股數與佔總資產權重
+      // 當前帳戶持有總股數
       const heldPos = userPositions.find(p => p.ticker === pick.ticker);
       const heldShares = heldPos ? heldPos.shares : 0;
       const curWeightPct = totalNetAssetsTwd > 0 ? (((heldShares * price * fx) / totalNetAssetsTwd) * 100) : 0;
       const weightDiffPct = Math.abs(curWeightPct - totalWeightPct);
 
+      // 【核心實戰規則】：同一標的優先以 A 隊為主補滿，多出的持股給 B 隊，B 隊不滿的部分就建議買入補齊！
+      const allocSharesA = Math.min(heldShares, targetSharesA);
+      const deficitSharesA = Math.max(0, targetSharesA - allocSharesA);
+      const isFullA = deficitSharesA === 0;
+
+      const remForB = Math.max(0, heldShares - targetSharesA);
+      const allocSharesB = Math.min(remForB, targetSharesB);
+      const deficitSharesB = Math.max(0, targetSharesB - allocSharesB);
+      const isFullB = deficitSharesB === 0;
+
+      const totalDeficitShares = deficitSharesA + deficitSharesB;
+      const excessShares = Math.max(0, heldShares - targetSharesTotal);
+
       const suggKey = `sugg_${rebalanceMode}_${pick.ticker}`;
       const isAlreadyDismissed = dismissedSuggestions.includes(suggKey);
-
-      // 目標配置文字 (清晰展示梯隊與總淨值比例，杜絕「怎麼不是50/30/20」的誤解)
-      const targetWeightDisplay = isHalfTranche
-        ? `梯隊 ${trancheWeightPct}% (總額 ${totalWeightPct}%)`
-        : `${totalWeightPct}%`;
-
-      const roleTitle = isHalfTranche
-        ? `${modePrefix} 👑第${pick.rank}主力 (梯隊${trancheWeightPct}% / 總額${totalWeightPct}%)`
-        : `${modePrefix} 👑第${pick.rank}主力 (${totalWeightPct}%)`;
 
       let action = '續抱';
       let actionColor = '#10B981';
       let recShares = 0;
+      let actionNote = '';
       let isBalanced = false;
       let estFee = 0;
 
       if (isAlreadyDismissed) {
-        // 如果使用者先前已手動點擊執行送出該建議，保留此行展示為已執行，避免表格缺檔
         action = '續抱';
         actionColor = '#10B981';
         recShares = 0;
+        actionNote = '已完成調倉執行';
         isBalanced = true;
-      } else if (isHalfTranche) {
-        // === 單梯隊調倉模式 (🅰️ 1號 A 隊 或 🅱️ 22號 B 隊) ===
-        // 在雙梯隊架構中，單梯隊調倉動用帳戶 50% 總資金。
-        // 1. 若當前持股已達雙隊共振滿倉 (持股比例已覆蓋單梯隊 1.6 倍以上，如第1名 >= 40%、第2名 >= 24%、第3名 >= 16% 或股數足額):
-        const isFullResonance = curWeightPct >= (totalWeightPct * 1.6) || (targetShares > 0 && heldShares >= Math.floor(targetShares * 1.6));
-        // 2. 若當前持股在單梯隊目標容差帶內 (偏差 <= 2.5% 或股數金額偏差 <= 5000):
-        const isTrancheAligned = weightDiffPct <= 2.5 || Math.abs((targetShares - heldShares) * price * fx) <= 5000;
-
-        if (heldShares === 0 && targetShares > 0) {
-          // 全新建倉買入
-          action = '買入';
-          actionColor = '#10B981';
-          recShares = targetShares;
-          estFee = isUsd ? 15 : Math.max(20, Math.round(targetShares * price * 0.001425));
-        } else if (isFullResonance) {
-          // 雙隊共振滿倉，該梯隊已完全滿足！絕不叫使用者減持！
+      } else if (rebalanceMode === 'full_100') {
+        // === 模式 1（主要模式）：雙梯隊統一檢視 (A隊優先補滿 + B隊缺額補齊) ===
+        if (totalDeficitShares === 0 && (excessShares === 0 || weightDiffPct <= 5.0)) {
           action = '續抱';
           actionColor = '#10B981';
           recShares = 0;
+          actionNote = '雙隊皆已滿額補齊';
           isBalanced = true;
-        } else if (isTrancheAligned) {
-          // 單梯隊部位已對齊
-          action = '續抱';
-          actionColor = '#10B981';
-          recShares = 0;
-          isBalanced = true;
-        } else if (curWeightPct < totalWeightPct - 2.5) {
-          // 低於單梯隊目標需加碼補足
-          const diff = Math.max(1, targetShares - heldShares);
-          action = '加碼';
-          actionColor = '#38BDF8';
-          recShares = diff;
-          estFee = isUsd ? 15 : Math.max(20, Math.round(diff * price * 0.001425));
-        } else {
-          // 持股介於單梯隊至雙隊共振之間，梯隊額度已安全滿足，續抱即可
-          action = '續抱';
-          actionColor = '#10B981';
-          recShares = 0;
-          isBalanced = true;
-        }
-      } else {
-        // === 🔥 100% 雙隊滿倉模式 ===
-        const diffShares = targetShares - heldShares;
-        if (heldShares === 0 && targetShares > 0) {
-          action = '買入';
-          actionColor = '#10B981';
-          recShares = targetShares;
-          estFee = isUsd ? 15 : Math.max(20, Math.round(targetShares * price * 0.001425));
-        } else if (weightDiffPct <= 5.0 || Math.abs(diffShares * price * fx) <= 5000) {
-          action = '續抱';
-          actionColor = '#10B981';
-          recShares = 0;
-          isBalanced = true;
-        } else if (diffShares > 0) {
-          action = '加碼';
-          actionColor = '#38BDF8';
-          recShares = diffShares;
-          estFee = isUsd ? 15 : Math.max(20, Math.round(diffShares * price * 0.001425));
-        } else {
-          const reduceShares = Math.abs(diffShares);
+        } else if (totalDeficitShares === 0 && excessShares > 0 && weightDiffPct > 5.0 && (excessShares * price * fx) > 5000) {
           action = '減持';
           actionColor = '#F59E0B';
-          recShares = reduceShares;
-          estFee = isUsd ? 15 : Math.round(reduceShares * price * (0.003 + 0.001425));
+          recShares = excessShares;
+          actionNote = `超出雙隊上限 ${excessShares} 股`;
+          estFee = isUsd ? 15 : Math.round(excessShares * price * (0.003 + 0.001425));
+        } else if (isFullA && deficitSharesB > 0) {
+          // A 隊已補滿，B 隊不滿，買入補齊 B 隊缺額！
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = deficitSharesB;
+          actionNote = `A隊已補滿，建議買入 +${deficitSharesB} 股補齊B隊`;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(deficitSharesB * price * 0.001425));
+        } else {
+          // A 隊未補滿（且 B 隊未補滿）
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = totalDeficitShares;
+          actionNote = `建議買入 +${totalDeficitShares} 股 (A隊補滿${deficitSharesA}股 + B隊補齊${deficitSharesB}股)`;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(totalDeficitShares * price * 0.001425));
+        }
+      } else if (rebalanceMode === 'tranche_a_50') {
+        // 單看 A 隊 (1號 A梯隊 50% 專屬調倉)
+        if (isFullA) {
+          action = '續抱';
+          actionColor = '#10B981';
+          recShares = 0;
+          actionNote = 'A隊已滿額 (續抱)';
+          isBalanced = true;
+        } else {
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = deficitSharesA;
+          actionNote = `建議買入 +${deficitSharesA} 股補滿 A隊`;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(deficitSharesA * price * 0.001425));
+        }
+      } else {
+        // 單看 B 隊 (22號 B梯隊 50% 專屬調倉)
+        if (isFullB) {
+          action = '續抱';
+          actionColor = '#10B981';
+          recShares = 0;
+          actionNote = 'B隊已補齊 (續抱)';
+          isBalanced = true;
+        } else {
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = deficitSharesB;
+          actionNote = `建議買入 +${deficitSharesB} 股補齊 B隊`;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(deficitSharesB * price * 0.001425));
         }
       }
+
+      // 目標配置文字標籤
+      const targetWeightDisplay = rebalanceMode === 'full_100'
+        ? `雙隊 ${totalWeightPct}% (A隊${weightTeamPct}% + B隊${weightTeamPct}%)`
+        : `梯隊 ${weightTranchePct}% (總額 ${weightTeamPct}%)`;
+
+      const roleTitle = `👑 第${pick.rank}主力 (總目標 ${totalWeightPct}%)`;
 
       suggestions.push({
         key: suggKey,
@@ -740,13 +745,22 @@ export default function GlobalSovereignDashboard() {
         currency: pick.currency,
         targetWeightPct: totalWeightPct,
         targetWeightDisplay,
-        targetTwd,
+        targetTwd: targetTwdTotal,
         currentShares: heldShares,
-        targetShares: isHalfTranche && (curWeightPct >= totalWeightPct * 1.6) ? heldShares : targetShares,
+        targetShares: targetSharesTotal,
+        targetSharesA,
+        allocSharesA,
+        deficitSharesA,
+        isFullA,
+        targetSharesB,
+        allocSharesB,
+        deficitSharesB,
+        isFullB,
         recShares,
         defaultPrice: price,
         defaultTaxFee: estFee,
         role: roleTitle,
+        actionNote,
         heldPos,
         isBalanced,
         isExecuted: isAlreadyDismissed
@@ -2358,14 +2372,14 @@ export default function GlobalSovereignDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  🔄 雙梯隊持倉更動建議（支援「🔥 100% 雙隊滿倉」與「50% 單梯隊」一鍵切換試算）
+                  🔄 雙梯隊持倉更動建議（A隊優先補滿 ＋ B隊缺額買入補齊）
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
                   {rebalanceMode === 'full_100'
-                    ? `目前為【🔥 100% 雙隊純滿倉模式 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：A隊(50%) + B隊(50%) 共振合流，以 50% / 30% / 20% 黃金階梯滿額配置。`
+                    ? `目前為【👑 雙梯隊交錯進攻總覽 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：同一標的優先以 🅰️ A隊(每月1號・50%預算) 為主補滿，🅱️ B隊(每月22號・50%預算) 不滿的部分即建議買入補齊！雙隊皆補滿時安心續抱。`
                     : rebalanceMode === 'tranche_a_50'
-                      ? `目前為【🅰️ 1號 A 梯隊半倉調倉 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：每月 1 號專屬定期調倉！梯隊內部配置 50% / 30% / 20%（佔總淨值 25% / 15% / 10%）。若持股已達雙隊共振滿額則安心續抱，絕不誤砍部位！`
-                      : `目前為【🅱️ 22號 B 梯隊半倉調倉 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：每月 22 號專屬定期調倉！梯隊內部配置 50% / 30% / 20%（佔總淨值 25% / 15% / 10%）。若持股已達雙隊共振滿額則安心續抱，絕不誤砍部位！`}
+                      ? `目前為【🅰️ 1號 A 梯隊專屬調倉 (50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：梯隊內部配置 50% / 30% / 20% (佔總淨值 25% / 15% / 10%)。優先補滿 A 隊！`
+                      : `目前為【🅱️ 22號 B 梯隊專屬調倉 (50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：梯隊內部配置 50% / 30% / 20% (佔總淨值 25% / 15% / 10%)。建議買入補齊 B 隊缺額！`}
                 </p>
               </div>
 
@@ -2394,7 +2408,7 @@ export default function GlobalSovereignDashboard() {
                       color: rebalanceMode === 'full_100' ? '#FFF' : '#94A3B8'
                     }}
                   >
-                    🔥 100% 雙隊滿倉 (50/30/20%)
+                    🔥 雙隊合流 (A隊補滿+B隊補齊)
                   </button>
                   <button
                     type="button"
@@ -2526,16 +2540,41 @@ export default function GlobalSovereignDashboard() {
                               color: sugg.actionColor,
                               border: `1px solid ${sugg.actionColor}60`
                             }}>
-                              {sugg.action === '續抱' ? '✅ 續抱' : (sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出')))}
+                              {sugg.action === '續抱' ? '✅ 續抱' : (sugg.isFullA && sugg.deficitSharesB > 0 ? '🟢 補齊B隊' : (sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出'))))}
                             </span>
                           </td>
 
-                          {/* 標的名稱 */}
+                          {/* 標的名稱 與 雙梯隊分配進度 */}
                           <td>
                             <strong style={{ color: '#F8FAFC' }}>{sugg.name}</strong>
                             <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                               {sugg.ticker} | <span style={{ color: '#FBBF24' }}>{sugg.role}</span>
                             </div>
+                            {/* 雙梯隊 A隊補滿 / B隊補齊 狀態條 */}
+                            {sugg.targetSharesA > 0 && (
+                              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.3rem', fontSize: '0.7rem', flexWrap: 'wrap' }}>
+                                <span style={{
+                                  padding: '1px 6px',
+                                  borderRadius: '3px',
+                                  background: sugg.isFullA ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                  color: sugg.isFullA ? '#34D399' : '#F87171',
+                                  border: sugg.isFullA ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                                  fontFamily: 'monospace'
+                                }}>
+                                  🅰️ A隊: {sugg.isFullA ? `✅ 已補滿 (${sugg.allocSharesA}/${sugg.targetSharesA}股)` : `⚠️ 缺 ${sugg.deficitSharesA} 股`}
+                                </span>
+                                <span style={{
+                                  padding: '1px 6px',
+                                  borderRadius: '3px',
+                                  background: sugg.isFullB ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                                  color: sugg.isFullB ? '#34D399' : '#FBBF24',
+                                  border: sugg.isFullB ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
+                                  fontFamily: 'monospace'
+                                }}>
+                                  🅱️ B隊: {sugg.isFullB ? `✅ 已補齊 (${sugg.allocSharesB}/${sugg.targetSharesB}股)` : `⚠️ 缺 ${sugg.deficitSharesB} 股 (買入補齊)`}
+                                </span>
+                              </div>
+                            )}
                           </td>
 
                           {/* 目標配置 */}
@@ -2548,12 +2587,20 @@ export default function GlobalSovereignDashboard() {
 
                           {/* 目前股數 */}
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
-                            {sugg.currentShares.toLocaleString()} 股
+                            <div style={{ color: '#F1F5F9', fontWeight: 'bold' }}>{sugg.currentShares.toLocaleString()} 股</div>
+                            <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>
+                              佔比 {totalNetAssetsTwd > 0 ? (((sugg.currentShares * sugg.defaultPrice * (sugg.currency === 'USD' ? usdFx : 1)) / totalNetAssetsTwd) * 100).toFixed(1) : 0}%
+                            </div>
                           </td>
 
                           {/* 建議股數 */}
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: sugg.action === '續抱' ? '#34D399' : '#67E8F9' }}>
-                            {sugg.action === '續抱' ? '0 股 (平衡)' : (sugg.action === '買入' || sugg.action === '加碼' ? `+${sugg.recShares} 股` : `-${sugg.recShares} 股`)}
+                            <div>{sugg.action === '續抱' ? '0 股 (已平衡)' : (sugg.action === '買入' || sugg.action === '加碼' ? `+${sugg.recShares} 股` : `-${sugg.recShares} 股`)}</div>
+                            {sugg.actionNote && (
+                              <div style={{ fontSize: '0.68rem', color: sugg.action === '續抱' ? '#6EE7B7' : '#FCD34D', fontWeight: 'normal', fontFamily: 'sans-serif' }}>
+                                {sugg.actionNote}
+                              </div>
+                            )}
                           </td>
 
                           {/* 實際股數 Input */}
