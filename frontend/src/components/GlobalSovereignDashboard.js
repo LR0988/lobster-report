@@ -722,6 +722,27 @@ export default function GlobalSovereignDashboard() {
           role: roleTitle,
           heldPos: heldPos
         });
+      } else {
+        // 權重在容差帶內或金額偏差極小：部位平衡無需調整，明確展示為續抱，確保 3 檔目標 100% 透明無遺漏！
+        suggestions.push({
+          key: suggKey,
+          action: '續抱',
+          actionColor: '#10B981',
+          ticker: pick.ticker,
+          name: pick.name,
+          market: pick.market,
+          currency: pick.currency,
+          targetWeightPct: effectiveWeightPct,
+          targetTwd: targetTwd,
+          currentShares: heldShares,
+          targetShares: targetShares,
+          recShares: 0,
+          defaultPrice: price,
+          defaultTaxFee: 0,
+          role: roleTitle,
+          heldPos: heldPos,
+          isBalanced: true
+        });
       }
     });
 
@@ -784,8 +805,33 @@ export default function GlobalSovereignDashboard() {
     }));
   };
 
+  // 一鍵複製所有調倉委託指令
+  const handleCopyAllOrders = () => {
+    if (!rebalanceSuggestions || rebalanceSuggestions.length === 0) return;
+    const activeLines = rebalanceSuggestions
+      .filter(s => s.action !== '續抱' && s.recShares > 0)
+      .map(s => {
+        const isUsd = s.currency === 'USD';
+        const actionText = s.action === '買入' || s.action === '加碼' ? '買進' : '賣出';
+        const curr = isUsd ? 'USD $' : 'NT$ ';
+        return `${s.ticker} ${s.name}: ${actionText} ${s.recShares} 股 (參考價 ${curr}${s.defaultPrice})`;
+      });
+    if (activeLines.length === 0) {
+      triggerNotice('ℹ️ 目前 3 檔主力標的均已處於平衡容差帶內，無須發送任何調倉委託！');
+      return;
+    }
+    const text = activeLines.join('\n');
+    navigator.clipboard.writeText(text);
+    triggerNotice(`📋 已成功複製 ${activeLines.length} 筆調倉委託指令！`);
+  };
+
   // 4. 點擊「🚀 確認送出」執行建議更動
   const handleExecuteSuggestion = (sugg) => {
+    if (sugg.action === '續抱' || sugg.isBalanced) {
+      triggerNotice(`✅「${sugg.name}」目前持倉權重已完全對齊目標，處於平衡容差帶內，請安心續抱！`);
+      return;
+    }
+
     const rowVal = getRowValues(sugg);
     const actualShares = parseInt(rowVal.shares, 10);
     const actualPrice = parseFloat(rowVal.price);
@@ -1682,7 +1728,7 @@ export default function GlobalSovereignDashboard() {
         }}>
           <button
             type="button"
-            onClick={() => setDashboardStationView('all')}
+            onClick={() => { setDashboardStationView('all'); setRebalanceMode('full_100'); }}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -1703,7 +1749,7 @@ export default function GlobalSovereignDashboard() {
           </button>
           <button
             type="button"
-            onClick={() => setDashboardStationView('titan_a')}
+            onClick={() => { setDashboardStationView('titan_a'); setRebalanceMode('tranche_a_50'); }}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -1724,7 +1770,7 @@ export default function GlobalSovereignDashboard() {
           </button>
           <button
             type="button"
-            onClick={() => setDashboardStationView('titan_b')}
+            onClick={() => { setDashboardStationView('titan_b'); setRebalanceMode('tranche_b_50'); }}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -2269,7 +2315,7 @@ export default function GlobalSovereignDashboard() {
           </div>
 
           {/* 2. 雙梯隊持倉更動建議 (Dual-Tranche Rebalance Recommendations) */}
-          {(dashboardStationView === 'all' || dashboardStationView === 'titan_attack') && (
+          {(dashboardStationView === 'all' || dashboardStationView === 'titan_attack' || dashboardStationView === 'titan_a' || dashboardStationView === 'titan_b') && (
             <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.04)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
               <div>
@@ -2298,7 +2344,7 @@ export default function GlobalSovereignDashboard() {
                 }}>
                   <button
                     type="button"
-                    onClick={() => setRebalanceMode('full_100')}
+                    onClick={() => { setRebalanceMode('full_100'); setDashboardStationView('all'); }}
                     style={{
                       padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
@@ -2314,7 +2360,7 @@ export default function GlobalSovereignDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setRebalanceMode('tranche_a_50')}
+                    onClick={() => { setRebalanceMode('tranche_a_50'); setDashboardStationView('titan_a'); }}
                     style={{
                       padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
@@ -2330,7 +2376,7 @@ export default function GlobalSovereignDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setRebalanceMode('tranche_b_50')}
+                    onClick={() => { setRebalanceMode('tranche_b_50'); setDashboardStationView('titan_b'); }}
                     style={{
                       padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
@@ -2345,6 +2391,24 @@ export default function GlobalSovereignDashboard() {
                     🅱️ 22號 B隊 (50%)
                   </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={handleCopyAllOrders}
+                  style={{
+                    background: 'rgba(56, 189, 248, 0.2)',
+                    border: '1px solid #38BDF8',
+                    color: '#67E8F9',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '5px',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                  title="一鍵複製目前所有需要調整的下單指令"
+                >
+                  📋 一鍵複製調倉委託
+                </button>
 
                 {dismissedSuggestions.length > 0 && (
                   <button
@@ -2424,7 +2488,7 @@ export default function GlobalSovereignDashboard() {
                               color: sugg.actionColor,
                               border: `1px solid ${sugg.actionColor}60`
                             }}>
-                              {sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出'))}
+                              {sugg.action === '續抱' ? '✅ 續抱' : (sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出')))}
                             </span>
                           </td>
 
@@ -2450,8 +2514,8 @@ export default function GlobalSovereignDashboard() {
                           </td>
 
                           {/* 建議股數 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#67E8F9' }}>
-                            {sugg.action === '加碼' ? `+${sugg.recShares}` : (sugg.action === '減持' ? `-${sugg.recShares}` : `${sugg.recShares}`)} 股
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: sugg.action === '續抱' ? '#34D399' : '#67E8F9' }}>
+                            {sugg.action === '續抱' ? '0 股 (平衡)' : (sugg.action === '加碼' ? `+${sugg.recShares}` : (sugg.action === '減持' ? `-${sugg.recShares}` : `${sugg.recShares}`)) + ' 股'}
                           </td>
 
                           {/* 實際股數 Input */}
@@ -2460,13 +2524,14 @@ export default function GlobalSovereignDashboard() {
                               type="number"
                               value={rowVal.shares}
                               onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
+                              disabled={sugg.action === '續抱'}
                               style={{
                                 width: '85px',
                                 padding: '0.3rem 0.4rem',
                                 borderRadius: '4px',
-                                background: 'rgba(0,0,0,0.6)',
-                                border: '1px solid #38BDF8',
-                                color: '#38BDF8',
+                                background: sugg.action === '續抱' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)',
+                                border: sugg.action === '續抱' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #38BDF8',
+                                color: sugg.action === '續抱' ? '#94A3B8' : '#38BDF8',
                                 fontWeight: 'bold',
                                 textAlign: 'right',
                                 fontFamily: 'monospace',
@@ -2532,9 +2597,9 @@ export default function GlobalSovereignDashboard() {
                               style={{
                                 padding: '0.35rem 0.8rem',
                                 fontSize: '0.78rem',
-                                background: `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
-                                color: '#FFF',
-                                border: 'none',
+                                background: sugg.action === '續抱' ? 'rgba(16, 185, 129, 0.25)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
+                                color: sugg.action === '續抱' ? '#34D399' : '#FFF',
+                                border: sugg.action === '續抱' ? '1px solid rgba(16, 185, 129, 0.5)' : 'none',
                                 borderRadius: '4px',
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
@@ -2542,7 +2607,7 @@ export default function GlobalSovereignDashboard() {
                                 whiteSpace: 'nowrap'
                               }}
                             >
-                              🚀 確認送出
+                              {sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出'}
                             </button>
                           </td>
                         </tr>
