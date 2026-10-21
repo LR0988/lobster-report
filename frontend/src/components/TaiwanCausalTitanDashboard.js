@@ -54,16 +54,18 @@ export default function TaiwanCausalTitanDashboard() {
     document.body.removeChild(link);
   };
 
-  // 動態計算各檔個股建議配置股數
+  // 動態計算各檔個股建議配置股數 (依黃金階梯權重分配 35/25/20/10/10)
   const calculatedPositions = useMemo(() => {
-    const capitalPerStock = userCapital / (current_positions.length || 5);
     return current_positions.map(pos => {
-      const targetShares = Math.floor(capitalPerStock / pos.current_price);
+      const weight = (pos.weight_pct || 20) / 100;
+      const allocatedCapital = userCapital * weight;
+      const targetShares = Math.floor(allocatedCapital / pos.current_price);
       const targetLots = Math.floor(targetShares / 1000);
       const oddShares = targetShares % 1000;
       const targetAmount = targetShares * pos.current_price;
       return {
         ...pos,
+        allocatedCapital,
         targetShares,
         targetLots,
         oddShares,
@@ -304,9 +306,9 @@ export default function TaiwanCausalTitanDashboard() {
               </div>
 
               <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1.2rem' }}>
-                <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>等權重試算 (每檔 20%)</div>
+                <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>黃金階梯配置試算 (35% / 25% / 20% / 10% / 10%)</div>
                 <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#38BDF8' }}>
-                  NT$ {Math.round(userCapital / (calculatedPositions.length || 5)).toLocaleString()} / 檔
+                  5 檔依進攻階梯權重動態分配
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
                   預計持股總額: NT$ {totalAllocatedAmount.toLocaleString()} (留存現金: NT$ {residualCash.toLocaleString()})
@@ -382,7 +384,7 @@ export default function TaiwanCausalTitanDashboard() {
 
                 {/* 建議買進配置 */}
                 <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '0.6rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>本金試算建議股數</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>本金建議股數 ({pos.weight_pct}%)</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#38BDF8' }}>
                     {pos.targetShares.toLocaleString()} 股
                   </div>
