@@ -1,121 +1,23 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import defaultTitanData from '../data/taiwan_causal_titan_data.json';
 import { getCurrentUser } from '../api';
 
 // ==========================================
 // 👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10)
-// 完全復刻全球主權泰坦互動操作架構
-// 包含帳戶資產總覽、階梯調倉更動建議表格、實盤部位與歷史流水帳深度連動、歷年年度勝率與報酬
+// 核心架構：嚴格以「歷史進出交易流水帳 (txHistory)」為唯一真實來源 (Single Source of Truth)
+// 1. 所有持股部位 100% 由歷史交易流水帳 (txHistory) 的買進/加碼/減持/賣出動態推導！
+// 2. 歷史進出若無買任何股票，持股部位即為 0 檔，絕無幽靈部位脫鉤！
+// 3. 所有損益（未實現、已實現、總淨利、手續費、現金）100% 由歷史流水帳動態核算！
 // ==========================================
 
 const getTaiwanTitanStorageKeys = (username) => ({
-  positions: `tw_causal_titan_user_positions_v2_${username}`,
   idleCash: `tw_causal_titan_idle_cash_v2_${username}`,
   allTx: `tw_causal_titan_all_tx_v2_${username}`,
   dismissedSugg: `tw_causal_titan_dismissed_sugg_v2_${username}`
 });
 
-// 預設 5 檔初始部位 (依 100 萬投資本金，2026-10-12 法定公告日建倉，DOE 黃金階梯 35/25/20/10/10 配置)
-const DEFAULT_POSITIONS = [
-  {
-    id: 'pos_3105',
-    stock_id: '3105',
-    ticker: '3105.TW',
-    stock_name: '穩懋',
-    name: '穩懋 (PA 功率放大器 / 5G射頻王者)',
-    industry: 'PA 功率放大器 / 5G射頻王者',
-    role: '👑 王者先鋒 (35%)',
-    target_weight_pct: 35.0,
-    shares: 603,
-    entry_price: 580.0,
-    current_price: 512.0,
-    entry_date: '2026-10-12',
-    price_date: '2026-10-21',
-    entry_fee: 498,
-    stop_loss_price: 460.93,
-    stop_condition: '逐日監控：跌破 60MA 季線 (460.9元) 則動態出場停泊現金',
-    highlight: '砷化鎵龍頭，因果吸籌大單破季線突破'
-  },
-  {
-    id: 'pos_8358',
-    stock_id: '8358',
-    ticker: '8358.TW',
-    stock_name: '金居',
-    name: '金居 (高頻高速銅箔龍頭)',
-    industry: '高頻高速銅箔龍頭',
-    role: '🚀 核心主力 (25%)',
-    target_weight_pct: 25.0,
-    shares: 478,
-    entry_price: 522.0,
-    current_price: 482.0,
-    entry_date: '2026-10-12',
-    price_date: '2026-10-21',
-    entry_fee: 356,
-    stop_loss_price: 458.93,
-    stop_condition: '逐日監控：跌破 60MA 季線 (458.9元) 則動態出場停泊現金',
-    highlight: 'AI伺服器PCB高頻銅箔主升段爆發'
-  },
-  {
-    id: 'pos_3324',
-    stock_id: '3324',
-    ticker: '3324.TW',
-    stock_name: '雙鴻',
-    name: '雙鴻 (AI 水冷散熱伺服器龍頭)',
-    industry: 'AI 水冷散熱伺服器龍頭',
-    role: '⚡ 動能旗艦 (20%)',
-    target_weight_pct: 20.0,
-    shares: 129,
-    entry_price: 1540.0,
-    current_price: 1375.0,
-    entry_date: '2026-10-12',
-    price_date: '2026-10-21',
-    entry_fee: 283,
-    stop_loss_price: 1220.22,
-    stop_condition: '逐日監控：跌破 60MA 季線 (1220.2元) 則動態出場停泊現金',
-    highlight: 'GB200水冷板主動吸收站穩VWAP'
-  },
-  {
-    id: 'pos_1303',
-    stock_id: '1303',
-    ticker: '1303.TW',
-    stock_name: '南亞',
-    name: '南亞 (電子材料 / 環氧樹脂)',
-    industry: '電子材料 / 環氧樹脂',
-    role: '🛡️ 結構支柱 (10%)',
-    target_weight_pct: 10.0,
-    shares: 330,
-    entry_price: 303.0,
-    current_price: 320.5,
-    entry_date: '2026-10-12',
-    price_date: '2026-10-21',
-    entry_fee: 142,
-    stop_loss_price: 227.11,
-    stop_condition: '逐日監控：跌破 60MA 季線 (227.1元) 則動態出場停泊現金',
-    highlight: 'CCL玻纖布原物料反轉向上潛伏防守'
-  },
-  {
-    id: 'pos_3026',
-    stock_id: '3026',
-    ticker: '3026.TW',
-    stock_name: '禾伸堂',
-    name: '禾伸堂 (MLCC 被動元件 / 車用陶瓷)',
-    industry: 'MLCC 被動元件 / 車用陶瓷',
-    role: '🎯 爆發突破 (10%)',
-    target_weight_pct: 10.0,
-    shares: 119,
-    entry_price: 840.0,
-    current_price: 815.0,
-    entry_date: '2026-10-12',
-    price_date: '2026-10-21',
-    entry_fee: 142,
-    stop_loss_price: 703.27,
-    stop_condition: '逐日監控：跌破 60MA 季線 (703.3元) 則動態出場停泊現金',
-    highlight: '車用被動元件阻力衰減突破'
-  }
-];
-
-// 預設 5 檔初始建倉流水帳 (依 100 萬本金開倉，與當前實戰持股完全對齊)
-const DEFAULT_TX_HISTORY = [
+// 10/12 法定建倉預設交易範本 (100萬本金 × DOE 黃金階梯 35/25/20/10/10)
+const TEMPLATE_1012_TRANSACTIONS = [
   {
     id: 'tx_tw_deposit_1',
     date: '2026-10-12',
@@ -224,52 +126,28 @@ export default function TaiwanCausalTitanDashboard() {
     setTimeout(() => setFeedbackMsg(''), 4000);
   };
 
-  // 持股部位狀態 (localStorage 持久化，並具備版本自動遷移校準)
-  const [userPositions, setUserPositions] = useState(() => {
-    try {
-      const saved = localStorage.getItem(storageKeys.positions);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // 檢查是否有舊的錯誤成本 (例如 穩懋 475 或 736 股)，若有自動升級至真實 10/12 建倉成本
-          const hasOldData = parsed.some(p => p.stock_id === '3105' && (p.entry_price === 475 || p.shares === 736));
-          if (hasOldData) {
-            try { localStorage.setItem(storageKeys.positions, JSON.stringify(DEFAULT_POSITIONS)); } catch {}
-            return DEFAULT_POSITIONS;
-          }
-          return parsed;
-        }
-      }
-      return DEFAULT_POSITIONS;
-    } catch {
-      return DEFAULT_POSITIONS;
-    }
-  });
-
-  // 歷史交易流水帳 (localStorage 持久化 - 唯一真實來源)
+  // =========================================================================
+  // 唯一的真實來源 (Single Source of Truth)：實戰歷史交易進出流水帳 (txHistory)
+  // =========================================================================
   const [txHistory, setTxHistory] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKeys.allTx);
       if (saved) {
         let parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const hasOldData = parsed.some(tx => tx.stock_id === '3105' && (tx.price === 475 || tx.shares === 736));
-          if (hasOldData) {
-            parsed = DEFAULT_TX_HISTORY;
-            try { localStorage.setItem(storageKeys.allTx, JSON.stringify(parsed)); } catch {}
-          }
-          // 確保歷史紀錄包含初始入金流水帳
+          // 確保歷史紀錄中包含投入現金本金紀錄
           const hasDeposit = parsed.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || (tx.note && tx.note.includes('入金')));
           if (!hasDeposit) {
-            parsed = [DEFAULT_TX_HISTORY[0], ...parsed];
+            parsed = [TEMPLATE_1012_TRANSACTIONS[0], ...parsed];
             try { localStorage.setItem(storageKeys.allTx, JSON.stringify(parsed)); } catch {}
           }
           return parsed;
         }
       }
-      return DEFAULT_TX_HISTORY;
+      // 預設為初始本金 100 萬待命 (若使用者尚未建倉則持股為 0，可隨時一鍵執行法定建倉)
+      return [TEMPLATE_1012_TRANSACTIONS[0]];
     } catch {
-      return DEFAULT_TX_HISTORY;
+      return [TEMPLATE_1012_TRANSACTIONS[0]];
     }
   });
 
@@ -283,26 +161,136 @@ export default function TaiwanCausalTitanDashboard() {
     }
   });
 
-  // 表格內即時修改的建議數據暫存 (比照全球主權泰坦模式)
+  // 表格內即時修改的建議數據暫存
   const [customEdits, setCustomEdits] = useState({});
 
-  // 自動持久化儲存
+  // 持久化儲存流水帳 (唯一的狀態來源)
   useEffect(() => {
     try {
-      localStorage.setItem(storageKeys.positions, JSON.stringify(userPositions));
       localStorage.setItem(storageKeys.allTx, JSON.stringify(txHistory));
       localStorage.setItem(storageKeys.dismissedSugg, JSON.stringify(dismissedSuggestions));
     } catch (err) {
-      console.warn('無法儲存台股泰坦持倉:', err);
+      console.warn('無法儲存台股泰坦流水帳:', err);
     }
-  }, [userPositions, txHistory, dismissedSuggestions, storageKeys]);
+  }, [txHistory, dismissedSuggestions, storageKeys]);
 
-  // 閒置現金 (TWD) - 100% 由交易流水帳 (txHistory) 的現金流動態加總推導 (唯一真實來源)
+  // 目標階梯配置基準 (DOE 35/25/20/10/10)
+  const targetAllocationConfig = useMemo(() => [
+    { stock_id: '3105', name: '穩懋', role: '👑 王者先鋒 (35%)', weight_pct: 35.0, price: 512.0, stop_loss: 460.93, industry: 'PA 功率放大器 / 5G射頻王者' },
+    { stock_id: '8358', name: '金居', role: '🚀 核心主力 (25%)', weight_pct: 25.0, price: 482.0, stop_loss: 458.93, industry: '高頻高速銅箔龍頭' },
+    { stock_id: '3324', name: '雙鴻', role: '⚡ 動能旗艦 (20%)', weight_pct: 20.0, price: 1375.0, stop_loss: 1220.22, industry: 'AI 水冷散熱伺服器龍頭' },
+    { stock_id: '1303', name: '南亞', role: '🛡️ 結構支柱 (10%)', weight_pct: 10.0, price: 320.5, stop_loss: 227.11, industry: '電子材料 / 環氧樹脂' },
+    { stock_id: '3026', name: '禾伸堂', role: '🎯 爆發突破 (10%)', weight_pct: 10.0, price: 815.0, stop_loss: 703.27, industry: 'MLCC 被動元件 / 車用陶瓷' }
+  ], []);
+
+  // =========================================================================
+  // 核心推導：所有持股部位 (userPositions) 100% 嚴格由歷史流水帳 (txHistory) 計算推導！
+  // 歷史流水帳中沒有買股票 -> 持股部位絕對為 0！徹底杜絕脫鉤現象。
+  // =========================================================================
+  const userPositions = useMemo(() => {
+    if (!Array.isArray(txHistory) || txHistory.length === 0) return [];
+
+    // 依交易日期正序推算部位變化
+    const sortedTx = [...txHistory].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    const holdingsMap = {};
+
+    sortedTx.forEach(tx => {
+      const action = tx.action;
+      const stockId = String(tx.stock_id || '').trim();
+      const ticker = String(tx.ticker || '').trim();
+      const name = tx.name || '';
+
+      // 跳過純資金進出與無效代碼
+      if (['投入現金', '提取本金', '入金', '出金'].includes(action) || (!stockId && !ticker) || stockId === '-') {
+        return;
+      }
+
+      const key = (stockId && stockId !== '-') ? stockId : ticker;
+      if (!key) return;
+
+      if (!holdingsMap[key]) {
+        holdingsMap[key] = {
+          stock_id: (stockId && stockId !== '-') ? stockId : key.split('.')[0],
+          ticker: (ticker && ticker !== '-') ? ticker : `${stockId}.TW`,
+          name: name.replace(/\s*\(\d+\)/, '').trim(),
+          shares: 0,
+          totalCost: 0,
+          totalFee: 0,
+          firstBuyDate: tx.date || '',
+          lastTxDate: tx.date || ''
+        };
+      }
+
+      const h = holdingsMap[key];
+      const shares = parseInt(tx.shares, 10) || 0;
+      const price = parseFloat(tx.price) || 0;
+      const fee = parseFloat(tx.tax_fee) || 0;
+
+      if (action === '買入' || action === '加碼') {
+        h.shares += shares;
+        h.totalCost += (shares * price);
+        h.totalFee += fee;
+        h.lastTxDate = tx.date || h.lastTxDate;
+        if (!h.firstBuyDate) h.firstBuyDate = tx.date || '';
+      } else if (action === '賣出' || action === '減持') {
+        if (h.shares > 0) {
+          const avgCost = h.totalCost / h.shares;
+          const reduceShares = Math.min(shares, h.shares);
+          h.shares -= reduceShares;
+          h.totalCost -= (reduceShares * avgCost);
+        }
+        h.lastTxDate = tx.date || h.lastTxDate;
+      }
+    });
+
+    // 只有在歷史進出中「淨持有股數 > 0」的股票才會產生實戰部位！
+    const activePositions = [];
+    Object.keys(holdingsMap).forEach(key => {
+      const h = holdingsMap[key];
+      if (h.shares > 0) {
+        const avgPrice = h.shares > 0 ? (h.totalCost / h.shares) : 0;
+        const config = targetAllocationConfig.find(t => t.stock_id === h.stock_id || h.ticker?.includes(t.stock_id));
+        const defaultPos = (data?.current_positions || []).find(p => p.stock_id === h.stock_id || p.ticker === h.ticker);
+
+        const curPrice = defaultPos?.current_price || config?.price || avgPrice;
+        const stopLossPrice = defaultPos?.stop_loss_price || config?.stop_loss || Math.round(curPrice * 0.9 * 100) / 100;
+        const role = config?.role || defaultPos?.role || '💎 實盤自選持股';
+        const industry = config?.industry || defaultPos?.industry || '台股前100大';
+        const targetWeightPct = config?.weight_pct || 20.0;
+
+        activePositions.push({
+          id: `pos_${h.stock_id}`,
+          stock_id: h.stock_id,
+          ticker: h.ticker,
+          stock_name: h.name,
+          name: h.name,
+          industry,
+          role,
+          target_weight_pct: targetWeightPct,
+          shares: h.shares,
+          entry_price: parseFloat(avgPrice.toFixed(2)),
+          current_price: curPrice,
+          price_date: defaultPos?.price_date || '2026-10-21',
+          entry_date: h.firstBuyDate,
+          entry_fee: Math.round(h.totalFee),
+          stop_loss_price: stopLossPrice,
+          stop_condition: `逐日監控：跌破 60MA 季線 (${stopLossPrice}元) 則動態出場`
+        });
+      }
+    });
+
+    return activePositions;
+  }, [txHistory, targetAllocationConfig, data?.current_positions]);
+
+  // =========================================================================
+  // 損益與資金 100% 由「歷史進出 (txHistory)」核算推導！
+  // =========================================================================
+  // 1. 閒置現金 (TWD) - 由流水帳中所有現金流（入金、出金、買入扣款、賣出回流）動態加總推導
   const idleCash = useMemo(() => {
     return txHistory.reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
   }, [txHistory]);
 
-  // 累計投入本金 (TWD) - 100% 由歷史紀錄推導
+  // 2. 累計投入本金 (TWD) - 由流水帳中的入金項目計算
   const totalDepositsTwd = useMemo(() => {
     const sum = txHistory
       .filter(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')))
@@ -310,97 +298,7 @@ export default function TaiwanCausalTitanDashboard() {
     return sum > 0 ? sum : 1000000;
   }, [txHistory]);
 
-  // 深度連動核心機制 1：自動將「當前持股部位」的成本均價、股數、費用與建倉日，100% 嚴格綁定對齊「歷史交易流水帳」最新買入明細！
-  useEffect(() => {
-    if (!Array.isArray(txHistory) || txHistory.length === 0) return;
-    setUserPositions(prev => {
-      let changed = false;
-      const next = prev.map(p => {
-        const matchTx = txHistory.find(tx => 
-          (tx.action === '買入' || tx.action === '加碼') && 
-          (tx.stock_id === p.stock_id || tx.ticker === p.ticker || 
-           (tx.ticker && p.ticker && tx.ticker.split('.')[0] === p.ticker.split('.')[0]) || 
-           (tx.name && p.name && (tx.name.includes(p.name.slice(0, 2)) || p.name.includes(tx.name.slice(0, 2)))))
-        );
-        if (matchTx && matchTx.price > 0) {
-          const nextPrice = matchTx.price;
-          const nextShares = matchTx.shares > 0 ? matchTx.shares : p.shares;
-          const nextFee = matchTx.tax_fee !== undefined ? matchTx.tax_fee : p.entry_fee;
-          const nextDate = matchTx.date || p.entry_date;
-          if (p.entry_price !== nextPrice || p.shares !== nextShares || p.entry_fee !== nextFee || p.entry_date !== nextDate) {
-            changed = true;
-            return {
-              ...p,
-              entry_price: nextPrice,
-              shares: nextShares,
-              entry_fee: nextFee,
-              entry_date: nextDate
-            };
-          }
-        }
-        return p;
-      });
-      return changed ? next : prev;
-    });
-  }, [txHistory]);
-
-  // 深度連動核心機制 2：自動將「當前持股部位」的最新現價 (current_price) 與報價日期 (price_date)，依據最新資料庫行情動態同步對齊
-  useEffect(() => {
-    const defaultPositions = data?.current_positions || [];
-    if (!defaultPositions || defaultPositions.length === 0) return;
-    setUserPositions(prev => {
-      let changed = false;
-      const next = prev.map(p => {
-        const match = defaultPositions.find(dp => dp.stock_id === p.stock_id || dp.ticker === p.ticker);
-        if (match && match.current_price && (p.current_price !== match.current_price || p.price_date !== match.price_date)) {
-          changed = true;
-          return {
-            ...p,
-            current_price: match.current_price,
-            price_date: match.price_date || '2026-10-21',
-            stop_loss_price: match.stop_loss_price || p.stop_loss_price
-          };
-        }
-        return p;
-      });
-      return changed ? next : prev;
-    });
-  }, [data]);
-
-  // 持股市值、成本、未實現損益
-  const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
-    let marketVal = 0;
-    let cost = 0;
-    userPositions.forEach(p => {
-      const curPrice = p.current_price || p.entry_price || 0;
-      marketVal += (p.shares || 0) * curPrice;
-      cost += ((p.shares || 0) * (p.entry_price || 0)) + (p.entry_fee || 0);
-    });
-    const pnl = marketVal - cost;
-    const pct = cost > 0 ? (pnl / cost) * 100 : 0;
-    return {
-      totalStockMarketValTwd: marketVal,
-      totalCostTwd: cost,
-      unrealizedPnlTwd: pnl,
-      unrealizedReturnPct: pct
-    };
-  }, [userPositions]);
-
-  // 當前總資產淨值 (閒置現金 + 持股市值)
-  const totalNetAssetsTwd = useMemo(() => {
-    return Math.max(0, idleCash + totalStockMarketValTwd);
-  }, [idleCash, totalStockMarketValTwd]);
-
-  // 帳戶真實總淨利與淨利率
-  const totalNetProfitTwd = useMemo(() => {
-    return totalNetAssetsTwd - totalDepositsTwd;
-  }, [totalNetAssetsTwd, totalDepositsTwd]);
-
-  const totalNetProfitPct = useMemo(() => {
-    return totalDepositsTwd > 0 ? (totalNetProfitTwd / totalDepositsTwd) * 100 : 0;
-  }, [totalNetProfitTwd, totalDepositsTwd]);
-
-  // 歷史流水帳統計 (已實現損益、勝率、總稅費)
+  // 3. 歷史進出已實現損益與手續費統計
   const { totalRealizedPnlTwd, totalTaxesPaidTwd, closedTradesCount, winningTradesCount, winRate } = useMemo(() => {
     let pnl = 0;
     let taxes = 0;
@@ -426,26 +324,48 @@ export default function TaiwanCausalTitanDashboard() {
     };
   }, [txHistory]);
 
-  // ==========================================
-  // 目標階梯配置配置池 (DOE 35/25/20/10/10)
-  // ==========================================
-  const targetAllocationConfig = useMemo(() => [
-    { stock_id: '3105', name: '穩懋', role: '👑 王者先鋒 (35%)', weight_pct: 35.0, price: 512.0, stop_loss: 460.93, industry: 'PA 功率放大器 / 5G射頻王者' },
-    { stock_id: '8358', name: '金居', role: '🚀 核心主力 (25%)', weight_pct: 25.0, price: 482.0, stop_loss: 458.93, industry: '高頻高速銅箔龍頭' },
-    { stock_id: '3324', name: '雙鴻', role: '⚡ 動能旗艦 (20%)', weight_pct: 20.0, price: 1375.0, stop_loss: 1220.22, industry: 'AI 水冷散熱伺服器龍頭' },
-    { stock_id: '1303', name: '南亞', role: '🛡️ 結構支柱 (10%)', weight_pct: 10.0, price: 320.5, stop_loss: 227.11, industry: '電子材料 / 環氧樹脂' },
-    { stock_id: '3026', name: '禾伸堂', role: '🎯 爆發突破 (10%)', weight_pct: 10.0, price: 815.0, stop_loss: 703.27, industry: 'MLCC 被動元件 / 車用陶瓷' }
-  ], []);
+  // 4. 持股未實現損益與總市值 (依據由歷史推導出的目前持股 vs 當前市價)
+  const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
+    let marketVal = 0;
+    let cost = 0;
+    userPositions.forEach(p => {
+      const curPrice = p.current_price || p.entry_price || 0;
+      marketVal += (p.shares || 0) * curPrice;
+      cost += ((p.shares || 0) * (p.entry_price || 0)) + (p.entry_fee || 0);
+    });
+    const pnl = marketVal - cost;
+    const pct = cost > 0 ? (pnl / cost) * 100 : 0;
+    return {
+      totalStockMarketValTwd: marketVal,
+      totalCostTwd: cost,
+      unrealizedPnlTwd: pnl,
+      unrealizedReturnPct: pct
+    };
+  }, [userPositions]);
+
+  // 5. 當前總資產淨值 (閒置現金 + 持股市值)
+  const totalNetAssetsTwd = useMemo(() => {
+    return Math.max(0, idleCash + totalStockMarketValTwd);
+  }, [idleCash, totalStockMarketValTwd]);
+
+  // 6. 實盤總淨利 (已實現損益 + 未實現損益)
+  const totalNetProfitTwd = useMemo(() => {
+    return totalRealizedPnlTwd + unrealizedPnlTwd;
+  }, [totalRealizedPnlTwd, unrealizedPnlTwd]);
+
+  const totalNetProfitPct = useMemo(() => {
+    return totalDepositsTwd > 0 ? (totalNetProfitTwd / totalDepositsTwd) * 100 : 0;
+  }, [totalNetProfitTwd, totalDepositsTwd]);
 
   // ==========================================
-  // 階梯持倉更動建議演算法 (完全對齊全球主權泰坦模式，含 DOE ±5% 容差帶與續抱透明展示)
+  // 階梯持倉更動建議演算法 (完全對齊全球主權泰坦模式)
   // ==========================================
   const rebalanceSuggestions = useMemo(() => {
     if (totalNetAssetsTwd <= 0) return [];
     const suggestions = [];
     const tolerancePct = 5.0; // DOE ±5% 容差帶
 
-    // 1. 針對目標 5 大主力進行部位試算 (確保 5 檔皆具備明確狀態：買入 / 加碼 / 減持 / 續抱)
+    // 1. 針對目標 5 大主力進行部位試算 (確保 5 檔皆有明確狀態：買入 / 加碼 / 減持 / 續抱)
     targetAllocationConfig.forEach(target => {
       const targetTwd = totalNetAssetsTwd * (target.weight_pct / 100.0);
       const targetShares = Math.floor(targetTwd / target.price);
@@ -541,7 +461,7 @@ export default function TaiwanCausalTitanDashboard() {
           isBalanced: false
         });
       } else {
-        // 權重在容差帶內：部位平衡無需調整，明確展示為續抱，確保 5 檔主力 100% 透明掌控！
+        // 權重在容差帶內：部位平衡無需調整，明確展示為續抱
         suggestions.push({
           key: suggKey,
           action: '續抱',
@@ -567,7 +487,7 @@ export default function TaiwanCausalTitanDashboard() {
       }
     });
 
-    // 2. 針對持倉中但不在目標 5 大主力中的非策略持股提出賣出清倉建議
+    // 2. 針對持倉中但不在目標 5 大主力中的非策略持股提出賣出建議
     userPositions.forEach(heldPos => {
       const isInTarget = targetAllocationConfig.some(t => t.stock_id === heldPos.stock_id || heldPos.ticker?.includes(t.stock_id));
       const suggKey = `sugg_exit_tw_${heldPos.stock_id || heldPos.id}`;
@@ -606,7 +526,7 @@ export default function TaiwanCausalTitanDashboard() {
     return suggestions;
   }, [totalNetAssetsTwd, targetAllocationConfig, userPositions, dismissedSuggestions]);
 
-  // 取得目前某列的編輯數值 (比照全球主權泰坦模式)
+  // 取得目前表格列的編輯數值
   const getRowValues = (sugg) => {
     const edits = customEdits[sugg.key] || {};
     return {
@@ -626,10 +546,7 @@ export default function TaiwanCausalTitanDashboard() {
     }));
   };
 
-  // ==========================================
-  // 調倉執行與指令操作 (完全對齊全球主權泰坦模式)
-  // ==========================================
-  // 複製單一券商委託下單字串
+  // 複製單一券商下單字串
   const handleCopyOrder = (sugg) => {
     if (sugg.action === '續抱' || sugg.isBalanced) {
       triggerNotice(`ℹ️「${sugg.name}」目前持倉平衡，無須下單！`);
@@ -665,7 +582,7 @@ export default function TaiwanCausalTitanDashboard() {
     triggerNotice(`📋 已成功複製 ${activeLines.length} 筆調倉委託指令！`);
   };
 
-  // 一鍵執行單筆調倉建議 (自動連動持股與流水帳)
+  // 一鍵執行單筆調倉建議 (嚴格寫入歷史進出流水帳，持股與損益自動由流水帳動態生成)
   const handleExecuteSuggestion = (sugg, isBatch = false) => {
     if (sugg.action === '續抱' || sugg.isBalanced) {
       if (!isBatch) triggerNotice(`✅「${sugg.name}」目前持倉權重已完全對齊目標，處於平衡容差帶內，請安心續抱！`);
@@ -694,26 +611,6 @@ export default function TaiwanCausalTitanDashboard() {
         if (!proceed) return;
       }
 
-      const newPos = {
-        id: `pos_${sugg.stock_id}_${Date.now()}`,
-        stock_id: sugg.stock_id,
-        ticker: `${sugg.stock_id}.TW`,
-        stock_name: sugg.name,
-        name: `${sugg.name} (${sugg.industry || ''})`,
-        industry: sugg.industry || '',
-        role: sugg.role,
-        target_weight_pct: sugg.targetWeightPct,
-        shares: actualShares,
-        entry_price: actualPrice,
-        current_price: actualPrice,
-        entry_date: today,
-        price_date: today,
-        entry_fee: actualTaxFee,
-        stop_loss_price: sugg.stop_loss_price || Math.round(actualPrice * 0.9 * 100) / 100,
-        stop_condition: `逐日監控：跌破 60MA 季線 (${sugg.stop_loss_price}元) 則動態出場`,
-        highlight: sugg.highlight || '因果 Alpha 階梯配置'
-      };
-
       const newTx = {
         id: `tx_buy_${Date.now()}_${sugg.stock_id}`,
         date: today,
@@ -727,32 +624,14 @@ export default function TaiwanCausalTitanDashboard() {
         cash_flow_twd: -Math.round(totalCost),
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: `法定調倉建倉 (${sugg.role})`
+        note: `法定調倉買入建倉 (${sugg.role})`
       };
 
-      setUserPositions(prev => [newPos, ...prev]);
       setTxHistory(prev => [newTx, ...prev]);
-      if (!isBatch) triggerNotice(`✅ 已成功【買入】${sugg.name} ${actualShares} 股！已寫入歷史交易紀錄並扣除現金 NT$ ${Math.round(totalCost).toLocaleString()}`);
+      if (!isBatch) triggerNotice(`✅ 已成功【買入】${sugg.name} ${actualShares} 股！已寫入歷史進出，持股部位已自動生成。`);
 
     } else if (sugg.action === '加碼') {
       const totalCost = grossVal + actualTaxFee;
-      setUserPositions(prev => prev.map(p => {
-        if (p.stock_id === sugg.stock_id || p.ticker === sugg.ticker) {
-          const oldCost = p.shares * p.entry_price;
-          const addCost = actualShares * actualPrice;
-          const totalShares = p.shares + actualShares;
-          const newAvgPrice = totalShares > 0 ? (oldCost + addCost) / totalShares : p.entry_price;
-          return {
-            ...p,
-            shares: totalShares,
-            entry_price: parseFloat(newAvgPrice.toFixed(2)),
-            current_price: actualPrice,
-            entry_fee: (p.entry_fee || 0) + actualTaxFee
-          };
-        }
-        return p;
-      }));
-
       const newTx = {
         id: `tx_add_${Date.now()}_${sugg.stock_id}`,
         date: today,
@@ -769,7 +648,7 @@ export default function TaiwanCausalTitanDashboard() {
         note: `定期調倉加碼 (${sugg.role})`
       };
       setTxHistory(prev => [newTx, ...prev]);
-      if (!isBatch) triggerNotice(`🔵 已成功【加碼】${sugg.name} ${actualShares} 股！平均成本已重新計算並寫入流水帳。`);
+      if (!isBatch) triggerNotice(`🔵 已成功【加碼】${sugg.name} ${actualShares} 股！歷史進出已更新，平均成本已重算。`);
 
     } else if (sugg.action === '減持') {
       const netProceeds = grossVal - actualTaxFee;
@@ -777,16 +656,6 @@ export default function TaiwanCausalTitanDashboard() {
       const costBasis = actualShares * (heldPos?.entry_price || actualPrice);
       const realizedPnl = netProceeds - costBasis;
       const realizedReturnPct = costBasis > 0 ? (realizedPnl / costBasis) * 100 : 0;
-
-      setUserPositions(prev => prev.map(p => {
-        if (p.stock_id === sugg.stock_id || p.ticker === sugg.ticker) {
-          return {
-            ...p,
-            shares: Math.max(0, p.shares - actualShares)
-          };
-        }
-        return p;
-      }).filter(p => p.shares > 0));
 
       const newTx = {
         id: `tx_reduce_${Date.now()}_${sugg.stock_id}`,
@@ -801,7 +670,7 @@ export default function TaiwanCausalTitanDashboard() {
         cash_flow_twd: Math.round(netProceeds),
         realized_pnl_twd: Math.round(realizedPnl),
         realized_return_pct: Math.round(realizedReturnPct * 10) / 10,
-        note: `定期調倉減持平衡 (已實現損益 NT$ ${Math.round(realizedPnl).toLocaleString()})`
+        note: `定期調倉減持平衡 (實現損益 NT$ ${Math.round(realizedPnl).toLocaleString()})`
       };
       setTxHistory(prev => [newTx, ...prev]);
       if (!isBatch) triggerNotice(`🟠 已成功【減持】${sugg.name} ${actualShares} 股！現金回流 NT$ ${Math.round(netProceeds).toLocaleString()}。`);
@@ -812,8 +681,6 @@ export default function TaiwanCausalTitanDashboard() {
       const costBasis = (actualShares * (heldPos?.entry_price || actualPrice)) + (heldPos?.entry_fee || 0);
       const realizedPnl = netProceeds - costBasis;
       const realizedReturnPct = costBasis > 0 ? (realizedPnl / costBasis) * 100 : 0;
-
-      setUserPositions(prev => prev.filter(p => p.stock_id !== sugg.stock_id && p.id !== heldPos?.id));
 
       const newTx = {
         id: `tx_exit_${Date.now()}_${sugg.stock_id}`,
@@ -828,10 +695,10 @@ export default function TaiwanCausalTitanDashboard() {
         cash_flow_twd: Math.round(netProceeds),
         realized_pnl_twd: Math.round(realizedPnl),
         realized_return_pct: Math.round(realizedReturnPct * 10) / 10,
-        note: `調倉換股清倉 (已實現損益 NT$ ${Math.round(realizedPnl).toLocaleString()})`
+        note: `調倉換股平倉 (實現損益 NT$ ${Math.round(realizedPnl).toLocaleString()})`
       };
       setTxHistory(prev => [newTx, ...prev]);
-      if (!isBatch) triggerNotice(`🔴 已成功【賣出平倉】${sugg.name}！現金回流 NT$ ${Math.round(netProceeds).toLocaleString()}。`);
+      if (!isBatch) triggerNotice(`🔴 已成功【賣出平倉】${sugg.name}！現金回流 NT$ ${Math.round(netProceeds).toLocaleString()}，持股部位已清空。`);
     }
   };
 
@@ -842,16 +709,38 @@ export default function TaiwanCausalTitanDashboard() {
       triggerNotice('ℹ️ 目前 5 檔黃金階梯主力標的均已處於平衡狀態，無須執行任何調倉！');
       return;
     }
-    if (!window.confirm(`確定要一次性執行共 ${activeSuggestions.length} 檔調倉更動嗎？\n系統將自動調整持股部位並在歷史流水帳中寫入完整交易紀錄。`)) return;
+    if (!window.confirm(`確定要一次性執行共 ${activeSuggestions.length} 檔調倉更動嗎？\n系統將自動在歷史進出流水帳中寫入交易紀錄，持股部位與損益將自動精確生成。`)) return;
 
     activeSuggestions.forEach(s => handleExecuteSuggestion(s, true));
-    triggerNotice(`⚡ 已成功批次執行 ${activeSuggestions.length} 項調倉指令！持股與流水帳已全面同步。`);
+    triggerNotice(`⚡ 已成功批次執行 ${activeSuggestions.length} 項調倉指令！歷史進出與實戰持股已全面同步。`);
   };
 
   // 暫時收起忽略建議
   const handleDismissSuggestion = (key) => {
     setDismissedSuggestions(prev => [...prev, key]);
     triggerNotice('👁️ 已暫時隱藏此調倉建議');
+  };
+
+  // ==========================================
+  // 便捷範本載入與持股清空操作
+  // ==========================================
+  // 1. 一鍵載入 10/12 法定開倉交易明細
+  const handleLoadDefault1012Positions = () => {
+    if (window.confirm('確定要載入 2026-10-12 法定建倉 5 筆交易紀錄嗎？\n這將自動在歷史進出中寫入穩懋、金居、雙鴻、南亞、禾伸堂的買進明細。')) {
+      setTxHistory(TEMPLATE_1012_TRANSACTIONS);
+      setDismissedSuggestions([]);
+      triggerNotice('⚡ 已成功寫入 10/12 法定建倉交易明細！實戰部位與損益已即時生成。');
+    }
+  };
+
+  // 2. 清空所有股票買入 (僅保留現金本金)
+  const handleClearAllStockPositions = () => {
+    if (window.confirm('確定要清空歷史進出中所有股票買賣紀錄嗎？\n（將只保留 100 萬入金本金，持股部位將隨即歸零）')) {
+      const depositTx = txHistory.find(tx => tx.action === '投入現金' || tx.action === '初始入金') || TEMPLATE_1012_TRANSACTIONS[0];
+      setTxHistory([depositTx]);
+      setDismissedSuggestions([]);
+      triggerNotice('🧹 已清空歷史進出中之所有股票買賣！當前持股已完全歸零，資金 100% 待命。');
+    }
   };
 
   // ==========================================
@@ -917,7 +806,6 @@ export default function TaiwanCausalTitanDashboard() {
   // 2. 持股手動出場平倉彈窗
   const [exitModal, setExitModal] = useState({
     open: false,
-    posId: '',
     stock_id: '',
     name: '',
     shares: 0,
@@ -934,7 +822,6 @@ export default function TaiwanCausalTitanDashboard() {
     const estTaxFee = Math.round(pos.shares * curPrice * (0.003 + 0.001425));
     setExitModal({
       open: true,
-      posId: pos.id,
       stock_id: pos.stock_id,
       name: pos.stock_name || pos.name,
       shares: pos.shares,
@@ -972,17 +859,15 @@ export default function TaiwanCausalTitanDashboard() {
       note: `${exitModal.reason} (實現淨損益: ${netPnl >= 0 ? '+' : ''}${Math.round(netPnl).toLocaleString()})`
     };
 
-    setUserPositions(prev => prev.filter(p => p.id !== exitModal.posId && p.stock_id !== exitModal.stock_id));
     setTxHistory(prev => [newTx, ...prev]);
-    triggerNotice(`🚪 已結利/停損平倉「${exitModal.name}」，現金回流 NT$ ${Math.round(totalProceeds).toLocaleString()}！`);
+    triggerNotice(`🚪 已結利/停損平倉「${exitModal.name}」！歷史進出已記入已實現損益 NT$ ${Math.round(netPnl).toLocaleString()}，持股部位已自動結清。`);
     setExitModal({ ...exitModal, open: false });
   };
 
-  // 3. 編輯/新增持股部位彈窗 (深度支援連動歷史流水帳)
+  // 3. 編輯/新增持股部位彈窗 (直接操作歷史流水帳 txHistory)
   const [editPosModal, setEditPosModal] = useState({
     open: false,
     isNew: false,
-    id: '',
     stock_id: '',
     stock_name: '',
     industry: '',
@@ -993,15 +878,13 @@ export default function TaiwanCausalTitanDashboard() {
     entry_fee: '0',
     entry_date: new Date().toISOString().split('T')[0],
     stop_loss_price: '',
-    stop_condition: '',
-    syncBuyTx: true
+    stop_condition: ''
   });
 
   const handleOpenEditPos = (pos) => {
     setEditPosModal({
       open: true,
       isNew: false,
-      id: pos.id,
       stock_id: pos.stock_id,
       stock_name: pos.stock_name || pos.name,
       industry: pos.industry || '',
@@ -1012,8 +895,7 @@ export default function TaiwanCausalTitanDashboard() {
       entry_fee: String(pos.entry_fee || '0'),
       entry_date: pos.entry_date || new Date().toISOString().split('T')[0],
       stop_loss_price: String(pos.stop_loss_price || ''),
-      stop_condition: pos.stop_condition || '',
-      syncBuyTx: true
+      stop_condition: pos.stop_condition || ''
     });
   };
 
@@ -1021,7 +903,6 @@ export default function TaiwanCausalTitanDashboard() {
     setEditPosModal({
       open: true,
       isNew: true,
-      id: `pos_${Date.now()}`,
       stock_id: '',
       stock_name: '',
       industry: '',
@@ -1032,8 +913,7 @@ export default function TaiwanCausalTitanDashboard() {
       entry_fee: '143',
       entry_date: new Date().toISOString().split('T')[0],
       stop_loss_price: '90',
-      stop_condition: '跌破季線停損',
-      syncBuyTx: true
+      stop_condition: '跌破季線停損'
     });
   };
 
@@ -1041,59 +921,39 @@ export default function TaiwanCausalTitanDashboard() {
     e.preventDefault();
     const sharesNum = parseInt(editPosModal.shares, 10) || 0;
     const entryPx = parseFloat(editPosModal.entry_price) || 0;
-    const curPx = parseFloat(editPosModal.current_price) || entryPx;
     const fee = parseFloat(editPosModal.entry_fee) || 0;
-    const stopPx = parseFloat(editPosModal.stop_loss_price) || 0;
-
-    const updated = {
-      id: editPosModal.id || `pos_${Date.now()}`,
-      stock_id: editPosModal.stock_id,
-      ticker: `${editPosModal.stock_id}.TW`,
-      stock_name: editPosModal.stock_name,
-      name: `${editPosModal.stock_name} (${editPosModal.industry || ''})`,
-      industry: editPosModal.industry,
-      role: editPosModal.role,
-      shares: sharesNum,
-      entry_price: entryPx,
-      current_price: curPx,
-      entry_fee: fee,
-      entry_date: editPosModal.entry_date,
-      price_date: new Date().toISOString().split('T')[0],
-      stop_loss_price: stopPx,
-      stop_condition: editPosModal.stop_condition
-    };
 
     if (editPosModal.isNew) {
-      setUserPositions(prev => [...prev, updated]);
-      if (editPosModal.syncBuyTx) {
-        const costTwd = Math.round(sharesNum * entryPx + fee);
-        const newTx = {
-          id: `tx_buy_${Date.now()}`,
-          date: editPosModal.entry_date,
-          action: '買入',
-          ticker: `${editPosModal.stock_id}.TW`,
-          stock_id: editPosModal.stock_id,
-          name: `${editPosModal.stock_name} (${editPosModal.stock_id})`,
-          shares: sharesNum,
-          price: entryPx,
-          tax_fee: fee,
-          cash_flow_twd: -costTwd,
-          realized_pnl_twd: null,
-          realized_return_pct: null,
-          note: `手動新增建倉 (${editPosModal.role})`
-        };
-        setTxHistory(prev => [newTx, ...prev]);
-      }
-      triggerNotice(`➕ 已手動新增持股部位「${updated.stock_name}」${editPosModal.syncBuyTx ? '，並同步寫入歷史買進紀錄' : ''}！`);
+      // 新增持股：直接在 txHistory 寫入買進紀錄
+      const costTwd = Math.round(sharesNum * entryPx + fee);
+      const newTx = {
+        id: `tx_buy_${Date.now()}`,
+        date: editPosModal.entry_date,
+        action: '買入',
+        ticker: `${editPosModal.stock_id}.TW`,
+        stock_id: editPosModal.stock_id,
+        name: `${editPosModal.stock_name} (${editPosModal.stock_id})`,
+        shares: sharesNum,
+        price: entryPx,
+        tax_fee: fee,
+        cash_flow_twd: -costTwd,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `手動新增建倉 (${editPosModal.role})`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+      triggerNotice(`➕ 已在歷史進出寫入買進「${editPosModal.stock_name}」，持股部位已自動生成！`);
     } else {
-      setUserPositions(prev => prev.map(p => p.id === updated.id ? { ...p, ...updated } : p));
-      if (editPosModal.syncBuyTx) {
-        setTxHistory(prev => prev.map(tx => {
-          if ((tx.action === '買入' || tx.action === '加碼') && (tx.stock_id === updated.stock_id || tx.ticker === updated.ticker)) {
+      // 編輯持股：同步更新 txHistory 中該標的之買進紀錄
+      setTxHistory(prev => {
+        let updated = false;
+        return prev.map(tx => {
+          if (!updated && (tx.action === '買入' || tx.action === '加碼') && (tx.stock_id === editPosModal.stock_id || tx.ticker?.includes(editPosModal.stock_id))) {
+            updated = true;
             const costTwd = Math.round(sharesNum * entryPx + fee);
             return {
               ...tx,
-              date: updated.entry_date,
+              date: editPosModal.entry_date,
               shares: sharesNum,
               price: entryPx,
               tax_fee: fee,
@@ -1101,34 +961,21 @@ export default function TaiwanCausalTitanDashboard() {
             };
           }
           return tx;
-        }));
-      }
-      triggerNotice(`✏️ 已更新「${updated.stock_name}」持股明細${editPosModal.syncBuyTx ? '，並同步對齊歷史流水帳' : ''}！`);
+        });
+      });
+      triggerNotice(`✏️ 已同步更新「${editPosModal.stock_name}」歷史進出流水帳，持股均價與股數已動態重算！`);
     }
     setEditPosModal({ ...editPosModal, open: false });
   };
 
   const handleDeletePos = (pos) => {
-    const matchingTx = txHistory.find(t => (t.stock_id === pos.stock_id || t.ticker === pos.ticker || t.name?.includes(pos.stock_id)) && (t.action === '買入' || t.action === '加碼'));
-    if (matchingTx) {
-      const confirmBoth = window.confirm(
-        `確定要自持股清單中刪除「${pos.stock_name || pos.name} (${pos.stock_id})」部位嗎？\n\n💡 系統偵測到歷史流水帳中存在建倉買進紀錄 (${matchingTx.date} 買入 ${matchingTx.name})。\n\n是否【同時刪除持股部位與其歷史買入紀錄】？\n• 點擊「確定」：同時刪除持股部位 + 歷史買進紀錄\n• 點擊「取消」：僅刪除持股部位，保留流水帳`
-      );
-      if (confirmBoth) {
-        setUserPositions(prev => prev.filter(p => p.id !== pos.id));
-        setTxHistory(prev => prev.filter(t => t.id !== matchingTx.id));
-        triggerNotice(`🗑️ 已同步移除「${pos.stock_name || pos.name}」持股部位與歷史買入紀錄！`);
-        return;
-      }
-    }
-
-    if (window.confirm(`確定要刪除「${pos.stock_name || pos.name}」持股部位嗎？\n刪除後該部位不再計入總淨值。`)) {
-      setUserPositions(prev => prev.filter(p => p.id !== pos.id));
-      triggerNotice(`🗑️ 已刪除持股「${pos.stock_name || pos.name}」！`);
+    if (window.confirm(`確定要刪除「${pos.stock_name || pos.name}」部位嗎？\n\n系統將自歷史進出流水帳中移除該標的之買進紀錄，持股部位將隨即清空。`)) {
+      setTxHistory(prev => prev.filter(t => t.stock_id !== pos.stock_id && t.ticker !== pos.ticker && !t.name?.includes(pos.stock_id)));
+      triggerNotice(`🗑️ 已自歷史進出移除「${pos.stock_name || pos.name}」，持股部位已同步清空！`);
     }
   };
 
-  // 4. 歷史流水帳編輯與手動新增 (深度支援連動實戰持股)
+  // 4. 歷史流水帳編輯與手動新增
   const [editTxModal, setEditTxModal] = useState({
     open: false,
     isNew: false,
@@ -1204,72 +1051,28 @@ export default function TaiwanCausalTitanDashboard() {
 
     if (editTxModal.isNew) {
       setTxHistory(prev => [updated, ...prev]);
-      triggerNotice('➕ 已成功新增一筆歷史交易流水帳！');
+      triggerNotice('➕ 已成功新增歷史交易流水帳！持股部位已自動重算。');
     } else {
       setTxHistory(prev => prev.map(t => t.id === updated.id ? updated : t));
-      triggerNotice('✏️ 已成功更新歷史交易紀錄！');
-    }
-
-    // 若是買入/加碼動作，立即同步更新對應實戰持股部位成本均價與股數
-    if (updated.action === '買入' || updated.action === '加碼') {
-      setUserPositions(prevPos => prevPos.map(p => {
-        if (p.stock_id === updated.stock_id || p.ticker === updated.ticker || (p.ticker && updated.ticker && p.ticker.split('.')[0] === updated.ticker.split('.')[0]) || p.name === updated.name) {
-          return {
-            ...p,
-            entry_price: updated.price,
-            shares: updated.shares > 0 ? updated.shares : p.shares,
-            entry_fee: updated.tax_fee,
-            entry_date: updated.date
-          };
-        }
-        return p;
-      }));
+      triggerNotice('✏️ 已更新歷史交易紀錄！持股均價與未實現損益已自動連動。');
     }
 
     setEditTxModal({ ...editTxModal, open: false });
   };
 
   const handleDeleteTx = (id, name, action) => {
-    const txToDelete = txHistory.find(t => t.id === id);
-    const matchingPos = txToDelete && (txToDelete.action === '買入' || txToDelete.action === '加碼')
-      ? userPositions.find(p => p.stock_id === txToDelete.stock_id || p.name === txToDelete.name)
-      : null;
-
-    if (matchingPos) {
-      const confirmBoth = window.confirm(
-        `確定要刪除「${action} ${name}」這筆交易紀錄嗎？\n\n⚠️ 系統偵測到您目前持有中部位亦包含「${name} (${matchingPos.shares} 股)」！\n\n是否【同步刪除持股部位】？\n• 點擊「確定」：同時刪除歷史交易紀錄 + 移除該持股部位\n• 點擊「取消」：僅刪除流水帳，保留持股部位`
-      );
-      if (confirmBoth) {
-        setTxHistory(prev => prev.filter(t => t.id !== id));
-        setUserPositions(prev => prev.filter(p => p.id !== matchingPos.id));
-        triggerNotice(`🗑️ 已同步刪除「${name}」交易流水帳與持股部位！`);
-        return;
-      }
-    }
-
-    if (window.confirm(`確定要刪除「${action} ${name}」這筆交易流水帳嗎？\n刪除後無法復原。`)) {
+    if (window.confirm(`確定要刪除「${action} ${name}」這筆交易流水帳嗎？\n刪除後，當前持股部位與損益將自動依據剩餘流水帳動態重算。`)) {
       setTxHistory(prev => prev.filter(t => t.id !== id));
-      triggerNotice(`🗑️ 已刪除該筆流水帳紀錄！`);
-    }
-  };
-
-  // 重置回預設開倉
-  const handleResetToDefaults = () => {
-    if (window.confirm('確定要重置持股與流水帳回 2026-10-12 法定開倉預設狀態 (100萬本金 × DOE黃金階梯 35/25/20/10/10) 嗎？')) {
-      setUserPositions(DEFAULT_POSITIONS);
-      setTxHistory(DEFAULT_TX_HISTORY);
-      setDismissedSuggestions([]);
-      triggerNotice('↺ 已成功重置回法定建倉初始狀態！');
+      triggerNotice(`🗑️ 已刪除該筆流水帳紀錄！持股與損益已即時重算。`);
     }
   };
 
   // 匯出 JSON 備份
   const handleExportBackup = () => {
     const payload = {
-      version: 'tw_causal_titan_v2',
+      version: 'tw_causal_titan_v3_pure_ledger',
       export_date: new Date().toISOString(),
       user: currentUsername,
-      positions: userPositions,
       tx_history: txHistory,
       dismissed_suggestions: dismissedSuggestions
     };
@@ -1292,13 +1095,12 @@ export default function TaiwanCausalTitanDashboard() {
     reader.onload = (evt) => {
       try {
         const imported = JSON.parse(evt.target.result);
-        if (Array.isArray(imported.positions) && Array.isArray(imported.tx_history)) {
-          setUserPositions(imported.positions);
+        if (Array.isArray(imported.tx_history)) {
           setTxHistory(imported.tx_history);
           if (Array.isArray(imported.dismissed_suggestions)) setDismissedSuggestions(imported.dismissed_suggestions);
-          triggerNotice(`📥 已成功匯入備份！共 ${imported.positions.length} 檔持股，${imported.tx_history.length} 筆流水帳。`);
+          triggerNotice(`📥 已成功匯入備份！共 ${imported.tx_history.length} 筆流水帳，持股部位已自動生成。`);
         } else {
-          alert('備份格式不正確，需包含 positions 與 tx_history 陣列');
+          alert('備份格式不正確，需包含 tx_history 陣列');
         }
       } catch (err) {
         alert('解析備份檔案失敗: ' + err.message);
@@ -1337,7 +1139,7 @@ export default function TaiwanCausalTitanDashboard() {
     triggerNotice('📥 交易流水帳 CSV 已成功匯出！');
   };
 
-  // 匯出回測交易 CSV
+  // 匯出回測 1,290 筆交易 CSV
   const handleExportTradesCsv = () => {
     if (!trades || trades.length === 0) return;
     const headers = ['標的代號', '股票名稱', '配置角色', '進場日期', '進場價格', '出場日期', '出場價格', '持有天數', '單筆報酬率(%)', '出場原因/機制'];
@@ -1469,7 +1271,7 @@ export default function TaiwanCausalTitanDashboard() {
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              市值前 100 大滾動池 · 每月 11 號法定公告日建倉 · 4 大真因果 Alpha 因子 · 60MA 季線動態風控停損
+              市值前 100 大滾動池 · 每月 11 號法定公告日建倉 · 4 大真因果 Alpha 因子 · 60MA 季線動態風控停損 · <strong>以歷史交易進出流水帳為唯一真實來源</strong>
             </p>
           </div>
 
@@ -1543,7 +1345,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       </div>
 
-      {/* ===== 第二行：5 個帳戶資產數據方塊 (完全對齊全球主權泰坦模式) ===== */}
+      {/* ===== 第二行：5 個帳戶資產數據方塊 (100% 由歷史進出 txHistory 即時推導) ===== */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
@@ -1919,7 +1721,7 @@ export default function TaiwanCausalTitanDashboard() {
                                     fontWeight: 'bold',
                                     cursor: 'pointer'
                                   }}
-                                  title="執行成交：自動連動持股與歷史流水帳"
+                                  title="執行成交：自動在歷史進出寫入真實交易紀錄，部位與損益隨即生成"
                                 >
                                   ⚡ 執行
                                 </button>
@@ -1966,7 +1768,7 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
           </div>
 
-          {/* 2. 當前實盤持股部位清單 (Active Real Positions - 100% 綁定歷史交易流水帳) */}
+          {/* 2. 當前實盤持股部位清單 (100% 嚴格由歷史流水帳 txHistory 動態推導) */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
             border: '1px solid rgba(59, 130, 246, 0.35)',
@@ -1976,14 +1778,45 @@ export default function TaiwanCausalTitanDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#60A5FA', fontSize: '1.15rem' }}>
-                  📊 當前實戰持股部位管理 (全市場前 100 大 · 60MA 風控監控)
+                  📊 當前實戰持股部位管理 (100% 由下方歷史進出推導 · 60MA 風控監控)
                 </h4>
                 <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
-                  持股成本與建倉明細 100% 參照下方歷史進出流水帳，每日逐筆監控 60MA 季線動態停損
+                  持股部位與成本均價完全取決於歷史進出流水帳！若歷史未買入任何股票，持倉即為 0。
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleLoadDefault1012Positions}
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.2)',
+                    border: '1px solid #10B981',
+                    color: '#6EE7B7',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                  title="將 10/12 法定開倉 5 筆交易寫入歷史進出"
+                >
+                  ⚡ 載入 10/12 建倉
+                </button>
+                <button
+                  onClick={handleClearAllStockPositions}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#FCA5A5',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer'
+                  }}
+                  title="清空歷史進出中之所有股票買賣，僅留現金本金"
+                >
+                  🧹 清空股票持倉
+                </button>
                 <button
                   onClick={handleOpenNewPos}
                   style={{
@@ -2010,7 +1843,7 @@ export default function TaiwanCausalTitanDashboard() {
                     fontSize: '0.78rem',
                     cursor: 'pointer'
                   }}
-                  title="將持股與交易流水帳完整匯出備份 JSON"
+                  title="將流水帳完整匯出備份 JSON"
                 >
                   💾 匯出備份
                 </button>
@@ -2029,10 +1862,36 @@ export default function TaiwanCausalTitanDashboard() {
               </div>
             </div>
 
-            {/* 持股部位表格 */}
+            {/* 持股部位表格 (100% 依據歷史進出動態呈現) */}
             {userPositions.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8' }}>
-                目前尚無持股部位。資金 100% 待命中，可至上方「階梯更動建議試算器」執行買入！
+              <div style={{
+                textAlign: 'center',
+                padding: '2.5rem 1rem',
+                background: 'rgba(0,0,0,0.2)',
+                borderRadius: '8px',
+                border: '1px dashed rgba(255,255,255,0.15)'
+              }}>
+                <div style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>📭</div>
+                <strong style={{ fontSize: '1rem', color: '#CBD5E1' }}>歷史進出中目前尚無未平倉股票</strong>
+                <div style={{ fontSize: '0.82rem', color: '#94A3B8', marginTop: '0.4rem', maxWidth: '560px', margin: '0.4rem auto 1.2rem auto', lineHeight: '1.6' }}>
+                  系統已切換為「歷史進出流水帳唯一來源」模式。因歷史流水帳中尚未買進股票，故目前真實持倉為 <strong>0 檔</strong>，資金 <strong>100% 待命</strong>。
+                  您可至上方「階梯更動建議試算器」點擊<strong>「⚡ 一鍵執行所有調倉」</strong>建立持倉，或點擊下方按鈕載入 10/12 法定建倉交易。
+                </div>
+                <button
+                  onClick={handleLoadDefault1012Positions}
+                  style={{
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    color: '#FFF',
+                    border: 'none',
+                    padding: '0.5rem 1.3rem',
+                    borderRadius: '6px',
+                    fontSize: '0.86rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⚡ 一鍵載入 10/12 法定建倉交易明細
+                </button>
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -2124,7 +1983,7 @@ export default function TaiwanCausalTitanDashboard() {
                               <button
                                 onClick={() => handleOpenEditPos(pos)}
                                 style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.85rem' }}
-                                title="編輯持股"
+                                title="編輯流水帳中此標的之買進紀錄"
                               >
                                 ✏️
                               </button>
@@ -2140,14 +1999,14 @@ export default function TaiwanCausalTitanDashboard() {
                                   cursor: 'pointer',
                                   fontWeight: 'bold'
                                 }}
-                                title="手動結利或停損記帳出場"
+                                title="手動平倉出場：在歷史進出寫入賣出並計算已實現損益"
                               >
                                 🚪 出場
                               </button>
                               <button
                                 onClick={() => handleDeletePos(pos)}
                                 style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '0.85rem' }}
-                                title="刪除持股部位"
+                                title="自歷史進出移除該標的之買進紀錄"
                               >
                                 🗑️
                               </button>
@@ -2162,7 +2021,7 @@ export default function TaiwanCausalTitanDashboard() {
             )}
           </div>
 
-          {/* 3. 歷史交易流水帳 (唯一的真實交易來源，深度連動實戰持股) */}
+          {/* 3. 歷史交易進出流水帳 (唯一真實來源 - 損益與部位以此為準) */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
@@ -2172,7 +2031,7 @@ export default function TaiwanCausalTitanDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.15rem' }}>
-                  📋 實戰交易全歷史進出流水帳 (唯一真實來源)
+                  📋 實戰交易全歷史進出流水帳 (唯一真實來源 · 損益與持倉以此為準)
                 </h4>
                 <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
                   共記錄 <strong style={{ color: '#FDE68A' }}>{txHistory.length}</strong> 筆交易，累計實現損益 NT$ <strong style={{ color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171' }}>{totalRealizedPnlTwd >= 0 ? '+' : ''}{Math.round(totalRealizedPnlTwd).toLocaleString()}</strong>，累計交易稅費 NT$ {Math.round(totalTaxesPaidTwd).toLocaleString()}
@@ -2209,21 +2068,6 @@ export default function TaiwanCausalTitanDashboard() {
                   }}
                 >
                   📥 匯出流水帳 CSV
-                </button>
-                <button
-                  onClick={handleResetToDefaults}
-                  style={{
-                    background: 'none',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: '#94A3B8',
-                    padding: '0.35rem 0.65rem',
-                    borderRadius: '6px',
-                    fontSize: '0.76rem',
-                    cursor: 'pointer'
-                  }}
-                  title="重置回初始法定開倉紀錄"
-                >
-                  ↺ 重置開倉
                 </button>
               </div>
             </div>
@@ -2884,7 +2728,7 @@ export default function TaiwanCausalTitanDashboard() {
                     color: '#FFF', fontWeight: 'bold', padding: '0.45rem 1.2rem', borderRadius: '6px', border: 'none', fontSize: '0.84rem', cursor: 'pointer'
                   }}
                 >
-                  確認出場並入帳
+                  確認出場並寫入歷史
                 </button>
               </div>
             </form>
@@ -2892,7 +2736,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== 彈窗 3: 編輯 / 新增持股部位 Modal (含深度連動歷史流水帳) ===== */}
+      {/* ===== 彈窗 3: 編輯 / 新增持股部位 Modal ===== */}
       {editPosModal.open && (
         <div style={{
           position: 'fixed',
@@ -2908,7 +2752,7 @@ export default function TaiwanCausalTitanDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h4 style={{ margin: 0, color: '#60A5FA', fontSize: '1.15rem' }}>
-                {editPosModal.isNew ? '➕ 手動新增台股泰坦持股部位' : `✏️ 編輯持股部位 - ${editPosModal.stock_name}`}
+                {editPosModal.isNew ? '➕ 手動新增持股 (將自動寫入歷史進出)' : `✏️ 編輯持股成本 - ${editPosModal.stock_name}`}
               </h4>
               <button
                 onClick={() => setEditPosModal({ ...editPosModal, open: false })}
@@ -2974,7 +2818,7 @@ export default function TaiwanCausalTitanDashboard() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>成本均價</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>成本均價 ($)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2985,50 +2829,28 @@ export default function TaiwanCausalTitanDashboard() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>最新現價</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>手續費 (NT$)</label>
                   <input
                     type="number"
-                    step="0.01"
-                    value={editPosModal.current_price}
-                    onChange={(e) => setEditPosModal({ ...editPosModal, current_price: e.target.value })}
-                    required
+                    step="1"
+                    value={editPosModal.entry_fee}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, entry_fee: e.target.value })}
                     style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>60MA 停損價</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>建倉日期</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    value={editPosModal.stop_loss_price}
-                    onChange={(e) => setEditPosModal({ ...editPosModal, stop_loss_price: e.target.value })}
+                    type="date"
+                    value={editPosModal.entry_date}
+                    onChange={(e) => setEditPosModal({ ...editPosModal, entry_date: e.target.value })}
                     style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
                   />
                 </div>
               </div>
 
-              <div style={{ marginBottom: '0.9rem' }}>
-                <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>建倉日期</label>
-                <input
-                  type="date"
-                  value={editPosModal.entry_date}
-                  onChange={(e) => setEditPosModal({ ...editPosModal, entry_date: e.target.value })}
-                  style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
-                />
-              </div>
-
-              {/* 深度連動開關 */}
-              <div style={{ marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(56, 189, 248, 0.1)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                <input
-                  type="checkbox"
-                  id="tw_syncBuyTx"
-                  checked={editPosModal.syncBuyTx}
-                  onChange={(e) => setEditPosModal({ ...editPosModal, syncBuyTx: e.target.checked })}
-                  style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                />
-                <label htmlFor="tw_syncBuyTx" style={{ fontSize: '0.8rem', color: '#38BDF8', cursor: 'pointer', fontWeight: 'bold' }}>
-                  {editPosModal.isNew ? '🔄 同步在歷史進出流水帳中自動寫入買進紀錄' : '🔄 同步更新歷史進出流水帳中之買進紀錄'}
-                </label>
+              <div style={{ fontSize: '0.75rem', color: '#38BDF8', marginBottom: '1.2rem', background: 'rgba(56, 189, 248, 0.1)', padding: '0.6rem', borderRadius: '6px' }}>
+                💡 提示：保存後系統將自動在「歷史進出流水帳」中寫入/更新對應買進紀錄，持股與未實現損益 100% 依流水帳自動連動！
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
@@ -3046,7 +2868,7 @@ export default function TaiwanCausalTitanDashboard() {
                     color: '#FFF', fontWeight: 'bold', padding: '0.45rem 1.2rem', borderRadius: '6px', border: 'none', fontSize: '0.84rem', cursor: 'pointer'
                   }}
                 >
-                  確認保存
+                  確認保存至歷史進出
                 </button>
               </div>
             </form>
@@ -3228,7 +3050,7 @@ export default function TaiwanCausalTitanDashboard() {
                     color: '#000', fontWeight: 'bold', padding: '0.45rem 1.2rem', borderRadius: '6px', border: 'none', fontSize: '0.84rem', cursor: 'pointer'
                   }}
                 >
-                  確認保存並連動實戰持股
+                  確認保存至歷史進出
                 </button>
               </div>
             </form>
