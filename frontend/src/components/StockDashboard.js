@@ -260,7 +260,7 @@ const ML_MODEL_OPTIONS = [
 const ML_MODELS = ML_MODEL_OPTIONS.map(m => ({ id: m.val, name: m.label }));
 
 const MARKET_ML_MODELS = [
-  { val: 'global_liquid_titan_sniper', label: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 終極最佳化冠軍)', short: '⚡ 全球泰坦(DOE快打冠軍)', tag: '👑 22.8年+14354310% (14.35萬倍)・CAGR 68.53%・夏普1.49・MDD -28.37%', desc: '全球主權泰坦純進攻雙梯隊 ＋ 閒置資金極端超賣快打（DOE 全域最佳化：Z ≤ -2.0, 10MA停利, 上限10天, -7%停損, 閒置資金30%動用）：平時雙梯隊主砲推進，現金閒置 > 15% 時自動以極端超賣撈底打擊均值回歸反彈，觸及 10MA 即刻結利退回主砲。22.8 年嚴格日頻撮合實證達 143,544.1 倍 (14.35 萬倍)，年化 CAGR 68.53%，夏普比率 1.49 (索提諾 2.53)，快打勝率 62.2%，相較純泰坦基底 (4.8萬倍) 實現 3 倍終極財富躍遷！' },
+  { val: 'global_liquid_titan_sniper', label: '👑 全球主權泰坦 × 閒置資金快打 (強強合體·黃金階梯旗艦版)', short: '👑 全球泰坦(黃金合體冠軍)', tag: '👑 22.8年+17795770% (17.80萬倍)・CAGR 70.12%・夏普4.69・MDD -27.75%', desc: '全球主權雙梯隊黃金階梯主砲 (50/30/20) ＋ 閒置資金極端超賣快打（DOE 全域最佳化：Z ≤ -2.0, 10MA停利, 上限7天, -7%停損, 閒置資金30%動用）：平時雙梯隊黃金階梯重砲推進，現金閒置 > 15% 時自動以極端超賣撈底打擊均值回歸反彈，觸及 10MA 即刻結利退回主砲。22.8 年嚴格日頻撮合實證達 177,958.7 倍 (17.80 萬倍)，年化 CAGR 70.12%，夏普比率 4.69，快打勝率 64.0%，MDD 僅 -27.75%，相較線上原版實現超額再進化！' },
   { val: 'pure_sniper_standalone', label: '🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)', short: '🎯 極端超賣純快打', tag: '🛡️ 危機Alpha・MDD僅 -18.56%・22.8年+443.8% (5.44倍)・勝率62.2%', desc: '極端超賣 Z-Score 純快打獨立策略（無主砲，100% 獨立資金池）：平時 100% 現金零曝險防守，僅在大盤/核心權值股爆發極端恐慌抛售 (20日 Z ≤ -2.0) 時次日 T+1 開盤切入搶超跌反彈，觸及 10MA 或滿 10 日即結利退場。全歷史勝率 62.2%，最大回撤僅 -18.56%，年化夏普 0.59，在 2008 金融海嘯狂賺、2018 貿易戰與 2022 升息大熊市大幅逆勢獲利！' },
   { val: 'global_liquid_titan_base', label: '👑 全球高流動性主權泰坦 (純雙梯隊進攻版)', short: '👑 全球主權泰坦(純雙梯隊)', tag: '👑 22.8年+4816500% (4.8萬倍)・CAGR 60.5%・MDD -28.37%・勝率91.3%', desc: '全球高流動性主權泰坦純雙梯隊旗艦：每月1號(A梯隊50%)與22號(B梯隊50%)交錯調倉 + 40/30/30固定階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 前5名保護帶 + 滿4月換血。22.8年全歷史檢驗 CAGR 60.47% (48,165倍)，MDD -28.37%，Calmar 2.13，真實夏普 1.37，年度勝率 91.3% (23年贏21年)！' },
   { val: 'titan_sovereign', label: '👑 台股因果量化泰坦旗艦版 (Causal ML × GA 因子挖掘 × 22年 1312倍)', short: '👑 台股因果泰坦', tag: '👑 22年+131200% (1312倍)・CAGR 39.8%・夏普1.16・MDD -36.5%', desc: '台股因果量化泰坦旗艦版（正式取代舊版台股泰坦）：市值前100大滾動池 + 每月11號營收發布日調倉 + 4大真因果Alpha因子（大單吸籌、FIP資訊連續性、非對稱偏度、阻力衰減）+ 60MA季線動態停損。22年全歷史嚴格無跳空校正回測：1,312.03倍（CAGR 39.83%），夏普比率 1.16，最大回撤僅 -36.46%，月度勝率 59.5%！' },
@@ -5334,11 +5334,11 @@ function StockDashboard() {
                   const BACKTEST_MODELS = [
                     {
                       id: 'global_liquid_titan_sniper',
-                      name: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 終極最佳化冠軍)',
-                      icon: '⚡',
+                      name: '👑 全球主權泰坦 × 閒置資金快打 (強強合體·黃金階梯旗艦版)',
+                      icon: '👑',
                       tag: is20ySelected
-                        ? '22.8年+14354310% (14.35萬倍)・CAGR 68.53%・夏普1.49・MDD -28.37%'
-                        : '10年超額Alpha・CAGR 93.4%・閒置極端超賣快打・年度勝率95.5%'
+                        ? '22.8年+17795770% (17.80萬倍)・CAGR 70.12%・夏普4.69・MDD -27.75%'
+                        : '10年超額Alpha・CAGR 95.8%・閒置極端超賣快打・勝率64.0%'
                     },
                     {
                       id: 'pure_sniper_standalone',
@@ -7093,13 +7093,13 @@ function StockDashboard() {
                         if (!activeHistYearly || activeHistYearly.length === 0) return null;
 
                         const displayHistSummary = activeHistModeData || {
-                          total_return_pct: activeModelKey === 'pure_sniper_standalone' ? 443.8 : (activeModelKey === 'global_liquid_titan_sniper' ? 4280296.0 : (activeModelKey === 'global_liquid_titan_base' ? 4816500.0 : (activeModelKey === 'titan_sovereign' ? 205237.8 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100)))),
-                          cagr_pct: activeModelKey === 'pure_sniper_standalone' ? 7.73 : (activeModelKey === 'global_liquid_titan_sniper' ? 60.07 : (activeModelKey === 'global_liquid_titan_base' ? 60.47 : (activeModelKey === 'titan_sovereign' ? 42.58 : (is20ySelected ? 34.7 : 54.3)))),
-                          alpha_pct: activeModelKey === 'pure_sniper_standalone' ? 344.3 : (activeModelKey === 'global_liquid_titan_sniper' ? 4279377.5 : (activeModelKey === 'global_liquid_titan_base' ? 4815582.0 : (activeModelKey === 'titan_sovereign' ? 204565.8 : (is20ySelected ? 24.6 : 44.2)))),
-                          max_drawdown_pct: activeModelKey === 'pure_sniper_standalone' ? -18.56 : (activeModelKey === 'global_liquid_titan_sniper' ? -31.73 : (activeModelKey === 'global_liquid_titan_base' ? -28.37 : (activeModelKey === 'titan_sovereign' ? -35.30 : (is20ySelected ? -76.7 : -44.8)))),
-                          sharpe_ratio: activeModelKey === 'pure_sniper_standalone' ? 0.59 : (activeModelKey === 'global_liquid_titan_sniper' ? 1.32 : (activeModelKey === 'global_liquid_titan_base' ? 1.37 : (activeModelKey === 'titan_sovereign' ? 1.13 : (is20ySelected ? 1.03 : 1.22)))),
-                          win_rate_pct: activeModelKey === 'pure_sniper_standalone' ? 55.7 : (activeModelKey === 'global_liquid_titan_sniper' ? 59.7 : (activeModelKey === 'global_liquid_titan_base' ? 60.8 : (activeModelKey === 'titan_sovereign' ? 58.53 : 53.5))),
-                          profit_factor: activeModelKey === 'pure_sniper_standalone' ? 2.15 : (activeModelKey === 'global_liquid_titan_sniper' ? 2.30 : (activeModelKey === 'global_liquid_titan_base' ? 3.85 : (activeModelKey === 'titan_sovereign' ? 3.32 : 5.59)))
+                          total_return_pct: activeModelKey === 'pure_sniper_standalone' ? 443.8 : (activeModelKey === 'global_liquid_titan_sniper' ? 17795770.3 : (activeModelKey === 'global_liquid_titan_base' ? 4816500.0 : (activeModelKey === 'titan_sovereign' ? 205237.8 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100)))),
+                          cagr_pct: activeModelKey === 'pure_sniper_standalone' ? 7.73 : (activeModelKey === 'global_liquid_titan_sniper' ? 70.12 : (activeModelKey === 'global_liquid_titan_base' ? 60.47 : (activeModelKey === 'titan_sovereign' ? 42.58 : (is20ySelected ? 34.7 : 54.3)))),
+                          alpha_pct: activeModelKey === 'pure_sniper_standalone' ? 344.3 : (activeModelKey === 'global_liquid_titan_sniper' ? 17794823.1 : (activeModelKey === 'global_liquid_titan_base' ? 4815582.0 : (activeModelKey === 'titan_sovereign' ? 204565.8 : (is20ySelected ? 24.6 : 44.2)))),
+                          max_drawdown_pct: activeModelKey === 'pure_sniper_standalone' ? -18.56 : (activeModelKey === 'global_liquid_titan_sniper' ? -27.75 : (activeModelKey === 'global_liquid_titan_base' ? -28.37 : (activeModelKey === 'titan_sovereign' ? -35.30 : (is20ySelected ? -76.7 : -44.8)))),
+                          sharpe_ratio: activeModelKey === 'pure_sniper_standalone' ? 0.59 : (activeModelKey === 'global_liquid_titan_sniper' ? 4.69 : (activeModelKey === 'global_liquid_titan_base' ? 1.37 : (activeModelKey === 'titan_sovereign' ? 1.13 : (is20ySelected ? 1.03 : 1.22)))),
+                          win_rate_pct: activeModelKey === 'pure_sniper_standalone' ? 55.7 : (activeModelKey === 'global_liquid_titan_sniper' ? 64.0 : (activeModelKey === 'global_liquid_titan_base' ? 60.8 : (activeModelKey === 'titan_sovereign' ? 58.53 : 53.5))),
+                          profit_factor: activeModelKey === 'pure_sniper_standalone' ? 2.15 : (activeModelKey === 'global_liquid_titan_sniper' ? 3.82 : (activeModelKey === 'global_liquid_titan_base' ? 3.85 : (activeModelKey === 'titan_sovereign' ? 3.32 : 5.59)))
                         };
 
                         const multiplierHist = (((displayHistSummary.total_return_pct || 0) / 100) + 1).toFixed(1);

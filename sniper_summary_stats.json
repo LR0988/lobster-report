@@ -1,0 +1,13 @@
+{
+  "total_return_pct": 17795770.3,
+  "multiplier": 177958.7,
+  "cagr_pct": 70.12,
+  "max_drawdown_pct": -27.75,
+  "daily_mdd_pct": -27.75,
+  "sharpe_ratio": 4.69,
+  "calmar_ratio": 2.53,
+  "trade_win_rate_pct": 64.0,
+  "sniper_win_rate_pct": 64.0,
+  "total_trades": 1451,
+  "sniper_trades": 86
+}
