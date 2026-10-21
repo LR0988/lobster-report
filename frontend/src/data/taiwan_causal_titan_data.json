@@ -9,7 +9,8 @@
     "holding_count": 5,
     "allocation_type": "黃金階梯 (35% / 25% / 20% / 10% / 10%)",
     "exit_rule": "盤中逐日跌破 60MA 季線動態停損 · 剩餘天數停泊 1.5% 無風險現金",
-    "transaction_friction": "38.5 bps (0.3% 證交稅 + 0.085% 券商手續費)"
+    "transaction_friction": "38.5 bps (0.3% 證交稅 + 0.085% 券商手續費)",
+    "latest_data_date": "2026-10-21"
   },
   "kpis": {
     "cagr": 42.58,
@@ -36,19 +37,19 @@
       "target_weight_pct": 35.0,
       "entry_date": "2026-10-12",
       "entry_price": 580.0,
-      "current_price": 475.0,
-      "latest_price": 475.0,
-      "unrealized_return_pct": -18.1,
-      "pnl_pct": -18.1,
+      "current_price": 512.0,
+      "latest_price": 512.0,
+      "unrealized_return_pct": -11.72,
+      "pnl_pct": -11.72,
       "holding_days": 6,
       "stop_loss_price": 460.93,
       "ma60_stop_price": 460.93,
       "stop_loss_ma60": 460.93,
-      "dist_to_stop_pct": -2.96,
-      "stop_loss_pct": -2.96,
+      "dist_to_stop_pct": 9.97,
+      "stop_loss_pct": 9.97,
       "stop_condition": "逐日監控：若跌破季線 60MA (460.9元) 則動態出場停泊現金",
-      "strategy_current_price": 475.0,
-      "price_date": "2026-10-20",
+      "strategy_current_price": 512.0,
+      "price_date": "2026-10-21",
       "highlight": "砷化鎵龍頭，因果吸籌大單破季線突破"
     },
     {
@@ -61,19 +62,19 @@
       "target_weight_pct": 25.0,
       "entry_date": "2026-10-12",
       "entry_price": 522.0,
-      "current_price": 469.5,
-      "latest_price": 469.5,
-      "unrealized_return_pct": -10.06,
-      "pnl_pct": -10.06,
+      "current_price": 482.0,
+      "latest_price": 482.0,
+      "unrealized_return_pct": -7.66,
+      "pnl_pct": -7.66,
       "holding_days": 6,
       "stop_loss_price": 458.93,
       "ma60_stop_price": 458.93,
       "stop_loss_ma60": 458.93,
-      "dist_to_stop_pct": -2.25,
-      "stop_loss_pct": -2.25,
+      "dist_to_stop_pct": 4.79,
+      "stop_loss_pct": 4.79,
       "stop_condition": "逐日監控：若跌破季線 60MA (458.9元) 則動態出場停泊現金",
-      "strategy_current_price": 469.5,
-      "price_date": "2026-10-20",
+      "strategy_current_price": 482.0,
+      "price_date": "2026-10-21",
       "highlight": "AI伺服器PCB高頻銅箔主升段爆發"
     },
     {
@@ -86,19 +87,19 @@
       "target_weight_pct": 20.0,
       "entry_date": "2026-10-12",
       "entry_price": 1540.0,
-      "current_price": 1395.0,
-      "latest_price": 1395.0,
-      "unrealized_return_pct": -9.42,
-      "pnl_pct": -9.42,
+      "current_price": 1375.0,
+      "latest_price": 1375.0,
+      "unrealized_return_pct": -10.71,
+      "pnl_pct": -10.71,
       "holding_days": 6,
       "stop_loss_price": 1220.22,
       "ma60_stop_price": 1220.22,
       "stop_loss_ma60": 1220.22,
-      "dist_to_stop_pct": -12.53,
-      "stop_loss_pct": -12.53,
+      "dist_to_stop_pct": 11.26,
+      "stop_loss_pct": 11.26,
       "stop_condition": "逐日監控：若跌破季線 60MA (1220.2元) 則動態出場停泊現金",
-      "strategy_current_price": 1395.0,
-      "price_date": "2026-10-20",
+      "strategy_current_price": 1375.0,
+      "price_date": "2026-10-21",
       "highlight": "GB200水冷板主動吸收站穩VWAP"
     },
     {
@@ -111,19 +112,19 @@
       "target_weight_pct": 10.0,
       "entry_date": "2026-10-12",
       "entry_price": 303.0,
-      "current_price": 296.0,
-      "latest_price": 296.0,
-      "unrealized_return_pct": -2.31,
-      "pnl_pct": -2.31,
+      "current_price": 320.5,
+      "latest_price": 320.5,
+      "unrealized_return_pct": 5.78,
+      "pnl_pct": 5.78,
       "holding_days": 6,
       "stop_loss_price": 227.11,
       "ma60_stop_price": 227.11,
       "stop_loss_ma60": 227.11,
-      "dist_to_stop_pct": -23.27,
-      "stop_loss_pct": -23.27,
+      "dist_to_stop_pct": 29.14,
+      "stop_loss_pct": 29.14,
       "stop_condition": "逐日監控：若跌破季線 60MA (227.1元) 則動態出場停泊現金",
-      "strategy_current_price": 296.0,
-      "price_date": "2026-10-20",
+      "strategy_current_price": 320.5,
+      "price_date": "2026-10-21",
       "highlight": "CCL玻纖布原物料反轉向上潛伏防守"
     },
     {
@@ -136,19 +137,19 @@
       "target_weight_pct": 10.0,
       "entry_date": "2026-10-12",
       "entry_price": 840.0,
-      "current_price": 794.0,
-      "latest_price": 794.0,
-      "unrealized_return_pct": -5.48,
-      "pnl_pct": -5.48,
+      "current_price": 815.0,
+      "latest_price": 815.0,
+      "unrealized_return_pct": -2.98,
+      "pnl_pct": -2.98,
       "holding_days": 6,
       "stop_loss_price": 703.27,
       "ma60_stop_price": 703.27,
       "stop_loss_ma60": 703.27,
-      "dist_to_stop_pct": -11.43,
-      "stop_loss_pct": -11.43,
+      "dist_to_stop_pct": 13.71,
+      "stop_loss_pct": 13.71,
       "stop_condition": "逐日監控：若跌破季線 60MA (703.3元) 則動態出場停泊現金",
-      "strategy_current_price": 794.0,
-      "price_date": "2026-10-20",
+      "strategy_current_price": 815.0,
+      "price_date": "2026-10-21",
       "highlight": "車用被動元件阻力衰減突破"
     }
   ],
@@ -1966,154 +1967,198 @@
       "strategy_ret": -7.01,
       "taiex_ret": 12.65,
       "alpha": -19.66,
-      "is_positive": false
+      "is_positive": false,
+      "return_pct": -7.01,
+      "taiex_pct": 12.65
     },
     {
       "year": 2006,
       "strategy_ret": 14.75,
       "taiex_ret": 13.1,
       "alpha": 1.65,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 14.75,
+      "taiex_pct": 13.1
     },
     {
       "year": 2007,
       "strategy_ret": 3.87,
       "taiex_ret": 5.39,
       "alpha": -1.52,
-      "is_positive": true
+      "is_positive": false,
+      "return_pct": 3.87,
+      "taiex_pct": 5.39
     },
     {
       "year": 2008,
       "strategy_ret": -8.93,
       "taiex_ret": -44.53,
       "alpha": 35.6,
-      "is_positive": false
+      "is_positive": true,
+      "return_pct": -8.93,
+      "taiex_pct": -44.53
     },
     {
       "year": 2009,
       "strategy_ret": 105.5,
       "taiex_ret": 86.89,
       "alpha": 18.61,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 105.5,
+      "taiex_pct": 86.89
     },
     {
       "year": 2010,
       "strategy_ret": 23.72,
       "taiex_ret": 7.3,
       "alpha": 16.42,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 23.72,
+      "taiex_pct": 7.3
     },
     {
       "year": 2011,
       "strategy_ret": -9.95,
       "taiex_ret": -19.52,
       "alpha": 9.57,
-      "is_positive": false
+      "is_positive": true,
+      "return_pct": -9.95,
+      "taiex_pct": -19.52
     },
     {
       "year": 2012,
       "strategy_ret": 4.97,
       "taiex_ret": 8.78,
       "alpha": -3.81,
-      "is_positive": true
+      "is_positive": false,
+      "return_pct": 4.97,
+      "taiex_pct": 8.78
     },
     {
       "year": 2013,
       "strategy_ret": 222.24,
       "taiex_ret": 9.55,
       "alpha": 212.69,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 222.24,
+      "taiex_pct": 9.55
     },
     {
       "year": 2014,
       "strategy_ret": 5.41,
       "taiex_ret": 7.15,
       "alpha": -1.74,
-      "is_positive": true
+      "is_positive": false,
+      "return_pct": 5.41,
+      "taiex_pct": 7.15
     },
     {
       "year": 2015,
       "strategy_ret": 31.85,
       "taiex_ret": -15.14,
       "alpha": 46.99,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 31.85,
+      "taiex_pct": -15.14
     },
     {
       "year": 2016,
       "strategy_ret": 7.53,
       "taiex_ret": 20.0,
       "alpha": -12.47,
-      "is_positive": true
+      "is_positive": false,
+      "return_pct": 7.53,
+      "taiex_pct": 20.0
     },
     {
       "year": 2017,
       "strategy_ret": 29.61,
       "taiex_ret": 15.67,
       "alpha": 13.94,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 29.61,
+      "taiex_pct": 15.67
     },
     {
       "year": 2018,
       "strategy_ret": 75.06,
       "taiex_ret": -9.72,
       "alpha": 84.78,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 75.06,
+      "taiex_pct": -9.72
     },
     {
       "year": 2019,
       "strategy_ret": 70.12,
       "taiex_ret": 24.12,
       "alpha": 46.0,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 70.12,
+      "taiex_pct": 24.12
     },
     {
       "year": 2020,
       "strategy_ret": 146.94,
       "taiex_ret": 28.43,
       "alpha": 118.51,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 146.94,
+      "taiex_pct": 28.43
     },
     {
       "year": 2021,
       "strategy_ret": 20.0,
       "taiex_ret": 17.55,
       "alpha": 2.45,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 20.0,
+      "taiex_pct": 17.55
     },
     {
       "year": 2022,
       "strategy_ret": -22.75,
       "taiex_ret": -19.34,
       "alpha": -3.41,
-      "is_positive": false
+      "is_positive": false,
+      "return_pct": -22.75,
+      "taiex_pct": -19.34
     },
     {
       "year": 2023,
       "strategy_ret": 80.47,
       "taiex_ret": 18.94,
       "alpha": 61.53,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 80.47,
+      "taiex_pct": 18.94
     },
     {
       "year": 2024,
       "strategy_ret": 39.85,
       "taiex_ret": 28.17,
       "alpha": 11.68,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 39.85,
+      "taiex_pct": 28.17
     },
     {
       "year": 2025,
       "strategy_ret": 120.28,
       "taiex_ret": 35.93,
       "alpha": 84.35,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 120.28,
+      "taiex_pct": 35.93
     },
     {
       "year": 2026,
       "strategy_ret": 257.73,
       "taiex_ret": 61.29,
       "alpha": 196.44,
-      "is_positive": true
+      "is_positive": true,
+      "return_pct": 257.73,
+      "taiex_pct": 61.29
     }
   ],
   "trades": [

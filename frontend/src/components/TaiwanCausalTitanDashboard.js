@@ -5,7 +5,7 @@ import { getCurrentUser } from '../api';
 // ==========================================
 // 👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10)
 // 完全復刻全球主權泰坦互動操作架構
-// 包含帳戶資產總覽、調倉更動建議試算、實盤部位增刪修與出場、流水帳記帳與備份
+// 包含帳戶資產總覽、階梯調倉更動建議表格、實盤部位與歷史流水帳深度連動、歷年年度勝率與報酬
 // ==========================================
 
 const getTaiwanTitanStorageKeys = (username) => ({
@@ -26,11 +26,11 @@ const DEFAULT_POSITIONS = [
     industry: 'PA 功率放大器 / 5G射頻王者',
     role: '👑 王者先鋒 (35%)',
     target_weight_pct: 35.0,
-    shares: 736, // 約 0 張 + 736 股
-    entry_price: 475.0,
-    current_price: 475.0,
+    shares: 603,
+    entry_price: 580.0,
+    current_price: 512.0,
     entry_date: '2026-10-12',
-    price_date: '2026-10-20',
+    price_date: '2026-10-21',
     entry_fee: 498,
     stop_loss_price: 460.93,
     stop_condition: '逐日監控：跌破 60MA 季線 (460.9元) 則動態出場停泊現金',
@@ -45,11 +45,11 @@ const DEFAULT_POSITIONS = [
     industry: '高頻高速銅箔龍頭',
     role: '🚀 核心主力 (25%)',
     target_weight_pct: 25.0,
-    shares: 532, // 約 0 張 + 532 股
-    entry_price: 469.5,
-    current_price: 469.5,
+    shares: 478,
+    entry_price: 522.0,
+    current_price: 482.0,
     entry_date: '2026-10-12',
-    price_date: '2026-10-20',
+    price_date: '2026-10-21',
     entry_fee: 356,
     stop_loss_price: 458.93,
     stop_condition: '逐日監控：跌破 60MA 季線 (458.9元) 則動態出場停泊現金',
@@ -64,12 +64,12 @@ const DEFAULT_POSITIONS = [
     industry: 'AI 水冷散熱伺服器龍頭',
     role: '⚡ 動能旗艦 (20%)',
     target_weight_pct: 20.0,
-    shares: 143, // 約 0 張 + 143 股
-    entry_price: 1395.0,
-    current_price: 1395.0,
+    shares: 129,
+    entry_price: 1540.0,
+    current_price: 1375.0,
     entry_date: '2026-10-12',
-    price_date: '2026-10-20',
-    entry_fee: 284,
+    price_date: '2026-10-21',
+    entry_fee: 283,
     stop_loss_price: 1220.22,
     stop_condition: '逐日監控：跌破 60MA 季線 (1220.2元) 則動態出場停泊現金',
     highlight: 'GB200水冷板主動吸收站穩VWAP'
@@ -83,11 +83,11 @@ const DEFAULT_POSITIONS = [
     industry: '電子材料 / 環氧樹脂',
     role: '🛡️ 結構支柱 (10%)',
     target_weight_pct: 10.0,
-    shares: 337, // 約 0 張 + 337 股
-    entry_price: 296.0,
-    current_price: 296.0,
+    shares: 330,
+    entry_price: 303.0,
+    current_price: 320.5,
     entry_date: '2026-10-12',
-    price_date: '2026-10-20',
+    price_date: '2026-10-21',
     entry_fee: 142,
     stop_loss_price: 227.11,
     stop_condition: '逐日監控：跌破 60MA 季線 (227.1元) 則動態出場停泊現金',
@@ -102,25 +102,26 @@ const DEFAULT_POSITIONS = [
     industry: 'MLCC 被動元件 / 車用陶瓷',
     role: '🎯 爆發突破 (10%)',
     target_weight_pct: 10.0,
-    shares: 125, // 約 0 張 + 125 股
-    entry_price: 794.0,
-    current_price: 794.0,
+    shares: 119,
+    entry_price: 840.0,
+    current_price: 815.0,
     entry_date: '2026-10-12',
-    price_date: '2026-10-20',
-    entry_fee: 141,
+    price_date: '2026-10-21',
+    entry_fee: 142,
     stop_loss_price: 703.27,
     stop_condition: '逐日監控：跌破 60MA 季線 (703.3元) 則動態出場停泊現金',
     highlight: '車用被動元件阻力衰減突破'
   }
 ];
 
-// 預設 5 檔初始建倉流水帳 (依 100 萬本金開倉)
+// 預設 5 檔初始建倉流水帳 (依 100 萬本金開倉，與當前實戰持股完全對齊)
 const DEFAULT_TX_HISTORY = [
   {
     id: 'tx_tw_deposit_1',
     date: '2026-10-12',
     action: '投入現金',
     ticker: '-',
+    stock_id: '-',
     name: '台股因果泰坦初始本金入金',
     shares: 0,
     price: 0,
@@ -137,10 +138,10 @@ const DEFAULT_TX_HISTORY = [
     ticker: '3105.TW',
     stock_id: '3105',
     name: '穩懋 (3105)',
-    shares: 736,
-    price: 475.0,
+    shares: 603,
+    price: 580.0,
     tax_fee: 498,
-    cash_flow_twd: -350098,
+    cash_flow_twd: -350238,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10/12 法定公告日建倉 👑 王者先鋒 (35%)'
@@ -152,10 +153,10 @@ const DEFAULT_TX_HISTORY = [
     ticker: '8358.TW',
     stock_id: '8358',
     name: '金居 (8358)',
-    shares: 532,
-    price: 469.5,
+    shares: 478,
+    price: 522.0,
     tax_fee: 356,
-    cash_flow_twd: -250130,
+    cash_flow_twd: -249872,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10/12 法定公告日建倉 🚀 核心主力 (25%)'
@@ -167,10 +168,10 @@ const DEFAULT_TX_HISTORY = [
     ticker: '3324.TW',
     stock_id: '3324',
     name: '雙鴻 (3324)',
-    shares: 143,
-    price: 1395.0,
-    tax_fee: 284,
-    cash_flow_twd: -199769,
+    shares: 129,
+    price: 1540.0,
+    tax_fee: 283,
+    cash_flow_twd: -198943,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10/12 法定公告日建倉 ⚡ 動能旗艦 (20%)'
@@ -182,10 +183,10 @@ const DEFAULT_TX_HISTORY = [
     ticker: '1303.TW',
     stock_id: '1303',
     name: '南亞 (1303)',
-    shares: 337,
-    price: 296.0,
+    shares: 330,
+    price: 303.0,
     tax_fee: 142,
-    cash_flow_twd: -99894,
+    cash_flow_twd: -100132,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10/12 法定公告日建倉 🛡️ 結構支柱 (10%)'
@@ -197,10 +198,10 @@ const DEFAULT_TX_HISTORY = [
     ticker: '3026.TW',
     stock_id: '3026',
     name: '禾伸堂 (3026)',
-    shares: 125,
-    price: 794.0,
-    tax_fee: 141,
-    cash_flow_twd: -99391,
+    shares: 119,
+    price: 840.0,
+    tax_fee: 142,
+    cash_flow_twd: -100102,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10/12 法定公告日建倉 🎯 爆發突破 (10%)'
@@ -223,13 +224,21 @@ export default function TaiwanCausalTitanDashboard() {
     setTimeout(() => setFeedbackMsg(''), 4000);
   };
 
-  // 持股部位狀態 (localStorage 持久化)
+  // 持股部位狀態 (localStorage 持久化，並具備版本自動遷移校準)
   const [userPositions, setUserPositions] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKeys.positions);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // 檢查是否有舊的錯誤成本 (例如 穩懋 475 或 736 股)，若有自動升級至真實 10/12 建倉成本
+          const hasOldData = parsed.some(p => p.stock_id === '3105' && (p.entry_price === 475 || p.shares === 736));
+          if (hasOldData) {
+            try { localStorage.setItem(storageKeys.positions, JSON.stringify(DEFAULT_POSITIONS)); } catch {}
+            return DEFAULT_POSITIONS;
+          }
+          return parsed;
+        }
       }
       return DEFAULT_POSITIONS;
     } catch {
@@ -237,13 +246,26 @@ export default function TaiwanCausalTitanDashboard() {
     }
   });
 
-  // 歷史交易流水帳 (localStorage 持久化)
+  // 歷史交易流水帳 (localStorage 持久化 - 唯一真實來源)
   const [txHistory, setTxHistory] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKeys.allTx);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        let parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasOldData = parsed.some(tx => tx.stock_id === '3105' && (tx.price === 475 || tx.shares === 736));
+          if (hasOldData) {
+            parsed = DEFAULT_TX_HISTORY;
+            try { localStorage.setItem(storageKeys.allTx, JSON.stringify(parsed)); } catch {}
+          }
+          // 確保歷史紀錄包含初始入金流水帳
+          const hasDeposit = parsed.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || (tx.note && tx.note.includes('入金')));
+          if (!hasDeposit) {
+            parsed = [DEFAULT_TX_HISTORY[0], ...parsed];
+            try { localStorage.setItem(storageKeys.allTx, JSON.stringify(parsed)); } catch {}
+          }
+          return parsed;
+        }
       }
       return DEFAULT_TX_HISTORY;
     } catch {
@@ -261,6 +283,9 @@ export default function TaiwanCausalTitanDashboard() {
     }
   });
 
+  // 表格內即時修改的建議數據暫存 (比照全球主權泰坦模式)
+  const [customEdits, setCustomEdits] = useState({});
+
   // 自動持久化儲存
   useEffect(() => {
     try {
@@ -272,18 +297,75 @@ export default function TaiwanCausalTitanDashboard() {
     }
   }, [userPositions, txHistory, dismissedSuggestions, storageKeys]);
 
-  // 閒置現金 (TWD) - 100% 由交易流水帳現金流動態加總推導
+  // 閒置現金 (TWD) - 100% 由交易流水帳 (txHistory) 的現金流動態加總推導 (唯一真實來源)
   const idleCash = useMemo(() => {
     return txHistory.reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
   }, [txHistory]);
 
-  // 累計投入本金 (TWD)
+  // 累計投入本金 (TWD) - 100% 由歷史紀錄推導
   const totalDepositsTwd = useMemo(() => {
     const sum = txHistory
       .filter(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')))
       .reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
     return sum > 0 ? sum : 1000000;
   }, [txHistory]);
+
+  // 深度連動核心機制 1：自動將「當前持股部位」的成本均價、股數、費用與建倉日，100% 嚴格綁定對齊「歷史交易流水帳」最新買入明細！
+  useEffect(() => {
+    if (!Array.isArray(txHistory) || txHistory.length === 0) return;
+    setUserPositions(prev => {
+      let changed = false;
+      const next = prev.map(p => {
+        const matchTx = txHistory.find(tx => 
+          (tx.action === '買入' || tx.action === '加碼') && 
+          (tx.stock_id === p.stock_id || tx.ticker === p.ticker || 
+           (tx.ticker && p.ticker && tx.ticker.split('.')[0] === p.ticker.split('.')[0]) || 
+           (tx.name && p.name && (tx.name.includes(p.name.slice(0, 2)) || p.name.includes(tx.name.slice(0, 2)))))
+        );
+        if (matchTx && matchTx.price > 0) {
+          const nextPrice = matchTx.price;
+          const nextShares = matchTx.shares > 0 ? matchTx.shares : p.shares;
+          const nextFee = matchTx.tax_fee !== undefined ? matchTx.tax_fee : p.entry_fee;
+          const nextDate = matchTx.date || p.entry_date;
+          if (p.entry_price !== nextPrice || p.shares !== nextShares || p.entry_fee !== nextFee || p.entry_date !== nextDate) {
+            changed = true;
+            return {
+              ...p,
+              entry_price: nextPrice,
+              shares: nextShares,
+              entry_fee: nextFee,
+              entry_date: nextDate
+            };
+          }
+        }
+        return p;
+      });
+      return changed ? next : prev;
+    });
+  }, [txHistory]);
+
+  // 深度連動核心機制 2：自動將「當前持股部位」的最新現價 (current_price) 與報價日期 (price_date)，依據最新資料庫行情動態同步對齊
+  useEffect(() => {
+    const defaultPositions = data?.current_positions || [];
+    if (!defaultPositions || defaultPositions.length === 0) return;
+    setUserPositions(prev => {
+      let changed = false;
+      const next = prev.map(p => {
+        const match = defaultPositions.find(dp => dp.stock_id === p.stock_id || dp.ticker === p.ticker);
+        if (match && match.current_price && (p.current_price !== match.current_price || p.price_date !== match.price_date)) {
+          changed = true;
+          return {
+            ...p,
+            current_price: match.current_price,
+            price_date: match.price_date || '2026-10-21',
+            stop_loss_price: match.stop_loss_price || p.stop_loss_price
+          };
+        }
+        return p;
+      });
+      return changed ? next : prev;
+    });
+  }, [data]);
 
   // 持股市值、成本、未實現損益
   const { totalStockMarketValTwd, totalCostTwd, unrealizedPnlTwd, unrealizedReturnPct } = useMemo(() => {
@@ -345,22 +427,25 @@ export default function TaiwanCausalTitanDashboard() {
   }, [txHistory]);
 
   // ==========================================
-  // 調倉窗口與更動建議試算器 (DOE 35/25/20/10/10)
+  // 目標階梯配置配置池 (DOE 35/25/20/10/10)
   // ==========================================
   const targetAllocationConfig = useMemo(() => [
-    { stock_id: '3105', name: '穩懋', role: '👑 王者先鋒 (35%)', weight_pct: 35.0, price: 475.0, stop_loss: 460.93, industry: 'PA 功率放大器 / 5G射頻王者' },
-    { stock_id: '8358', name: '金居', role: '🚀 核心主力 (25%)', weight_pct: 25.0, price: 469.5, stop_loss: 458.93, industry: '高頻高速銅箔龍頭' },
-    { stock_id: '3324', name: '雙鴻', role: '⚡ 動能旗艦 (20%)', weight_pct: 20.0, price: 1395.0, stop_loss: 1220.22, industry: 'AI 水冷散熱伺服器龍頭' },
-    { stock_id: '1303', name: '南亞', role: '🛡️ 結構支柱 (10%)', weight_pct: 10.0, price: 296.0, stop_loss: 227.11, industry: '電子材料 / 環氧樹脂' },
-    { stock_id: '3026', name: '禾伸堂', role: '🎯 爆發突破 (10%)', weight_pct: 10.0, price: 794.0, stop_loss: 703.27, industry: 'MLCC 被動元件 / 車用陶瓷' }
+    { stock_id: '3105', name: '穩懋', role: '👑 王者先鋒 (35%)', weight_pct: 35.0, price: 512.0, stop_loss: 460.93, industry: 'PA 功率放大器 / 5G射頻王者' },
+    { stock_id: '8358', name: '金居', role: '🚀 核心主力 (25%)', weight_pct: 25.0, price: 482.0, stop_loss: 458.93, industry: '高頻高速銅箔龍頭' },
+    { stock_id: '3324', name: '雙鴻', role: '⚡ 動能旗艦 (20%)', weight_pct: 20.0, price: 1375.0, stop_loss: 1220.22, industry: 'AI 水冷散熱伺服器龍頭' },
+    { stock_id: '1303', name: '南亞', role: '🛡️ 結構支柱 (10%)', weight_pct: 10.0, price: 320.5, stop_loss: 227.11, industry: '電子材料 / 環氧樹脂' },
+    { stock_id: '3026', name: '禾伸堂', role: '🎯 爆發突破 (10%)', weight_pct: 10.0, price: 815.0, stop_loss: 703.27, industry: 'MLCC 被動元件 / 車用陶瓷' }
   ], []);
 
+  // ==========================================
+  // 階梯持倉更動建議演算法 (完全對齊全球主權泰坦模式，含 DOE ±5% 容差帶與續抱透明展示)
+  // ==========================================
   const rebalanceSuggestions = useMemo(() => {
     if (totalNetAssetsTwd <= 0) return [];
     const suggestions = [];
     const tolerancePct = 5.0; // DOE ±5% 容差帶
 
-    // 1. 針對目標 5 大主力進行部位試算
+    // 1. 針對目標 5 大主力進行部位試算 (確保 5 檔皆具備明確狀態：買入 / 加碼 / 減持 / 續抱)
     targetAllocationConfig.forEach(target => {
       const targetTwd = totalNetAssetsTwd * (target.weight_pct / 100.0);
       const targetShares = Math.floor(targetTwd / target.price);
@@ -394,12 +479,15 @@ export default function TaiwanCausalTitanDashboard() {
           currentShares: heldShares,
           targetShares,
           recShares: targetShares,
+          defaultPrice: target.price,
+          defaultTaxFee: estFee,
           sharesDesc,
           price: target.price,
           estTaxFee: estFee,
           stop_loss_price: target.stop_loss,
           industry: target.industry,
-          heldPos: null
+          heldPos: null,
+          isBalanced: false
         });
       } else if (heldShares > 0 && weightDiffPct > tolerancePct && diffShares > 0 && Math.abs(diffShares * target.price) > 5000) {
         // 加碼
@@ -416,12 +504,15 @@ export default function TaiwanCausalTitanDashboard() {
           currentShares: heldShares,
           targetShares,
           recShares: diffShares,
+          defaultPrice: target.price,
+          defaultTaxFee: estFee,
           sharesDesc,
           price: target.price,
           estTaxFee: estFee,
           stop_loss_price: target.stop_loss,
           industry: target.industry,
-          heldPos
+          heldPos,
+          isBalanced: false
         });
       } else if (heldShares > 0 && weightDiffPct > tolerancePct && diffShares < 0 && Math.abs(diffShares * target.price) > 5000) {
         // 減持
@@ -439,12 +530,39 @@ export default function TaiwanCausalTitanDashboard() {
           currentShares: heldShares,
           targetShares,
           recShares: reduceShares,
+          defaultPrice: target.price,
+          defaultTaxFee: estTaxFee,
           sharesDesc,
           price: target.price,
           estTaxFee,
           stop_loss_price: target.stop_loss,
           industry: target.industry,
-          heldPos
+          heldPos,
+          isBalanced: false
+        });
+      } else {
+        // 權重在容差帶內：部位平衡無需調整，明確展示為續抱，確保 5 檔主力 100% 透明掌控！
+        suggestions.push({
+          key: suggKey,
+          action: '續抱',
+          actionColor: '#10B981',
+          stock_id: target.stock_id,
+          name: target.name,
+          role: target.role,
+          targetWeightPct: target.weight_pct,
+          targetTwd,
+          currentShares: heldShares,
+          targetShares,
+          recShares: 0,
+          defaultPrice: target.price,
+          defaultTaxFee: 0,
+          sharesDesc: '0 股 (平衡)',
+          price: target.price,
+          estTaxFee: 0,
+          stop_loss_price: target.stop_loss,
+          industry: target.industry,
+          heldPos,
+          isBalanced: true
         });
       }
     });
@@ -466,18 +584,21 @@ export default function TaiwanCausalTitanDashboard() {
           actionColor: '#EF4444',
           stock_id: heldPos.stock_id || '-',
           name: heldPos.stock_name || heldPos.name || '非核心標的',
-          role: '⚠️ 非目標梯隊',
+          role: '⚠️ 跌出階梯名單',
           targetWeightPct: 0,
           targetTwd: 0,
           currentShares: exitShares,
           targetShares: 0,
           recShares: exitShares,
+          defaultPrice: curPrice,
+          defaultTaxFee: estTaxFee,
           sharesDesc,
           price: curPrice,
           estTaxFee,
           stop_loss_price: heldPos.stop_loss_price || 0,
           industry: heldPos.industry || '-',
-          heldPos
+          heldPos,
+          isBalanced: false
         });
       }
     });
@@ -485,35 +606,94 @@ export default function TaiwanCausalTitanDashboard() {
     return suggestions;
   }, [totalNetAssetsTwd, targetAllocationConfig, userPositions, dismissedSuggestions]);
 
+  // 取得目前某列的編輯數值 (比照全球主權泰坦模式)
+  const getRowValues = (sugg) => {
+    const edits = customEdits[sugg.key] || {};
+    return {
+      shares: edits.shares !== undefined ? edits.shares : String(sugg.recShares),
+      price: edits.price !== undefined ? edits.price : String(sugg.defaultPrice),
+      taxFee: edits.taxFee !== undefined ? edits.taxFee : String(sugg.defaultTaxFee)
+    };
+  };
+
+  const handleUpdateRowInput = (key, field, val) => {
+    setCustomEdits(prev => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || {}),
+        [field]: val
+      }
+    }));
+  };
+
   // ==========================================
-  // 調倉執行與指令複製操作
+  // 調倉執行與指令操作 (完全對齊全球主權泰坦模式)
   // ==========================================
   // 複製單一券商委託下單字串
   const handleCopyOrder = (sugg) => {
+    if (sugg.action === '續抱' || sugg.isBalanced) {
+      triggerNotice(`ℹ️「${sugg.name}」目前持倉平衡，無須下單！`);
+      return;
+    }
+    const rowVal = getRowValues(sugg);
+    const shares = parseInt(rowVal.shares, 10) || sugg.recShares;
+    const price = parseFloat(rowVal.price) || sugg.defaultPrice;
     const actionText = sugg.action === '買入' || sugg.action === '加碼' ? '現股買進' : '現股賣出';
-    const text = `${sugg.stock_id} ${sugg.name} ${actionText} ${sugg.recShares}股 · 委託價 $${sugg.price}`;
+    const text = `${sugg.stock_id} ${sugg.name} ${actionText} ${shares}股 · 委託價 $${price}`;
     navigator.clipboard.writeText(text);
     triggerNotice(`📋 已複製委託字串：${text}`);
   };
 
   // 複製全部建議下單字串
   const handleCopyAllOrders = () => {
-    if (rebalanceSuggestions.length === 0) return;
-    const text = rebalanceSuggestions.map(s => {
-      const actionText = s.action === '買入' || s.action === '加碼' ? '現股買進' : '現股賣出';
-      return `${s.stock_id} ${s.name} ${actionText} ${s.recShares}股 ($${s.price})`;
-    }).join('\n');
+    const activeLines = rebalanceSuggestions
+      .filter(s => s.action !== '續抱' && !s.isBalanced && s.recShares > 0)
+      .map(s => {
+        const rowVal = getRowValues(s);
+        const shares = parseInt(rowVal.shares, 10) || s.recShares;
+        const price = parseFloat(rowVal.price) || s.defaultPrice;
+        const actionText = s.action === '買入' || s.action === '加碼' ? '現股買進' : '現股賣出';
+        return `${s.stock_id} ${s.name} ${actionText} ${shares}股 ($${price})`;
+      });
+
+    if (activeLines.length === 0) {
+      triggerNotice('ℹ️ 目前 5 檔黃金階梯主力標的均已處於平衡容差帶內，無須發送任何調倉委託！');
+      return;
+    }
+    const text = activeLines.join('\n');
     navigator.clipboard.writeText(text);
-    triggerNotice(`📋 已成功複製 ${rebalanceSuggestions.length} 筆調倉委託指令！`);
+    triggerNotice(`📋 已成功複製 ${activeLines.length} 筆調倉委託指令！`);
   };
 
   // 一鍵執行單筆調倉建議 (自動連動持股與流水帳)
-  const handleExecuteSuggestion = (sugg) => {
+  const handleExecuteSuggestion = (sugg, isBatch = false) => {
+    if (sugg.action === '續抱' || sugg.isBalanced) {
+      if (!isBatch) triggerNotice(`✅「${sugg.name}」目前持倉權重已完全對齊目標，處於平衡容差帶內，請安心續抱！`);
+      return;
+    }
+
+    const rowVal = getRowValues(sugg);
+    const actualShares = parseInt(rowVal.shares, 10);
+    const actualPrice = parseFloat(rowVal.price);
+    const actualTaxFee = parseFloat(rowVal.taxFee || 0);
+
+    if (isNaN(actualShares) || actualShares <= 0 || isNaN(actualPrice) || actualPrice <= 0) {
+      if (!isBatch) alert('請填寫有效的股數與成交價格');
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
-    const amount = sugg.recShares * sugg.price;
+    const grossVal = actualShares * actualPrice;
 
     if (sugg.action === '買入') {
-      const cashFlow = -(amount + sugg.estTaxFee);
+      const totalCost = grossVal + actualTaxFee;
+      if (idleCash < totalCost && !isBatch) {
+        const proceed = window.confirm(
+          `提醒：當前閒置現金 (NT$ ${Math.round(idleCash).toLocaleString()}) 小於預計買進總成本 (NT$ ${Math.round(totalCost).toLocaleString()})。\n是否依然確認建倉？(閒置現金將變為負值或需追加投入)`
+        );
+        if (!proceed) return;
+      }
+
       const newPos = {
         id: `pos_${sugg.stock_id}_${Date.now()}`,
         stock_id: sugg.stock_id,
@@ -523,172 +703,213 @@ export default function TaiwanCausalTitanDashboard() {
         industry: sugg.industry || '',
         role: sugg.role,
         target_weight_pct: sugg.targetWeightPct,
-        shares: sugg.recShares,
-        entry_price: sugg.price,
-        current_price: sugg.price,
+        shares: actualShares,
+        entry_price: actualPrice,
+        current_price: actualPrice,
         entry_date: today,
         price_date: today,
-        entry_fee: sugg.estTaxFee,
-        stop_loss_price: sugg.stop_loss_price,
+        entry_fee: actualTaxFee,
+        stop_loss_price: sugg.stop_loss_price || Math.round(actualPrice * 0.9 * 100) / 100,
         stop_condition: `逐日監控：跌破 60MA 季線 (${sugg.stop_loss_price}元) 則動態出場`,
-        highlight: '台股因果泰坦法定公告日調倉'
+        highlight: sugg.highlight || '因果 Alpha 階梯配置'
       };
+
       const newTx = {
-        id: `tx_${Date.now()}`,
+        id: `tx_buy_${Date.now()}_${sugg.stock_id}`,
         date: today,
         action: '買入',
-        ticker: `${sugg.stock_id}.TW`,
         stock_id: sugg.stock_id,
+        ticker: `${sugg.stock_id}.TW`,
         name: `${sugg.name} (${sugg.stock_id})`,
-        shares: sugg.recShares,
-        price: sugg.price,
-        tax_fee: sugg.estTaxFee,
-        cash_flow_twd: cashFlow,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: -Math.round(totalCost),
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: `法定調倉買入 ${sugg.role}`
+        note: `法定調倉建倉 (${sugg.role})`
       };
-      setUserPositions(prev => [...prev, newPos]);
+
+      setUserPositions(prev => [newPos, ...prev]);
       setTxHistory(prev => [newTx, ...prev]);
-      triggerNotice(`✅ 已執行買進「${sugg.name}」${sugg.recShares}股，寫入流水帳！`);
+      if (!isBatch) triggerNotice(`✅ 已成功【買入】${sugg.name} ${actualShares} 股！已寫入歷史交易紀錄並扣除現金 NT$ ${Math.round(totalCost).toLocaleString()}`);
+
     } else if (sugg.action === '加碼') {
-      const cashFlow = -(amount + sugg.estTaxFee);
+      const totalCost = grossVal + actualTaxFee;
       setUserPositions(prev => prev.map(p => {
-        if (p.stock_id === sugg.stock_id || p.ticker?.includes(sugg.stock_id)) {
-          const newShares = p.shares + sugg.recShares;
-          const newAvgPrice = Math.round(((p.shares * p.entry_price) + amount) / newShares * 100) / 100;
+        if (p.stock_id === sugg.stock_id || p.ticker === sugg.ticker) {
+          const oldCost = p.shares * p.entry_price;
+          const addCost = actualShares * actualPrice;
+          const totalShares = p.shares + actualShares;
+          const newAvgPrice = totalShares > 0 ? (oldCost + addCost) / totalShares : p.entry_price;
           return {
             ...p,
-            shares: newShares,
-            entry_price: newAvgPrice,
-            current_price: sugg.price,
-            entry_fee: (p.entry_fee || 0) + sugg.estTaxFee
+            shares: totalShares,
+            entry_price: parseFloat(newAvgPrice.toFixed(2)),
+            current_price: actualPrice,
+            entry_fee: (p.entry_fee || 0) + actualTaxFee
           };
         }
         return p;
       }));
+
       const newTx = {
-        id: `tx_${Date.now()}`,
+        id: `tx_add_${Date.now()}_${sugg.stock_id}`,
         date: today,
         action: '加碼',
-        ticker: `${sugg.stock_id}.TW`,
         stock_id: sugg.stock_id,
+        ticker: `${sugg.stock_id}.TW`,
         name: `${sugg.name} (${sugg.stock_id})`,
-        shares: sugg.recShares,
-        price: sugg.price,
-        tax_fee: sugg.estTaxFee,
-        cash_flow_twd: cashFlow,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: -Math.round(totalCost),
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: `階梯配比加碼 ${sugg.role}`
+        note: `定期調倉加碼 (${sugg.role})`
       };
       setTxHistory(prev => [newTx, ...prev]);
-      triggerNotice(`✅ 已執行加碼「${sugg.name}」${sugg.recShares}股！`);
-    } else if (sugg.action === '減持' || sugg.action === '賣出') {
-      const proceeds = amount - sugg.estTaxFee;
-      const targetPos = sugg.heldPos;
-      const costBasis = targetPos ? targetPos.entry_price * sugg.recShares : amount;
-      const netPnl = proceeds - costBasis;
-      const pnlPct = costBasis > 0 ? (netPnl / costBasis) * 100 : 0;
+      if (!isBatch) triggerNotice(`🔵 已成功【加碼】${sugg.name} ${actualShares} 股！平均成本已重新計算並寫入流水帳。`);
 
-      if (sugg.action === '賣出' || (targetPos && sugg.recShares >= targetPos.shares)) {
-        setUserPositions(prev => prev.filter(p => p.stock_id !== sugg.stock_id && !p.ticker?.includes(sugg.stock_id)));
-      } else if (targetPos) {
-        setUserPositions(prev => prev.map(p => {
-          if (p.stock_id === sugg.stock_id || p.ticker?.includes(sugg.stock_id)) {
-            return { ...p, shares: Math.max(0, p.shares - sugg.recShares) };
-          }
-          return p;
-        }));
-      }
+    } else if (sugg.action === '減持') {
+      const netProceeds = grossVal - actualTaxFee;
+      const heldPos = sugg.heldPos || userPositions.find(p => p.stock_id === sugg.stock_id);
+      const costBasis = actualShares * (heldPos?.entry_price || actualPrice);
+      const realizedPnl = netProceeds - costBasis;
+      const realizedReturnPct = costBasis > 0 ? (realizedPnl / costBasis) * 100 : 0;
+
+      setUserPositions(prev => prev.map(p => {
+        if (p.stock_id === sugg.stock_id || p.ticker === sugg.ticker) {
+          return {
+            ...p,
+            shares: Math.max(0, p.shares - actualShares)
+          };
+        }
+        return p;
+      }).filter(p => p.shares > 0));
 
       const newTx = {
-        id: `tx_${Date.now()}`,
+        id: `tx_reduce_${Date.now()}_${sugg.stock_id}`,
         date: today,
-        action: sugg.action === '賣出' ? '賣出' : '減持',
-        ticker: `${sugg.stock_id}.TW`,
+        action: '減持',
         stock_id: sugg.stock_id,
+        ticker: `${sugg.stock_id}.TW`,
         name: `${sugg.name} (${sugg.stock_id})`,
-        shares: sugg.recShares,
-        price: sugg.price,
-        tax_fee: sugg.estTaxFee,
-        cash_flow_twd: Math.round(proceeds),
-        realized_pnl_twd: Math.round(netPnl),
-        realized_return_pct: Math.round(pnlPct * 10) / 10,
-        note: `法定調倉${sugg.action} (已實現損益: ${netPnl >= 0 ? '+' : ''}${Math.round(netPnl).toLocaleString()})`
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: Math.round(netProceeds),
+        realized_pnl_twd: Math.round(realizedPnl),
+        realized_return_pct: Math.round(realizedReturnPct * 10) / 10,
+        note: `定期調倉減持平衡 (已實現損益 NT$ ${Math.round(realizedPnl).toLocaleString()})`
       };
       setTxHistory(prev => [newTx, ...prev]);
-      triggerNotice(`✅ 已執行${sugg.action}「${sugg.name}」${sugg.recShares}股，回流現金 NT$ ${Math.round(proceeds).toLocaleString()}！`);
-    }
+      if (!isBatch) triggerNotice(`🟠 已成功【減持】${sugg.name} ${actualShares} 股！現金回流 NT$ ${Math.round(netProceeds).toLocaleString()}。`);
 
-    // 暫時消去該建議
-    setDismissedSuggestions(prev => [...prev, sugg.key]);
+    } else if (sugg.action === '賣出') {
+      const netProceeds = grossVal - actualTaxFee;
+      const heldPos = sugg.heldPos || userPositions.find(p => p.stock_id === sugg.stock_id);
+      const costBasis = (actualShares * (heldPos?.entry_price || actualPrice)) + (heldPos?.entry_fee || 0);
+      const realizedPnl = netProceeds - costBasis;
+      const realizedReturnPct = costBasis > 0 ? (realizedPnl / costBasis) * 100 : 0;
+
+      setUserPositions(prev => prev.filter(p => p.stock_id !== sugg.stock_id && p.id !== heldPos?.id));
+
+      const newTx = {
+        id: `tx_exit_${Date.now()}_${sugg.stock_id}`,
+        date: today,
+        action: '賣出',
+        stock_id: sugg.stock_id,
+        ticker: `${sugg.stock_id}.TW`,
+        name: `${sugg.name} (${sugg.stock_id})`,
+        shares: actualShares,
+        price: actualPrice,
+        tax_fee: actualTaxFee,
+        cash_flow_twd: Math.round(netProceeds),
+        realized_pnl_twd: Math.round(realizedPnl),
+        realized_return_pct: Math.round(realizedReturnPct * 10) / 10,
+        note: `調倉換股清倉 (已實現損益 NT$ ${Math.round(realizedPnl).toLocaleString()})`
+      };
+      setTxHistory(prev => [newTx, ...prev]);
+      if (!isBatch) triggerNotice(`🔴 已成功【賣出平倉】${sugg.name}！現金回流 NT$ ${Math.round(netProceeds).toLocaleString()}。`);
+    }
   };
 
   // 一鍵執行所有調倉建議
   const handleExecuteAllSuggestions = () => {
-    if (rebalanceSuggestions.length === 0) return;
-    if (!window.confirm(`確定要一次性執行所有共 ${rebalanceSuggestions.length} 檔調倉更動嗎？\n系統將自動調整持股部位並在交易日記中寫入完整紀錄。`)) return;
-    rebalanceSuggestions.forEach(s => handleExecuteSuggestion(s));
-    triggerNotice(`⚡ 已成功批次執行 ${rebalanceSuggestions.length} 項調倉指令！`);
+    const activeSuggestions = rebalanceSuggestions.filter(s => s.action !== '續抱' && !s.isBalanced && s.recShares > 0);
+    if (activeSuggestions.length === 0) {
+      triggerNotice('ℹ️ 目前 5 檔黃金階梯主力標的均已處於平衡狀態，無須執行任何調倉！');
+      return;
+    }
+    if (!window.confirm(`確定要一次性執行共 ${activeSuggestions.length} 檔調倉更動嗎？\n系統將自動調整持股部位並在歷史流水帳中寫入完整交易紀錄。`)) return;
+
+    activeSuggestions.forEach(s => handleExecuteSuggestion(s, true));
+    triggerNotice(`⚡ 已成功批次執行 ${activeSuggestions.length} 項調倉指令！持股與流水帳已全面同步。`);
   };
 
-  // 暫時忽略此建議
+  // 暫時收起忽略建議
   const handleDismissSuggestion = (key) => {
     setDismissedSuggestions(prev => [...prev, key]);
-    triggerNotice('已暫時收起此項調倉建議');
+    triggerNotice('👁️ 已暫時隱藏此調倉建議');
   };
 
   // ==========================================
-  // Modals 與互動表單狀態
+  // 彈窗交互狀態 (Modal States)
   // ==========================================
-  // 1. 現金調整彈窗
+  // 1. 現金存入與校準彈窗
   const [cashModalOpen, setCashModalOpen] = useState(false);
+  const [cashActionType, setCashActionType] = useState('deposit');
   const [cashInputAmount, setCashInputAmount] = useState('');
-  const [cashActionType, setCashActionType] = useState('deposit'); // 'deposit' or 'set'
 
   const handleSaveCashChange = (e) => {
     e.preventDefault();
     const val = parseFloat(cashInputAmount);
-    if (!val || isNaN(val)) return;
-    const today = new Date().toISOString().split('T')[0];
+    if (isNaN(val) || val <= 0) {
+      alert('請輸入有效金額');
+      return;
+    }
 
+    const today = new Date().toISOString().split('T')[0];
     if (cashActionType === 'deposit') {
       const newTx = {
         id: `tx_deposit_${Date.now()}`,
         date: today,
         action: '投入現金',
         ticker: '-',
-        name: '追加本金/儲備金',
+        stock_id: '-',
+        name: '手動追加存入本金',
         shares: 0,
         price: 0,
         tax_fee: 0,
-        cash_flow_twd: val,
+        cash_flow_twd: Math.round(val),
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: '手動追加存入帳戶現金'
+        note: `追加存入資金 NT$ ${Math.round(val).toLocaleString()}`
       };
       setTxHistory(prev => [newTx, ...prev]);
-      triggerNotice(`💵 成功存入閒置資金 NT$ ${val.toLocaleString()}！`);
+      triggerNotice(`💵 已成功存入 NT$ ${Math.round(val).toLocaleString()}！閒置資金已增加。`);
     } else {
       const diff = val - idleCash;
       const newTx = {
-        id: `tx_adj_${Date.now()}`,
+        id: `tx_adjust_${Date.now()}`,
         date: today,
         action: diff >= 0 ? '投入現金' : '提取本金',
         ticker: '-',
-        name: '直接校準閒置資金',
+        stock_id: '-',
+        name: '直接校準閒置現金總額',
         shares: 0,
         price: 0,
         tax_fee: 0,
-        cash_flow_twd: diff,
+        cash_flow_twd: Math.round(diff),
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: `手動校準閒置現金總額為 NT$ ${val.toLocaleString()}`
+        note: `手動校準閒置現金至 NT$ ${Math.round(val).toLocaleString()}`
       };
       setTxHistory(prev => [newTx, ...prev]);
-      triggerNotice(`💵 閒置現金已校準為 NT$ ${val.toLocaleString()}！`);
+      triggerNotice(`💵 已校準閒置現金為 NT$ ${Math.round(val).toLocaleString()}！`);
     }
+
     setCashModalOpen(false);
     setCashInputAmount('');
   };
@@ -757,7 +978,7 @@ export default function TaiwanCausalTitanDashboard() {
     setExitModal({ ...exitModal, open: false });
   };
 
-  // 3. 編輯/新增持股部位彈窗
+  // 3. 編輯/新增持股部位彈窗 (深度支援連動歷史流水帳)
   const [editPosModal, setEditPosModal] = useState({
     open: false,
     isNew: false,
@@ -769,8 +990,11 @@ export default function TaiwanCausalTitanDashboard() {
     shares: '',
     entry_price: '',
     current_price: '',
+    entry_fee: '0',
+    entry_date: new Date().toISOString().split('T')[0],
     stop_loss_price: '',
-    stop_condition: ''
+    stop_condition: '',
+    syncBuyTx: true
   });
 
   const handleOpenEditPos = (pos) => {
@@ -785,8 +1009,11 @@ export default function TaiwanCausalTitanDashboard() {
       shares: String(pos.shares),
       entry_price: String(pos.entry_price),
       current_price: String(pos.current_price || pos.entry_price),
+      entry_fee: String(pos.entry_fee || '0'),
+      entry_date: pos.entry_date || new Date().toISOString().split('T')[0],
       stop_loss_price: String(pos.stop_loss_price || ''),
-      stop_condition: pos.stop_condition || ''
+      stop_condition: pos.stop_condition || '',
+      syncBuyTx: true
     });
   };
 
@@ -802,13 +1029,22 @@ export default function TaiwanCausalTitanDashboard() {
       shares: '1000',
       entry_price: '100',
       current_price: '100',
+      entry_fee: '143',
+      entry_date: new Date().toISOString().split('T')[0],
       stop_loss_price: '90',
-      stop_condition: '跌破季線停損'
+      stop_condition: '跌破季線停損',
+      syncBuyTx: true
     });
   };
 
   const handleSavePosition = (e) => {
     e.preventDefault();
+    const sharesNum = parseInt(editPosModal.shares, 10) || 0;
+    const entryPx = parseFloat(editPosModal.entry_price) || 0;
+    const curPx = parseFloat(editPosModal.current_price) || entryPx;
+    const fee = parseFloat(editPosModal.entry_fee) || 0;
+    const stopPx = parseFloat(editPosModal.stop_loss_price) || 0;
+
     const updated = {
       id: editPosModal.id || `pos_${Date.now()}`,
       stock_id: editPosModal.stock_id,
@@ -817,38 +1053,87 @@ export default function TaiwanCausalTitanDashboard() {
       name: `${editPosModal.stock_name} (${editPosModal.industry || ''})`,
       industry: editPosModal.industry,
       role: editPosModal.role,
-      shares: parseInt(editPosModal.shares, 10) || 0,
-      entry_price: parseFloat(editPosModal.entry_price) || 0,
-      current_price: parseFloat(editPosModal.current_price) || parseFloat(editPosModal.entry_price) || 0,
-      entry_fee: Math.max(20, Math.round((parseInt(editPosModal.shares, 10) || 0) * (parseFloat(editPosModal.entry_price) || 0) * 0.001425)),
-      stop_loss_price: parseFloat(editPosModal.stop_loss_price) || 0,
-      stop_condition: editPosModal.stop_condition,
-      price_date: new Date().toISOString().split('T')[0]
+      shares: sharesNum,
+      entry_price: entryPx,
+      current_price: curPx,
+      entry_fee: fee,
+      entry_date: editPosModal.entry_date,
+      price_date: new Date().toISOString().split('T')[0],
+      stop_loss_price: stopPx,
+      stop_condition: editPosModal.stop_condition
     };
 
     if (editPosModal.isNew) {
       setUserPositions(prev => [...prev, updated]);
-      triggerNotice(`➕ 已手動新增持股部位「${updated.stock_name}」！`);
+      if (editPosModal.syncBuyTx) {
+        const costTwd = Math.round(sharesNum * entryPx + fee);
+        const newTx = {
+          id: `tx_buy_${Date.now()}`,
+          date: editPosModal.entry_date,
+          action: '買入',
+          ticker: `${editPosModal.stock_id}.TW`,
+          stock_id: editPosModal.stock_id,
+          name: `${editPosModal.stock_name} (${editPosModal.stock_id})`,
+          shares: sharesNum,
+          price: entryPx,
+          tax_fee: fee,
+          cash_flow_twd: -costTwd,
+          realized_pnl_twd: null,
+          realized_return_pct: null,
+          note: `手動新增建倉 (${editPosModal.role})`
+        };
+        setTxHistory(prev => [newTx, ...prev]);
+      }
+      triggerNotice(`➕ 已手動新增持股部位「${updated.stock_name}」${editPosModal.syncBuyTx ? '，並同步寫入歷史買進紀錄' : ''}！`);
     } else {
       setUserPositions(prev => prev.map(p => p.id === updated.id ? { ...p, ...updated } : p));
-      triggerNotice(`✏️ 已更新「${updated.stock_name}」持股明細！`);
+      if (editPosModal.syncBuyTx) {
+        setTxHistory(prev => prev.map(tx => {
+          if ((tx.action === '買入' || tx.action === '加碼') && (tx.stock_id === updated.stock_id || tx.ticker === updated.ticker)) {
+            const costTwd = Math.round(sharesNum * entryPx + fee);
+            return {
+              ...tx,
+              date: updated.entry_date,
+              shares: sharesNum,
+              price: entryPx,
+              tax_fee: fee,
+              cash_flow_twd: -costTwd
+            };
+          }
+          return tx;
+        }));
+      }
+      triggerNotice(`✏️ 已更新「${updated.stock_name}」持股明細${editPosModal.syncBuyTx ? '，並同步對齊歷史流水帳' : ''}！`);
     }
     setEditPosModal({ ...editPosModal, open: false });
   };
 
-  const handleDeletePos = (id, name) => {
-    if (window.confirm(`確定要刪除「${name}」持股部位嗎？\n（此操作只移除當前持倉清單，不更動流水帳）`)) {
-      setUserPositions(prev => prev.filter(p => p.id !== id));
-      triggerNotice(`🗑️ 已刪除持股「${name}」！`);
+  const handleDeletePos = (pos) => {
+    const matchingTx = txHistory.find(t => (t.stock_id === pos.stock_id || t.ticker === pos.ticker || t.name?.includes(pos.stock_id)) && (t.action === '買入' || t.action === '加碼'));
+    if (matchingTx) {
+      const confirmBoth = window.confirm(
+        `確定要自持股清單中刪除「${pos.stock_name || pos.name} (${pos.stock_id})」部位嗎？\n\n💡 系統偵測到歷史流水帳中存在建倉買進紀錄 (${matchingTx.date} 買入 ${matchingTx.name})。\n\n是否【同時刪除持股部位與其歷史買入紀錄】？\n• 點擊「確定」：同時刪除持股部位 + 歷史買進紀錄\n• 點擊「取消」：僅刪除持股部位，保留流水帳`
+      );
+      if (confirmBoth) {
+        setUserPositions(prev => prev.filter(p => p.id !== pos.id));
+        setTxHistory(prev => prev.filter(t => t.id !== matchingTx.id));
+        triggerNotice(`🗑️ 已同步移除「${pos.stock_name || pos.name}」持股部位與歷史買入紀錄！`);
+        return;
+      }
+    }
+
+    if (window.confirm(`確定要刪除「${pos.stock_name || pos.name}」持股部位嗎？\n刪除後該部位不再計入總淨值。`)) {
+      setUserPositions(prev => prev.filter(p => p.id !== pos.id));
+      triggerNotice(`🗑️ 已刪除持股「${pos.stock_name || pos.name}」！`);
     }
   };
 
-  // 4. 歷史流水帳編輯與手動新增
+  // 4. 歷史流水帳編輯與手動新增 (深度支援連動實戰持股)
   const [editTxModal, setEditTxModal] = useState({
     open: false,
     isNew: false,
     id: '',
-    date: '',
+    date: new Date().toISOString().split('T')[0],
     action: '買入',
     stock_id: '',
     name: '',
@@ -866,14 +1151,14 @@ export default function TaiwanCausalTitanDashboard() {
       open: true,
       isNew: false,
       id: tx.id,
-      date: tx.date || new Date().toISOString().split('T')[0],
-      action: tx.action || '買入',
-      stock_id: tx.stock_id || tx.ticker?.split('.')[0] || '',
-      name: tx.name || '',
-      shares: String(tx.shares || 0),
-      price: String(tx.price || 0),
-      tax_fee: String(tx.tax_fee || 0),
-      cash_flow_twd: String(tx.cash_flow_twd || 0),
+      date: tx.date,
+      action: tx.action,
+      stock_id: tx.stock_id || '',
+      name: tx.name,
+      shares: String(tx.shares || '0'),
+      price: String(tx.price || '0'),
+      tax_fee: String(tx.tax_fee || '0'),
+      cash_flow_twd: String(tx.cash_flow_twd || '0'),
       realized_pnl_twd: tx.realized_pnl_twd !== null && tx.realized_pnl_twd !== undefined ? String(tx.realized_pnl_twd) : '',
       realized_return_pct: tx.realized_return_pct !== null && tx.realized_return_pct !== undefined ? String(tx.realized_return_pct) : '',
       note: tx.note || ''
@@ -887,15 +1172,15 @@ export default function TaiwanCausalTitanDashboard() {
       id: `tx_${Date.now()}`,
       date: new Date().toISOString().split('T')[0],
       action: '買入',
-      stock_id: '3105',
-      name: '穩懋 (3105)',
+      stock_id: '',
+      name: '',
       shares: '1000',
-      price: '475',
-      tax_fee: '676',
-      cash_flow_twd: '-475676',
+      price: '100',
+      tax_fee: '143',
+      cash_flow_twd: '-100143',
       realized_pnl_twd: '',
       realized_return_pct: '',
-      note: '手動記帳'
+      note: '手動記錄交易'
     });
   };
 
@@ -924,10 +1209,44 @@ export default function TaiwanCausalTitanDashboard() {
       setTxHistory(prev => prev.map(t => t.id === updated.id ? updated : t));
       triggerNotice('✏️ 已成功更新歷史交易紀錄！');
     }
+
+    // 若是買入/加碼動作，立即同步更新對應實戰持股部位成本均價與股數
+    if (updated.action === '買入' || updated.action === '加碼') {
+      setUserPositions(prevPos => prevPos.map(p => {
+        if (p.stock_id === updated.stock_id || p.ticker === updated.ticker || (p.ticker && updated.ticker && p.ticker.split('.')[0] === updated.ticker.split('.')[0]) || p.name === updated.name) {
+          return {
+            ...p,
+            entry_price: updated.price,
+            shares: updated.shares > 0 ? updated.shares : p.shares,
+            entry_fee: updated.tax_fee,
+            entry_date: updated.date
+          };
+        }
+        return p;
+      }));
+    }
+
     setEditTxModal({ ...editTxModal, open: false });
   };
 
   const handleDeleteTx = (id, name, action) => {
+    const txToDelete = txHistory.find(t => t.id === id);
+    const matchingPos = txToDelete && (txToDelete.action === '買入' || txToDelete.action === '加碼')
+      ? userPositions.find(p => p.stock_id === txToDelete.stock_id || p.name === txToDelete.name)
+      : null;
+
+    if (matchingPos) {
+      const confirmBoth = window.confirm(
+        `確定要刪除「${action} ${name}」這筆交易紀錄嗎？\n\n⚠️ 系統偵測到您目前持有中部位亦包含「${name} (${matchingPos.shares} 股)」！\n\n是否【同步刪除持股部位】？\n• 點擊「確定」：同時刪除歷史交易紀錄 + 移除該持股部位\n• 點擊「取消」：僅刪除流水帳，保留持股部位`
+      );
+      if (confirmBoth) {
+        setTxHistory(prev => prev.filter(t => t.id !== id));
+        setUserPositions(prev => prev.filter(p => p.id !== matchingPos.id));
+        triggerNotice(`🗑️ 已同步刪除「${name}」交易流水帳與持股部位！`);
+        return;
+      }
+    }
+
     if (window.confirm(`確定要刪除「${action} ${name}」這筆交易流水帳嗎？\n刪除後無法復原。`)) {
       setTxHistory(prev => prev.filter(t => t.id !== id));
       triggerNotice(`🗑️ 已刪除該筆流水帳紀錄！`);
@@ -935,34 +1254,34 @@ export default function TaiwanCausalTitanDashboard() {
   };
 
   // 重置回預設開倉
-  const handleResetToDefault = () => {
-    if (window.confirm('確定要將台股因果泰坦重設回初始預設持倉 (100萬本金開倉) 嗎？\n您現有的自訂持倉與流水帳將被重置。')) {
+  const handleResetToDefaults = () => {
+    if (window.confirm('確定要重置持股與流水帳回 2026-10-12 法定開倉預設狀態 (100萬本金 × DOE黃金階梯 35/25/20/10/10) 嗎？')) {
       setUserPositions(DEFAULT_POSITIONS);
       setTxHistory(DEFAULT_TX_HISTORY);
       setDismissedSuggestions([]);
-      triggerNotice('🔄 已重設為初始開倉持倉與流水帳！');
+      triggerNotice('↺ 已成功重置回法定建倉初始狀態！');
     }
   };
 
   // 匯出 JSON 備份
   const handleExportBackup = () => {
-    const exportData = {
-      app: 'Lobster Report Taiwan Causal Titan',
-      version: 'v3.2.0',
-      username: currentUsername,
-      exported_at: new Date().toISOString(),
+    const payload = {
+      version: 'tw_causal_titan_v2',
+      export_date: new Date().toISOString(),
+      user: currentUsername,
       positions: userPositions,
       tx_history: txHistory,
       dismissed_suggestions: dismissedSuggestions
     };
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportData, null, 2));
-    const a = document.createElement('a');
-    a.setAttribute('href', dataStr);
-    a.setAttribute('download', `taiwan_causal_titan_${currentUsername}_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    triggerNotice(`📤 已匯出「${currentUsername}」專屬台股泰坦備份檔！`);
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `taiwan_causal_titan_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    triggerNotice('📥 台股泰坦帳本 JSON 備份檔已成功匯出！');
   };
 
   // 匯入 JSON 備份
@@ -1002,8 +1321,8 @@ export default function TaiwanCausalTitanDashboard() {
       t.price,
       t.tax_fee,
       t.cash_flow_twd,
-      t.realized_pnl_twd !== null ? t.realized_pnl_twd : '',
-      t.realized_return_pct !== null ? t.realized_return_pct : '',
+      t.realized_pnl_twd !== null && t.realized_pnl_twd !== undefined ? t.realized_pnl_twd : '',
+      t.realized_return_pct !== null && t.realized_return_pct !== undefined ? t.realized_return_pct : '',
       t.note || ''
     ]);
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
@@ -1018,7 +1337,7 @@ export default function TaiwanCausalTitanDashboard() {
     triggerNotice('📥 交易流水帳 CSV 已成功匯出！');
   };
 
-  // 匯出回測 413 筆交易 CSV
+  // 匯出回測交易 CSV
   const handleExportTradesCsv = () => {
     if (!trades || trades.length === 0) return;
     const headers = ['標的代號', '股票名稱', '配置角色', '進場日期', '進場價格', '出場日期', '出場價格', '持有天數', '單筆報酬率(%)', '出場原因/機制'];
@@ -1046,239 +1365,294 @@ export default function TaiwanCausalTitanDashboard() {
     triggerNotice('📥 22年回測全交易紀錄 CSV 已成功匯出！');
   };
 
+  // 計算歷年交易勝率統計 (按年度分組 trades)
+  const yearlyTradeStats = useMemo(() => {
+    const map = {};
+    if (Array.isArray(trades)) {
+      trades.forEach(t => {
+        const year = String(t.entry_date).slice(0, 4);
+        if (!map[year]) {
+          map[year] = { count: 0, wins: 0, best: null, totalRet: 0 };
+        }
+        map[year].count += 1;
+        const ret = Number(t.return_pct) || 0;
+        map[year].totalRet += ret;
+        if (ret > 0) map[year].wins += 1;
+        if (!map[year].best || ret > (map[year].best.return_pct || -999)) {
+          map[year].best = t;
+        }
+      });
+    }
+    return map;
+  }, [trades]);
+
   // 曲線 SVG 點計算
   const svgCurveData = useMemo(() => {
-    if (!curve || curve.length === 0) return { pathStrat: '', pathTx: '', width: 860, height: 280 };
-    const width = 860;
+    if (!curve || curve.length === 0) return { pathStrat: '', pathTx: '', width: 850, height: 280 };
+    const width = 850;
     const height = 280;
-    const padding = { top: 20, right: 30, bottom: 30, left: 60 };
+    const padX = 60;
+    const padY = 30;
+    const drawW = width - padX - 20;
+    const drawH = height - padY * 2;
 
-    const maxStrat = Math.max(...curve.map(c => c.strategy_nav));
-    const minStrat = Math.min(...curve.map(c => Math.min(c.strategy_nav, c.taiex_nav)));
+    const minLog = 0; // Log10(1) = 0
+    const maxLog = 3.35; // Log10(2238) ≈ 3.35
 
-    const logMin = Math.log10(Math.max(0.8, minStrat));
-    const logMax = Math.log10(Math.max(10, maxStrat));
+    const pointsStrat = curve.map((pt, idx) => {
+      const x = padX + (idx / (curve.length - 1)) * drawW;
+      const logVal = Math.log10(Math.max(1, pt.strategy));
+      const normY = (logVal - minLog) / (maxLog - minLog);
+      const y = height - padY - (normY * drawH);
+      return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    }).join(' ');
 
-    const getX = (idx) => padding.left + (idx / (curve.length - 1)) * (width - padding.left - padding.right);
-    const getY = (val) => {
-      const logVal = Math.log10(Math.max(0.8, val));
-      const ratio = (logVal - logMin) / (logMax - logMin);
-      return height - padding.bottom - ratio * (height - padding.top - padding.bottom);
-    };
+    const pointsTx = curve.map((pt, idx) => {
+      const x = padX + (idx / (curve.length - 1)) * drawW;
+      const logVal = Math.log10(Math.max(1, pt.taiex));
+      const normY = (logVal - minLog) / (maxLog - minLog);
+      const y = height - padY - (normY * drawH);
+      return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    }).join(' ');
 
-    let pathStrat = `M ${getX(0)} ${getY(curve[0].strategy_nav)}`;
-    let pathTx = `M ${getX(0)} ${getY(curve[0].taiex_nav)}`;
-
-    curve.forEach((c, idx) => {
-      if (idx > 0) {
-        pathStrat += ` L ${getX(idx)} ${getY(c.strategy_nav)}`;
-        pathTx += ` L ${getX(idx)} ${getY(c.taiex_nav)}`;
-      }
-    });
-
-    return { pathStrat, pathTx, width, height, padding, maxStrat };
+    return { pathStrat: pointsStrat, pathTx: pointsTx, width, height };
   }, [curve]);
 
   return (
-    <div style={{ color: '#E2E8F0', padding: '1.2rem', maxWidth: '1440px', margin: '0 auto', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      
-      {/* 提示通知氣泡 */}
+    <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem', color: '#F8FAFC' }}>
+      {/* 浮動通知 Toast */}
       {feedbackMsg && (
         <div style={{
           position: 'fixed',
           top: '20px',
           right: '20px',
+          zIndex: 999999,
           background: 'linear-gradient(135deg, #10B981, #059669)',
           color: '#FFF',
-          padding: '0.85rem 1.4rem',
+          padding: '0.8rem 1.4rem',
           borderRadius: '8px',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.4)',
-          zIndex: 99999,
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)',
+          fontSize: '0.9rem',
           fontWeight: 'bold',
-          fontSize: '0.92rem',
-          animation: 'fadeIn 0.25s ease'
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.6rem'
         }}>
-          {feedbackMsg}
+          <span>{feedbackMsg}</span>
         </div>
       )}
 
-      {/* ===== 頂部綜合旗艦橫條 (Mini Account Banner) ===== */}
+      {/* ===== 頂部策略橫幅 ===== */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
-        border: '1px solid rgba(59, 130, 246, 0.35)',
+        background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+        border: '1px solid rgba(59, 130, 246, 0.4)',
         borderRadius: '16px',
-        padding: '1.4rem',
+        padding: '1.5rem',
         marginBottom: '1.5rem',
-        boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08)'
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.4)'
       }}>
-        {/* 第一行：策略標題、標籤與操作工具列 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 'bold' }}>
-              👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10)
-            </h3>
-            <span style={{
-              fontSize: '0.78rem',
-              background: 'rgba(56, 189, 248, 0.15)',
-              border: '1px solid rgba(56, 189, 248, 0.4)',
-              color: '#38BDF8',
-              padding: '0.2rem 0.65rem',
-              borderRadius: '6px',
-              fontWeight: 'bold'
-            }}>
-              🗓️ 報價日：<strong style={{ color: '#FCD34D' }}>2026-10-20</strong> · 下次調倉：<strong style={{ color: '#FCD34D' }}>11/11 法定公告日</strong>
-            </span>
-            <span style={{
-              fontSize: '0.76rem',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2))',
-              border: '1px solid rgba(16, 185, 129, 0.4)',
-              color: '#34D399',
-              padding: '0.2rem 0.6rem',
-              borderRadius: '6px',
-              fontWeight: 'bold'
-            }}>
-              🚀 22年回測 2,053.38倍 (CAGR 42.58%) · Sharpe 1.13 · 60MA 季線風控
-            </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <span style={{
+                background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                color: '#000',
+                fontWeight: '900',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '6px',
+                fontSize: '0.78rem'
+              }}>
+                👑 DOE 終極尋優版
+              </span>
+              <h2 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 'bold', color: '#F8FAFC' }}>
+                👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10)
+              </h2>
+            </div>
+            <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
+              市值前 100 大滾動池 · 每月 11 號法定公告日建倉 · 4 大真因果 Alpha 因子 · 60MA 季線動態風控停損
+            </p>
           </div>
 
-          {/* 帳本身分與備份快捷鍵 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
               background: 'rgba(0, 0, 0, 0.4)',
-              border: '1px solid rgba(99, 102, 241, 0.4)',
-              padding: '0.25rem 0.65rem',
-              borderRadius: '6px',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '8px',
+              padding: '0.4rem 0.8rem',
               fontSize: '0.78rem'
             }}>
-              <span style={{ color: '#94A3B8' }}>👤 帳本:</span>
-              <strong style={{ color: '#FCD34D' }}>{currentUsername}</strong>
-              <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.72rem' }}>● 本機雲端就緒</span>
+              <span style={{ color: '#94A3B8' }}>調倉週期：</span>
+              <strong style={{ color: '#FDE68A' }}>每月 11 號 (T+1開盤建倉)</strong>
             </div>
-
-            <button
-              onClick={handleExportBackup}
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#CBD5E1',
-                padding: '0.25rem 0.65rem',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                cursor: 'pointer'
-              }}
-              title="匯出個人持倉與交易流水帳 JSON 備份檔"
-            >
-              📤 備份
-            </button>
-
-            <label style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#CBD5E1',
-              padding: '0.25rem 0.65rem',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              cursor: 'pointer'
-            }} title="匯入已備份的 JSON 帳本檔案">
-              📥 匯入
-              <input type="file" accept=".json" onChange={handleImportBackup} style={{ display: 'none' }} />
-            </label>
-
-            <button
-              onClick={handleResetToDefault}
-              style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.35)',
-                color: '#FCA5A5',
-                padding: '0.25rem 0.65rem',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                cursor: 'pointer'
-              }}
-              title="重設回初始開倉持倉與流水帳"
-            >
-              🔄 重設
-            </button>
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '8px',
+              padding: '0.4rem 0.8rem',
+              fontSize: '0.78rem'
+            }}>
+              <span style={{ color: '#94A3B8' }}>下次調倉：</span>
+              <strong style={{ color: '#60A5FA' }}>2026-11-11</strong>
+            </div>
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              borderRadius: '8px',
+              padding: '0.4rem 0.8rem',
+              fontSize: '0.78rem'
+            }}>
+              <span style={{ color: '#6EE7B7' }}>最新行情日期：</span>
+              <strong style={{ color: '#34D399' }}>2026-10-21</strong>
+            </div>
           </div>
         </div>
 
-        {/* 第二行：5 個帳戶資產數據方塊 (完全對齊全球主權泰坦模式) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.8rem' }}>
-          {/* 總資產淨值 */}
-          <div style={{ background: 'rgba(0, 0, 0, 0.35)', padding: '0.75rem 0.9rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>💼 總資產淨值 (閒置+持股)</div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
-              NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: totalNetProfitTwd >= 0 ? '#34D399' : '#F87171', marginTop: '0.25rem' }}>
-              本金: NT$ {Math.round(totalDepositsTwd).toLocaleString()} | 總淨利: {totalNetProfitTwd >= 0 ? '+' : ''}{totalNetProfitPct.toFixed(2)}%
-            </div>
+        {/* 策略核心 KPI 方塊 */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          gap: '0.8rem',
+          marginTop: '1.2rem',
+          paddingTop: '1.2rem',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年回測倍數</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>2,053.38x</div>
           </div>
-
-          {/* 股票持股市值 */}
-          <div style={{ background: 'rgba(0, 0, 0, 0.35)', padding: '0.75rem 0.9rem', borderRadius: '8px', borderLeft: '3px solid #6366F1' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>📊 階梯持股市值 (目標 100%)</div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 'bold', color: '#A5B4FC', fontFamily: 'monospace' }}>
-              NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.25rem' }}>
-              佔比: {totalNetAssetsTwd > 0 ? ((totalStockMarketValTwd / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (5檔主力滿倉)
-            </div>
+          <div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年化報酬率 CAGR</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+42.58%</div>
           </div>
-
-          {/* 閒置資金與儲備池 */}
-          <div style={{ background: 'rgba(0, 0, 0, 0.35)', padding: '0.75rem 0.9rem', borderRadius: '8px', borderLeft: '3px solid #10B981' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-              <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>💵 閒置現金與儲備池</span>
-              <button
-                onClick={() => { setCashActionType('deposit'); setCashModalOpen(true); }}
-                style={{
-                  background: 'rgba(16, 185, 129, 0.2)',
-                  border: 'none',
-                  color: '#34D399',
-                  fontSize: '0.72rem',
-                  padding: '0.15rem 0.45rem',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                ➕ 存入/調整
-              </button>
-            </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 'bold', color: '#6EE7B7', fontFamily: 'monospace' }}>
-              NT$ {Math.round(idleCash).toLocaleString()}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.25rem' }}>
-              佔比: {totalNetAssetsTwd > 0 ? ((idleCash / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (待命中儲備金)
-            </div>
+          <div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>夏普比率 Sharpe</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>1.13</div>
           </div>
-
-          {/* 未實現損益 */}
-          <div style={{ background: 'rgba(0, 0, 0, 0.35)', padding: '0.75rem 0.9rem', borderRadius: '8px', borderLeft: unrealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>📈 當前未實現損益</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: unrealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
-              {unrealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(unrealizedPnlTwd).toLocaleString()}
-              <span style={{ fontSize: '0.8rem', marginLeft: '0.35rem' }}>
-                ({unrealizedReturnPct >= 0 ? '+' : ''}{unrealizedReturnPct.toFixed(2)}%)
-              </span>
-            </div>
-            <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.25rem' }}>
-              持股總成本: NT$ {Math.round(totalCostTwd).toLocaleString()}
-            </div>
+          <div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>最大回撤 MDD</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>-35.30%</div>
           </div>
+          <div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>卡瑪比率 Calmar</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#C084FC', fontFamily: 'monospace' }}>1.21</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年度勝率 (贏大盤)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>86.4% (19/22)</div>
+          </div>
+        </div>
+      </div>
 
-          {/* 累計已實現淨利 */}
-          <div style={{ background: 'rgba(0, 0, 0, 0.35)', padding: '0.75rem 0.9rem', borderRadius: '8px', borderLeft: totalRealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>🏆 累計已實現淨利 (扣稅費)</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
-              {totalRealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(totalRealizedPnlTwd).toLocaleString()}
-            </div>
-            <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.25rem' }}>
-              已平倉 {closedTradesCount} 筆 · 勝率 {winRate.toFixed(0)}% · 稅費 NT$ {Math.round(totalTaxesPaidTwd).toLocaleString()}
-            </div>
+      {/* ===== 第二行：5 個帳戶資產數據方塊 (完全對齊全球主權泰坦模式) ===== */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+        gap: '0.9rem',
+        marginBottom: '1.5rem'
+      }}>
+        {/* 1. 總資產淨值 */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '12px',
+          padding: '1.1rem'
+        }}>
+          <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.3rem' }}>總資產淨值 (TWD)</div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 'bold', color: '#F8FAFC', fontFamily: 'monospace' }}>
+            NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.3rem' }}>
+            本金 NT$ {Math.round(totalDepositsTwd).toLocaleString()}
+          </div>
+        </div>
+
+        {/* 2. 閒置資金 */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+          border: '1px solid rgba(245, 158, 11, 0.3)',
+          borderRadius: '12px',
+          padding: '1.1rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.76rem', color: '#94A3B8' }}>閒置現金 (TWD)</span>
+            <button
+              onClick={() => { setCashInputAmount(''); setCashModalOpen(true); }}
+              style={{
+                background: 'rgba(245, 158, 11, 0.2)',
+                border: '1px solid #F59E0B',
+                color: '#FDE68A',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                padding: '0.15rem 0.4rem',
+                cursor: 'pointer'
+              }}
+            >
+              💵 調整資金
+            </button>
+          </div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace', marginTop: '0.3rem' }}>
+            NT$ {Math.round(idleCash).toLocaleString()}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.3rem' }}>
+            佔比 {totalNetAssetsTwd > 0 ? ((idleCash / totalNetAssetsTwd) * 100).toFixed(1) : 0}% · 待命中
+          </div>
+        </div>
+
+        {/* 3. 持股市值 */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          borderRadius: '12px',
+          padding: '1.1rem'
+        }}>
+          <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.3rem' }}>持股現值 (TWD)</div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
+            NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.3rem' }}>
+            共 {userPositions.length} 檔持股 · 佔比 {totalNetAssetsTwd > 0 ? ((totalStockMarketValTwd / totalNetAssetsTwd) * 100).toFixed(1) : 0}%
+          </div>
+        </div>
+
+        {/* 4. 未實現損益 */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '12px',
+          padding: '1.1rem'
+        }}>
+          <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.3rem' }}>未實現損益 (現持股)</div>
+          <div style={{
+            fontSize: '1.55rem',
+            fontWeight: 'bold',
+            color: unrealizedPnlTwd >= 0 ? '#34D399' : '#F87171',
+            fontFamily: 'monospace'
+          }}>
+            {unrealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(unrealizedPnlTwd).toLocaleString()}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: unrealizedReturnPct >= 0 ? '#34D399' : '#F87171', marginTop: '0.3rem', fontWeight: 'bold' }}>
+            {unrealizedReturnPct >= 0 ? '+' : ''}{unrealizedReturnPct.toFixed(2)}% (成本 NT$ {Math.round(totalCostTwd).toLocaleString()})
+          </div>
+        </div>
+
+        {/* 5. 實盤總淨利 */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+          border: '1px solid rgba(168, 85, 247, 0.3)',
+          borderRadius: '12px',
+          padding: '1.1rem'
+        }}>
+          <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.3rem' }}>實盤總淨利 (含已實現)</div>
+          <div style={{
+            fontSize: '1.55rem',
+            fontWeight: 'bold',
+            color: totalNetProfitTwd >= 0 ? '#34D399' : '#F87171',
+            fontFamily: 'monospace'
+          }}>
+            {totalNetProfitTwd >= 0 ? '+' : ''}NT$ {Math.round(totalNetProfitTwd).toLocaleString()}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: totalNetProfitPct >= 0 ? '#34D399' : '#F87171', marginTop: '0.3rem', fontWeight: 'bold' }}>
+            淨投報率 {totalNetProfitPct >= 0 ? '+' : ''}{totalNetProfitPct.toFixed(2)}%
           </div>
         </div>
       </div>
@@ -1290,7 +1664,7 @@ export default function TaiwanCausalTitanDashboard() {
           { id: 'curve', label: '📈 22年 2,053.38x 淨值曲線 (Log)' },
           { id: 'yearly', label: '🏆 歷年年度勝率與報酬 (2005-2026)' },
           { id: 'alphas', label: '🔬 4 大真因果 Alpha 不變性雷達' },
-          { id: 'trades', label: '📋 回測歷史全交易紀錄 (413筆)' },
+          { id: 'trades', label: '📋 回測歷史全交易紀錄 (1,290筆)' },
           { id: 'rules', label: '📖 策略 SOP 與風控法典' }
         ].map(tab => (
           <button
@@ -1316,351 +1690,272 @@ export default function TaiwanCausalTitanDashboard() {
       {/* ===== TAB 1: 實盤跟單與調倉指揮部 (完全對齊全球主權泰坦模式) ===== */}
       {activeTabSub === 'portfolio' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* 1. 每月 11 號法定營收調倉窗口與更動建議試算器 */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%)',
-            border: '1px solid rgba(245, 158, 11, 0.45)',
-            borderRadius: '12px',
+
+          {/* 1. 每月 11 號法定調倉窗口 · 階梯更動建議試算器 (完全對齊全球主權泰坦模式) */}
+          <div className="glass-card" style={{
             padding: '1.2rem',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)'
+            borderTop: '3px solid #F59E0B',
+            background: 'rgba(245, 158, 11, 0.04)',
+            borderRadius: '12px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   🔄 每月 11 號法定調倉窗口 · 階梯更動建議試算器
                 </h4>
-                <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.8rem', color: '#CBD5E1' }}>
-                  依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與 DOE 黃金階梯基準 (35% / 25% / 20% / 10% / 10%) 即時比對偏差。
+                <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
+                  依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與 DOE 黃金階梯基準 (35% / 25% / 20% / 10% / 10%) 即時比對偏差。全台股前 100 大市值池，次月法定調倉窗口：<strong>2026-11-11</strong>。
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <button
+                  type="button"
                   onClick={handleCopyAllOrders}
-                  disabled={rebalanceSuggestions.length === 0}
                   style={{
                     background: 'rgba(245, 158, 11, 0.2)',
                     border: '1px solid #F59E0B',
                     color: '#FDE68A',
-                    padding: '0.4rem 0.85rem',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '5px',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: rebalanceSuggestions.length === 0 ? 'not-allowed' : 'pointer',
-                    opacity: rebalanceSuggestions.length === 0 ? 0.5 : 1
+                    cursor: 'pointer'
                   }}
+                  title="一鍵複製所有調倉委託指令"
                 >
-                  📋 一鍵複製全部委託指令
+                  📋 一鍵複製調倉委託
                 </button>
+
                 <button
+                  type="button"
                   onClick={handleExecuteAllSuggestions}
-                  disabled={rebalanceSuggestions.length === 0}
                   style={{
                     background: 'linear-gradient(135deg, #10B981, #059669)',
                     border: 'none',
                     color: '#FFF',
-                    padding: '0.4rem 0.95rem',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: 'bold',
-                    cursor: rebalanceSuggestions.length === 0 ? 'not-allowed' : 'pointer',
-                    opacity: rebalanceSuggestions.length === 0 ? 0.5 : 1
-                  }}
-                >
-                  ⚡ 一鍵執行所有調倉建議
-                </button>
-              </div>
-            </div>
-
-            {/* 建議卡片清單 */}
-            {rebalanceSuggestions.length === 0 ? (
-              <div style={{
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px dashed rgba(16, 185, 129, 0.4)',
-                borderRadius: '8px',
-                padding: '1.2rem',
-                textAlign: 'center',
-                color: '#34D399',
-                fontSize: '0.9rem'
-              }}>
-                ✅ <strong>目前實盤持股配置已完美對齊 DOE 黃金階梯目標 (35/25/20/10/10)！</strong>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.3rem' }}>
-                  所有主力持倉權重偏差均在 ±5% 容差帶內，無需額外手續費磨損，請安心抱牢並逐日監控 60MA 季線！
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '0.9rem' }}>
-                {rebalanceSuggestions.map(sugg => (
-                  <div key={sugg.key} style={{
-                    background: 'rgba(0, 0, 0, 0.45)',
-                    border: `1px solid ${sugg.actionColor}55`,
-                    borderLeft: `4px solid ${sugg.actionColor}`,
-                    borderRadius: '8px',
-                    padding: '0.9rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    gap: '0.6rem'
-                  }}>
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.3rem' }}>
-                        <div>
-                          <span style={{
-                            background: sugg.actionColor,
-                            color: '#000',
-                            padding: '0.15rem 0.5rem',
-                            borderRadius: '4px',
-                            fontWeight: 'bold',
-                            fontSize: '0.75rem',
-                            marginRight: '0.4rem'
-                          }}>
-                            {sugg.action}
-                          </span>
-                          <strong style={{ fontSize: '1.05rem', color: '#F8FAFC' }}>
-                            {sugg.stock_id} {sugg.name}
-                          </strong>
-                        </div>
-                        <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>{sugg.role}</span>
-                      </div>
-
-                      <div style={{ fontSize: '0.8rem', color: '#CBD5E1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', marginTop: '0.4rem' }}>
-                        <div>現有持股: <strong style={{ color: '#F8FAFC' }}>{sugg.currentShares.toLocaleString()} 股</strong></div>
-                        <div>目標配比: <strong style={{ color: '#FDE68A' }}>{sugg.targetWeightPct}%</strong></div>
-                        <div>建議調倉: <strong style={{ color: sugg.actionColor }}>{sugg.sharesDesc}</strong></div>
-                        <div>現價估值: <strong style={{ color: '#38BDF8' }}>${sugg.price} (約 NT${Math.round(sugg.recShares * sugg.price).toLocaleString()})</strong></div>
-                      </div>
-
-                      <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginTop: '0.4rem' }}>
-                        預估稅費: NT$ {sugg.estTaxFee.toLocaleString()} · 60MA 季線風控: ${sugg.stop_loss_price}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.5rem' }}>
-                      <button
-                        onClick={() => handleCopyOrder(sugg)}
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.08)',
-                          border: 'none',
-                          color: '#CBD5E1',
-                          padding: '0.25rem 0.6rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        📋 複製下單
-                      </button>
-                      <button
-                        onClick={() => handleExecuteSuggestion(sugg)}
-                        style={{
-                          background: sugg.actionColor,
-                          border: 'none',
-                          color: '#000',
-                          fontWeight: 'bold',
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ⚡ 一鍵執行
-                      </button>
-                      <button
-                        onClick={() => handleDismissSuggestion(sugg.key)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#64748B',
-                          fontSize: '0.75rem',
-                          cursor: 'pointer',
-                          padding: '0.25rem 0.4rem'
-                        }}
-                        title="暫時收起此建議"
-                      >
-                        ✕ 稍後
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* 2. 當前實盤持股部位清單 (Active Real Positions) */}
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.75)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '12px',
-            padding: '1.2rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
-              <div>
-                <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  📊 當前實戰持股部位管理 (全市場前 100 大 · 60MA 風控監控)
-                </h4>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-                  共持有 <strong style={{ color: '#FDE68A' }}>{userPositions.length}</strong> 檔股票部位，總市值 NT$ <strong style={{ color: '#FDE68A' }}>{Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  onClick={handleOpenNewPos}
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.2)',
-                    border: '1px solid #3B82F6',
-                    color: '#93C5FD',
-                    padding: '0.35rem 0.8rem',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: '5px',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
+                  title="一鍵執行所有需要調整的調倉建議"
                 >
-                  ➕ 手動新增部位
+                  ⚡ 一鍵執行所有調倉
                 </button>
+
+                {dismissedSuggestions.length > 0 && (
+                  <button
+                    onClick={() => setDismissedSuggestions([])}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      color: '#94A3B8',
+                      padding: '0.28rem 0.55rem',
+                      borderRadius: '5px',
+                      fontSize: '0.72rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ↺ 重新產生建議
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* 持股表格 */}
+            {/* 階梯更動建議表格 (完全對齊全球主權泰坦模式) */}
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
+              <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.15)', color: '#94A3B8' }}>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>標的</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>階梯角色</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>持股數 (張+股)</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>成本均價</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>最新現價</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>持股市值</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>未實現損益</th>
-                    <th style={{ padding: '0.7rem 0.5rem' }}>60MA 季線風控</th>
-                    <th style={{ padding: '0.7rem 0.5rem', textAlign: 'right' }}>操作</th>
+                  <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <th style={{ width: '80px', textAlign: 'center' }}>動作建議</th>
+                    <th>標的名稱 (代碼)</th>
+                    <th style={{ textAlign: 'right' }}>目標配置 (金額)</th>
+                    <th style={{ textAlign: 'right' }}>目前股數</th>
+                    <th style={{ textAlign: 'right', color: '#67E8F9' }}>建議更動股數</th>
+                    <th style={{ textAlign: 'center', width: '110px' }}>實際成交股數 (可改)</th>
+                    <th style={{ textAlign: 'center', width: '110px' }}>成交價格 (可改)</th>
+                    <th style={{ textAlign: 'center', width: '100px' }}>稅金/手續費</th>
+                    <th style={{ textAlign: 'right' }}>預估現金變動</th>
+                    <th style={{ textAlign: 'center', width: '130px' }}>執行確認</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {userPositions.map(pos => {
-                    const curPrice = pos.current_price || pos.entry_price || 0;
-                    const marketVal = pos.shares * curPrice;
-                    const costVal = (pos.shares * pos.entry_price) + (pos.entry_fee || 0);
-                    const pnl = marketVal - costVal;
-                    const pnlPct = costVal > 0 ? (pnl / costVal) * 100 : 0;
+                  {rebalanceSuggestions.map((sugg) => {
+                    const rowVal = getRowValues(sugg);
+                    const sharesNum = parseInt(rowVal.shares, 10) || 0;
+                    const priceNum = parseFloat(rowVal.price) || 0;
+                    const feeNum = parseFloat(rowVal.taxFee) || 0;
 
-                    const lots = Math.floor(pos.shares / 1000);
-                    const odd = pos.shares % 1000;
-                    const isStopLossWarning = pos.stop_loss_price && curPrice <= pos.stop_loss_price;
-                    const distToStop = pos.stop_loss_price && curPrice > 0 ? ((curPrice - pos.stop_loss_price) / curPrice) * 100 : 0;
+                    let cashDiffTwd = 0;
+                    if (sugg.action === '買入' || sugg.action === '加碼') {
+                      cashDiffTwd = -(sharesNum * priceNum + feeNum);
+                    } else if (sugg.action === '減持' || sugg.action === '賣出') {
+                      cashDiffTwd = (sharesNum * priceNum - feeNum);
+                    }
 
                     return (
-                      <tr key={pos.id || pos.stock_id} style={{
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-                        background: isStopLossWarning ? 'rgba(239, 68, 68, 0.12)' : 'transparent'
-                      }}>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>
-                          <div style={{ fontWeight: 'bold', color: '#F8FAFC', fontSize: '0.92rem' }}>
-                            {pos.stock_id} {pos.stock_name || pos.name}
-                          </div>
-                          <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{pos.industry || pos.highlight}</div>
-                        </td>
-
-                        <td style={{ padding: '0.75rem 0.5rem' }}>
+                      <tr key={sugg.key} style={{ background: 'rgba(255,255,255,0.02)' }}>
+                        {/* 動作標籤 */}
+                        <td style={{ textAlign: 'center' }}>
                           <span style={{
-                            background: 'rgba(59, 130, 246, 0.2)',
-                            color: '#93C5FD',
-                            padding: '0.15rem 0.45rem',
+                            padding: '0.2rem 0.5rem',
                             borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            fontSize: '0.78rem',
+                            background: sugg.actionColor + '25',
+                            color: sugg.actionColor,
+                            border: `1px solid ${sugg.actionColor}60`
                           }}>
-                            {pos.role || '主權主力'}
+                            {sugg.action === '續抱' ? '✅ 續抱' : (sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出')))}
                           </span>
                         </td>
 
-                        <td style={{ padding: '0.75rem 0.5rem', fontFamily: 'monospace' }}>
-                          <strong style={{ color: '#FDE68A' }}>{pos.shares.toLocaleString()} 股</strong>
-                          <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                            ({lots > 0 ? `${lots}張 ` : ''}{odd > 0 ? `${odd}股` : ''})
+                        {/* 標的名稱 */}
+                        <td>
+                          <strong style={{ color: '#F8FAFC' }}>{sugg.name}</strong>
+                          <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                            {sugg.stock_id} | <span style={{ color: '#FBBF24' }}>{sugg.role}</span>
                           </div>
                         </td>
 
-                        <td style={{ padding: '0.75rem 0.5rem', fontFamily: 'monospace' }}>
-                          ${pos.entry_price?.toLocaleString()}
-                        </td>
-
-                        <td style={{ padding: '0.75rem 0.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8' }}>
-                          ${curPrice.toLocaleString()}
-                        </td>
-
-                        <td style={{ padding: '0.75rem 0.5rem', fontFamily: 'monospace' }}>
-                          NT$ {Math.round(marketVal).toLocaleString()}
-                        </td>
-
-                        <td style={{ padding: '0.75rem 0.5rem', fontFamily: 'monospace' }}>
-                          <div style={{ color: pnl >= 0 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
-                            {pnl >= 0 ? '+' : ''}NT$ {Math.round(pnl).toLocaleString()}
-                          </div>
-                          <div style={{ fontSize: '0.72rem', color: pnl >= 0 ? '#34D399' : '#F87171' }}>
-                            ({pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)
+                        {/* 目標配置 */}
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ color: '#CBD5E1', fontWeight: 'bold' }}>{sugg.targetWeightPct}%</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                            NT$ {Math.round(sugg.targetTwd).toLocaleString()}
                           </div>
                         </td>
 
-                        <td style={{ padding: '0.75rem 0.5rem' }}>
-                          <div style={{ color: isStopLossWarning ? '#EF4444' : '#FBBF24', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                            ${pos.stop_loss_price || '-'}
-                          </div>
-                          <div style={{ fontSize: '0.72rem', color: isStopLossWarning ? '#F87171' : '#94A3B8' }}>
-                            {isStopLossWarning ? '⚠️ 跌破季線停損！' : `距停損 ${distToStop.toFixed(1)}%`}
-                          </div>
+                        {/* 目前股數 */}
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
+                          {sugg.currentShares.toLocaleString()} 股
                         </td>
 
-                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>
-                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.35rem' }}>
-                            <button
-                              onClick={() => handleOpenExitModal(pos)}
+                        {/* 建議更動股數 */}
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: sugg.action === '續抱' ? '#34D399' : '#67E8F9' }}>
+                          {sugg.action === '續抱' ? '0 股 (平衡)' : (sugg.action === '加碼' ? `+${sugg.recShares}` : (sugg.action === '減持' ? `-${sugg.recShares}` : `${sugg.recShares}`)) + ' 股'}
+                        </td>
+
+                        {/* 實際股數 Input */}
+                        <td style={{ textAlign: 'center' }}>
+                          <input
+                            type="number"
+                            value={rowVal.shares}
+                            onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
+                            disabled={sugg.action === '續抱'}
+                            style={{
+                              width: '85px',
+                              padding: '0.3rem 0.4rem',
+                              borderRadius: '4px',
+                              background: sugg.action === '續抱' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)',
+                              border: sugg.action === '續抱' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #38BDF8',
+                              color: sugg.action === '續抱' ? '#94A3B8' : '#38BDF8',
+                              fontWeight: 'bold',
+                              textAlign: 'right',
+                              fontFamily: 'monospace',
+                              fontSize: '0.85rem'
+                            }}
+                          />
+                        </td>
+
+                        {/* 成交價格 Input */}
+                        <td style={{ textAlign: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
+                            <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>$</span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={rowVal.price}
+                              onChange={(e) => handleUpdateRowInput(sugg.key, 'price', e.target.value)}
                               style={{
-                                background: 'rgba(239, 68, 68, 0.2)',
-                                border: '1px solid rgba(239, 68, 68, 0.4)',
-                                color: '#FCA5A5',
-                                padding: '0.2rem 0.5rem',
+                                width: '80px',
+                                padding: '0.3rem 0.4rem',
                                 borderRadius: '4px',
-                                fontSize: '0.74rem',
-                                cursor: 'pointer'
+                                background: 'rgba(0,0,0,0.6)',
+                                border: '1px solid rgba(255,255,255,0.25)',
+                                color: '#F8FAFC',
+                                fontWeight: 'bold',
+                                textAlign: 'right',
+                                fontFamily: 'monospace',
+                                fontSize: '0.85rem'
                               }}
-                              title="手動結利或停損記帳出場"
-                            >
-                              🚪 出場
-                            </button>
-                            <button
-                              onClick={() => handleOpenEditPos(pos)}
-                              style={{
-                                background: 'rgba(255, 255, 255, 0.08)',
-                                border: 'none',
-                                color: '#CBD5E1',
-                                padding: '0.2rem 0.5rem',
-                                borderRadius: '4px',
-                                fontSize: '0.74rem',
-                                cursor: 'pointer'
-                              }}
-                              title="編輯持股明細"
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              onClick={() => handleDeletePos(pos.id, pos.stock_name || pos.name)}
-                              style={{
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                border: 'none',
-                                color: '#F87171',
-                                padding: '0.2rem 0.45rem',
-                                borderRadius: '4px',
-                                fontSize: '0.74rem',
-                                cursor: 'pointer'
-                              }}
-                              title="刪除部位"
-                            >
-                              🗑️
-                            </button>
+                            />
+                          </div>
+                        </td>
+
+                        {/* 預估手續費/稅費 */}
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{ fontSize: '0.76rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                            ${feeNum.toLocaleString()}
+                          </span>
+                        </td>
+
+                        {/* 預估現金變動 */}
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: cashDiffTwd > 0 ? '#34D399' : (cashDiffTwd < 0 ? '#F87171' : '#94A3B8') }}>
+                          {cashDiffTwd > 0 ? `+NT$ ${Math.round(cashDiffTwd).toLocaleString()}` : (cashDiffTwd < 0 ? `-NT$ ${Math.round(Math.abs(cashDiffTwd)).toLocaleString()}` : 'NT$ 0')}
+                        </td>
+
+                        {/* 執行確認操作列 */}
+                        <td style={{ textAlign: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>
+                            {sugg.action === '續抱' ? (
+                              <span style={{ color: '#10B981', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                ✓ 部位平衡
+                              </span>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleExecuteSuggestion(sugg)}
+                                  style={{
+                                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                                    color: '#FFF',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '0.3rem 0.55rem',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="執行成交：自動連動持股與歷史流水帳"
+                                >
+                                  ⚡ 執行
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyOrder(sugg)}
+                                  style={{
+                                    background: 'rgba(255,255,255,0.08)',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    color: '#CBD5E1',
+                                    borderRadius: '4px',
+                                    padding: '0.3rem 0.45rem',
+                                    fontSize: '0.72rem',
+                                    cursor: 'pointer'
+                                  }}
+                                  title="複製券商下單字串"
+                                >
+                                  📋
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDismissSuggestion(sugg.key)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#64748B',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                    padding: '0.2rem'
+                                  }}
+                                  title="暫時隱藏"
+                                >
+                                  👁️
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1671,33 +1966,244 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
           </div>
 
-          {/* 3. 歷史全進出交易流水帳日記 (Transaction History) */}
+          {/* 2. 當前實盤持股部位清單 (Active Real Positions - 100% 綁定歷史交易流水帳) */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.75)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+            border: '1px solid rgba(59, 130, 246, 0.35)',
+            borderRadius: '12px',
+            padding: '1.2rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+              <div>
+                <h4 style={{ margin: 0, color: '#60A5FA', fontSize: '1.15rem' }}>
+                  📊 當前實戰持股部位管理 (全市場前 100 大 · 60MA 風控監控)
+                </h4>
+                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
+                  持股成本與建倉明細 100% 參照下方歷史進出流水帳，每日逐筆監控 60MA 季線動態停損
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleOpenNewPos}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid #3B82F6',
+                    color: '#93C5FD',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ➕ 新增持股部位
+                </button>
+                <button
+                  onClick={handleExportBackup}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#CBD5E1',
+                    padding: '0.35rem 0.65rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer'
+                  }}
+                  title="將持股與交易流水帳完整匯出備份 JSON"
+                >
+                  💾 匯出備份
+                </button>
+                <label style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: '#CBD5E1',
+                  padding: '0.35rem 0.65rem',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer'
+                }}>
+                  📂 匯入備份
+                  <input type="file" accept=".json" onChange={handleImportBackup} style={{ display: 'none' }} />
+                </label>
+              </div>
+            </div>
+
+            {/* 持股部位表格 */}
+            {userPositions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#94A3B8' }}>
+                目前尚無持股部位。資金 100% 待命中，可至上方「階梯更動建議試算器」執行買入！
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.15)', color: '#94A3B8' }}>
+                      <th style={{ padding: '0.65rem 0.5rem' }}>標的名稱</th>
+                      <th style={{ padding: '0.65rem 0.5rem' }}>配置角色</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>持有股數</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>成本均價</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>最新現價</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>帳面市值</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>未實現損益</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>60MA季線停損</th>
+                      <th style={{ padding: '0.65rem 0.5rem', textAlign: 'center' }}>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {userPositions.map(pos => {
+                      const curPrice = pos.current_price || pos.entry_price || 0;
+                      const marketVal = pos.shares * curPrice;
+                      const costBasis = (pos.shares * pos.entry_price) + (pos.entry_fee || 0);
+                      const pnl = marketVal - costBasis;
+                      const pnlPct = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
+                      const stopLossPrice = pos.stop_loss_price || 0;
+                      const distToStopPct = stopLossPrice > 0 && curPrice > 0 ? ((curPrice - stopLossPrice) / curPrice) * 100 : 0;
+                      const isDanger = curPrice <= stopLossPrice;
+
+                      return (
+                        <tr key={pos.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: isDanger ? 'rgba(239, 68, 68, 0.1)' : 'transparent' }}>
+                          <td style={{ padding: '0.65rem 0.5rem' }}>
+                            <strong style={{ color: '#F8FAFC' }}>{pos.stock_name || pos.name}</strong>
+                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                              {pos.stock_id || pos.ticker} · {pos.industry || '台股前100大'}
+                            </div>
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem' }}>
+                            <span style={{
+                              background: 'rgba(59, 130, 246, 0.2)',
+                              color: '#93C5FD',
+                              padding: '0.2rem 0.45rem',
+                              borderRadius: '4px',
+                              fontSize: '0.74rem',
+                              fontWeight: 'bold'
+                            }}>
+                              {pos.role}
+                            </span>
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                            {pos.shares.toLocaleString()} 股
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            ${pos.entry_price}
+                            <div style={{ fontSize: '0.7rem', color: '#64748B' }}>建倉: {pos.entry_date || '2026-10-12'}</div>
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FDE68A' }}>
+                            ${curPrice}
+                            <div style={{ fontSize: '0.7rem', color: '#64748B' }}>{pos.price_date || '2026-10-21'}</div>
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                            NT$ {Math.round(marketVal).toLocaleString()}
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ color: pnl >= 0 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
+                              {pnl >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: pnl >= 0 ? '#34D399' : '#F87171' }}>
+                              {pnl >= 0 ? '+' : ''}NT$ {Math.round(pnl).toLocaleString()}
+                            </div>
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ color: isDanger ? '#EF4444' : '#CBD5E1', fontWeight: isDanger ? 'bold' : 'normal' }}>
+                              ${stopLossPrice.toFixed(1)}
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: isDanger ? '#EF4444' : (distToStopPct < 5 ? '#FBBF24' : '#34D399') }}>
+                              {isDanger ? '⚠️ 跌破停損' : `距季線 +${distToStopPct.toFixed(1)}%`}
+                            </div>
+                          </td>
+
+                          <td style={{ padding: '0.65rem 0.5rem', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.35rem' }}>
+                              <button
+                                onClick={() => handleOpenEditPos(pos)}
+                                style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.85rem' }}
+                                title="編輯持股"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => handleOpenExitModal(pos)}
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.2)',
+                                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                                  color: '#F87171',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: '4px',
+                                  fontSize: '0.72rem',
+                                  cursor: 'pointer',
+                                  fontWeight: 'bold'
+                                }}
+                                title="手動結利或停損記帳出場"
+                              >
+                                🚪 出場
+                              </button>
+                              <button
+                                onClick={() => handleDeletePos(pos)}
+                                style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '0.85rem' }}
+                                title="刪除持股部位"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* 3. 歷史交易流水帳 (唯一的真實交易來源，深度連動實戰持股) */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
             borderRadius: '12px',
             padding: '1.2rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.15rem' }}>
-                  📜 歷史全進出流水帳日記 (全記錄無隱藏 · 支援 CSV 匯出)
+                  📋 實戰交易全歷史進出流水帳 (唯一真實來源)
                 </h4>
-                <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-                  共記錄 <strong style={{ color: '#FDE68A' }}>{txHistory.length}</strong> 筆交易，累計實現損益 NT$ <strong style={{ color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171' }}>{totalRealizedPnlTwd >= 0 ? '+' : ''}{Math.round(totalRealizedPnlTwd).toLocaleString()}</strong>
-                </div>
+                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
+                  共記錄 <strong style={{ color: '#FDE68A' }}>{txHistory.length}</strong> 筆交易，累計實現損益 NT$ <strong style={{ color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171' }}>{totalRealizedPnlTwd >= 0 ? '+' : ''}{Math.round(totalRealizedPnlTwd).toLocaleString()}</strong>，累計交易稅費 NT$ {Math.round(totalTaxesPaidTwd).toLocaleString()}
+                </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleOpenNewTx}
+                  style={{
+                    background: 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid #3B82F6',
+                    color: '#93C5FD',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ➕ 記一筆交易
+                </button>
                 <button
                   onClick={handleExportTxCsv}
                   style={{
                     background: 'rgba(16, 185, 129, 0.2)',
                     border: '1px solid #10B981',
                     color: '#6EE7B7',
-                    padding: '0.35rem 0.8rem',
+                    padding: '0.35rem 0.75rem',
                     borderRadius: '6px',
-                    fontSize: '0.8rem',
+                    fontSize: '0.78rem',
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
@@ -1705,99 +2211,85 @@ export default function TaiwanCausalTitanDashboard() {
                   📥 匯出流水帳 CSV
                 </button>
                 <button
-                  onClick={handleOpenNewTx}
+                  onClick={handleResetToDefaults}
                   style={{
-                    background: 'rgba(99, 102, 241, 0.2)',
-                    border: '1px solid #6366F1',
-                    color: '#C7D2FE',
-                    padding: '0.35rem 0.8rem',
+                    background: 'none',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#94A3B8',
+                    padding: '0.35rem 0.65rem',
                     borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: 'bold',
+                    fontSize: '0.76rem',
                     cursor: 'pointer'
                   }}
+                  title="重置回初始法定開倉紀錄"
                 >
-                  ➕ 手動記帳
+                  ↺ 重置開倉
                 </button>
               </div>
             </div>
 
-            {/* 流水帳清單表格 */}
-            <div style={{ overflowX: 'auto' }}>
+            {/* 流水帳明細表格 */}
+            <div style={{ overflowX: 'auto', maxHeight: '420px' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
-                <thead>
+                <thead style={{ position: 'sticky', top: 0, background: '#1E293B', zIndex: 2 }}>
                   <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.15)', color: '#94A3B8' }}>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>日期</th>
+                    <th style={{ padding: '0.6rem 0.5rem' }}>交易日期</th>
                     <th style={{ padding: '0.6rem 0.5rem' }}>動作</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>標的</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>成交股數</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>價格</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>稅金手續費</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>現金流變動</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>已實現損益</th>
-                    <th style={{ padding: '0.6rem 0.5rem' }}>備註說明</th>
-                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>操作</th>
+                    <th style={{ padding: '0.6rem 0.5rem' }}>標的代碼/名稱</th>
+                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>成交股數</th>
+                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>成交單價</th>
+                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>稅金手續費</th>
+                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>現金流變動</th>
+                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>已實現損益</th>
+                    <th style={{ padding: '0.6rem 0.5rem' }}>備註</th>
+                    <th style={{ padding: '0.6rem 0.5rem', textAlign: 'center' }}>操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   {txHistory.map(tx => (
                     <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                      <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace', color: '#CBD5E1' }}>
-                        {tx.date}
-                      </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem' }}>
+                      <td style={{ padding: '0.6rem 0.5rem', fontFamily: 'monospace' }}>{tx.date}</td>
+                      <td style={{ padding: '0.6rem 0.5rem' }}>
                         <span style={{
-                          background: tx.action === '買入' || tx.action === '加碼' ? 'rgba(16, 185, 129, 0.2)' : tx.action === '賣出' || tx.action === '減持' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                          color: tx.action === '買入' || tx.action === '加碼' ? '#34D399' : tx.action === '賣出' || tx.action === '減持' ? '#F87171' : '#FBBF24',
                           padding: '0.15rem 0.45rem',
                           borderRadius: '4px',
-                          fontSize: '0.74rem',
-                          fontWeight: 'bold'
+                          fontSize: '0.72rem',
+                          fontWeight: 'bold',
+                          background: tx.action === '買入' || tx.action === '投入現金' ? 'rgba(16, 185, 129, 0.2)' : (tx.action === '加碼' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(239, 68, 68, 0.2)'),
+                          color: tx.action === '買入' || tx.action === '投入現金' ? '#34D399' : (tx.action === '加碼' ? '#38BDF8' : '#F87171')
                         }}>
                           {tx.action}
                         </span>
                       </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', color: '#F8FAFC' }}>
-                        {tx.name || tx.stock_id || tx.ticker}
-                      </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace' }}>
+                      <td style={{ padding: '0.6rem 0.5rem', fontWeight: 'bold' }}>{tx.name || tx.stock_id}</td>
+                      <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
                         {tx.shares > 0 ? `${tx.shares.toLocaleString()} 股` : '-'}
                       </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace' }}>
-                        {tx.price > 0 ? `$${tx.price.toLocaleString()}` : '-'}
+                      <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                        {tx.price > 0 ? `$${tx.price}` : '-'}
                       </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace', color: '#94A3B8' }}>
-                        {tx.tax_fee > 0 ? `NT$ ${tx.tax_fee.toLocaleString()}` : '-'}
+                      <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
+                        {tx.tax_fee > 0 ? `$${tx.tax_fee}` : '-'}
                       </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: (Number(tx.cash_flow_twd) || 0) >= 0 ? '#34D399' : '#F87171' }}>
-                        {(Number(tx.cash_flow_twd) || 0) >= 0 ? '+' : ''}NT$ {Math.round(Number(tx.cash_flow_twd) || 0).toLocaleString()}
+                      <td style={{
+                        padding: '0.6rem 0.5rem',
+                        textAlign: 'right',
+                        fontFamily: 'monospace',
+                        fontWeight: 'bold',
+                        color: tx.cash_flow_twd >= 0 ? '#34D399' : '#F87171'
+                      }}>
+                        {tx.cash_flow_twd >= 0 ? '+' : ''}NT$ {Math.round(tx.cash_flow_twd).toLocaleString()}
                       </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace' }}>
+                      <td style={{ padding: '0.6rem 0.5rem', textAlign: 'right', fontFamily: 'monospace' }}>
                         {tx.realized_pnl_twd !== null && tx.realized_pnl_twd !== undefined ? (
                           <span style={{ color: tx.realized_pnl_twd >= 0 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
-                            {tx.realized_pnl_twd >= 0 ? '+' : ''}NT$ {Math.round(tx.realized_pnl_twd).toLocaleString()}
-                            {tx.realized_return_pct !== null && (
-                              <span style={{ fontSize: '0.7rem', marginLeft: '0.2rem' }}>
-                                ({tx.realized_return_pct >= 0 ? '+' : ''}{tx.realized_return_pct}%)
-                              </span>
-                            )}
+                            {tx.realized_pnl_twd >= 0 ? '+' : ''}NT$ {Math.round(tx.realized_pnl_twd).toLocaleString()} ({tx.realized_return_pct >= 0 ? '+' : ''}{tx.realized_return_pct}%)
                           </span>
                         ) : '-'}
                       </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', color: '#94A3B8', fontSize: '0.76rem' }}>
-                        {tx.note || '-'}
-                      </td>
-
-                      <td style={{ padding: '0.65rem 0.5rem', textAlign: 'right' }}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.3rem' }}>
+                      <td style={{ padding: '0.6rem 0.5rem', fontSize: '0.74rem', color: '#94A3B8' }}>{tx.note}</td>
+                      <td style={{ padding: '0.6rem 0.5rem', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.3rem' }}>
                           <button
                             onClick={() => handleOpenEditTx(tx)}
                             style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.76rem' }}
@@ -1841,38 +2333,30 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
           </div>
 
-          {/* SVG 圖表 */}
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <svg viewBox={`0 0 ${svgCurveData.width} ${svgCurveData.height}`} style={{ width: '100%', maxHeight: '420px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>
-              {/* 網格線 */}
               <line x1="60" y1="20" x2="830" y2="20" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
               <line x1="60" y1="80" x2="830" y2="80" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
               <line x1="60" y1="150" x2="830" y2="150" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
               <line x1="60" y1="220" x2="830" y2="220" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
               <line x1="60" y1="250" x2="830" y2="250" stroke="rgba(255,255,255,0.15)" />
 
-              {/* 標籤文字 */}
               <text x="15" y="25" fill="#F59E0B" fontSize="10" fontFamily="monospace">2000x</text>
               <text x="15" y="85" fill="#94A3B8" fontSize="10" fontFamily="monospace">100x</text>
               <text x="15" y="155" fill="#94A3B8" fontSize="10" fontFamily="monospace">10x</text>
               <text x="15" y="250" fill="#94A3B8" fontSize="10" fontFamily="monospace">1.0x</text>
 
-              {/* 年份刻度 */}
               <text x="70" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2005</text>
               <text x="240" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2010</text>
               <text x="420" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2015</text>
               <text x="610" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2020</text>
               <text x="800" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2026</text>
 
-              {/* 加權指數走勢 */}
               <path d={svgCurveData.pathTx} fill="none" stroke="#64748B" strokeWidth="1.8" />
-
-              {/* 泰坦策略走勢 */}
               <path d={svgCurveData.pathStrat} fill="none" stroke="#F59E0B" strokeWidth="2.8" strokeLinecap="round" />
             </svg>
           </div>
 
-          {/* 策略績效核心亮點卡片 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.9rem', marginTop: '1.2rem' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年累積倍數</div>
@@ -1901,9 +2385,46 @@ export default function TaiwanCausalTitanDashboard() {
       {/* ===== TAB 3: 歷年年度勝率與報酬 (2005 - 2026) ===== */}
       {activeTabSub === 'yearly' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
-          <h4 style={{ margin: '0 0 1rem 0', color: '#F8FAFC', fontSize: '1.2rem' }}>
-            🏆 2005 - 2026 歷年年度績效對比 (22 年勝率 86.4% · 贏 19 年輸 3 年)
-          </h4>
+          {/* 頂部歷年總結卡片 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
+              <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年累積總倍數</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>2,053.38x</div>
+              <div style={{ fontSize: '0.72rem', color: '#34D399', marginTop: '0.2rem' }}>大盤 7.72x (超越大盤 266 倍)</div>
+            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
+              <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年化複合報酬率 (CAGR)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+42.58%</div>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.2rem' }}>大盤 10.02% (Alpha +32.56%)</div>
+            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #38BDF8' }}>
+              <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年度勝率 (贏大盤年份)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>86.4%</div>
+              <div style={{ fontSize: '0.72rem', color: '#67E8F9', marginTop: '0.2rem' }}>22 年中 19 年完勝大盤 (僅輸3年)</div>
+            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #A855F7' }}>
+              <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>正報酬年份比率</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#C084FC', fontFamily: 'monospace' }}>81.8%</div>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.2rem' }}>22 年中 18 年實現正報酬獲利</div>
+            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #EC4899' }}>
+              <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年回測交易總勝率</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>58.53%</div>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.2rem' }}>全歷史共 1,290 筆真實撮合進出</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div>
+              <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.2rem' }}>
+                🏆 2005 - 2026 歷年年度績效與個股實戰勝率對比 (22 年勝率 86.4%)
+              </h4>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
+                每年嚴格遵循法定營收公告日次日 T+1 開盤建倉 + 60MA 季線動態風控停損
+              </p>
+            </div>
+          </div>
+
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
               <thead>
@@ -1913,23 +2434,29 @@ export default function TaiwanCausalTitanDashboard() {
                   <th style={{ padding: '0.7rem 0.6rem' }}>加權大盤報酬</th>
                   <th style={{ padding: '0.7rem 0.6rem' }}>超額 Alpha</th>
                   <th style={{ padding: '0.7rem 0.6rem' }}>年度勝負</th>
-                  <th style={{ padding: '0.7rem 0.6rem' }}>年度勝率條狀</th>
+                  <th style={{ padding: '0.7rem 0.6rem' }}>該年個股勝率</th>
+                  <th style={{ padding: '0.7rem 0.6rem' }}>該年最強飆股</th>
+                  <th style={{ padding: '0.7rem 0.6rem' }}>績效條狀圖</th>
                 </tr>
               </thead>
               <tbody>
                 {yearly_stats.map(y => {
-                  const isWin = y.return_pct > y.taiex_pct;
-                  const alpha = y.return_pct - y.taiex_pct;
+                  const retPct = Number(y.strategy_ret ?? y.return_pct ?? 0);
+                  const taiexPct = Number(y.taiex_ret ?? y.taiex_pct ?? 0);
+                  const alpha = Number(y.alpha ?? (retPct - taiexPct));
+                  const isWin = y.is_positive !== undefined ? y.is_positive : (retPct > taiexPct);
+                  const tStat = yearlyTradeStats[String(y.year)];
+
                   return (
                     <tr key={y.year} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                       <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
                         {y.year}
                       </td>
-                      <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace', fontWeight: 'bold', color: y.return_pct >= 0 ? '#34D399' : '#F87171' }}>
-                        {y.return_pct >= 0 ? '+' : ''}{y.return_pct.toFixed(1)}%
+                      <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace', fontWeight: 'bold', color: retPct >= 0 ? '#34D399' : '#F87171' }}>
+                        {retPct >= 0 ? '+' : ''}{retPct.toFixed(1)}%
                       </td>
                       <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace', color: '#94A3B8' }}>
-                        {y.taiex_pct >= 0 ? '+' : ''}{y.taiex_pct.toFixed(1)}%
+                        {taiexPct >= 0 ? '+' : ''}{taiexPct.toFixed(1)}%
                       </td>
                       <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace', fontWeight: 'bold', color: alpha >= 0 ? '#FBBF24' : '#F87171' }}>
                         {alpha >= 0 ? '+' : ''}{alpha.toFixed(1)}%
@@ -1943,15 +2470,29 @@ export default function TaiwanCausalTitanDashboard() {
                           fontSize: '0.75rem',
                           fontWeight: 'bold'
                         }}>
-                          {isWin ? '🏆 完勝大盤' : '落後'}
+                          {isWin ? '🏆 完勝大盤' : '落後大盤'}
                         </span>
+                      </td>
+                      <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace' }}>
+                        {tStat ? (
+                          <span style={{ color: (tStat.wins / tStat.count) >= 0.5 ? '#34D399' : '#FBBF24' }}>
+                            {((tStat.wins / tStat.count) * 100).toFixed(1)}% <span style={{ color: '#64748B', fontSize: '0.72rem' }}>({tStat.wins}/{tStat.count})</span>
+                          </span>
+                        ) : '-'}
+                      </td>
+                      <td style={{ padding: '0.7rem 0.6rem', fontSize: '0.78rem' }}>
+                        {tStat?.best ? (
+                          <span style={{ color: '#FDE68A' }}>
+                            {tStat.best.stock_name} <strong style={{ color: '#34D399', fontFamily: 'monospace' }}>(+{tStat.best.return_pct.toFixed(1)}%)</strong>
+                          </span>
+                        ) : '-'}
                       </td>
                       <td style={{ padding: '0.7rem 0.6rem' }}>
                         <div style={{ width: '120px', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                           <div style={{
-                            width: `${Math.min(100, Math.max(5, (y.return_pct + 40) / 1.5))}%`,
+                            width: `${Math.min(100, Math.max(5, (retPct + 40) / 1.5))}%`,
                             height: '100%',
-                            background: y.return_pct >= 0 ? 'linear-gradient(90deg, #10B981, #34D399)' : '#EF4444'
+                            background: retPct >= 0 ? 'linear-gradient(90deg, #10B981, #34D399)' : '#EF4444'
                           }} />
                         </div>
                       </td>
@@ -1998,16 +2539,16 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== TAB 5: 回測歷史全交易紀錄 (413 筆) ===== */}
+      {/* ===== TAB 5: 回測歷史全交易紀錄 (1,290 筆) ===== */}
       {activeTabSub === 'trades' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.2rem' }}>
-                📋 2005 - 2026 回測全進出交易明細 (共 413 筆完整日誌)
+                📋 2005 - 2026 回測全進出交易明細 (共 1,290 筆完整紀錄)
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                每一筆皆嚴格遵循法定營收公告日 T+1 進場與 60MA 季線動態停損機制
+                每一筆皆嚴格遵循法定營收公告日次日開盤進場與 60MA 季線動態風控停損
               </p>
             </div>
             <button
@@ -2023,7 +2564,7 @@ export default function TaiwanCausalTitanDashboard() {
                 cursor: 'pointer'
               }}
             >
-              📥 匯出 413 筆回測 CSV
+              📥 匯出 1,290 筆回測 CSV
             </button>
           </div>
 
@@ -2041,7 +2582,7 @@ export default function TaiwanCausalTitanDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {trades.slice(0, 100).map((t, idx) => (
+                {trades.slice(0, 150).map((t, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                     <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', color: '#F8FAFC' }}>
                       {t.stock_id} {t.stock_name}
@@ -2102,7 +2643,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== 彈窗 1: 存入 / 調整資金 Modal (完全對齊全球主權泰坦模式) ===== */}
+      {/* ===== 彈窗 1: 存入 / 調整資金 Modal ===== */}
       {cashModalOpen && (
         <div style={{
           position: 'fixed',
@@ -2129,7 +2670,7 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
 
             <p style={{ fontSize: '0.82rem', color: '#CBD5E1', margin: '0 0 1rem 0' }}>
-              投入金額不一定需要立即買進股票，可記錄為當前閒置資金，系統將留待下次調倉時動態計算建議。
+              投入金額不一定需要立即買進股票，可記錄為當前閒置資金，系統將留待調倉時動態試算階梯配置。
             </p>
 
             <form onSubmit={handleSaveCashChange}>
@@ -2351,7 +2892,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== 彈窗 3: 編輯 / 新增持股部位 Modal ===== */}
+      {/* ===== 彈窗 3: 編輯 / 新增持股部位 Modal (含深度連動歷史流水帳) ===== */}
       {editPosModal.open && (
         <div style={{
           position: 'fixed',
@@ -2466,15 +3007,28 @@ export default function TaiwanCausalTitanDashboard() {
                 </div>
               </div>
 
-              <div style={{ marginBottom: '1.2rem' }}>
-                <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>風控停損條件備註</label>
+              <div style={{ marginBottom: '0.9rem' }}>
+                <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>建倉日期</label>
                 <input
-                  type="text"
-                  placeholder="例: 跌破 60MA 季線動態出場停泊現金"
-                  value={editPosModal.stop_condition}
-                  onChange={(e) => setEditPosModal({ ...editPosModal, stop_condition: e.target.value })}
+                  type="date"
+                  value={editPosModal.entry_date}
+                  onChange={(e) => setEditPosModal({ ...editPosModal, entry_date: e.target.value })}
                   style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
                 />
+              </div>
+
+              {/* 深度連動開關 */}
+              <div style={{ marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(56, 189, 248, 0.1)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                <input
+                  type="checkbox"
+                  id="tw_syncBuyTx"
+                  checked={editPosModal.syncBuyTx}
+                  onChange={(e) => setEditPosModal({ ...editPosModal, syncBuyTx: e.target.checked })}
+                  style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                />
+                <label htmlFor="tw_syncBuyTx" style={{ fontSize: '0.8rem', color: '#38BDF8', cursor: 'pointer', fontWeight: 'bold' }}>
+                  {editPosModal.isNew ? '🔄 同步在歷史進出流水帳中自動寫入買進紀錄' : '🔄 同步更新歷史進出流水帳中之買進紀錄'}
+                </label>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
@@ -2492,7 +3046,7 @@ export default function TaiwanCausalTitanDashboard() {
                     color: '#FFF', fontWeight: 'bold', padding: '0.45rem 1.2rem', borderRadius: '6px', border: 'none', fontSize: '0.84rem', cursor: 'pointer'
                   }}
                 >
-                  確認儲存部位
+                  確認保存
                 </button>
               </div>
             </form>
@@ -2511,12 +3065,12 @@ export default function TaiwanCausalTitanDashboard() {
         }}>
           <div style={{
             maxWidth: '520px', width: '100%',
-            background: 'linear-gradient(135deg, #1E293B, #0F172A)',
-            border: '1px solid rgba(99, 102, 241, 0.5)', borderRadius: '12px', padding: '1.4rem'
+            background: 'linear-gradient(135deg, #0F172A, #1E293B)',
+            border: '1px solid rgba(245, 158, 11, 0.5)', borderRadius: '12px', padding: '1.4rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h4 style={{ margin: 0, color: '#A5B4FC', fontSize: '1.15rem' }}>
-                {editTxModal.isNew ? '➕ 新增台股泰坦歷史交易紀錄' : '✏️ 編輯歷史流水帳明細'}
+              <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.15rem' }}>
+                {editTxModal.isNew ? '➕ 記一筆實戰交易紀錄' : '✏️ 編輯歷史交易流水帳'}
               </h4>
               <button
                 onClick={() => setEditTxModal({ ...editTxModal, open: false })}
@@ -2567,7 +3121,7 @@ export default function TaiwanCausalTitanDashboard() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>標的名稱</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>股票名稱 / 說明</label>
                   <input
                     type="text"
                     placeholder="例: 穩懋 (3105)"
@@ -2591,7 +3145,7 @@ export default function TaiwanCausalTitanDashboard() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>成交價格 ($)</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>成交單價 ($)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -2614,51 +3168,33 @@ export default function TaiwanCausalTitanDashboard() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
-                    <label style={{ fontSize: '0.76rem', color: '#94A3B8' }}>現金流變動 (NT$)</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const sh = parseInt(editTxModal.shares, 10) || 0;
-                        const pr = parseFloat(editTxModal.price) || 0;
-                        const fee = parseFloat(editTxModal.tax_fee) || 0;
-                        if (editTxModal.action === '買入' || editTxModal.action === '加碼') {
-                          setEditTxModal(prev => ({ ...prev, cash_flow_twd: String(-(sh * pr + fee)) }));
-                        } else if (editTxModal.action === '賣出' || editTxModal.action === '減持') {
-                          setEditTxModal(prev => ({ ...prev, cash_flow_twd: String(Math.round(sh * pr - fee)) }));
-                        }
-                      }}
-                      style={{ background: 'none', border: 'none', color: '#38BDF8', fontSize: '0.7rem', cursor: 'pointer', padding: 0 }}
-                      title="自動依股數、價格與稅費試算台幣現金流"
-                    >
-                      ⚡ 試算
-                    </button>
-                  </div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>現金流變動 (NT$)</label>
                   <input
                     type="number"
                     step="1"
-                    placeholder="負為支出, 正為入帳"
                     value={editTxModal.cash_flow_twd}
                     onChange={(e) => setEditTxModal({ ...editTxModal, cash_flow_twd: e.target.value })}
                     required
-                    style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
+                    style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FDE68A', fontWeight: 'bold' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>實現淨損益 (選填)</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>已實現損益 (選填)</label>
                   <input
                     type="number"
                     step="1"
+                    placeholder="平倉時填寫"
                     value={editTxModal.realized_pnl_twd}
                     onChange={(e) => setEditTxModal({ ...editTxModal, realized_pnl_twd: e.target.value })}
                     style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>實現報酬率 %</label>
+                  <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>報酬率 % (選填)</label>
                   <input
                     type="number"
                     step="0.1"
+                    placeholder="例: 15.2"
                     value={editTxModal.realized_return_pct}
                     onChange={(e) => setEditTxModal({ ...editTxModal, realized_return_pct: e.target.value })}
                     style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
@@ -2670,7 +3206,7 @@ export default function TaiwanCausalTitanDashboard() {
                 <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>備註說明</label>
                 <input
                   type="text"
-                  placeholder="例: 法定調倉建倉、季線跌破停損等"
+                  placeholder="例: 10/12 法定公告日建倉 👑 王者先鋒 (35%)"
                   value={editTxModal.note}
                   onChange={(e) => setEditTxModal({ ...editTxModal, note: e.target.value })}
                   style={{ width: '100%', padding: '0.45rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: '#FFF' }}
@@ -2688,18 +3224,17 @@ export default function TaiwanCausalTitanDashboard() {
                 <button
                   type="submit"
                   style={{
-                    background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
-                    color: '#FFF', fontWeight: 'bold', padding: '0.45rem 1.2rem', borderRadius: '6px', border: 'none', fontSize: '0.84rem', cursor: 'pointer'
+                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                    color: '#000', fontWeight: 'bold', padding: '0.45rem 1.2rem', borderRadius: '6px', border: 'none', fontSize: '0.84rem', cursor: 'pointer'
                   }}
                 >
-                  確認儲存
+                  確認保存並連動實戰持股
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }
