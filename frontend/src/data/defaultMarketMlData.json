@@ -6217,20 +6217,20 @@
       }
     },
     "global_liquid_titan_base": {
-      "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
-      "description": "雙梯隊交錯(1號50%+22號50%) + 40/30/30固定階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 主權寬幅0.50/0.30",
+      "name": "👑 全球高流動性主權泰坦 (純雙梯隊黃金階梯版)",
+      "description": "雙梯隊交錯(1號50%+22號50%) + 50/30/20黃金階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 主權寬幅0.50/0.30：22.8年全歷史 63,117.4 倍、CAGR 62.55%、MDD -27.75%、夏普 1.56、勝率 90.9%",
       "metrics": {
         "model_id": "global_liquid_titan_base",
         "name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
         "short_name": "👑 全球泰坦(雙梯隊進攻版)",
         "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊進攻版)",
-        "total_return_pct": 4816402.2,
-        "cagr_pct": 60.63,
-        "alpha_pct": 49.85,
-        "max_drawdown_pct": -28.37,
-        "sharpe_ratio": 1.33,
+        "total_return_pct": 6311636.6,
+        "cagr_pct": 62.55,
+        "alpha_pct": 6310718.7,
+        "max_drawdown_pct": -27.75,
+        "sharpe_ratio": 1.56,
         "sortino_ratio": 3.08,
-        "win_rate_pct": 60.7,
+        "win_rate_pct": 60.8,
         "profit_factor": 2.53,
         "total_trades": 1365,
         "market_exposure_pct": 80.8
@@ -6386,7 +6386,15 @@
         "action": "BUY",
         "signal": "STRONG_BUY",
         "directive": "全球主權寬幅多頭共振，A梯隊(1號)與B梯隊(22號)雙軌滿倉運作中"
-      }
+      },
+      "short_name": "👑 全球主權泰坦(黃金階梯)",
+      "model_name": "👑 全球高流動性主權泰坦 (純雙梯隊黃金階梯版)",
+      "total_return_pct": 6311636.6,
+      "cagr_pct": 62.55,
+      "alpha_pct": 6310718.7,
+      "max_drawdown_pct": -27.75,
+      "sharpe_ratio": 1.56,
+      "win_rate_pct": 60.8
     },
     "global_liquid_titan_sniper": {
       "name": "👑 全球主權泰坦 × 閒置資金快打 (強強合體·黃金階梯旗艦版)",

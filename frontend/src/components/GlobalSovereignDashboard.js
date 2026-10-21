@@ -23,14 +23,14 @@ const DEFAULT_POSITIONS = [
     name: '莫德納 (Moderna 生技巨擘)',
     market: '美股 (NASDAQ)',
     currency: 'USD',
-    shares: 54,
+    shares: 68,
     entry_price: 186.61,
     current_price: 236.50,
     price_date: '2026-10-15',
     entry_date: '2026-10-01',
     entry_fee: 15,
     stop_loss_price: 165.0,
-    role: '👑 第1王者 (40%)',
+    role: '👑 第1王者 (50%)',
     stop_condition: '大波段抱牢，SPY破年線才清倉'
   },
   {
@@ -39,7 +39,7 @@ const DEFAULT_POSITIONS = [
     name: '欣興 (Unimicron 載板王者)',
     market: '台股 (TWSE)',
     currency: 'TWD',
-    shares: 236,
+    shares: 251,
     entry_price: 1195.0,
     current_price: 1090.0,
     price_date: '2026-10-16',
@@ -55,14 +55,14 @@ const DEFAULT_POSITIONS = [
     name: '創意 (Global Unichip ASIC)',
     market: '台股 (TWSE)',
     currency: 'TWD',
-    shares: 35,
+    shares: 25,
     entry_price: 8031.0,
     current_price: 7480.0,
     price_date: '2026-10-16',
     entry_date: '2026-10-01',
     entry_fee: 400,
     stop_loss_price: 7150.0,
-    role: '🥉 第3主力 (30%)',
+    role: '🥉 第3先鋒 (20%)',
     stop_condition: 'ASIC龍頭多頭強勁，每週一動態檢視'
   }
 ];
@@ -90,13 +90,13 @@ const DEFAULT_TX_HISTORY = [
     ticker: 'MRNA',
     name: '莫德納 (Moderna)',
     currency: 'USD',
-    shares: 54,
+    shares: 68,
     price: 186.61,
     tax_fee: 15,
-    cash_flow_twd: -327887,
+    cash_flow_twd: -412408,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '10月初策略建倉 第1王者 (40%)'
+    note: '10月初策略建倉 第1王者 (50%)'
   },
   {
     id: 'tx_init_2',
@@ -105,10 +105,10 @@ const DEFAULT_TX_HISTORY = [
     ticker: '3037.TW',
     name: '欣興 (Unimicron)',
     currency: 'TWD',
-    shares: 236,
+    shares: 251,
     price: 1195.0,
     tax_fee: 400,
-    cash_flow_twd: -282420,
+    cash_flow_twd: -299945,
     realized_pnl_twd: null,
     realized_return_pct: null,
     note: '10月初策略建倉 第2主力 (30%)'
@@ -120,13 +120,13 @@ const DEFAULT_TX_HISTORY = [
     ticker: '3443.TW',
     name: '創意 (Global Unichip)',
     currency: 'TWD',
-    shares: 35,
+    shares: 25,
     price: 8031.0,
     tax_fee: 400,
-    cash_flow_twd: -281485,
+    cash_flow_twd: -200775,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '10月初策略建倉 第3主力 (30%)'
+    note: '10月初策略建倉 第3先鋒 (20%)'
   }
 ];
 
@@ -610,8 +610,8 @@ export default function GlobalSovereignDashboard() {
 
     // A. 針對目標 Top 3 標的
     activeTopPicks.forEach(pick => {
-      const baseWeightPct = pick.weight_pct || (pick.rank === 1 ? 40 : 30);
-      const effectiveWeightPct = baseWeightPct * budgetMultiplier; // 滿倉: 40/30/30% | 單梯隊半倉: 20/15/15%
+      const baseWeightPct = pick.weight_pct || (pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : 20));
+      const effectiveWeightPct = baseWeightPct * budgetMultiplier; // 滿倉: 50/30/20% | 單梯隊半倉: 25/15/10%
       const weight = effectiveWeightPct / 100.0;
       const targetTwd = totalNetAssetsTwd * weight;
       const isUsd = pick.currency === 'USD';
@@ -1780,7 +1780,7 @@ export default function GlobalSovereignDashboard() {
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>20%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>15%</strong>（佔總淨值合計 50%，即梯隊內 40/30/30）。<br/>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>25%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>10%</strong>（佔總淨值合計 50%，即梯隊內 50/30/20 黃金階梯）。<br/>
               • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 才重新檢視。
             </div>
           </div>
@@ -1799,7 +1799,7 @@ export default function GlobalSovereignDashboard() {
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>20%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>15%</strong>（佔總淨值合計 50%，即梯隊內 40/30/30）。<br/>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>25%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>10%</strong>（佔總淨值合計 50%，即梯隊內 50/30/20 黃金階梯）。<br/>
               • <strong>當期狀態</strong>：下次調倉日為 <strong style={{ color: '#FBBF24' }}>{dualTrancheGuide.nextActionLabel}</strong>。捕捉最新財報季後強勢動能黑馬！
             </div>
           </div>
@@ -1815,7 +1815,7 @@ export default function GlobalSovereignDashboard() {
               💡 我該怎麼在「同一個帳戶」輕鬆跟單？
             </div>
             <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              1️⃣ <strong>兩隊選股相同時（常態共振）</strong>：A 隊 (20/15/15%) + B 隊 (20/15/15%) 合流為 <strong>40% / 30% / 30%（只買 3 檔，合計 100% 滿額進攻）</strong>。<br/>
+              1️⃣ <strong>兩隊選股相同時（常態共振）</strong>：A 隊 (25/15/10%) + B 隊 (25/15/10%) 合流為 <strong>50% / 30% / 20%（只買 3 檔，合計 100% 滿額進攻）</strong>。<br/>
               2️⃣ <strong>22 號出現新黑馬時</strong>：若舊股跌出前 5 名，只賣出該舊股<strong>一半部位換入新黑馬</strong>，另一半留待 1 號調倉再決定。<br/>
               3️⃣ <strong>下方一鍵切換試算</strong>：下方調倉表已內建「🔥 100% 雙隊滿倉」與「🅰️/🅱️ 50% 單梯隊」按鈕，自動幫您精算真實股數！
             </div>
@@ -1958,7 +1958,7 @@ export default function GlobalSovereignDashboard() {
                 <span style={{ fontSize: '1.15rem' }}>🛡️</span>
                 <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【👑 全球主權泰坦・純雙梯隊進攻旗艦紀律】</span>
                 <span style={{ color: '#CBD5E1' }}>
-                  ① <strong>100% 雙梯隊滿額進攻</strong>（1 號 A 隊 50% + 22 號 B 隊 50% 各自 20/15/15%，共振時合流為 40/30/30%）；
+                  ① <strong>100% 雙梯隊滿額進攻</strong>（1 號 A 隊 50% + 22 號 B 隊 50% 各自 25/15/10%，共振時合流為 50/30/20%）；
                   ② <strong>45/35/20 敏銳動能</strong>（12M 45% + 3M 35% + 1M 20% × FIP 資訊離散度）；
                   ③ <strong>爆量滯漲防護</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除高檔出貨陷阱）；
                   ④ <strong>前 5 名保護帶 + 滿 4 月換血 + 容差免頻繁換股</strong>；
@@ -2262,10 +2262,10 @@ export default function GlobalSovereignDashboard() {
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
                   {rebalanceMode === 'full_100'
-                    ? `目前為【🔥 100% 雙隊純滿倉模式 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：A梯隊(50%) + B梯隊(50%)，當名單重疊共振時總倉位對齊 40% / 30% / 30% (純雙梯隊進攻基準)。`
+                    ? `目前為【🔥 100% 雙隊純滿倉模式 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：A梯隊(50%) + B梯隊(50%)，當名單重疊共振時總倉位對齊 50% / 30% / 20% (黃金階梯進攻基準)。`
                     : rebalanceMode === 'tranche_a_50'
-                      ? `目前為【🅰️ 1號 A 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 20% / 15% / 15% (梯隊內 40/30/30)。`
-                      : `目前為【🅱️ 22號 B 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 20% / 15% / 15% (梯隊內 40/30/30)。`}
+                      ? `目前為【🅰️ 1號 A 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 25% / 15% / 10% (梯隊內 50/30/20)。`
+                      : `目前為【🅱️ 22號 B 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 25% / 15% / 10% (梯隊內 50/30/20)。`}
                 </p>
               </div>
 
@@ -2294,7 +2294,7 @@ export default function GlobalSovereignDashboard() {
                       color: rebalanceMode === 'full_100' ? '#FFF' : '#94A3B8'
                     }}
                   >
-                    🔥 100% 雙隊滿倉 (40/30/30%)
+                    🔥 100% 雙隊滿倉 (50/30/20%)
                   </button>
                   <button
                     type="button"
@@ -2353,7 +2353,7 @@ export default function GlobalSovereignDashboard() {
               <div style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px dashed #10B981' }}>
                 <span style={{ fontSize: '1.1rem' }}>✨</span>
                 <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.92rem', marginTop: '0.2rem' }}>
-                  目前持倉與選定模式（{rebalanceMode === 'full_100' ? '100% 雙隊純滿倉 40/30/30%' : (rebalanceMode === 'tranche_a_50' ? '1號 A梯隊 (50%)' : '22號 B梯隊 (50%)')}）已處於平衡容差帶內，無須進行任何調倉！
+                  目前持倉與選定模式（{rebalanceMode === 'full_100' ? '100% 雙隊純滿倉 50/30/20%' : (rebalanceMode === 'tranche_a_50' ? '1號 A梯隊 (50%)' : '22號 B梯隊 (50%)')}）已處於平衡容差帶內，無須進行任何調倉！
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.76rem', marginTop: '0.2rem' }}>
                   下次定期調倉窗口為 <strong>{dualTrancheGuide.nextActionLabel} ({dualTrancheGuide.nextTrancheBadge})</strong>，屆時系統將自動依據最新排名試算換股建議。
@@ -2580,7 +2580,7 @@ export default function GlobalSovereignDashboard() {
                       const isBuf = pick.rank > 3 && pick.rank <= 5;
                       const curr = pick.currency === 'USD' ? 'US$ ' : 'NT$ ';
                       const isHeld = userPositions.some(p => p.ticker === pick.ticker || (p.ticker && pick.ticker && p.ticker.split('.')[0] === pick.ticker.split('.')[0]));
-                      const singleW = isTop3 ? (pick.rank === 1 ? 40 : 30) : 0;
+                      const singleW = isTop3 ? (pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : 20)) : 0;
                       const navHalfW = singleW / 2;
 
                       return (
@@ -3473,9 +3473,9 @@ export default function GlobalSovereignDashboard() {
                       borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
                     }}
                   >
-                    <option value="👑 第1王者 (40%)">👑 第1王者 (40%)</option>
+                    <option value="👑 第1王者 (50%)">👑 第1王者 (50%)</option>
                     <option value="🥈 第2主力 (30%)">🥈 第2主力 (30%)</option>
-                    <option value="🥉 第3主力 (30%)">🥉 第3主力 (30%)</option>
+                    <option value="🥉 第3先鋒 (20%)">🥉 第3先鋒 (20%)</option>
                     <option value="🛡️ 現金避險">🛡️ 現金避險</option>
                   </select>
                 </div>

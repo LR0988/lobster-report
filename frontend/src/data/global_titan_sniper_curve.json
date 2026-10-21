@@ -21,7 +21,7 @@
     "market_exposure_pct": 0.0,
     "cash_reserve_pct": 100.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040202",
@@ -33,7 +33,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040227",
@@ -45,7 +45,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040301",
@@ -57,7 +57,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040331",
@@ -69,7 +69,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040401",
@@ -81,7 +81,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040430",
@@ -93,7 +93,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040503",
@@ -105,7 +105,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20040531",
@@ -332,8 +332,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "ISRG",
-    "leader_name": "ISRG"
+    "leader_sid": "AAPL",
+    "leader_name": "蘋果 (Apple)"
   },
   {
     "date": "20050301",
@@ -344,8 +344,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "ISRG",
-    "leader_name": "ISRG"
+    "leader_sid": "AAPL",
+    "leader_name": "蘋果 (Apple)"
   },
   {
     "date": "20050331",
@@ -620,8 +620,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "3231.TW",
-    "leader_name": "緯創 (AI 代工伺服器)"
+    "leader_sid": "MNST",
+    "leader_name": "MNST"
   },
   {
     "date": "20060301",
@@ -632,8 +632,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "3231.TW",
-    "leader_name": "緯創 (AI 代工伺服器)"
+    "leader_sid": "MNST",
+    "leader_name": "MNST"
   },
   {
     "date": "20060331",
@@ -644,8 +644,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_sid": "MNST",
+    "leader_name": "MNST"
   },
   {
     "date": "20060403",
@@ -656,8 +656,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_sid": "MNST",
+    "leader_name": "MNST"
   },
   {
     "date": "20060428",
@@ -669,7 +669,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20060501",
@@ -681,7 +681,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20060531",
@@ -693,7 +693,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20060601",
@@ -705,7 +705,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20060630",
@@ -717,7 +717,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "ILMN",
-    "leader_name": "因美納 (Illumina 基因定序)"
+    "leader_name": "ILMN"
   },
   {
     "date": "20060703",
@@ -729,7 +729,7 @@
     "market_exposure_pct": 89.5,
     "cash_reserve_pct": 10.5,
     "leader_sid": "ILMN",
-    "leader_name": "因美納 (Illumina 基因定序)"
+    "leader_name": "ILMN"
   },
   {
     "date": "20060731",
@@ -740,8 +740,8 @@
     "exposure": 0.9,
     "market_exposure_pct": 89.8,
     "cash_reserve_pct": 10.2,
-    "leader_sid": "ILMN",
-    "leader_name": "因美納 (Illumina 基因定序)"
+    "leader_sid": "MNST",
+    "leader_name": "MNST"
   },
   {
     "date": "20060801",
@@ -752,8 +752,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "ILMN",
-    "leader_name": "因美納 (Illumina 基因定序)"
+    "leader_sid": "MNST",
+    "leader_name": "MNST"
   },
   {
     "date": "20060831",
@@ -765,7 +765,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20060901",
@@ -777,7 +777,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20060929",
@@ -789,7 +789,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20061002",
@@ -801,7 +801,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20061031",
@@ -813,7 +813,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20061101",
@@ -825,7 +825,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20061130",
@@ -837,7 +837,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20061201",
@@ -849,7 +849,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20061229",
@@ -861,7 +861,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20070102",
@@ -873,7 +873,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20070131",
@@ -885,7 +885,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20070201",
@@ -897,7 +897,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20070228",
@@ -1269,7 +1269,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "ILMN",
-    "leader_name": "因美納 (Illumina 基因定序)"
+    "leader_name": "ILMN"
   },
   {
     "date": "20080602",
@@ -1281,7 +1281,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "ILMN",
-    "leader_name": "因美納 (Illumina 基因定序)"
+    "leader_name": "ILMN"
   },
   {
     "date": "20080630",
@@ -1292,8 +1292,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "MA",
-    "leader_name": "MA"
+    "leader_sid": "ILMN",
+    "leader_name": "ILMN"
   },
   {
     "date": "20080701",
@@ -1304,8 +1304,8 @@
     "exposure": 0.83,
     "market_exposure_pct": 82.6,
     "cash_reserve_pct": 17.4,
-    "leader_sid": "MA",
-    "leader_name": "MA"
+    "leader_sid": "ILMN",
+    "leader_name": "ILMN"
   },
   {
     "date": "20080731",
@@ -1533,7 +1533,7 @@
     "market_exposure_pct": 20.0,
     "cash_reserve_pct": 80.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090501",
@@ -1545,7 +1545,7 @@
     "market_exposure_pct": 26.2,
     "cash_reserve_pct": 73.8,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090529",
@@ -1557,7 +1557,7 @@
     "market_exposure_pct": 36.1,
     "cash_reserve_pct": 63.9,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090601",
@@ -1569,7 +1569,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090630",
@@ -1581,7 +1581,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090701",
@@ -1593,7 +1593,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090731",
@@ -1605,7 +1605,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090803",
@@ -1617,7 +1617,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090831",
@@ -1629,7 +1629,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090901",
@@ -1641,7 +1641,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20090930",
@@ -1653,7 +1653,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3231.TW",
-    "leader_name": "緯創 (AI 代工伺服器)"
+    "leader_name": "3231.TW"
   },
   {
     "date": "20091001",
@@ -1665,7 +1665,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3231.TW",
-    "leader_name": "緯創 (AI 代工伺服器)"
+    "leader_name": "3231.TW"
   },
   {
     "date": "20091030",
@@ -1677,7 +1677,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20091102",
@@ -1689,7 +1689,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20091130",
@@ -1701,7 +1701,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20091201",
@@ -1713,7 +1713,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20091231",
@@ -1749,7 +1749,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20100201",
@@ -1761,7 +1761,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20100226",
@@ -1773,7 +1773,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20100301",
@@ -1785,7 +1785,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20100331",
@@ -1797,7 +1797,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20100401",
@@ -1809,7 +1809,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20100430",
@@ -1821,7 +1821,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20100503",
@@ -1833,7 +1833,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20100531",
@@ -1893,7 +1893,7 @@
     "market_exposure_pct": 20.0,
     "cash_reserve_pct": 80.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20100802",
@@ -1905,7 +1905,7 @@
     "market_exposure_pct": 28.8,
     "cash_reserve_pct": 71.2,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20100831",
@@ -1917,7 +1917,7 @@
     "market_exposure_pct": 29.2,
     "cash_reserve_pct": 70.8,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20100901",
@@ -1929,7 +1929,7 @@
     "market_exposure_pct": 90.5,
     "cash_reserve_pct": 9.5,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20100930",
@@ -1941,7 +1941,7 @@
     "market_exposure_pct": 90.8,
     "cash_reserve_pct": 9.2,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20101001",
@@ -1953,7 +1953,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20101029",
@@ -1965,7 +1965,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20101101",
@@ -1977,7 +1977,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20101130",
@@ -1989,7 +1989,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20101201",
@@ -2001,7 +2001,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20101231",
@@ -2013,7 +2013,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20110103",
@@ -2025,7 +2025,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20110131",
@@ -2037,7 +2037,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20110201",
@@ -2049,7 +2049,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20110228",
@@ -2061,7 +2061,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20110301",
@@ -2073,7 +2073,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20110331",
@@ -2108,8 +2108,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_sid": "LULU",
+    "leader_name": "LULU"
   },
   {
     "date": "20110502",
@@ -2120,8 +2120,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_sid": "LULU",
+    "leader_name": "LULU"
   },
   {
     "date": "20110531",
@@ -2612,8 +2612,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "GILD",
-    "leader_name": "GILD"
+    "leader_sid": "CX",
+    "leader_name": "CX"
   },
   {
     "date": "20130201",
@@ -2624,8 +2624,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "GILD",
-    "leader_name": "GILD"
+    "leader_sid": "CX",
+    "leader_name": "CX"
   },
   {
     "date": "20130228",
@@ -2661,7 +2661,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20130401",
@@ -2673,7 +2673,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20130430",
@@ -2685,7 +2685,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20130501",
@@ -2697,7 +2697,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20130531",
@@ -2709,7 +2709,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20130603",
@@ -2721,7 +2721,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20130628",
@@ -2757,7 +2757,7 @@
     "market_exposure_pct": 92.5,
     "cash_reserve_pct": 7.5,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20130801",
@@ -2769,7 +2769,7 @@
     "market_exposure_pct": 89.3,
     "cash_reserve_pct": 10.7,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20130830",
@@ -2781,7 +2781,7 @@
     "market_exposure_pct": 99.5,
     "cash_reserve_pct": 0.5,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20130902",
@@ -2793,7 +2793,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20130930",
@@ -2805,7 +2805,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20131001",
@@ -2817,7 +2817,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20131031",
@@ -2829,7 +2829,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20131101",
@@ -2841,7 +2841,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20131129",
@@ -2925,7 +2925,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20140303",
@@ -2937,7 +2937,7 @@
     "market_exposure_pct": 81.6,
     "cash_reserve_pct": 18.4,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20140331",
@@ -2949,7 +2949,7 @@
     "market_exposure_pct": 81.9,
     "cash_reserve_pct": 18.1,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20140401",
@@ -2961,7 +2961,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20140430",
@@ -2973,7 +2973,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20140501",
@@ -2985,7 +2985,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20140530",
@@ -2997,7 +2997,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140602",
@@ -3009,7 +3009,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140630",
@@ -3021,7 +3021,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140701",
@@ -3033,7 +3033,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140731",
@@ -3045,7 +3045,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140801",
@@ -3057,7 +3057,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140829",
@@ -3069,7 +3069,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140901",
@@ -3081,7 +3081,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20140930",
@@ -3093,7 +3093,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AVGO",
-    "leader_name": "博通 (Broadcom 網通霸主)"
+    "leader_name": "博通 (Broadcom)"
   },
   {
     "date": "20141001",
@@ -3105,7 +3105,7 @@
     "market_exposure_pct": 92.3,
     "cash_reserve_pct": 7.7,
     "leader_sid": "AVGO",
-    "leader_name": "博通 (Broadcom 網通霸主)"
+    "leader_name": "博通 (Broadcom)"
   },
   {
     "date": "20141031",
@@ -3141,7 +3141,7 @@
     "market_exposure_pct": 10.0,
     "cash_reserve_pct": 90.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20141201",
@@ -3153,7 +3153,7 @@
     "market_exposure_pct": 99.3,
     "cash_reserve_pct": 0.7,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20141231",
@@ -3165,7 +3165,7 @@
     "market_exposure_pct": 98.9,
     "cash_reserve_pct": 1.1,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150102",
@@ -3177,7 +3177,7 @@
     "market_exposure_pct": 52.8,
     "cash_reserve_pct": 47.2,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150130",
@@ -3189,7 +3189,7 @@
     "market_exposure_pct": 62.6,
     "cash_reserve_pct": 37.4,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20150202",
@@ -3201,7 +3201,7 @@
     "market_exposure_pct": 38.9,
     "cash_reserve_pct": 61.1,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20150227",
@@ -3213,7 +3213,7 @@
     "market_exposure_pct": 39.0,
     "cash_reserve_pct": 61.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20150302",
@@ -3225,7 +3225,7 @@
     "market_exposure_pct": 79.0,
     "cash_reserve_pct": 21.0,
     "leader_sid": "3008.TW",
-    "leader_name": "大立光 (Largan 光學鏡頭)"
+    "leader_name": "3008.TW"
   },
   {
     "date": "20150331",
@@ -3237,7 +3237,7 @@
     "market_exposure_pct": 89.0,
     "cash_reserve_pct": 11.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150401",
@@ -3249,7 +3249,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150430",
@@ -3261,7 +3261,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150501",
@@ -3273,7 +3273,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150529",
@@ -3285,7 +3285,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150601",
@@ -3297,7 +3297,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "PANW",
-    "leader_name": "派拓網路 (資安龍頭)"
+    "leader_name": "PANW"
   },
   {
     "date": "20150630",
@@ -3309,7 +3309,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20150701",
@@ -3321,7 +3321,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20150731",
@@ -3333,7 +3333,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20150803",
@@ -3345,7 +3345,7 @@
     "market_exposure_pct": 91.2,
     "cash_reserve_pct": 8.8,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20150831",
@@ -3357,7 +3357,7 @@
     "market_exposure_pct": 91.1,
     "cash_reserve_pct": 8.9,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20150901",
@@ -3369,7 +3369,7 @@
     "market_exposure_pct": 51.2,
     "cash_reserve_pct": 48.8,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20150930",
@@ -3405,7 +3405,7 @@
     "market_exposure_pct": 20.0,
     "cash_reserve_pct": 80.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20151102",
@@ -3417,7 +3417,7 @@
     "market_exposure_pct": 39.6,
     "cash_reserve_pct": 60.4,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20151130",
@@ -3525,7 +3525,7 @@
     "market_exposure_pct": 0.0,
     "cash_reserve_pct": 100.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160401",
@@ -3537,7 +3537,7 @@
     "market_exposure_pct": 38.3,
     "cash_reserve_pct": 61.7,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160429",
@@ -3549,7 +3549,7 @@
     "market_exposure_pct": 38.6,
     "cash_reserve_pct": 61.4,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160502",
@@ -3561,7 +3561,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160531",
@@ -3573,7 +3573,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160601",
@@ -3585,7 +3585,7 @@
     "market_exposure_pct": 92.1,
     "cash_reserve_pct": 7.9,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160630",
@@ -3597,7 +3597,7 @@
     "market_exposure_pct": 92.0,
     "cash_reserve_pct": 8.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160701",
@@ -3609,7 +3609,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160729",
@@ -3621,7 +3621,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160801",
@@ -3633,7 +3633,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20160831",
@@ -3645,7 +3645,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20160901",
@@ -3657,7 +3657,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20160930",
@@ -3693,7 +3693,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20161101",
@@ -3705,7 +3705,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20161130",
@@ -3716,8 +3716,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "PBR",
-    "leader_name": "PBR"
+    "leader_sid": "NVDA",
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20161201",
@@ -3728,8 +3728,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "PBR",
-    "leader_name": "PBR"
+    "leader_sid": "NVDA",
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20161230",
@@ -3740,8 +3740,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_sid": "NVDA",
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20170103",
@@ -3752,8 +3752,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_sid": "NVDA",
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20170131",
@@ -3765,7 +3765,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20170201",
@@ -3777,7 +3777,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20170228",
@@ -3885,7 +3885,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20170703",
@@ -3897,7 +3897,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20170731",
@@ -3909,7 +3909,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20170801",
@@ -3921,7 +3921,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20170831",
@@ -3933,7 +3933,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20170901",
@@ -3945,7 +3945,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20170929",
@@ -3957,7 +3957,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20171002",
@@ -3969,7 +3969,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20171031",
@@ -4004,8 +4004,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_sid": "3443.TW",
+    "leader_name": "創意 (Global Unichip ASIC)"
   },
   {
     "date": "20171201",
@@ -4016,8 +4016,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "NVDA",
-    "leader_name": "輝達 (NVIDIA AI算力之王)"
+    "leader_sid": "3443.TW",
+    "leader_name": "創意 (Global Unichip ASIC)"
   },
   {
     "date": "20171229",
@@ -4028,8 +4028,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "MU",
-    "leader_name": "美光科技 (Micron 記憶體巨頭)"
+    "leader_sid": "NVDA",
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20180102",
@@ -4040,8 +4040,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "MU",
-    "leader_name": "美光科技 (Micron 記憶體巨頭)"
+    "leader_sid": "NVDA",
+    "leader_name": "輝達 (NVIDIA)"
   },
   {
     "date": "20180131",
@@ -4125,7 +4125,7 @@
     "market_exposure_pct": 92.3,
     "cash_reserve_pct": 7.7,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20180501",
@@ -4137,7 +4137,7 @@
     "market_exposure_pct": 98.3,
     "cash_reserve_pct": 1.7,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20180531",
@@ -4149,7 +4149,7 @@
     "market_exposure_pct": 98.3,
     "cash_reserve_pct": 1.7,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20180601",
@@ -4161,7 +4161,7 @@
     "market_exposure_pct": 97.4,
     "cash_reserve_pct": 2.6,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20180629",
@@ -4173,7 +4173,7 @@
     "market_exposure_pct": 98.3,
     "cash_reserve_pct": 1.7,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20180702",
@@ -4185,7 +4185,7 @@
     "market_exposure_pct": 93.3,
     "cash_reserve_pct": 6.7,
     "leader_sid": "NFLX",
-    "leader_name": "NFLX"
+    "leader_name": "網飛 (Netflix)"
   },
   {
     "date": "20180731",
@@ -4196,8 +4196,8 @@
     "exposure": 0.93,
     "market_exposure_pct": 93.3,
     "cash_reserve_pct": 6.7,
-    "leader_sid": "LULU",
-    "leader_name": "LULU"
+    "leader_sid": "TTD",
+    "leader_name": "TTD"
   },
   {
     "date": "20180801",
@@ -4208,8 +4208,8 @@
     "exposure": 0.41,
     "market_exposure_pct": 40.9,
     "cash_reserve_pct": 59.1,
-    "leader_sid": "LULU",
-    "leader_name": "LULU"
+    "leader_sid": "TTD",
+    "leader_name": "TTD"
   },
   {
     "date": "20180831",
@@ -4341,7 +4341,7 @@
     "market_exposure_pct": 10.0,
     "cash_reserve_pct": 90.0,
     "leader_sid": "6669.TW",
-    "leader_name": "緯穎 (AI 伺服器巨頭)"
+    "leader_name": "緯穎 (雲端伺服器)"
   },
   {
     "date": "20190201",
@@ -4353,7 +4353,7 @@
     "market_exposure_pct": 26.2,
     "cash_reserve_pct": 73.8,
     "leader_sid": "6669.TW",
-    "leader_name": "緯穎 (AI 伺服器巨頭)"
+    "leader_name": "緯穎 (雲端伺服器)"
   },
   {
     "date": "20190228",
@@ -4581,7 +4581,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20191202",
@@ -4593,7 +4593,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20191231",
@@ -4605,7 +4605,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20200102",
@@ -4617,7 +4617,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20200131",
@@ -4629,7 +4629,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20200203",
@@ -4641,7 +4641,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20200228",
@@ -4653,7 +4653,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20200302",
@@ -4665,7 +4665,7 @@
     "market_exposure_pct": 91.5,
     "cash_reserve_pct": 8.5,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20200331",
@@ -4797,7 +4797,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20200901",
@@ -4809,7 +4809,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20200930",
@@ -4821,7 +4821,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20201001",
@@ -4833,7 +4833,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "TSLA",
-    "leader_name": "特斯拉 (Tesla 自動駕駛)"
+    "leader_name": "特斯拉 (Tesla)"
   },
   {
     "date": "20201030",
@@ -4845,7 +4845,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20201102",
@@ -4857,7 +4857,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "AMD",
-    "leader_name": "超微半導體 (AMD)"
+    "leader_name": "超微 (AMD)"
   },
   {
     "date": "20201130",
@@ -4869,7 +4869,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "UMC",
-    "leader_name": "聯電 (UMC 晶圓代工ADR)"
+    "leader_name": "UMC"
   },
   {
     "date": "20201201",
@@ -4881,7 +4881,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "UMC",
-    "leader_name": "聯電 (UMC 晶圓代工ADR)"
+    "leader_name": "UMC"
   },
   {
     "date": "20201231",
@@ -4893,7 +4893,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "UMC",
-    "leader_name": "聯電 (UMC 晶圓代工ADR)"
+    "leader_name": "UMC"
   },
   {
     "date": "20210104",
@@ -4905,7 +4905,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "UMC",
-    "leader_name": "聯電 (UMC 晶圓代工ADR)"
+    "leader_name": "UMC"
   },
   {
     "date": "20210129",
@@ -4989,7 +4989,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20210503",
@@ -5001,7 +5001,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20210531",
@@ -5013,7 +5013,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20210601",
@@ -5025,7 +5025,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20210630",
@@ -5037,7 +5037,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20210701",
@@ -5049,7 +5049,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20210730",
@@ -5061,7 +5061,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2603.TW",
-    "leader_name": "長榮海運 (貨櫃航運龍頭)"
+    "leader_name": "2603.TW"
   },
   {
     "date": "20210802",
@@ -5073,7 +5073,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2603.TW",
-    "leader_name": "長榮海運 (貨櫃航運龍頭)"
+    "leader_name": "2603.TW"
   },
   {
     "date": "20210831",
@@ -5181,7 +5181,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20220103",
@@ -5193,7 +5193,7 @@
     "market_exposure_pct": 14.1,
     "cash_reserve_pct": 85.9,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20220131",
@@ -5205,7 +5205,7 @@
     "market_exposure_pct": 33.7,
     "cash_reserve_pct": 66.3,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20220201",
@@ -5217,7 +5217,7 @@
     "market_exposure_pct": 99.1,
     "cash_reserve_pct": 0.9,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20220228",
@@ -5253,7 +5253,7 @@
     "market_exposure_pct": 91.0,
     "cash_reserve_pct": 9.0,
     "leader_sid": "2603.TW",
-    "leader_name": "長榮海運 (貨櫃航運龍頭)"
+    "leader_name": "2603.TW"
   },
   {
     "date": "20220401",
@@ -5265,7 +5265,7 @@
     "market_exposure_pct": 34.0,
     "cash_reserve_pct": 66.0,
     "leader_sid": "2603.TW",
-    "leader_name": "長榮海運 (貨櫃航運龍頭)"
+    "leader_name": "2603.TW"
   },
   {
     "date": "20220429",
@@ -5277,7 +5277,7 @@
     "market_exposure_pct": 34.2,
     "cash_reserve_pct": 65.8,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20220502",
@@ -5289,7 +5289,7 @@
     "market_exposure_pct": 75.1,
     "cash_reserve_pct": 24.9,
     "leader_sid": "2609.TW",
-    "leader_name": "陽明海運 (貨櫃航運)"
+    "leader_name": "2609.TW"
   },
   {
     "date": "20220531",
@@ -5445,7 +5445,7 @@
     "market_exposure_pct": 0.0,
     "cash_reserve_pct": 100.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20221201",
@@ -5457,7 +5457,7 @@
     "market_exposure_pct": 15.0,
     "cash_reserve_pct": 85.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20221230",
@@ -5469,7 +5469,7 @@
     "market_exposure_pct": 15.2,
     "cash_reserve_pct": 84.8,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230103",
@@ -5481,7 +5481,7 @@
     "market_exposure_pct": 93.9,
     "cash_reserve_pct": 6.1,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230131",
@@ -5493,7 +5493,7 @@
     "market_exposure_pct": 94.0,
     "cash_reserve_pct": 6.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230201",
@@ -5505,7 +5505,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230228",
@@ -5517,7 +5517,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230301",
@@ -5529,7 +5529,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "8996.TW",
-    "leader_name": "高力 (Kaori 水冷散熱飆股)"
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230331",
@@ -5540,8 +5540,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "1513.TW",
-    "leader_name": "1513.TW"
+    "leader_sid": "8996.TW",
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230403",
@@ -5552,8 +5552,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "1513.TW",
-    "leader_name": "1513.TW"
+    "leader_sid": "8996.TW",
+    "leader_name": "8996.TW"
   },
   {
     "date": "20230428",
@@ -5589,7 +5589,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "SMCI",
-    "leader_name": "美超微 (Supermicro)"
+    "leader_name": "SMCI"
   },
   {
     "date": "20230601",
@@ -5601,7 +5601,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "SMCI",
-    "leader_name": "美超微 (Supermicro)"
+    "leader_name": "SMCI"
   },
   {
     "date": "20230630",
@@ -5613,7 +5613,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "SMCI",
-    "leader_name": "美超微 (Supermicro)"
+    "leader_name": "SMCI"
   },
   {
     "date": "20230703",
@@ -5625,7 +5625,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "SMCI",
-    "leader_name": "美超微 (Supermicro)"
+    "leader_name": "SMCI"
   },
   {
     "date": "20230731",
@@ -5636,8 +5636,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "1519.TW",
-    "leader_name": "1519.TW"
+    "leader_sid": "3231.TW",
+    "leader_name": "3231.TW"
   },
   {
     "date": "20230801",
@@ -5648,8 +5648,8 @@
     "exposure": 1.0,
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
-    "leader_sid": "1519.TW",
-    "leader_name": "1519.TW"
+    "leader_sid": "3231.TW",
+    "leader_name": "3231.TW"
   },
   {
     "date": "20230831",
@@ -5661,7 +5661,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3231.TW",
-    "leader_name": "緯創 (AI 代工伺服器)"
+    "leader_name": "3231.TW"
   },
   {
     "date": "20230901",
@@ -5673,7 +5673,7 @@
     "market_exposure_pct": 94.4,
     "cash_reserve_pct": 5.6,
     "leader_sid": "3231.TW",
-    "leader_name": "緯創 (AI 代工伺服器)"
+    "leader_name": "3231.TW"
   },
   {
     "date": "20230929",
@@ -5733,7 +5733,7 @@
     "market_exposure_pct": 20.0,
     "cash_reserve_pct": 80.0,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20231201",
@@ -5745,7 +5745,7 @@
     "market_exposure_pct": 27.1,
     "cash_reserve_pct": 72.9,
     "leader_sid": "3661.TW",
-    "leader_name": "世芯-KY (AI ASIC 矽智財)"
+    "leader_name": "3661.TW"
   },
   {
     "date": "20231229",
@@ -5853,7 +5853,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "SMCI",
-    "leader_name": "美超微 (Supermicro)"
+    "leader_name": "SMCI"
   },
   {
     "date": "20240501",
@@ -5865,7 +5865,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "SMCI",
-    "leader_name": "美超微 (Supermicro)"
+    "leader_name": "SMCI"
   },
   {
     "date": "20240531",
@@ -5877,7 +5877,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20240603",
@@ -5889,7 +5889,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20240628",
@@ -5901,7 +5901,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20240701",
@@ -5913,7 +5913,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20240731",
@@ -5925,7 +5925,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20240801",
@@ -5937,7 +5937,7 @@
     "market_exposure_pct": 100.0,
     "cash_reserve_pct": 0.0,
     "leader_sid": "3017.TW",
-    "leader_name": "奇鋐 (AI 水冷散熱龍頭)"
+    "leader_name": "3017.TW"
   },
   {
     "date": "20240830",
@@ -6069,7 +6069,7 @@
     "market_exposure_pct": 94.8,
     "cash_reserve_pct": 5.2,
     "leader_sid": "AVGO",
-    "leader_name": "博通 (Broadcom 網通霸主)"
+    "leader_name": "博通 (Broadcom)"
   },
   {
     "date": "20250203",
@@ -6081,7 +6081,7 @@
     "market_exposure_pct": 36.1,
     "cash_reserve_pct": 63.9,
     "leader_sid": "AVGO",
-    "leader_name": "博通 (Broadcom 網通霸主)"
+    "leader_name": "博通 (Broadcom)"
   },
   {
     "date": "20250228",
