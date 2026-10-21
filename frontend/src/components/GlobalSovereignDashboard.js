@@ -598,7 +598,7 @@ export default function GlobalSovereignDashboard() {
     };
   }, []);
 
-  // 3. 雙梯隊持倉更動建議演算法 (支援 70% 旗艦雙隊進攻 / 35% 單梯隊 / 100% 滿倉基準 / 50% 單梯隊，含 DOE 容差帶與前 5 名保護帶)
+  // 3. 雙梯隊持倉更動建議演算法 (支援 100% 雙隊滿倉 / 1號 A梯隊 50% / 22號 B梯隊 50%，含 DOE 容差帶與前 5 名保護帶)
   const rebalanceSuggestions = useMemo(() => {
     if (totalNetAssetsTwd <= 0) return [];
 
@@ -606,35 +606,25 @@ export default function GlobalSovereignDashboard() {
     const suggestions = [];
     const isHalfTranche = rebalanceMode === 'tranche_a_50' || rebalanceMode === 'tranche_b_50';
 
-    let budgetMultiplier = 1.0;
     let modePrefix = '🔥 100%雙隊滿倉';
-    let tolerancePct = 5.0;
-
-    if (rebalanceMode === 'full_100') {
-      budgetMultiplier = 1.0;
-      modePrefix = '🔥 100%雙隊滿倉';
-      tolerancePct = 5.0;
-    } else if (rebalanceMode === 'tranche_a_50') {
-      budgetMultiplier = 0.5;
-      modePrefix = '🅰️ A梯隊(50%定錨)';
-      tolerancePct = 2.5;
+    if (rebalanceMode === 'tranche_a_50') {
+      modePrefix = '🅰️ 1號A隊(50%)';
     } else if (rebalanceMode === 'tranche_b_50') {
-      budgetMultiplier = 0.5;
-      modePrefix = '🅱️ B梯隊(50%定錨)';
-      tolerancePct = 2.5;
+      modePrefix = '🅱️ 22號B隊(50%)';
     }
 
     // A. 針對目標 Top 3 標的
     activeTopPicks.forEach(pick => {
-      const baseWeightPct = pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : (pick.rank === 3 ? 20 : 0));
-      const effectiveWeightPct = baseWeightPct * budgetMultiplier; // 滿倉: 50/30/20% | 單梯隊半倉: 25/15/10%
-      const weight = effectiveWeightPct / 100.0;
-      const targetTwd = totalNetAssetsTwd * weight;
+      // 梯隊內標準黃金階梯配置: 50% / 30% / 20%
+      const trancheWeightPct = pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : (pick.rank === 3 ? 20 : 0));
+      // 佔總淨值目標比例: 滿倉模式為 50/30/20%，單梯隊模式為 25/15/10%
+      const totalWeightPct = isHalfTranche ? (trancheWeightPct * 0.5) : trancheWeightPct;
+      const targetTwd = totalNetAssetsTwd * (totalWeightPct / 100.0);
       const isUsd = pick.currency === 'USD';
       const price = pick.price || 1;
       const fx = isUsd ? usdFx : 1.0;
 
-      // 計算目標總股數
+      // 目標股數 (該模式下對應目標額度所換算之理論股數)
       let targetShares = 0;
       if (isUsd) {
         const targetUsd = targetTwd / fx;
@@ -643,107 +633,124 @@ export default function GlobalSovereignDashboard() {
         targetShares = Math.floor(targetTwd / price);
       }
 
-      // 檢查目前持有股數與權重偏差 (DOE ±5% 容差帶檢查)
+      // 檢查目前持有股數與佔總資產權重
       const heldPos = userPositions.find(p => p.ticker === pick.ticker);
       const heldShares = heldPos ? heldPos.shares : 0;
-      const diffShares = targetShares - heldShares;
       const curWeightPct = totalNetAssetsTwd > 0 ? (((heldShares * price * fx) / totalNetAssetsTwd) * 100) : 0;
-      const targetWeightPct = effectiveWeightPct;
-      const weightDiffPct = Math.abs(curWeightPct - targetWeightPct);
+      const weightDiffPct = Math.abs(curWeightPct - totalWeightPct);
 
       const suggKey = `sugg_${rebalanceMode}_${pick.ticker}`;
-      if (dismissedSuggestions.includes(suggKey)) return;
+      const isAlreadyDismissed = dismissedSuggestions.includes(suggKey);
 
-      const roleTitle = pick.rank === 1
-        ? `${modePrefix} 👑第1王者(${effectiveWeightPct}%)`
-        : (pick.rank === 2 ? `${modePrefix} 🥈第2主力(${effectiveWeightPct}%)` : `${modePrefix} 🥉第3先鋒(${effectiveWeightPct}%)`);
+      // 目標配置文字 (清晰展示梯隊與總淨值比例，杜絕「怎麼不是50/30/20」的誤解)
+      const targetWeightDisplay = isHalfTranche
+        ? `梯隊 ${trancheWeightPct}% (總額 ${totalWeightPct}%)`
+        : `${totalWeightPct}%`;
 
-      if (heldShares === 0 && targetShares > 0) {
-        // 全新買入
-        const estFee = isUsd ? 15 : Math.max(20, Math.round(targetShares * price * 0.001425));
-        suggestions.push({
-          key: suggKey,
-          action: '買入',
-          actionColor: '#10B981',
-          ticker: pick.ticker,
-          name: pick.name,
-          market: pick.market,
-          currency: pick.currency,
-          targetWeightPct: effectiveWeightPct,
-          targetTwd: targetTwd,
-          currentShares: heldShares,
-          targetShares: targetShares,
-          recShares: targetShares,
-          defaultPrice: price,
-          defaultTaxFee: estFee,
-          role: roleTitle,
-          heldPos: null
-        });
-      } else if (heldShares > 0 && weightDiffPct > tolerancePct && diffShares > 0 && Math.abs(diffShares * price * fx) > 5000) {
-        // 權重偏差超出容差帶且金額 > 5000: 加碼
-        const estFee = isUsd ? 15 : Math.max(20, Math.round(diffShares * price * 0.001425));
-        suggestions.push({
-          key: suggKey,
-          action: '加碼',
-          actionColor: '#38BDF8',
-          ticker: pick.ticker,
-          name: pick.name,
-          market: pick.market,
-          currency: pick.currency,
-          targetWeightPct: effectiveWeightPct,
-          targetTwd: targetTwd,
-          currentShares: heldShares,
-          targetShares: targetShares,
-          recShares: diffShares,
-          defaultPrice: price,
-          defaultTaxFee: estFee,
-          role: roleTitle,
-          heldPos: heldPos
-        });
-      } else if (heldShares > 0 && weightDiffPct > tolerancePct && diffShares < 0 && Math.abs(diffShares * price * fx) > 5000) {
-        // 權重偏差超出容差帶且金額 > 5000: 減持
-        const reduceShares = Math.abs(diffShares);
-        const estTaxFee = isUsd ? 15 : Math.round(reduceShares * price * (0.003 + 0.001425));
-        suggestions.push({
-          key: suggKey,
-          action: '減持',
-          actionColor: '#F59E0B',
-          ticker: pick.ticker,
-          name: pick.name,
-          market: pick.market,
-          currency: pick.currency,
-          targetWeightPct: effectiveWeightPct,
-          targetTwd: targetTwd,
-          currentShares: heldShares,
-          targetShares: targetShares,
-          recShares: reduceShares,
-          defaultPrice: price,
-          defaultTaxFee: estTaxFee,
-          role: roleTitle,
-          heldPos: heldPos
-        });
+      const roleTitle = isHalfTranche
+        ? `${modePrefix} 👑第${pick.rank}主力 (梯隊${trancheWeightPct}% / 總額${totalWeightPct}%)`
+        : `${modePrefix} 👑第${pick.rank}主力 (${totalWeightPct}%)`;
+
+      let action = '續抱';
+      let actionColor = '#10B981';
+      let recShares = 0;
+      let isBalanced = false;
+      let estFee = 0;
+
+      if (isAlreadyDismissed) {
+        // 如果使用者先前已手動點擊執行送出該建議，保留此行展示為已執行，避免表格缺檔
+        action = '續抱';
+        actionColor = '#10B981';
+        recShares = 0;
+        isBalanced = true;
+      } else if (isHalfTranche) {
+        // === 單梯隊調倉模式 (🅰️ 1號 A 隊 或 🅱️ 22號 B 隊) ===
+        // 在雙梯隊架構中，單梯隊調倉動用帳戶 50% 總資金。
+        // 1. 若當前持股已達雙隊共振滿倉 (持股比例已覆蓋單梯隊 1.6 倍以上，如第1名 >= 40%、第2名 >= 24%、第3名 >= 16% 或股數足額):
+        const isFullResonance = curWeightPct >= (totalWeightPct * 1.6) || (targetShares > 0 && heldShares >= Math.floor(targetShares * 1.6));
+        // 2. 若當前持股在單梯隊目標容差帶內 (偏差 <= 2.5% 或股數金額偏差 <= 5000):
+        const isTrancheAligned = weightDiffPct <= 2.5 || Math.abs((targetShares - heldShares) * price * fx) <= 5000;
+
+        if (heldShares === 0 && targetShares > 0) {
+          // 全新建倉買入
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = targetShares;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(targetShares * price * 0.001425));
+        } else if (isFullResonance) {
+          // 雙隊共振滿倉，該梯隊已完全滿足！絕不叫使用者減持！
+          action = '續抱';
+          actionColor = '#10B981';
+          recShares = 0;
+          isBalanced = true;
+        } else if (isTrancheAligned) {
+          // 單梯隊部位已對齊
+          action = '續抱';
+          actionColor = '#10B981';
+          recShares = 0;
+          isBalanced = true;
+        } else if (curWeightPct < totalWeightPct - 2.5) {
+          // 低於單梯隊目標需加碼補足
+          const diff = Math.max(1, targetShares - heldShares);
+          action = '加碼';
+          actionColor = '#38BDF8';
+          recShares = diff;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(diff * price * 0.001425));
+        } else {
+          // 持股介於單梯隊至雙隊共振之間，梯隊額度已安全滿足，續抱即可
+          action = '續抱';
+          actionColor = '#10B981';
+          recShares = 0;
+          isBalanced = true;
+        }
       } else {
-        // 權重在容差帶內或金額偏差極小：部位平衡無需調整，明確展示為續抱，確保 3 檔目標 100% 透明無遺漏！
-        suggestions.push({
-          key: suggKey,
-          action: '續抱',
-          actionColor: '#10B981',
-          ticker: pick.ticker,
-          name: pick.name,
-          market: pick.market,
-          currency: pick.currency,
-          targetWeightPct: effectiveWeightPct,
-          targetTwd: targetTwd,
-          currentShares: heldShares,
-          targetShares: targetShares,
-          recShares: 0,
-          defaultPrice: price,
-          defaultTaxFee: 0,
-          role: roleTitle,
-          heldPos: heldPos,
-          isBalanced: true
-        });
+        // === 🔥 100% 雙隊滿倉模式 ===
+        const diffShares = targetShares - heldShares;
+        if (heldShares === 0 && targetShares > 0) {
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = targetShares;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(targetShares * price * 0.001425));
+        } else if (weightDiffPct <= 5.0 || Math.abs(diffShares * price * fx) <= 5000) {
+          action = '續抱';
+          actionColor = '#10B981';
+          recShares = 0;
+          isBalanced = true;
+        } else if (diffShares > 0) {
+          action = '加碼';
+          actionColor = '#38BDF8';
+          recShares = diffShares;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(diffShares * price * 0.001425));
+        } else {
+          const reduceShares = Math.abs(diffShares);
+          action = '減持';
+          actionColor = '#F59E0B';
+          recShares = reduceShares;
+          estFee = isUsd ? 15 : Math.round(reduceShares * price * (0.003 + 0.001425));
+        }
       }
+
+      suggestions.push({
+        key: suggKey,
+        action,
+        actionColor,
+        ticker: pick.ticker,
+        name: pick.name,
+        market: pick.market,
+        currency: pick.currency,
+        targetWeightPct: totalWeightPct,
+        targetWeightDisplay,
+        targetTwd,
+        currentShares: heldShares,
+        targetShares: isHalfTranche && (curWeightPct >= totalWeightPct * 1.6) ? heldShares : targetShares,
+        recShares,
+        defaultPrice: price,
+        defaultTaxFee: estFee,
+        role: roleTitle,
+        heldPos,
+        isBalanced,
+        isExecuted: isAlreadyDismissed
+      });
     });
 
     // B. 針對目前持倉中、但不在 Top 3 的股票:
@@ -756,28 +763,36 @@ export default function GlobalSovereignDashboard() {
       const isBufferProtected = rank <= 5 && (!heldPos.tenure_months || heldPos.tenure_months < 4);
 
       const suggKey = `sugg_exit_${rebalanceMode}_${heldPos.ticker}`;
-      if (!isInTarget && !isBufferProtected && !dismissedSuggestions.includes(suggKey)) {
+      if (!isInTarget && !isBufferProtected) {
         const isUsd = heldPos.currency === 'USD';
         const curPrice = heldPos.current_price || heldPos.entry_price;
-        const exitShares = isHalfTranche ? Math.max(1, Math.floor(heldPos.shares / 2)) : heldPos.shares;
+        const curWeightPct = totalNetAssetsTwd > 0 ? (((heldPos.shares * curPrice * (isUsd ? usdFx : 1.0)) / totalNetAssetsTwd) * 100) : 0;
+
+        // 若為單梯隊調倉且部位為雙隊共振(>15%)，只換血該梯隊之50%份額；若為單梯隊持股或滿倉模式則全數出場
+        const shouldHalve = isHalfTranche && heldPos.shares >= 2 && curWeightPct > 15;
+        const exitShares = shouldHalve ? Math.max(1, Math.floor(heldPos.shares / 2)) : heldPos.shares;
         const estTaxFee = isUsd ? 15 : Math.round(exitShares * curPrice * (0.003 + 0.001425));
+
         suggestions.push({
           key: suggKey,
-          action: isHalfTranche && exitShares < heldPos.shares ? '減持' : '賣出',
+          action: shouldHalve ? '減持' : '賣出',
           actionColor: '#EF4444',
           ticker: heldPos.ticker,
           name: heldPos.name,
           market: heldPos.market,
           currency: heldPos.currency,
           targetWeightPct: 0,
+          targetWeightDisplay: '0% (離場)',
           targetTwd: 0,
           currentShares: heldPos.shares,
-          targetShares: isHalfTranche ? (heldPos.shares - exitShares) : 0,
+          targetShares: shouldHalve ? (heldPos.shares - exitShares) : 0,
           recShares: exitShares,
           defaultPrice: curPrice,
           defaultTaxFee: estTaxFee,
-          role: `${modePrefix} 跌出Top5換血`,
-          heldPos: heldPos
+          role: shouldHalve ? `${modePrefix} 跌出Top5換血 (釋出50%份額)` : `${modePrefix} 跌出Top5換血 (全數出場)`,
+          heldPos: heldPos,
+          isBalanced: false,
+          isExecuted: dismissedSuggestions.includes(suggKey)
         });
       }
     });
@@ -858,26 +873,49 @@ export default function GlobalSovereignDashboard() {
         if (!proceed) return;
       }
 
-      // 新增至持股
-      const newPos = {
-        id: 'pos_' + Date.now(),
-        ticker: sugg.ticker,
-        name: sugg.name,
-        market: sugg.market,
-        currency: sugg.currency,
-        shares: actualShares,
-        entry_price: actualPrice,
-        current_price: actualPrice,
-        entry_date: today,
-        entry_fee: actualTaxFee,
-        role: sugg.role,
-        stop_condition: '大波段抱牢，SPY破年線才清倉'
-      };
+      // 檢查是否已持有該標的 (例如單梯隊加碼或重複操作)
+      const existingPos = userPositions.find(p => p.ticker === sugg.ticker);
+      if (existingPos) {
+        setUserPositions(prev => prev.map(p => {
+          if (p.ticker === sugg.ticker) {
+            const oldCost = p.shares * p.entry_price;
+            const addCost = actualShares * actualPrice;
+            const totalShares = p.shares + actualShares;
+            const newAvgPrice = totalShares > 0 ? (oldCost + addCost) / totalShares : p.entry_price;
+            return {
+              ...p,
+              shares: totalShares,
+              entry_price: parseFloat(newAvgPrice.toFixed(2)),
+              current_price: actualPrice,
+              entry_fee: (p.entry_fee || 0) + actualTaxFee,
+              role: sugg.role
+            };
+          }
+          return p;
+        }));
+      } else {
+        // 全新新增至持股
+        const newPos = {
+          id: 'pos_' + Date.now(),
+          ticker: sugg.ticker,
+          name: sugg.name,
+          market: sugg.market,
+          currency: sugg.currency,
+          shares: actualShares,
+          entry_price: actualPrice,
+          current_price: actualPrice,
+          entry_date: today,
+          entry_fee: actualTaxFee,
+          role: sugg.role,
+          stop_condition: '大波段抱牢，SPY破年線才清倉'
+        };
+        setUserPositions(prev => [newPos, ...prev]);
+      }
 
-      setUserPositions(prev => [newPos, ...prev]);
       setIdleCash(prev => prev - totalCostTwd);
 
       // 記帳流水
+      const modeNotePrefix = rebalanceMode === 'full_100' ? '雙隊滿倉' : (rebalanceMode === 'tranche_a_50' ? '🅰️ 1號A隊調倉' : '🅱️ 22號B隊調倉');
       const newTx = {
         id: 'tx_' + Date.now(),
         date: today,
@@ -891,7 +929,7 @@ export default function GlobalSovereignDashboard() {
         cash_flow_twd: -totalCostTwd,
         realized_pnl_twd: null,
         realized_return_pct: null,
-        note: `月底調倉：新買入建倉 (${sugg.role})`
+        note: `${modeNotePrefix}：買入建倉 (${sugg.role})`
       };
       setTxHistory(prev => [newTx, ...prev]);
 
@@ -1728,7 +1766,7 @@ export default function GlobalSovereignDashboard() {
         }}>
           <button
             type="button"
-            onClick={() => { setDashboardStationView('all'); setRebalanceMode('full_100'); }}
+            onClick={() => { setDashboardStationView('all'); setRebalanceMode('full_100'); setCustomEdits({}); }}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -1749,7 +1787,7 @@ export default function GlobalSovereignDashboard() {
           </button>
           <button
             type="button"
-            onClick={() => { setDashboardStationView('titan_a'); setRebalanceMode('tranche_a_50'); }}
+            onClick={() => { setDashboardStationView('titan_a'); setRebalanceMode('tranche_a_50'); setCustomEdits({}); }}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -1770,7 +1808,7 @@ export default function GlobalSovereignDashboard() {
           </button>
           <button
             type="button"
-            onClick={() => { setDashboardStationView('titan_b'); setRebalanceMode('tranche_b_50'); }}
+            onClick={() => { setDashboardStationView('titan_b'); setRebalanceMode('tranche_b_50'); setCustomEdits({}); }}
             style={{
               padding: '0.4rem 0.9rem',
               borderRadius: '6px',
@@ -2324,10 +2362,10 @@ export default function GlobalSovereignDashboard() {
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
                   {rebalanceMode === 'full_100'
-                    ? `目前為【🔥 100% 雙隊純滿倉模式 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：A梯隊(50%) + B梯隊(50%)，當名單重疊共振時總倉位對齊 50% / 30% / 20% (黃金階梯進攻基準)。`
+                    ? `目前為【🔥 100% 雙隊純滿倉模式 (動用 100% 總淨值 NT$ ${Math.round(totalNetAssetsTwd).toLocaleString()})】：A隊(50%) + B隊(50%) 共振合流，以 50% / 30% / 20% 黃金階梯滿額配置。`
                     : rebalanceMode === 'tranche_a_50'
-                      ? `目前為【🅰️ 1號 A 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 25% / 15% / 10% (梯隊內 50/30/20)。`
-                      : `目前為【🅱️ 22號 B 梯隊半倉模式 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：單梯隊買進佔總資產 25% / 15% / 10% (梯隊內 50/30/20)。`}
+                      ? `目前為【🅰️ 1號 A 梯隊半倉調倉 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：每月 1 號專屬定期調倉！梯隊內部配置 50% / 30% / 20%（佔總淨值 25% / 15% / 10%）。若持股已達雙隊共振滿額則安心續抱，絕不誤砍部位！`
+                      : `目前為【🅱️ 22號 B 梯隊半倉調倉 (動用 50% 總淨值 NT$ ${Math.round(totalNetAssetsTwd * 0.5).toLocaleString()})】：每月 22 號專屬定期調倉！梯隊內部配置 50% / 30% / 20%（佔總淨值 25% / 15% / 10%）。若持股已達雙隊共振滿額則安心續抱，絕不誤砍部位！`}
                 </p>
               </div>
 
@@ -2344,7 +2382,7 @@ export default function GlobalSovereignDashboard() {
                 }}>
                   <button
                     type="button"
-                    onClick={() => { setRebalanceMode('full_100'); setDashboardStationView('all'); }}
+                    onClick={() => { setRebalanceMode('full_100'); setDashboardStationView('all'); setCustomEdits({}); }}
                     style={{
                       padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
@@ -2360,7 +2398,7 @@ export default function GlobalSovereignDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setRebalanceMode('tranche_a_50'); setDashboardStationView('titan_a'); }}
+                    onClick={() => { setRebalanceMode('tranche_a_50'); setDashboardStationView('titan_a'); setCustomEdits({}); }}
                     style={{
                       padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
@@ -2376,7 +2414,7 @@ export default function GlobalSovereignDashboard() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setRebalanceMode('tranche_b_50'); setDashboardStationView('titan_b'); }}
+                    onClick={() => { setRebalanceMode('tranche_b_50'); setDashboardStationView('titan_b'); setCustomEdits({}); }}
                     style={{
                       padding: '0.35rem 0.75rem',
                       borderRadius: '5px',
@@ -2502,7 +2540,7 @@ export default function GlobalSovereignDashboard() {
 
                           {/* 目標配置 */}
                           <td style={{ textAlign: 'right' }}>
-                            <div style={{ color: '#CBD5E1', fontWeight: 'bold' }}>{sugg.targetWeightPct}%</div>
+                            <div style={{ color: '#CBD5E1', fontWeight: 'bold' }}>{sugg.targetWeightDisplay || `${sugg.targetWeightPct}%`}</div>
                             <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                               NT$ {Math.round(sugg.targetTwd).toLocaleString()}
                             </div>
@@ -2515,7 +2553,7 @@ export default function GlobalSovereignDashboard() {
 
                           {/* 建議股數 */}
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: sugg.action === '續抱' ? '#34D399' : '#67E8F9' }}>
-                            {sugg.action === '續抱' ? '0 股 (平衡)' : (sugg.action === '加碼' ? `+${sugg.recShares}` : (sugg.action === '減持' ? `-${sugg.recShares}` : `${sugg.recShares}`)) + ' 股'}
+                            {sugg.action === '續抱' ? '0 股 (平衡)' : (sugg.action === '買入' || sugg.action === '加碼' ? `+${sugg.recShares} 股` : `-${sugg.recShares} 股`)}
                           </td>
 
                           {/* 實際股數 Input */}
@@ -2524,14 +2562,14 @@ export default function GlobalSovereignDashboard() {
                               type="number"
                               value={rowVal.shares}
                               onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
-                              disabled={sugg.action === '續抱'}
+                              disabled={sugg.action === '續抱' || sugg.isExecuted}
                               style={{
                                 width: '85px',
                                 padding: '0.3rem 0.4rem',
                                 borderRadius: '4px',
-                                background: sugg.action === '續抱' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)',
-                                border: sugg.action === '續抱' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #38BDF8',
-                                color: sugg.action === '續抱' ? '#94A3B8' : '#38BDF8',
+                                background: (sugg.action === '續抱' || sugg.isExecuted) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)',
+                                border: (sugg.action === '續抱' || sugg.isExecuted) ? '1px solid rgba(255,255,255,0.1)' : '1px solid #38BDF8',
+                                color: (sugg.action === '續抱' || sugg.isExecuted) ? '#94A3B8' : '#38BDF8',
                                 fontWeight: 'bold',
                                 textAlign: 'right',
                                 fontFamily: 'monospace',
@@ -2594,20 +2632,21 @@ export default function GlobalSovereignDashboard() {
                           <td style={{ textAlign: 'center' }}>
                             <button
                               onClick={() => handleExecuteSuggestion(sugg)}
+                              disabled={sugg.action === '續抱' || sugg.isExecuted}
                               style={{
                                 padding: '0.35rem 0.8rem',
                                 fontSize: '0.78rem',
-                                background: sugg.action === '續抱' ? 'rgba(16, 185, 129, 0.25)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
-                                color: sugg.action === '續抱' ? '#34D399' : '#FFF',
-                                border: sugg.action === '續抱' ? '1px solid rgba(16, 185, 129, 0.5)' : 'none',
+                                background: (sugg.action === '續抱' || sugg.isExecuted) ? 'rgba(16, 185, 129, 0.25)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
+                                color: (sugg.action === '續抱' || sugg.isExecuted) ? '#34D399' : '#FFF',
+                                border: (sugg.action === '續抱' || sugg.isExecuted) ? '1px solid rgba(16, 185, 129, 0.5)' : 'none',
                                 borderRadius: '4px',
                                 fontWeight: 'bold',
-                                cursor: 'pointer',
+                                cursor: (sugg.action === '續抱' || sugg.isExecuted) ? 'default' : 'pointer',
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                                 whiteSpace: 'nowrap'
                               }}
                             >
-                              {sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出'}
+                              {sugg.isExecuted ? '✅ 已執行' : (sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出')}
                             </button>
                           </td>
                         </tr>
