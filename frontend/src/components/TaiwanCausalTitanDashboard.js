@@ -5,9 +5,54 @@ export default function TaiwanCausalTitanDashboard() {
   const [data] = useState(defaultTitanData);
   const [userCapital, setUserCapital] = useState(1000000); // 預設 100 萬投資本金試算
   const [copiedIndex, setCopiedIndex] = useState(null);
-  const [activeTabSub, setActiveTabSub] = useState('portfolio'); // 'portfolio', 'curve', 'yearly', 'alphas'
+  const [activeTabSub, setActiveTabSub] = useState('portfolio'); // 'portfolio', 'curve', 'yearly', 'alphas', 'trades'
+  const [tradeFilter, setTradeFilter] = useState('all'); // 'all', 'win', 'loss'
+  const [tradeSearch, setTradeSearch] = useState('');
 
-  const { strategy_info, kpis, current_positions, curve, yearly_stats, causal_alphas } = data;
+  const { strategy_info, kpis, current_positions, curve, yearly_stats, causal_alphas, trades = [] } = data;
+
+  const filteredTrades = useMemo(() => {
+    return trades.filter(t => {
+      if (tradeFilter === 'win' && (t.return_pct || 0) < 0) return false;
+      if (tradeFilter === 'loss' && (t.return_pct || 0) >= 0) return false;
+      if (tradeSearch.trim()) {
+        const q = tradeSearch.trim().toLowerCase();
+        const sid = String(t.stock_id || '').toLowerCase();
+        const sname = String(t.stock_name || '').toLowerCase();
+        return sid.includes(q) || sname.includes(q);
+      }
+      return true;
+    });
+  }, [trades, tradeFilter, tradeSearch]);
+
+  const winCount = useMemo(() => trades.filter(t => (t.return_pct || 0) >= 0).length, [trades]);
+  const lossCount = useMemo(() => trades.filter(t => (t.return_pct || 0) < 0).length, [trades]);
+
+  const handleExportTradesCsv = () => {
+    if (!trades || trades.length === 0) return;
+    const headers = ['標的代號', '股票名稱', '配置角色', '進場日期', '進場價格', '出場日期', '出場價格', '持有天數', '單筆報酬率(%)', '出場原因/機制'];
+    const rows = trades.map(t => [
+      t.stock_id,
+      t.stock_name,
+      t.role,
+      t.entry_date,
+      t.entry_price,
+      t.exit_date,
+      t.exit_price,
+      t.holding_days,
+      t.return_pct,
+      t.exit_reason
+    ]);
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `taiwan_causal_titan_trades_2005_2026.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // 動態計算各檔個股建議配置股數
   const calculatedPositions = useMemo(() => {
@@ -167,9 +212,10 @@ export default function TaiwanCausalTitanDashboard() {
       </div>
 
       {/* ===== 功能導航子頁籤 ===== */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '1.2rem', paddingBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '1.2rem', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
         {[
           { id: 'portfolio', label: '🚀 當前最新持倉與跟隨試算', icon: '⚡' },
+          { id: 'trades', label: `📜 逐筆歷史交易紀錄 (${trades.length} 筆)`, icon: '📝' },
           { id: 'curve', label: '📈 22 年真實淨值曲線 (對照大盤)', icon: '📊' },
           { id: 'yearly', label: '📅 2005~2026 歷年年度績效明細', icon: '📜' },
           { id: 'alphas', label: '🧠 四大因果 Alpha 因子解析 (Causal ML)', icon: '🛡️' }
@@ -501,6 +547,203 @@ export default function TaiwanCausalTitanDashboard() {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ===== TAB 5: 逐筆歷史交易紀錄 ===== */}
+      {activeTabSub === 'trades' && (
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.75)',
+          borderRadius: '12px',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          padding: '1.25rem',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+        }}>
+          {/* 頂部工具列 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#FCD34D', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>📜</span>
+                <span>【台股因果泰坦 22 年全歷史】逐筆模擬交易明細 (共 {trades.length} 筆)</span>
+              </h3>
+              <div style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.25rem' }}>
+                前 5 大因果 Alpha 股各 20% 等權重 · 每月 11 號法定營收公告日 T+1 建倉 · 60MA 季線破線即刻動態停損
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              {/* 搜尋欄 */}
+              <input
+                type="text"
+                placeholder="🔍 搜尋股票名稱或代號..."
+                value={tradeSearch}
+                onChange={e => setTradeSearch(e.target.value)}
+                style={{
+                  padding: '0.3rem 0.75rem',
+                  borderRadius: '6px',
+                  background: 'rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#FFF',
+                  fontSize: '0.78rem',
+                  outline: 'none',
+                  minWidth: '180px'
+                }}
+              />
+
+              {/* 篩選按鈕 */}
+              <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', padding: '2px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <button
+                  type="button"
+                  onClick={() => setTradeFilter('all')}
+                  style={{
+                    padding: '0.2rem 0.65rem',
+                    fontSize: '0.75rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: tradeFilter === 'all' ? 'bold' : 'normal',
+                    background: tradeFilter === 'all' ? '#2563EB' : 'transparent',
+                    color: tradeFilter === 'all' ? 'white' : '#94A3B8'
+                  }}
+                >
+                  全部 ({trades.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTradeFilter('win')}
+                  style={{
+                    padding: '0.2rem 0.65rem',
+                    fontSize: '0.75rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: tradeFilter === 'win' ? 'bold' : 'normal',
+                    background: tradeFilter === 'win' ? 'rgba(16, 185, 129, 0.4)' : 'transparent',
+                    color: tradeFilter === 'win' ? '#34D399' : '#94A3B8'
+                  }}
+                >
+                  🟢 獲利 ({winCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTradeFilter('loss')}
+                  style={{
+                    padding: '0.2rem 0.65rem',
+                    fontSize: '0.75rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: tradeFilter === 'loss' ? 'bold' : 'normal',
+                    background: tradeFilter === 'loss' ? 'rgba(239, 68, 68, 0.4)' : 'transparent',
+                    color: tradeFilter === 'loss' ? '#F87171' : '#94A3B8'
+                  }}
+                >
+                  🔴 虧損/停損 ({lossCount})
+                </button>
+              </div>
+
+              {/* 下載 CSV */}
+              <button
+                type="button"
+                onClick={handleExportTradesCsv}
+                style={{
+                  padding: '0.3rem 0.85rem',
+                  fontSize: '0.78rem',
+                  background: 'rgba(59, 130, 246, 0.25)',
+                  border: '1px solid #3B82F6',
+                  color: '#93C5FD',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem'
+                }}
+              >
+                📥 匯出 CSV 明細
+              </button>
+            </div>
+          </div>
+
+          {/* 表格主體 */}
+          <div style={{ overflowX: 'auto', maxHeight: '560px', overflowY: 'auto' }}>
+            <table style={{ width: '100%', fontSize: '0.8rem', textAlign: 'center', borderCollapse: 'collapse' }}>
+              <thead style={{ position: 'sticky', top: 0, zIndex: 2, background: '#1E293B', color: '#CBD5E1' }}>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>標的股票</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>配置角色</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>進場日期</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>進場價</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>出場日期</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>出場價</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>持有天數</th>
+                  <th style={{ padding: '0.65rem 0.5rem' }}>單筆報酬率</th>
+                  <th style={{ padding: '0.65rem 0.5rem', textAlign: 'left' }}>出場原因 / 風控機制</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTrades.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} style={{ padding: '2rem', color: '#94A3B8' }}>
+                      無符合篩選條件之交易紀錄
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTrades.map((t, idx) => {
+                    const isWin = (t.return_pct || 0) >= 0;
+                    const formatDt = (d) => {
+                      const s = String(d || '');
+                      if (s.length === 8) return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+                      return s;
+                    };
+                    return (
+                      <tr key={idx} style={{
+                        background: idx % 2 === 0 ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.02)',
+                        borderBottom: '1px solid rgba(255,255,255,0.04)'
+                      }}>
+                        <td style={{ padding: '0.55rem 0.5rem', fontWeight: 'bold', color: '#FDE68A' }}>
+                          {t.stock_name} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>({t.stock_id})</span>
+                        </td>
+                        <td style={{ padding: '0.55rem 0.5rem' }}>
+                          <span style={{
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '4px',
+                            fontSize: '0.72rem',
+                            fontWeight: 'bold',
+                            background: t.role?.includes('先鋒') ? 'rgba(245, 158, 11, 0.2)' : 'rgba(56, 189, 248, 0.2)',
+                            color: t.role?.includes('先鋒') ? '#FBBF24' : '#38BDF8',
+                            border: t.role?.includes('先鋒') ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(56, 189, 248, 0.4)'
+                          }}>
+                            {t.role || '👑 因果泰坦 (20%)'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.55rem 0.5rem', color: '#CBD5E1' }}>{formatDt(t.entry_date)}</td>
+                        <td style={{ padding: '0.55rem 0.5rem', fontFamily: 'monospace', color: '#E2E8F0' }}>
+                          {typeof t.entry_price === 'number' ? t.entry_price.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : t.entry_price}
+                        </td>
+                        <td style={{ padding: '0.55rem 0.5rem', color: '#CBD5E1' }}>{formatDt(t.exit_date)}</td>
+                        <td style={{ padding: '0.55rem 0.5rem', fontFamily: 'monospace', color: '#E2E8F0' }}>
+                          {typeof t.exit_price === 'number' ? t.exit_price.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : t.exit_price}
+                        </td>
+                        <td style={{ padding: '0.55rem 0.5rem', color: '#94A3B8' }}>{t.holding_days} 天</td>
+                        <td style={{ padding: '0.55rem 0.5rem', fontWeight: 'bold', color: isWin ? '#34D399' : '#F87171' }}>
+                          {isWin ? '+' : ''}{Number(t.return_pct || 0).toFixed(2)}%
+                        </td>
+                        <td style={{
+                          padding: '0.55rem 0.5rem',
+                          textAlign: 'left',
+                          fontSize: '0.74rem',
+                          color: t.exit_reason?.includes('停損') ? '#FCA5A5' : '#94A3B8'
+                        }}>
+                          {t.exit_reason}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
