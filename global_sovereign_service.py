@@ -236,7 +236,7 @@ def get_global_sovereign_dashboard_data():
         # 依最新複合動能分數重新排序 Top 10 候選名單並更新排名與梯隊緩衝狀態
         if valid_picks:
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
-            weights_single_tranche = [40, 30, 30]
+            weights_single_tranche = [50, 30, 20]
             for idx_p, pick in enumerate(valid_picks, start=1):
                 pick["rank"] = idx_p
                 pick["is_active"] = (idx_p <= 3)

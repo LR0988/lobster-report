@@ -158,7 +158,17 @@ export default function GlobalSovereignDashboard() {
   const [userPositions, setUserPositions] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKeys.positions) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_POSITIONS) : null);
-      return saved ? JSON.parse(saved) : DEFAULT_POSITIONS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // 如果舊的緩存中還是舊的 40% 角色或舊持股數 (54 股)，自動升級遷移至最新的 50/30/20 黃金階梯基準！
+        const hasOld40 = Array.isArray(parsed) && parsed.some(p => p.role && (p.role.includes('40%') || p.shares === 54));
+        if (hasOld40) {
+          try { localStorage.setItem(storageKeys.positions, JSON.stringify(DEFAULT_POSITIONS)); } catch {}
+          return DEFAULT_POSITIONS;
+        }
+        return parsed;
+      }
+      return DEFAULT_POSITIONS;
     } catch { return DEFAULT_POSITIONS; }
   });
 
@@ -168,6 +178,12 @@ export default function GlobalSovereignDashboard() {
       const saved = localStorage.getItem(storageKeys.allTx) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_ALL_TX) : null);
       let list = saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
       if (!Array.isArray(list) || list.length === 0) list = DEFAULT_TX_HISTORY;
+      // 如果舊流水帳含有 40% 或 54 股，自動升級為 50/30/20 黃金階梯流水帳
+      const hasOld40 = list.some(tx => (tx.note && tx.note.includes('40%')) || (tx.ticker === 'MRNA' && tx.shares === 54));
+      if (hasOld40) {
+        list = DEFAULT_TX_HISTORY;
+        try { localStorage.setItem(storageKeys.allTx, JSON.stringify(list)); } catch {}
+      }
       // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/1 初始入金 100 萬)
       const hasDeposit = list.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')));
       if (!hasDeposit) {
@@ -610,7 +626,7 @@ export default function GlobalSovereignDashboard() {
 
     // A. 針對目標 Top 3 標的
     activeTopPicks.forEach(pick => {
-      const baseWeightPct = pick.weight_pct || (pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : 20));
+      const baseWeightPct = pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : (pick.rank === 3 ? 20 : 0));
       const effectiveWeightPct = baseWeightPct * budgetMultiplier; // 滿倉: 50/30/20% | 單梯隊半倉: 25/15/10%
       const weight = effectiveWeightPct / 100.0;
       const targetTwd = totalNetAssetsTwd * weight;
@@ -640,7 +656,7 @@ export default function GlobalSovereignDashboard() {
 
       const roleTitle = pick.rank === 1
         ? `${modePrefix} 👑第1王者(${effectiveWeightPct}%)`
-        : (pick.rank === 2 ? `${modePrefix} 🥈第2主力(${effectiveWeightPct}%)` : `${modePrefix} 🥉第3主力(${effectiveWeightPct}%)`);
+        : (pick.rank === 2 ? `${modePrefix} 🥈第2主力(${effectiveWeightPct}%)` : `${modePrefix} 🥉第3先鋒(${effectiveWeightPct}%)`);
 
       if (heldShares === 0 && targetShares > 0) {
         // 全新買入
