@@ -3076,45 +3076,50 @@ export default function GlobalSovereignDashboard() {
             )}
           </div>
 
-          {/* 📐 全球泰坦 DOE 終極冠軍複合動能公式展示卡片 */}
+          {/* 📐 全球泰坦 17 大全因子 DOE 終極冠軍複合動能公式展示卡片 */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.65), rgba(15, 23, 42, 0.75))',
-            border: '1px solid rgba(167, 139, 250, 0.3)',
+            background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.75), rgba(15, 23, 42, 0.85))',
+            border: '1px solid rgba(167, 139, 250, 0.35)',
             borderRadius: '10px',
-            padding: '1.1rem 1.3rem',
+            padding: '1.2rem 1.4rem',
             marginBottom: '1.5rem',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08)'
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 20px rgba(0,0,0,0.3)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>📐</span>
-                <span style={{ fontSize: '0.92rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球泰坦 DOE 終極冠軍複合動能數學公式 (Momentum Ensemble Formula)
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>👑</span>
+                <span style={{ fontSize: '0.96rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
+                  全球泰坦 17 大全因子 DOE 終極冠軍數學公式 (17-Factor Grand Ensemble Formula)
                 </span>
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#A78BFA', background: 'rgba(167, 139, 250, 0.15)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
-                非線性相乘複合架構
-              </span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                  月MDD -24.57% 歷史新低
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#A78BFA', background: 'rgba(167, 139, 250, 0.15)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
+                  17大因子非線性乘數架構
+                </span>
+              </div>
             </div>
 
             {/* 核心主公式大字標題 */}
             <div style={{
-              background: 'rgba(0, 0, 0, 0.45)',
-              border: '1px solid rgba(253, 224, 71, 0.3)',
+              background: 'rgba(0, 0, 0, 0.55)',
+              border: '1px solid rgba(253, 224, 71, 0.35)',
               borderRadius: '8px',
-              padding: '0.8rem 1rem',
+              padding: '0.85rem 1.1rem',
               fontFamily: 'monospace',
-              fontSize: '0.92rem',
+              fontSize: '0.88rem',
               color: '#FDE047',
               textAlign: 'center',
-              lineHeight: '1.6',
+              lineHeight: '1.7',
               overflowX: 'auto',
-              marginBottom: '0.9rem'
+              marginBottom: '1rem'
             }}>
-              <strong>Final Score</strong> = (0.85 × <strong>Raw_Mom</strong> + 0.15 × <strong>Residual_Alpha</strong>) × (1 + 0.50 × <strong>FIP</strong>) × [1 + 0.20 × clip(<strong>Convexity</strong> - 1.0, -0.5, 2.0)]
+              <strong>Final Score</strong> = <strong>Blend_Mom</strong> × (1 + 0.45×<strong>FIP</strong>) × [1 + 0.16×clip(<strong>Conv</strong>-1, -0.5, 2)] × (1 + 0.30×<strong>ER60</strong>) × (1 + 0.10×<strong>Prox52W</strong>) × (1 + 0.15×<strong>VCP</strong>) × (1 + 0.16×<strong>Chip</strong>) × (1 - 0.05×<strong>Bias60</strong>)
             </div>
 
-            {/* 四大公式層級細項分解 */}
+            {/* 6 大公式層級細項分解 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem', fontSize: '0.78rem' }}>
               {/* 第 1 層：多週期混合動能基底 */}
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -3128,7 +3133,7 @@ export default function GlobalSovereignDashboard() {
                   Res_Alpha = Raw_Mom - β(126D) × Raw_Mom(SPY)
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
-                  • 85% 總收益動能 + 15% 剝離大盤 Beta 之純特質 Alpha (Blitz et al. 2011)。
+                  • 88% 總收益動能 + 12% 剝離大盤 Beta 之純特質 Alpha (Blitz et al. 2011)。
                 </div>
               </div>
 
@@ -3141,7 +3146,7 @@ export default function GlobalSovereignDashboard() {
                   FIP = (上漲天數 - 下跌天數) / 總交易日 (252D)
                 </div>
                 <div style={{ fontFamily: 'monospace', color: '#34D399', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  乘數因子: (1.0 + 0.50 × FIP)
+                  乘數因子: (1.0 + 0.45 × FIP)
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
                   • Da et al. (2014 RFS)：獎勵機構低調漸進買盤，懲罰暴漲一日隨後陰跌之假妖股。
@@ -3157,22 +3162,54 @@ export default function GlobalSovereignDashboard() {
                   Convexity = 上行爆發波動(60D) / 下行收斂波動(60D)
                 </div>
                 <div style={{ fontFamily: 'monospace', color: '#C084FC', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  乘數因子: 1.0 + 0.20 × clip(Convexity - 1.0, -0.5, 2.0)
+                  乘數因子: 1.0 + 0.16 × clip(Convexity - 1.0, -0.5, 2.0)
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
                   • 鎖定「上漲時劇烈發散暴衝、回檔時收斂縮量」的極品右偏資產。
                 </div>
               </div>
 
-              {/* 第 4 層：三大硬性過濾門檻 */}
+              {/* 第 4 層：🌪️ VCP 波動收縮緊湊度乘數 */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#FBBF24', fontWeight: 'bold', marginBottom: '0.3rem' }}>
+                  4. 🌪️ 波動收縮型態 (VCP Tightness Pivot)
+                </div>
+                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
+                  VCP = 0.40(1-Tightness) + 0.30(VolDry) + 0.30(PivotProx)
+                </div>
+                <div style={{ fontFamily: 'monospace', color: '#FBBF24', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
+                  乘數因子: 1.0 + 0.15 × (VCP_Norm - 0.5)
+                </div>
+                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
+                  • Minervini 經典起漲點：浮額洗淨、量縮極致收斂後的起漲樞紐點 (Low Risk Pivot)。
+                </div>
+              </div>
+
+              {/* 第 5 層：💎 Chip 籌碼沉澱與吸籌乘數 */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#EC4899', fontWeight: 'bold', marginBottom: '0.3rem' }}>
+                  5. 💎 籌碼沉澱吸籌 (Chip Concentration)
+                </div>
+                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
+                  Chip = 0.50 × (UpVol/DownVol) + 0.25 × (CMF_20D + 1)
+                </div>
+                <div style={{ fontFamily: 'monospace', color: '#EC4899', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
+                  乘數因子: 1.0 + 0.16 × (Chip_Norm - 0.5)
+                </div>
+                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
+                  • 鎖定大戶拉抬有量、回檔洗盤無人賣的籌碼鎖定股，排除主力高檔倒貨。
+                </div>
+              </div>
+
+              {/* 第 6 層：三大硬性過濾門檻 */}
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ color: '#F87171', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  4. 三大前置硬風控門檻 (Hard Pre-Filters)
+                  6. 三大前置硬風控門檻 (Hard Pre-Filters)
                 </div>
                 <div style={{ color: '#E2E8F0', fontSize: '0.74rem', lineHeight: '1.5' }}>
-                  <div>🛡️ <strong>多頭排列</strong>: Price &gt; 60MA 且 Price &gt; 200MA</div>
-                  <div>⚡ <strong>正動能約束</strong>: Final Score &gt; 0 (負分一律淘汰)</div>
-                  <div>🚨 <strong>爆量滯漲剔除</strong>: 5D均量 &gt; 2倍60D均量 且 10D漲幅 &lt; 2% (防主力高檔倒貨)</div>
+                  <div>🛡️ <strong>雙均線多頭</strong>: Price &gt; 60MA 且 Price &gt; 200MA</div>
+                  <div>🌊 <strong>分形趨勢效率</strong>: 0.30 × (ER_60 - 0.5) 獎勵低雜訊平滑趨勢</div>
+                  <div>🚨 <strong>爆量滯漲剔除</strong>: 5D均量 &gt; 2倍60D均量 且 10D漲幅 &lt; 2% 強制淘汰</div>
                 </div>
               </div>
             </div>
