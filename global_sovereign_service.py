@@ -218,8 +218,8 @@ def get_global_sovereign_dashboard_data():
                 raw_conv = up_std / max(dn_std, 1e-6)
                 convexity_val = round(min(5.0, max(0.2, raw_conv)), 2)
 
-            # 計算 DOE 終極冠軍複合動能分數:
-            # ((85% Raw + 15% Residual) * (1 + 0.5*FIP) * (1 + 0.20*clip(Convexity - 1.0, -0.5, 2.0)))
+            # 計算 17 大全因子 DOE 終極冠軍複合動能分數:
+            # Blend_Mom * (1 + 0.45*FIP) * (1 + 0.16*Conv) * (1 + 0.30*ER60) * (1 + 0.10*Prox52W) * (1 - 0.05*Bias60)
             score_val = None
             if mom12m is not None and mom3m is not None:
                 raw_mom = (0.45 * mom12m + 0.35 * mom3m + 0.20 * mom1m) / 100.0
@@ -230,9 +230,30 @@ def get_global_sovereign_dashboard_data():
                     spy_12m = (spy_closes[0] / spy_closes[min(252, len(spy_closes)-1)] - 1.0)
                     spy_core = 0.45 * spy_12m + 0.35 * spy_3m + 0.20 * spy_1m
                     res_mom = raw_mom - 0.85 * spy_core
-                blend_mom = 0.85 * raw_mom + 0.15 * res_mom
+                blend_mom = 0.88 * raw_mom + 0.12 * res_mom
                 conv_clip = min(2.0, max(-0.5, convexity_val - 1.0))
-                score_val = round(blend_mom * (1.0 + 0.5 * fip_val) * (1.0 + 0.20 * conv_clip), 4)
+
+                # ER 60D 分形效率
+                er_len = min(60, len(closes) - 1)
+                net_er = abs(closes[0] - closes[er_len]) if er_len > 0 else 0.0
+                tot_er = sum(abs(closes[i] - closes[i+1]) for i in range(er_len)) if er_len > 0 else 1.0
+                er_val = min(1.0, max(0.0, net_er / max(tot_er, 1e-6)))
+
+                # 52W 新高接近度
+                p252_len = min(252, len(closes))
+                h252 = max(closes[:p252_len]) if p252_len > 0 else cur_px
+                prox_val = min(1.0, max(0.1, cur_px / max(h252, 1e-6)))
+
+                # 60MA 乖離
+                bias_val = (cur_px / max(1e-6, ma60)) - 1.0
+
+                fip_m = 1.0 + 0.45 * fip_val
+                conv_m = 1.0 + 0.16 * conv_clip
+                er_m = 1.0 + 0.30 * (er_val - 0.5)
+                prox_m = 1.0 + 0.10 * (prox_val ** 2 - 0.5)
+                bias_m = 1.0 - 0.05 * bias_val
+
+                score_val = round(blend_mom * fip_m * conv_m * er_m * prox_m * bias_m, 4)
 
             # 爆量滯漲過濾 (Churn Filter: 5D均量 > 2.0倍60D均量 且 10D漲幅 < 2%)
             churn_safe = True
