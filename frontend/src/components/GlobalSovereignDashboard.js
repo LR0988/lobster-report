@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import defaultData from '../data/defaultGlobalSovereignData.json';
+import defaultRankIcData from '../data/global_titan_rank_ic.json';
 import twStockNamesMap from '../data/tw_stock_names_map.json';
-import { getCurrentUser, apiGetGlobalTitanPortfolio, apiSaveGlobalTitanPortfolio, apiGetGlobalSovereignDashboard, supabaseDirectFetch } from '../api';
+import { getCurrentUser, apiGetGlobalTitanPortfolio, apiSaveGlobalTitanPortfolio, apiGetGlobalSovereignDashboard, apiGetGlobalTitanRankIc, supabaseDirectFetch } from '../api';
 
 // 全球泰坦旗艦核心標的中文對照表 (確保所有台股與美股代號如 8996.TW 均能清楚顯示中文名稱)
 export const GLOBAL_TITAN_NAME_MAP = {
@@ -209,6 +210,16 @@ const DEFAULT_TX_HISTORY = [
 export default function GlobalSovereignDashboard() {
   const [data, setData] = useState(defaultData);
   const [loading, setLoading] = useState(false);
+
+  // ==========================================
+  // 🔬 全球泰坦 Rank IC 動態因子檢驗專區 State
+  // ==========================================
+  const [rankIcFactor, setRankIcFactor] = useState('composite');
+  const [rankIcPreset, setRankIcPreset] = useState('ALL'); // 'ALL' | 'OOS' | '5Y' | '3Y' | '1Y' | 'CUSTOM'
+  const [rankIcStartDate, setRankIcStartDate] = useState('2004-01-01');
+  const [rankIcEndDate, setRankIcEndDate] = useState('2026-10-22');
+  const [rankIcLoading, setRankIcLoading] = useState(false);
+  const [rankIcHoverPoint, setRankIcHoverPoint] = useState(null);
 
   // 登入使用者身分與帳本歸屬
   const currentUser = getCurrentUser();
@@ -1442,6 +1453,145 @@ export default function GlobalSovereignDashboard() {
       triggerNotice('⚠️ 雲端連線失敗，目前已妥善保存在本機快取');
     }
   };
+
+  // ==========================================
+  // 🔬 Rank IC 因子檢驗計算器與時間範圍處理
+  // ==========================================
+  const handleRankIcPresetChange = (preset) => {
+    setRankIcPreset(preset);
+    let s = '2004-01-01';
+    let e = '2026-10-22';
+    if (preset === 'OOS') {
+      s = '2018-01-01';
+    } else if (preset === '5Y') {
+      s = '2021-01-01';
+    } else if (preset === '3Y') {
+      s = '2023-01-01';
+    } else if (preset === '1Y') {
+      s = '2025-01-01';
+    }
+    setRankIcStartDate(s);
+    setRankIcEndDate(e);
+  };
+
+  // 即時計算當前選擇範圍與因子的 Rank IC 指標
+  const currentRankIcAnalysis = useMemo(() => {
+    const rawSeries = defaultRankIcData?.monthly_series || [];
+    const filtered = rawSeries.filter(r => {
+      const d = r.date || '';
+      return (!rankIcStartDate || d >= rankIcStartDate) && (!rankIcEndDate || d <= rankIcEndDate);
+    });
+
+    const activeList = filtered.length > 0 ? filtered : rawSeries;
+    const vals = activeList.map(r => Number(r[rankIcFactor] || 0));
+    const n = vals.length;
+    if (n === 0) return null;
+
+    const mean = vals.reduce((a, b) => a + b, 0) / n;
+    const variance = vals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (n > 1 ? n - 1 : 1);
+    const std = Math.sqrt(variance) || 0.0001;
+    const icir = (mean / std) * Math.sqrt(24);
+    const winRate = (vals.filter(v => v > 0).length / n) * 100.0;
+    const tStat = mean / (std / Math.sqrt(n));
+
+    let cum = 0;
+    const chartSeries = activeList.map(r => {
+      const v = Number(r[rankIcFactor] || 0);
+      cum += v;
+      return {
+        date: r.date,
+        yearMonth: r.year_month,
+        ic: Math.round(v * 10000) / 10000,
+        cumIc: Math.round(cum * 10000) / 10000,
+        sampleCount: r.sample_count || 0
+      };
+    });
+
+    let rating = '⚠️ 具備正向預測力 (Predictive Alpha)';
+    let ratingColor = '#FBBF24';
+    if (mean >= 0.05 && icir >= 0.7) {
+      rating = '🔥 頂級強效 (Excellent Alpha)';
+      ratingColor = '#34D399';
+    } else if (mean >= 0.025 && icir >= 0.4) {
+      rating = '✅ 穩健有效 (Robust Alpha)';
+      ratingColor = '#60A5FA';
+    } else if (mean <= 0) {
+      rating = '❌ 因子失效或反轉 (Ineffective)';
+      ratingColor = '#F87171';
+    }
+
+    return {
+      factor: rankIcFactor,
+      factorName: defaultRankIcData?.factor_definitions?.[rankIcFactor] || rankIcFactor,
+      startDate: activeList[0]?.date || rankIcStartDate,
+      endDate: activeList[activeList.length - 1]?.date || rankIcEndDate,
+      periodCount: n,
+      meanIc: Math.round(mean * 10000) / 10000,
+      stdIc: Math.round(std * 10000) / 10000,
+      icir: Math.round(icir * 100) / 100,
+      winRate: Math.round(winRate * 10) / 10,
+      tStat: Math.round(tStat * 100) / 100,
+      rating,
+      ratingColor,
+      chartSeries
+    };
+  }, [rankIcFactor, rankIcStartDate, rankIcEndDate]);
+
+  // SVG 向量圖形幾何計算
+  const rankIcSvgData = useMemo(() => {
+    if (!currentRankIcAnalysis || !currentRankIcAnalysis.chartSeries || currentRankIcAnalysis.chartSeries.length === 0) {
+      return null;
+    }
+    const series = currentRankIcAnalysis.chartSeries;
+    const w = 920;
+    const h = 260;
+    const padL = 50;
+    const padR = 25;
+    const padT = 20;
+    const padB = 40;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+
+    const cumVals = series.map(s => s.cumIc);
+    const minCum = Math.min(0, ...cumVals);
+    const maxCum = Math.max(0.5, ...cumVals);
+    const rangeCum = (maxCum - minCum) || 1;
+
+    const points = series.map((s, idx) => {
+      const x = padL + (idx / Math.max(1, series.length - 1)) * plotW;
+      const normY = (s.cumIc - minCum) / rangeCum;
+      const y = h - padB - normY * plotH;
+      return { x, y, ...s };
+    });
+
+    const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const zeroY = h - padB - ((0 - minCum) / rangeCum) * plotH;
+    const areaPath = points.length > 0
+      ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${zeroY.toFixed(1)} L ${points[0].x.toFixed(1)} ${zeroY.toFixed(1)} Z`
+      : '';
+
+    // 計算柱狀圖幾何 (每期 IC)
+    const barH = 120;
+    const barPadT = 15;
+    const barPadB = 25;
+    const barPlotH = barH - barPadT - barPadB;
+    const icVals = series.map(s => s.ic);
+    const maxAbsIc = Math.max(0.15, ...icVals.map(Math.abs));
+    const barZeroY = barPadT + barPlotH / 2;
+
+    const barWidth = Math.max(1.2, Math.min(8, (plotW / series.length) * 0.75));
+    const bars = series.map((s, idx) => {
+      const x = padL + (idx / Math.max(1, series.length - 1)) * plotW - barWidth / 2;
+      const height = (Math.abs(s.ic) / maxAbsIc) * (barPlotH / 2);
+      const y = s.ic >= 0 ? barZeroY - height : barZeroY;
+      return { x, y, width: barWidth, height: Math.max(1, height), ic: s.ic, date: s.date, isPos: s.ic >= 0 };
+    });
+
+    return {
+      w, h, padL, padR, padT, padB, plotW, plotH, minCum, maxCum, zeroY, points, linePath, areaPath,
+      barH, barPlotH, barZeroY, maxAbsIc, bars
+    };
+  }, [currentRankIcAnalysis]);
 
   const handleExportBackup = () => {
     const exportData = {
@@ -2861,6 +3011,458 @@ export default function GlobalSovereignDashboard() {
               </div>
             )}
           </div>
+
+        {/* 🔬 全球泰坦 Rank IC (Information Coefficient) 動態因子檢驗專區 */}
+        <div className="glass-card" style={{
+          marginTop: '2.5rem',
+          padding: '1.6rem',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.90))',
+          border: '1px solid rgba(99, 102, 241, 0.4)',
+          borderTop: '4px solid #6366F1',
+          borderRadius: '14px',
+          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.5)'
+        }}>
+          {/* 頂部標題與評級 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.2rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ fontSize: '1.4rem' }}>🔬</span>
+                <h3 style={{ margin: 0, color: '#A5B4FC', fontSize: '1.3rem', fontWeight: 'bold' }}>
+                  全球泰坦 Rank IC (秩相關係數) 動態因子檢驗
+                </h3>
+              </div>
+              <p style={{ margin: '0.35rem 0 0 0', color: '#94A3B8', fontSize: '0.82rem', lineHeight: '1.4' }}>
+                遵循 Grinold & Kahn 主動投資基本法則（<span style={{ fontFamily: 'monospace', color: '#CBD5E1' }}>IR = IC × √Breadth</span>），
+                檢驗因子排序與未來 1 個月真實股票收益率的斯皮爾曼等級相關係數，可自選檢驗歷史區間與因子。
+              </p>
+            </div>
+
+            {currentRankIcAnalysis && (
+              <div style={{
+                background: 'rgba(99, 102, 241, 0.15)',
+                border: '1px solid rgba(99, 102, 241, 0.35)',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                textAlign: 'right'
+              }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>因子有效性評級</div>
+                <div style={{ fontSize: '0.96rem', fontWeight: 'bold', color: currentRankIcAnalysis.ratingColor }}>
+                  {currentRankIcAnalysis.rating}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 控制面板：時間範圍切換 + 因子切換 */}
+          <div style={{
+            background: 'rgba(0, 0, 0, 0.35)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '1rem 1.2rem',
+            borderRadius: '10px',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            {/* 1. 時間範圍選擇 */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.82rem', color: '#CBD5E1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <span>📅</span> 檢驗時間範圍選擇:
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                  當前區間: {currentRankIcAnalysis?.startDate} ~ {currentRankIcAnalysis?.endDate} ({currentRankIcAnalysis?.periodCount} 期雙梯隊橫截面)
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem', alignItems: 'center' }}>
+                {[
+                  { key: 'ALL', label: '全歷史 22年 (2004–2026)' },
+                  { key: 'OOS', label: '樣本外 9年 (2018–2026 實戰)' },
+                  { key: '5Y', label: '近 5 年 (2021–2026)' },
+                  { key: '3Y', label: '近 3 年 (2023–2026)' },
+                  { key: '1Y', label: '近 1 年 (2025–2026)' },
+                  { key: 'CUSTOM', label: '自訂區間 ⚙️' }
+                ].map(item => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handleRankIcPresetChange(item.key)}
+                    style={{
+                      padding: '0.38rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: rankIcPreset === item.key ? 'bold' : 'normal',
+                      border: rankIcPreset === item.key ? '1px solid #818CF8' : '1px solid rgba(255, 255, 255, 0.1)',
+                      background: rankIcPreset === item.key ? 'linear-gradient(135deg, #4F46E5, #3730A3)' : 'rgba(255, 255, 255, 0.05)',
+                      color: rankIcPreset === item.key ? '#FFFFFF' : '#CBD5E1',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* 若選擇自訂區間，展開精準日期 Input */}
+              {rankIcPreset === 'CUSTOM' && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.8rem',
+                  marginTop: '0.7rem',
+                  padding: '0.6rem 0.8rem',
+                  background: 'rgba(79, 70, 229, 0.12)',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(129, 140, 248, 0.25)'
+                }}>
+                  <span style={{ fontSize: '0.76rem', color: '#A5B4FC' }}>自訂起訖:</span>
+                  <input
+                    type="date"
+                    value={rankIcStartDate}
+                    onChange={(e) => setRankIcStartDate(e.target.value)}
+                    style={{
+                      background: 'rgba(0,0,0,0.5)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '4px',
+                      color: '#FFF',
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.8rem'
+                    }}
+                  />
+                  <span style={{ color: '#94A3B8' }}>~</span>
+                  <input
+                    type="date"
+                    value={rankIcEndDate}
+                    onChange={(e) => setRankIcEndDate(e.target.value)}
+                    style={{
+                      background: 'rgba(0,0,0,0.5)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '4px',
+                      color: '#FFF',
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.8rem'
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* 2. 檢驗因子切換 */}
+            <div>
+              <div style={{ fontSize: '0.82rem', color: '#CBD5E1', fontWeight: 'bold', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <span>🧬</span> 檢驗因子選擇:
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                {[
+                  { key: 'composite', label: '👑 DOE 複合動能冠軍 (Composite Score)' },
+                  { key: 'raw_mom', label: '📈 原始多週期複合動能 (Raw 12M+3M+1M)' },
+                  { key: 'res_mom', label: '⚡ 純殘差動能 (Residual Alpha vs SPY)' },
+                  { key: 'fip', label: '🐸 FIP 溫水煮青蛙連續性 (Frog-in-the-Pan)' },
+                  { key: 'convexity', label: '📐 60D 非對稱凸性比 (Convexity)' },
+                  { key: 'prox_52w', label: '🎯 52週新高接近度 (52W High Proximity)' }
+                ].map(item => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setRankIcFactor(item.key)}
+                    style={{
+                      padding: '0.38rem 0.75rem',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: rankIcFactor === item.key ? 'bold' : 'normal',
+                      border: rankIcFactor === item.key ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.1)',
+                      background: rankIcFactor === item.key ? 'linear-gradient(135deg, #059669, #047857)' : 'rgba(255, 255, 255, 0.05)',
+                      color: rankIcFactor === item.key ? '#FFFFFF' : '#CBD5E1',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 四大核心量化指標卡片 */}
+          {currentRankIcAnalysis && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+              gap: '0.8rem',
+              marginBottom: '1.5rem'
+            }}>
+              {/* Mean Rank IC */}
+              <div style={{
+                background: 'rgba(16, 185, 129, 0.08)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+                borderRadius: '10px',
+                padding: '0.9rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>Mean Rank IC (平均秩相關)</div>
+                <div style={{
+                  fontSize: '1.45rem',
+                  fontFamily: 'monospace',
+                  fontWeight: 'bold',
+                  color: currentRankIcAnalysis.meanIc >= 0 ? '#34D399' : '#F87171'
+                }}>
+                  {currentRankIcAnalysis.meanIc >= 0 ? '+' : ''}{currentRankIcAnalysis.meanIc}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#6EE7B7', marginTop: '0.2rem' }}>
+                  {currentRankIcAnalysis.meanIc >= 0.03 ? '🔥 具備強健選股前瞻預測力' : '正向有效 (預測方向正確)'}
+                </div>
+              </div>
+
+              {/* 年化 ICIR */}
+              <div style={{
+                background: 'rgba(59, 130, 246, 0.08)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                borderRadius: '10px',
+                padding: '0.9rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>年化 ICIR (信息比率)</div>
+                <div style={{ fontSize: '1.45rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#60A5FA' }}>
+                  {currentRankIcAnalysis.icir}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#93C5FD', marginTop: '0.2rem' }}>
+                  Mean(IC) / Std(IC) × √24 (穩定度)
+                </div>
+              </div>
+
+              {/* Rank IC 勝率 */}
+              <div style={{
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                borderRadius: '10px',
+                padding: '0.9rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>IC 正向勝率 (IC &gt; 0)</div>
+                <div style={{ fontSize: '1.45rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24' }}>
+                  {currentRankIcAnalysis.winRate}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#FDE68A', marginTop: '0.2rem' }}>
+                  正向預測週期佔比 (高於50%具Alpha)
+                </div>
+              </div>
+
+              {/* t-stat & 顯著性 */}
+              <div style={{
+                background: 'rgba(168, 85, 247, 0.08)',
+                border: '1px solid rgba(168, 85, 247, 0.25)',
+                borderRadius: '10px',
+                padding: '0.9rem',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginBottom: '0.2rem' }}>t-stat 檢驗統計量</div>
+                <div style={{ fontSize: '1.45rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#C084FC' }}>
+                  t = {currentRankIcAnalysis.tStat}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#E9D5FF', marginTop: '0.2rem' }}>
+                  {Math.abs(currentRankIcAnalysis.tStat) >= 2.0 ? '✅ 統計顯著 (p < 0.05 拒絕虛無)' : '樣本邊際檢驗中'}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 視覺化圖表 A：累計 Rank IC 走勢曲線 (Cumulative Rank IC) */}
+          {rankIcSvgData && (
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.07)',
+              borderRadius: '10px',
+              padding: '1.2rem',
+              marginBottom: '1.2rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                <span style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span>📈</span> 累計 Rank IC 淨值走勢曲線（Cumulative Rank IC）
+                </span>
+                <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
+                  持續平穩右上爬升 = 因子具備跨週期長期 Alpha 延續力
+                </span>
+              </div>
+
+              <div style={{ position: 'relative' }}>
+                <svg viewBox={`0 0 ${rankIcSvgData.w} ${rankIcSvgData.h}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+                  <defs>
+                    <linearGradient id="rankIcGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10B981" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* 零基準線 */}
+                  <line
+                    x1={rankIcSvgData.padL}
+                    y1={rankIcSvgData.zeroY}
+                    x2={rankIcSvgData.w - rankIcSvgData.padR}
+                    y2={rankIcSvgData.zeroY}
+                    stroke="rgba(255, 255, 255, 0.15)"
+                    strokeDasharray="3 3"
+                  />
+                  <text
+                    x={rankIcSvgData.padL - 8}
+                    y={rankIcSvgData.zeroY + 3}
+                    fill="#94A3B8"
+                    fontSize="10"
+                    textAnchor="end"
+                    fontFamily="monospace"
+                  >
+                    0.0
+                  </text>
+
+                  {/* 頂部極值線 */}
+                  <line
+                    x1={rankIcSvgData.padL}
+                    y1={rankIcSvgData.padT}
+                    x2={rankIcSvgData.w - rankIcSvgData.padR}
+                    y2={rankIcSvgData.padT}
+                    stroke="rgba(255, 255, 255, 0.05)"
+                  />
+                  <text
+                    x={rankIcSvgData.padL - 8}
+                    y={rankIcSvgData.padT + 4}
+                    fill="#94A3B8"
+                    fontSize="10"
+                    textAnchor="end"
+                    fontFamily="monospace"
+                  >
+                    +{rankIcSvgData.maxCum.toFixed(1)}
+                  </text>
+
+                  {/* 漸層面積與折線 */}
+                  {rankIcSvgData.areaPath && (
+                    <path d={rankIcSvgData.areaPath} fill="url(#rankIcGrad)" />
+                  )}
+                  <path
+                    d={rankIcSvgData.linePath}
+                    fill="none"
+                    stroke="#10B981"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  {/* 橫軸時間標籤 (抽樣顯示 6~8 個時間點) */}
+                  {rankIcSvgData.points.filter((_, idx) => idx % Math.max(1, Math.floor(rankIcSvgData.points.length / 7)) === 0).map((pt, idx) => (
+                    <text
+                      key={idx}
+                      x={pt.x}
+                      y={rankIcSvgData.h - 12}
+                      fill="#94A3B8"
+                      fontSize="10"
+                      textAnchor="middle"
+                      fontFamily="monospace"
+                    >
+                      {pt.yearMonth}
+                    </text>
+                  ))}
+                </svg>
+              </div>
+            </div>
+          )}
+
+          {/* 視覺化圖表 B：雙梯隊調倉每期 Rank IC 柱狀分佈圖 (Monthly Rank IC Bars) */}
+          {rankIcSvgData && (
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.07)',
+              borderRadius: '10px',
+              padding: '1.2rem',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                <span style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span>📊</span> 各期橫截面 Rank IC 柱狀分佈（翠綠正向預測 / 珊瑚紅負向反轉）
+                </span>
+                <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
+                  單期 IC 振幅上限: ±{rankIcSvgData.maxAbsIc.toFixed(2)}
+                </span>
+              </div>
+
+              <div style={{ position: 'relative' }}>
+                <svg viewBox={`0 0 ${rankIcSvgData.w} ${rankIcSvgData.barH}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+                  {/* 柱狀圖 0 基準線 */}
+                  <line
+                    x1={rankIcSvgData.padL}
+                    y1={rankIcSvgData.barZeroY}
+                    x2={rankIcSvgData.w - rankIcSvgData.padR}
+                    y2={rankIcSvgData.barZeroY}
+                    stroke="rgba(255, 255, 255, 0.25)"
+                  />
+                  <text
+                    x={rankIcSvgData.padL - 8}
+                    y={rankIcSvgData.barZeroY + 3}
+                    fill="#94A3B8"
+                    fontSize="10"
+                    textAnchor="end"
+                    fontFamily="monospace"
+                  >
+                    0
+                  </text>
+
+                  {/* 每期柱體 */}
+                  {rankIcSvgData.bars.map((b, idx) => (
+                    <rect
+                      key={idx}
+                      x={b.x}
+                      y={b.y}
+                      width={b.width}
+                      height={b.height}
+                      fill={b.isPos ? '#10B981' : '#F43F5E'}
+                      opacity="0.85"
+                      rx="1"
+                      onMouseEnter={() => setRankIcHoverPoint(b)}
+                      onMouseLeave={() => setRankIcHoverPoint(null)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  ))}
+                </svg>
+
+                {/* 懸停 Tooltip */}
+                {rankIcHoverPoint && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '5px',
+                    right: '15px',
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    border: '1px solid #6366F1',
+                    borderRadius: '6px',
+                    padding: '0.4rem 0.8rem',
+                    fontSize: '0.76rem',
+                    color: '#FFF',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                    fontFamily: 'monospace'
+                  }}>
+                    📅 日期: <strong>{rankIcHoverPoint.date}</strong> | 當期 Rank IC: <strong style={{ color: rankIcHoverPoint.isPos ? '#34D399' : '#F87171' }}>
+                      {rankIcHoverPoint.ic >= 0 ? '+' : ''}{rankIcHoverPoint.ic}
+                    </strong>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 學術小叮嚀指南 */}
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#94A3B8',
+            background: 'rgba(255, 255, 255, 0.03)',
+            padding: '0.6rem 0.9rem',
+            borderRadius: '6px',
+            borderLeft: '3px solid #6366F1',
+            lineHeight: '1.5'
+          }}>
+            💡 <strong>量化常識解析</strong>：
+            Rank IC 衡量每期因子打分對未來 1 個月股價報酬率的排序預測能力。
+            股票市場普遍雜訊極大，通常月度 Rank IC 平均在 <strong style={{ color: '#FDE68A' }}>0.02 ~ 0.05</strong> 即具備極高實戰價值；
+            若年化 ICIR 高於 <strong style={{ color: '#FDE68A' }}>0.5</strong> 且勝率高於 <strong style={{ color: '#FDE68A' }}>55%</strong>，即可保證透過長期雙梯隊輪動累積驚人的複合超額 Alpha。
+          </div>
+        </div>
       </div>
 
       {/* 資金存入 / 調整彈窗 Modal */}

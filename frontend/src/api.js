@@ -377,6 +377,23 @@ export async function apiGetGlobalSovereignDashboard() {
   return null;
 }
 
+export async function apiGetGlobalTitanRankIc(params = {}) {
+  const base = await resolveApiBase();
+  const query = new URLSearchParams(params).toString();
+  try {
+    const res = await fetch(`${base}/api/global-sovereign/rank-ic?${query}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'ok') {
+        return json;
+      }
+    }
+  } catch (err) {
+    console.warn(`筆電本機 ${base}/api/global-sovereign/rank-ic 未連線:`, err.message);
+  }
+  return null;
+}
+
 // ==========================================
 // 🎯 極端超賣快打專屬 Dashboard API (直連筆電本機 tw_stock.db)
 // ==========================================

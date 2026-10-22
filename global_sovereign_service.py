@@ -7,6 +7,7 @@ Global Sovereign Service (Scheme A Upgrade - Direct SQLite Database Connection)
 import os
 import json
 import sqlite3
+import numpy as np
 from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "tw_stock.db")
@@ -374,7 +375,104 @@ def get_global_sovereign_dashboard_data():
     except Exception as e:
         print("直連資料庫計算全球主權數據失敗:", e)
 
+    # 附加 Rank IC 總覽快照 (供前端即時渲染)
+    try:
+        rank_ic_file = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "global_titan_rank_ic.json")
+        if os.path.exists(rank_ic_file):
+            with open(rank_ic_file, "r", encoding="utf-8") as f_ic:
+                ic_json = json.load(f_ic)
+                data["rank_ic_summary"] = ic_json.get("overall_summary", {})
+                data["rank_ic_total_periods"] = ic_json.get("total_periods", 0)
+    except Exception as e:
+        pass
+
     return data
+
+def get_global_titan_rank_ic_analysis(start_date: str = None, end_date: str = None, factor: str = "composite"):
+    """
+    動態 Rank IC 因子檢驗計算器：
+    支援依任意時間範圍 (start_date ~ end_date) 與特定因子 (composite, raw_mom, res_mom, fip, convexity, prox_52w)
+    動態重算 Mean Rank IC, ICIR, 勝率, t-stat, p-value 及累計 IC 走勢
+    """
+    from scipy.stats import t as student_t
+    rank_ic_file = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "global_titan_rank_ic.json")
+    if not os.path.exists(rank_ic_file):
+        import generate_global_titan_rank_ic
+        generate_global_titan_rank_ic.compute_all_rank_ic()
+
+    with open(rank_ic_file, "r", encoding="utf-8") as f:
+        full_data = json.load(f)
+
+    series = full_data.get("monthly_series", [])
+    if not series:
+        return {"status": "error", "message": "無 Rank IC 數據"}
+
+    # 日期範圍過濾
+    filtered_series = []
+    for row in series:
+        dt = row.get("date", "")
+        if start_date and dt < start_date:
+            continue
+        if end_date and dt > end_date:
+            continue
+        filtered_series.append(row)
+
+    if not filtered_series:
+        filtered_series = series
+
+    valid_factors = ['composite', 'raw_mom', 'res_mom', 'fip', 'convexity', 'prox_52w']
+    if factor not in valid_factors:
+        factor = 'composite'
+
+    # 動態計算該時段與該因子的統計指標
+    ic_vals = [float(r.get(factor, 0.0)) for r in filtered_series]
+    n = len(ic_vals)
+    mean_ic = float(np.mean(ic_vals)) if n > 0 else 0.0
+    std_ic = float(np.std(ic_vals)) + 1e-9 if n > 0 else 1.0
+    icir = float(mean_ic / std_ic * np.sqrt(24)) if n > 0 else 0.0
+    win_rate = float((np.array(ic_vals) > 0).mean() * 100.0) if n > 0 else 0.0
+    t_stat = float(mean_ic / (std_ic / np.sqrt(n))) if n > 1 else 0.0
+    pval = float(2 * (1 - student_t.cdf(abs(t_stat), df=max(1, n - 1)))) if n > 1 else 1.0
+
+    rating = "🔥 頂級強效 (Excellent Alpha)" if (mean_ic >= 0.07 and icir >= 0.8) else (
+        "✅ 穩健有效 (Robust Alpha)" if (mean_ic >= 0.04 and icir >= 0.4) else (
+            "⚠️ 具備正向預測力 (Predictive Alpha)" if mean_ic > 0 else "❌ 失效或反轉 (Ineffective)"
+        )
+    )
+
+    # 重建累計 IC 曲線
+    cum_ic = 0.0
+    chart_series = []
+    for r in filtered_series:
+        v = float(r.get(factor, 0.0))
+        cum_ic += v
+        chart_series.append({
+            'date': r.get('date'),
+            'year_month': r.get('year_month'),
+            'ic': round(v, 4),
+            'cum_ic': round(cum_ic, 4),
+            'sample_count': r.get('sample_count', 0)
+        })
+
+    return {
+        'status': 'ok',
+        'factor': factor,
+        'factor_name': full_data.get('factor_definitions', {}).get(factor, factor),
+        'start_date': filtered_series[0]['date'] if filtered_series else start_date,
+        'end_date': filtered_series[-1]['date'] if filtered_series else end_date,
+        'period_count': n,
+        'metrics': {
+            'mean_ic': round(mean_ic, 4),
+            'ic_std': round(std_ic, 4),
+            'icir': round(icir, 3),
+            'win_rate': round(win_rate, 1),
+            't_stat': round(t_stat, 2),
+            'p_value': round(pval, 5),
+            'rating': rating
+        },
+        'factor_definitions': full_data.get('factor_definitions', {}),
+        'chart_series': chart_series
+    }
 
 if __name__ == "__main__":
     res = get_global_sovereign_dashboard_data()

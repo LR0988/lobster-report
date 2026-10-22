@@ -4142,6 +4142,13 @@ def get_global_sovereign_dashboard():
     import global_sovereign_service
     return global_sovereign_service.get_global_sovereign_dashboard_data()
 
+@app.get("/api/global_sovereign/rank-ic")
+@app.get("/api/global-sovereign/rank-ic")
+def get_global_sovereign_rank_ic(start_date: str = None, end_date: str = None, factor: str = "composite"):
+    """全球泰坦 Rank IC 動態因子檢驗 API：支援任意時間範圍與六大因子評估"""
+    import global_sovereign_service
+    return global_sovereign_service.get_global_titan_rank_ic_analysis(start_date, end_date, factor)
+
 @app.get("/api/tw_event_radar/dashboard")
 def get_tw_event_radar_dashboard():
     """台股事件與ETF吃豆腐看板：高股息ETF換股提前卡位預測 + 個股期貨逆價差與軋空事件掃描"""
