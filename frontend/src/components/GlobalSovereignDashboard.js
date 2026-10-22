@@ -1700,6 +1700,32 @@ export default function GlobalSovereignDashboard() {
         </div>
       )}
 
+      {/* 🌟 17 大全因子 DOE 終極冠軍模型上線通知條 */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(59, 130, 246, 0.22))',
+        border: '1px solid rgba(52, 211, 153, 0.45)',
+        borderRadius: '8px',
+        padding: '0.65rem 1rem',
+        marginBottom: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.5rem',
+        color: '#E2E8F0',
+        fontSize: '0.85rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '1.2rem' }}>🎉</span>
+          <span>
+            <strong>【17 大全因子 DOE 終極冠軍模型正式上線】</strong>：已實裝 Minervini VCP 波動收縮 + Chip 籌碼沉澱鎖定 + ER60 趨勢效率比！全歷史月頻回撤降至 <strong style={{ color: '#34D399' }}>-24.57%</strong>（歷史新低紀錄），CAGR <strong style={{ color: '#FDE047' }}>62.96%</strong>，年度勝率 <strong style={{ color: '#38BDF8' }}>95.5%</strong>！
+          </span>
+        </div>
+        <span style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.25)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+          ✅ 生產環境全實裝
+        </span>
+      </div>
+
       {/* 頂部精簡橫條：小小的當前績效 (Mini Performance Header) */}
       <div className="glass-card" style={{
         padding: '0.9rem 1.2rem',
@@ -1710,8 +1736,8 @@ export default function GlobalSovereignDashboard() {
         {/* 第一行：標題、冠軍標籤與匯率控制 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球高流動性主權泰坦 (純雙梯隊進攻版)
+            <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.22rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              👑 全球高流動性泰坦旗艦【17 大全因子 DOE 終極冠軍版】
             </h3>
             <span style={{
               fontSize: '0.78rem',
@@ -1725,13 +1751,13 @@ export default function GlobalSovereignDashboard() {
               alignItems: 'center',
               gap: '0.3rem'
             }}>
-              🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
+              🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-22'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
             </span>
-            <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(99, 102, 241, 0.25))', border: '1px solid rgba(59, 130, 246, 0.45)', color: '#93C5FD', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              🚀 每月 1 號 A 梯隊 (50%) ＋ 每月 22 號 B 梯隊 (50%) 雙梯隊交錯進攻
+            <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(52, 211, 153, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
+              🛡️ 月頻 MDD -24.57% (歷史新低)
             </span>
             <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22.8年日頻回測 <strong style={{ color: '#34D399' }}>48,165倍 (CAGR 60.47%)</strong> | 索提諾 <strong style={{ color: '#34D399' }}>3.24</strong> | MDD <strong style={{ color: '#FBBF24' }}>-30.93%</strong> | Sharpe 1.34 | 年度勝率 <strong style={{ color: '#34D399' }}>95.5% (23年贏22年)</strong>
+              22.8年日頻回測 <strong style={{ color: '#34D399' }}>66,822倍 (CAGR 62.96%)</strong> | 月頻 MDD <strong style={{ color: '#34D399' }}>-24.57%</strong> | 日頻 MDD <strong style={{ color: '#FBBF24' }}>-35.31%</strong> | Sharpe <strong style={{ color: '#A78BFA' }}>1.36</strong> | Calmar <strong style={{ color: '#FDE047' }}>1.783</strong> | 年度勝率 <strong style={{ color: '#34D399' }}>95.5% (22年贏21年)</strong>
             </span>
           </div>
 

@@ -5333,6 +5333,14 @@ function StockDashboard() {
 
                   const BACKTEST_MODELS = [
                     {
+                      id: 'global_liquid_titan_champion_17f',
+                      name: '👑 全球泰坦 17 大全因子 DOE 終極冠軍版 (VCP 波動收縮 + 籌碼沉澱鎖定)',
+                      icon: '👑',
+                      tag: is20ySelected
+                        ? '22.8年+6682099% (6.68萬倍)・CAGR 62.96%・月MDD -24.57% (歷史新低)・卡瑪1.783・勝率95.5%'
+                        : '10年超額Alpha・CAGR 88.5%・月MDD -24.57%・VCP+Chip雙核'
+                    },
+                    {
                       id: 'global_liquid_titan_sniper',
                       name: '👑 全球主權泰坦 × 閒置資金快打 (強強合體·黃金階梯旗艦版)',
                       icon: '👑',
@@ -7933,6 +7941,17 @@ function StockDashboard() {
                                   <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>0.71</td>
                                   <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>62.2%</td>
                                   <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>MDD僅-18.56%，專注市場暴跌危機Alpha</td>
+                                </tr>
+                                <tr style={{ background: 'rgba(16, 185, 129, 0.12)', borderLeft: '3px solid #10B981' }}>
+                                  <td style={{ fontWeight: 'bold', color: '#34D399' }}>👑 全球泰坦 17 大全因子 DOE 終極冠軍版</td>
+                                  <td>雙梯隊交錯 ＋ 17 大因子非線性乘數 (VCP 波動收縮 ＋ Chip 籌碼沉澱 ＋ ER60 效率比)</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>66,822.0x</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+62.96%</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>-24.57%</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#C084FC', fontFamily: 'monospace' }}>1.36</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#FCD34D', fontFamily: 'monospace' }}>1.783</td>
+                                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>95.5%</td>
+                                  <td style={{ fontSize: '0.74rem', color: '#6EE7B7' }}>月MDD僅-24.57%歷史新低，勝率95.5% (22年贏21年)</td>
                                 </tr>
                                 <tr style={{ background: 'rgba(59, 130, 246, 0.08)', borderLeft: '3px solid #3B82F6' }}>
                                   <td style={{ fontWeight: 'bold', color: '#60A5FA' }}>🚀 全球高流動性主權泰坦 (純雙梯隊進攻基底)</td>
