@@ -420,7 +420,12 @@ def get_global_titan_rank_ic_analysis(start_date: str = None, end_date: str = No
     if not filtered_series:
         filtered_series = series
 
-    valid_factors = ['composite', 'raw_mom', 'res_mom', 'fip', 'convexity', 'prox_52w']
+    valid_factors = [
+        'composite', 'blend_mom',
+        'raw_mom', 'mom_12m', 'mom_6m', 'mom_3m', 'mom_1m', 'mom_2w',
+        'res_mom', 'fip', 'convexity', 'er_60', 'prox_52w',
+        'bias_ma60', 'zscore_20d'
+    ]
     if factor not in valid_factors:
         factor = 'composite'
 

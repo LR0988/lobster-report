@@ -207,6 +207,28 @@ const DEFAULT_TX_HISTORY = [
   }
 ];
 
+export const ALL_RANK_IC_FACTORS = [
+  // 旗艦複合
+  { key: 'composite', label: '👑 DOE 複合動能冠軍 (Composite Score)', cat: 'flagship', catName: '🏆 旗艦複合', desc: '(85% Raw + 15% Res) × FIP × Convexity 終極冠軍' },
+  { key: 'blend_mom', label: '⚖️ 混合動能基底 (Blend Momentum)', cat: 'flagship', catName: '🏆 旗艦複合', desc: '85% Raw + 15% Residual Alpha (Beta中性基底)' },
+  // 價格動能系列
+  { key: 'mom_12m', label: '🚀 12個月長線動能 (12M Momentum)', cat: 'momentum', catName: '📈 價格動能', desc: 'Jegadeesh & Titman (1993) 經典長週期機構鎖定動能' },
+  { key: 'mom_6m', label: '⏳ 6個月中長線動能 (6M Momentum)', cat: 'momentum', catName: '📈 價格動能', desc: '中期主升段中樞 (波段趨勢延續主力)' },
+  { key: 'mom_3m', label: '⚡ 3個月中線動能 (3M Momentum)', cat: 'momentum', catName: '📈 價格動能', desc: '季線波段發動與加速因子' },
+  { key: 'raw_mom', label: '📈 45/35/20 多週期動能 (Raw Mom)', cat: 'momentum', catName: '📈 價格動能', desc: '45% 12M + 35% 3M + 20% 1M 多尺度融合動能' },
+  { key: 'mom_1m', label: '⏱️ 1個月短線動能 (1M Momentum)', cat: 'momentum', catName: '📈 價格動能', desc: '月度輪動爆發力 (短線領先指標)' },
+  { key: 'mom_2w', label: '🏃 2週超短衝刺動能 (2W Momentum)', cat: 'momentum', catName: '📈 價格動能', desc: '短線急衝力道 (通常伴隨短期均值回歸反轉)' },
+  // 質量與路徑
+  { key: 'res_mom', label: '⚡ 純殘差動能 (Residual Alpha vs SPY)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'Blitz et al. (2011) 剝離大盤Beta之純個股Alpha' },
+  { key: 'fip', label: '🐸 FIP 溫水煮青蛙連續性 (Frog-in-the-Pan)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'Da et al. (2014 RFS) 252日漲跌天數連續性比率' },
+  { key: 'convexity', label: '📐 60D 非對稱波動凸性比 (Convexity)', cat: 'quality', catName: '🔬 質量與路徑', desc: '右偏上行爆發波動 / 下行收斂波動 (右偏凸性溢價)' },
+  { key: 'er_60', label: '🌊 Kaufman 60D 趨勢效率比 (Efficiency Ratio)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'Kaufman (1995) 淨位移 / 總路徑雜訊 (趨勢純淨度)' },
+  { key: 'prox_52w', label: '🎯 52週新高接近度 (52W High Proximity)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'George & Hwang (2004 JF) 股價/252D新高錨定效應' },
+  // 技術與乖離
+  { key: 'bias_ma60', label: '📏 60MA 季線乖離率 (Bias MA60)', cat: 'technicals', catName: '🛡️ 技術與乖離', desc: '(Price - 60MA) / 60MA 季線加速偏離程度' },
+  { key: 'zscore_20d', label: '🎚️ 20日價格 Z-Score (Mean Reversion)', cat: 'technicals', catName: '🛡️ 技術與乖離', desc: '(Price - 20MA) / Std20 超買超賣與急跌反彈' }
+];
+
 export default function GlobalSovereignDashboard() {
   const [data, setData] = useState(defaultData);
   const [loading, setLoading] = useState(false);
@@ -215,6 +237,7 @@ export default function GlobalSovereignDashboard() {
   // 🔬 全球泰坦 Rank IC 動態因子檢驗專區 State
   // ==========================================
   const [rankIcFactor, setRankIcFactor] = useState('composite');
+  const [rankIcCategoryTab, setRankIcCategoryTab] = useState('ALL'); // 'ALL' | 'flagship' | 'momentum' | 'quality' | 'technicals'
   const [rankIcPreset, setRankIcPreset] = useState('ALL'); // 'ALL' | 'OOS' | '5Y' | '3Y' | '1Y' | 'CUSTOM'
   const [rankIcStartDate, setRankIcStartDate] = useState('2004-01-01');
   const [rankIcEndDate, setRankIcEndDate] = useState('2026-10-22');
@@ -3148,40 +3171,98 @@ export default function GlobalSovereignDashboard() {
               )}
             </div>
 
-            {/* 2. 檢驗因子切換 */}
+            {/* 2. 檢驗因子切換 (15 大全維度量化因子) */}
             <div>
-              <div style={{ fontSize: '0.82rem', color: '#CBD5E1', fontWeight: 'bold', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <span>🧬</span> 檢驗因子選擇:
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <div style={{ fontSize: '0.82rem', color: '#CBD5E1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <span>🧬</span> 檢驗因子選擇 (共 15 大全維度因子):
+                </div>
+
+                {/* 分類篩選 Tab */}
+                <div style={{ display: 'flex', gap: '0.3rem', background: 'rgba(255,255,255,0.04)', padding: '2px', borderRadius: '6px' }}>
+                  {[
+                    { key: 'ALL', label: '🌟 全部 15 因子' },
+                    { key: 'flagship', label: '🏆 旗艦複合' },
+                    { key: 'momentum', label: '📈 價格動能' },
+                    { key: 'quality', label: '🔬 質量與路徑' },
+                    { key: 'technicals', label: '🛡️ 技術與反轉' }
+                  ].map(tab => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setRankIcCategoryTab(tab.key)}
+                      style={{
+                        padding: '0.2rem 0.55rem',
+                        fontSize: '0.72rem',
+                        borderRadius: '4px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: rankIcCategoryTab === tab.key ? '#6366F1' : 'transparent',
+                        color: rankIcCategoryTab === tab.key ? '#FFF' : '#94A3B8',
+                        fontWeight: rankIcCategoryTab === tab.key ? 'bold' : 'normal'
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* 因子按鈕矩陣 */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-                {[
-                  { key: 'composite', label: '👑 DOE 複合動能冠軍 (Composite Score)' },
-                  { key: 'raw_mom', label: '📈 原始多週期複合動能 (Raw 12M+3M+1M)' },
-                  { key: 'res_mom', label: '⚡ 純殘差動能 (Residual Alpha vs SPY)' },
-                  { key: 'fip', label: '🐸 FIP 溫水煮青蛙連續性 (Frog-in-the-Pan)' },
-                  { key: 'convexity', label: '📐 60D 非對稱凸性比 (Convexity)' },
-                  { key: 'prox_52w', label: '🎯 52週新高接近度 (52W High Proximity)' }
-                ].map(item => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setRankIcFactor(item.key)}
-                    style={{
-                      padding: '0.38rem 0.75rem',
-                      borderRadius: '6px',
-                      fontSize: '0.78rem',
-                      fontWeight: rankIcFactor === item.key ? 'bold' : 'normal',
-                      border: rankIcFactor === item.key ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.1)',
-                      background: rankIcFactor === item.key ? 'linear-gradient(135deg, #059669, #047857)' : 'rgba(255, 255, 255, 0.05)',
-                      color: rankIcFactor === item.key ? '#FFFFFF' : '#CBD5E1',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+                {ALL_RANK_IC_FACTORS
+                  .filter(f => rankIcCategoryTab === 'ALL' || f.cat === rankIcCategoryTab)
+                  .map(item => {
+                    const isSelected = rankIcFactor === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => setRankIcFactor(item.key)}
+                        title={item.desc}
+                        style={{
+                          padding: '0.36rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.78rem',
+                          fontWeight: isSelected ? 'bold' : 'normal',
+                          border: isSelected ? '1px solid #10B981' : '1px solid rgba(255, 255, 255, 0.1)',
+                          background: isSelected ? 'linear-gradient(135deg, #059669, #047857)' : 'rgba(255, 255, 255, 0.05)',
+                          color: isSelected ? '#FFFFFF' : '#CBD5E1',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
               </div>
+
+              {/* 當前選中因子說明條 */}
+              {(() => {
+                const currentFactorObj = ALL_RANK_IC_FACTORS.find(f => f.key === rankIcFactor);
+                if (!currentFactorObj) return null;
+                return (
+                  <div style={{
+                    marginTop: '0.65rem',
+                    padding: '0.4rem 0.8rem',
+                    background: 'rgba(16, 185, 129, 0.08)',
+                    borderLeft: '3px solid #10B981',
+                    borderRadius: '4px',
+                    fontSize: '0.74rem',
+                    color: '#CBD5E1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>[{currentFactorObj.catName}]</span>
+                    <span>{currentFactorObj.desc}</span>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
