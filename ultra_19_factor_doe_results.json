@@ -1,0 +1,857 @@
+{
+  "timestamp": "2026-10-23T00:34:49.395793",
+  "total_tested": 540,
+  "elapsed_seconds": 67.03,
+  "champion_overall": {
+    "param": {
+      "w_mom": [
+        0.5,
+        0.0,
+        0.3,
+        0.15,
+        0.05
+      ],
+      "w_res": 0.16,
+      "w_fip": 0.45,
+      "w_conv": 0.14,
+      "w_er": 0.4,
+      "w_prox": 0.12,
+      "w_bias": -0.05,
+      "w_z": 0.0,
+      "w_vcp": 0.24,
+      "w_chip": 0.12,
+      "w_parkinson": 0.08,
+      "w_pullback": 0.0,
+      "ladder": [
+        0.6,
+        0.25,
+        0.15
+      ]
+    },
+    "CAGR": 67.61,
+    "Month_MDD": -26.18,
+    "Daily_MDD": -35.54,
+    "Sharpe": 1.31,
+    "Calmar": 2.583,
+    "Win_Rate": 66.7,
+    "Fitness": 78.46
+  },
+  "champion_cagr": {
+    "param": {
+      "w_mom": [
+        0.5,
+        0.0,
+        0.3,
+        0.15,
+        0.05
+      ],
+      "w_res": 0.16,
+      "w_fip": 0.45,
+      "w_conv": 0.14,
+      "w_er": 0.4,
+      "w_prox": 0.12,
+      "w_bias": -0.05,
+      "w_z": 0.0,
+      "w_vcp": 0.24,
+      "w_chip": 0.12,
+      "w_parkinson": 0.08,
+      "w_pullback": 0.0,
+      "ladder": [
+        0.6,
+        0.25,
+        0.15
+      ]
+    },
+    "CAGR": 67.61,
+    "Month_MDD": -26.18,
+    "Daily_MDD": -35.54,
+    "Sharpe": 1.31,
+    "Calmar": 2.583,
+    "Win_Rate": 66.7,
+    "Fitness": 78.46
+  },
+  "champion_calmar": {
+    "param": {
+      "w_mom": [
+        0.5,
+        0.0,
+        0.3,
+        0.15,
+        0.05
+      ],
+      "w_res": 0.16,
+      "w_fip": 0.45,
+      "w_conv": 0.14,
+      "w_er": 0.32,
+      "w_prox": 0.06,
+      "w_bias": -0.05,
+      "w_z": 0.0,
+      "w_vcp": 0.18,
+      "w_chip": 0.16,
+      "w_parkinson": 0.16,
+      "w_pullback": 0.0,
+      "ladder": [
+        0.6,
+        0.25,
+        0.15
+      ]
+    },
+    "CAGR": 64.79,
+    "Month_MDD": -24.95,
+    "Daily_MDD": -35.86,
+    "Sharpe": 1.27,
+    "Calmar": 2.597,
+    "Win_Rate": 67.4,
+    "Fitness": 77.69
+  },
+  "champion_min_mdd": {
+    "param": {
+      "w_mom": [
+        0.45,
+        0.0,
+        0.35,
+        0.2,
+        0.0
+      ],
+      "w_res": 0.16,
+      "w_fip": 0.4,
+      "w_conv": 0.18,
+      "w_er": 0.25,
+      "w_prox": 0.12,
+      "w_bias": -0.05,
+      "w_z": 0.0,
+      "w_vcp": 0.18,
+      "w_chip": 0.12,
+      "w_parkinson": 0.08,
+      "w_pullback": 0.0,
+      "ladder": [
+        0.5,
+        0.3,
+        0.2
+      ]
+    },
+    "CAGR": 63.06,
+    "Month_MDD": -24.46,
+    "Daily_MDD": -35.24,
+    "Sharpe": 1.33,
+    "Calmar": 2.578,
+    "Win_Rate": 68.9,
+    "Fitness": 77.76
+  },
+  "champion_win_rate": {
+    "param": {
+      "w_mom": [
+        0.45,
+        0.0,
+        0.35,
+        0.2,
+        0.0
+      ],
+      "w_res": 0.12,
+      "w_fip": 0.45,
+      "w_conv": 0.14,
+      "w_er": 0.25,
+      "w_prox": 0.0,
+      "w_bias": -0.06,
+      "w_z": -0.04,
+      "w_vcp": 0.12,
+      "w_chip": 0.16,
+      "w_parkinson": 0.2,
+      "w_pullback": 0.12,
+      "ladder": [
+        0.5,
+        0.3,
+        0.2
+      ]
+    },
+    "CAGR": 61.6,
+    "Month_MDD": -29.84,
+    "Daily_MDD": -39.13,
+    "Sharpe": 1.31,
+    "Calmar": 2.064,
+    "Win_Rate": 70.0,
+    "Fitness": 67.26
+  },
+  "top_20": [
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.16,
+        "w_fip": 0.45,
+        "w_conv": 0.14,
+        "w_er": 0.4,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.12,
+        "w_parkinson": 0.08,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 67.61,
+      "Month_MDD": -26.18,
+      "Daily_MDD": -35.54,
+      "Sharpe": 1.31,
+      "Calmar": 2.583,
+      "Win_Rate": 66.7,
+      "Fitness": 78.46
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.1,
+        "w_fip": 0.45,
+        "w_conv": 0.18,
+        "w_er": 0.25,
+        "w_prox": 0.06,
+        "w_bias": 0.0,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.16,
+        "w_parkinson": 0.08,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 65.63,
+      "Month_MDD": -25.37,
+      "Daily_MDD": -35.0,
+      "Sharpe": 1.3,
+      "Calmar": 2.587,
+      "Win_Rate": 67.4,
+      "Fitness": 78.05
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.1,
+          0.3,
+          0.15,
+          0.0
+        ],
+        "w_res": 0.1,
+        "w_fip": 0.45,
+        "w_conv": 0.18,
+        "w_er": 0.25,
+        "w_prox": 0.06,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.16,
+        "w_parkinson": 0.12,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 64.73,
+      "Month_MDD": -24.92,
+      "Daily_MDD": -35.99,
+      "Sharpe": 1.32,
+      "Calmar": 2.597,
+      "Win_Rate": 65.6,
+      "Fitness": 77.87
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.0,
+          0.35,
+          0.2,
+          0.0
+        ],
+        "w_res": 0.16,
+        "w_fip": 0.4,
+        "w_conv": 0.18,
+        "w_er": 0.25,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.12,
+        "w_parkinson": 0.08,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.5,
+          0.3,
+          0.2
+        ]
+      },
+      "CAGR": 63.06,
+      "Month_MDD": -24.46,
+      "Daily_MDD": -35.24,
+      "Sharpe": 1.33,
+      "Calmar": 2.578,
+      "Win_Rate": 68.9,
+      "Fitness": 77.76
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.16,
+        "w_fip": 0.45,
+        "w_conv": 0.14,
+        "w_er": 0.32,
+        "w_prox": 0.06,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.16,
+        "w_parkinson": 0.16,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 64.79,
+      "Month_MDD": -24.95,
+      "Daily_MDD": -35.86,
+      "Sharpe": 1.27,
+      "Calmar": 2.597,
+      "Win_Rate": 67.4,
+      "Fitness": 77.69
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.1,
+          0.3,
+          0.15,
+          0.0
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.55,
+        "w_conv": 0.14,
+        "w_er": 0.25,
+        "w_prox": 0.0,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.16,
+        "w_parkinson": 0.2,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 64.01,
+      "Month_MDD": -24.81,
+      "Daily_MDD": -35.8,
+      "Sharpe": 1.31,
+      "Calmar": 2.58,
+      "Win_Rate": 66.7,
+      "Fitness": 77.47
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.0,
+          0.35,
+          0.2,
+          0.0
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.45,
+        "w_conv": 0.14,
+        "w_er": 0.25,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.16,
+        "w_parkinson": 0.12,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 64.7,
+      "Month_MDD": -25.16,
+      "Daily_MDD": -36.15,
+      "Sharpe": 1.28,
+      "Calmar": 2.571,
+      "Win_Rate": 67.8,
+      "Fitness": 77.4
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.55,
+        "w_conv": 0.18,
+        "w_er": 0.32,
+        "w_prox": 0.06,
+        "w_bias": 0.0,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.12,
+        "w_parkinson": 0.2,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 63.91,
+      "Month_MDD": -24.92,
+      "Daily_MDD": -35.87,
+      "Sharpe": 1.3,
+      "Calmar": 2.564,
+      "Win_Rate": 68.5,
+      "Fitness": 77.35
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.16,
+        "w_fip": 0.55,
+        "w_conv": 0.14,
+        "w_er": 0.4,
+        "w_prox": 0.12,
+        "w_bias": 0.0,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.16,
+        "w_parkinson": 0.08,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 65.14,
+      "Month_MDD": -25.66,
+      "Daily_MDD": -35.47,
+      "Sharpe": 1.33,
+      "Calmar": 2.538,
+      "Win_Rate": 66.3,
+      "Fitness": 77.06
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.1,
+          0.3,
+          0.15,
+          0.0
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.4,
+        "w_conv": 0.14,
+        "w_er": 0.4,
+        "w_prox": 0.06,
+        "w_bias": 0.0,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.22,
+        "w_parkinson": 0.12,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 63.93,
+      "Month_MDD": -24.96,
+      "Daily_MDD": -36.02,
+      "Sharpe": 1.29,
+      "Calmar": 2.561,
+      "Win_Rate": 66.7,
+      "Fitness": 76.95
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.45,
+        "w_conv": 0.22,
+        "w_er": 0.32,
+        "w_prox": 0.0,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.22,
+        "w_parkinson": 0.2,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.5,
+          0.3,
+          0.2
+        ]
+      },
+      "CAGR": 63.43,
+      "Month_MDD": -25.11,
+      "Daily_MDD": -35.72,
+      "Sharpe": 1.33,
+      "Calmar": 2.526,
+      "Win_Rate": 68.9,
+      "Fitness": 76.84
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.45,
+        "w_conv": 0.18,
+        "w_er": 0.32,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.12,
+        "w_chip": 0.16,
+        "w_parkinson": 0.16,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.5,
+          0.3,
+          0.2
+        ]
+      },
+      "CAGR": 63.73,
+      "Month_MDD": -25.14,
+      "Daily_MDD": -35.23,
+      "Sharpe": 1.32,
+      "Calmar": 2.535,
+      "Win_Rate": 67.8,
+      "Fitness": 76.78
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.0,
+          0.35,
+          0.2,
+          0.0
+        ],
+        "w_res": 0.1,
+        "w_fip": 0.55,
+        "w_conv": 0.14,
+        "w_er": 0.25,
+        "w_prox": 0.0,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.16,
+        "w_parkinson": 0.16,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 64.21,
+      "Month_MDD": -25.37,
+      "Daily_MDD": -36.29,
+      "Sharpe": 1.29,
+      "Calmar": 2.531,
+      "Win_Rate": 68.1,
+      "Fitness": 76.59
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.0,
+          0.35,
+          0.2,
+          0.0
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.55,
+        "w_conv": 0.14,
+        "w_er": 0.32,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.16,
+        "w_parkinson": 0.2,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 62.37,
+      "Month_MDD": -24.56,
+      "Daily_MDD": -35.62,
+      "Sharpe": 1.3,
+      "Calmar": 2.54,
+      "Win_Rate": 68.5,
+      "Fitness": 76.49
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.4,
+          0.1,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.4,
+        "w_conv": 0.14,
+        "w_er": 0.25,
+        "w_prox": 0.12,
+        "w_bias": 0.0,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.22,
+        "w_parkinson": 0.16,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 63.76,
+      "Month_MDD": -25.06,
+      "Daily_MDD": -35.8,
+      "Sharpe": 1.3,
+      "Calmar": 2.544,
+      "Win_Rate": 65.2,
+      "Fitness": 76.46
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.0,
+          0.35,
+          0.2,
+          0.0
+        ],
+        "w_res": 0.1,
+        "w_fip": 0.4,
+        "w_conv": 0.14,
+        "w_er": 0.4,
+        "w_prox": 0.0,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.12,
+        "w_parkinson": 0.16,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 63.87,
+      "Month_MDD": -25.17,
+      "Daily_MDD": -35.74,
+      "Sharpe": 1.29,
+      "Calmar": 2.537,
+      "Win_Rate": 67.0,
+      "Fitness": 76.45
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.45,
+        "w_conv": 0.18,
+        "w_er": 0.4,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.16,
+        "w_parkinson": 0.12,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 63.23,
+      "Month_MDD": -24.9,
+      "Daily_MDD": -35.32,
+      "Sharpe": 1.28,
+      "Calmar": 2.539,
+      "Win_Rate": 67.8,
+      "Fitness": 76.42
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.4,
+          0.1,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.12,
+        "w_fip": 0.45,
+        "w_conv": 0.14,
+        "w_er": 0.32,
+        "w_prox": 0.06,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.18,
+        "w_chip": 0.22,
+        "w_parkinson": 0.12,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 63.39,
+      "Month_MDD": -25.21,
+      "Daily_MDD": -36.08,
+      "Sharpe": 1.31,
+      "Calmar": 2.515,
+      "Win_Rate": 67.0,
+      "Fitness": 76.16
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.45,
+          0.0,
+          0.35,
+          0.2,
+          0.0
+        ],
+        "w_res": 0.1,
+        "w_fip": 0.4,
+        "w_conv": 0.14,
+        "w_er": 0.4,
+        "w_prox": 0.12,
+        "w_bias": -0.05,
+        "w_z": 0.0,
+        "w_vcp": 0.24,
+        "w_chip": 0.22,
+        "w_parkinson": 0.2,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.6,
+          0.25,
+          0.15
+        ]
+      },
+      "CAGR": 62.99,
+      "Month_MDD": -25.03,
+      "Daily_MDD": -35.81,
+      "Sharpe": 1.3,
+      "Calmar": 2.516,
+      "Win_Rate": 67.8,
+      "Fitness": 76.14
+    },
+    {
+      "param": {
+        "w_mom": [
+          0.5,
+          0.0,
+          0.3,
+          0.15,
+          0.05
+        ],
+        "w_res": 0.16,
+        "w_fip": 0.55,
+        "w_conv": 0.18,
+        "w_er": 0.4,
+        "w_prox": 0.06,
+        "w_bias": -0.06,
+        "w_z": -0.04,
+        "w_vcp": 0.12,
+        "w_chip": 0.22,
+        "w_parkinson": 0.12,
+        "w_pullback": 0.0,
+        "ladder": [
+          0.55,
+          0.3,
+          0.15
+        ]
+      },
+      "CAGR": 62.42,
+      "Month_MDD": -24.59,
+      "Daily_MDD": -35.54,
+      "Sharpe": 1.29,
+      "Calmar": 2.539,
+      "Win_Rate": 65.9,
+      "Fitness": 75.99
+    }
+  ]
+}
