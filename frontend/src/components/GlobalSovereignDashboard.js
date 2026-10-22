@@ -1,6 +1,82 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import defaultData from '../data/defaultGlobalSovereignData.json';
+import twStockNamesMap from '../data/tw_stock_names_map.json';
 import { getCurrentUser, apiGetGlobalTitanPortfolio, apiSaveGlobalTitanPortfolio, apiGetGlobalSovereignDashboard, supabaseDirectFetch } from '../api';
+
+// 全球泰坦旗艦核心標的中文對照表 (確保所有台股與美股代號如 8996.TW 均能清楚顯示中文名稱)
+export const GLOBAL_TITAN_NAME_MAP = {
+  '8996.TW': '高力 (Kaori 水冷散熱飆股)',
+  '8996': '高力',
+  '3017.TW': '奇鋐 (AI 水冷散熱龍頭)',
+  '3017': '奇鋐',
+  '3008.TW': '大立光 (Largan 光學鏡頭鏡王)',
+  '3008': '大立光',
+  '3037.TW': '欣興 (Unimicron 載板王者)',
+  '3037': '欣興',
+  '3443.TW': '創意 (Global Unichip ASIC)',
+  '3443': '創意',
+  '2330.TW': '台積電 (TSMC 神山)',
+  '2330': '台積電',
+  '2454.TW': '聯發科 (MediaTek 晶片霸主)',
+  '2454': '聯發科',
+  '2382.TW': '廣達 (AI 伺服器代工)',
+  '2382': '廣達',
+  '3231.TW': '緯創 (AI 代工伺服器)',
+  '3231': '緯創',
+  '6669.TW': '緯穎 (AI 伺服器巨頭)',
+  '6669': '緯穎',
+  '2317.TW': '鴻海 (電子代工巨擘)',
+  '2317': '鴻海',
+  '2308.TW': '台達電 (綠能電源龍頭)',
+  '2308': '台達電',
+  '3661.TW': '世芯-KY (AI ASIC 矽智財)',
+  '3661': '世芯-KY',
+  '2603.TW': '長榮海運 (貨櫃航運龍頭)',
+  '2603': '長榮',
+  '2609.TW': '陽明海運 (貨櫃航運)',
+  '2609': '陽明',
+  'MRNA': '莫德納 (Moderna 生技巨擘)',
+  'TEAM': 'Atlassian (TEAM 協同軟體龍頭)',
+  'ASX': '日月光投控 (ASE 封測龍頭ADR)',
+  'ILMN': '因美納 (Illumina 基因定序霸主)',
+  'PBR': '巴西石油 ADR (Petrobras)',
+  'MU': '美光科技 (Micron 記憶體巨頭)',
+  'NVDA': '輝達 (NVIDIA AI算力之王)',
+  'AVGO': '博通 (Broadcom 網通霸主)',
+  'TSLA': '特斯拉 (Tesla 自動駕駛)',
+  'AAPL': '蘋果 (Apple)',
+  'MSFT': '微軟 (Microsoft)',
+  'AMZN': '亞馬遜 (Amazon)',
+  'GOOGL': '谷歌 (Alphabet)',
+  'META': 'Meta (臉書)'
+};
+
+export const formatStockDisplayName = (ticker, originalName) => {
+  if (!ticker && !originalName) return '';
+  const cleanTicker = String(ticker || '').trim();
+  const baseTicker = cleanTicker.split('.')[0];
+
+  // 1. 優先比對全球泰坦專屬中文對照表
+  if (GLOBAL_TITAN_NAME_MAP[cleanTicker]) return GLOBAL_TITAN_NAME_MAP[cleanTicker];
+  if (GLOBAL_TITAN_NAME_MAP[baseTicker]) return GLOBAL_TITAN_NAME_MAP[baseTicker];
+
+  // 2. 比對台股全市場 350+ 檔中文名稱庫
+  if (twStockNamesMap) {
+    if (twStockNamesMap[baseTicker]) {
+      return `${twStockNamesMap[baseTicker]} (${cleanTicker})`;
+    }
+    if (twStockNamesMap[cleanTicker]) {
+      return `${twStockNamesMap[cleanTicker]} (${cleanTicker})`;
+    }
+  }
+
+  // 3. 若原有名稱已有繁體中文且不單是代號，則優先沿用
+  if (originalName && originalName !== cleanTicker && originalName !== baseTicker && /[\u4e00-\u9fa5]/.test(originalName)) {
+    return originalName;
+  }
+
+  return originalName || cleanTicker;
+};
 
 const STORAGE_KEY_POSITIONS = 'global_titan_user_positions_v2';
 const STORAGE_KEY_IDLE_CASH = 'global_titan_idle_cash_v2';
@@ -212,7 +288,7 @@ export default function GlobalSovereignDashboard() {
         const isUs = !ticker.includes('.TW') && !ticker.includes('.TWO') && tx.currency === 'USD';
         holdingsMap[key] = {
           ticker: ticker,
-          name: name.replace(/\s*\(\d+\)/, '').trim(),
+          name: formatStockDisplayName(ticker, name.replace(/\s*\(\d+\)/, '').trim()),
           market: isUs ? '美股 (NASDAQ)' : '台股 (TWSE)',
           currency: tx.currency || (isUs ? 'USD' : 'TWD'),
           shares: 0,
@@ -269,7 +345,7 @@ export default function GlobalSovereignDashboard() {
         activePositions.push({
           id: `pos_${baseTicker}`,
           ticker: h.ticker,
-          name: h.name,
+          name: formatStockDisplayName(h.ticker, h.name),
           market: h.market,
           currency: h.currency,
           shares: h.shares,
@@ -722,7 +798,7 @@ export default function GlobalSovereignDashboard() {
         action,
         actionColor,
         ticker: pick.ticker,
-        name: pick.name,
+        name: formatStockDisplayName(pick.ticker, pick.name),
         market: pick.market,
         currency: pick.currency,
         targetWeightPct: totalWeightPct,
@@ -774,7 +850,7 @@ export default function GlobalSovereignDashboard() {
           action: shouldHalve ? '減持' : '賣出',
           actionColor: '#EF4444',
           ticker: heldPos.ticker,
-          name: heldPos.name,
+          name: formatStockDisplayName(heldPos.ticker, heldPos.name),
           market: heldPos.market,
           currency: heldPos.currency,
           targetWeightPct: 0,
@@ -2020,7 +2096,7 @@ export default function GlobalSovereignDashboard() {
                       return (
                         <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255,255,255,0.015)' }}>
                           <td>
-                            <strong style={{ color: '#F8FAFC' }}>{pos.name}</strong>
+                            <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(pos.ticker, pos.name)}</strong>
                             <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
                           </td>
                           <td style={{ textAlign: 'center' }}>
@@ -2306,7 +2382,7 @@ export default function GlobalSovereignDashboard() {
 
                           {/* 標的名稱 與 雙梯隊分配進度 */}
                           <td>
-                            <strong style={{ color: '#F8FAFC' }}>{sugg.name}</strong>
+                            <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(sugg.ticker, sugg.name)}</strong>
                             <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                               {sugg.ticker} | <span style={{ color: '#FBBF24' }}>{sugg.role}</span>
                             </div>
@@ -2528,7 +2604,7 @@ export default function GlobalSovereignDashboard() {
                             </span>
                           </td>
                           <td>
-                            <strong style={{ color: '#F8FAFC' }}>{pick.name}</strong>
+                            <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(pick.ticker, pick.name)}</strong>
                             <span style={{ fontSize: '0.73rem', color: '#94A3B8', marginLeft: '0.35rem', fontFamily: 'monospace' }}>
                               ({pick.ticker} · {pick.market})
                             </span>
@@ -2710,7 +2786,7 @@ export default function GlobalSovereignDashboard() {
                             </span>
                           </td>
                           <td>
-                            <strong style={{ color: '#F1F5F9' }}>{tx.name}</strong>
+                            <strong style={{ color: '#F1F5F9' }}>{formatStockDisplayName(tx.ticker, tx.name)}</strong>
                             {tx.ticker !== '-' && (
                               <span style={{ fontSize: '0.72rem', color: '#94A3B8', marginLeft: '0.3rem', fontFamily: 'monospace' }}>
                                 ({tx.ticker})
@@ -2933,7 +3009,7 @@ export default function GlobalSovereignDashboard() {
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.7rem 0.9rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.82rem' }}>
               <div style={{ color: '#F8FAFC', fontWeight: 'bold', fontSize: '0.95rem' }}>
-                {exitModal.name} <span style={{ fontFamily: 'monospace', color: '#94A3B8' }}>({exitModal.ticker})</span>
+                {formatStockDisplayName(exitModal.ticker, exitModal.name)} <span style={{ fontFamily: 'monospace', color: '#94A3B8' }}>({exitModal.ticker})</span>
               </div>
               <div style={{ color: '#CBD5E1', marginTop: '0.2rem' }}>
                 持有: <strong style={{ color: '#FDE68A' }}>{exitModal.shares?.toLocaleString()} 股</strong> | 成本: <strong style={{ color: '#FDE68A' }}>{exitModal.currency === 'USD' ? 'US$ ' : 'NT$ '}{exitModal.entry_price?.toLocaleString()}</strong>

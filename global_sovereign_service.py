@@ -14,6 +14,69 @@ local_template = os.path.join(os.path.dirname(__file__), "frontend", "src", "dat
 parent_template = os.path.join(os.path.dirname(__file__), "..", "openclaw_test", "frontend", "src", "data", "defaultGlobalSovereignData.json")
 TEMPLATE_PATH = local_template if os.path.exists(local_template) else parent_template
 
+GLOBAL_STOCK_NAME_MAP = {
+    '8996.TW': '高力 (Kaori 水冷散熱飆股)',
+    '8996': '高力',
+    '3017.TW': '奇鋐 (AI 水冷散熱龍頭)',
+    '3017': '奇鋐',
+    '3008.TW': '大立光 (Largan 光學鏡頭鏡王)',
+    '3008': '大立光',
+    '3037.TW': '欣興 (Unimicron 載板王者)',
+    '3037': '欣興',
+    '3443.TW': '創意 (Global Unichip ASIC)',
+    '3443': '創意',
+    '2330.TW': '台積電 (TSMC 神山)',
+    '2330': '台積電',
+    '2454.TW': '聯發科 (MediaTek 晶片霸主)',
+    '2454': '聯發科',
+    '2382.TW': '廣達 (AI 伺服器代工)',
+    '2382': '廣達',
+    '3231.TW': '緯創 (AI 代工伺服器)',
+    '3231': '緯創',
+    '6669.TW': '緯穎 (AI 伺服器巨頭)',
+    '6669': '緯穎',
+    '2317.TW': '鴻海 (電子代工巨擘)',
+    '2317': '鴻海',
+    '2308.TW': '台達電 (綠能電源龍頭)',
+    '2308': '台達電',
+    '3661.TW': '世芯-KY (AI ASIC 矽智財)',
+    '3661': '世芯-KY',
+    '2603.TW': '長榮海運 (貨櫃航運龍頭)',
+    '2603': '長榮',
+    '2609.TW': '陽明海運 (貨櫃航運)',
+    '2609': '陽明',
+    'MRNA': '莫德納 (Moderna 生技巨擘)',
+    'TEAM': 'Atlassian (TEAM 協同軟體龍頭)',
+    'ASX': '日月光投控 (ASE 封測龍頭ADR)',
+    'ILMN': '因美納 (Illumina 基因定序霸主)',
+    'PBR': '巴西石油 ADR (Petrobras)',
+    'MU': '美光科技 (Micron 記憶體巨頭)',
+    'NVDA': '輝達 (NVIDIA AI算力之王)',
+    'AVGO': '博通 (Broadcom 網通霸主)',
+    'TSLA': '特斯拉 (Tesla 自動駕駛)',
+    'AAPL': '蘋果 (Apple)',
+    'MSFT': '微軟 (Microsoft)',
+    'AMZN': '亞馬遜 (Amazon)',
+    'GOOGL': '谷歌 (Alphabet)',
+    'META': 'Meta (臉書)'
+}
+
+def _resolve_display_name(ticker: str, cursor=None) -> str:
+    if ticker in GLOBAL_STOCK_NAME_MAP:
+        return GLOBAL_STOCK_NAME_MAP[ticker]
+    base = ticker.split(".")[0]
+    if base in GLOBAL_STOCK_NAME_MAP:
+        return f"{GLOBAL_STOCK_NAME_MAP[base]} ({ticker})"
+    if cursor and (ticker.endswith(".TW") or base.isdigit()):
+        try:
+            cursor.execute("SELECT stock_name FROM daily_stock WHERE stock_id = ? AND stock_name IS NOT NULL LIMIT 1", (base,))
+            row = cursor.fetchone()
+            if row and row[0]:
+                return f"{row[0]} ({ticker})"
+        except Exception:
+            pass
+    return ticker
+
 def get_global_sovereign_dashboard_data():
     """
     直接從 tw_stock.db 的 global_stock_daily 及 global_sovereign_positions 資料表
@@ -200,6 +263,13 @@ def get_global_sovereign_dashboard_data():
             ticker = pick.get("ticker")
             if not ticker:
                 continue
+            # 確保股票名稱具備清晰繁體中文標註 (如 8996.TW 顯示為 高力 (Kaori 水冷散熱飆股))
+            cur_name = pick.get("name") or ""
+            if not cur_name or cur_name == ticker or cur_name == ticker.split(".")[0] or not any('\u4e00' <= char <= '\u9fff' for char in cur_name):
+                resolved_name = _resolve_display_name(ticker, c)
+                if resolved_name:
+                    pick["name"] = resolved_name
+
             st = _query_ticker_stats(ticker)
             if st:
                 pick["price"] = st["price"]
