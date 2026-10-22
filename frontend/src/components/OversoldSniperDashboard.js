@@ -89,7 +89,9 @@ export default function OversoldSniperDashboard() {
       if (res && res.status === 'ok') {
         setLiveData(res);
         if (isManual) {
-          triggerNotice(`✅ 雷達掃描完成！最新資料日期：${res.market_date || '2026-10-21'} (共 ${res.radar?.triggers?.length || 0} 檔觸發撈底)`);
+          const twCnt = res.radar?.taiwan_triggers?.length || 0;
+          const glbCnt = res.radar?.global_triggers?.length || 0;
+          triggerNotice(`✅ 雷達掃描完成！已搜尋台股新資料庫與全球庫 (${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔觸發撈底 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)`);
         }
       } else {
         setLiveData(defaultOversoldSniperData);
@@ -101,7 +103,7 @@ export default function OversoldSniperDashboard() {
       console.warn('載入超賣快打雷達失敗:', e);
       setLiveData(defaultOversoldSniperData);
       if (isManual) {
-        triggerNotice(`✅ 雷達已載入最新快取數據 (${defaultOversoldSniperData.market_date})！`);
+        triggerNotice(`✅ 雷達已重整至台股新資料庫最新行情 (${defaultOversoldSniperData.market_date})！`);
       }
     } finally {
       setLoading(false);
@@ -133,13 +135,17 @@ export default function OversoldSniperDashboard() {
 
   const triggers = liveData?.radar?.triggers || [];
   const watchlist = liveData?.radar?.watch_list || [];
+  const taiwanTriggers = liveData?.radar?.taiwan_triggers || triggers.filter(t => t.country === '台灣');
+  const globalTriggers = liveData?.radar?.global_triggers || triggers.filter(t => t.country !== '台灣');
   const allScanned = liveData?.radar?.all_ranked || [];
 
   const radarDisplayItems = useMemo(() => {
     if (radarFilter === 'triggers') return triggers;
+    if (radarFilter === 'taiwan') return taiwanTriggers;
+    if (radarFilter === 'global') return globalTriggers;
     if (radarFilter === 'watchlist') return watchlist;
     return allScanned;
-  }, [radarFilter, triggers, watchlist, allScanned]);
+  }, [radarFilter, triggers, taiwanTriggers, globalTriggers, watchlist, allScanned]);
 
   // 回測明細篩選
   const filteredTrades = useMemo(() => {
@@ -421,15 +427,15 @@ export default function OversoldSniperDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#F87171', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                📡 全球核心流動性權值股 — 即時超賣撈底雷達
+                📡 台股新資料庫 ＆ 全球核心權值股 — 即時超賣撈底雷達
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                直連 tw_stock.db 動態運算全球 177 檔核心標的最新 20 日 Z-Score。當 Z ≤ -2.0 且 Price ≥ 0.85×200MA 時自動亮燈，提示 10MA 停利目標與預期反彈漲幅！
+                直連 tw_stock.db 動態運算<strong>台股新資料庫 (1,058 檔上市櫃主力)</strong> 與全球權值庫 (150 檔巨頭)，即時計算 20 日 Z-Score。當 Z ≤ -2.0 且 Price ≥ 0.85×200MA 時自動亮燈，提示 10MA 停利目標與預期反彈漲幅！
               </p>
             </div>
 
             {/* 篩選標籤 */}
-            <div style={{ display: 'flex', gap: '0.4rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setRadarFilter('triggers')}
                 style={{
@@ -443,7 +449,37 @@ export default function OversoldSniperDashboard() {
                   color: radarFilter === 'triggers' ? '#FFF' : '#94A3B8'
                 }}
               >
-                🔥 已觸發撈底 ({triggers.length})
+                🔥 全部已觸發 ({triggers.length})
+              </button>
+              <button
+                onClick={() => setRadarFilter('taiwan')}
+                style={{
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'taiwan' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
+                  color: radarFilter === 'taiwan' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🇹🇼 台股撈底 ({taiwanTriggers.length})
+              </button>
+              <button
+                onClick={() => setRadarFilter('global')}
+                style={{
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'global' ? 'linear-gradient(135deg, #8B5CF6, #7C3AED)' : 'transparent',
+                  color: radarFilter === 'global' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🌐 美股全球 ({globalTriggers.length})
               </button>
               <button
                 onClick={() => setRadarFilter('watchlist')}
@@ -458,7 +494,7 @@ export default function OversoldSniperDashboard() {
                   color: radarFilter === 'watchlist' ? '#FFF' : '#94A3B8'
                 }}
               >
-                ⚠️ 接近超賣警戒 ({watchlist.length})
+                ⚠️ 接近警戒 ({watchlist.length})
               </button>
               <button
                 onClick={() => setRadarFilter('all')}
@@ -473,7 +509,7 @@ export default function OversoldSniperDashboard() {
                   color: radarFilter === 'all' ? '#FFF' : '#94A3B8'
                 }}
               >
-                🌐 全部排名 ({allScanned.length})
+                📊 全部掃描 ({allScanned.length})
               </button>
             </div>
           </div>

@@ -4177,8 +4177,10 @@ def get_tw_asymmetric_alpha_dashboard():
 @app.get("/api/oversold_sniper/dashboard")
 @app.get("/api/oversold_sniper/radar")
 def get_oversold_sniper_dashboard():
-    """極端超賣快打專屬看板：20日 Z <= -2.0 即時雷達、10MA 停利目標與 352 筆嚴格日頻回測"""
+    """極端超賣快打專屬看板：直連 tw_stock.db 台股新資料庫 + 全球權值庫即時雷達"""
+    import importlib
     import oversold_sniper_service
+    importlib.reload(oversold_sniper_service)
     return oversold_sniper_service.get_oversold_sniper_dashboard_data()
 
 @app.get("/api/market_ml/status")

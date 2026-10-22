@@ -2,7 +2,7 @@
   "status": "ok",
   "strategy_group": "⚡ 台股可轉債 (CB/CBAS) 主力鎖碼 × 強勢股 RSI(2) 急跌反彈狙擊",
   "latest_data_date": "2026-10-22",
-  "generated_at": "2026-10-22 16:36:24",
+  "generated_at": "2026-10-23 01:31:53",
   "data_source": "tw_stock.db (2016~2026 集保千張大戶 × 自營商避險買盤 × Connors RSI(2) 即時運算)",
   "summary_kpi": {
     "cbas_backtest_cagr_pct": 18.24,
