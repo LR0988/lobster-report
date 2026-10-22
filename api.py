@@ -4142,6 +4142,19 @@ def get_global_sovereign_dashboard():
     import global_sovereign_service
     return global_sovereign_service.get_global_sovereign_dashboard_data()
 
+@app.get("/api/global_sovereign/dml-dsr")
+@app.get("/api/global-sovereign/dml-dsr")
+def get_global_sovereign_dml_dsr():
+    """全球泰坦 DML 因果提純與 DSR (Deflated Sharpe Ratio) 檢驗完整量化報告"""
+    results_path = os.path.join(BASE_DIR, "dml_and_dsr_results.json")
+    if os.path.exists(results_path):
+        try:
+            with open(results_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"讀取 DML/DSR 成果失敗: {e}")
+    raise HTTPException(status_code=404, detail="DML & DSR 分析成果檔尚未生成，請先執行 run_dml_and_dsr_analysis.py")
+
 @app.get("/api/global_sovereign/rank-ic")
 @app.get("/api/global-sovereign/rank-ic")
 def get_global_sovereign_rank_ic(start_date: str = None, end_date: str = None, factor: str = "composite"):
