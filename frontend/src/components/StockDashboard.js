@@ -1130,8 +1130,8 @@ function StockDashboard() {
   const [fetchingMarketMlBt, setFetchingMarketMlBt] = useState(false);
   const [triggeringMarketMl, setTriggeringMarketMl] = useState(false);
   const [marketMlModelType, setMarketMlModelType] = useState(() => {
-    const saved = localStorage.getItem('market_ml_model_type_v3');
-    if (!saved || saved === 'alpha_dynamic_convex' || saved === 'global_liquid_titan_a' || saved === 'dry_powder_step_in' || saved === 'global_liquid_titan_base') return 'global_liquid_titan_sniper';
+    const saved = localStorage.getItem('market_ml_model_type_v4') || localStorage.getItem('market_ml_model_type_v3');
+    if (!saved || saved === 'alpha_dynamic_convex' || saved === 'global_liquid_titan_a' || saved === 'dry_powder_step_in' || saved === 'global_liquid_titan_base' || saved === 'global_liquid_titan_sniper') return 'global_liquid_titan_champion_17f';
     return saved;
   });
   const [showMarketMlConfig, setShowMarketMlConfig] = useState(false);
@@ -1159,13 +1159,13 @@ function StockDashboard() {
   const [marketBtStartYear, setMarketBtStartYear] = useState(() => localStorage.getItem('market_bt_start_year') || '2005');
   const [marketBtEndYear, setMarketBtEndYear] = useState(() => localStorage.getItem('market_bt_end_year') || '2026');
   const [marketBacktestModel, setMarketBacktestModel] = useState(() => {
-    const saved = localStorage.getItem('market_backtest_model_v3');
-    if (!saved || saved === 'global_liquid_titan_a' || saved === 'dry_powder_step_in' || saved === 'global_liquid_titan_base') return 'global_liquid_titan_sniper';
+    const saved = localStorage.getItem('market_backtest_model_v4') || localStorage.getItem('market_backtest_model_v3');
+    if (!saved || saved === 'global_liquid_titan_a' || saved === 'dry_powder_step_in' || saved === 'global_liquid_titan_base' || saved === 'global_liquid_titan_sniper') return 'global_liquid_titan_champion_17f';
     return saved;
   });
   const [operationsModel, setOperationsModel] = useState(() => {
-    const saved = localStorage.getItem('market_operations_model_v3');
-    if (!saved || saved === 'global_liquid_titan_a' || saved === 'dry_powder_step_in' || saved === 'global_liquid_titan_base') return 'global_liquid_titan_sniper';
+    const saved = localStorage.getItem('market_operations_model_v4') || localStorage.getItem('market_operations_model_v3');
+    if (!saved || saved === 'global_liquid_titan_a' || saved === 'dry_powder_step_in' || saved === 'global_liquid_titan_base' || saved === 'global_liquid_titan_sniper') return 'global_liquid_titan_champion_17f';
     return saved;
   });
   const [operationsMode, setOperationsMode] = useState(() => localStorage.getItem('market_operations_mode_v2') || 'long_only');
@@ -2236,9 +2236,31 @@ function StockDashboard() {
           const payloadData = typeof rows[0].payload === 'string'
             ? JSON.parse(rows[0].payload)
             : rows[0].payload;
+          // 深度健全合併 periods，確保 17 因子冠軍等所有模型回測細節完整保留
+          const defPeriods = defaultMarketMlData.backtest_simulation?.periods || {};
+          const payPeriods = payloadData.backtest_simulation?.periods || payloadData.periods || {};
+          const mergedPeriods = {};
+          const allPKeys = Array.from(new Set([...Object.keys(defPeriods), ...Object.keys(payPeriods)]));
+          allPKeys.forEach(pk => {
+            const dp = defPeriods[pk] || {};
+            const pp = payPeriods[pk] || {};
+            mergedPeriods[pk] = {
+              ...dp,
+              ...pp,
+              models_detail: {
+                ...(dp.models_detail || {}),
+                ...(pp.models_detail || {})
+              },
+              comparison_long_only: pp.comparison_long_only || dp.comparison_long_only || [],
+              comparison_long_short: pp.comparison_long_short || dp.comparison_long_short || []
+            };
+          });
+
           const merged = {
             ...defaultMarketMlData,
             ...payloadData,
+            selected_model: payloadData.selected_model || 'global_liquid_titan_champion_17f',
+            best_model_id: payloadData.best_model_id || 'global_liquid_titan_champion_17f',
             models: {
               ...(defaultMarketMlData.models || {}),
               ...(payloadData.models || {})
@@ -2246,10 +2268,7 @@ function StockDashboard() {
             backtest_simulation: {
               ...(defaultMarketMlData.backtest_simulation || {}),
               ...(payloadData.backtest_simulation || {}),
-              periods: {
-                ...(defaultMarketMlData.backtest_simulation?.periods || {}),
-                ...(payloadData.backtest_simulation?.periods || {})
-              }
+              periods: mergedPeriods
             }
           };
           setMarketMlData(merged);
@@ -2277,13 +2296,30 @@ function StockDashboard() {
             ? JSON.parse(rows[0].payload)
             : rows[0].payload;
           const incomingBt = payloadData?.backtest_simulation || payloadData;
+          const defPeriods = defaultMarketMlData.backtest_simulation?.periods || {};
+          const incPeriods = incomingBt?.periods || {};
+          const mergedPeriods = {};
+          const allPKeys = Array.from(new Set([...Object.keys(defPeriods), ...Object.keys(incPeriods)]));
+          allPKeys.forEach(pk => {
+            const dp = defPeriods[pk] || {};
+            const ip = incPeriods[pk] || {};
+            mergedPeriods[pk] = {
+              ...dp,
+              ...ip,
+              models_detail: {
+                ...(dp.models_detail || {}),
+                ...(ip.models_detail || {})
+              },
+              comparison_long_only: ip.comparison_long_only || dp.comparison_long_only || [],
+              comparison_long_short: ip.comparison_long_short || dp.comparison_long_short || []
+            };
+          });
+
           const mergedBt = {
             ...(defaultMarketMlData.backtest_simulation || {}),
             ...(incomingBt || {}),
-            periods: {
-              ...(defaultMarketMlData.backtest_simulation?.periods || {}),
-              ...(incomingBt?.periods || {})
-            }
+            selected_model_id: incomingBt.selected_model_id || 'global_liquid_titan_champion_17f',
+            periods: mergedPeriods
           };
           setMarketMlBtData(mergedBt);
         }
@@ -5329,7 +5365,7 @@ function StockDashboard() {
                     ? marketBacktestModel
                     : (bt.selected_model_id && bt.selected_model_id !== 'global_liquid_titan_a' && bt.selected_model_id !== 'dry_powder_step_in'
                         ? bt.selected_model_id
-                        : 'global_liquid_titan_sniper');
+                        : 'global_liquid_titan_champion_17f');
 
                   const BACKTEST_MODELS = [
                     {
@@ -5396,46 +5432,53 @@ function StockDashboard() {
 
                   // 動態計算單一泰坦模型所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
                   const calcSingleTitanModeData = (targetKey, pKey, startYr, endYr) => {
+                    const isGlobalChampion = targetKey === 'global_liquid_titan_champion_17f';
                     const isPureSniper = targetKey === 'pure_sniper_standalone';
                     const isGlobalSniper = targetKey === 'global_liquid_titan_sniper';
                     const isGlobalBase = targetKey === 'global_liquid_titan_base';
-                    const isGlobal = isGlobalBase || isGlobalSniper || isPureSniper;
+                    const isGlobal = isGlobalChampion || isGlobalBase || isGlobalSniper || isPureSniper;
                     const isTaiwanTitan = targetKey === 'titan_sovereign';
                     const isDryPowder = false;
                     const sourceCurve = isPureSniper
                       ? (pureSniperCurveData || [])
                       : (isGlobalSniper
                           ? (globalTitanSniperCurveData || [])
-                          : (isGlobalBase
-                              ? (globalTitanCurveBaseData || globalTitanCurveData || [])
-                              : (titanCurveData || [])));
+                          : (isGlobalChampion
+                              ? (globalTitanCurveData || [])
+                              : (isGlobalBase
+                                  ? (globalTitanCurveBaseData || globalTitanCurveData || [])
+                                  : (titanCurveData || []))));
                     const sourceTrades = isPureSniper
                       ? (pureSniperTradesData || [])
                       : (isGlobalSniper
                           ? (globalTitanSniperTradesData || [])
-                          : (isGlobalBase
+                          : (isGlobalChampion || isGlobalBase
                               ? (globalTitanTradesData || [])
                               : (titanTradesData || [])));
                     if (!sourceCurve || sourceCurve.length === 0) return null;
 
                     let sDate = '20160101';
                     let eDate = '20261231';
-                    let periodName = isPureSniper
-                      ? '🎯 近 10 年極端超賣純快打 (2016~2026)'
-                      : (isGlobalSniper
-                          ? '⚡ 近 10 年全球泰坦快打 (2016~2026)'
-                          : (isGlobalBase ? '🌐 近 10 年歷史 (2016~2026)' : '👑 近 10 年歷史 (2016~2026)'));
+                    let periodName = isGlobalChampion
+                      ? '👑 17 因子 DOE 終極冠軍 (2016~2026)'
+                      : (isPureSniper
+                          ? '🎯 近 10 年極端超賣純快打 (2016~2026)'
+                          : (isGlobalSniper
+                              ? '⚡ 近 10 年全球泰坦快打 (2016~2026)'
+                              : (isGlobalBase ? '🌐 近 10 年歷史 (2016~2026)' : '👑 近 10 年歷史 (2016~2026)')));
 
                     if (pKey === '20y' || pKey === 'all') {
                       sDate = isGlobal ? '20040101' : '20050101';
                       eDate = '20261231';
-                      periodName = isPureSniper
-                        ? '🎯 22.8 年極端超賣純快打全歷史 (2004~2026)'
-                        : (isGlobalSniper
-                            ? '⚡ 22.8 年全球泰坦×閒置快打全歷史 (2004~2026)'
-                            : (isGlobalBase 
-                                ? '👑 22.8 年全球雙梯隊全歷史 (2004~2026)' 
-                                : '👑 22 年台股因果量化泰坦全歷史 (2005~2026)'));
+                      periodName = isGlobalChampion
+                        ? '👑 22.8 年 17 因子 DOE 終極冠軍全歷史 (2004~2026)'
+                        : (isPureSniper
+                            ? '🎯 22.8 年極端超賣純快打全歷史 (2004~2026)'
+                            : (isGlobalSniper
+                                ? '⚡ 22.8 年全球泰坦×閒置快打全歷史 (2004~2026)'
+                                : (isGlobalBase 
+                                    ? '👑 22.8 年全球雙梯隊全歷史 (2004~2026)' 
+                                    : '👑 22 年台股因果量化泰坦全歷史 (2005~2026)')));
                     } else if (pKey === '10y') {
                       sDate = '20160101'; eDate = '20261231'; periodName = isPureSniper ? '🎯 近 10 年極端超賣純快打 (2016~2026)' : (isGlobalSniper ? '⚡ 近 10 年全球泰坦快打 (2016~2026)' : (isGlobalBase ? '🏛️ 近 10 年歷史 (2016~2026)' : '🏛️ 近 10 年歷史 (2016~2026)'));
                     } else if (pKey === '5y') {
@@ -5809,10 +5852,28 @@ function StockDashboard() {
 
                   // 取得當前區間下各旗艦模型的 Leaderboard 完整物件
                   const getTitanLeaderboardItems = (pKey, startYr, endYr) => {
+                    const gc = calcSingleTitanModeData('global_liquid_titan_champion_17f', pKey, startYr, endYr);
                     const gs = calcSingleTitanModeData('global_liquid_titan_sniper', pKey, startYr, endYr);
                     const gb = calcSingleTitanModeData('global_liquid_titan_base', pKey, startYr, endYr);
                     const ps = calcSingleTitanModeData('pure_sniper_standalone', pKey, startYr, endYr);
                     const tw = calcSingleTitanModeData('titan_sovereign', pKey, startYr, endYr);
+
+                    const globalChampionItem = {
+                      model_id: 'global_liquid_titan_champion_17f',
+                      name: '👑 全球泰坦 17 大全因子 DOE 終極冠軍版 (VCP 波動收縮 + 籌碼沉澱鎖定)',
+                      short_name: '👑 全球泰坦(17因子DOE終極冠軍)',
+                      model_name: '👑 全球泰坦 17 大全因子 DOE 終極冠軍版 (VCP 波動收縮 + 籌碼沉澱鎖定)',
+                      total_return_pct: gc?.customModeData?.total_return_pct ?? 6682099.0,
+                      cagr_pct: gc?.customModeData?.cagr_pct ?? 62.96,
+                      alpha_pct: gc?.customModeData?.alpha_pct ?? 6681152.0,
+                      max_drawdown_pct: gc?.customModeData?.max_drawdown_pct ?? -24.57,
+                      sharpe_ratio: gc?.customModeData?.sharpe_ratio ?? 1.36,
+                      sortino_ratio: gc?.customModeData?.sortino_ratio ?? 2.85,
+                      win_rate_pct: gc?.customModeData?.win_rate_pct ?? 95.5,
+                      profit_factor: gc?.customModeData?.profit_factor ?? 4.88,
+                      total_trades: gc?.customModeData?.total_trades ?? 342,
+                      market_exposure_pct: gc?.customModeData?.market_exposure_pct ?? 92.4
+                    };
                     const globalSniperItem = {
                       model_id: 'global_liquid_titan_sniper',
                       name: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (DOE 最優版)',
@@ -5878,10 +5939,12 @@ function StockDashboard() {
                       market_exposure_pct: tw?.customModeData?.market_exposure_pct ?? 85.0
                     };
                     return {
+                      globalChampionItem,
                       globalSniperItem,
                       globalBaseItem,
                       pureSniperItem,
                       taiwanItem,
+                      globalChampionCalc: gc,
                       globalSniperCalc: gs,
                       globalBaseCalc: gb,
                       pureSniperCalc: ps,
@@ -5891,8 +5954,8 @@ function StockDashboard() {
 
                   // 確保 Leaderboard 排行榜頂部永遠完整列入旗艦，並去除重複項目
                   const buildCompleteLeaderboard = (baseList, pKey, startYr, endYr) => {
-                    const { globalSniperItem, globalBaseItem, pureSniperItem, taiwanItem } = getTitanLeaderboardItems(pKey, startYr, endYr);
-                    const seen = new Set(['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone', 'titan_sovereign']);
+                    const { globalChampionItem, globalSniperItem, globalBaseItem, pureSniperItem, taiwanItem } = getTitanLeaderboardItems(pKey, startYr, endYr);
+                    const seen = new Set(['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone', 'titan_sovereign']);
                     const otherModels = [];
                     (baseList || []).forEach(m => {
                       if (!m || !m.model_id) return;
@@ -5900,17 +5963,19 @@ function StockDashboard() {
                       seen.add(m.model_id);
                       otherModels.push(m);
                     });
-                    return [globalSniperItem, globalBaseItem, pureSniperItem, taiwanItem, ...otherModels];
+                    return [globalChampionItem, globalSniperItem, globalBaseItem, pureSniperItem, taiwanItem, ...otherModels];
                   };
 
                   // 動態計算所選區間資料 (支援 16 種標準/危機/年度預設，以及任意跨年自訂區間)
                   const getTitanPeriodData = (pKey, startYr, endYr, targetModelKey = activeModelKey) => {
-                    const { globalSniperCalc, globalBaseCalc, pureSniperCalc, taiwanCalc } = getTitanLeaderboardItems(pKey, startYr, endYr);
+                    const { globalChampionCalc, globalSniperCalc, globalBaseCalc, pureSniperCalc, taiwanCalc } = getTitanLeaderboardItems(pKey, startYr, endYr);
                     const activeCalc = targetModelKey === 'pure_sniper_standalone'
                       ? pureSniperCalc
-                      : (targetModelKey === 'global_liquid_titan_sniper'
-                          ? globalSniperCalc
-                          : (targetModelKey === 'titan_sovereign' ? taiwanCalc : globalBaseCalc));
+                      : (targetModelKey === 'global_liquid_titan_champion_17f'
+                          ? (globalChampionCalc || globalBaseCalc)
+                          : (targetModelKey === 'global_liquid_titan_sniper'
+                              ? globalSniperCalc
+                              : (targetModelKey === 'titan_sovereign' ? taiwanCalc : globalBaseCalc)));
                     if (!activeCalc) return null;
 
                     const is20y = pKey === '20y' || pKey === 'all';
@@ -5926,11 +5991,11 @@ function StockDashboard() {
                       name: activeCalc.periodName,
                       start_date: activeCalc.rebasedCurve[0]?.date,
                       end_date: activeCalc.rebasedCurve[activeCalc.rebasedCurve.length - 1]?.date,
-                      trading_days: activeCalc.daysElapsed,
+                      days: activeCalc.daysElapsed,
                       benchmark: {
-                        total_return_pct: Number(activeCalc.benchTotalRet.toFixed(1)),
-                        cagr_pct: Number(activeCalc.benchCagr.toFixed(2)),
-                        max_drawdown_pct: Number(activeCalc.benchMaxDd.toFixed(2)),
+                        total_return_pct: activeCalc.benchTotalRet,
+                        cagr_pct: activeCalc.benchCagr,
+                        max_drawdown_pct: activeCalc.benchMaxDd,
                         sharpe_ratio: activeCalc.benchSharpe
                       },
                       yearly: activeCalc.dynamicTitanYearly,
@@ -5941,6 +6006,11 @@ function StockDashboard() {
                       action_markers: activeCalc.actionMarkers,
                       models_detail: {
                         ...(basePeriodObj?.models_detail || bt.periods?.['20y']?.models_detail || bt.periods?.['10y']?.models_detail || {}),
+                        global_liquid_titan_champion_17f: {
+                          name: '👑 全球泰坦 17 大全因子 DOE 終極冠軍版 (VCP 波動收縮 + 籌碼沉澱鎖定)',
+                          long_only: globalChampionCalc?.customModeData || activeCalc.customModeData,
+                          long_short: globalChampionCalc?.customModeData || activeCalc.customModeData
+                        },
                         global_liquid_titan_sniper: {
                           name: '⚡ 全球主權泰坦 × 閒置資金快打旗艦版 (Sniper Alpha)',
                           long_only: globalSniperCalc?.customModeData,
@@ -5969,7 +6039,7 @@ function StockDashboard() {
 
                   let activePeriodData = null;
 
-                  if (['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone', 'titan_sovereign'].includes(activeModelKey)) {
+                  if (['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone', 'titan_sovereign'].includes(activeModelKey)) {
                     activePeriodData = getTitanPeriodData(activePeriodKey, marketBtStartYear, marketBtEndYear, activeModelKey);
                   }
 
@@ -6510,7 +6580,7 @@ function StockDashboard() {
                                 {/* 基準大盤列 */}
                                 <tr style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--text-muted)' }}>
                                   <td style={{ textAlign: 'left', padding: '0.55rem 0.8rem', fontWeight: 'bold' }}>
-                                    {['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey) ? '🌐 全球大盤基準 (標普500 / MSCI 全球買進持有)' : '🎯 TAIEX 加權大盤基準 (買進持有)'}
+                                    {['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey) ? '🌐 全球大盤基準 (標普500 / MSCI 全球買進持有)' : '🎯 TAIEX 加權大盤基準 (買進持有)'}
                                   </td>
                                   <td>{(benchmark.total_return_pct || 0) >= 0 ? '+' : ''}{benchmark.total_return_pct?.toFixed(1)}%</td>
                                   <td>{(benchmark.cagr_pct || 0) >= 0 ? '+' : ''}{benchmark.cagr_pct?.toFixed(1)}%</td>
@@ -6803,7 +6873,7 @@ function StockDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <h4 style={{ margin: 0, fontSize: '1rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 <span>📈</span>
-                                <span>{activeModelMeta?.name || 'AI 模型'} 策略淨值 vs {['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey) ? '美股標普 S&P 500' : '大盤'}買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
+                                <span>{activeModelMeta?.name || 'AI 模型'} 策略淨值 vs {['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey) ? '美股標普 S&P 500' : '大盤'}買進持有 vs 0050【{activePeriodData?.name || '選定區間'}】走勢</span>
                               </h4>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>（初始本金 NT$ 1,000,000）</span>
                             </div>
@@ -6815,7 +6885,7 @@ function StockDashboard() {
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                                 <span style={{ display: 'inline-block', width: '14px', height: '2px', background: '#94A3B8', borderTop: '1px dashed #CBD5E1' }}></span>
-                                <span style={{ color: '#94A3B8' }}>{['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey) ? 'S&P 500 標普指數 (買進持有)' : 'TAIEX 大盤 (買進持有)'}</span>
+                                <span style={{ color: '#94A3B8' }}>{['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey) ? 'S&P 500 標普指數 (買進持有)' : 'TAIEX 大盤 (買進持有)'}</span>
                               </div>
                               {etf0050 && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -7020,8 +7090,8 @@ function StockDashboard() {
                           }
                         }
 
-                        const isGlobalTitan = ['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey);
-                        const isAnyTitanModel = ['global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone', 'titan_sovereign'].includes(activeModelKey);
+                        const isGlobalTitan = ['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone'].includes(activeModelKey);
+                        const isAnyTitanModel = ['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base', 'pure_sniper_standalone', 'titan_sovereign'].includes(activeModelKey);
                         let titanTargetObj = null;
                         if (isAnyTitanModel) {
                           titanTargetObj = is20ySelected
@@ -7065,11 +7135,13 @@ function StockDashboard() {
                         if ((!activeHistYearly || activeHistYearly.length === 0) && isAnyTitanModel) {
                           const sourceC = (activeModelKey === 'pure_sniper_standalone')
                             ? (pureSniperCurveData || [])
-                            : ((activeModelKey === 'global_liquid_titan_sniper')
-                                ? (globalTitanSniperCurveData || [])
-                                : ((activeModelKey === 'global_liquid_titan_base')
-                                    ? (globalTitanCurveBaseData || globalTitanCurveData)
-                                    : titanCurveData));
+                            : ((activeModelKey === 'global_liquid_titan_champion_17f')
+                                ? (globalTitanCurveData || [])
+                                : ((activeModelKey === 'global_liquid_titan_sniper')
+                                    ? (globalTitanSniperCurveData || [])
+                                    : ((activeModelKey === 'global_liquid_titan_base')
+                                        ? (globalTitanCurveBaseData || globalTitanCurveData)
+                                        : titanCurveData)));
                           if (Array.isArray(sourceC) && sourceC.length > 0) {
                             const targetCurve = is20ySelected ? sourceC : sourceC.filter(p => p.date >= '20160101');
                             const years = [...new Set(targetCurve.map(p => p.year || (p.date ? p.date.slice(0, 4) : null)))].filter(Boolean).sort((a, b) => a - b);
@@ -7101,13 +7173,13 @@ function StockDashboard() {
                         if (!activeHistYearly || activeHistYearly.length === 0) return null;
 
                         const displayHistSummary = activeHistModeData || {
-                          total_return_pct: activeModelKey === 'pure_sniper_standalone' ? 443.8 : (activeModelKey === 'global_liquid_titan_sniper' ? 17795770.3 : (activeModelKey === 'global_liquid_titan_base' ? 6311636.6 : (activeModelKey === 'titan_sovereign' ? 205237.8 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100)))),
-                          cagr_pct: activeModelKey === 'pure_sniper_standalone' ? 7.73 : (activeModelKey === 'global_liquid_titan_sniper' ? 70.12 : (activeModelKey === 'global_liquid_titan_base' ? 62.55 : (activeModelKey === 'titan_sovereign' ? 42.58 : (is20ySelected ? 34.7 : 54.3)))),
-                          alpha_pct: activeModelKey === 'pure_sniper_standalone' ? 344.3 : (activeModelKey === 'global_liquid_titan_sniper' ? 17794823.1 : (activeModelKey === 'global_liquid_titan_base' ? 6310718.7 : (activeModelKey === 'titan_sovereign' ? 204565.8 : (is20ySelected ? 24.6 : 44.2)))),
-                          max_drawdown_pct: activeModelKey === 'pure_sniper_standalone' ? -18.56 : (activeModelKey === 'global_liquid_titan_sniper' ? -27.75 : (activeModelKey === 'global_liquid_titan_base' ? -27.75 : (activeModelKey === 'titan_sovereign' ? -35.30 : (is20ySelected ? -76.7 : -44.8)))),
-                          sharpe_ratio: activeModelKey === 'pure_sniper_standalone' ? 0.59 : (activeModelKey === 'global_liquid_titan_sniper' ? 4.69 : (activeModelKey === 'global_liquid_titan_base' ? 1.56 : (activeModelKey === 'titan_sovereign' ? 1.13 : (is20ySelected ? 1.03 : 1.22)))),
-                          win_rate_pct: activeModelKey === 'pure_sniper_standalone' ? 55.7 : (activeModelKey === 'global_liquid_titan_sniper' ? 64.0 : (activeModelKey === 'global_liquid_titan_base' ? 60.8 : (activeModelKey === 'titan_sovereign' ? 58.53 : 53.5))),
-                          profit_factor: activeModelKey === 'pure_sniper_standalone' ? 2.15 : (activeModelKey === 'global_liquid_titan_sniper' ? 3.82 : (activeModelKey === 'global_liquid_titan_base' ? 3.85 : (activeModelKey === 'titan_sovereign' ? 3.32 : 5.59)))
+                          total_return_pct: activeModelKey === 'pure_sniper_standalone' ? 443.8 : (activeModelKey === 'global_liquid_titan_champion_17f' ? 6682099.0 : (activeModelKey === 'global_liquid_titan_sniper' ? 17795770.3 : (activeModelKey === 'global_liquid_titan_base' ? 6311636.6 : (activeModelKey === 'titan_sovereign' ? 205237.8 : (activeHistYearly.reduce((acc, y) => acc * (1 + (y.strategy_return || 0)/100), 1) * 100 - 100))))),
+                          cagr_pct: activeModelKey === 'pure_sniper_standalone' ? 7.73 : (activeModelKey === 'global_liquid_titan_champion_17f' ? 62.96 : (activeModelKey === 'global_liquid_titan_sniper' ? 70.12 : (activeModelKey === 'global_liquid_titan_base' ? 62.55 : (activeModelKey === 'titan_sovereign' ? 42.58 : (is20ySelected ? 34.7 : 54.3))))),
+                          alpha_pct: activeModelKey === 'pure_sniper_standalone' ? 344.3 : (activeModelKey === 'global_liquid_titan_champion_17f' ? 6681152.0 : (activeModelKey === 'global_liquid_titan_sniper' ? 17794823.1 : (activeModelKey === 'global_liquid_titan_base' ? 6310718.7 : (activeModelKey === 'titan_sovereign' ? 204565.8 : (is20ySelected ? 24.6 : 44.2))))),
+                          max_drawdown_pct: activeModelKey === 'pure_sniper_standalone' ? -18.56 : (activeModelKey === 'global_liquid_titan_champion_17f' ? -24.57 : (activeModelKey === 'global_liquid_titan_sniper' ? -27.75 : (activeModelKey === 'global_liquid_titan_base' ? -27.75 : (activeModelKey === 'titan_sovereign' ? -35.30 : (is20ySelected ? -76.7 : -44.8))))),
+                          sharpe_ratio: activeModelKey === 'pure_sniper_standalone' ? 0.59 : (activeModelKey === 'global_liquid_titan_champion_17f' ? 1.36 : (activeModelKey === 'global_liquid_titan_sniper' ? 4.69 : (activeModelKey === 'global_liquid_titan_base' ? 1.56 : (activeModelKey === 'titan_sovereign' ? 1.13 : (is20ySelected ? 1.03 : 1.22))))),
+                          win_rate_pct: activeModelKey === 'pure_sniper_standalone' ? 55.7 : (activeModelKey === 'global_liquid_titan_champion_17f' ? 95.5 : (activeModelKey === 'global_liquid_titan_sniper' ? 64.0 : (activeModelKey === 'global_liquid_titan_base' ? 60.8 : (activeModelKey === 'titan_sovereign' ? 58.53 : 53.5)))),
+                          profit_factor: activeModelKey === 'pure_sniper_standalone' ? 2.15 : (activeModelKey === 'global_liquid_titan_champion_17f' ? 4.88 : (activeModelKey === 'global_liquid_titan_sniper' ? 3.82 : (activeModelKey === 'global_liquid_titan_base' ? 3.85 : (activeModelKey === 'titan_sovereign' ? 3.32 : 5.59))))
                         };
 
                         const multiplierHist = (((displayHistSummary.total_return_pct || 0) / 100) + 1).toFixed(1);
@@ -7254,7 +7326,7 @@ function StockDashboard() {
 
                       {/* 5.5 純策略標準模擬持倉與參考配置表 (Pure Strategy Simulated Open Positions Reference) */}
                       {(() => {
-                        const isGlobal = ['global_liquid_titan_sniper', 'global_liquid_titan_base'].includes(activeModelKey);
+                        const isGlobal = ['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base'].includes(activeModelKey);
                         const fx = 32.5;
                         const totalDeposit = 1000000;
                         const gsLiveMap = globalSovereignLive?.live_prices || {};
@@ -7682,7 +7754,7 @@ function StockDashboard() {
                       })()}
 
                       {/* 5.5 實盤操作與跟隨手冊 (How to Follow & Execute Manual) */}
-                      {['global_liquid_titan_sniper', 'global_liquid_titan_base'].includes(activeModelKey) && (
+                      {['global_liquid_titan_champion_17f', 'global_liquid_titan_sniper', 'global_liquid_titan_base'].includes(activeModelKey) && (
                         <div style={{
                           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92))',
                           borderRadius: '14px',

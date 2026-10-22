@@ -218,8 +218,28 @@ def get_global_sovereign_dashboard_data():
                 raw_conv = up_std / max(dn_std, 1e-6)
                 convexity_val = round(min(5.0, max(0.2, raw_conv)), 2)
 
+            # VCP 波動收縮特徵 (10D波幅/40D波幅 + 5D量能乾涸 + 20D高點接近度)
+            range_10 = (max(closes[:min(10, len(closes))]) - min(closes[:min(10, len(closes))])) if len(closes) >= 10 else 0.0
+            range_40 = (max(closes[:min(40, len(closes))]) - min(closes[:min(40, len(closes))])) if len(closes) >= 40 else max(1e-6, range_10)
+            vcp_tightness = min(1.0, max(0.1, range_10 / max(range_40, 1e-6)))
+            v60_avg = (sum(vols[:60]) / len(vols[:60])) if vols and len(vols) >= 60 else (sum(vols) / max(1, len(vols))) if vols else 1.0
+            v5_avg = (sum(vols[:5]) / len(vols[:5])) if vols and len(vols) >= 5 else v60_avg
+            vol_dryup = min(3.0, max(0.1, v5_avg / max(v60_avg, 1e-6)))
+            h20 = max(closes[:min(20, len(closes))]) if closes else cur_px
+            pivot_prox = min(1.0, max(0.5, cur_px / max(h20, 1e-6)))
+            vcp_raw = (1.0 - vcp_tightness) * 0.40 + (1.0 / (vol_dryup + 0.5)) * 0.30 + pivot_prox * 0.30
+            vcp_val = round(float(vcp_raw), 2)
+
+            # Chip 籌碼沉澱特徵 (陽線吸籌成交量 / 陰線拋售成交量)
+            up_vols = [vols[i] for i in range(min(20, len(daily_rets))) if daily_rets[i] > 0]
+            dn_vols = [vols[i] for i in range(min(20, len(daily_rets))) if daily_rets[i] < 0]
+            mean_up_v = (sum(up_vols) / len(up_vols)) if up_vols else 1.0
+            mean_dn_v = (sum(dn_vols) / len(dn_vols)) if dn_vols else 1.0
+            vol_abs = min(5.0, max(0.2, mean_up_v / max(mean_dn_v, 1e-6)))
+            chip_val = round(float(min(1.0, max(0.0, (vol_abs - 0.2) / 4.8))), 2)
+
             # 計算 17 大全因子 DOE 終極冠軍複合動能分數:
-            # Blend_Mom * (1 + 0.45*FIP) * (1 + 0.16*Conv) * (1 + 0.30*ER60) * (1 + 0.10*Prox52W) * (1 - 0.05*Bias60)
+            # Blend_Mom * (1 + 0.45*FIP) * (1 + 0.16*Conv) * (1 + 0.30*ER60) * (1 + 0.10*Prox52W) * (1 - 0.05*Bias60) * (1 + 0.15*VCP) * (1 + 0.16*Chip)
             score_val = None
             if mom12m is not None and mom3m is not None:
                 raw_mom = (0.45 * mom12m + 0.35 * mom3m + 0.20 * mom1m) / 100.0
@@ -252,8 +272,10 @@ def get_global_sovereign_dashboard_data():
                 er_m = 1.0 + 0.30 * (er_val - 0.5)
                 prox_m = 1.0 + 0.10 * (prox_val ** 2 - 0.5)
                 bias_m = 1.0 - 0.05 * bias_val
+                vcp_m = 1.0 + 0.15 * (vcp_val - 0.5)
+                chip_m = 1.0 + 0.16 * (chip_val - 0.5)
 
-                score_val = round(blend_mom * fip_m * conv_m * er_m * prox_m * bias_m, 4)
+                score_val = round(blend_mom * fip_m * conv_m * er_m * prox_m * bias_m * vcp_m * chip_m, 4)
 
             # 爆量滯漲過濾 (Churn Filter: 5D均量 > 2.0倍60D均量 且 10D漲幅 < 2%)
             churn_safe = True
@@ -275,6 +297,8 @@ def get_global_sovereign_dashboard_data():
                 "mom_12m": mom12m,
                 "fip": fip_val,
                 "convexity": convexity_val,
+                "vcp": vcp_val,
+                "chip": chip_val,
                 "score": score_val,
                 "churn_safe": churn_safe
             }
@@ -306,6 +330,10 @@ def get_global_sovereign_dashboard_data():
                     pick["fip"] = st["fip"]
                 if st["convexity"] is not None:
                     pick["convexity"] = st["convexity"]
+                if st["vcp"] is not None:
+                    pick["vcp"] = st["vcp"]
+                if st["chip"] is not None:
+                    pick["chip"] = st["chip"]
                 if st["score"] is not None:
                     pick["score"] = st["score"]
                 pick["churn_safe"] = st["churn_safe"]

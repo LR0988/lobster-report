@@ -224,6 +224,8 @@ export const ALL_RANK_IC_FACTORS = [
   { key: 'convexity', label: '📐 60D 非對稱波動凸性比 (Convexity)', cat: 'quality', catName: '🔬 質量與路徑', desc: '右偏上行爆發波動 / 下行收斂波動 (右偏凸性溢價)' },
   { key: 'er_60', label: '🌊 Kaufman 60D 趨勢效率比 (Efficiency Ratio)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'Kaufman (1995) 淨位移 / 總路徑雜訊 (趨勢純淨度)' },
   { key: 'prox_52w', label: '🎯 52週新高接近度 (52W High Proximity)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'George & Hwang (2004 JF) 股價/252D新高錨定效應' },
+  { key: 'vcp_score', label: '🌀 VCP 波動收縮緊湊度 (Minervini VCP)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'Minervini (2013) 價格波幅收斂+量能乾涸+Pivot突破' },
+  { key: 'chip_score', label: '🧱 Chip 籌碼沉澱鎖定 (CMF & Vol Absorption)', cat: 'quality', catName: '🔬 質量與路徑', desc: 'Chaikin 資金流向 + 陽線吸籌比率 (浮額洗淨鎖碼)' },
   // 技術與乖離
   { key: 'bias_ma60', label: '📏 60MA 季線乖離率 (Bias MA60)', cat: 'technicals', catName: '🛡️ 技術與乖離', desc: '(Price - 60MA) / 60MA 季線加速偏離程度' },
   { key: 'zscore_20d', label: '🎚️ 20日價格 Z-Score (Mean Reversion)', cat: 'technicals', catName: '🛡️ 技術與乖離', desc: '(Price - 20MA) / Std20 超買超賣與急跌反彈' }
@@ -706,9 +708,10 @@ export default function GlobalSovereignDashboard() {
     }
 
     // A. 針對目標 Top 3 標的
-    activeTopPicks.forEach(pick => {
+    activeTopPicks.forEach((pick, idx) => {
+      const pRank = pick.rank || (idx + 1);
       // 雙梯隊權重設計：各隊佔 50% 總資金，梯隊內部為 50/30/20 黃金階梯
-      const weightTranchePct = pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : 20); // 梯隊內比例 50%, 30%, 20%
+      const weightTranchePct = pRank === 1 ? 50 : (pRank === 2 ? 30 : 20); // 梯隊內比例 50%, 30%, 20%
       const weightTeamPct = weightTranchePct * 0.5; // 各隊佔總資產 25%, 15%, 10%
       const totalWeightPct = weightTranchePct;       // 雙隊合併佔總資產 50%, 30%, 20%
 
@@ -753,13 +756,7 @@ export default function GlobalSovereignDashboard() {
       let isBalanced = false;
       let estFee = 0;
 
-      if (isAlreadyDismissed) {
-        action = '續抱';
-        actionColor = '#10B981';
-        recShares = 0;
-        actionNote = '已完成調倉執行';
-        isBalanced = true;
-      } else if (rebalanceMode === 'full_100') {
+      if (rebalanceMode === 'full_100') {
         // === 模式 1（主要模式）：雙梯隊統一檢視 (A隊優先補滿 + B隊缺額補齊) ===
         if (totalDeficitShares === 0 && (excessShares === 0 || weightDiffPct <= 5.0)) {
           action = '續抱';
@@ -825,7 +822,8 @@ export default function GlobalSovereignDashboard() {
         ? `雙隊 ${totalWeightPct}% (A隊${weightTeamPct}% + B隊${weightTeamPct}%)`
         : `梯隊 ${weightTranchePct}% (總額 ${weightTeamPct}%)`;
 
-      const roleTitle = `👑 第${pick.rank}主力 (總目標 ${totalWeightPct}%)`;
+      const roleTitle = `👑 第${pRank}主力 (總目標 ${totalWeightPct}%)`;
+      const finalNote = isAlreadyDismissed ? (actionNote ? `${actionNote} (已標記完成)` : '已標記完成') : actionNote;
 
       suggestions.push({
         key: suggKey,
@@ -852,7 +850,7 @@ export default function GlobalSovereignDashboard() {
         defaultPrice: price,
         defaultTaxFee: estFee,
         role: roleTitle,
-        actionNote,
+        actionNote: finalNote,
         heldPos,
         isBalanced,
         isExecuted: isAlreadyDismissed
@@ -2499,18 +2497,27 @@ export default function GlobalSovereignDashboard() {
 
                 {dismissedSuggestions.length > 0 && (
                   <button
-                    onClick={() => setDismissedSuggestions([])}
-                    style={{
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      color: '#94A3B8',
-                      padding: '0.28rem 0.55rem',
-                      borderRadius: '5px',
-                      fontSize: '0.72rem',
-                      cursor: 'pointer'
+                    type="button"
+                    onClick={() => {
+                      setDismissedSuggestions([]);
+                      triggerNotice('✓ 已重設所有調倉標記，重新為您生成即時最新建議！');
                     }}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.18)',
+                      border: '1px solid #EF4444',
+                      color: '#FCA5A5',
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: '5px',
+                      fontSize: '0.76rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                    title="清空歷史消掉記錄，重新強制運算所有標的之即時缺額與調倉建議"
                   >
-                    ↺ 重新產生建議
+                    ↺ 重新產生建議 ({dismissedSuggestions.length} 筆已標記)
                   </button>
                 )}
               </div>
@@ -2712,24 +2719,45 @@ export default function GlobalSovereignDashboard() {
 
                           {/* 右側按鈕送出 */}
                           <td style={{ textAlign: 'center' }}>
-                            <button
-                              onClick={() => handleExecuteSuggestion(sugg)}
-                              disabled={sugg.action === '續抱' || sugg.isExecuted}
-                              style={{
-                                padding: '0.35rem 0.8rem',
-                                fontSize: '0.78rem',
-                                background: (sugg.action === '續抱' || sugg.isExecuted) ? 'rgba(16, 185, 129, 0.25)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
-                                color: (sugg.action === '續抱' || sugg.isExecuted) ? '#34D399' : '#FFF',
-                                border: (sugg.action === '續抱' || sugg.isExecuted) ? '1px solid rgba(16, 185, 129, 0.5)' : 'none',
-                                borderRadius: '4px',
-                                fontWeight: 'bold',
-                                cursor: (sugg.action === '續抱' || sugg.isExecuted) ? 'default' : 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {sugg.isExecuted ? '✅ 已執行' : (sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出')}
-                            </button>
+                            {sugg.isExecuted ? (
+                              <button
+                                type="button"
+                                onClick={() => setDismissedSuggestions(prev => prev.filter(k => k !== sugg.key))}
+                                title="點擊取消已執行標記，重新恢復為待調倉建議"
+                                style={{
+                                  padding: '0.35rem 0.65rem',
+                                  fontSize: '0.74rem',
+                                  background: 'rgba(59, 130, 246, 0.2)',
+                                  color: '#93C5FD',
+                                  border: '1px solid rgba(59, 130, 246, 0.4)',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  cursor: 'pointer',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                ✅ 已執行 (↺重算)
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleExecuteSuggestion(sugg)}
+                                disabled={sugg.action === '續抱'}
+                                style={{
+                                  padding: '0.35rem 0.8rem',
+                                  fontSize: '0.78rem',
+                                  background: sugg.action === '續抱' ? 'rgba(16, 185, 129, 0.25)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
+                                  color: sugg.action === '續抱' ? '#34D399' : '#FFF',
+                                  border: sugg.action === '續抱' ? '1px solid rgba(16, 185, 129, 0.5)' : 'none',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  cursor: sugg.action === '續抱' ? 'default' : 'pointer',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出'}
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );
@@ -2747,10 +2775,10 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📡 全球泰坦 Top 10 即時敏銳動能與非對稱凸性雷達（1號 / 22號 選股順位的唯一依據）
+                    📡 全球泰坦 17 大全因子 DOE 終極冠軍即時雷達（1號 / 22號 選股順位的唯一依據）
                   </h4>
                   <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    採用 <strong>(85% Raw + 15% 殘差 Alpha) × (45% 12M + 35% 3M + 20% 1M) × (1 + 0.5 FIP) × (1 + 0.20 凸性比)</strong> 排序，並通過「<strong>爆量滯漲濾網</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除）」。第 1~3 名為當期正選，第 4~5 名為在手續抱保護緩衝帶！
+                    採用 <strong>17 大全因子 DOE 尋優冠軍公式</strong>：(88% Raw + 12% 殘差) × FIP(0.45) × 凸性(0.16) × ER60(0.30) × 52W新高(0.10) × <strong>VCP波動收縮(0.15)</strong> × <strong>Chip籌碼沉澱(0.16)</strong> × 季線乖離(-0.05) 排序，並通過「<strong>爆量滯漲濾網</strong>」。第 1~3 名為當期正選，第 4~5 名為在手續抱保護緩衝帶！
                   </p>
                 </div>
                 <span style={{ fontSize: '0.78rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
@@ -2772,17 +2800,20 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>12M 長期主升</th>
                       <th style={{ textAlign: 'right' }}>FIP 品質</th>
                       <th style={{ textAlign: 'right' }}>凸性比 (Conv)</th>
-                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>複合動能總分</th>
+                      <th style={{ textAlign: 'right', color: '#C084FC' }}>VCP 緊湊度</th>
+                      <th style={{ textAlign: 'right', color: '#F472B6' }}>Chip 籌碼</th>
+                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>17因子總分</th>
                       <th style={{ textAlign: 'center' }}>爆量滯漲濾網</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentPicks.slice(0, 10).map((pick) => {
-                      const isTop3 = pick.rank <= 3;
-                      const isBuf = pick.rank > 3 && pick.rank <= 5;
+                    {currentPicks.slice(0, 10).map((pick, idx) => {
+                      const pickRank = pick.rank || (idx + 1);
+                      const isTop3 = pickRank <= 3;
+                      const isBuf = pickRank > 3 && pickRank <= 5;
                       const curr = pick.currency === 'USD' ? 'US$ ' : 'NT$ ';
                       const isHeld = userPositions.some(p => p.ticker === pick.ticker || (p.ticker && pick.ticker && p.ticker.split('.')[0] === pick.ticker.split('.')[0]));
-                      const singleW = isTop3 ? (pick.rank === 1 ? 50 : (pick.rank === 2 ? 30 : 20)) : 0;
+                      const singleW = isTop3 ? (pickRank === 1 ? 50 : (pickRank === 2 ? 30 : 20)) : 0;
                       const navHalfW = singleW / 2;
 
                       return (
@@ -2799,7 +2830,7 @@ export default function GlobalSovereignDashboard() {
                               background: isTop3 ? 'rgba(16, 185, 129, 0.22)' : (isBuf ? 'rgba(59, 130, 246, 0.22)' : 'rgba(255,255,255,0.07)'),
                               color: isTop3 ? '#34D399' : (isBuf ? '#60A5FA' : '#94A3B8')
                             }}>
-                              {isTop3 ? `👑 Top ${pick.rank} 正選` : (isBuf ? `🛡️ Rank ${pick.rank} 保護帶` : `Rank ${pick.rank} 候補`)}
+                              {isTop3 ? `👑 Top ${pickRank} 正選` : (isBuf ? `🛡️ Rank ${pickRank} 保護帶` : `Rank ${pickRank} 候補`)}
                             </span>
                           </td>
                           <td>
@@ -2858,6 +2889,12 @@ export default function GlobalSovereignDashboard() {
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>
                             {pick.convexity !== undefined ? `${Number(pick.convexity).toFixed(2)}x` : '1.00x'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#C084FC', fontWeight: 'bold' }}>
+                            {pick.vcp !== undefined ? `${Number(pick.vcp).toFixed(2)}` : '0.65'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F472B6', fontWeight: 'bold' }}>
+                            {pick.chip !== undefined ? `${Number(pick.chip).toFixed(2)}` : '0.20'}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24' }}>
                             {pick.score?.toFixed(3)}
