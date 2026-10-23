@@ -4185,7 +4185,7 @@ def get_oversold_sniper_dashboard():
 
 @app.post("/api/oversold_sniper/trades")
 def create_oversold_sniper_trade(payload: dict = Body(...)):
-    """新增實盤跟單紀錄 (一鍵跟單或自訂輸入進場價位)"""
+    """新增實盤跟單紀錄 (一鍵跟單或自訂輸入進場價位與獨立時間)"""
     import oversold_sniper_service
     ticker = payload.get("ticker", "")
     name = payload.get("name", ticker)
@@ -4194,17 +4194,19 @@ def create_oversold_sniper_trade(payload: dict = Body(...)):
     entry_price = payload.get("entry_price", 0)
     shares = payload.get("shares", 1000)
     entry_date = payload.get("entry_date", datetime.now().strftime("%Y-%m-%d"))
+    entry_time = payload.get("entry_time", datetime.now().strftime("%H:%M:%S"))
     notes = payload.get("notes", "")
-    return oversold_sniper_service.add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes)
+    return oversold_sniper_service.add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes, entry_time=entry_time)
 
 @app.post("/api/oversold_sniper/trades/{trade_id}/close")
 def close_oversold_sniper_trade(trade_id: str, payload: dict = Body(...)):
-    """平倉實盤快打紀錄 (輸入賣出價位與理由，移入歷史進出)"""
+    """平倉實盤快打紀錄 (輸入賣出價位與理由，分開記錄出場日期與時間)"""
     import oversold_sniper_service
     exit_price = payload.get("exit_price", 0)
     exit_date = payload.get("exit_date", datetime.now().strftime("%Y-%m-%d"))
+    exit_time = payload.get("exit_time", datetime.now().strftime("%H:%M:%S"))
     exit_reason = payload.get("exit_reason", "🎯 觸及 10MA 停利")
-    return oversold_sniper_service.close_user_trade(trade_id, exit_price, exit_date, exit_reason)
+    return oversold_sniper_service.close_user_trade(trade_id, exit_price, exit_date, exit_reason, exit_time=exit_time)
 
 @app.delete("/api/oversold_sniper/trades/{trade_id}")
 def delete_oversold_sniper_trade(trade_id: str):

@@ -397,9 +397,10 @@ export async function apiGetGlobalTitanRankIc(params = {}) {
 }
 
 // ==========================================
-// 🎯 極端超賣快打專屬 Dashboard API (直連筆電本機 tw_stock.db)
+// 🎯 極端超賣快打專屬 Dashboard API (直連筆電本機 tw_stock.db + 雲端三重容錯備援)
 // ==========================================
 const LOCAL_SNIPER_TRADES_KEY = 'user_oversold_sniper_trades_v1';
+const LOCAL_SNIPER_DELETED_KEY = 'user_oversold_sniper_deleted_ids_v1';
 
 export function getLocalSniperTrades() {
   try {
@@ -416,6 +417,50 @@ export function saveLocalSniperTrades(trades) {
       localStorage.setItem(LOCAL_SNIPER_TRADES_KEY, JSON.stringify(trades));
     }
   } catch (e) {}
+}
+
+export function getDeletedSniperTradeIds() {
+  try {
+    const raw = (typeof window !== 'undefined') ? localStorage.getItem(LOCAL_SNIPER_DELETED_KEY) : null;
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveDeletedSniperTradeIds(ids) {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_SNIPER_DELETED_KEY, JSON.stringify(ids));
+    }
+  } catch (e) {}
+}
+
+export async function syncDeletedSniperTradeIdsToSupabase(ids) {
+  try {
+    await supabaseDirectFetch('/stock_ml_cache', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        model_type: 'user_oversold_sniper_deleted_ids',
+        payload: JSON.stringify(ids),
+        updated_at: new Date().toISOString()
+      })
+    });
+  } catch (e) {}
+}
+
+export async function loadDeletedSniperTradeIdsFromSupabase() {
+  try {
+    const res = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.user_oversold_sniper_deleted_ids&select=payload');
+    if (res.ok) {
+      const rows = await res.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        return typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+      }
+    }
+  } catch (e) {}
+  return [];
 }
 
 export async function syncSniperTradesToSupabase(trades) {
@@ -464,6 +509,12 @@ export async function apiGetOversoldSniperDashboard() {
     }
   }
 
+  // 讀取本地與雲端已刪除黑名單 (確保被刪除的紀錄絕不再被復原)
+  const localDeleted = getDeletedSniperTradeIds();
+  const cloudDeleted = await loadDeletedSniperTradeIdsFromSupabase().catch(() => []);
+  const allDeletedIds = new Set([...localDeleted, ...(cloudDeleted || [])]);
+  const isNotDeleted = (t) => t && !allDeletedIds.has(t.id) && !allDeletedIds.has(String(t.id));
+
   // 讀取本地與雲端用戶跟單紀錄
   const localTrades = getLocalSniperTrades();
   let cloudTrades = null;
@@ -473,28 +524,71 @@ export async function apiGetOversoldSniperDashboard() {
       saveLocalSniperTrades(cloudTrades);
     }
   }
-  const allUserTrades = localTrades.length > 0 ? localTrades : (cloudTrades || []);
+  const allUserTrades = (localTrades.length > 0 ? localTrades : (cloudTrades || [])).filter(isNotDeleted);
 
-  const activeHoldings = allUserTrades.filter(t => t.status === 'ACTIVE');
-  const closedTrades = allUserTrades.filter(t => t.status === 'CLOSED');
+  const userActiveHoldings = allUserTrades.filter(t => t.status === 'ACTIVE');
+  const userClosedTrades = allUserTrades.filter(t => t.status === 'CLOSED');
+
+  let activeHoldings = [];
+  let tradeHistory = [];
 
   if (serverData) {
-    if (activeHoldings.length > 0 && (!serverData.active_holdings || serverData.active_holdings.length === 0)) {
-      serverData.active_holdings = activeHoldings;
-    }
-    if (closedTrades.length > 0 && (!serverData.trade_history || serverData.trade_history.length === 0)) {
-      serverData.trade_history = closedTrades;
-    }
-    return serverData;
+    const sActive = (serverData.active_holdings || []).filter(isNotDeleted);
+    const sClosed = (serverData.trade_history || []).filter(isNotDeleted);
+
+    const existingActiveIds = new Set(sActive.map(t => t.id));
+    const mergedActive = [...userActiveHoldings.filter(t => !existingActiveIds.has(t.id)), ...sActive];
+
+    const existingClosedIds = new Set(sClosed.map(t => t.id));
+    const mergedClosed = [...userClosedTrades.filter(t => !existingClosedIds.has(t.id)), ...sClosed];
+
+    activeHoldings = mergedActive;
+    tradeHistory = mergedClosed;
+    serverData.active_holdings = activeHoldings;
+    serverData.trade_history = tradeHistory;
+  } else {
+    const defaultData = defaultOversoldSniperData || {};
+    const dActive = (defaultData.active_holdings || []).filter(isNotDeleted);
+    const dClosed = (defaultData.trade_history || []).filter(isNotDeleted);
+
+    const existingActiveIds = new Set(dActive.map(t => t.id));
+    const mergedActive = [...userActiveHoldings.filter(t => !existingActiveIds.has(t.id)), ...dActive];
+
+    const existingClosedIds = new Set(dClosed.map(t => t.id));
+    const mergedClosed = [...userClosedTrades.filter(t => !existingClosedIds.has(t.id)), ...dClosed];
+
+    activeHoldings = mergedActive;
+    tradeHistory = mergedClosed;
+    serverData = {
+      ...defaultData,
+      active_holdings: activeHoldings,
+      trade_history: tradeHistory
+    };
   }
 
-  // 若後端離線，以 defaultOversoldSniperData + 本地/雲端用戶持倉融合返回
-  const defaultData = defaultOversoldSniperData;
-  return {
-    ...defaultData,
-    active_holdings: activeHoldings.length > 0 ? activeHoldings : (defaultData.active_holdings || []),
-    trade_history: closedTrades.length > 0 ? closedTrades : (defaultData.trade_history || [])
+  // 以真實歷史紀錄即時計算績效 (Single Source of Truth)
+  const totClosed = tradeHistory.length;
+  const wins = tradeHistory.filter(t => (t.pnl_pct || 0) > 0);
+  const losses = tradeHistory.filter(t => (t.pnl_pct || 0) <= 0);
+  const winRate = totClosed > 0 ? parseFloat(((wins.length / totClosed) * 100.0).toFixed(1)) : 0.0;
+  const avgRet = totClosed > 0 ? parseFloat((tradeHistory.reduce((acc, t) => acc + (t.pnl_pct || 0), 0) / totClosed).toFixed(2)) : 0.0;
+  const avgHolding = totClosed > 0 ? parseFloat((tradeHistory.reduce((acc, t) => acc + (t.holding_days || 1), 0) / totClosed).toFixed(1)) : 0.0;
+  const totPnlTwd = tradeHistory.filter(t => t.currency === 'TWD' || (t.ticker && t.ticker.endsWith('.TW'))).reduce((acc, t) => acc + (t.pnl_amount || 0), 0);
+  const totPnlUsd = tradeHistory.filter(t => t.currency === 'USD' || (!t.currency && !t.ticker?.endsWith('.TW'))).reduce((acc, t) => acc + (t.pnl_amount || 0), 0);
+
+  serverData.user_performance = {
+    total_closed_trades: totClosed,
+    win_trades: wins.length,
+    loss_trades: losses.length,
+    win_rate: winRate,
+    avg_return_pct: avgRet,
+    avg_holding_days: avgHolding,
+    total_pnl_twd: parseFloat(totPnlTwd.toFixed(2)),
+    total_pnl_usd: parseFloat(totPnlUsd.toFixed(2)),
+    active_positions_count: activeHoldings.length
   };
+
+  return serverData;
 }
 
 // ==========================================
@@ -520,12 +614,25 @@ export async function apiAddOversoldSniperTrade(payload) {
   const base = await resolveApiBase();
   let localResult = null;
 
+  const now = new Date();
+  const defaultDate = now.toISOString().split('T')[0];
+  const defaultTime = now.toTimeString().split(' ')[0]; // HH:mm:ss
+
+  const entryDate = payload.entry_date || defaultDate;
+  const entryTime = payload.entry_time || defaultTime;
+
+  const fullPayload = {
+    ...payload,
+    entry_date: entryDate,
+    entry_time: entryTime
+  };
+
   if (base) {
     try {
       const res = await fetch(`${base}/api/oversold_sniper/trades`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(fullPayload)
       });
       if (res.ok) {
         localResult = await res.json();
@@ -546,7 +653,9 @@ export async function apiAddOversoldSniperTrade(payload) {
     market: payload.market || '美股',
     currency: payload.currency || 'USD',
     status: 'ACTIVE',
-    entry_date: payload.entry_date || new Date().toISOString().split('T')[0],
+    entry_date: entryDate,
+    entry_time: entryTime,
+    entry_datetime: `${entryDate} ${entryTime}`,
     entry_price: inputPrice,
     shares: inputShares,
     current_price: inputPrice,
@@ -559,7 +668,7 @@ export async function apiAddOversoldSniperTrade(payload) {
     can_sell: false,
     sell_badge: '🛡️ 建倉持有中',
     sell_badge_color: '#38BDF8',
-    sell_instruction: '剛進場持倉第 1 天，目標等待反彈觸及 10MA 停利！',
+    sell_instruction: `進場時間: ${entryDate} ${entryTime.slice(0, 5)}，目標等待反彈觸及 10MA 停利！`,
     notes: payload.notes || ''
   };
 
@@ -570,8 +679,10 @@ export async function apiAddOversoldSniperTrade(payload) {
 
   return localResult || {
     status: 'ok',
-    message: `成功新增跟單 ${payload.ticker} (成本: ${inputPrice})！`,
-    trade_id: newTradeId
+    message: `成功新增跟單 ${payload.ticker} (成本: ${inputPrice}，進場時間: ${entryDate} ${entryTime.slice(0, 5)})！`,
+    trade_id: newTradeId,
+    entry_date: entryDate,
+    entry_time: entryTime
   };
 }
 
@@ -579,12 +690,25 @@ export async function apiCloseOversoldSniperTrade(tradeId, payload) {
   const base = await resolveApiBase();
   let localResult = null;
 
+  const now = new Date();
+  const defaultDate = now.toISOString().split('T')[0];
+  const defaultTime = now.toTimeString().split(' ')[0]; // HH:mm:ss
+
+  const exitDate = payload.exit_date || defaultDate;
+  const exitTime = payload.exit_time || defaultTime;
+
+  const fullPayload = {
+    ...payload,
+    exit_date: exitDate,
+    exit_time: exitTime
+  };
+
   if (base) {
     try {
       const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}/close`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(fullPayload)
       });
       if (res.ok) {
         localResult = await res.json();
@@ -600,14 +724,26 @@ export async function apiCloseOversoldSniperTrade(tradeId, payload) {
       const xPrice = parseFloat(payload.exit_price) || t.entry_price;
       const pnlPct = parseFloat(((xPrice / t.entry_price - 1.0) * 100.0).toFixed(2));
       const pnlAmt = parseFloat(((xPrice - t.entry_price) * t.shares).toFixed(2));
+
+      let holdingDays = 1;
+      try {
+        const eStr = `${t.entry_date}T${t.entry_time || '09:00:00'}`;
+        const xStr = `${exitDate}T${exitTime}`;
+        const diffMs = new Date(xStr).getTime() - new Date(eStr).getTime();
+        holdingDays = Math.max(0, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+      } catch (e) {}
+
       return {
         ...t,
         status: 'CLOSED',
-        exit_date: payload.exit_date || new Date().toISOString().split('T')[0],
+        exit_date: exitDate,
+        exit_time: exitTime,
+        exit_datetime: `${exitDate} ${exitTime}`,
         exit_price: xPrice,
-        exit_reason: payload.exit_reason || '手動獲利平倉',
+        exit_reason: payload.exit_reason || '🎯 手動獲利平倉',
         pnl_pct: pnlPct,
-        pnl_amount: pnlAmt
+        pnl_amount: pnlAmt,
+        holding_days: holdingDays
       };
     }
     return t;
@@ -617,7 +753,7 @@ export async function apiCloseOversoldSniperTrade(tradeId, payload) {
 
   return localResult || {
     status: 'ok',
-    message: `成功平倉跟單紀錄！`
+    message: `成功平倉跟單紀錄！出場時間: ${exitDate} ${exitTime.slice(0, 5)}`
   };
 }
 
@@ -638,8 +774,17 @@ export async function apiDeleteOversoldSniperTrade(tradeId) {
     }
   }
 
+  // 1. 寫入本地與雲端黑名單，確保不會被後端舊快照或預設檔復原
+  const currentDeleted = getDeletedSniperTradeIds();
+  if (!currentDeleted.includes(tradeId)) {
+    const updatedDeleted = [...currentDeleted, tradeId];
+    saveDeletedSniperTradeIds(updatedDeleted);
+    syncDeletedSniperTradeIdsToSupabase(updatedDeleted);
+  }
+
+  // 2. 從本地持倉列表中剔除
   const currentTrades = getLocalSniperTrades();
-  const updatedTrades = currentTrades.filter(t => t.id !== tradeId);
+  const updatedTrades = currentTrades.filter(t => t.id !== tradeId && String(t.id) !== String(tradeId));
   saveLocalSniperTrades(updatedTrades);
   syncSniperTradesToSupabase(updatedTrades);
 

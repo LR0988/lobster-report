@@ -59,7 +59,7 @@ KNOWN_NAMES = {
 }
 
 def ensure_user_sniper_table(conn):
-    """確保用戶實盤快打記錄表存在"""
+    """確保用戶實盤快打記錄表存在並支援獨立進出場時間"""
     conn.execute('''
     CREATE TABLE IF NOT EXISTS user_sniper_trades (
         id TEXT PRIMARY KEY,
@@ -69,9 +69,11 @@ def ensure_user_sniper_table(conn):
         currency TEXT DEFAULT 'TWD',
         status TEXT DEFAULT 'OPEN', -- 'OPEN' or 'CLOSED'
         entry_date TEXT NOT NULL,
+        entry_time TEXT,
         entry_price REAL NOT NULL,
         shares REAL DEFAULT 1000,
         exit_date TEXT,
+        exit_time TEXT,
         exit_price REAL,
         exit_reason TEXT,
         pnl_pct REAL,
@@ -85,6 +87,12 @@ def ensure_user_sniper_table(conn):
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+    # 安全檢查欄位
+    cols = [col[1] for col in conn.execute("PRAGMA table_info(user_sniper_trades)").fetchall()]
+    if 'entry_time' not in cols:
+        conn.execute("ALTER TABLE user_sniper_trades ADD COLUMN entry_time TEXT")
+    if 'exit_time' not in cols:
+        conn.execute("ALTER TABLE user_sniper_trades ADD COLUMN exit_time TEXT")
     conn.commit()
 
 def get_oversold_sniper_dashboard_data():
@@ -385,7 +393,8 @@ def get_oversold_sniper_dashboard_data():
             SELECT id, ticker, stock_name, market, currency, status, 
                    entry_date, entry_price, shares, exit_date, exit_price, 
                    exit_reason, pnl_pct, pnl_amount, holding_days, 
-                   target_ma10, target_ma20, stop_loss_price, notes
+                   target_ma10, target_ma20, stop_loss_price, notes,
+                   entry_time, exit_time
             FROM user_sniper_trades
             ORDER BY created_at DESC
         """).fetchall()
@@ -397,7 +406,8 @@ def get_oversold_sniper_dashboard_data():
             (t_id, t_ticker, t_name, t_market, t_curr, t_status, 
              e_date, e_price, t_shares, x_date, x_price, 
              x_reason, p_pct, p_amt, h_days, 
-             t_ma10, t_ma20, t_sl, t_notes) = row
+             t_ma10, t_ma20, t_sl, t_notes,
+             e_time, x_time) = row
 
             if t_status == 'OPEN':
                 # 動態更新最新現價與 10MA/20MA
@@ -484,6 +494,7 @@ def get_oversold_sniper_dashboard_data():
                         "text": sell_instruction
                     })
 
+                entry_time_str = e_time or ""
                 active_holdings.append({
                     "id": t_id,
                     "ticker": t_ticker,
@@ -491,6 +502,7 @@ def get_oversold_sniper_dashboard_data():
                     "market": t_market,
                     "currency": t_curr,
                     "entry_date": e_date,
+                    "entry_time": entry_time_str,
                     "entry_price": e_price,
                     "current_price": c_price,
                     "shares": t_shares,
@@ -517,9 +529,11 @@ def get_oversold_sniper_dashboard_data():
                     "market": t_market,
                     "currency": t_curr,
                     "entry_date": e_date,
+                    "entry_time": e_time or "",
                     "entry_price": e_price,
                     "shares": t_shares,
                     "exit_date": x_date or "",
+                    "exit_time": x_time or "",
                     "exit_price": x_price or e_price,
                     "exit_reason": x_reason or "手動獲利平倉",
                     "pnl_pct": p_pct or 0.0,
@@ -608,8 +622,8 @@ def get_oversold_sniper_dashboard_data():
 # =================================================================
 # 🛠️ 用戶實盤交易 CRUD 接口
 # =================================================================
-def add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes=""):
-    """新增一筆實盤快打記錄 (一鍵跟單或手動新增)"""
+def add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes="", entry_time=None):
+    """新增一筆實盤快打記錄 (一鍵跟單或手動新增，支援分開記錄進場日期與時間)"""
     conn = sqlite3.connect(DB_PATH)
     ensure_user_sniper_table(conn)
     c = conn.cursor()
@@ -617,6 +631,7 @@ def add_user_trade(ticker, name, market, currency, entry_price, shares, entry_da
     trade_id = f"snip_{int(datetime.now().timestamp() * 1000)}"
     entry_p = float(entry_price)
     shs = float(shares)
+    e_time = entry_time or datetime.now().strftime("%H:%M:%S")
     
     # 預設目標與停損
     target_ma10 = round(entry_p * 1.05, 2)
@@ -625,27 +640,41 @@ def add_user_trade(ticker, name, market, currency, entry_price, shares, entry_da
 
     c.execute("""
         INSERT INTO user_sniper_trades 
-        (id, ticker, stock_name, market, currency, status, entry_date, entry_price, shares, target_ma10, target_ma20, stop_loss_price, notes)
-        VALUES (?, ?, ?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, ?, ?)
-    """, (trade_id, ticker.upper(), name or ticker, market, currency, entry_date, entry_p, shs, target_ma10, target_ma20, stop_loss, notes))
+        (id, ticker, stock_name, market, currency, status, entry_date, entry_time, entry_price, shares, target_ma10, target_ma20, stop_loss_price, notes)
+        VALUES (?, ?, ?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (trade_id, ticker.upper(), name or ticker, market, currency, entry_date, e_time, entry_p, shs, target_ma10, target_ma20, stop_loss, notes))
 
     conn.commit()
     conn.close()
-    return {"status": "ok", "message": f"成功新增跟單 {ticker} (成本: {entry_p})！", "trade_id": trade_id}
 
-def close_user_trade(trade_id, exit_price, exit_date, exit_reason="🎯 觸及 10MA 停利"):
-    """平倉一筆快打持倉，記錄賣出價位與獲利"""
+    # 即時刷新預設快取
+    try:
+        get_oversold_sniper_dashboard_data()
+    except Exception:
+        pass
+
+    return {
+        "status": "ok", 
+        "message": f"成功新增跟單 {ticker} (成本: {entry_p}，進場時間: {entry_date} {e_time})！", 
+        "trade_id": trade_id,
+        "entry_date": entry_date,
+        "entry_time": e_time
+    }
+
+def close_user_trade(trade_id, exit_price, exit_date, exit_reason="🎯 觸及 10MA 停利", exit_time=None):
+    """平倉一筆快打持倉，分開記錄賣出日期與具體出場時間與獲利"""
     conn = sqlite3.connect(DB_PATH)
     ensure_user_sniper_table(conn)
     c = conn.cursor()
 
-    row = c.execute("SELECT entry_price, shares, entry_date FROM user_sniper_trades WHERE id = ?", (trade_id,)).fetchone()
+    row = c.execute("SELECT entry_price, shares, entry_date, entry_time FROM user_sniper_trades WHERE id = ?", (trade_id,)).fetchone()
     if not row:
         conn.close()
         return {"status": "error", "message": "找不到該筆交易紀錄"}
 
-    entry_p, shs, e_date = row
+    entry_p, shs, e_date, e_time = row
     exit_p = float(exit_price)
+    x_time = exit_time or datetime.now().strftime("%H:%M:%S")
     
     # 計算獲利 % 與 金額
     pnl_pct = round(((exit_p - entry_p) / entry_p) * 100.0, 2)
@@ -663,6 +692,7 @@ def close_user_trade(trade_id, exit_price, exit_date, exit_reason="🎯 觸及 1
         UPDATE user_sniper_trades 
         SET status = 'CLOSED',
             exit_date = ?,
+            exit_time = ?,
             exit_price = ?,
             exit_reason = ?,
             pnl_pct = ?,
@@ -670,22 +700,38 @@ def close_user_trade(trade_id, exit_price, exit_date, exit_reason="🎯 觸及 1
             holding_days = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-    """, (exit_date, exit_p, exit_reason, pnl_pct, pnl_amt, holding_days, trade_id))
+    """, (exit_date, x_time, exit_p, exit_reason, pnl_pct, pnl_amt, holding_days, trade_id))
 
     conn.commit()
     conn.close()
+
+    # 即時刷新預設快取
+    try:
+        get_oversold_sniper_dashboard_data()
+    except Exception:
+        pass
+
     return {
         "status": "ok", 
-        "message": f"成功平倉！賣出價位: {exit_p}，本次報酬率: {pnl_pct:+}% (獲利: {pnl_amt:+} )",
+        "message": f"成功平倉！賣出價位: {exit_p} (出場時間: {exit_date} {x_time})，本次報酬率: {pnl_pct:+}% (獲利: {pnl_amt:+} )",
         "pnl_pct": pnl_pct,
-        "pnl_amount": pnl_amt
+        "pnl_amount": pnl_amt,
+        "exit_date": exit_date,
+        "exit_time": x_time
     }
 
 def delete_user_trade(trade_id):
-    """刪除一筆交易紀錄"""
+    """刪除一筆交易紀錄並同步刷新快照"""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("DELETE FROM user_sniper_trades WHERE id = ?", (trade_id,))
     conn.commit()
     conn.close()
+
+    # 即時刷新預設快取，確保刪除後立刻反映
+    try:
+        get_oversold_sniper_dashboard_data()
+    except Exception:
+        pass
+
     return {"status": "ok", "message": "已刪除該筆交易紀錄"}

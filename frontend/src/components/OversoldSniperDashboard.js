@@ -28,7 +28,8 @@ export default function OversoldSniperDashboard() {
     name: '',
     price: '',
     shares: '1000',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toTimeString().split(' ')[0].slice(0, 5)
   });
 
   const triggerNotice = (msg) => {
@@ -137,6 +138,10 @@ export default function OversoldSniperDashboard() {
       return;
     }
 
+    const now = new Date();
+    const curDate = now.toISOString().split('T')[0];
+    const curTime = now.toTimeString().split(' ')[0];
+
     const payload = {
       ticker: item.ticker.toUpperCase(),
       name: item.name || item.ticker,
@@ -144,7 +149,8 @@ export default function OversoldSniperDashboard() {
       currency: isTw ? 'TWD' : 'USD',
       entry_price: inputPrice,
       shares: inputShares,
-      entry_date: new Date().toISOString().split('T')[0],
+      entry_date: curDate,
+      entry_time: curTime,
       notes: `強勢股回檔 Z=${item.z_score} 極限超賣撈底`
     };
 
@@ -154,7 +160,7 @@ export default function OversoldSniperDashboard() {
 
     if (res && res.status === 'ok') {
       const cSign = isTw ? 'NT$' : '$';
-      triggerNotice(`✅ 已成功記錄買入 ${payload.ticker}！買入價: ${cSign}${inputPrice}，股數: ${inputShares} 股，已加入持倉關注！`);
+      triggerNotice(`✅ 已成功記錄買入 ${payload.ticker}！買入價: ${cSign}${inputPrice} (進場時間: ${curDate} ${curTime.slice(0, 5)})，股數: ${inputShares} 股，已加入持倉關注！`);
       setActiveSubTab('tracker');
       loadDashboardData(false);
     } else {
@@ -174,6 +180,10 @@ export default function OversoldSniperDashboard() {
     const p = parseFloat(quickAdd.price);
     const shs = parseFloat(quickAdd.shares) || (isTw ? 1000 : 10);
 
+    const now = new Date();
+    const curDate = quickAdd.date || now.toISOString().split('T')[0];
+    const curTime = quickAdd.time ? (quickAdd.time.length === 5 ? `${quickAdd.time}:00` : quickAdd.time) : now.toTimeString().split(' ')[0];
+
     const payload = {
       ticker: finalTicker,
       name: quickAdd.name || finalTicker,
@@ -181,7 +191,8 @@ export default function OversoldSniperDashboard() {
       currency: isTw ? 'TWD' : 'USD',
       entry_price: p,
       shares: shs,
-      entry_date: quickAdd.date || new Date().toISOString().split('T')[0],
+      entry_date: curDate,
+      entry_time: curTime,
       notes: '手動快速輸入跟單'
     };
 
@@ -190,8 +201,15 @@ export default function OversoldSniperDashboard() {
     setLoading(false);
 
     if (res && res.status === 'ok') {
-      triggerNotice(`✅ 成功買入跟單 ${payload.ticker}！股價: ${p}，股數: ${shs} 股！`);
-      setQuickAdd({ ticker: '', name: '', price: '', shares: '1000', date: new Date().toISOString().split('T')[0] });
+      triggerNotice(`✅ 成功買入跟單 ${payload.ticker}！股價: ${p} (進場時間: ${curDate} ${curTime.slice(0, 5)})，股數: ${shs} 股！`);
+      setQuickAdd({ 
+        ticker: '', 
+        name: '', 
+        price: '', 
+        shares: '1000', 
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0].slice(0, 5)
+      });
       setActiveSubTab('tracker');
       loadDashboardData(false);
     } else {
@@ -199,11 +217,14 @@ export default function OversoldSniperDashboard() {
     }
   };
 
-  // 🚪 直接從行內輸入賣出股價平倉
+  // 🚪 直接從行內輸入賣出股價與出場時間平倉
   const handleInlineClose = async (holding) => {
     const rowExit = exitRowInputs[holding.id] || {};
     const inputExitPrice = rowExit.price !== undefined && rowExit.price !== '' ? parseFloat(rowExit.price) : holding.current_price;
     const inputReason = rowExit.reason || (holding.current_price >= holding.target_ma10 ? '🎯 觸及 10MA 停利' : '🎯 手動獲利平倉');
+    const now = new Date();
+    const inputExitDate = rowExit.exitDate || now.toISOString().split('T')[0];
+    const inputExitTime = rowExit.exitTime ? (rowExit.exitTime.length === 5 ? `${rowExit.exitTime}:00` : rowExit.exitTime) : now.toTimeString().split(' ')[0];
 
     if (!inputExitPrice || inputExitPrice <= 0) {
       alert('請輸入有效的賣出股價！');
@@ -212,7 +233,8 @@ export default function OversoldSniperDashboard() {
 
     const payload = {
       exit_price: inputExitPrice,
-      exit_date: new Date().toISOString().split('T')[0],
+      exit_date: inputExitDate,
+      exit_time: inputExitTime,
       exit_reason: inputReason
     };
 
@@ -223,7 +245,7 @@ export default function OversoldSniperDashboard() {
     if (res && res.status === 'ok') {
       const sign = (res.pnl_pct || 0) >= 0 ? '+' : '';
       const amtSign = (res.pnl_amount || 0) >= 0 ? '+' : '';
-      triggerNotice(`🎉 成功賣出平倉 ${holding.ticker}！賣出價位: ${payload.exit_price}，本次報酬率: ${sign}${res.pnl_pct}% (獲利: ${amtSign}${res.pnl_amount} ${holding.currency})！`);
+      triggerNotice(`🎉 成功賣出平倉 ${holding.ticker}！賣出價位: ${payload.exit_price} (出場時間: ${inputExitDate} ${inputExitTime.slice(0, 5)})，本次報酬率: ${sign}${res.pnl_pct}% (獲利: ${amtSign}${res.pnl_amount} ${holding.currency})！`);
       setActiveSubTab('history');
       loadDashboardData(false);
     } else {
@@ -231,39 +253,57 @@ export default function OversoldSniperDashboard() {
     }
   };
 
-  // 刪除交易紀錄
+  // 刪除交易紀錄 (持倉中或歷史紀錄)
   const handleDeleteTrade = async (tradeId, ticker) => {
-    if (window.confirm(`確定要刪除 ${ticker} 的這筆進出紀錄嗎？`)) {
+    if (window.confirm(`確定要徹底刪除 ${ticker || ''} 的這筆紀錄嗎？（刪除後將不再出現）`)) {
       setLoading(true);
+      // 樂觀更新前端畫面
+      setLiveData(prev => {
+        if (!prev) return prev;
+        const newActive = (prev.active_holdings || []).filter(t => t.id !== tradeId && String(t.id) !== String(tradeId));
+        const newHistory = (prev.trade_history || []).filter(t => t.id !== tradeId && String(t.id) !== String(tradeId));
+        return {
+          ...prev,
+          active_holdings: newActive,
+          trade_history: newHistory
+        };
+      });
+
       const res = await apiDeleteOversoldSniperTrade(tradeId);
       setLoading(false);
       if (res && res.status === 'ok') {
-        triggerNotice(`已刪除 ${ticker} 紀錄！`);
-        loadDashboardData(false);
+        triggerNotice(`🗑️ 已徹底刪除 ${ticker || ''} 紀錄！`);
+        await loadDashboardData(false);
+      } else {
+        alert(res?.message || '刪除失敗，請重試！');
+        await loadDashboardData(false);
       }
     }
   };
 
-  // 匯出真實進出歷史 CSV
+  // 匯出真實進出歷史 CSV (含獨立進出場日期與時間)
   const handleExportCsv = () => {
     if (!tradeHistory || tradeHistory.length === 0) {
       alert('目前尚無歷史進出紀錄可匯出！');
       return;
     }
-    const headers = ['標的代號', '標的名稱', '幣別', '買進日期', '賣出日期', '買進股價', '賣出股價', '買賣股數', '報酬率(%)', '損益金額', '持有天數', '出場理由', '備註'];
+    const headers = ['標的代號', '標的名稱', '市場', '幣別', '買進日期', '買進時間', '賣出日期', '賣出時間', '買進股價', '賣出股價', '買賣股數', '報酬率(%)', '損益金額', '持有天數', '出場理由', '備註'];
     const rows = tradeHistory.map(t => [
       t.ticker,
-      `"${t.name}"`,
+      `"${t.name || t.ticker}"`,
+      t.market || '',
       t.currency,
-      t.entry_date,
-      t.exit_date,
+      t.entry_date || '',
+      t.entry_time ? t.entry_time.slice(0, 8) : '',
+      t.exit_date || '',
+      t.exit_time ? t.exit_time.slice(0, 8) : '',
       t.entry_price,
       t.exit_price,
       t.shares,
       t.pnl_pct,
       t.pnl_amount,
       t.holding_days,
-      `"${t.exit_reason}"`,
+      `"${t.exit_reason || ''}"`,
       `"${t.notes || ''}"`
     ]);
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -500,19 +540,37 @@ export default function OversoldSniperDashboard() {
             />
           </div>
 
-          <input
-            type="date"
-            value={quickAdd.date}
-            onChange={e => setQuickAdd(prev => ({ ...prev, date: e.target.value }))}
-            style={{
-              padding: '0.35rem 0.5rem',
-              fontSize: '0.78rem',
-              borderRadius: '4px',
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: '#0F172A',
-              color: '#FFF'
-            }}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <input
+              type="date"
+              value={quickAdd.date}
+              onChange={e => setQuickAdd(prev => ({ ...prev, date: e.target.value }))}
+              title="買進日期"
+              style={{
+                padding: '0.35rem 0.5rem',
+                fontSize: '0.78rem',
+                borderRadius: '4px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: '#0F172A',
+                color: '#FFF'
+              }}
+            />
+            <input
+              type="time"
+              value={quickAdd.time}
+              onChange={e => setQuickAdd(prev => ({ ...prev, time: e.target.value }))}
+              title="買進時間"
+              style={{
+                padding: '0.35rem 0.4rem',
+                fontSize: '0.78rem',
+                borderRadius: '4px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: '#0F172A',
+                color: '#FFF',
+                width: '85px'
+              }}
+            />
+          </div>
 
           <button
             onClick={handleQuickAddSubmit}
@@ -889,7 +947,7 @@ export default function OversoldSniperDashboard() {
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代碼與名稱</th>
-                    <th>進場日期</th>
+                    <th>🟢 買進時間 (進場)</th>
                     <th style={{ textAlign: 'center' }}>持有天數 (上限10天)</th>
                     <th style={{ textAlign: 'right' }}>買入成本價</th>
                     <th style={{ textAlign: 'right' }}>最新現價</th>
@@ -897,8 +955,9 @@ export default function OversoldSniperDashboard() {
                     <th style={{ textAlign: 'right' }}>未實現損益 (%)</th>
                     <th style={{ textAlign: 'center' }}>🔔 賣出出場訊號提示</th>
                     <th style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)' }}>
-                      🚪 直接輸入賣出股價與理由平倉
+                      🚪 輸入賣出股價與時間平倉
                     </th>
+                    <th style={{ textAlign: 'center' }}>操作</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -920,7 +979,12 @@ export default function OversoldSniperDashboard() {
                             {pos.ticker} ({pos.shares} 股)
                           </div>
                         </td>
-                        <td>{pos.entry_date}</td>
+                        <td>
+                          <div style={{ color: '#F8FAFC', fontWeight: '500' }}>{pos.entry_date}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#38BDF8', fontFamily: 'monospace' }}>
+                            {pos.entry_time ? pos.entry_time.slice(0, 5) : '盤中'}
+                          </div>
+                        </td>
                         <td style={{ textAlign: 'center' }}>
                           <span style={{
                             fontSize: '0.82rem',
@@ -966,61 +1030,102 @@ export default function OversoldSniperDashboard() {
                             {pos.sell_instruction}
                           </div>
                         </td>
-                        {/* 🚪 直接輸入賣出股價與理由平倉 */}
+                        {/* 🚪 直接輸入賣出股價、日期、時間與理由平倉 */}
                         <td style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.05)' }}>
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <input
-                                type="number"
-                                step="any"
-                                value={valExitPrice}
-                                onChange={e => setExitRowInputs(prev => ({
-                                  ...prev,
-                                  [pos.id]: { ...(prev[pos.id] || {}), price: e.target.value }
-                                }))}
-                                placeholder="賣價"
-                                title="直接輸入實際賣出股價"
-                                style={{
-                                  width: '85px',
-                                  padding: '2px 4px',
-                                  fontSize: '0.78rem',
-                                  borderRadius: '3px',
-                                  border: '1px solid #10B981',
-                                  background: '#0F172A',
-                                  color: '#34D399',
-                                  fontWeight: 'bold',
-                                  fontFamily: 'monospace',
-                                  textAlign: 'right'
-                                }}
-                              />
-                              <select
-                                value={valExitReason}
-                                onChange={e => setExitRowInputs(prev => ({
-                                  ...prev,
-                                  [pos.id]: { ...(prev[pos.id] || {}), reason: e.target.value }
-                                }))}
-                                style={{
-                                  width: '85px',
-                                  padding: '1px',
-                                  fontSize: '0.68rem',
-                                  borderRadius: '3px',
-                                  border: '1px solid rgba(255,255,255,0.15)',
-                                  background: '#0F172A',
-                                  color: '#CBD5E1'
-                                }}
-                              >
-                                <option value="🎯 觸及 10MA 停利">10MA停利</option>
-                                <option value="🚀 觸及 +8% / 20MA 擴大停利">+8%/20MA</option>
-                                <option value="⏱️ 滿 10 天時間風控強制出場">10天到期</option>
-                                <option value="🛑 跌破 -10% 硬停損">-10%停損</option>
-                                <option value="🎯 手動獲利平倉">手動平倉</option>
-                              </select>
+                              <div style={{ display: 'flex', gap: '2px' }}>
+                                <input
+                                  type="number"
+                                  step="any"
+                                  value={valExitPrice}
+                                  onChange={e => setExitRowInputs(prev => ({
+                                    ...prev,
+                                    [pos.id]: { ...(prev[pos.id] || {}), price: e.target.value }
+                                  }))}
+                                  placeholder="賣價"
+                                  title="直接輸入實際賣出股價"
+                                  style={{
+                                    width: '80px',
+                                    padding: '2px 4px',
+                                    fontSize: '0.78rem',
+                                    borderRadius: '3px',
+                                    border: '1px solid #10B981',
+                                    background: '#0F172A',
+                                    color: '#34D399',
+                                    fontWeight: 'bold',
+                                    fontFamily: 'monospace',
+                                    textAlign: 'right'
+                                  }}
+                                />
+                                <select
+                                  value={valExitReason}
+                                  onChange={e => setExitRowInputs(prev => ({
+                                    ...prev,
+                                    [pos.id]: { ...(prev[pos.id] || {}), reason: e.target.value }
+                                  }))}
+                                  style={{
+                                    width: '85px',
+                                    padding: '1px',
+                                    fontSize: '0.68rem',
+                                    borderRadius: '3px',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: '#0F172A',
+                                    color: '#CBD5E1'
+                                  }}
+                                >
+                                  <option value="🎯 觸及 10MA 停利">10MA停利</option>
+                                  <option value="🚀 觸及 +8% / 20MA 擴大停利">+8%/20MA</option>
+                                  <option value="⏱️ 滿 10 天時間風控強制出場">10天到期</option>
+                                  <option value="🛑 跌破 -10% 硬停損">-10%停損</option>
+                                  <option value="🎯 手動獲利平倉">手動平倉</option>
+                                </select>
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '2px' }}>
+                                <input
+                                  type="date"
+                                  value={curExit.exitDate || new Date().toISOString().split('T')[0]}
+                                  onChange={e => setExitRowInputs(prev => ({
+                                    ...prev,
+                                    [pos.id]: { ...(prev[pos.id] || {}), exitDate: e.target.value }
+                                  }))}
+                                  title="賣出日期"
+                                  style={{
+                                    width: '95px',
+                                    padding: '1px 2px',
+                                    fontSize: '0.68rem',
+                                    borderRadius: '3px',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: '#0F172A',
+                                    color: '#FCD34D'
+                                  }}
+                                />
+                                <input
+                                  type="time"
+                                  value={curExit.exitTime !== undefined ? curExit.exitTime : new Date().toTimeString().split(' ')[0].slice(0, 5)}
+                                  onChange={e => setExitRowInputs(prev => ({
+                                    ...prev,
+                                    [pos.id]: { ...(prev[pos.id] || {}), exitTime: e.target.value }
+                                  }))}
+                                  title="賣出時間"
+                                  style={{
+                                    width: '70px',
+                                    padding: '1px 2px',
+                                    fontSize: '0.68rem',
+                                    borderRadius: '3px',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    background: '#0F172A',
+                                    color: '#FCD34D'
+                                  }}
+                                />
+                              </div>
                             </div>
 
                             <button
                               onClick={() => handleInlineClose(pos)}
                               style={{
-                                padding: '0.45rem 0.65rem',
+                                padding: '0.55rem 0.65rem',
                                 fontSize: '0.76rem',
                                 background: pos.can_sell ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #B91C1C)',
                                 border: 'none',
@@ -1036,6 +1141,23 @@ export default function OversoldSniperDashboard() {
                               <span>🚪</span> 賣出
                             </button>
                           </div>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            onClick={() => handleDeleteTrade(pos.id, pos.ticker)}
+                            title="刪除/放棄此筆持倉"
+                            style={{
+                              padding: '0.35rem 0.5rem',
+                              fontSize: '0.74rem',
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              color: '#F87171',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🗑️
+                          </button>
                         </td>
                       </tr>
                     );
@@ -1141,8 +1263,8 @@ export default function OversoldSniperDashboard() {
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代號與名稱</th>
-                    <th>買進日期</th>
-                    <th>賣出日期</th>
+                    <th>🟢 買進時間 (進場)</th>
+                    <th>🔴 賣出時間 (出場)</th>
                     <th style={{ textAlign: 'right' }}>買進股價</th>
                     <th style={{ textAlign: 'right' }}>賣出股價</th>
                     <th style={{ textAlign: 'right' }}>股數</th>
@@ -1167,8 +1289,18 @@ export default function OversoldSniperDashboard() {
                             {trade.ticker}
                           </div>
                         </td>
-                        <td>{trade.entry_date}</td>
-                        <td style={{ color: '#FCD34D', fontWeight: 'bold' }}>{trade.exit_date}</td>
+                        <td>
+                          <div style={{ color: '#F8FAFC', fontWeight: 'bold' }}>{trade.entry_date}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                            {trade.entry_time ? trade.entry_time.slice(0, 5) : '盤中'}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ color: '#FCD34D', fontWeight: 'bold' }}>{trade.exit_date}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#FBBF24', fontFamily: 'monospace' }}>
+                            {trade.exit_time ? trade.exit_time.slice(0, 5) : '收盤'}
+                          </div>
+                        </td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                           {cSign} {trade.entry_price?.toLocaleString()}
                         </td>
@@ -1185,7 +1317,7 @@ export default function OversoldSniperDashboard() {
                           {trade.pnl_amount >= 0 ? '+' : ''}{trade.pnl_amount?.toLocaleString()} {trade.currency}
                         </td>
                         <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
-                          {trade.holding_days} 天
+                          {trade.holding_days === 0 ? '當日 (<1天)' : `${trade.holding_days} 天`}
                         </td>
                         <td>
                           <span style={{
@@ -1201,11 +1333,11 @@ export default function OversoldSniperDashboard() {
                         <td style={{ textAlign: 'center' }}>
                           <button
                             onClick={() => handleDeleteTrade(trade.id, trade.ticker)}
-                            title="刪除此筆進出紀錄"
+                            title="徹底刪除此筆進出紀錄"
                             style={{
                               padding: '0.2rem 0.5rem',
                               fontSize: '0.72rem',
-                              background: 'transparent',
+                              background: 'rgba(239, 68, 68, 0.1)',
                               border: '1px solid rgba(239, 68, 68, 0.4)',
                               color: '#F87171',
                               borderRadius: '4px',
