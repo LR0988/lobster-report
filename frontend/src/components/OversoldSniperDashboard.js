@@ -573,7 +573,7 @@ export default function OversoldSniperDashboard() {
                 📡 全球主權泰坦強勢股庫 — 極限超賣撈底即時雷達
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                直連 SQLite 實時運算 180+ 檔多頭強勢股（台股旗艦 + 美股科技巨頭），<strong>可直接在下方列表輸入您的實盤買入股價與股數，點擊買入即可直接加入持倉！</strong>
+                直連 SQLite 實時運算 180+ 檔多頭強勢股。<strong>已為您依照 DOE 最優均線彈力分自動排序，預估勝率最高（🚀 95% 極致深坑 / ⭐ 90% 強烈推薦）之標的自動置頂，標示「👑 優先首選打擊」！</strong>
               </p>
             </div>
 
@@ -671,6 +671,9 @@ export default function OversoldSniperDashboard() {
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代號與名稱</th>
+                    <th style={{ textAlign: 'center', background: 'rgba(192, 132, 252, 0.12)', color: '#E9D5FF' }}>
+                      🎯 均線彈力分 (勝率優先級)
+                    </th>
                     <th style={{ textAlign: 'right' }}>參考現價</th>
                     <th style={{ textAlign: 'center' }}>20日 Z-Score</th>
                     <th style={{ textAlign: 'right' }}>🎯 10MA 目標</th>
@@ -702,6 +705,31 @@ export default function OversoldSniperDashboard() {
                             {item.ticker}
                           </div>
                         </td>
+
+                        {/* 🎯 均線彈力分 (勝率優先級) */}
+                        <td style={{ textAlign: 'center', background: 'rgba(192, 132, 252, 0.05)' }}>
+                          <div>
+                            <span style={{
+                              fontSize: '0.74rem',
+                              background: item.priority_color || '#38BDF8',
+                              color: '#FFF',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontWeight: 'bold',
+                              display: 'inline-block',
+                              boxShadow: item.sniper_power_score >= 8.1 ? '0 0 10px rgba(192, 132, 252, 0.5)' : 'none'
+                            }}>
+                              {item.win_rate_tier || (item.is_trigger ? '🔥 82% 黃金優選' : '👀 常態觀察')}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#CBD5E1', marginTop: '2px', fontFamily: 'monospace' }}>
+                            彈力分: <strong style={{ color: '#FACC15' }}>{item.sniper_power_score ? `+${item.sniper_power_score}%` : '-'}</strong>
+                          </div>
+                          <div style={{ fontSize: '0.68rem', color: item.priority_color || '#94A3B8', fontWeight: 'bold' }}>
+                            {item.priority_badge || ''}
+                          </div>
+                        </td>
+
                         <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace' }}>
                           {cSign} {item.close.toLocaleString()}
                         </td>

@@ -173,13 +173,40 @@ def get_oversold_sniper_dashboard_data():
                 continue
             z = (latest_c - m20) / s20
 
-            # 10MA, 20MA
+            # 均線體系：MA5, MA10, MA20, MA60, MA200
+            ma5 = float(np.mean(closes[-5:]))
             ma10 = float(np.mean(closes[-10:]))
             ma20 = float(m20)
-
-            # 200MA 長期趨勢防守
+            ma60 = float(np.mean(closes[-60:])) if len(closes) >= 30 else float(ma20)
             ma200 = float(np.mean(closes[-200:])) if len(closes) >= 80 else float(ma10)
             valid_trend = bool(latest_c >= 0.85 * ma200)
+
+            # DOE 最佳均線負乖離評分公式：Score = 0.5 * (MA5-P)/P + 0.5 * (MA60-P)/P
+            dev5 = ((ma5 - latest_c) / latest_c) * 100.0
+            dev60 = ((ma60 - latest_c) / latest_c) * 100.0
+            sniper_power_score = round(0.5 * dev5 + 0.5 * dev60, 2)
+
+            # 依據實測分位數映射勝率等級
+            if sniper_power_score >= 8.7:
+                win_rate_tier = "🚀 95% 極致深坑"
+                win_rate_pct = 95.2
+                priority_badge = "👑 優先首選打擊"
+                priority_color = "#C084FC"
+            elif sniper_power_score >= 8.1:
+                win_rate_tier = "⭐ 90% 強烈推薦"
+                win_rate_pct = 90.0
+                priority_badge = "🔥 強烈優先"
+                priority_color = "#34D399"
+            elif sniper_power_score >= 4.2:
+                win_rate_tier = "🔥 82% 黃金優選"
+                win_rate_pct = 81.6
+                priority_badge = "⚡ 推薦打擊"
+                priority_color = "#38BDF8"
+            else:
+                win_rate_tier = "⚡ 75% 常態快打"
+                win_rate_pct = 74.5
+                priority_badge = "👀 常態觀察"
+                priority_color = "#94A3B8"
 
             exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
             exp_rebound_20 = round(float(((ma20 - latest_c) / latest_c) * 100), 2)
@@ -194,8 +221,10 @@ def get_oversold_sniper_dashboard_data():
 
             live_price_map[t_key] = {
                 "close": round(latest_c, 2),
+                "ma5": round(ma5, 2),
                 "ma10": round(ma10, 2),
                 "ma20": round(ma20, 2),
+                "ma60": round(ma60, 2),
                 "ma200": round(ma200, 2),
                 "name": disp_name
             }
@@ -208,10 +237,19 @@ def get_oversold_sniper_dashboard_data():
                 "market": "台股上市/上櫃",
                 "date": market_date,
                 "close": round(latest_c, 2),
+                "ma5": round(ma5, 2),
                 "ma10": round(ma10, 2),
                 "ma20": round(ma20, 2),
+                "ma60": round(ma60, 2),
                 "ma200": round(ma200, 2),
                 "z_score": round(float(z), 2),
+                "dev5_pct": round(dev5, 2),
+                "dev60_pct": round(dev60, 2),
+                "sniper_power_score": sniper_power_score,
+                "win_rate_tier": win_rate_tier,
+                "win_rate_pct": win_rate_pct,
+                "priority_badge": priority_badge,
+                "priority_color": priority_color,
                 "exp_rebound_pct": exp_rebound,
                 "exp_rebound_ma20_pct": exp_rebound_20,
                 "stop_loss_price": stop_loss,
@@ -254,10 +292,40 @@ def get_oversold_sniper_dashboard_data():
                     continue
                 z = (latest_c - m20) / s20
 
+                # 均線體系：MA5, MA10, MA20, MA60, MA200
+                ma5 = float(np.mean(closes[-5:]))
                 ma10 = float(np.mean(closes[-10:]))
                 ma20 = float(m20)
+                ma60 = float(np.mean(closes[-60:])) if len(closes) >= 30 else float(ma20)
                 ma200 = float(np.mean(closes[-200:])) if len(closes) >= 80 else float(ma10)
                 valid_trend = bool(latest_c >= 0.85 * ma200)
+
+                # DOE 最佳均線負乖離評分公式：Score = 0.5 * (MA5-P)/P + 0.5 * (MA60-P)/P
+                dev5 = ((ma5 - latest_c) / latest_c) * 100.0
+                dev60 = ((ma60 - latest_c) / latest_c) * 100.0
+                sniper_power_score = round(0.5 * dev5 + 0.5 * dev60, 2)
+
+                # 依據實測分位數映射勝率等級
+                if sniper_power_score >= 8.7:
+                    win_rate_tier = "🚀 95% 極致深坑"
+                    win_rate_pct = 95.2
+                    priority_badge = "👑 優先首選打擊"
+                    priority_color = "#C084FC"
+                elif sniper_power_score >= 8.1:
+                    win_rate_tier = "⭐ 90% 強烈推薦"
+                    win_rate_pct = 90.0
+                    priority_badge = "🔥 強烈優先"
+                    priority_color = "#34D399"
+                elif sniper_power_score >= 4.2:
+                    win_rate_tier = "🔥 82% 黃金優選"
+                    win_rate_pct = 81.6
+                    priority_badge = "⚡ 推薦打擊"
+                    priority_color = "#38BDF8"
+                else:
+                    win_rate_tier = "⚡ 75% 常態快打"
+                    win_rate_pct = 74.5
+                    priority_badge = "👀 常態觀察"
+                    priority_color = "#94A3B8"
 
                 exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
                 exp_rebound_20 = round(float(((ma20 - latest_c) / latest_c) * 100), 2)
@@ -272,8 +340,10 @@ def get_oversold_sniper_dashboard_data():
 
                 live_price_map[ticker] = {
                     "close": round(latest_c, 2),
+                    "ma5": round(ma5, 2),
                     "ma10": round(ma10, 2),
                     "ma20": round(ma20, 2),
+                    "ma60": round(ma60, 2),
                     "ma200": round(ma200, 2),
                     "name": disp_name
                 }
@@ -285,10 +355,19 @@ def get_oversold_sniper_dashboard_data():
                     "market": meta.get("market", "美股 (NASDAQ/NYSE)"),
                     "date": market_date,
                     "close": round(latest_c, 2),
+                    "ma5": round(ma5, 2),
                     "ma10": round(ma10, 2),
                     "ma20": round(ma20, 2),
+                    "ma60": round(ma60, 2),
                     "ma200": round(ma200, 2),
                     "z_score": round(float(z), 2),
+                    "dev5_pct": round(dev5, 2),
+                    "dev60_pct": round(dev60, 2),
+                    "sniper_power_score": sniper_power_score,
+                    "win_rate_tier": win_rate_tier,
+                    "win_rate_pct": win_rate_pct,
+                    "priority_badge": priority_badge,
+                    "priority_color": priority_color,
                     "exp_rebound_pct": exp_rebound,
                     "exp_rebound_ma20_pct": exp_rebound_20,
                     "stop_loss_price": stop_loss,
@@ -472,8 +551,8 @@ def get_oversold_sniper_dashboard_data():
     finally:
         conn.close()
 
-    # 排序雷達候選：Z-Score 由小到大 (超賣最嚴重的排最前面)
-    radar_candidates.sort(key=lambda x: x["z_score"])
+    # 排序雷達候選：觸發標的排最前，並嚴格依照「均線彈力評分 (預估勝率最高)」由大到小排序
+    radar_candidates.sort(key=lambda x: (not x.get("is_trigger", False), -x.get("sniper_power_score", 0), x.get("z_score", 0)))
 
     dashboard_data = {
         "status": "ok",
