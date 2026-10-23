@@ -1,6 +1,8 @@
 // ==========================================
 // 💻 筆電本機端與雲端連線基礎配置 (優先直連筆電 Port 8000)
 // ==========================================
+import defaultOversoldSniperData from './data/defaultOversoldSniperData.json';
+
 let dynamicApiBase = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
   ? 'http://localhost:8000'
   : (process.env.REACT_APP_API_URL || process.env.REACT_APP_STOCK_API_URL || '');
@@ -397,20 +399,102 @@ export async function apiGetGlobalTitanRankIc(params = {}) {
 // ==========================================
 // 🎯 極端超賣快打專屬 Dashboard API (直連筆電本機 tw_stock.db)
 // ==========================================
-export async function apiGetOversoldSniperDashboard() {
-  const base = await resolveApiBase();
+const LOCAL_SNIPER_TRADES_KEY = 'user_oversold_sniper_trades_v1';
+
+export function getLocalSniperTrades() {
   try {
-    const res = await fetch(`${base}/api/oversold_sniper/dashboard`);
+    const raw = (typeof window !== 'undefined') ? localStorage.getItem(LOCAL_SNIPER_TRADES_KEY) : null;
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveLocalSniperTrades(trades) {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_SNIPER_TRADES_KEY, JSON.stringify(trades));
+    }
+  } catch (e) {}
+}
+
+export async function syncSniperTradesToSupabase(trades) {
+  try {
+    await supabaseDirectFetch('/stock_ml_cache', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        model_type: 'user_oversold_sniper_trades',
+        payload: JSON.stringify(trades),
+        updated_at: new Date().toISOString()
+      })
+    });
+  } catch (e) {
+    console.warn('同步超賣跟單至 Supabase 異常:', e);
+  }
+}
+
+export async function loadSniperTradesFromSupabase() {
+  try {
+    const res = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.user_oversold_sniper_trades&select=payload');
     if (res.ok) {
-      const json = await res.json();
-      if (json.status === 'ok') {
-        return json;
+      const rows = await res.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        return typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
       }
     }
-  } catch (err) {
-    console.warn(`筆電本機 ${base}/api/oversold_sniper/dashboard 連線異常:`, err.message);
-  }
+  } catch (e) {}
   return null;
+}
+
+export async function apiGetOversoldSniperDashboard() {
+  const base = await resolveApiBase();
+  let serverData = null;
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/oversold_sniper/dashboard`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'ok') {
+          serverData = json;
+        }
+      }
+    } catch (err) {
+      console.warn(`筆電本機 ${base}/api/oversold_sniper/dashboard 連線異常:`, err.message);
+    }
+  }
+
+  // 讀取本地與雲端用戶跟單紀錄
+  const localTrades = getLocalSniperTrades();
+  let cloudTrades = null;
+  if (localTrades.length === 0) {
+    cloudTrades = await loadSniperTradesFromSupabase();
+    if (cloudTrades && Array.isArray(cloudTrades)) {
+      saveLocalSniperTrades(cloudTrades);
+    }
+  }
+  const allUserTrades = localTrades.length > 0 ? localTrades : (cloudTrades || []);
+
+  const activeHoldings = allUserTrades.filter(t => t.status === 'ACTIVE');
+  const closedTrades = allUserTrades.filter(t => t.status === 'CLOSED');
+
+  if (serverData) {
+    if (activeHoldings.length > 0 && (!serverData.active_holdings || serverData.active_holdings.length === 0)) {
+      serverData.active_holdings = activeHoldings;
+    }
+    if (closedTrades.length > 0 && (!serverData.trade_history || serverData.trade_history.length === 0)) {
+      serverData.trade_history = closedTrades;
+    }
+    return serverData;
+  }
+
+  // 若後端離線，以 defaultOversoldSniperData + 本地/雲端用戶持倉融合返回
+  const defaultData = defaultOversoldSniperData;
+  return {
+    ...defaultData,
+    active_holdings: activeHoldings.length > 0 ? activeHoldings : (defaultData.active_holdings || []),
+    trade_history: closedTrades.length > 0 ? closedTrades : (defaultData.trade_history || [])
+  };
 }
 
 // ==========================================
@@ -434,45 +518,135 @@ export async function apiGetMsciImbalanceDashboard() {
 
 export async function apiAddOversoldSniperTrade(payload) {
   const base = await resolveApiBase();
-  try {
-    const res = await fetch(`${base}/api/oversold_sniper/trades`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn(`新增快打跟單異常:`, err.message);
+  let localResult = null;
+
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/oversold_sniper/trades`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        localResult = await res.json();
+      }
+    } catch (err) {
+      console.warn(`後端通道異常，自動切換至雲端/本地韌性保存:`, err.message);
+    }
   }
-  return null;
+
+  const newTradeId = localResult?.trade_id || `snip_${Date.now()}`;
+  const inputPrice = parseFloat(payload.entry_price);
+  const inputShares = parseFloat(payload.shares);
+
+  const newTrade = {
+    id: newTradeId,
+    ticker: payload.ticker,
+    name: payload.name || payload.ticker,
+    market: payload.market || '美股',
+    currency: payload.currency || 'USD',
+    status: 'ACTIVE',
+    entry_date: payload.entry_date || new Date().toISOString().split('T')[0],
+    entry_price: inputPrice,
+    shares: inputShares,
+    current_price: inputPrice,
+    unrealized_pnl_pct: 0.0,
+    unrealized_pnl_amount: 0.0,
+    holding_days: 1,
+    target_ma10: parseFloat((inputPrice * 1.075).toFixed(2)),
+    target_ma20: parseFloat((inputPrice * 1.10).toFixed(2)),
+    stop_loss_price: parseFloat((inputPrice * 0.90).toFixed(2)),
+    can_sell: false,
+    sell_badge: '🛡️ 建倉持有中',
+    sell_badge_color: '#38BDF8',
+    sell_instruction: '剛進場持倉第 1 天，目標等待反彈觸及 10MA 停利！',
+    notes: payload.notes || ''
+  };
+
+  const currentTrades = getLocalSniperTrades();
+  const updatedTrades = [newTrade, ...currentTrades.filter(t => t.id !== newTradeId)];
+  saveLocalSniperTrades(updatedTrades);
+  syncSniperTradesToSupabase(updatedTrades);
+
+  return localResult || {
+    status: 'ok',
+    message: `成功新增跟單 ${payload.ticker} (成本: ${inputPrice})！`,
+    trade_id: newTradeId
+  };
 }
 
 export async function apiCloseOversoldSniperTrade(tradeId, payload) {
   const base = await resolveApiBase();
-  try {
-    const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}/close`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn(`平倉快打紀錄異常:`, err.message);
+  let localResult = null;
+
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}/close`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        localResult = await res.json();
+      }
+    } catch (err) {
+      console.warn(`平倉快打紀錄異常:`, err.message);
+    }
   }
-  return null;
+
+  const currentTrades = getLocalSniperTrades();
+  const updatedTrades = currentTrades.map(t => {
+    if (t.id === tradeId || t.ticker === tradeId) {
+      const xPrice = parseFloat(payload.exit_price) || t.entry_price;
+      const pnlPct = parseFloat(((xPrice / t.entry_price - 1.0) * 100.0).toFixed(2));
+      const pnlAmt = parseFloat(((xPrice - t.entry_price) * t.shares).toFixed(2));
+      return {
+        ...t,
+        status: 'CLOSED',
+        exit_date: payload.exit_date || new Date().toISOString().split('T')[0],
+        exit_price: xPrice,
+        exit_reason: payload.exit_reason || '手動獲利平倉',
+        pnl_pct: pnlPct,
+        pnl_amount: pnlAmt
+      };
+    }
+    return t;
+  });
+  saveLocalSniperTrades(updatedTrades);
+  syncSniperTradesToSupabase(updatedTrades);
+
+  return localResult || {
+    status: 'ok',
+    message: `成功平倉跟單紀錄！`
+  };
 }
 
 export async function apiDeleteOversoldSniperTrade(tradeId) {
   const base = await resolveApiBase();
-  try {
-    const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}`, {
-      method: 'DELETE'
-    });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn(`刪除快打紀錄異常:`, err.message);
+  let localResult = null;
+
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        localResult = await res.json();
+      }
+    } catch (err) {
+      console.warn(`刪除快打紀錄異常:`, err.message);
+    }
   }
-  return null;
+
+  const currentTrades = getLocalSniperTrades();
+  const updatedTrades = currentTrades.filter(t => t.id !== tradeId);
+  saveLocalSniperTrades(updatedTrades);
+  syncSniperTradesToSupabase(updatedTrades);
+
+  return localResult || {
+    status: 'ok',
+    message: `已刪除跟單紀錄`
+  };
 }
 
 // ==========================================
