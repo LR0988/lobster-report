@@ -413,6 +413,49 @@ export async function apiGetOversoldSniperDashboard() {
   return null;
 }
 
+export async function apiAddOversoldSniperTrade(payload) {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/oversold_sniper/trades`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn(`新增快打跟單異常:`, err.message);
+  }
+  return null;
+}
+
+export async function apiCloseOversoldSniperTrade(tradeId, payload) {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}/close`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn(`平倉快打紀錄異常:`, err.message);
+  }
+  return null;
+}
+
+export async function apiDeleteOversoldSniperTrade(tradeId) {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/oversold_sniper/trades/${tradeId}`, {
+      method: 'DELETE'
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn(`刪除快打紀錄異常:`, err.message);
+  }
+  return null;
+}
+
 // ==========================================
 // 👑 全球泰坦實盤持倉與交易紀錄 (優先直連筆電本機 tw_stock.db)
 // ==========================================

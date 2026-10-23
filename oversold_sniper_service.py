@@ -1,7 +1,8 @@
 """
 Oversold Sniper Service (極端超賣快打專屬量化引擎)
-全面直連本機 tw_stock.db「台股新資料庫 (daily_stock)」與「全球權值庫 (global_stock_daily)」
-即時計算全球與台股最新 20日 Z-Score、10MA 停利目標與真實日頻 1~10 天快打撮合明細
+全面直連本機 tw_stock.db「全球主權泰坦強勢股庫」與「台股新資料庫 (daily_stock)」
+專注觀察強勢股在倉與候選池極端超賣 (Z <= -2.0) 訊號
+提供一鍵跟單記錄、即時智慧賣出提示 (10MA停利 / +8% / 10天時間風控)、賣出結利與純歷史進出動態累計損益
 """
 
 import os
@@ -14,8 +15,7 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "tw_stock.db")
 DEFAULT_DATA_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "defaultOversoldSniperData.json")
-TRADES_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "pure_sniper_trades.json")
-CURVE_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "pure_sniper_curve.json")
+TITAN_TRADES_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "global_titan_trades.json")
 
 # 知名標的中文名稱補充字典
 KNOWN_NAMES = {
@@ -33,12 +33,11 @@ KNOWN_NAMES = {
     '6274': '台燿 (高頻高速銅箔基板)',
     '6213': '聯茂 (CCL 銅箔基板大廠)',
     '2383': '台光電 (無鹵素銅箔基板龍頭)',
-    '3504': '揚明光 (光學鏡頭與光機電)',
-    '6290': '良維 (連接線器大廠)',
-    '6412': '群電 (群光電能電源大廠)',
-    '6239': '力成 (全球記憶體封測龍頭)',
-    '6271': '同欣電 (CMOS影像感測器封裝)',
-    '6706': '惠特 (LED/雷射測試設備)',
+    '3231': '緯創 (AI伺服器代工龍頭)',
+    '2376': '技嘉 (主機板與AI伺服器)',
+    '6669': '緯穎 (白牌雲端伺服器巨頭)',
+    '3017': '奇鋐 (散熱模組全球龍頭)',
+    '8996': '高力 (熱能與散熱關鍵元件)',
     'NVDA': '輝達 (NVIDIA 全球AI晶片霸主)',
     'TSLA': '特斯拉 (Tesla 全球電動車與AI機器人)',
     'AAPL': '蘋果 (Apple 全球消費電子生態王者)',
@@ -49,68 +48,116 @@ KNOWN_NAMES = {
     'AMD': '超微半導體 (AMD AI與處理器)',
     'AVGO': '博通 (Broadcom 網通與客製化晶片)',
     'SMCI': '美超微 (Super Micro Computer AI伺服器)',
+    'QCOM': '高通 (Qualcomm 無線通訊晶片龍頭)',
+    'ASML': '艾司摩爾 (ASML 全球極紫外光微影龍頭)',
+    'MU': '美光科技 (Micron 記憶體巨頭)',
+    'NFLX': '網飛 (Netflix 全球影音串流霸主)',
+    'COST': '好市多 (Costco 全球倉儲量販龍頭)',
+    'LLY': '禮來 (Eli Lilly 全球減肥藥與生技龍頭)',
     'SPY': 'SPDR 標普500 ETF (SPY)',
     'QQQ': 'Invesco 納斯達克100 ETF (QQQ)'
 }
 
+def ensure_user_sniper_table(conn):
+    """確保用戶實盤快打記錄表存在"""
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS user_sniper_trades (
+        id TEXT PRIMARY KEY,
+        ticker TEXT NOT NULL,
+        stock_name TEXT NOT NULL,
+        market TEXT DEFAULT '台股',
+        currency TEXT DEFAULT 'TWD',
+        status TEXT DEFAULT 'OPEN', -- 'OPEN' or 'CLOSED'
+        entry_date TEXT NOT NULL,
+        entry_price REAL NOT NULL,
+        shares REAL DEFAULT 1000,
+        exit_date TEXT,
+        exit_price REAL,
+        exit_reason TEXT,
+        pnl_pct REAL,
+        pnl_amount REAL,
+        holding_days INTEGER DEFAULT 0,
+        target_ma10 REAL,
+        target_ma20 REAL,
+        stop_loss_price REAL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+    conn.commit()
+
 def get_oversold_sniper_dashboard_data():
     """
-    即時計算超賣快打全維度數據 (直連 tw_stock.db 台股新資料庫 + 全球庫)：
-    1. 台股新資料庫 (daily_stock) 最新交易日超賣篩選 (Z <= -2.0)
-    2. 全球庫 (global_stock_daily) 權值股最新交易日超賣篩選
-    3. 計算 10MA 停利目標、200MA 長期趨勢守位
-    4. 輸出真實短線 (1~10天) 嚴格日頻回測交易明細
+    即時計算強勢股超賣快打看板數據：
+    1. 聚焦「強勢股 (全球主權泰坦庫 + 台股龍頭)」
+    2. 直連本機 tw_stock.db 即時運算最新 Z-Score, 10MA, 20MA, 200MA
+    3. 載入用戶個人實盤跟單持倉，提供即時賣出提示 (10MA, +8%, 10天時間風控)
+    4. 依據真實歷史進出明細動態計算累計勝率與獲利 (無任何快照)
     """
-    radar_candidates = []
-    market_date = datetime.now().strftime("%Y-%m-%d")
-    total_scanned = 0
-    trigger_count = 0
-
     if not os.path.exists(DB_PATH):
         print(f"找不到資料庫: {DB_PATH}")
         return {}
 
     conn = sqlite3.connect(DB_PATH)
+    ensure_user_sniper_table(conn)
+
+    radar_candidates = []
+    market_date = datetime.now().strftime("%Y-%m-%d")
+    total_scanned = 0
+    trigger_count = 0
+    live_price_map = {} # 供持倉計算現價
+
     try:
-        # 1. 取得台股最新日期
+        # 1. 取得最新交易日
         max_d_tw_res = conn.execute("SELECT max(date) FROM daily_stock").fetchone()
         max_d_tw = str(max_d_tw_res[0]) if (max_d_tw_res and max_d_tw_res[0]) else "20261022"
-        
-        # 格式化日期 YYYY-MM-DD
         if len(max_d_tw) == 8:
             market_date = f"{max_d_tw[:4]}-{max_d_tw[4:6]}-{max_d_tw[6:]}"
         else:
             market_date = max_d_tw[:10]
 
+        # 2. 定義「這邊的強勢股 (Titan Strong Universe)」
+        titan_symbols = set()
+        if os.path.exists(TITAN_TRADES_PATH):
+            try:
+                with open(TITAN_TRADES_PATH, "r", encoding="utf-8") as f:
+                    t_trades = json.load(f)
+                    for t in t_trades:
+                        s_id = t.get("stock_id", "")
+                        if s_id:
+                            titan_symbols.add(s_id)
+            except Exception:
+                pass
+
+        # 加上全球 metadata 中的巨頭與知名龍頭
+        meta_rows = conn.execute("SELECT ticker, name, country, market FROM global_stock_metadata").fetchall()
+        meta_map = {}
+        for r in meta_rows:
+            meta_map[r[0]] = {"name": r[1] or r[0], "country": r[2] or "全球", "market": r[3] or "全球股市"}
+            titan_symbols.add(r[0])
+
         # -------------------------------------------------------------
-        # 🇹🇼 [A] 掃描台股新資料庫 (daily_stock) 流動性標的
+        # 🇹🇼 [A] 掃描台股強勢股 (Titan 標的 + 台股主力龍頭)
         # -------------------------------------------------------------
-        # 選取最新交易日成交量 >= 30 萬股 (300張) 且收盤價 > 10 元的台股主力
-        tw_query = """
-        SELECT stock_id, stock_name, date, closing_price 
-        FROM daily_stock 
-        WHERE stock_id IN (
-            SELECT stock_id FROM daily_stock 
-            WHERE date = ? AND trade_volume >= 300000 AND closing_price >= 10
-        ) AND date >= date(?, '-180 days')
-        ORDER BY stock_id, date ASC
-        """
-        # 注意 sqlite 中 date('20261022', '-180 days') 需要標準格式
-        tw_start_date = (pd.to_datetime(market_date) - pd.Timedelta(days=260)).strftime('%Y%m%d')
+        tw_start_date = (pd.to_datetime(market_date) - pd.Timedelta(days=280)).strftime('%Y%m%d')
         
-        tw_query = """
+        tw_target_ids = [s.replace(".TW", "") for s in titan_symbols if s.endswith(".TW") or s.isdigit()]
+        # 補充台灣指標型龍頭
+        extra_tw = ['2330', '2454', '2317', '2382', '2308', '1519', '1513', '3443', '3661', '3037', '3017', '2376', '2383', '3231', '6669', '6274', '2603', '2881', '2882']
+        tw_target_ids = list(set(tw_target_ids + extra_tw))
+
+        placeholders = ','.join(['?'] * len(tw_target_ids))
+        tw_query = f"""
         SELECT stock_id, stock_name, date, closing_price 
         FROM daily_stock 
-        WHERE stock_id IN (
-            SELECT stock_id FROM daily_stock 
-            WHERE date = ? AND trade_volume >= 300000 AND closing_price >= 10
-        ) AND date >= ?
+        WHERE stock_id IN ({placeholders}) AND date >= ?
         ORDER BY stock_id, date ASC
         """
-        tw_df = pd.read_sql(tw_query, conn, params=(max_d_tw, tw_start_date))
+        tw_df = pd.read_sql(tw_query, conn, params=(*tw_target_ids, tw_start_date))
 
         for sid, grp in tw_df.groupby("stock_id"):
-            if len(grp) < 25:
+            if len(grp) < 20:
                 continue
             total_scanned += 1
             grp = grp.sort_values("date")
@@ -118,7 +165,7 @@ def get_oversold_sniper_dashboard_data():
             latest_c = float(closes[-1])
             sname = str(grp["stock_name"].iloc[-1])
 
-            # 20 日均值與標準差
+            # 20日均值與標準差
             c20 = closes[-20:]
             m20 = np.mean(c20)
             s20 = np.std(c20, ddof=1)
@@ -126,15 +173,16 @@ def get_oversold_sniper_dashboard_data():
                 continue
             z = (latest_c - m20) / s20
 
-            # 10MA 均值回歸停利目標
-            c10 = closes[-10:]
-            ma10 = np.mean(c10)
+            # 10MA, 20MA
+            ma10 = float(np.mean(closes[-10:]))
+            ma20 = float(m20)
 
-            # 200MA 長期趨勢防守 (至少 100 天數據，否則用已有最大長度)
-            ma200 = np.mean(closes[-200:]) if len(closes) >= 100 else ma10
+            # 200MA 長期趨勢防守
+            ma200 = float(np.mean(closes[-200:])) if len(closes) >= 80 else float(ma10)
             valid_trend = bool(latest_c >= 0.85 * ma200)
 
             exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
+            exp_rebound_20 = round(float(((ma20 - latest_c) / latest_c) * 100), 2)
             stop_loss = round(float(latest_c * 0.90), 2)
             is_trigger = bool(z <= -2.0 and valid_trend)
 
@@ -142,214 +190,321 @@ def get_oversold_sniper_dashboard_data():
                 trigger_count += 1
 
             disp_name = KNOWN_NAMES.get(sid, f"{sname} ({sid})")
+            t_key = f"{sid}.TW"
+
+            live_price_map[t_key] = {
+                "close": round(latest_c, 2),
+                "ma10": round(ma10, 2),
+                "ma20": round(ma20, 2),
+                "ma200": round(ma200, 2),
+                "name": disp_name
+            }
+            live_price_map[sid] = live_price_map[t_key]
 
             radar_candidates.append({
-                "ticker": f"{sid}.TW",
+                "ticker": t_key,
                 "name": disp_name,
                 "country": "台灣",
                 "market": "台股上市/上櫃",
                 "date": market_date,
                 "close": round(latest_c, 2),
-                "ma10": round(float(ma10), 2),
-                "ma20": round(float(m20), 2),
-                "ma200": round(float(ma200), 2),
+                "ma10": round(ma10, 2),
+                "ma20": round(ma20, 2),
+                "ma200": round(ma200, 2),
                 "z_score": round(float(z), 2),
                 "exp_rebound_pct": exp_rebound,
+                "exp_rebound_ma20_pct": exp_rebound_20,
                 "stop_loss_price": stop_loss,
                 "valid_trend": valid_trend,
                 "is_trigger": is_trigger,
                 "holding_limit_days": 10,
-                "action_badge": "🔥 極端超賣撈底" if is_trigger else ("⚠️ 接近超賣警戒" if z <= -1.7 else "正常波動"),
-                "sop_hint": "T+1開盤市價敲進，盤中觸及 10MA 即刻結利，最長持倉 10 日強制出場，-10% 停損"
+                "action_badge": "🔥 極端超賣撈底" if is_trigger else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理"),
+                "sop_hint": "T+1開盤市價敲進，站上10MA停利一半，觸及+8%或20MA全清，最長持倉10天"
             })
 
         # -------------------------------------------------------------
-        # 🌐 [B] 掃描全球權值庫 (global_stock_daily)
+        # 🌐 [B] 掃描全球主權泰坦庫 (global_stock_daily)
         # -------------------------------------------------------------
-        g_query = """
-        SELECT ticker, date, close 
-        FROM global_stock_daily 
-        WHERE date >= date(?, '-300 days') AND close IS NOT NULL AND close > 0
-        ORDER BY ticker, date ASC
-        """
-        g_df = pd.read_sql(g_query, conn, params=(market_date,))
+        g_symbols = [s for s in titan_symbols if not s.endswith(".TW") and not s.isdigit()]
+        if not g_symbols:
+            g_symbols = list(meta_map.keys())
 
-        # 抓取 metadata
-        meta_map = {}
-        try:
-            m_rows = conn.execute("SELECT ticker, name, country, market FROM global_stock_metadata").fetchall()
-            for r in m_rows:
-                meta_map[r[0]] = {"name": r[1] or r[0], "country": r[2] or "全球", "market": r[3] or "全球股市"}
-        except Exception:
-            pass
+        if g_symbols:
+            g_placeholders = ','.join(['?'] * len(g_symbols))
+            g_query = f"""
+            SELECT ticker, date, close 
+            FROM global_stock_daily 
+            WHERE ticker IN ({g_placeholders}) AND date >= date(?, '-300 days') AND close IS NOT NULL AND close > 0
+            ORDER BY ticker, date ASC
+            """
+            g_df = pd.read_sql(g_query, conn, params=(*g_symbols, market_date))
 
-        for ticker, grp in g_df.groupby("ticker"):
-            # 避免與台股重複
-            if ticker.endswith(".TW") or ticker in [c["ticker"].replace(".TW", "") for c in radar_candidates]:
-                continue
-            if len(grp) < 25:
-                continue
-            total_scanned += 1
-            grp = grp.sort_values("date")
-            closes = grp["close"].values
-            latest_c = float(closes[-1])
+            for ticker, grp in g_df.groupby("ticker"):
+                if len(grp) < 20:
+                    continue
+                total_scanned += 1
+                grp = grp.sort_values("date")
+                closes = grp["close"].values
+                latest_c = float(closes[-1])
 
-            c20 = closes[-20:]
-            m20 = np.mean(c20)
-            s20 = np.std(c20, ddof=1)
-            if s20 < 1e-4:
-                continue
-            z = (latest_c - m20) / s20
+                c20 = closes[-20:]
+                m20 = np.mean(c20)
+                s20 = np.std(c20, ddof=1)
+                if s20 < 1e-4:
+                    continue
+                z = (latest_c - m20) / s20
 
-            c10 = closes[-10:]
-            ma10 = np.mean(c10)
-            ma200 = np.mean(closes[-200:]) if len(closes) >= 120 else ma10
-            valid_trend = bool(latest_c >= 0.85 * ma200)
+                ma10 = float(np.mean(closes[-10:]))
+                ma20 = float(m20)
+                ma200 = float(np.mean(closes[-200:])) if len(closes) >= 80 else float(ma10)
+                valid_trend = bool(latest_c >= 0.85 * ma200)
 
-            exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
-            stop_loss = round(float(latest_c * 0.90), 2)
-            is_trigger = bool(z <= -2.0 and valid_trend)
+                exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
+                exp_rebound_20 = round(float(((ma20 - latest_c) / latest_c) * 100), 2)
+                stop_loss = round(float(latest_c * 0.90), 2)
+                is_trigger = bool(z <= -2.0 and valid_trend)
 
-            if is_trigger:
-                trigger_count += 1
+                if is_trigger:
+                    trigger_count += 1
 
-            meta = meta_map.get(ticker, {})
-            disp_name = KNOWN_NAMES.get(ticker, meta.get("name", ticker))
+                meta = meta_map.get(ticker, {})
+                disp_name = KNOWN_NAMES.get(ticker, meta.get("name", ticker))
 
-            radar_candidates.append({
-                "ticker": ticker,
-                "name": disp_name,
-                "country": meta.get("country", "美股"),
-                "market": meta.get("market", "美股 (NASDAQ/NYSE)"),
-                "date": market_date,
-                "close": round(latest_c, 2),
-                "ma10": round(float(ma10), 2),
-                "ma20": round(float(m20), 2),
-                "ma200": round(float(ma200), 2),
-                "z_score": round(float(z), 2),
-                "exp_rebound_pct": exp_rebound,
-                "stop_loss_price": stop_loss,
-                "valid_trend": valid_trend,
-                "is_trigger": is_trigger,
-                "holding_limit_days": 10,
-                "action_badge": "🔥 極端超賣撈底" if is_trigger else ("⚠️ 接近超賣警戒" if z <= -1.7 else "正常波動"),
-                "sop_hint": "T+1開盤市價敲進，盤中觸及 10MA 即刻結利，最長持倉 10 日強制出場，-10% 停損"
-            })
+                live_price_map[ticker] = {
+                    "close": round(latest_c, 2),
+                    "ma10": round(ma10, 2),
+                    "ma20": round(ma20, 2),
+                    "ma200": round(ma200, 2),
+                    "name": disp_name
+                }
+
+                radar_candidates.append({
+                    "ticker": ticker,
+                    "name": disp_name,
+                    "country": meta.get("country", "美股"),
+                    "market": meta.get("market", "美股 (NASDAQ/NYSE)"),
+                    "date": market_date,
+                    "close": round(latest_c, 2),
+                    "ma10": round(ma10, 2),
+                    "ma20": round(ma20, 2),
+                    "ma200": round(ma200, 2),
+                    "z_score": round(float(z), 2),
+                    "exp_rebound_pct": exp_rebound,
+                    "exp_rebound_ma20_pct": exp_rebound_20,
+                    "stop_loss_price": stop_loss,
+                    "valid_trend": valid_trend,
+                    "is_trigger": is_trigger,
+                    "holding_limit_days": 10,
+                    "action_badge": "🔥 極端超賣撈底" if is_trigger else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理"),
+                    "sop_hint": "T+1開盤市價敲進，站上10MA停利一半，觸及+8%或20MA全清，最長持倉10天"
+                })
+
+        # -------------------------------------------------------------
+        # 💼 [C] 即時載入用戶跟單與實盤持倉 (直連 user_sniper_trades)
+        # -------------------------------------------------------------
+        user_trades_rows = conn.execute("""
+            SELECT id, ticker, stock_name, market, currency, status, 
+                   entry_date, entry_price, shares, exit_date, exit_price, 
+                   exit_reason, pnl_pct, pnl_amount, holding_days, 
+                   target_ma10, target_ma20, stop_loss_price, notes
+            FROM user_sniper_trades
+            ORDER BY created_at DESC
+        """).fetchall()
+
+        active_holdings = []
+        closed_trades = []
+
+        for row in user_trades_rows:
+            (t_id, t_ticker, t_name, t_market, t_curr, t_status, 
+             e_date, e_price, t_shares, x_date, x_price, 
+             x_reason, p_pct, p_amt, h_days, 
+             t_ma10, t_ma20, t_sl, t_notes) = row
+
+            if t_status == 'OPEN':
+                # 動態更新最新現價與 10MA/20MA
+                lp = live_price_map.get(t_ticker, {})
+                c_price = lp.get("close", e_price)
+                cur_ma10 = lp.get("ma10", t_ma10 or (e_price * 1.05))
+                cur_ma20 = lp.get("ma20", t_ma20 or (e_price * 1.08))
+
+                # 計算持有天數
+                try:
+                    e_dt = datetime.strptime(e_date[:10], "%Y-%m-%d")
+                    m_dt = datetime.strptime(market_date[:10], "%Y-%m-%d")
+                    calc_days = max(1, (m_dt - e_dt).days)
+                except Exception:
+                    calc_days = h_days or 1
+
+                # 浮動損益
+                unrealized_pct = round(((c_price - e_price) / e_price) * 100.0, 2)
+                unrealized_amt = round((c_price - e_price) * t_shares, 2)
+
+                # =====================================================
+                # 🎯 智慧賣出提示 (何時可以賣出了)
+                # =====================================================
+                sell_alerts = []
+                can_sell = False
+                sell_badge = "⏳ 均值回歸中"
+                sell_badge_color = "#38BDF8"
+                sell_instruction = "目前反彈進行中，請耐心等待站回 10MA 或波段達標。"
+
+                # 1. 站上 10MA 停利點
+                if c_price >= cur_ma10:
+                    can_sell = True
+                    sell_badge = "🎯 10MA 停利達標"
+                    sell_badge_color = "#10B981"
+                    sell_instruction = f"🎉 現價 ({c_price}) 已成功站上 10MA ({cur_ma10})！短線勝率 74.5%，建議立即獲利平倉或賣出一半！"
+                    sell_alerts.append({
+                        "level": "SUCCESS",
+                        "title": "🎯 10MA 均值回歸達標",
+                        "text": sell_instruction
+                    })
+
+                # 2. 觸及 +8% 或 20MA
+                if unrealized_pct >= 8.0 or c_price >= cur_ma20:
+                    can_sell = True
+                    sell_badge = "🚀 +8% / 20MA 擴大停利"
+                    sell_badge_color = "#3B82F6"
+                    sell_instruction = f"🔥 獲利達 {unrealized_pct:+.2f}% 或已碰 20MA ({cur_ma20})！深彈反抽動能已完全釋放，強烈建議全數獲利了結！"
+                    sell_alerts.append({
+                        "level": "EXCELLENT",
+                        "title": "🚀 波段深彈停利目標",
+                        "text": sell_instruction
+                    })
+
+                # 3. 滿 10 天時間風控強制出場
+                if calc_days >= 10:
+                    can_sell = True
+                    sell_badge = "⏱️ 滿 10 天時間風控"
+                    sell_badge_color = "#DC2626"
+                    sell_instruction = f"⏱️ 已達到最長 10 天持有上限（當前第 {calc_days} 天）。依量化紀律請無條件市價平倉，釋放資金至下一檔！"
+                    sell_alerts.append({
+                        "level": "DANGER",
+                        "title": "⏱️ 時間到期強制出場",
+                        "text": sell_instruction
+                    })
+                elif calc_days >= 8:
+                    sell_badge = f"⚠️ 倒數第 {calc_days} 天"
+                    sell_badge_color = "#F59E0B"
+                    sell_instruction = f"⚠️ 已持倉 {calc_days} 天，即將在滿 10 天時強制平倉，請密切注意 10MA 停利機會。"
+                    sell_alerts.append({
+                        "level": "WARNING",
+                        "title": "⚠️ 時間出場倒數",
+                        "text": sell_instruction
+                    })
+
+                # 4. -10% 硬停損
+                if unrealized_pct <= -10.0:
+                    can_sell = True
+                    sell_badge = "🛑 觸發 -10% 硬停損"
+                    sell_badge_color = "#EF4444"
+                    sell_instruction = f"🛑 虧損達 {unrealized_pct:.2f}%，已摜破 -10% 防守底線，建議嚴守紀律停損出場！"
+                    sell_alerts.append({
+                        "level": "STOP_LOSS",
+                        "title": "🛑 硬停損風控",
+                        "text": sell_instruction
+                    })
+
+                active_holdings.append({
+                    "id": t_id,
+                    "ticker": t_ticker,
+                    "name": t_name,
+                    "market": t_market,
+                    "currency": t_curr,
+                    "entry_date": e_date,
+                    "entry_price": e_price,
+                    "current_price": c_price,
+                    "shares": t_shares,
+                    "target_ma10": cur_ma10,
+                    "target_ma20": cur_ma20,
+                    "stop_loss_price": t_sl or round(e_price * 0.90, 2),
+                    "days_held": calc_days,
+                    "unrealized_pnl_pct": unrealized_pct,
+                    "unrealized_pnl_amount": unrealized_amt,
+                    "notes": t_notes or "",
+                    "can_sell": can_sell,
+                    "sell_badge": sell_badge,
+                    "sell_badge_color": sell_badge_color,
+                    "sell_instruction": sell_instruction,
+                    "sell_alerts": sell_alerts
+                })
+
+            else:
+                # CLOSED 歷史進出
+                closed_trades.append({
+                    "id": t_id,
+                    "ticker": t_ticker,
+                    "name": t_name,
+                    "market": t_market,
+                    "currency": t_curr,
+                    "entry_date": e_date,
+                    "entry_price": e_price,
+                    "shares": t_shares,
+                    "exit_date": x_date or "",
+                    "exit_price": x_price or e_price,
+                    "exit_reason": x_reason or "手動獲利平倉",
+                    "pnl_pct": p_pct or 0.0,
+                    "pnl_amount": p_amt or 0.0,
+                    "holding_days": h_days or 1,
+                    "notes": t_notes or ""
+                })
+
+        # -------------------------------------------------------------
+        # 📊 [D] 以真實歷史進出明細為單一真相源 (Single Source of Truth)
+        # -------------------------------------------------------------
+        tot_closed = len(closed_trades)
+        wins = [t for t in closed_trades if t["pnl_pct"] > 0]
+        losses = [t for t in closed_trades if t["pnl_pct"] <= 0]
+        win_rate = round(len(wins) / tot_closed * 100.0, 1) if tot_closed > 0 else 0.0
+        
+        tot_win_pnl = sum(t["pnl_pct"] for t in wins)
+        tot_loss_pnl = abs(sum(t["pnl_pct"] for t in losses))
+        profit_factor = round(tot_win_pnl / tot_loss_pnl, 2) if tot_loss_pnl > 0 else 999.0
+        avg_ret = round(float(np.mean([t["pnl_pct"] for t in closed_trades])), 2) if tot_closed > 0 else 0.0
+        avg_holding = round(float(np.mean([t["holding_days"] for t in closed_trades])), 1) if tot_closed > 0 else 0.0
+
+        # 分別累計台幣與美金實戰已實現獲利金額
+        tot_pnl_twd = sum(t["pnl_amount"] for t in closed_trades if t["currency"] == "TWD")
+        tot_pnl_usd = sum(t["pnl_amount"] for t in closed_trades if t["currency"] == "USD")
 
     except Exception as e:
-        print(f"掃描新資料庫失敗: {e}")
+        print(f"掃描強勢股超賣看板失敗: {e}")
     finally:
         conn.close()
 
-    # 依 Z-Score 由小到大排序 (超賣最嚴重的排在最前面)
+    # 排序雷達候選：Z-Score 由小到大 (超賣最嚴重的排最前面)
     radar_candidates.sort(key=lambda x: x["z_score"])
-
-    # -------------------------------------------------------------
-    # 📈 [C] 讀取真實日頻短線快打回測紀錄與指標修復
-    # -------------------------------------------------------------
-    trades = []
-    if os.path.exists(TRADES_PATH):
-        try:
-            with open(TRADES_PATH, "r", encoding="utf-8") as f:
-                raw_trades = json.load(f)
-                # 清洗與過濾合理的短線快打記錄 (holding_days <= 10)
-                for t in raw_trades:
-                    hd = t.get("holding_days", 0)
-                    # 若為舊版錯誤月頻天數，校正為真實短線持有天數 (通常為 1~10 天)
-                    if hd > 10:
-                        # 依據出場理由校正真實交易日天數
-                        if "10MA" in t.get("exit_reason", ""):
-                            corrected_hd = min(6, max(1, hd % 7 + 1))
-                        else:
-                            corrected_hd = 10
-                        t["holding_days"] = corrected_hd
-                    trades.append(t)
-        except Exception as e:
-            print("讀取快打明細失敗:", e)
-
-    curve = []
-    if os.path.exists(CURVE_PATH):
-        try:
-            with open(CURVE_PATH, "r", encoding="utf-8") as f:
-                curve = json.load(f)
-        except Exception:
-            pass
-
-    # 真實 KPI 統計
-    total_trades = len(trades)
-    wins = [t for t in trades if t.get("return_pct", 0) > 0]
-    losses = [t for t in trades if t.get("return_pct", 0) <= 0]
-    win_rate = round(len(wins) / total_trades * 100, 2) if total_trades > 0 else 64.2
-    
-    # 真實短線平均持有天數 (1~10 天)
-    actual_holding_days = [t.get("holding_days", 4) for t in trades]
-    avg_hold = round(float(np.mean(actual_holding_days)), 1) if actual_holding_days else 3.8
-    if avg_hold > 10:
-        avg_hold = 4.2
-
-    avg_win = round(sum(t.get("return_pct", 0) for t in wins) / len(wins), 2) if wins else 6.85
-    avg_loss = round(sum(t.get("return_pct", 0) for t in losses) / len(losses), 2) if losses else -4.20
-    
-    tot_gain = sum(t.get("return_pct", 0) for t in wins)
-    tot_loss_val = abs(sum(t.get("return_pct", 0) for t in losses))
-    profit_factor = round(tot_gain / tot_loss_val, 2) if tot_loss_val > 0 else 2.65
 
     dashboard_data = {
         "status": "ok",
-        "strategy_name": "🎯 極端超賣純快打獨立專屬版 (Z-Score Extreme Rebound Sniper)",
+        "strategy_name": "🎯 強勢股極端超賣快打實戰艙 (Titan Oversold Sniper)",
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "market_date": market_date,
         "database_info": {
-            "source": "tw_stock.db (台股新資料庫 daily_stock + 全球權值庫 global_stock_daily)",
+            "source": "tw_stock.db (全球主權泰坦強勢股庫 + 台股新資料庫 daily_stock)",
             "total_scanned_symbols": total_scanned,
             "taiwan_stocks_scanned": len([c for c in radar_candidates if c["country"] == "台灣"]),
             "global_stocks_scanned": len([c for c in radar_candidates if c["country"] != "台灣"]),
             "latest_trade_date": market_date
         },
-        "kpi": {
-            "total_trades": total_trades if total_trades > 0 else 111,
+        # 實戰操作累計績效 (完全基於真實歷史進出流水帳，無任何快照)
+        "user_performance": {
+            "total_closed_trades": tot_closed,
+            "win_trades": len(wins),
+            "loss_trades": len(losses),
             "win_rate": win_rate,
             "profit_factor": profit_factor,
-            "avg_holding_days": avg_hold,
-            "max_holding_days": 10,
-            "avg_win_pct": avg_win,
-            "avg_loss_pct": avg_loss,
-            "mdd_pct": -18.56,
-            "cumulative_return_pct": 443.8,
-            "sharpe_ratio": 1.15,
-            "annualized_cagr": 24.8,
-            "cash_defense_ratio": 100.0,
-            "exit_reason_breakdown": {
-                "ma10_profit_take": 85,
-                "ma10_profit_take_pct": 76.58,
-                "ten_day_time_exit": 16,
-                "ten_day_time_exit_pct": 14.41,
-                "hard_stop_loss": 10,
-                "hard_stop_loss_pct": 9.01
-            }
+            "avg_return_pct": avg_ret,
+            "avg_holding_days": avg_holding,
+            "total_pnl_twd": round(tot_pnl_twd, 2),
+            "total_pnl_usd": round(tot_pnl_usd, 2),
+            "active_positions_count": len(active_holdings)
         },
-        "four_iron_rules": [
-            {
-                "rule_no": "鐵律 1",
-                "title": "極端恐慌急跌篩選 (Z ≤ -2.0)",
-                "content": "收盤價相較 20 日均線偏離度達 -2.0 個標準差以下，捕捉機構爆發性去槓桿拋售造成的極端定價無效性。"
-            },
-            {
-                "rule_no": "鐵律 2",
-                "title": "拒碰長期垂死空頭 (Price ≥ 0.85 × 200MA)",
-                "content": "標的價格必須高於 200 日均線的 85%，嚴格過濾基本面崩塌、面臨破產的長期空頭股，只做優質回歸。"
-            },
-            {
-                "rule_no": "鐵律 3",
-                "title": "反彈即走：10MA 均值回歸強制停利",
-                "content": "一旦盤中或收盤反彈觸及 10 日均線（10MA），立刻無情市價獲利了結退場（通常 1~4 天內完成），絕不貪戀後續波段！"
-            },
-            {
-                "rule_no": "鐵律 4",
-                "title": "時間風控：上限 10 個交易日強制無條件退場",
-                "content": "快打重視資金週轉效率。若進場後第 10 個交易日收盤仍未觸碰 10MA，強制無條件市價出場；若觸及 -10% 硬停損立即出場。"
-            }
-        ],
+        # 關注與實戰進行中持倉 (含智慧賣出提醒)
+        "active_holdings": active_holdings,
+        # 歷史進出實戰記錄 (Single Source of Truth)
+        "trade_history": closed_trades,
+        # 雷達清單
         "radar": {
             "total_scanned": total_scanned,
             "trigger_count": trigger_count,
@@ -358,24 +513,99 @@ def get_oversold_sniper_dashboard_data():
             "taiwan_triggers": [c for c in radar_candidates if c["is_trigger"] and c["country"] == "台灣"],
             "global_triggers": [c for c in radar_candidates if c["is_trigger"] and c["country"] != "台灣"],
             "all_ranked": radar_candidates[:60]
-        },
-        "recent_trades": trades[:60],
-        "curve_points": curve
+        }
     }
 
-    # 💾 同步寫入靜態檔案 defaultOversoldSniperData.json
+    # 💾 同步持久化快取
     try:
         with open(DEFAULT_DATA_PATH, "w", encoding="utf-8") as f:
             json.dump(dashboard_data, f, indent=2, ensure_ascii=False)
-        print(f"✅ defaultOversoldSniperData.json 已同步更新至最新日期 {market_date}！")
     except Exception as e:
         print(f"同步寫入 defaultOversoldSniperData.json 失敗: {e}")
 
     return dashboard_data
 
-if __name__ == "__main__":
-    data = get_oversold_sniper_dashboard_data()
-    print(f"掃描完成！最新日期: {data.get('market_date')}")
-    print(f"總共掃描標的: {data['radar']['total_scanned']} 檔 (台股+美股)")
-    print(f"觸發極端超賣 (Z <= -2.0): {data['radar']['trigger_count']} 檔")
-    print(f"平均持倉天數: {data['kpi']['avg_holding_days']} 天 (上限 {data['kpi']['max_holding_days']} 天)")
+# =================================================================
+# 🛠️ 用戶實盤交易 CRUD 接口
+# =================================================================
+def add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes=""):
+    """新增一筆實盤快打記錄 (一鍵跟單或手動新增)"""
+    conn = sqlite3.connect(DB_PATH)
+    ensure_user_sniper_table(conn)
+    c = conn.cursor()
+
+    trade_id = f"snip_{int(datetime.now().timestamp() * 1000)}"
+    entry_p = float(entry_price)
+    shs = float(shares)
+    
+    # 預設目標與停損
+    target_ma10 = round(entry_p * 1.05, 2)
+    target_ma20 = round(entry_p * 1.08, 2)
+    stop_loss = round(entry_p * 0.90, 2)
+
+    c.execute("""
+        INSERT INTO user_sniper_trades 
+        (id, ticker, stock_name, market, currency, status, entry_date, entry_price, shares, target_ma10, target_ma20, stop_loss_price, notes)
+        VALUES (?, ?, ?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, ?, ?)
+    """, (trade_id, ticker.upper(), name or ticker, market, currency, entry_date, entry_p, shs, target_ma10, target_ma20, stop_loss, notes))
+
+    conn.commit()
+    conn.close()
+    return {"status": "ok", "message": f"成功新增跟單 {ticker} (成本: {entry_p})！", "trade_id": trade_id}
+
+def close_user_trade(trade_id, exit_price, exit_date, exit_reason="🎯 觸及 10MA 停利"):
+    """平倉一筆快打持倉，記錄賣出價位與獲利"""
+    conn = sqlite3.connect(DB_PATH)
+    ensure_user_sniper_table(conn)
+    c = conn.cursor()
+
+    row = c.execute("SELECT entry_price, shares, entry_date FROM user_sniper_trades WHERE id = ?", (trade_id,)).fetchone()
+    if not row:
+        conn.close()
+        return {"status": "error", "message": "找不到該筆交易紀錄"}
+
+    entry_p, shs, e_date = row
+    exit_p = float(exit_price)
+    
+    # 計算獲利 % 與 金額
+    pnl_pct = round(((exit_p - entry_p) / entry_p) * 100.0, 2)
+    pnl_amt = round((exit_p - entry_p) * shs, 2)
+
+    # 計算持有天數
+    try:
+        e_dt = datetime.strptime(e_date[:10], "%Y-%m-%d")
+        x_dt = datetime.strptime(exit_date[:10], "%Y-%m-%d")
+        holding_days = max(1, (x_dt - e_dt).days)
+    except Exception:
+        holding_days = 1
+
+    c.execute("""
+        UPDATE user_sniper_trades 
+        SET status = 'CLOSED',
+            exit_date = ?,
+            exit_price = ?,
+            exit_reason = ?,
+            pnl_pct = ?,
+            pnl_amount = ?,
+            holding_days = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (exit_date, exit_p, exit_reason, pnl_pct, pnl_amt, holding_days, trade_id))
+
+    conn.commit()
+    conn.close()
+    return {
+        "status": "ok", 
+        "message": f"成功平倉！賣出價位: {exit_p}，本次報酬率: {pnl_pct:+}% (獲利: {pnl_amt:+} )",
+        "pnl_pct": pnl_pct,
+        "pnl_amount": pnl_amt
+    }
+
+def delete_user_trade(trade_id):
+    """刪除一筆交易紀錄"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM user_sniper_trades WHERE id = ?", (trade_id,))
+    conn.commit()
+    conn.close()
+    return {"status": "ok", "message": "已刪除該筆交易紀錄"}

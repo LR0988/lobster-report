@@ -4177,11 +4177,40 @@ def get_tw_asymmetric_alpha_dashboard():
 @app.get("/api/oversold_sniper/dashboard")
 @app.get("/api/oversold_sniper/radar")
 def get_oversold_sniper_dashboard():
-    """極端超賣快打專屬看板：直連 tw_stock.db 台股新資料庫 + 全球權值庫即時雷達"""
+    """強勢股極端超賣快打專屬看板：直連 tw_stock.db 全球主權泰坦強勢股庫 + 台股新資料庫即時雷達"""
     import importlib
     import oversold_sniper_service
     importlib.reload(oversold_sniper_service)
     return oversold_sniper_service.get_oversold_sniper_dashboard_data()
+
+@app.post("/api/oversold_sniper/trades")
+def create_oversold_sniper_trade(payload: dict = Body(...)):
+    """新增實盤跟單紀錄 (一鍵跟單或自訂輸入進場價位)"""
+    import oversold_sniper_service
+    ticker = payload.get("ticker", "")
+    name = payload.get("name", ticker)
+    market = payload.get("market", "台股")
+    currency = payload.get("currency", "TWD")
+    entry_price = payload.get("entry_price", 0)
+    shares = payload.get("shares", 1000)
+    entry_date = payload.get("entry_date", datetime.now().strftime("%Y-%m-%d"))
+    notes = payload.get("notes", "")
+    return oversold_sniper_service.add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes)
+
+@app.post("/api/oversold_sniper/trades/{trade_id}/close")
+def close_oversold_sniper_trade(trade_id: str, payload: dict = Body(...)):
+    """平倉實盤快打紀錄 (輸入賣出價位與理由，移入歷史進出)"""
+    import oversold_sniper_service
+    exit_price = payload.get("exit_price", 0)
+    exit_date = payload.get("exit_date", datetime.now().strftime("%Y-%m-%d"))
+    exit_reason = payload.get("exit_reason", "🎯 觸及 10MA 停利")
+    return oversold_sniper_service.close_user_trade(trade_id, exit_price, exit_date, exit_reason)
+
+@app.delete("/api/oversold_sniper/trades/{trade_id}")
+def delete_oversold_sniper_trade(trade_id: str):
+    """刪除實盤快打交易紀錄"""
+    import oversold_sniper_service
+    return oversold_sniper_service.delete_user_trade(trade_id)
 
 @app.get("/api/market_ml/status")
 @app.get("/api/market_ml/predict")
