@@ -678,9 +678,7 @@ export default function OversoldSniperDashboard() {
                     <th style={{ textAlign: 'center' }}>20日 Z-Score</th>
                     <th style={{ textAlign: 'right' }}>🎯 10MA 目標</th>
                     <th style={{ textAlign: 'right' }}>預期反彈</th>
-                    <th style={{ textAlign: 'right' }}>🚀 20MA 目標</th>
                     <th style={{ textAlign: 'center' }}>200MA 防守</th>
-                    <th style={{ textAlign: 'center' }}>快打動作</th>
                     <th style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.08)' }}>
                       ✍️ 直接輸入買入股價與股數
                     </th>
@@ -752,9 +750,6 @@ export default function OversoldSniperDashboard() {
                         <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: item.exp_rebound_pct >= 0 ? '#34D399' : '#94A3B8' }}>
                           {item.exp_rebound_pct >= 0 ? '+' : ''}{item.exp_rebound_pct}%
                         </td>
-                        <td style={{ textAlign: 'right', color: '#818CF8', fontFamily: 'monospace' }}>
-                          {cSign} {item.ma20.toLocaleString()}
-                        </td>
                         <td style={{ textAlign: 'center' }}>
                           {item.valid_trend ? (
                             <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
@@ -763,17 +758,6 @@ export default function OversoldSniperDashboard() {
                           ) : (
                             <span style={{ fontSize: '0.72rem', color: '#EF4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
                               ⚠️ 破線
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'center' }}>
-                          {isTrig ? (
-                            <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, #EF4444, #B91C1C)', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                              🔥 T+1市價打擊
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '0.74rem', color: isWatch ? '#F59E0B' : '#94A3B8' }}>
-                              {isWatch ? '⚠️ 密切觀察' : '👀 多頭整理'}
                             </span>
                           )}
                         </td>
