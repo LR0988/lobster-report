@@ -17,6 +17,7 @@ import defaultPodcastData from '../data/defaultPodcastData.json';
 import GlobalSovereignDashboard from './GlobalSovereignDashboard';
 import TaiwanCausalTitanDashboard from './TaiwanCausalTitanDashboard';
 import OversoldSniperDashboard from './OversoldSniperDashboard';
+import MsciImbalanceDashboard from './MsciImbalanceDashboard';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
 
@@ -4258,6 +4259,7 @@ function StockDashboard() {
             { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦' },
             { id: 'global_sovereign', label: '👑 全球主權泰坦' },
             { id: 'oversold_sniper', label: '🎯 超賣快打' },
+            { id: 'msci_imbalance', label: '👑 MSCI 尾盤失衡' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
             { id: 'database', label: '🗄️ 資料庫與爬蟲控制', badge: activeTasks.some(t => t.type === 'data_backfill') ? '🗄️ 回補中' : null },
             { id: 'schedule', label: '⏰ 排程管理' },
@@ -8390,6 +8392,11 @@ function StockDashboard() {
         {/* ===== 🎯 極端超賣快打專屬戰情室 ===== */}
         {activeTab === 'oversold_sniper' && (
           <OversoldSniperDashboard />
+        )}
+
+        {/* ===== 👑 MSCI 尾盤失衡隔日沖專屬戰情室 ===== */}
+        {activeTab === 'msci_imbalance' && (
+          <MsciImbalanceDashboard />
         )}
 
         {/* ===== 🗄️ 資料庫與爬蟲戰情中心 (合併全新設計) ===== */}

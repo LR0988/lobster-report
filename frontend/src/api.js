@@ -413,6 +413,25 @@ export async function apiGetOversoldSniperDashboard() {
   return null;
 }
 
+// ==========================================
+// 👑 MSCI 尾盤失衡隔日沖專屬 API
+// ==========================================
+export async function apiGetMsciImbalanceDashboard() {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/msci_imbalance/dashboard`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.status === 'ok') {
+        return json;
+      }
+    }
+  } catch (err) {
+    console.warn(`筆電本機 ${base}/api/msci_imbalance/dashboard 連線異常:`, err.message);
+  }
+  return null;
+}
+
 export async function apiAddOversoldSniperTrade(payload) {
   const base = await resolveApiBase();
   try {
