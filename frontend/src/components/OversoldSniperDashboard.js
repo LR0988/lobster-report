@@ -16,42 +16,25 @@ export default function OversoldSniperDashboard() {
   const [loading, setLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
+  // 雷達表格行內即時輸入 (股價、股數)
+  const [radarRowInputs, setRadarRowInputs] = useState({});
+
+  // 持倉表格行內即時輸入 (賣出股價、出場理由)
+  const [exitRowInputs, setExitRowInputs] = useState({});
+
+  // 頂部通用快速買進記帳列
+  const [quickAdd, setQuickAdd] = useState({
+    ticker: '',
+    name: '',
+    price: '',
+    shares: '1000',
+    date: new Date().toISOString().split('T')[0]
+  });
+
   const triggerNotice = (msg) => {
     setFeedbackMsg(msg);
     setTimeout(() => setFeedbackMsg(''), 4500);
   };
-
-  // 1. 新增跟單彈窗 (Entry Modal - 允許輸入買進價位)
-  const [addModal, setAddModal] = useState({
-    open: false,
-    ticker: '',
-    name: '',
-    market: '台股',
-    currency: 'TWD',
-    entry_price: '',
-    shares: '1000',
-    entry_date: new Date().toISOString().split('T')[0],
-    target_ma10: '',
-    target_ma20: '',
-    stop_loss: '',
-    notes: ''
-  });
-
-  // 2. 賣出平倉彈窗 (Exit Modal - 允許輸入賣出價位與理由)
-  const [closeModal, setCloseModal] = useState({
-    open: false,
-    trade_id: '',
-    ticker: '',
-    name: '',
-    currency: 'TWD',
-    shares: 1000,
-    entry_price: 0,
-    current_price: 0,
-    exit_price: '',
-    exit_date: new Date().toISOString().split('T')[0],
-    exit_reason: '🎯 觸及 10MA 停利',
-    days_held: 1
-  });
 
   // 載入即時後端雷達與數據
   const loadDashboardData = async (isManual = false) => {
@@ -104,7 +87,7 @@ export default function OversoldSniperDashboard() {
   // 歷史進出實戰記錄 (Single Source of Truth)
   const tradeHistory = liveData?.trade_history || [];
 
-  // 動態實戰績效統計 (無任何快照)
+  // 動態實戰績效統計 (由真實歷史進出驅動，無任何快照)
   const userPerf = liveData?.user_performance || {
     total_closed_trades: tradeHistory.length,
     win_trades: tradeHistory.filter(t => (t.pnl_pct || 0) > 0).length,
@@ -136,41 +119,31 @@ export default function OversoldSniperDashboard() {
     });
   }, [tradeHistory, tradeFilter, tradeSearch]);
 
-  // ⚡ 從雷達點擊「一鍵跟單」
-  const handleAdoptFromRadar = (item) => {
+  // ⚡ 直接從行內輸入股價與股數買入 (無需多餘彈窗)
+  const handleInlineBuy = async (item) => {
     const isTw = item.ticker.endsWith('.TW') || item.country === '台灣';
-    const cPrice = item.close || 0;
-    setAddModal({
-      open: true,
-      ticker: item.ticker,
-      name: item.name,
-      market: item.market || (isTw ? '台股' : '美股'),
-      currency: isTw ? 'TWD' : 'USD',
-      entry_price: String(cPrice),
-      shares: isTw ? '1000' : '10',
-      entry_date: new Date().toISOString().split('T')[0],
-      target_ma10: String(item.ma10 || (cPrice * 1.05).toFixed(2)),
-      target_ma20: String(item.ma20 || (cPrice * 1.08).toFixed(2)),
-      stop_loss: String(item.stop_loss_price || (cPrice * 0.90).toFixed(2)),
-      notes: `強勢股回檔 Z=${item.z_score} 極限超賣撈底`
-    });
-  };
+    const rowInput = radarRowInputs[item.ticker] || {};
+    const inputPrice = rowInput.price !== undefined && rowInput.price !== '' ? parseFloat(rowInput.price) : item.close;
+    const inputShares = rowInput.shares !== undefined && rowInput.shares !== '' ? parseFloat(rowInput.shares) : (isTw ? 1000 : 10);
 
-  // 確認新增跟單
-  const handleSaveAddTrade = async () => {
-    if (!addModal.ticker || !addModal.entry_price) {
-      alert('請填寫標的代號與買入價格！');
+    if (!inputPrice || inputPrice <= 0) {
+      alert('請輸入有效的買入股價！');
       return;
     }
+    if (!inputShares || inputShares <= 0) {
+      alert('請輸入有效的買入股數！');
+      return;
+    }
+
     const payload = {
-      ticker: addModal.ticker.toUpperCase(),
-      name: addModal.name || addModal.ticker,
-      market: addModal.market,
-      currency: addModal.currency,
-      entry_price: parseFloat(addModal.entry_price),
-      shares: parseFloat(addModal.shares) || (addModal.currency === 'TWD' ? 1000 : 10),
-      entry_date: addModal.entry_date,
-      notes: addModal.notes
+      ticker: item.ticker.toUpperCase(),
+      name: item.name || item.ticker,
+      market: isTw ? '台股' : '美股',
+      currency: isTw ? 'TWD' : 'USD',
+      entry_price: inputPrice,
+      shares: inputShares,
+      entry_date: new Date().toISOString().split('T')[0],
+      notes: `強勢股回檔 Z=${item.z_score} 極限超賣撈底`
     };
 
     setLoading(true);
@@ -178,56 +151,77 @@ export default function OversoldSniperDashboard() {
     setLoading(false);
 
     if (res && res.status === 'ok') {
-      triggerNotice(`✅ 已成功記錄跟單 ${payload.ticker}！買入價位: ${payload.entry_price}，已加入實戰持倉關注！`);
-      setAddModal(prev => ({ ...prev, open: false }));
+      const cSign = isTw ? 'NT$' : '$';
+      triggerNotice(`✅ 已成功記錄買入 ${payload.ticker}！買入價: ${cSign}${inputPrice}，股數: ${inputShares} 股，已加入持倉關注！`);
       setActiveSubTab('tracker');
       loadDashboardData(false);
     } else {
-      alert(res?.message || '新增跟單失敗，請檢查輸入內容！');
+      alert(res?.message || '買入記錄失敗，請檢查輸入內容！');
     }
   };
 
-  // 點擊「🚪 平倉/賣出」打開賣出確認彈窗
-  const handleOpenCloseModal = (holding) => {
-    setCloseModal({
-      open: true,
-      trade_id: holding.id,
-      ticker: holding.ticker,
-      name: holding.name,
-      currency: holding.currency || 'TWD',
-      shares: holding.shares || 1000,
-      entry_price: holding.entry_price,
-      current_price: holding.current_price,
-      exit_price: String(holding.current_price),
-      exit_date: new Date().toISOString().split('T')[0],
-      exit_reason: holding.current_price >= holding.target_ma10 
-        ? '🎯 觸及 10MA 停利' 
-        : (holding.days_held >= 10 ? '⏱️ 滿 10 天時間風控強制出場' : '🎯 手動獲利平倉'),
-      days_held: holding.days_held
-    });
-  };
-
-  // 確認賣出平倉
-  const handleConfirmCloseTrade = async () => {
-    if (!closeModal.exit_price || parseFloat(closeModal.exit_price) <= 0) {
-      alert('請輸入有效的賣出成交價格！');
+  // ⚡ 頂部快速手動輸入買進
+  const handleQuickAddSubmit = async () => {
+    if (!quickAdd.ticker || !quickAdd.price) {
+      alert('請填寫標的代號與買入股價！');
       return;
     }
+    const tkr = quickAdd.ticker.toUpperCase();
+    const isTw = tkr.endsWith('.TW') || (!tkr.includes('.') && /^\d+$/.test(tkr));
+    const finalTicker = (isTw && !tkr.endsWith('.TW')) ? `${tkr}.TW` : tkr;
+    const p = parseFloat(quickAdd.price);
+    const shs = parseFloat(quickAdd.shares) || (isTw ? 1000 : 10);
+
     const payload = {
-      exit_price: parseFloat(closeModal.exit_price),
-      exit_date: closeModal.exit_date,
-      exit_reason: closeModal.exit_reason
+      ticker: finalTicker,
+      name: quickAdd.name || finalTicker,
+      market: isTw ? '台股' : '美股',
+      currency: isTw ? 'TWD' : 'USD',
+      entry_price: p,
+      shares: shs,
+      entry_date: quickAdd.date || new Date().toISOString().split('T')[0],
+      notes: '手動快速輸入跟單'
     };
 
     setLoading(true);
-    const res = await apiCloseOversoldSniperTrade(closeModal.trade_id, payload);
+    const res = await apiAddOversoldSniperTrade(payload);
+    setLoading(false);
+
+    if (res && res.status === 'ok') {
+      triggerNotice(`✅ 成功買入跟單 ${payload.ticker}！股價: ${p}，股數: ${shs} 股！`);
+      setQuickAdd({ ticker: '', name: '', price: '', shares: '1000', date: new Date().toISOString().split('T')[0] });
+      setActiveSubTab('tracker');
+      loadDashboardData(false);
+    } else {
+      alert(res?.message || '買入失敗，請重試！');
+    }
+  };
+
+  // 🚪 直接從行內輸入賣出股價平倉
+  const handleInlineClose = async (holding) => {
+    const rowExit = exitRowInputs[holding.id] || {};
+    const inputExitPrice = rowExit.price !== undefined && rowExit.price !== '' ? parseFloat(rowExit.price) : holding.current_price;
+    const inputReason = rowExit.reason || (holding.current_price >= holding.target_ma10 ? '🎯 觸及 10MA 停利' : '🎯 手動獲利平倉');
+
+    if (!inputExitPrice || inputExitPrice <= 0) {
+      alert('請輸入有效的賣出股價！');
+      return;
+    }
+
+    const payload = {
+      exit_price: inputExitPrice,
+      exit_date: new Date().toISOString().split('T')[0],
+      exit_reason: inputReason
+    };
+
+    setLoading(true);
+    const res = await apiCloseOversoldSniperTrade(holding.id, payload);
     setLoading(false);
 
     if (res && res.status === 'ok') {
       const sign = (res.pnl_pct || 0) >= 0 ? '+' : '';
       const amtSign = (res.pnl_amount || 0) >= 0 ? '+' : '';
-      triggerNotice(`🎉 成功平倉 ${closeModal.ticker}！賣出價位: ${payload.exit_price}，本次報酬率: ${sign}${res.pnl_pct}% (獲利: ${amtSign}${res.pnl_amount} ${closeModal.currency})！`);
-      setCloseModal(prev => ({ ...prev, open: false }));
+      triggerNotice(`🎉 成功賣出平倉 ${holding.ticker}！賣出價位: ${payload.exit_price}，本次報酬率: ${sign}${res.pnl_pct}% (獲利: ${amtSign}${res.pnl_amount} ${holding.currency})！`);
       setActiveSubTab('history');
       loadDashboardData(false);
     } else {
@@ -237,7 +231,7 @@ export default function OversoldSniperDashboard() {
 
   // 刪除交易紀錄
   const handleDeleteTrade = async (tradeId, ticker) => {
-    if (window.confirm(`確定要刪除 ${ticker} 的這筆交易紀錄嗎？`)) {
+    if (window.confirm(`確定要刪除 ${ticker} 的這筆進出紀錄嗎？`)) {
       setLoading(true);
       const res = await apiDeleteOversoldSniperTrade(tradeId);
       setLoading(false);
@@ -248,17 +242,16 @@ export default function OversoldSniperDashboard() {
     }
   };
 
-  // 匯出真實歷史進出 CSV
+  // 匯出真實進出歷史 CSV
   const handleExportCsv = () => {
     if (!tradeHistory || tradeHistory.length === 0) {
       alert('目前尚無歷史進出紀錄可匯出！');
       return;
     }
-    const headers = ['標的代號', '標的名稱', '市場', '幣別', '買入日期', '賣出日期', '買入價格', '賣出價格', '股數', '報酬率(%)', '損益金額', '持有天數', '出場理由', '備註'];
+    const headers = ['標的代號', '標的名稱', '幣別', '買進日期', '賣出日期', '買進股價', '賣出股價', '買賣股數', '報酬率(%)', '損益金額', '持有天數', '出場理由', '備註'];
     const rows = tradeHistory.map(t => [
       t.ticker,
       `"${t.name}"`,
-      t.market,
       t.currency,
       t.entry_date,
       t.exit_date,
@@ -275,7 +268,7 @@ export default function OversoldSniperDashboard() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `titan_sniper_real_trades_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `titan_sniper_trade_history_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -306,14 +299,14 @@ export default function OversoldSniperDashboard() {
       {/* 頂部標題與哲學橫條 */}
       <div className="glass-card" style={{
         padding: '1.1rem 1.4rem',
-        marginBottom: '1.2rem',
+        marginBottom: '1rem',
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.88))',
         border: '1px solid rgba(239, 68, 68, 0.35)',
         borderLeft: '5px solid #EF4444'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.6rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, color: '#F87171', fontSize: '1.28rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <h3 style={{ margin: 0, color: '#F87171', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               🎯 強勢股極端超賣快打實戰艙 (Titan Oversold Sniper)
             </h3>
             <span style={{
@@ -323,12 +316,9 @@ export default function OversoldSniperDashboard() {
               color: '#FCA5A5',
               padding: '0.2rem 0.65rem',
               borderRadius: '5px',
-              fontWeight: 'bold',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem'
+              fontWeight: 'bold'
             }}>
-              📡 雷達掃描日：<strong style={{ color: '#FCD34D' }}>{liveData?.market_date || defaultOversoldSniperData.market_date}</strong> (直連 SQLite 實時運算)
+              📡 雷達掃描日：<strong style={{ color: '#FCD34D' }}>{liveData?.market_date || defaultOversoldSniperData.market_date}</strong>
             </span>
             <span style={{
               fontSize: '0.75rem',
@@ -339,104 +329,213 @@ export default function OversoldSniperDashboard() {
               borderRadius: '4px',
               fontWeight: 'bold'
             }}>
-              ⭐ 觀察標的：全球主權泰坦強勢股庫 (180+ 檔多頭旗艦)
+              ⭐ 觀察池：全球主權泰坦強勢股 (180+ 檔多頭領頭羊)
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button
-              onClick={() => loadDashboardData(true)}
-              disabled={loading}
-              style={{
-                padding: '0.4rem 0.9rem',
-                fontSize: '0.8rem',
-                borderRadius: '6px',
-                border: '1px solid rgba(239, 68, 68, 0.5)',
-                background: 'rgba(239, 68, 68, 0.15)',
-                color: '#FCA5A5',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.3rem'
-              }}
-            >
-              <span>{loading ? '🔄' : '⚡'}</span> {loading ? '掃描運算中...' : '即時重新掃描資料庫'}
-            </button>
-          </div>
+          <button
+            onClick={() => loadDashboardData(true)}
+            disabled={loading}
+            style={{
+              padding: '0.35rem 0.85rem',
+              fontSize: '0.78rem',
+              borderRadius: '6px',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              background: 'rgba(239, 68, 68, 0.15)',
+              color: '#FCA5A5',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}
+          >
+            <span>{loading ? '🔄' : '⚡'}</span> {loading ? '掃描中...' : '重新掃描資料庫'}
+          </button>
         </div>
-
-        {/* 策略核心邏輯說明 */}
-        <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-          💡 <strong>實戰哲學</strong>：專門監控<strong>「位於 200MA 長期多頭之上的優質強勢股」</strong>。當遭遇短線急跌、高頻算法摜出極限超賣 (<strong>Z ≤ -2.0</strong>) 時進場加碼短打；
-          <strong>站回 10MA 即刻結利退場（DOE 實測勝率 74.5%）</strong>，或觸及 +8% / 20MA 擴大停利，持倉嚴守 10 天風控。純歷史進出紀錄，累計真實戰果！
-        </p>
 
         {/* 實戰真實 KPI 橫條 (由真實歷史進出驅動，無快照) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
           gap: '0.6rem',
-          marginTop: '0.9rem'
+          marginTop: '0.6rem'
         }}>
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>📜 實戰已平倉筆數</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#F8FAFC', marginTop: '0.15rem' }}>
-              {userPerf.total_closed_trades} <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>筆</span>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.55rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>📜 實戰進出已結算</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#F8FAFC', marginTop: '0.1rem' }}>
+              {userPerf.total_closed_trades} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>筆</span>
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#38BDF8', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#38BDF8', marginTop: '0.1rem' }}>
               進行中：{activeHoldings.length} 檔
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
-            <div style={{ fontSize: '0.72rem', color: '#A7F3D0' }}>🎯 實戰平均勝率</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.15rem' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.55rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#A7F3D0' }}>🎯 實戰平均勝率</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.1rem' }}>
               {userPerf.win_rate}%
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#6EE7B7', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#6EE7B7', marginTop: '0.1rem' }}>
               {userPerf.win_trades} 勝 / {userPerf.loss_trades} 負
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(234, 179, 8, 0.25)' }}>
-            <div style={{ fontSize: '0.72rem', color: '#FEF08A' }}>💰 台幣累計已實現獲利</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FACC15', marginTop: '0.15rem' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.55rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(234, 179, 8, 0.25)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#FEF08A' }}>💰 台幣累計實賺</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#FACC15', marginTop: '0.1rem' }}>
               NT$ {userPerf.total_pnl_twd?.toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#E2E8F0', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#E2E8F0', marginTop: '0.1rem' }}>
               美金：$ {userPerf.total_pnl_usd?.toLocaleString()}
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
-            <div style={{ fontSize: '0.72rem', color: '#BAE6FD' }}>📈 平均單筆獲利</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.15rem' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.55rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#BAE6FD' }}>📈 平均單筆獲利</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.1rem' }}>
               {userPerf.avg_return_pct > 0 ? '+' : ''}{userPerf.avg_return_pct}%
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#93C5FD', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#93C5FD', marginTop: '0.1rem' }}>
               盈虧比：{userPerf.profit_factor}
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(192, 132, 252, 0.25)' }}>
-            <div style={{ fontSize: '0.72rem', color: '#E9D5FF' }}>⏱️ 平均持倉時間</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#C084FC', marginTop: '0.15rem' }}>
-              {userPerf.avg_holding_days} <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>天</span>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.55rem 0.8rem', borderRadius: '6px', border: '1px solid rgba(192, 132, 252, 0.25)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#E9D5FF' }}>⏱️ 平均持倉時間</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#C084FC', marginTop: '0.1rem' }}>
+              {userPerf.avg_holding_days} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>天</span>
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#E9D5FF', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '0.68rem', color: '#E9D5FF', marginTop: '0.1rem' }}>
               上限 10 天強制出場
             </div>
           </div>
         </div>
       </div>
 
+      {/* ⚡ 快速手動買進 / 記帳列 (直接輸入股價、股數快速新增) */}
+      <div className="glass-card" style={{
+        padding: '0.8rem 1.1rem',
+        marginBottom: '1rem',
+        background: 'rgba(15, 23, 42, 0.75)',
+        border: '1px solid rgba(56, 189, 248, 0.25)',
+        borderRadius: '8px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <span>⚡</span> 快速買進記帳：
+          </span>
+
+          <input
+            type="text"
+            placeholder="代號 (如 2330 / NVDA)"
+            value={quickAdd.ticker}
+            onChange={e => setQuickAdd(prev => ({ ...prev, ticker: e.target.value }))}
+            style={{
+              padding: '0.35rem 0.6rem',
+              fontSize: '0.8rem',
+              borderRadius: '4px',
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: '#0F172A',
+              color: '#FFF',
+              width: '150px'
+            }}
+          />
+
+          <input
+            type="text"
+            placeholder="名稱 (選填)"
+            value={quickAdd.name}
+            onChange={e => setQuickAdd(prev => ({ ...prev, name: e.target.value }))}
+            style={{
+              padding: '0.35rem 0.6rem',
+              fontSize: '0.8rem',
+              borderRadius: '4px',
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: '#0F172A',
+              color: '#FFF',
+              width: '120px'
+            }}
+          />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+            <span style={{ fontSize: '0.78rem', color: '#FACC15', fontWeight: 'bold' }}>買入股價:</span>
+            <input
+              type="number"
+              step="any"
+              placeholder="股價"
+              value={quickAdd.price}
+              onChange={e => setQuickAdd(prev => ({ ...prev, price: e.target.value }))}
+              style={{
+                padding: '0.35rem 0.6rem',
+                fontSize: '0.8rem',
+                borderRadius: '4px',
+                border: '1px solid #F59E0B',
+                background: '#0F172A',
+                color: '#FACC15',
+                width: '100px',
+                fontWeight: 'bold'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+            <span style={{ fontSize: '0.78rem', color: '#CBD5E1' }}>股數:</span>
+            <input
+              type="number"
+              placeholder="股數"
+              value={quickAdd.shares}
+              onChange={e => setQuickAdd(prev => ({ ...prev, shares: e.target.value }))}
+              style={{
+                padding: '0.35rem 0.6rem',
+                fontSize: '0.8rem',
+                borderRadius: '4px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: '#0F172A',
+                color: '#FFF',
+                width: '90px'
+              }}
+            />
+          </div>
+
+          <input
+            type="date"
+            value={quickAdd.date}
+            onChange={e => setQuickAdd(prev => ({ ...prev, date: e.target.value }))}
+            style={{
+              padding: '0.35rem 0.5rem',
+              fontSize: '0.78rem',
+              borderRadius: '4px',
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: '#0F172A',
+              color: '#FFF'
+            }}
+          />
+
+          <button
+            onClick={handleQuickAddSubmit}
+            style={{
+              padding: '0.35rem 0.9rem',
+              fontSize: '0.8rem',
+              borderRadius: '4px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #38BDF8, #0284C7)',
+              color: '#FFF',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            ➕ 立即記錄買入
+          </button>
+        </div>
+      </div>
+
       {/* 子分頁切換導航 */}
-      <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem', flexWrap: 'wrap' }}>
         {[
           { id: 'radar', label: `📡 今日強勢股超賣雷達 (${triggers.length} 檔觸發)`, color: '#EF4444' },
-          { id: 'tracker', label: `💼 我的跟單與實戰持倉 (${activeHoldings.length} 檔關注中)`, color: '#38BDF8' },
-          { id: 'history', label: `📜 歷史進出實戰紀錄簿 (${tradeHistory.length} 筆已結算)`, color: '#10B981' },
+          { id: 'tracker', label: `💼 我的進行中持倉 (${activeHoldings.length} 檔關注·即時賣出提示)`, color: '#38BDF8' },
+          { id: 'history', label: `📜 實戰進出歷史 (${tradeHistory.length} 筆已結算·累計獲利)`, color: '#10B981' },
           { id: 'rules', label: '🎯 快打四大鐵律與 SOP 手冊', color: '#F59E0B' }
         ].map(tab => (
           <button
@@ -464,7 +563,7 @@ export default function OversoldSniperDashboard() {
       </div>
 
       {/* ============================================================== */}
-      {/* 視圖 1：📡 今日強勢股超賣雷達 (Titan Strong Stocks Scanner) */}
+      {/* 視圖 1：📡 今日強勢股超賣雷達 (可直接在行內輸入股價與股數買入) */}
       {/* ============================================================== */}
       {activeSubTab === 'radar' && (
         <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #EF4444' }}>
@@ -474,19 +573,19 @@ export default function OversoldSniperDashboard() {
                 📡 全球主權泰坦強勢股庫 — 極限超賣撈底即時雷達
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                直連 SQLite 即時掃描全球泰坦 180+ 檔多頭龍頭股（台股旗艦 + 美股科技巨頭），計算 20 日 Z-Score。當 Z ≤ -2.0 且在 200MA 之上時觸發，提示 10MA 均值回歸目標！
+                直連 SQLite 實時運算 180+ 檔多頭強勢股（台股旗艦 + 美股科技巨頭），<strong>可直接在下方列表輸入您的實盤買入股價與股數，點擊買入即可直接加入持倉！</strong>
               </p>
             </div>
 
             {/* 篩選標籤 */}
-            <div style={{ display: 'flex', gap: '0.4rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setRadarFilter('triggers')}
                 style={{
-                  padding: '0.25rem 0.65rem',
+                  padding: '0.22rem 0.6rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.76rem',
+                  fontSize: '0.75rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'triggers' ? 'linear-gradient(135deg, #EF4444, #DC2626)' : 'transparent',
@@ -498,10 +597,10 @@ export default function OversoldSniperDashboard() {
               <button
                 onClick={() => setRadarFilter('taiwan')}
                 style={{
-                  padding: '0.25rem 0.65rem',
+                  padding: '0.22rem 0.6rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.76rem',
+                  fontSize: '0.75rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'taiwan' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
@@ -513,10 +612,10 @@ export default function OversoldSniperDashboard() {
               <button
                 onClick={() => setRadarFilter('global')}
                 style={{
-                  padding: '0.25rem 0.65rem',
+                  padding: '0.22rem 0.6rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.76rem',
+                  fontSize: '0.75rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'global' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
@@ -528,10 +627,10 @@ export default function OversoldSniperDashboard() {
               <button
                 onClick={() => setRadarFilter('watchlist')}
                 style={{
-                  padding: '0.25rem 0.65rem',
+                  padding: '0.22rem 0.6rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.76rem',
+                  fontSize: '0.75rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'watchlist' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
@@ -543,10 +642,10 @@ export default function OversoldSniperDashboard() {
               <button
                 onClick={() => setRadarFilter('all')}
                 style={{
-                  padding: '0.25rem 0.65rem',
+                  padding: '0.22rem 0.6rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.76rem',
+                  fontSize: '0.75rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'all' ? 'linear-gradient(135deg, #64748B, #475569)' : 'transparent',
@@ -572,15 +671,16 @@ export default function OversoldSniperDashboard() {
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代號與名稱</th>
-                    <th>市場 / 區域</th>
-                    <th style={{ textAlign: 'right' }}>最新現價</th>
+                    <th style={{ textAlign: 'right' }}>參考現價</th>
                     <th style={{ textAlign: 'center' }}>20日 Z-Score</th>
-                    <th style={{ textAlign: 'right' }}>🎯 10MA 停利目標</th>
-                    <th style={{ textAlign: 'right' }}>預期反彈漲幅</th>
+                    <th style={{ textAlign: 'right' }}>🎯 10MA 目標</th>
+                    <th style={{ textAlign: 'right' }}>預期反彈</th>
                     <th style={{ textAlign: 'right' }}>🚀 20MA 目標</th>
-                    <th style={{ textAlign: 'center' }}>長多 200MA 防守</th>
+                    <th style={{ textAlign: 'center' }}>200MA 防守</th>
                     <th style={{ textAlign: 'center' }}>快打動作</th>
-                    <th style={{ textAlign: 'center' }}>實戰操作</th>
+                    <th style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.08)' }}>
+                      ✍️ 直接輸入買入股價與股數
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -590,27 +690,17 @@ export default function OversoldSniperDashboard() {
                     const isTrig = item.is_trigger;
                     const isWatch = item.z_score <= -1.7 && !isTrig;
 
+                    const curInput = radarRowInputs[item.ticker] || {};
+                    const valPrice = curInput.price !== undefined ? curInput.price : item.close;
+                    const valShares = curInput.shares !== undefined ? curInput.shares : (isTw ? 1000 : 10);
+
                     return (
                       <tr key={item.ticker} style={{ background: isTrig ? 'rgba(239, 68, 68, 0.08)' : (isWatch ? 'rgba(245, 158, 11, 0.05)' : 'transparent') }}>
                         <td>
-                          <div style={{ fontWeight: 'bold', color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <span>{item.name}</span>
-                          </div>
+                          <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{item.name}</div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                             {item.ticker}
                           </div>
-                        </td>
-                        <td>
-                          <span style={{
-                            fontSize: '0.72rem',
-                            background: isTw ? 'rgba(59, 130, 246, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                            color: isTw ? '#60A5FA' : '#C084FC',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontWeight: 'bold'
-                          }}>
-                            {item.market || (isTw ? '台股' : '美股')}
-                          </span>
                         </td>
                         <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace' }}>
                           {cSign} {item.close.toLocaleString()}
@@ -640,7 +730,7 @@ export default function OversoldSniperDashboard() {
                         <td style={{ textAlign: 'center' }}>
                           {item.valid_trend ? (
                             <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
-                              ✅ 健康 (≥0.85×200MA)
+                              ✅ ≥0.85×200MA
                             </span>
                           ) : (
                             <span style={{ fontSize: '0.72rem', color: '#EF4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
@@ -651,33 +741,83 @@ export default function OversoldSniperDashboard() {
                         <td style={{ textAlign: 'center' }}>
                           {isTrig ? (
                             <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, #EF4444, #B91C1C)', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                              🔥 T+1開盤市價打擊
+                              🔥 T+1市價打擊
                             </span>
                           ) : (
                             <span style={{ fontSize: '0.74rem', color: isWatch ? '#F59E0B' : '#94A3B8' }}>
-                              {isWatch ? '⚠️ 密切觀察恐慌深坑' : '👀 多頭常態整理'}
+                              {isWatch ? '⚠️ 密切觀察' : '👀 多頭整理'}
                             </span>
                           )}
                         </td>
-                        <td style={{ textAlign: 'center' }}>
-                          <button
-                            onClick={() => handleAdoptFromRadar(item)}
-                            style={{
-                              padding: '0.24rem 0.65rem',
-                              fontSize: '0.74rem',
-                              background: 'linear-gradient(135deg, #38BDF8, #0284C7)',
-                              border: 'none',
-                              color: '#FFF',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.25rem'
-                            }}
-                          >
-                            <span>⚡</span> 一鍵跟單
-                          </button>
+                        {/* ✍️ 直接輸入買入股價與股數 */}
+                        <td style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.05)' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <input
+                                type="number"
+                                step="any"
+                                value={valPrice}
+                                onChange={e => setRadarRowInputs(prev => ({
+                                  ...prev,
+                                  [item.ticker]: { ...(prev[item.ticker] || {}), price: e.target.value }
+                                }))}
+                                placeholder="買價"
+                                title="直接輸入買入股價"
+                                style={{
+                                  width: '85px',
+                                  padding: '2px 4px',
+                                  fontSize: '0.78rem',
+                                  borderRadius: '3px',
+                                  border: '1px solid #F59E0B',
+                                  background: '#0F172A',
+                                  color: '#FACC15',
+                                  fontWeight: 'bold',
+                                  fontFamily: 'monospace',
+                                  textAlign: 'right'
+                                }}
+                              />
+                              <input
+                                type="number"
+                                value={valShares}
+                                onChange={e => setRadarRowInputs(prev => ({
+                                  ...prev,
+                                  [item.ticker]: { ...(prev[item.ticker] || {}), shares: e.target.value }
+                                }))}
+                                placeholder="股數"
+                                title="直接輸入買入股數"
+                                style={{
+                                  width: '85px',
+                                  padding: '2px 4px',
+                                  fontSize: '0.74rem',
+                                  borderRadius: '3px',
+                                  border: '1px solid rgba(255,255,255,0.15)',
+                                  background: '#0F172A',
+                                  color: '#FFF',
+                                  fontFamily: 'monospace',
+                                  textAlign: 'right'
+                                }}
+                              />
+                            </div>
+
+                            <button
+                              onClick={() => handleInlineBuy(item)}
+                              style={{
+                                padding: '0.45rem 0.65rem',
+                                fontSize: '0.76rem',
+                                background: 'linear-gradient(135deg, #38BDF8, #0284C7)',
+                                border: 'none',
+                                color: '#FFF',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.2rem'
+                              }}
+                            >
+                              <span>⚡</span> 買入
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -690,51 +830,19 @@ export default function OversoldSniperDashboard() {
       )}
 
       {/* ============================================================== */}
-      {/* 視圖 2：💼 我的跟單與實戰持倉艙 (Active Holdings & Live Sell Alerts) */}
+      {/* 視圖 2：💼 我的進行中持倉 (即時賣出提示 ＆ 直接輸入賣出股價平倉) */}
       {/* ============================================================== */}
       {activeSubTab === 'tracker' && (
         <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                💼 我的實戰快打跟單與關注持倉艙
+                💼 我的進行中持倉與關注艙 (實時賣出警示)
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                直連 SQLite 實時更新現價與持股天數（最長上限 10 天倒數）。<strong>系統會即時提示何時可以賣出（10MA 停利 / +8% 擴大停利 / 滿 10 天風控）</strong>，點擊平倉並自訂輸入賣出價位！
+                直連 SQLite 實時更新現價與持股天數。<strong>系統提示何時可以賣出，您可直接在下方表格輸入實際賣出股價，點擊平倉即可結算並存入「實戰進出歷史」！</strong>
               </p>
             </div>
-
-            <button
-              onClick={() => setAddModal({
-                open: true,
-                ticker: '',
-                name: '',
-                market: '台股',
-                currency: 'TWD',
-                entry_price: '',
-                shares: '1000',
-                entry_date: new Date().toISOString().split('T')[0],
-                target_ma10: '',
-                target_ma20: '',
-                stop_loss: '',
-                notes: ''
-              })}
-              style={{
-                padding: '0.35rem 0.85rem',
-                fontSize: '0.8rem',
-                borderRadius: '6px',
-                border: 'none',
-                background: 'linear-gradient(135deg, #10B981, #059669)',
-                color: '#FFF',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.3rem'
-              }}
-            >
-              <span>➕</span> 手動新增跟單標的
-            </button>
           </div>
 
           {activeHoldings.length === 0 ? (
@@ -742,7 +850,7 @@ export default function OversoldSniperDashboard() {
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎯</div>
               <strong>目前無進行中的快打持倉</strong>
               <div style={{ fontSize: '0.78rem', marginTop: '0.3rem' }}>
-                可至「📡 今日強勢股超賣雷達」選取標的點擊「一鍵跟單」，或點擊上方「手動新增跟單標的」。
+                可至「📡 今日強勢股超賣雷達」直接在行內輸入股價股數買入，或透過上方快速記帳列新增。
               </div>
             </div>
           ) : (
@@ -752,13 +860,15 @@ export default function OversoldSniperDashboard() {
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代碼與名稱</th>
                     <th>進場日期</th>
-                    <th style={{ textAlign: 'center' }}>已持天數 (上限10天)</th>
-                    <th style={{ textAlign: 'right' }}>買入進場價</th>
+                    <th style={{ textAlign: 'center' }}>持有天數 (上限10天)</th>
+                    <th style={{ textAlign: 'right' }}>買入成本價</th>
                     <th style={{ textAlign: 'right' }}>最新現價</th>
                     <th style={{ textAlign: 'right' }}>🎯 10MA 停利目標</th>
                     <th style={{ textAlign: 'right' }}>未實現損益 (%)</th>
                     <th style={{ textAlign: 'center' }}>🔔 賣出出場訊號提示</th>
-                    <th style={{ textAlign: 'center' }}>實戰平倉操作</th>
+                    <th style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)' }}>
+                      🚪 直接輸入賣出股價與理由平倉
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -767,6 +877,10 @@ export default function OversoldSniperDashboard() {
                     const cSign = isTw ? 'NT$' : '$';
                     const gainPct = pos.unrealized_pnl_pct || 0;
                     const isPositive = gainPct >= 0;
+
+                    const curExit = exitRowInputs[pos.id] || {};
+                    const valExitPrice = curExit.price !== undefined ? curExit.price : pos.current_price;
+                    const valExitReason = curExit.reason || (pos.current_price >= pos.target_ma10 ? '🎯 觸及 10MA 停利' : (pos.days_held >= 10 ? '⏱️ 滿 10 天時間風控強制出場' : '🎯 手動獲利平倉'));
 
                     return (
                       <tr key={pos.id} style={{ background: pos.can_sell ? 'rgba(16, 185, 129, 0.08)' : 'transparent' }}>
@@ -818,27 +932,80 @@ export default function OversoldSniperDashboard() {
                               {pos.sell_badge}
                             </span>
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: '#CBD5E1', marginTop: '3px', maxWidth: '220px' }}>
+                          <div style={{ fontSize: '0.72rem', color: '#CBD5E1', marginTop: '3px', maxWidth: '210px' }}>
                             {pos.sell_instruction}
                           </div>
                         </td>
-                        <td style={{ textAlign: 'center' }}>
-                          <button
-                            onClick={() => handleOpenCloseModal(pos)}
-                            style={{
-                              padding: '0.24rem 0.65rem',
-                              fontSize: '0.74rem',
-                              background: pos.can_sell ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #B91C1C)',
-                              border: 'none',
-                              color: '#FFF',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              marginRight: '4px'
-                            }}
-                          >
-                            🚪 平倉 / 輸入賣價
-                          </button>
+                        {/* 🚪 直接輸入賣出股價與理由平倉 */}
+                        <td style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.05)' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <input
+                                type="number"
+                                step="any"
+                                value={valExitPrice}
+                                onChange={e => setExitRowInputs(prev => ({
+                                  ...prev,
+                                  [pos.id]: { ...(prev[pos.id] || {}), price: e.target.value }
+                                }))}
+                                placeholder="賣價"
+                                title="直接輸入實際賣出股價"
+                                style={{
+                                  width: '85px',
+                                  padding: '2px 4px',
+                                  fontSize: '0.78rem',
+                                  borderRadius: '3px',
+                                  border: '1px solid #10B981',
+                                  background: '#0F172A',
+                                  color: '#34D399',
+                                  fontWeight: 'bold',
+                                  fontFamily: 'monospace',
+                                  textAlign: 'right'
+                                }}
+                              />
+                              <select
+                                value={valExitReason}
+                                onChange={e => setExitRowInputs(prev => ({
+                                  ...prev,
+                                  [pos.id]: { ...(prev[pos.id] || {}), reason: e.target.value }
+                                }))}
+                                style={{
+                                  width: '85px',
+                                  padding: '1px',
+                                  fontSize: '0.68rem',
+                                  borderRadius: '3px',
+                                  border: '1px solid rgba(255,255,255,0.15)',
+                                  background: '#0F172A',
+                                  color: '#CBD5E1'
+                                }}
+                              >
+                                <option value="🎯 觸及 10MA 停利">10MA停利</option>
+                                <option value="🚀 觸及 +8% / 20MA 擴大停利">+8%/20MA</option>
+                                <option value="⏱️ 滿 10 天時間風控強制出場">10天到期</option>
+                                <option value="🛑 跌破 -10% 硬停損">-10%停損</option>
+                                <option value="🎯 手動獲利平倉">手動平倉</option>
+                              </select>
+                            </div>
+
+                            <button
+                              onClick={() => handleInlineClose(pos)}
+                              style={{
+                                padding: '0.45rem 0.65rem',
+                                fontSize: '0.76rem',
+                                background: pos.can_sell ? 'linear-gradient(135deg, #10B981, #059669)' : 'linear-gradient(135deg, #EF4444, #B91C1C)',
+                                border: 'none',
+                                color: '#FFF',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.2rem'
+                              }}
+                            >
+                              <span>🚪</span> 賣出
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -851,17 +1018,17 @@ export default function OversoldSniperDashboard() {
       )}
 
       {/* ============================================================== */}
-      {/* 視圖 3：📜 歷史進出實戰紀錄簿 (Pure History & Realized PnL - No Snapshot) */}
+      {/* 視圖 3：📜 實戰進出歷史 (完整買賣進出流水帳·累計獲利·無快照) */}
       {/* ============================================================== */}
       {activeSubTab === 'history' && (
         <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #10B981' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                📜 歷史進出實戰紀錄簿 (純真實進出·累計獲利·無快照)
+                📜 實戰進出歷史紀錄簿 (純真實進出·累計獲利·無快照)
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                所有操作績效、勝率與累計獲利<strong>完全以此歷史進出資料為單一真相源（Single Source of Truth）</strong>。每筆平倉均包含實際買賣價位與天數，無任何快照偏差。
+                所有操作績效、勝率與累計獲利<strong>完全以這份進出歷史為單一真相源（Single Source of Truth）</strong>。清晰記錄每一筆標的買進日期、買進價格、賣出日期、賣出價格與損益！
               </p>
             </div>
 
@@ -925,7 +1092,7 @@ export default function OversoldSniperDashboard() {
                   gap: '0.3rem'
                 }}
               >
-                <span>📥</span> 匯出實戰歷史 CSV
+                <span>📥</span> 匯出進出歷史 CSV
               </button>
             </div>
           </div>
@@ -933,9 +1100,9 @@ export default function OversoldSniperDashboard() {
           {filteredHistoryTrades.length === 0 ? (
             <div style={{ padding: '3.5rem', textAlign: 'center', color: '#94A3B8' }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📜</div>
-              <strong>目前尚無符合條件的歷史進出紀錄</strong>
+              <strong>目前尚無符合條件的進出歷史紀錄</strong>
               <div style={{ fontSize: '0.78rem', marginTop: '0.3rem' }}>
-                當您在「💼 我的跟單與實戰持倉」點擊平倉並輸入賣出價格後，紀錄將即時存入此處並動態累計獲利。
+                當您在「💼 我的進行中持倉」輸入賣出股價點擊賣出後，紀錄將即時存入此處並動態累計獲利。
               </div>
             </div>
           ) : (
@@ -944,12 +1111,13 @@ export default function OversoldSniperDashboard() {
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代號與名稱</th>
-                    <th>進場日期</th>
-                    <th>出場日期</th>
-                    <th style={{ textAlign: 'right' }}>買入價</th>
-                    <th style={{ textAlign: 'right' }}>賣出價</th>
+                    <th>買進日期</th>
+                    <th>賣出日期</th>
+                    <th style={{ textAlign: 'right' }}>買進股價</th>
+                    <th style={{ textAlign: 'right' }}>賣出股價</th>
+                    <th style={{ textAlign: 'right' }}>股數</th>
                     <th style={{ textAlign: 'right' }}>平倉報酬率 (%)</th>
-                    <th style={{ textAlign: 'right' }}>已實現獲利金額</th>
+                    <th style={{ textAlign: 'right' }}>實賺/損益金額</th>
                     <th style={{ textAlign: 'center' }}>持有天數</th>
                     <th>出場理由</th>
                     <th style={{ textAlign: 'center' }}>操作</th>
@@ -966,16 +1134,19 @@ export default function OversoldSniperDashboard() {
                         <td>
                           <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{trade.name}</div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
-                            {trade.ticker} ({trade.shares} 股)
+                            {trade.ticker}
                           </div>
                         </td>
                         <td>{trade.entry_date}</td>
-                        <td>{trade.exit_date}</td>
+                        <td style={{ color: '#FCD34D', fontWeight: 'bold' }}>{trade.exit_date}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                           {cSign} {trade.entry_price?.toLocaleString()}
                         </td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#34D399' }}>
                           {cSign} {trade.exit_price?.toLocaleString()}
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                          {trade.shares} 股
                         </td>
                         <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
                           {isWin ? '+' : ''}{(trade.pnl_pct || 0).toFixed(2)}%
@@ -1000,6 +1171,7 @@ export default function OversoldSniperDashboard() {
                         <td style={{ textAlign: 'center' }}>
                           <button
                             onClick={() => handleDeleteTrade(trade.id, trade.ticker)}
+                            title="刪除此筆進出紀錄"
                             style={{
                               padding: '0.2rem 0.5rem',
                               fontSize: '0.72rem',
@@ -1024,7 +1196,7 @@ export default function OversoldSniperDashboard() {
       )}
 
       {/* ============================================================== */}
-      {/* 視圖 4：📜 快打四大鐵律與 SOP 手冊 */}
+      {/* 視圖 4：🎯 快打四大鐵律與 SOP 手冊 */}
       {/* ============================================================== */}
       {activeSubTab === 'rules' && (
         <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #F59E0B' }}>
@@ -1067,229 +1239,6 @@ export default function OversoldSniperDashboard() {
               <div style={{ fontSize: '0.8rem', color: '#CBD5E1', lineHeight: '1.5' }}>
                 資金效率第一。第 10 天收盤未達標強制市價平倉；若不幸跌破 -10% 硬停損立即離場。
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================== */}
-      {/* 彈窗 1：新增跟單記錄彈窗 (Entry Modal) */}
-      {/* ============================================================== */}
-      {addModal.open && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 99999
-        }}>
-          <div className="glass-card" style={{
-            background: '#1E293B',
-            width: '90%',
-            maxWidth: '460px',
-            padding: '1.4rem',
-            borderRadius: '10px',
-            border: '1px solid rgba(56, 189, 248, 0.4)',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-          }}>
-            <h4 style={{ margin: '0 0 1rem 0', color: '#38BDF8', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              ⚡ 一鍵記錄實戰跟單 (加入強勢股關注)
-            </h4>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.84rem' }}>
-              <div>
-                <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>標的名稱與代號</label>
-                <input
-                  type="text"
-                  value={`${addModal.name} (${addModal.ticker})`}
-                  disabled
-                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC', borderRadius: '4px' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
-                <div>
-                  <label style={{ display: 'block', color: '#FBBF24', fontWeight: 'bold', marginBottom: '0.2rem' }}>
-                    買入進場價格 *
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={addModal.entry_price}
-                    onChange={e => setAddModal(prev => ({ ...prev, entry_price: e.target.value }))}
-                    style={{ width: '100%', padding: '0.4rem', background: '#0F172A', border: '1px solid #F59E0B', color: '#FACC15', borderRadius: '4px', fontWeight: 'bold' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>買入股數</label>
-                  <input
-                    type="number"
-                    value={addModal.shares}
-                    onChange={e => setAddModal(prev => ({ ...prev, shares: e.target.value }))}
-                    style={{ width: '100%', padding: '0.4rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', borderRadius: '4px' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>進場日期</label>
-                <input
-                  type="date"
-                  value={addModal.entry_date}
-                  onChange={e => setAddModal(prev => ({ ...prev, entry_date: e.target.value }))}
-                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', borderRadius: '4px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>跟單備註</label>
-                <input
-                  type="text"
-                  value={addModal.notes}
-                  onChange={e => setAddModal(prev => ({ ...prev, notes: e.target.value }))}
-                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', borderRadius: '4px' }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1.2rem' }}>
-              <button
-                onClick={() => setAddModal(prev => ({ ...prev, open: false }))}
-                style={{ padding: '0.4rem 0.8rem', background: 'transparent', border: '1px solid #64748B', color: '#94A3B8', borderRadius: '4px', cursor: 'pointer' }}
-              >
-                取消
-              </button>
-              <button
-                onClick={handleSaveAddTrade}
-                style={{ padding: '0.4rem 1rem', background: 'linear-gradient(135deg, #38BDF8, #0284C7)', border: 'none', color: '#FFF', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                確認跟單記錄
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================== */}
-      {/* 彈窗 2：平倉賣出確認彈窗 (Exit Modal - 輸入賣出價位與理由) */}
-      {/* ============================================================== */}
-      {closeModal.open && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 99999
-        }}>
-          <div className="glass-card" style={{
-            background: '#1E293B',
-            width: '90%',
-            maxWidth: '460px',
-            padding: '1.4rem',
-            borderRadius: '10px',
-            border: '1px solid rgba(16, 185, 129, 0.4)',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-          }}>
-            <h4 style={{ margin: '0 0 1rem 0', color: '#34D399', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              🚪 實戰快打平倉賣出結利
-            </h4>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.84rem' }}>
-              <div>
-                <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>標的名稱與買入成本</label>
-                <input
-                  type="text"
-                  value={`${closeModal.name} (${closeModal.ticker}) | 買入價: ${closeModal.entry_price}`}
-                  disabled
-                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#F8FAFC', borderRadius: '4px' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
-                <div>
-                  <label style={{ display: 'block', color: '#34D399', fontWeight: 'bold', marginBottom: '0.2rem' }}>
-                    實際賣出成交價 *
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={closeModal.exit_price}
-                    onChange={e => setCloseModal(prev => ({ ...prev, exit_price: e.target.value }))}
-                    style={{ width: '100%', padding: '0.4rem', background: '#0F172A', border: '1px solid #10B981', color: '#34D399', borderRadius: '4px', fontWeight: 'bold' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>賣出日期</label>
-                  <input
-                    type="date"
-                    value={closeModal.exit_date}
-                    onChange={e => setCloseModal(prev => ({ ...prev, exit_date: e.target.value }))}
-                    style={{ width: '100%', padding: '0.4rem', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', borderRadius: '4px' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', color: '#94A3B8', marginBottom: '0.2rem' }}>平倉出場理由</label>
-                <select
-                  value={closeModal.exit_reason}
-                  onChange={e => setCloseModal(prev => ({ ...prev, exit_reason: e.target.value }))}
-                  style={{ width: '100%', padding: '0.4rem', background: '#0F172A', border: '1px solid rgba(255,255,255,0.15)', color: '#FFF', borderRadius: '4px' }}
-                >
-                  <option value="🎯 觸及 10MA 停利">🎯 觸及 10MA 停利 (DOE勝率74.5%)</option>
-                  <option value="🚀 觸及 +8% / 20MA 擴大停利">🚀 觸及 +8% / 20MA 擴大停利</option>
-                  <option value="⏱️ 滿 10 天時間風控強制出場">⏱️ 滿 10 天時間風控強制出場</option>
-                  <option value="🛑 跌破 -10% 硬停損">🛑 跌破 -10% 硬停損</option>
-                  <option value="🎯 手動獲利平倉">🎯 手動獲利平倉</option>
-                </select>
-              </div>
-
-              {/* 即時試算平倉損益 */}
-              {closeModal.exit_price && parseFloat(closeModal.exit_price) > 0 && (
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  {(() => {
-                    const retPct = ((parseFloat(closeModal.exit_price) - closeModal.entry_price) / closeModal.entry_price) * 100;
-                    const pnlAmt = (parseFloat(closeModal.exit_price) - closeModal.entry_price) * closeModal.shares;
-                    const isWin = retPct >= 0;
-                    return (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ color: '#94A3B8' }}>本次平倉試算損益：</span>
-                        <span style={{ fontWeight: 'bold', fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
-                          {isWin ? '+' : ''}{retPct.toFixed(2)}% ({pnlAmt >= 0 ? '+' : ''}{pnlAmt.toLocaleString()} {closeModal.currency})
-                        </span>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1.2rem' }}>
-              <button
-                onClick={() => setCloseModal(prev => ({ ...prev, open: false }))}
-                style={{ padding: '0.4rem 0.8rem', background: 'transparent', border: '1px solid #64748B', color: '#94A3B8', borderRadius: '4px', cursor: 'pointer' }}
-              >
-                取消
-              </button>
-              <button
-                onClick={handleConfirmCloseTrade}
-                style={{ padding: '0.4rem 1rem', background: 'linear-gradient(135deg, #10B981, #059669)', border: 'none', color: '#FFF', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                確認平倉結利 (存入歷史)
-              </button>
             </div>
           </div>
         </div>
