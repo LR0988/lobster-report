@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-10-23T09:26:45.027060",
+  "period_3y": {
+    "baseline": {
+      "start_date": "2023-10-23",
+      "end_date": "2026-10-01",
+      "years": 2.94,
+      "multiplier": 6.47,
+      "CAGR": 88.7,
+      "Month_MDD": -26.18,
+      "Daily_MDD": -35.54,
+      "Sharpe": 1.31,
+      "Calmar": 3.389,
+      "Win_Rate": 63.9
+    },
+    "daily_ma60_stop": {
+      "start_date": "2023-10-23",
+      "end_date": "2026-10-01",
+      "years": 2.94,
+      "multiplier": 3.51,
+      "CAGR": 53.23,
+      "Month_MDD": -38.17,
+      "Daily_MDD": -44.12,
+      "Sharpe": 0.97,
+      "Calmar": 1.395,
+      "Win_Rate": 52.8
+    }
+  },
+  "period_full_bull": {
+    "baseline": {
+      "start_date": "2023-01-03",
+      "end_date": "2026-10-01",
+      "years": 3.74,
+      "multiplier": 23.55,
+      "CAGR": 132.57,
+      "Month_MDD": -26.18,
+      "Daily_MDD": -35.54,
+      "Sharpe": 1.49,
+      "Calmar": 5.065,
+      "Win_Rate": 66.7
+    },
+    "daily_ma60_stop": {
+      "start_date": "2023-01-03",
+      "end_date": "2026-10-01",
+      "years": 3.74,
+      "multiplier": 9.18,
+      "CAGR": 80.83,
+      "Month_MDD": -38.17,
+      "Daily_MDD": -44.12,
+      "Sharpe": 1.21,
+      "Calmar": 2.118,
+      "Win_Rate": 55.6
+    }
+  },
+  "period_22y": {
+    "baseline": {
+      "start_date": "2004-01-01",
+      "end_date": "2026-10-01",
+      "years": 22.75,
+      "multiplier": 126650.61,
+      "CAGR": 67.61,
+      "Month_MDD": -26.18,
+      "Daily_MDD": -44.44,
+      "Sharpe": 1.31,
+      "Calmar": 2.583,
+      "Win_Rate": 66.7
+    },
+    "daily_ma60_stop": {
+      "start_date": "2004-01-01",
+      "end_date": "2026-10-01",
+      "years": 22.75,
+      "multiplier": 4207.98,
+      "CAGR": 44.31,
+      "Month_MDD": -38.17,
+      "Daily_MDD": -44.53,
+      "Sharpe": 1.05,
+      "Calmar": 1.161,
+      "Win_Rate": 61.2
+    }
+  }
+}
