@@ -492,20 +492,38 @@ export async function loadSniperTradesFromSupabase() {
   return null;
 }
 
-export async function apiGetOversoldSniperDashboard() {
-  const base = await resolveApiBase();
-  let serverData = null;
-  if (base) {
-    try {
-      const res = await fetch(`${base}/api/oversold_sniper/dashboard`);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.status === 'ok') {
-          serverData = json;
+export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
+  let serverData = cachedServerData;
+
+  if (!serverData) {
+    const base = await resolveApiBase();
+    if (base) {
+      try {
+        const res = await fetch(`${base}/api/oversold_sniper/dashboard`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.status === 'ok') {
+            serverData = json;
+          }
         }
+      } catch (err) {
+        console.warn(`筆電本機 ${base}/api/oversold_sniper/dashboard 連線異常:`, err.message);
       }
-    } catch (err) {
-      console.warn(`筆電本機 ${base}/api/oversold_sniper/dashboard 連線異常:`, err.message);
+    }
+
+    // 雲端 Supabase 備援讀取 (確保異地或手機存取時立即取得最新 10/23 掃描成果)
+    if (!serverData) {
+      try {
+        const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.oversold_sniper_dashboard&select=payload');
+        if (supRes.ok) {
+          const rows = await supRes.json();
+          if (rows && rows.length > 0 && rows[0].payload) {
+            serverData = typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+          }
+        }
+      } catch (e) {
+        console.warn('從 Supabase 讀取超賣快打看板備援失敗:', e);
+      }
     }
   }
 
@@ -536,8 +554,36 @@ export async function apiGetOversoldSniperDashboard() {
     const sActive = (serverData.active_holdings || []).filter(isNotDeleted);
     const sClosed = (serverData.trade_history || []).filter(isNotDeleted);
 
+    // 以最新即時行情更新用戶持倉中的現價與未實現損益
+    const priceMap = {};
+    for (const item of (serverData.radar?.all_ranked || [])) {
+      if (item.ticker && item.close) {
+        priceMap[item.ticker] = item.close;
+        if (item.ticker.endsWith('.TW')) {
+          priceMap[item.ticker.replace('.TW', '')] = item.close;
+        }
+      }
+    }
+    for (const h of sActive) {
+      if (h.ticker && h.current_price) {
+        priceMap[h.ticker] = h.current_price;
+      }
+    }
+
+    const refreshedUserActive = userActiveHoldings.map(pos => {
+      const liveP = priceMap[pos.ticker] || priceMap[pos.ticker.toUpperCase()] || pos.current_price;
+      const gainPct = parseFloat((((liveP - pos.entry_price) / pos.entry_price) * 100.0).toFixed(2));
+      const gainAmt = parseFloat(((liveP - pos.entry_price) * pos.shares).toFixed(2));
+      return {
+        ...pos,
+        current_price: liveP,
+        unrealized_pnl_pct: gainPct,
+        unrealized_pnl_amount: gainAmt
+      };
+    });
+
     const existingActiveIds = new Set(sActive.map(t => t.id));
-    const mergedActive = [...userActiveHoldings.filter(t => !existingActiveIds.has(t.id)), ...sActive];
+    const mergedActive = [...refreshedUserActive.filter(t => !existingActiveIds.has(t.id)), ...sActive];
 
     const existingClosedIds = new Set(sClosed.map(t => t.id));
     const mergedClosed = [...userClosedTrades.filter(t => !existingClosedIds.has(t.id)), ...sClosed];
@@ -589,6 +635,53 @@ export async function apiGetOversoldSniperDashboard() {
   };
 
   return serverData;
+}
+
+// ⚡ 觸發全市場重新連線掃描 (抓取 10/23 最新即時行情並重算)
+export async function apiTriggerOversoldSniperScan() {
+  const base = await resolveApiBase();
+  let freshData = null;
+
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/oversold_sniper/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'ok') {
+          freshData = json.data || json;
+        }
+      }
+    } catch (err) {
+      console.warn(`POST 重新掃描異常，嘗試 GET refresh:`, err.message);
+      try {
+        const res2 = await fetch(`${base}/api/oversold_sniper/dashboard?refresh=1`);
+        if (res2.ok) {
+          const json2 = await res2.json();
+          if (json2.status === 'ok') {
+            freshData = json2;
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  // 若後端通道不可及，從 Supabase 取得最新已同步之掃描資料
+  if (!freshData) {
+    try {
+      const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.oversold_sniper_dashboard&select=payload');
+      if (supRes.ok) {
+        const rows = await supRes.json();
+        if (rows && rows.length > 0 && rows[0].payload) {
+          freshData = typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+        }
+      }
+    } catch (e) {}
+  }
+
+  return await apiGetOversoldSniperDashboard(freshData);
 }
 
 // ==========================================

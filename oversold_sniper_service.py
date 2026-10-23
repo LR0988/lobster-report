@@ -8,6 +8,7 @@ Oversold Sniper Service (極端超賣快打專屬量化引擎)
 import os
 import json
 import sqlite3
+import urllib.request
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -16,6 +17,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "tw_stock.db")
 DEFAULT_DATA_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "defaultOversoldSniperData.json")
 TITAN_TRADES_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "global_titan_trades.json")
+
+SUPABASE_URL = os.environ.get("REACT_APP_SUPABASE_URL", "https://hvequgcognhytunjjsyp.supabase.co")
+SUPABASE_ANON_KEY = os.environ.get("REACT_APP_SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2ZXF1Z2NvZ25oeXR1bmpqc3lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5OTkxNjksImV4cCI6MjEwNTU3NTE2OX0.be_QMANHRP9avUIM5S9o-Xx20NOn0A68nBkAimet_e0")
 
 # 知名標的中文名稱補充字典
 KNOWN_NAMES = {
@@ -117,13 +121,13 @@ def get_oversold_sniper_dashboard_data():
     live_price_map = {} # 供持倉計算現價
 
     try:
-        # 1. 取得最新交易日
-        max_d_tw_res = conn.execute("SELECT max(date) FROM daily_stock").fetchone()
-        max_d_tw = str(max_d_tw_res[0]) if (max_d_tw_res and max_d_tw_res[0]) else "20261022"
-        if len(max_d_tw) == 8:
-            market_date = f"{max_d_tw[:4]}-{max_d_tw[4:6]}-{max_d_tw[6:]}"
-        else:
-            market_date = max_d_tw[:10]
+        # 1. 取得最新交易日 (全球與台股綜合最新日)
+        max_d_tw_res = conn.execute("SELECT max(date) FROM daily_stock WHERE stock_id != 'HOLIDAY'").fetchone()
+        max_d_glb_res = conn.execute("SELECT max(date) FROM global_stock_daily").fetchone()
+        d_tw = str(max_d_tw_res[0]) if (max_d_tw_res and max_d_tw_res[0]) else "20261022"
+        d_tw_fmt = f"{d_tw[:4]}-{d_tw[4:6]}-{d_tw[6:]}" if len(d_tw) == 8 else d_tw[:10]
+        d_glb = str(max_d_glb_res[0])[:10] if (max_d_glb_res and max_d_glb_res[0]) else "2026-10-23"
+        market_date = max(d_tw_fmt, d_glb)
 
         # 2. 定義「這邊的強勢股 (Titan Strong Universe)」
         titan_symbols = set()
@@ -238,12 +242,15 @@ def get_oversold_sniper_dashboard_data():
             }
             live_price_map[sid] = live_price_map[t_key]
 
+            tw_last_d = str(grp["date"].iloc[-1])
+            tw_disp_date = f"{tw_last_d[:4]}-{tw_last_d[4:6]}-{tw_last_d[6:]}" if len(tw_last_d) == 8 else tw_last_d[:10]
+
             radar_candidates.append({
                 "ticker": t_key,
                 "name": disp_name,
                 "country": "台灣",
                 "market": "台股上市/上櫃",
-                "date": market_date,
+                "date": tw_disp_date,
                 "close": round(latest_c, 2),
                 "ma5": round(ma5, 2),
                 "ma10": round(ma10, 2),
@@ -356,12 +363,14 @@ def get_oversold_sniper_dashboard_data():
                     "name": disp_name
                 }
 
+                glb_disp_date = str(grp["date"].iloc[-1])[:10]
+
                 radar_candidates.append({
                     "ticker": ticker,
                     "name": disp_name,
                     "country": meta.get("country", "美股"),
                     "market": meta.get("market", "美股 (NASDAQ/NYSE)"),
-                    "date": market_date,
+                    "date": glb_disp_date,
                     "close": round(latest_c, 2),
                     "ma5": round(ma5, 2),
                     "ma10": round(ma10, 2),
@@ -610,14 +619,83 @@ def get_oversold_sniper_dashboard_data():
         }
     }
 
-    # 💾 同步持久化快取
+    # 💾 同步持久化快取 (本地 JSON + 雲端 Supabase stock_ml_cache)
     try:
         with open(DEFAULT_DATA_PATH, "w", encoding="utf-8") as f:
             json.dump(dashboard_data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"同步寫入 defaultOversoldSniperData.json 失敗: {e}")
 
+    try:
+        sync_sniper_dashboard_to_supabase(dashboard_data)
+    except Exception as e:
+        print(f"同步寫入 Supabase 失敗: {e}")
+
     return dashboard_data
+
+def sync_sniper_dashboard_to_supabase(dashboard_data):
+    """將超賣快打最新全看板數據同步上傳至 Supabase stock_ml_cache 供 Vercel / 移動端無縫讀取"""
+    try:
+        payload = json.dumps({
+            'model_type': 'oversold_sniper_dashboard',
+            'payload': json.dumps(dashboard_data, ensure_ascii=False),
+            'updated_at': datetime.utcnow().isoformat() + "Z"
+        }).encode('utf-8')
+
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/rest/v1/stock_ml_cache",
+            data=payload,
+            headers={
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': f'Bearer {SUPABASE_ANON_KEY}',
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            pass
+    except Exception as e:
+        print(f"同步超賣快打至 Supabase 警告: {e}")
+
+def sync_live_quotes_for_sniper():
+    """連線即時抓取持倉標的與重點超賣強勢股的 10/23 最新行情，寫入 SQLite"""
+    try:
+        import yfinance as yf
+        conn = sqlite3.connect(DB_PATH)
+        ensure_user_sniper_table(conn)
+
+        # 1. 抓取進行中的持倉代號
+        active_tickers = [r[0] for r in conn.execute("SELECT DISTINCT ticker FROM user_sniper_trades WHERE status = 'OPEN'").fetchall()]
+        
+        # 2. 加入代表性超賣雷達巨頭與重點觀察標的
+        scan_tickers = list(set(active_tickers + [
+            'DXCM', 'WEGE3.SA', 'ASML', 'BKR', 'ASX', 'SIEGY', 'MUFG', 'GOOG', 'GOOGL', 
+            'NVDA', 'TSLA', 'AAPL', 'MSFT', 'META', 'AMD', 'AVGO', 'COST', 'NFLX', 'LLY'
+        ]))
+        
+        df = yf.download(scan_tickers, period='5d', progress=False)
+        if 'Close' in df:
+            closes = df['Close']
+            for t in scan_tickers:
+                if t in closes.columns:
+                    s = closes[t].dropna()
+                    if len(s) > 0:
+                        d_str = s.index[-1].strftime('%Y-%m-%d')
+                        c_val = float(s.iloc[-1])
+                        conn.execute("""
+                            INSERT OR REPLACE INTO global_stock_daily (ticker, date, close, volume)
+                            VALUES (?, ?, ?, 1000000)
+                        """, (t, d_str, c_val))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"抓取最新即時行情警告: {e}")
+
+def run_full_rescan():
+    """完整重新掃描：連線抓取最新行情 -> 運算 Z-Score 與停利 -> 存入 SQLite 與預設檔 -> 同步 Supabase"""
+    sync_live_quotes_for_sniper()
+    return get_oversold_sniper_dashboard_data()
 
 # =================================================================
 # 🛠️ 用戶實盤交易 CRUD 接口

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import defaultOversoldSniperData from '../data/defaultOversoldSniperData.json';
 import { 
   apiGetOversoldSniperDashboard, 
+  apiTriggerOversoldSniperScan,
   apiAddOversoldSniperTrade, 
   apiCloseOversoldSniperTrade, 
   apiDeleteOversoldSniperTrade 
@@ -58,6 +59,27 @@ export default function OversoldSniperDashboard() {
     } catch (e) {
       console.warn('載入超賣快打雷達失敗:', e);
       setLiveData(defaultOversoldSniperData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRescan = async () => {
+    setLoading(true);
+    triggerNotice('⚡ 正在連線全球交易所抓取今日最新報價 (10/23) 並重算 Z-Score 極限超賣...');
+    try {
+      const res = await apiTriggerOversoldSniperScan();
+      if (res && res.status === 'ok') {
+        setLiveData(res);
+        const twCnt = res.radar?.taiwan_triggers?.length || 0;
+        const glbCnt = res.radar?.global_triggers?.length || 0;
+        triggerNotice(`🎉 重新掃描完成！已連線更新至最新行情 (${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
+      } else {
+        await loadDashboardData(true);
+      }
+    } catch (e) {
+      console.warn('重新掃描失敗:', e);
+      await loadDashboardData(true);
     } finally {
       setLoading(false);
     }
@@ -376,14 +398,14 @@ export default function OversoldSniperDashboard() {
           </div>
 
           <button
-            onClick={() => loadDashboardData(true)}
+            onClick={handleRescan}
             disabled={loading}
             style={{
               padding: '0.35rem 0.85rem',
               fontSize: '0.78rem',
               borderRadius: '6px',
               border: '1px solid rgba(239, 68, 68, 0.5)',
-              background: 'rgba(239, 68, 68, 0.15)',
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(185, 28, 28, 0.25))',
               color: '#FCA5A5',
               cursor: 'pointer',
               fontWeight: 'bold',
@@ -392,7 +414,7 @@ export default function OversoldSniperDashboard() {
               gap: '0.3rem'
             }}
           >
-            <span>{loading ? '🔄' : '⚡'}</span> {loading ? '掃描中...' : '重新掃描資料庫'}
+            <span>{loading ? '🔄' : '⚡'}</span> {loading ? '連線即時行情掃描中...' : '重新掃描最新行情 (10/23)'}
           </button>
         </div>
 

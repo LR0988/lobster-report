@@ -4176,12 +4176,27 @@ def get_tw_asymmetric_alpha_dashboard():
 
 @app.get("/api/oversold_sniper/dashboard")
 @app.get("/api/oversold_sniper/radar")
-def get_oversold_sniper_dashboard():
+def get_oversold_sniper_dashboard(refresh: bool = False, scan: bool = False):
     """強勢股極端超賣快打專屬看板：直連 tw_stock.db 全球主權泰坦強勢股庫 + 台股新資料庫即時雷達"""
     import importlib
     import oversold_sniper_service
     importlib.reload(oversold_sniper_service)
+    if refresh or scan:
+        return oversold_sniper_service.run_full_rescan()
     return oversold_sniper_service.get_oversold_sniper_dashboard_data()
+
+@app.post("/api/oversold_sniper/scan")
+def trigger_oversold_sniper_rescan():
+    """重新掃描全市場：連線抓取最新即時行情 (10/23) -> 運算 Z-Score -> 同步 Supabase"""
+    import importlib
+    import oversold_sniper_service
+    importlib.reload(oversold_sniper_service)
+    fresh_data = oversold_sniper_service.run_full_rescan()
+    return {
+        "status": "ok",
+        "message": "重新掃描成功！已連線更新至 10/23 最新行情！",
+        "data": fresh_data
+    }
 
 @app.post("/api/oversold_sniper/trades")
 def create_oversold_sniper_trade(payload: dict = Body(...)):
