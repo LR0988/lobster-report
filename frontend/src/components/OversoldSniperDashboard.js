@@ -48,7 +48,8 @@ export default function OversoldSniperDashboard() {
         if (isManual) {
           const twCnt = res.radar?.taiwan_triggers?.length || 0;
           const glbCnt = res.radar?.global_triggers?.length || 0;
-          triggerNotice(`✅ 強勢股雷達已連線更新 (${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發極限超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
+          const scanTime = (res.generated_at || '').slice(11, 19) || '剛剛';
+          triggerNotice(`✅ 強勢股雷達已連線更新至 ${scanTime} (${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發極限超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
         }
       } else {
         setLiveData(defaultOversoldSniperData);
@@ -73,7 +74,8 @@ export default function OversoldSniperDashboard() {
         setLiveData(res);
         const twCnt = res.radar?.taiwan_triggers?.length || 0;
         const glbCnt = res.radar?.global_triggers?.length || 0;
-        triggerNotice(`🎉 重新掃描完成！已連線更新至最新行情 (${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
+        const scanTime = (res.generated_at || '').slice(11, 19) || '剛剛';
+        triggerNotice(`🎉 重新掃描完成！行情已更新至 ${scanTime} (行情日：${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
       } else {
         await loadDashboardData(true);
       }
@@ -380,9 +382,15 @@ export default function OversoldSniperDashboard() {
               color: '#FCA5A5',
               padding: '0.2rem 0.65rem',
               borderRadius: '5px',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem'
             }}>
-              📡 雷達掃描日：<strong style={{ color: '#FCD34D' }}>{liveData?.market_date || defaultOversoldSniperData.market_date}</strong>
+              <span>📡</span> 最新行情日：<strong style={{ color: '#FCD34D' }}>{liveData?.market_date || defaultOversoldSniperData.market_date}</strong>
+              <span style={{ color: '#67E8F9', fontSize: '0.73rem', fontFamily: 'monospace' }}>
+                ({(liveData?.generated_at || defaultOversoldSniperData.generated_at || '').slice(11, 19) || '即時連線'})
+              </span>
             </span>
             <span style={{
               fontSize: '0.75rem',

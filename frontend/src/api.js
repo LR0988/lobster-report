@@ -5,7 +5,7 @@ import defaultOversoldSniperData from './data/defaultOversoldSniperData.json';
 
 let dynamicApiBase = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
   ? 'http://localhost:8000'
-  : (process.env.REACT_APP_API_URL || process.env.REACT_APP_STOCK_API_URL || '');
+  : '';
 
 // 雲端 PostgreSQL / Supabase 配置 (作為遠端安全通道註冊與異地離線備援鏡像)
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || 'https://hvequgcognhytunjjsyp.supabase.co';
@@ -25,14 +25,14 @@ export const supabaseDirectFetch = async (path, options = {}) => {
 /**
  * 動態解析主機連線網址：
  * 1. 筆電本機 (localhost / 127.0.0.1) -> 強制直連筆電 Port 8000 (SQLite: tw_stock.db)
- * 2. 外部遠端/手機存取 -> 查詢筆電 Cloudflare 安全通道 (Tunnel URL)，直通筆電後端
+ * 2. 外部遠端/手機存取 -> 優先查詢筆電在 Supabase 註冊之最新 Cloudflare 安全通道 (Tunnel URL)，直通筆電後端
  */
 export const resolveApiBase = async (forceRefresh = false) => {
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     dynamicApiBase = 'http://localhost:8000';
     return 'http://localhost:8000';
   }
-  if (!forceRefresh && dynamicApiBase && dynamicApiBase.startsWith('http')) {
+  if (!forceRefresh && dynamicApiBase && dynamicApiBase.startsWith('http') && !dynamicApiBase.includes('railway.app')) {
     return dynamicApiBase;
   }
   try {
@@ -49,8 +49,21 @@ export const resolveApiBase = async (forceRefresh = false) => {
   } catch (e) {
     console.warn('查詢筆電遠端通道失敗:', e);
   }
+
+  // 嘗試讀取本地快取
   const cached = (typeof window !== 'undefined') ? localStorage.getItem('remote_api_url') : null;
-  return cached || dynamicApiBase || 'http://localhost:8000';
+  if (cached && cached.startsWith('http') && !cached.includes('railway.app')) {
+    dynamicApiBase = cached;
+    return cached;
+  }
+
+  const envUrl = process.env.REACT_APP_API_URL || process.env.REACT_APP_STOCK_API_URL || '';
+  if (envUrl && envUrl.startsWith('http') && !envUrl.includes('railway.app')) {
+    dynamicApiBase = envUrl;
+    return envUrl;
+  }
+
+  return dynamicApiBase || 'http://localhost:8000';
 };
 
 export const getAuthToken = () => localStorage.getItem('token');
@@ -582,8 +595,20 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
       };
     });
 
-    const existingActiveIds = new Set(sActive.map(t => t.id));
-    const mergedActive = [...refreshedUserActive.filter(t => !existingActiveIds.has(t.id)), ...sActive];
+    const refreshedSActive = sActive.map(pos => {
+      const liveP = priceMap[pos.ticker] || priceMap[pos.ticker.toUpperCase()] || pos.current_price;
+      const gainPct = parseFloat((((liveP - pos.entry_price) / pos.entry_price) * 100.0).toFixed(2));
+      const gainAmt = parseFloat(((liveP - pos.entry_price) * pos.shares).toFixed(2));
+      return {
+        ...pos,
+        current_price: liveP,
+        unrealized_pnl_pct: gainPct,
+        unrealized_pnl_amount: gainAmt
+      };
+    });
+
+    const existingActiveIds = new Set(refreshedSActive.map(t => t.id));
+    const mergedActive = [...refreshedUserActive.filter(t => !existingActiveIds.has(t.id)), ...refreshedSActive];
 
     const existingClosedIds = new Set(sClosed.map(t => t.id));
     const mergedClosed = [...userClosedTrades.filter(t => !existingClosedIds.has(t.id)), ...sClosed];
@@ -639,15 +664,19 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
 
 // ⚡ 觸發全市場重新連線掃描 (抓取 10/23 最新即時行情並重算)
 export async function apiTriggerOversoldSniperScan() {
-  const base = await resolveApiBase();
+  const base = await resolveApiBase(true);
   let freshData = null;
 
   if (base) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s
       const res = await fetch(`${base}/api/oversold_sniper/scan`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (res.ok) {
         const json = await res.json();
         if (json.status === 'ok') {

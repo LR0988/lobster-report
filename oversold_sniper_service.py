@@ -671,22 +671,43 @@ def sync_live_quotes_for_sniper():
         # 2. 加入代表性超賣雷達巨頭與重點觀察標的
         scan_tickers = list(set(active_tickers + [
             'DXCM', 'WEGE3.SA', 'ASML', 'BKR', 'ASX', 'SIEGY', 'MUFG', 'GOOG', 'GOOGL', 
-            'NVDA', 'TSLA', 'AAPL', 'MSFT', 'META', 'AMD', 'AVGO', 'COST', 'NFLX', 'LLY'
+            'NVDA', 'TSLA', 'AAPL', 'MSFT', 'META', 'AMD', 'AVGO', 'COST', 'NFLX', 'LLY',
+            '1513.TW', '2330.TW', '2308.TW', '0050.TW', '2317.TW', '2454.TW'
         ]))
         
-        df = yf.download(scan_tickers, period='5d', progress=False)
-        if 'Close' in df:
-            closes = df['Close']
-            for t in scan_tickers:
-                if t in closes.columns:
-                    s = closes[t].dropna()
-                    if len(s) > 0:
-                        d_str = s.index[-1].strftime('%Y-%m-%d')
-                        c_val = float(s.iloc[-1])
-                        conn.execute("""
-                            INSERT OR REPLACE INTO global_stock_daily (ticker, date, close, volume)
-                            VALUES (?, ?, ?, 1000000)
-                        """, (t, d_str, c_val))
+        today_str = datetime.now().strftime('%Y-%m-%d')
+
+        # 3. 優先以 fast_info 取得最新盤中現價 (秒級即時報價)
+        for t in scan_tickers:
+            try:
+                tick = yf.Ticker(t)
+                last_p = tick.fast_info.get('lastPrice', None)
+                if last_p is not None and last_p > 0:
+                    conn.execute("""
+                        INSERT OR REPLACE INTO global_stock_daily (ticker, date, close, volume)
+                        VALUES (?, ?, ?, 1000000)
+                    """, (t, today_str, round(float(last_p), 2)))
+            except Exception:
+                pass
+
+        # 4. 批次下載歷史日 K 確保均線計算基底完整
+        try:
+            df = yf.download(scan_tickers, period='5d', progress=False)
+            if 'Close' in df:
+                closes = df['Close']
+                for t in scan_tickers:
+                    if t in closes.columns:
+                        s = closes[t].dropna()
+                        if len(s) > 0:
+                            d_str = s.index[-1].strftime('%Y-%m-%d')
+                            c_val = float(s.iloc[-1])
+                            conn.execute("""
+                                INSERT OR REPLACE INTO global_stock_daily (ticker, date, close, volume)
+                                VALUES (?, ?, ?, 1000000)
+                            """, (t, d_str, c_val))
+        except Exception as e_dl:
+            print(f"批次下載歷史 K 線警告: {e_dl}")
+
         conn.commit()
         conn.close()
     except Exception as e:
