@@ -1,0 +1,80 @@
+{
+  "period_2005_2019": {
+    "baseline": {
+      "start_date": "2005-01-03",
+      "end_date": "2019-12-31",
+      "years": 14.99,
+      "multiplier": 497.45,
+      "CAGR": 51.32,
+      "Month_MDD": -21.84,
+      "Daily_MDD": -29.35,
+      "Sharpe": 1.5,
+      "Calmar": 2.35,
+      "Win_Rate": 67.0
+    },
+    "stop": {
+      "start_date": "2005-01-03",
+      "end_date": "2019-12-31",
+      "years": 14.99,
+      "multiplier": 64.67,
+      "CAGR": 32.07,
+      "Month_MDD": -27.86,
+      "Daily_MDD": -32.26,
+      "Sharpe": 1.08,
+      "Calmar": 1.151,
+      "Win_Rate": 61.5
+    }
+  },
+  "period_2010_2014": {
+    "baseline": {
+      "start_date": "2010-01-04",
+      "end_date": "2014-12-31",
+      "years": 4.99,
+      "multiplier": 5.57,
+      "CAGR": 41.09,
+      "Month_MDD": -21.84,
+      "Daily_MDD": -29.35,
+      "Sharpe": 1.6,
+      "Calmar": 1.881,
+      "Win_Rate": 64.4
+    },
+    "stop": {
+      "start_date": "2010-01-04",
+      "end_date": "2014-12-31",
+      "years": 4.99,
+      "multiplier": 4.02,
+      "CAGR": 32.18,
+      "Month_MDD": -14.11,
+      "Daily_MDD": -17.85,
+      "Sharpe": 1.44,
+      "Calmar": 2.281,
+      "Win_Rate": 66.1
+    }
+  },
+  "period_2022_2026": {
+    "baseline": {
+      "start_date": "2022-01-03",
+      "end_date": "2026-10-01",
+      "years": 4.74,
+      "multiplier": 22.44,
+      "CAGR": 92.71,
+      "Month_MDD": -26.18,
+      "Daily_MDD": -35.54,
+      "Sharpe": 1.36,
+      "Calmar": 3.542,
+      "Win_Rate": 70.2
+    },
+    "stop": {
+      "start_date": "2022-01-03",
+      "end_date": "2026-10-01",
+      "years": 4.74,
+      "multiplier": 9.56,
+      "CAGR": 60.97,
+      "Month_MDD": -38.17,
+      "Daily_MDD": -44.12,
+      "Sharpe": 1.13,
+      "Calmar": 1.597,
+      "Win_Rate": 61.4
+    }
+  }
+}
