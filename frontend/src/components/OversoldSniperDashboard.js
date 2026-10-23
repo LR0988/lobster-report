@@ -69,6 +69,7 @@ export default function OversoldSniperDashboard() {
   // 雷達候選資料
   const triggers = liveData?.radar?.triggers || [];
   const watchlist = liveData?.radar?.watch_list || [];
+  const brokenTrendList = liveData?.radar?.broken_trend_list || [];
   const taiwanTriggers = liveData?.radar?.taiwan_triggers || triggers.filter(t => t.country === '台灣');
   const globalTriggers = liveData?.radar?.global_triggers || triggers.filter(t => t.country !== '台灣');
   const allScanned = liveData?.radar?.all_ranked || [];
@@ -78,8 +79,9 @@ export default function OversoldSniperDashboard() {
     if (radarFilter === 'taiwan') return taiwanTriggers;
     if (radarFilter === 'global') return globalTriggers;
     if (radarFilter === 'watchlist') return watchlist;
+    if (radarFilter === 'broken') return brokenTrendList;
     return allScanned;
-  }, [radarFilter, triggers, taiwanTriggers, globalTriggers, watchlist, allScanned]);
+  }, [radarFilter, triggers, taiwanTriggers, globalTriggers, watchlist, brokenTrendList, allScanned]);
 
   // 進行中持倉清單
   const activeHoldings = liveData?.active_holdings || [];
@@ -640,6 +642,21 @@ export default function OversoldSniperDashboard() {
                 👀 接近超賣警戒 ({watchlist.length})
               </button>
               <button
+                onClick={() => setRadarFilter('broken')}
+                style={{
+                  padding: '0.22rem 0.6rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'broken' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : 'transparent',
+                  color: radarFilter === 'broken' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🚫 破線排除 ({brokenTrendList.length})
+              </button>
+              <button
                 onClick={() => setRadarFilter('all')}
                 style={{
                   padding: '0.22rem 0.6rem',
@@ -689,14 +706,15 @@ export default function OversoldSniperDashboard() {
                     const isTw = item.country === '台灣' || item.ticker.endsWith('.TW');
                     const cSign = isTw ? 'NT$' : '$';
                     const isTrig = item.is_trigger;
-                    const isWatch = item.z_score <= -1.7 && !isTrig;
+                    const isWatch = item.valid_trend && item.z_score <= -1.7 && !isTrig;
+                    const isBroken = !item.valid_trend;
 
                     const curInput = radarRowInputs[item.ticker] || {};
                     const valPrice = curInput.price !== undefined ? curInput.price : item.close;
                     const valShares = curInput.shares !== undefined ? curInput.shares : (isTw ? 1000 : 10);
 
                     return (
-                      <tr key={item.ticker} style={{ background: isTrig ? 'rgba(239, 68, 68, 0.08)' : (isWatch ? 'rgba(245, 158, 11, 0.05)' : 'transparent') }}>
+                      <tr key={item.ticker} style={{ background: isTrig ? 'rgba(239, 68, 68, 0.08)' : (isWatch ? 'rgba(245, 158, 11, 0.05)' : (isBroken ? 'rgba(239, 68, 68, 0.03)' : 'transparent')) }}>
                         <td>
                           <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{item.name}</div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
@@ -709,22 +727,22 @@ export default function OversoldSniperDashboard() {
                           <div>
                             <span style={{
                               fontSize: '0.74rem',
-                              background: item.priority_color || '#38BDF8',
+                              background: item.valid_trend ? (item.priority_color || '#38BDF8') : '#64748B',
                               color: '#FFF',
                               padding: '2px 8px',
                               borderRadius: '4px',
                               fontWeight: 'bold',
                               display: 'inline-block',
-                              boxShadow: item.sniper_power_score >= 8.1 ? '0 0 10px rgba(192, 132, 252, 0.5)' : 'none'
+                              boxShadow: (item.valid_trend && item.sniper_power_score >= 8.1) ? '0 0 10px rgba(192, 132, 252, 0.5)' : 'none'
                             }}>
-                              {item.win_rate_tier || (item.is_trigger ? '🔥 82% 黃金優選' : '👀 常態觀察')}
+                              {item.valid_trend ? (item.win_rate_tier || (item.is_trigger ? '🔥 82% 黃金優選' : '👀 接近警戒')) : '🚫 破線防守破壞'}
                             </span>
                           </div>
                           <div style={{ fontSize: '0.7rem', color: '#CBD5E1', marginTop: '2px', fontFamily: 'monospace' }}>
-                            彈力分: <strong style={{ color: '#FACC15' }}>{item.sniper_power_score ? `+${item.sniper_power_score}%` : '-'}</strong>
+                            彈力分: <strong style={{ color: item.valid_trend ? '#FACC15' : '#94A3B8' }}>{item.sniper_power_score ? `+${item.sniper_power_score}%` : '-'}</strong>
                           </div>
-                          <div style={{ fontSize: '0.68rem', color: item.priority_color || '#94A3B8', fontWeight: 'bold' }}>
-                            {item.priority_badge || ''}
+                          <div style={{ fontSize: '0.68rem', color: item.valid_trend ? (item.priority_color || '#94A3B8') : '#EF4444', fontWeight: 'bold' }}>
+                            {item.valid_trend ? (item.priority_badge || '') : '⚠️ 嚴禁接刀'}
                           </div>
                         </td>
 

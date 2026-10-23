@@ -256,7 +256,7 @@ def get_oversold_sniper_dashboard_data():
                 "valid_trend": valid_trend,
                 "is_trigger": is_trigger,
                 "holding_limit_days": 10,
-                "action_badge": "🔥 極端超賣撈底" if is_trigger else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理"),
+                "action_badge": "🔥 極端超賣撈底" if is_trigger else ("🚫 破線排除 (跌破200MA)" if not valid_trend and z <= -1.7 else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理")),
                 "sop_hint": "T+1開盤市價敲進，站上10MA停利一半，觸及+8%或20MA全清，最長持倉10天"
             })
 
@@ -374,7 +374,7 @@ def get_oversold_sniper_dashboard_data():
                     "valid_trend": valid_trend,
                     "is_trigger": is_trigger,
                     "holding_limit_days": 10,
-                    "action_badge": "🔥 極端超賣撈底" if is_trigger else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理"),
+                    "action_badge": "🔥 極端超賣撈底" if is_trigger else ("🚫 破線排除 (跌破200MA)" if not valid_trend and z <= -1.7 else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理")),
                     "sop_hint": "T+1開盤市價敲進，站上10MA停利一半，觸及+8%或20MA全清，最長持倉10天"
                 })
 
@@ -588,7 +588,8 @@ def get_oversold_sniper_dashboard_data():
             "total_scanned": total_scanned,
             "trigger_count": trigger_count,
             "triggers": [c for c in radar_candidates if c["is_trigger"]],
-            "watch_list": [c for c in radar_candidates if not c["is_trigger"] and c["z_score"] <= -1.7][:25],
+            "watch_list": [c for c in radar_candidates if c["valid_trend"] and -2.0 < c["z_score"] <= -1.7][:25],
+            "broken_trend_list": [c for c in radar_candidates if not c["valid_trend"] and c["z_score"] <= -1.7][:25],
             "taiwan_triggers": [c for c in radar_candidates if c["is_trigger"] and c["country"] == "台灣"],
             "global_triggers": [c for c in radar_candidates if c["is_trigger"] and c["country"] != "台灣"],
             "all_ranked": radar_candidates[:60]
