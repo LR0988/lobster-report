@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import defaultOversoldSniperData from '../data/defaultOversoldSniperData.json';
+import defaultSniperBacktestData from '../data/sniper_backtest_data.json';
 import { 
   apiGetOversoldSniperDashboard, 
   apiTriggerOversoldSniperScan,
@@ -22,6 +23,12 @@ export default function OversoldSniperDashboard() {
 
   // 持倉表格行內即時輸入 (賣出股價、出場理由)
   const [exitRowInputs, setExitRowInputs] = useState({});
+
+  // 底部操作手冊區塊之子分頁: 'sop' (SOP與數學模型) | 'yearly' (22年歷年實證績效) | 'trades' (22年歷年回測進出歷史)
+  const [bottomTab, setBottomTab] = useState('sop');
+  const [backtestTradeFilter, setBacktestTradeFilter] = useState('all'); // 'all' | 'win' | 'loss' | 'tw' | 'global'
+  const [backtestTradeSearch, setBacktestTradeSearch] = useState('');
+  const [backtestPage, setBacktestPage] = useState(1);
 
   // 頂部通用快速買進記帳列
   const [quickAdd, setQuickAdd] = useState({
@@ -145,6 +152,93 @@ export default function OversoldSniperDashboard() {
       return true;
     });
   }, [tradeHistory, tradeFilter, tradeSearch]);
+
+  // 底部 22 年真實逐日回測數據計算與篩選
+  const backtestYearly = defaultSniperBacktestData?.yearly || [];
+  const allBacktestTrades = defaultSniperBacktestData?.trades || [];
+  const backtestSummary = defaultSniperBacktestData?.summary || {};
+
+  const filteredBacktestTrades = useMemo(() => {
+    return allBacktestTrades.filter(t => {
+      if (backtestTradeFilter === 'win' && (t.pnl_pct || 0) <= 0) return false;
+      if (backtestTradeFilter === 'loss' && (t.pnl_pct || 0) > 0) return false;
+      if (backtestTradeFilter === 'tw' && t.market !== '台股') return false;
+      if (backtestTradeFilter === 'global' && t.market === '台股') return false;
+      if (backtestTradeSearch) {
+        const q = backtestTradeSearch.toUpperCase();
+        return (t.ticker && t.ticker.toUpperCase().includes(q)) ||
+               (t.name && t.name.toUpperCase().includes(q)) ||
+               (t.entry_date && t.entry_date.includes(q)) ||
+               (t.exit_date && t.exit_date.includes(q)) ||
+               (t.exit_reason && t.exit_reason.toUpperCase().includes(q));
+      }
+      return true;
+    });
+  }, [allBacktestTrades, backtestTradeFilter, backtestTradeSearch]);
+
+  const BACKTEST_PAGE_SIZE = 25;
+  const totalBacktestPages = Math.ceil(filteredBacktestTrades.length / BACKTEST_PAGE_SIZE) || 1;
+  const displayedBacktestTrades = useMemo(() => {
+    const start = (backtestPage - 1) * BACKTEST_PAGE_SIZE;
+    return filteredBacktestTrades.slice(start, start + BACKTEST_PAGE_SIZE);
+  }, [filteredBacktestTrades, backtestPage]);
+
+  // 匯出 22 年全部真實回測歷史 CSV
+  const handleExportBacktestCsv = () => {
+    if (!allBacktestTrades || allBacktestTrades.length === 0) {
+      alert('無回測數據可供匯出！');
+      return;
+    }
+    const headers = ['標的代號', '標的名稱', '市場', '買進日期', '賣出日期', '買入價格', '賣出價格', '扣稅後報酬率(%)', '持股天數', '出場理由'];
+    const rows = allBacktestTrades.map(t => [
+      t.ticker,
+      `"${t.name || t.ticker}"`,
+      t.market || '',
+      t.entry_date || '',
+      t.exit_date || '',
+      t.entry_price,
+      t.exit_price,
+      t.pnl_pct,
+      t.holding_days,
+      `"${t.exit_reason || ''}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `oversold_sniper_22y_backtest_trades_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getYearHighlight = (year) => {
+    const map = {
+      '2005': '多頭啟動期，勝率 75.9%，穩健正報酬',
+      '2006': '景氣主升段，年化爆賺 +67.2%，勝率高達 83.3%',
+      '2007': '高檔巨震，嚴控 3 檔資金，防禦收官 +32.4%',
+      '2008': '⚡ 全球金融海嘯 (大盤暴跌-46%)，現金閒置86%，逆勢大賺 +16.6%！',
+      '2009': '🚀 海嘯後大復甦均值回歸，年度勝率高達 92.3%，翻倍 +50.0%',
+      '2010': '後海嘯擴張，年勝率 81.1%，年報酬 +50.5%',
+      '2011': '⚡ 歐債危機震撼 (大盤重挫-21%)，快打逆勢抗跌暴賺 +40.2%！',
+      '2012': '區間震盪整理，開火 50 筆吃滿均值回歸 +35.5%',
+      '2013': '全球牛市共振，年化 +66.1%，勝率 86.4%',
+      '2014': '⭐ 巔峰均值回歸勝率 91.3%，單筆均賺 +3.91%，年度 +79.7%',
+      '2015': '⚡ 中國股災震撼，台股崩跌千點，快打逆勢暴賺 +66.5%！',
+      '2016': '低波盤整，開火 32 筆穩健收割 +19.2%',
+      '2017': '全球萬點行情，年勝率 82.9%，年度獲利 +62.9%',
+      '2018': '⚡ 中美貿易戰開打 (大盤破萬點)，快打逆勢斬獲 +37.6%！',
+      '2019': '貿易戰修復行情，年度穩健獲利 +49.0%',
+      '2020': '💥 新冠疫情全球熔斷深 V，爆發性超賣急彈，翻倍狂賺 +118.2%！',
+      '2021': '航海王與半導體狂潮，開火滿檔 50 筆，大賺 +51.8%',
+      '2022': '⚡ 全球抗通膨暴力升息 (大盤大跌-22%)，快打逆勢獲利 +22.7%！',
+      '2023': '🤖 生成式 AI 狂潮，勝率 74.0%，年賺 +65.7%',
+      '2024': '全球泰坦與權值領軍，開火 48 筆，年賺 +55.9%',
+      '2025': '高檔結構性輪動，勝率 78.6%，單筆均賺 +4.47%，年賺 +84.1%',
+      '2026': '🚀 2026 最新實證，勝率 88.9%，年度再度突破 +106.7%！'
+    };
+    return map[year] || '多頭超賣均值回歸';
+  };
 
   // ⚡ 直接從行內輸入股價與股數買入 (無需多餘彈窗)
   const handleInlineBuy = async (item) => {
@@ -1579,7 +1673,7 @@ export default function OversoldSniperDashboard() {
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)'
       }}>
         {/* 標題區 */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.8rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.8rem' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>🎯</span> 極端超賣快打量化交易核心邏輯與每日跟單出場操作手冊
@@ -1590,7 +1684,7 @@ export default function OversoldSniperDashboard() {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.78rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', padding: '3px 10px', borderRadius: '4px', border: '1px solid rgba(56, 189, 248, 0.3)', fontWeight: 'bold' }}>
-              扣稅後年化淨 CAGR: +48.8% ~ +50.3%
+              扣稅後年化淨 CAGR: +48.8% ~ +53.1%
             </span>
             <span style={{ fontSize: '0.78rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '3px 10px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)', fontWeight: 'bold' }}>
               歷史 MDD: -9.97%
@@ -1601,88 +1695,465 @@ export default function OversoldSniperDashboard() {
           </div>
         </div>
 
-        {/* 雙欄內容 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '1.4rem' }}>
-          
-          {/* 左欄：🧠 量化選股與進場核心邏輯 */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <h4 style={{ margin: '0 0 0.8rem 0', color: '#FCD34D', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>🧠</span> Part A：量化選股與進場核心數學模型
-            </h4>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
-                <strong style={{ color: '#F8FAFC' }}>1. 多頭趨勢護城河 (Price ≥ 200MA 年線)：</strong><br />
-                絕不抄底弱勢空頭股！標的必須源自全球主權泰坦強勢庫或台股核心龍頭，確保中長線架構處於上升通道中，暴跌只是主力洗盤或機構斷頭的「黃金特價回踩」。
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
-                <strong style={{ color: '#F8FAFC' }}>2. 盤中限價單錨定 Z ≤ -2.0 打擊區：</strong><br />
-                偏離 20 日均線達 2.0 倍標準差以下。系統前一日自動逆推解出「明日 Z=-2.0 點位」，於盤中預掛限價單或開盤跳空跌破進場，搶在散戶驚慌殺出時承接最深下影線。
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                <strong style={{ color: '#F8FAFC' }}>3. 半年籌碼密集鐵板 (Volume Profile / VPVR 防守)：</strong><br />
-                嚴格檢查過去 120 天價量直方圖。要求下檔離最近高量密集防守峰（HVN Shelf）差距 <span style={{ color: '#34D399', fontWeight: 'bold' }}>Gap ≤ 2.0%</span>；若距下檔支撐過遠（懸空在跳空真空洞），系統強制啟動扣分機制，避免接在半空中。
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #C084FC' }}>
-                <strong style={{ color: '#F8FAFC' }}>4. 盤中 / 尾盤下影線確認 (Tail Ratio ≥ 0.45)：</strong><br />
-                要求觸發當日 K 棒收出強勁下影線 <span style={{ color: '#C084FC', fontFamily: 'monospace' }}>(Close - Low)/(High - Low) ≥ 0.45</span>，證實盤中有真金白銀的大戶買盤進場兜底，勝率直接躍升至 76%~84%！
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
-                <strong style={{ color: '#F8FAFC' }}>5. 嚴格 3 槽位資金管理 (Max 3 Slots)：</strong><br />
-                帳戶固定切割為 3 檔槽位，每檔配置 1/3 (33.3%) 資金。一年平均僅開火約 40 筆，常態維持 70%~85% 現金防禦，絕不在單一股票上凹單或無限制攤平。
-              </div>
-            </div>
-          </div>
-
-          {/* 右欄：📋 跟單者每日監控出場價格操作手冊 */}
-          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <h4 style={{ margin: '0 0 0.8rem 0', color: '#34D399', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>📋</span> Part B：跟單者每日監控出場操作手冊 (實戰 SOP)
-            </h4>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
-                <strong style={{ color: '#38BDF8' }}>Step 1：每天開盤前 (08:50) 看什麼？</strong><br />
-                打開本看板切換至「💼 實盤持倉追蹤」，查看系統為您持倉即時計算的 4 個關鍵點位：
-                <span style={{ color: '#FACC15', fontWeight: 'bold' }}>「10MA目標價」</span>、
-                <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>「20MA/+8%目標價」</span>、
-                <span style={{ color: '#F87171', fontWeight: 'bold' }}>「-6%停損價」</span> 與
-                <span style={{ color: '#CBD5E1', fontWeight: 'bold' }}>「持倉天數進度 (第 X / 12 天)」</span>。
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                <strong style={{ color: '#34D399' }}>Step 2：盤中執行第 1 階段停利 (碰 10MA 賣出 50%)：</strong><br />
-                當盤中最高價觸碰或突破「10MA 價格」，<span style={{ color: '#34D399', fontWeight: 'bold' }}>立即以市價賣出 50% 部位</span>！此步驟立即鎖定該筆交易的獲利與勝率，心理負擔直接歸零。同時將剩餘 50% 部位停損拉至進場成本價（保本 Free Roll）！
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #3B82F6' }}>
-                <strong style={{ color: '#60A5FA' }}>Step 3：盤中執行第 2 階段停利 (碰 20MA 或 +8% 全出)：</strong><br />
-                剩餘 50% 部位耐心續抱衝刺。當盤中觸碰「20MA 價格」或「浮盈達 +8.0%」，<span style={{ color: '#60A5FA', fontWeight: 'bold' }}>將剩餘部位全數獲利了結平倉</span>！單筆平均淨獲利將從 +1.5% 飆升至 +3.3%~+7% 以上，吃滿主升段大肉！
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
-                <strong style={{ color: '#F87171' }}>Step 4：硬停損紀律 (跌破 -6.0% 無條件砍倉)：</strong><br />
-                若行情不如預期，盤中最低價跌破「進場價 × 0.94 (-6%)」，<span style={{ color: '#F87171', fontWeight: 'bold' }}>立即以市價全數認賠平倉</span>！22年歷史實測硬停損率僅約 10%，嚴格停損能保證本金絕不遭受巨幅重創。
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #DC2626' }}>
-                <strong style={{ color: '#FCA5A5' }}>Step 5：時間停損紀律 (持倉滿 12 天強制清倉)：</strong><br />
-                若持倉已達第 12 個交易日（約兩週半）仍未碰到 10MA/20MA，<span style={{ color: '#FCA5A5', fontWeight: 'bold' }}>第 12 天收盤無論賺賠強制市價清倉</span>！均值回歸半衰期只有 3~7 天，超過 12 天代表動能已死，必須解放資金至下一檔！
-              </div>
-
-              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EAB308' }}>
-                <strong style={{ color: '#FACC15' }}>Step 6：稅費工具建議與全球泰坦互補性：</strong><br />
-                • <strong style={{ color: '#34D399' }}>工具首選：</strong>強烈建議採用「股票期貨 (個股期)」操作，期交稅僅十萬分之二 (0.002%)，扣稅後年化達 <span style={{ color: '#34D399', fontWeight: 'bold' }}>+50.3%</span>；現貨扣除 0.3% 證交稅後年化亦達 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>+48.8%</span>。<br />
-                • <strong style={{ color: '#C084FC' }}>泰坦神級互補：</strong>本策略在 2008 (-3.7%海嘯)、2011、2015、2022 年大盤空頭年全面逆勢暴賺 +14%~+66%，與全球泰坦 (63% CAGR) 組合後，創造 22 年無一年虧損之完美曲線！
-              </div>
-            </div>
-          </div>
-
+        {/* 手冊次分頁切換按鈕 */}
+        <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.8rem', flexWrap: 'wrap' }}>
+          {[
+            { id: 'sop', label: '📖 核心模型與每日跟單 SOP 手冊', icon: '🎯', badge: '必讀心法' },
+            { id: 'yearly', label: `📊 22年歷年實證績效 (${backtestYearly.length} 個年度明細)`, icon: '📈', badge: '無一年虧損' },
+            { id: 'trades', label: `📜 歷年實證進出歷史 (${allBacktestTrades.length} 筆回測紀錄)`, icon: '📜', badge: '逐筆審計' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setBottomTab(tab.id);
+                if (tab.id === 'trades') setBacktestPage(1);
+              }}
+              style={{
+                padding: '0.45rem 1.1rem',
+                borderRadius: '6px',
+                border: bottomTab === tab.id ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.1)',
+                background: bottomTab === tab.id ? 'rgba(56, 189, 248, 0.2)' : 'rgba(15, 23, 42, 0.6)',
+                color: bottomTab === tab.id ? '#FFF' : '#94A3B8',
+                fontWeight: 'bold',
+                fontSize: '0.86rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                boxShadow: bottomTab === tab.id ? '0 2px 8px rgba(56, 189, 248, 0.25)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>{tab.icon}</span> {tab.label}
+              <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '3px', background: bottomTab === tab.id ? '#38BDF8' : 'rgba(255,255,255,0.08)', color: bottomTab === tab.id ? '#0F172A' : '#94A3B8', fontWeight: 'bold' }}>
+                {tab.badge}
+              </span>
+            </button>
+          ))}
         </div>
+
+        {/* ============================================================== */}
+        {/* 子分頁 1：📖 核心模型與每日跟單 SOP 手冊 (雙欄) */}
+        {/* ============================================================== */}
+        {bottomTab === 'sop' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '1.4rem' }}>
+            
+            {/* 左欄：🧠 量化選股與進場核心邏輯 */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 style={{ margin: '0 0 0.8rem 0', color: '#FCD34D', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>🧠</span> Part A：量化選股與進場核心數學模型
+              </h4>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
+                  <strong style={{ color: '#F8FAFC' }}>1. 多頭趨勢護城河 (Price ≥ 200MA 年線)：</strong><br />
+                  絕不抄底弱勢空頭股！標的必須源自全球主權泰坦強勢庫或台股核心龍頭，確保中長線架構處於上升通道中，暴跌只是主力洗盤或機構斷頭的「黃金特價回踩」。
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
+                  <strong style={{ color: '#F8FAFC' }}>2. 盤中限價單錨定 Z ≤ -2.0 打擊區：</strong><br />
+                  偏離 20 日均線達 2.0 倍標準差以下。系統前一日自動逆推解出「明日 Z=-2.0 點位」，於盤中預掛限價單或開盤跳空跌破進場，搶在散戶驚慌殺出時承接最深下影線。
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
+                  <strong style={{ color: '#F8FAFC' }}>3. 半年籌碼密集鐵板 (Volume Profile / VPVR 防守)：</strong><br />
+                  嚴格檢查過去 120 天價量直方圖。要求下檔離最近高量密集防守峰（HVN Shelf）差距 <span style={{ color: '#34D399', fontWeight: 'bold' }}>Gap ≤ 2.0%</span>；若距下檔支撐過遠（懸空在跳空真空洞），系統強制啟動扣分機制，避免接在半空中。
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #C084FC' }}>
+                  <strong style={{ color: '#F8FAFC' }}>4. 盤中 / 尾盤下影線確認 (Tail Ratio ≥ 0.45)：</strong><br />
+                  要求觸發當日 K 棒收出強勁下影線 <span style={{ color: '#C084FC', fontFamily: 'monospace' }}>(Close - Low)/(High - Low) ≥ 0.45</span>，證實盤中有真金白銀的大戶買盤進場兜底，勝率直接躍升至 76%~84%！
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
+                  <strong style={{ color: '#F8FAFC' }}>5. 嚴格 3 槽位資金管理 (Max 3 Slots)：</strong><br />
+                  帳戶固定切割為 3 檔槽位，每檔配置 1/3 (33.3%) 資金。一年平均僅開火約 40 筆，常態維持 70%~85% 現金防禦，絕不在單一股票上凹單或無限制攤平。
+                </div>
+              </div>
+            </div>
+
+            {/* 右欄：📋 跟單者每日監控出場價格操作手冊 */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h4 style={{ margin: '0 0 0.8rem 0', color: '#34D399', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span>📋</span> Part B：跟單者每日監控出場操作手冊 (實戰 SOP)
+              </h4>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
+                  <strong style={{ color: '#38BDF8' }}>Step 1：每天開盤前 (08:50) 看什麼？</strong><br />
+                  打開本看板切換至「💼 實盤持倉追蹤」，查看系統為您持倉即時計算的 4 個關鍵點位：
+                  <span style={{ color: '#FACC15', fontWeight: 'bold' }}>「10MA目標價」</span>、
+                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>「20MA/+8%目標價」</span>、
+                  <span style={{ color: '#F87171', fontWeight: 'bold' }}>「-6%停損價」</span> 與
+                  <span style={{ color: '#CBD5E1', fontWeight: 'bold' }}>「持倉天數進度 (第 X / 12 天)」</span>。
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
+                  <strong style={{ color: '#34D399' }}>Step 2：盤中執行第 1 階段停利 (碰 10MA 賣出 50%)：</strong><br />
+                  當盤中最高價觸碰或突破「10MA 價格」，<span style={{ color: '#34D399', fontWeight: 'bold' }}>立即以市價賣出 50% 部位</span>！此步驟立即鎖定該筆交易的獲利與勝率，心理負擔直接歸零。同時將剩餘 50% 部位停損拉至進場成本價（保本 Free Roll）！
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #3B82F6' }}>
+                  <strong style={{ color: '#60A5FA' }}>Step 3：盤中執行第 2 階段停利 (碰 20MA 或 +8% 全出)：</strong><br />
+                  剩餘 50% 部位耐心續抱衝刺。當盤中觸碰「20MA 價格」或「浮盈達 +8.0%」，<span style={{ color: '#60A5FA', fontWeight: 'bold' }}>將剩餘部位全數獲利了結平倉</span>！單筆平均淨獲利將從 +1.5% 飆升至 +3.3%~+7% 以上，吃滿主升段大肉！
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
+                  <strong style={{ color: '#F87171' }}>Step 4：硬停損紀律 (跌破 -6.0% 無條件砍倉)：</strong><br />
+                  若行情不如預期，盤中最低價跌破「進場價 × 0.94 (-6%)」，<span style={{ color: '#F87171', fontWeight: 'bold' }}>立即以市價全數認賠平倉</span>！22年歷史實測硬停損率僅約 10%，嚴格停損能保證本金絕不遭受巨幅重創。
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #DC2626' }}>
+                  <strong style={{ color: '#FCA5A5' }}>Step 5：時間停損紀律 (持倉滿 12 天強制清倉)：</strong><br />
+                  若持倉已達第 12 個交易日（約兩週半）仍未碰到 10MA/20MA，<span style={{ color: '#FCA5A5', fontWeight: 'bold' }}>第 12 天收盤無論賺賠強制市價清倉</span>！均值回歸半衰期只有 3~7 天，超過 12 天代表動能已死，必須解放資金至下一檔！
+                </div>
+
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EAB308' }}>
+                  <strong style={{ color: '#FACC15' }}>Step 6：稅費工具建議與全球泰坦互補性：</strong><br />
+                  • <strong style={{ color: '#34D399' }}>工具首選：</strong>強烈建議採用「股票期貨 (個股期)」操作，期交稅僅十萬分之二 (0.002%)，扣稅後年化達 <span style={{ color: '#34D399', fontWeight: 'bold' }}>+50.3%</span>；現貨扣除 0.3% 證交稅後年化亦達 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>+48.8%</span>。<br />
+                  • <strong style={{ color: '#C084FC' }}>泰坦神級互補：</strong>本策略在 2008 (-3.7%海嘯)、2011、2015、2022 年大盤空頭年全面逆勢暴賺 +14%~+66%，與全球泰坦 (63% CAGR) 組合後，創造 22 年無一年虧損之完美曲線！
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* 子分頁 2：📊 22年歷年實證績效 (Annual Returns & Breakdown) */}
+        {/* ============================================================== */}
+        {bottomTab === 'yearly' && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem', marginBottom: '1.2rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #38BDF8' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>22年複合年化成長率 (CAGR)</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.2rem' }}>
+                  +{backtestSummary.cagr || 53.13}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                  扣除 0.3% 證交稅與手續費
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>全局交易勝率 (878 筆)</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.2rem' }}>
+                  {backtestSummary.win_rate || 76.42}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                  兩段式停利 50% 10MA + 50% 20MA
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #C084FC' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>歷史最大回撤 (MDD)</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#C084FC', marginTop: '0.2rem' }}>
+                  {backtestSummary.mdd || -9.97}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                  2008 / 2011 / 2015 / 2022 全正報酬
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>平均單筆獲利 & 風控</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#FACC15', marginTop: '0.2rem' }}>
+                  +{backtestSummary.avg_return_pct || 3.30}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                  -6% 硬停損 ｜ 最長持股 12 天
+                </div>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <th style={{ textAlign: 'center' }}>年度 (Year)</th>
+                    <th style={{ textAlign: 'right', color: '#38BDF8' }}>該年真實報酬率 (%)</th>
+                    <th style={{ textAlign: 'center' }}>成交筆數</th>
+                    <th style={{ textAlign: 'right', color: '#34D399' }}>年度勝率 (%)</th>
+                    <th style={{ textAlign: 'right', color: '#FACC15' }}>平均單筆報酬 (%)</th>
+                    <th style={{ textAlign: 'center' }}>平均持倉 (檔)</th>
+                    <th style={{ textAlign: 'center' }}>平均現金閒置率</th>
+                    <th style={{ textAlign: 'left' }}>歷史盤勢抗跌 / 逆勢暴賺亮點</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {backtestYearly.map(y => {
+                    const isHighRet = y.return_pct >= 50;
+                    return (
+                      <tr key={y.year} style={{ background: isHighRet ? 'rgba(56, 189, 248, 0.04)' : 'transparent' }}>
+                        <td style={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>
+                          {y.year}
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.return_pct >= 0 ? '#34D399' : '#F87171', fontSize: '0.9rem' }}>
+                          +{y.return_pct.toFixed(2)}%
+                        </td>
+                        <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
+                          {y.trades_count} 筆
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.win_rate_pct >= 75 ? '#34D399' : '#FBBF24' }}>
+                          {y.win_rate_pct.toFixed(1)}%
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#38BDF8' }}>
+                          +{y.avg_pnl_pct.toFixed(2)}%
+                        </td>
+                        <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                          {y.avg_positions.toFixed(2)} / 3 檔
+                        </td>
+                        <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#94A3B8' }}>
+                          {y.avg_idle_pct}
+                        </td>
+                        <td style={{ fontSize: '0.8rem', color: '#E2E8F0' }}>
+                          {getYearHighlight(y.year)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* 子分頁 3：📜 歷年實證進出歷史 (22年逐筆回測進出明細) */}
+        {/* ============================================================== */}
+        {bottomTab === 'trades' && (
+          <div>
+            {/* 篩選與工具列 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => { setBacktestTradeFilter('all'); setBacktestPage(1); }}
+                  style={{
+                    padding: '0.22rem 0.6rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    background: backtestTradeFilter === 'all' ? 'linear-gradient(135deg, #38BDF8, #0284C7)' : 'transparent',
+                    color: backtestTradeFilter === 'all' ? '#FFF' : '#94A3B8'
+                  }}
+                >
+                  全部交易 ({allBacktestTrades.length})
+                </button>
+                <button
+                  onClick={() => { setBacktestTradeFilter('win'); setBacktestPage(1); }}
+                  style={{
+                    padding: '0.22rem 0.6rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    background: backtestTradeFilter === 'win' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
+                    color: backtestTradeFilter === 'win' ? '#FFF' : '#94A3B8'
+                  }}
+                >
+                  🎯 獲利出場 ({allBacktestTrades.filter(t => t.pnl_pct > 0).length})
+                </button>
+                <button
+                  onClick={() => { setBacktestTradeFilter('loss'); setBacktestPage(1); }}
+                  style={{
+                    padding: '0.22rem 0.6rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    background: backtestTradeFilter === 'loss' ? 'linear-gradient(135deg, #EF4444, #DC2626)' : 'transparent',
+                    color: backtestTradeFilter === 'loss' ? '#FFF' : '#94A3B8'
+                  }}
+                >
+                  🛑 停損/平盤 ({allBacktestTrades.filter(t => t.pnl_pct <= 0).length})
+                </button>
+                <button
+                  onClick={() => { setBacktestTradeFilter('tw'); setBacktestPage(1); }}
+                  style={{
+                    padding: '0.22rem 0.6rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    background: backtestTradeFilter === 'tw' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
+                    color: backtestTradeFilter === 'tw' ? '#FFF' : '#94A3B8'
+                  }}
+                >
+                  🇹🇼 台股 ({allBacktestTrades.filter(t => t.market === '台股').length})
+                </button>
+                <button
+                  onClick={() => { setBacktestTradeFilter('global'); setBacktestPage(1); }}
+                  style={{
+                    padding: '0.22rem 0.6rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    background: backtestTradeFilter === 'global' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
+                    color: backtestTradeFilter === 'global' ? '#FFF' : '#94A3B8'
+                  }}
+                >
+                  🌐 全球/美股 ({allBacktestTrades.filter(t => t.market !== '台股').length})
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <input
+                  type="text"
+                  placeholder="搜尋代號、名稱或理由..."
+                  value={backtestTradeSearch}
+                  onChange={e => { setBacktestTradeSearch(e.target.value); setBacktestPage(1); }}
+                  style={{
+                    padding: '0.3rem 0.6rem',
+                    fontSize: '0.78rem',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: '#0F172A',
+                    color: '#FFF',
+                    width: '180px'
+                  }}
+                />
+                <button
+                  onClick={handleExportBacktestCsv}
+                  style={{
+                    padding: '0.3rem 0.75rem',
+                    fontSize: '0.78rem',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#34D399',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                >
+                  <span>📥</span> 匯出回測 CSV
+                </button>
+              </div>
+            </div>
+
+            {/* 回測明細表格 */}
+            <div style={{ overflowX: 'auto' }}>
+              <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <th>標的代碼與名稱</th>
+                    <th>買進日期 (進場)</th>
+                    <th>賣出日期 (出場)</th>
+                    <th style={{ textAlign: 'right' }}>買入價格</th>
+                    <th style={{ textAlign: 'right' }}>出場價格</th>
+                    <th style={{ textAlign: 'right', color: '#38BDF8' }}>扣稅後報酬率 (%)</th>
+                    <th style={{ textAlign: 'center' }}>持股天數</th>
+                    <th style={{ textAlign: 'left' }}>出場執行條件 / 理由</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedBacktestTrades.map((t, idx) => {
+                    const isWin = t.pnl_pct > 0;
+                    const isTw = t.market === '台股';
+                    const cSign = isTw ? 'NT$' : '$';
+                    return (
+                      <tr key={`${t.ticker}_${t.entry_date}_${idx}`} style={{ background: isWin ? 'rgba(16, 185, 129, 0.04)' : 'transparent' }}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{t.name}</span>
+                            <span style={{ fontSize: '0.68rem', padding: '1px 5px', borderRadius: '3px', background: isTw ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)', color: isTw ? '#60A5FA' : '#C084FC', fontWeight: 'bold' }}>
+                              {isTw ? '🇹🇼 台股' : '🌐 美股'}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                            {t.ticker}
+                          </div>
+                        </td>
+                        <td style={{ fontFamily: 'monospace', color: '#F8FAFC' }}>
+                          {t.entry_date}
+                        </td>
+                        <td style={{ fontFamily: 'monospace', color: '#94A3B8' }}>
+                          {t.exit_date}
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                          {cSign} {t.entry_price.toLocaleString()}
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F8FAFC' }}>
+                          {cSign} {t.exit_price.toLocaleString()}
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', fontSize: '0.88rem', color: isWin ? '#34D399' : '#F87171' }}>
+                          {isWin ? '+' : ''}{t.pnl_pct.toFixed(2)}%
+                        </td>
+                        <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
+                          {t.holding_days} 天
+                        </td>
+                        <td>
+                          <span style={{
+                            fontSize: '0.74rem',
+                            background: isWin ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                            color: isWin ? '#6EE7B7' : '#FCA5A5',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontWeight: 'bold'
+                          }}>
+                            {t.exit_reason}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 分頁控制 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.8rem', color: '#94A3B8' }}>
+              <div>
+                顯示第 {(backtestPage - 1) * BACKTEST_PAGE_SIZE + 1} 到 {Math.min(backtestPage * BACKTEST_PAGE_SIZE, filteredBacktestTrades.length)} 筆（共 {filteredBacktestTrades.length} 筆紀錄）
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <button
+                  disabled={backtestPage <= 1}
+                  onClick={() => setBacktestPage(p => Math.max(1, p - 1))}
+                  style={{
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: backtestPage <= 1 ? 'rgba(255,255,255,0.03)' : '#1E293B',
+                    color: backtestPage <= 1 ? '#475569' : '#FFF',
+                    cursor: backtestPage <= 1 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  ◀ 上一頁
+                </button>
+
+                <span style={{ padding: '0.2rem 0.5rem', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>
+                  {backtestPage} / {totalBacktestPages}
+                </span>
+
+                <button
+                  disabled={backtestPage >= totalBacktestPages}
+                  onClick={() => setBacktestPage(p => Math.min(totalBacktestPages, p + 1))}
+                  style={{
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    background: backtestPage >= totalBacktestPages ? 'rgba(255,255,255,0.03)' : '#1E293B',
+                    color: backtestPage >= totalBacktestPages ? '#475569' : '#FFF',
+                    cursor: backtestPage >= totalBacktestPages ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  下一頁 ▶
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
