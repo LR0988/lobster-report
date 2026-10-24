@@ -781,6 +781,9 @@ export default function OversoldSniperDashboard() {
                     </th>
                     <th style={{ textAlign: 'right' }}>參考現價</th>
                     <th style={{ textAlign: 'center' }}>20日 Z-Score</th>
+                    <th style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.12)', color: '#FCA5A5' }} title="若明日盤中跌破此價位，即觸發 Z<-2 極端超賣打擊區">
+                      ⚡ 明日 Z&lt;-2 狙擊掛單價
+                    </th>
                     <th style={{ textAlign: 'right' }}>🎯 10MA 目標</th>
                     <th style={{ textAlign: 'right' }}>預期反彈</th>
                     <th style={{ textAlign: 'center' }}>200MA 防守</th>
@@ -850,6 +853,34 @@ export default function OversoldSniperDashboard() {
                             {item.z_score}
                           </span>
                         </td>
+
+                        {/* ⚡ 明日 Z<-2 狙擊掛單價 */}
+                        <td style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.05)' }}>
+                          {isTrig ? (
+                            <span style={{ fontSize: '0.74rem', color: '#EF4444', fontWeight: 'bold', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
+                              🔥 已在超賣區 (開盤進)
+                            </span>
+                          ) : item.tomorrow_sniper_price ? (
+                            <div
+                              onClick={() => setRadarRowInputs(prev => ({
+                                ...prev,
+                                [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_price }
+                              }))}
+                              title="點擊直接填入買價掛單"
+                              style={{ cursor: 'pointer', display: 'inline-block' }}
+                            >
+                              <div style={{ color: '#FCD34D', fontWeight: 'bold', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                                {cSign} {item.tomorrow_sniper_price}
+                              </div>
+                              <div style={{ fontSize: '0.7rem', color: '#F87171', fontFamily: 'monospace' }}>
+                                ({item.tomorrow_sniper_diff_pct > 0 ? '+' : ''}{item.tomorrow_sniper_diff_pct}%)
+                              </div>
+                            </div>
+                          ) : (
+                            <span style={{ color: '#64748B', fontSize: '0.74rem' }}>-</span>
+                          )}
+                        </td>
+
                         <td style={{ textAlign: 'right', color: '#38BDF8', fontWeight: 'bold', fontFamily: 'monospace' }}>
                           {cSign} {item.ma10.toLocaleString()}
                         </td>

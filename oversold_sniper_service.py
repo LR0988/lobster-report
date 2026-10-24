@@ -99,6 +99,29 @@ def ensure_user_sniper_table(conn):
         conn.execute("ALTER TABLE user_sniper_trades ADD COLUMN exit_time TEXT")
     conn.commit()
 
+def solve_target_price_for_z(c19, target_z=-2.0):
+    """
+    計算隔日盤中股價跌至何價位時，20日 Z-Score 將跌破 target_z (預設 -2.0)
+    c19: 過去 19 個交易日的收盤價陣列 (含今日最新收盤)
+    """
+    if len(c19) < 19:
+        return None
+    low = 0.3 * float(c19[-1])
+    high = float(c19[-1])
+    for _ in range(30):
+        mid = (low + high) / 2.0
+        arr = np.append(c19, mid)
+        m = np.mean(arr)
+        s = np.std(arr, ddof=1)
+        if s < 1e-4:
+            return None
+        z = (mid - m) / s
+        if z < target_z:
+            low = mid
+        else:
+            high = mid
+    return round(float((low + high) / 2.0), 2)
+
 def get_oversold_sniper_dashboard_data():
     """
     即時計算強勢股超賣快打看板數據：
@@ -245,6 +268,10 @@ def get_oversold_sniper_dashboard_data():
             tw_last_d = str(grp["date"].iloc[-1])
             tw_disp_date = f"{tw_last_d[:4]}-{tw_last_d[4:6]}-{tw_last_d[6:]}" if len(tw_last_d) == 8 else tw_last_d[:10]
 
+            c19 = closes[-19:]
+            tomorrow_sniper_price = solve_target_price_for_z(c19, target_z=-2.0)
+            tomorrow_sniper_diff_pct = round(((tomorrow_sniper_price - latest_c) / latest_c) * 100.0, 2) if (tomorrow_sniper_price and latest_c > 0) else None
+
             radar_candidates.append({
                 "ticker": t_key,
                 "name": disp_name,
@@ -268,6 +295,8 @@ def get_oversold_sniper_dashboard_data():
                 "exp_rebound_pct": exp_rebound,
                 "exp_rebound_ma20_pct": exp_rebound_20,
                 "stop_loss_price": stop_loss,
+                "tomorrow_sniper_price": tomorrow_sniper_price,
+                "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
                 "valid_trend": valid_trend,
                 "is_trigger": is_trigger,
                 "holding_limit_days": 10,
@@ -365,6 +394,10 @@ def get_oversold_sniper_dashboard_data():
 
                 glb_disp_date = str(grp["date"].iloc[-1])[:10]
 
+                c19 = closes[-19:]
+                tomorrow_sniper_price = solve_target_price_for_z(c19, target_z=-2.0)
+                tomorrow_sniper_diff_pct = round(((tomorrow_sniper_price - latest_c) / latest_c) * 100.0, 2) if (tomorrow_sniper_price and latest_c > 0) else None
+
                 radar_candidates.append({
                     "ticker": ticker,
                     "name": disp_name,
@@ -388,6 +421,8 @@ def get_oversold_sniper_dashboard_data():
                     "exp_rebound_pct": exp_rebound,
                     "exp_rebound_ma20_pct": exp_rebound_20,
                     "stop_loss_price": stop_loss,
+                    "tomorrow_sniper_price": tomorrow_sniper_price,
+                    "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
                     "valid_trend": valid_trend,
                     "is_trigger": is_trigger,
                     "holding_limit_days": 10,
