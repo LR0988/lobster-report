@@ -122,6 +122,55 @@ def solve_target_price_for_z(c19, target_z=-2.0):
             high = mid
     return round(float((low + high) / 2.0), 2)
 
+def compute_stock_vpvr_and_tail(df_tail_slice, latest_c, is_tw=False):
+    """
+    計算標的之:
+    1. tail_ratio: 最新交易日之下影線比例 (Close - Low) / (High - Low)，大於 45% 代表多頭強勁承接
+    2. vpvr_gap: 過去 120 日成交量分佈 (Volume Profile) 最近籌碼密集峰間距 (%)，小於 2% 代表有鐵板支撐
+    """
+    tail_ratio = 50.0
+    h_col = "highest_price" if is_tw else "high"
+    l_col = "lowest_price" if is_tw else "low"
+    c_col = "closing_price" if is_tw else "close"
+    v_col = "trade_volume" if is_tw else "volume"
+    
+    if h_col in df_tail_slice.columns and l_col in df_tail_slice.columns:
+        valid_hl = df_tail_slice.dropna(subset=[h_col, l_col])
+        if len(valid_hl) > 0:
+            last_hl = valid_hl.iloc[-1]
+            try:
+                h = float(last_hl[h_col])
+                l = float(last_hl[l_col])
+                c = float(last_hl[c_col])
+                rng = h - l
+                if rng > 1e-4:
+                    tail_ratio = round(max(0.0, min(1.0, (c - l) / rng)) * 100.0, 1)
+            except Exception:
+                tail_ratio = 50.0
+
+    sub = df_tail_slice.tail(120)
+    if c_col in sub.columns:
+        c_vals = sub[c_col].dropna().values
+        if len(c_vals) >= 10:
+            v_vals = sub[v_col].fillna(1.0).values if v_col in sub.columns else np.ones(len(c_vals))
+            v_vals = np.nan_to_num(v_vals, nan=1.0)
+            hist, bin_edges = np.histogram(c_vals, bins=25, weights=v_vals[:len(c_vals)])
+            bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+            p65 = np.percentile(hist, 65)
+            hvn_prices = bin_centers[hist >= p65]
+            supports = hvn_prices[hvn_prices <= latest_c * 1.01]
+            if len(supports) > 0:
+                nearest_sup = float(np.max(supports))
+                vpvr_gap = round(float(((latest_c - nearest_sup) / latest_c) * 100.0), 1)
+            else:
+                vpvr_gap = 0.0
+        else:
+            vpvr_gap = 0.0
+    else:
+        vpvr_gap = 0.0
+
+    return tail_ratio, vpvr_gap
+
 def get_oversold_sniper_dashboard_data():
     """
     即時計算強勢股超賣快打看板數據：
@@ -184,7 +233,7 @@ def get_oversold_sniper_dashboard_data():
 
         placeholders = ','.join(['?'] * len(tw_target_ids))
         tw_query = f"""
-        SELECT stock_id, stock_name, date, closing_price 
+        SELECT stock_id, stock_name, date, highest_price, lowest_price, closing_price, trade_volume 
         FROM daily_stock 
         WHERE stock_id IN ({placeholders}) AND date >= ?
         ORDER BY stock_id, date ASC
@@ -199,6 +248,9 @@ def get_oversold_sniper_dashboard_data():
             closes = grp["closing_price"].values
             latest_c = float(closes[-1])
             sname = str(grp["stock_name"].iloc[-1])
+
+            # 計算下影線比率與 VPVR 籌碼密集峰間距
+            tail_ratio, vpvr_gap = compute_stock_vpvr_and_tail(grp, latest_c, is_tw=True)
 
             # 20日均值與標準差
             c20 = closes[-20:]
@@ -306,6 +358,10 @@ def get_oversold_sniper_dashboard_data():
                 "target_stage1_price": target_stage1,
                 "target_stage2_price": target_stage2,
                 "stop_loss_price": stop_loss,
+                "tail_ratio": tail_ratio,
+                "vpvr_gap": vpvr_gap,
+                "has_support": bool(vpvr_gap <= 2.0),
+                "has_tail_support": bool(tail_ratio >= 45.0),
                 "tomorrow_sniper_price": tomorrow_sniper_price,
                 "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
                 "tomorrow_sniper_deep_price": tomorrow_sniper_deep_price,
@@ -327,7 +383,7 @@ def get_oversold_sniper_dashboard_data():
         if g_symbols:
             g_placeholders = ','.join(['?'] * len(g_symbols))
             g_query = f"""
-            SELECT ticker, date, close 
+            SELECT ticker, date, high, low, close, volume 
             FROM global_stock_daily 
             WHERE ticker IN ({g_placeholders}) AND date >= date(?, '-300 days') AND close IS NOT NULL AND close > 0
             ORDER BY ticker, date ASC
@@ -341,6 +397,9 @@ def get_oversold_sniper_dashboard_data():
                 grp = grp.sort_values("date")
                 closes = grp["close"].values
                 latest_c = float(closes[-1])
+
+                # 計算下影線比率與 VPVR 籌碼密集峰間距
+                tail_ratio, vpvr_gap = compute_stock_vpvr_and_tail(grp, latest_c, is_tw=False)
 
                 c20 = closes[-20:]
                 m20 = np.mean(c20)
@@ -445,6 +504,10 @@ def get_oversold_sniper_dashboard_data():
                     "target_stage1_price": target_stage1,
                     "target_stage2_price": target_stage2,
                     "stop_loss_price": stop_loss,
+                    "tail_ratio": tail_ratio,
+                    "vpvr_gap": vpvr_gap,
+                    "has_support": bool(vpvr_gap <= 2.0),
+                    "has_tail_support": bool(tail_ratio >= 45.0),
                     "tomorrow_sniper_price": tomorrow_sniper_price,
                     "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
                     "tomorrow_sniper_deep_price": tomorrow_sniper_deep_price,

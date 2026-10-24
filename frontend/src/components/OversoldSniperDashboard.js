@@ -775,20 +775,20 @@ export default function OversoldSniperDashboard() {
               <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <th>標的代號與名稱</th>
-                    <th style={{ textAlign: 'center', background: 'rgba(192, 132, 252, 0.12)', color: '#E9D5FF' }}>
-                      🎯 均線彈力分 (勝率優先級)
-                    </th>
+                    <th>標的代號與市場</th>
                     <th style={{ textAlign: 'right' }}>參考現價</th>
-                    <th style={{ textAlign: 'center' }}>20日 Z-Score</th>
-                    <th style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.12)', color: '#FCA5A5' }} title="若明日盤中跌破此價位，即觸發 Z<-2 極端超賣打擊區">
-                      ⚡ 明日 Z&lt;-2 狙擊掛單價
+                    <th style={{ textAlign: 'center' }}>20日 Z 偏離</th>
+                    <th style={{ textAlign: 'left', background: 'rgba(16, 185, 129, 0.08)', color: '#A7F3D0' }}>
+                      🛡️ 核心濾網與下影線 (Tail / VPVR / 年線)
                     </th>
-                    <th style={{ textAlign: 'right' }}>🎯 10MA 目標</th>
-                    <th style={{ textAlign: 'right' }}>預期反彈</th>
-                    <th style={{ textAlign: 'center' }}>200MA 防守</th>
-                    <th style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.08)' }}>
-                      ✍️ 直接輸入買入股價與股數
+                    <th style={{ textAlign: 'left', background: 'rgba(56, 189, 248, 0.08)', color: '#BAE6FD' }}>
+                      🎯 兩段式停利目標與反彈 (10MA + 20MA/+8%)
+                    </th>
+                    <th style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.08)', color: '#FCA5A5' }} title="若明日盤中跌破此價位，即觸發 Z<-2 極端超賣打擊區">
+                      ⚡ 明日 Z&lt;-2 狙擊點
+                    </th>
+                    <th style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.05)' }}>
+                      ✍️ 快速跟單
                     </th>
                   </tr>
                 </thead>
@@ -804,61 +804,145 @@ export default function OversoldSniperDashboard() {
                     const valPrice = curInput.price !== undefined ? curInput.price : item.close;
                     const valShares = curInput.shares !== undefined ? curInput.shares : (isTw ? 1000 : 10);
 
+                    // 下影線與 VPVR 參數
+                    const tailRatio = item.tail_ratio !== undefined ? item.tail_ratio : 50.0;
+                    const hasTailSupport = item.has_tail_support !== undefined ? item.has_tail_support : (tailRatio >= 45.0);
+                    const vpvrGap = item.vpvr_gap !== undefined ? item.vpvr_gap : 0.0;
+                    const hasVpvrSupport = item.has_support !== undefined ? item.has_support : (vpvrGap <= 2.0);
+
                     return (
                       <tr key={item.ticker} style={{ background: isTrig ? 'rgba(239, 68, 68, 0.08)' : (isWatch ? 'rgba(245, 158, 11, 0.05)' : (isBroken ? 'rgba(239, 68, 68, 0.03)' : 'transparent')) }}>
-                        <td>
-                          <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{item.name}</div>
-                          <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
-                            {item.ticker}
-                          </div>
-                        </td>
-
-                        {/* 🎯 均線彈力分 (勝率優先級) */}
-                        <td style={{ textAlign: 'center', background: 'rgba(192, 132, 252, 0.05)' }}>
-                          <div>
+                        {/* 1. 標的代號與市場 */}
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 'bold', color: '#F8FAFC', fontSize: '0.9rem' }}>{item.name}</span>
                             <span style={{
-                              fontSize: '0.74rem',
-                              background: item.valid_trend ? (item.priority_color || '#38BDF8') : '#64748B',
-                              color: '#FFF',
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              fontWeight: 'bold',
-                              display: 'inline-block',
-                              boxShadow: (item.valid_trend && item.sniper_power_score >= 8.1) ? '0 0 10px rgba(192, 132, 252, 0.5)' : 'none'
+                              fontSize: '0.68rem',
+                              background: isTw ? 'rgba(59, 130, 246, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                              color: isTw ? '#60A5FA' : '#C084FC',
+                              padding: '1px 5px',
+                              borderRadius: '3px',
+                              fontWeight: 'bold'
                             }}>
-                              {item.valid_trend ? (item.win_rate_tier || (item.is_trigger ? '🔥 82% 黃金優選' : '👀 接近警戒')) : '🚫 破線防守破壞'}
+                              {isTw ? '🇹🇼 台股' : '🌐 美股'}
                             </span>
                           </div>
-                          <div style={{ fontSize: '0.7rem', color: '#CBD5E1', marginTop: '2px', fontFamily: 'monospace' }}>
-                            彈力分: <strong style={{ color: item.valid_trend ? '#FACC15' : '#94A3B8' }}>{item.sniper_power_score ? `+${item.sniper_power_score}%` : '-'}</strong>
-                          </div>
-                          <div style={{ fontSize: '0.68rem', color: item.valid_trend ? (item.priority_color || '#94A3B8') : '#EF4444', fontWeight: 'bold' }}>
-                            {item.valid_trend ? (item.priority_badge || '') : '⚠️ 嚴禁接刀'}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '3px' }}>
+                            <span style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                              {item.ticker}
+                            </span>
+                            {item.valid_trend && item.sniper_power_score && (
+                              <span style={{ fontSize: '0.68rem', color: '#FACC15', background: 'rgba(250, 204, 21, 0.1)', padding: '1px 4px', borderRadius: '3px' }}>
+                                彈力 +{item.sniper_power_score}%
+                              </span>
+                            )}
                           </div>
                         </td>
 
-                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                        {/* 2. 參考現價 */}
+                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', verticalAlign: 'middle', fontSize: '0.92rem' }}>
                           {cSign} {item.close.toLocaleString()}
                         </td>
-                        <td style={{ textAlign: 'center' }}>
+
+                        {/* 3. 20日 Z 偏離 */}
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                           <span style={{
-                            fontSize: '0.82rem',
+                            fontSize: '0.84rem',
                             fontWeight: 'bold',
                             fontFamily: 'monospace',
                             color: isTrig ? '#EF4444' : (isWatch ? '#F59E0B' : '#94A3B8'),
                             background: isTrig ? 'rgba(239, 68, 68, 0.2)' : (isWatch ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.05)'),
-                            padding: '2px 8px',
-                            borderRadius: '4px'
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            display: 'inline-block'
                           }}>
-                            {item.z_score}
+                            Z = {item.z_score}
                           </span>
+                          <div style={{ fontSize: '0.68rem', marginTop: '3px', fontWeight: 'bold', color: isTrig ? '#F87171' : (isWatch ? '#FBBF24' : '#64748B') }}>
+                            {isTrig ? '🔥 超賣觸發' : (isWatch ? '👀 接近警戒' : '常態震盪')}
+                          </div>
                         </td>
 
-                        {/* ⚡ 明日 Z<-2 狙擊掛單價 (含 Z=-2.2 深坑加碼點) */}
-                        <td style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.05)' }}>
+                        {/* 4. 🛡️ 核心濾網與下影線 (Tail Ratio / VPVR Gap / 年線) */}
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {/* 下影線承接 (Tail Ratio) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 'bold',
+                                padding: '1px 6px',
+                                borderRadius: '3px',
+                                background: hasTailSupport ? 'rgba(16, 185, 129, 0.18)' : 'rgba(245, 158, 11, 0.15)',
+                                color: hasTailSupport ? '#34D399' : '#FBBF24',
+                                border: `1px solid ${hasTailSupport ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.3)'}`
+                              }} title="下影線比例 >= 45% 代表盤中有強大買盤承接打底">
+                                📍 下影線: {tailRatio}% {hasTailSupport ? '✅' : '⚠️'}
+                              </span>
+                            </div>
+
+                            {/* 籌碼鐵板 (VPVR Gap) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 'bold',
+                                padding: '1px 6px',
+                                borderRadius: '3px',
+                                background: hasVpvrSupport ? 'rgba(56, 189, 248, 0.18)' : 'rgba(239, 68, 68, 0.15)',
+                                color: hasVpvrSupport ? '#38BDF8' : '#F87171',
+                                border: `1px solid ${hasVpvrSupport ? 'rgba(56, 189, 248, 0.35)' : 'rgba(239, 68, 68, 0.3)'}`
+                              }} title="下檔距離成交量密集峰 (HVN) 間距 <= 2% 代表有鐵板支撐防守">
+                                🧱 密集峰 Gap: {vpvrGap}% {hasVpvrSupport ? '✅' : '⚠️'}
+                              </span>
+                            </div>
+
+                            {/* 年線趨勢架構 */}
+                            <div style={{ fontSize: '0.7rem', color: item.is_strict_bull ? '#34D399' : (item.valid_trend ? '#FCD34D' : '#EF4444') }}>
+                              {item.is_strict_bull ? '👑 站穩 200MA 年線' : (item.valid_trend ? '🛡️ ≥0.85×200MA' : '🚫 跌破年線排除')}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* 5. 🎯 兩段式停利目標與反彈 (10MA 與預期反彈合一) */}
+                        <td style={{ verticalAlign: 'middle', background: 'rgba(56, 189, 248, 0.03)' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                            {/* 首段: 10MA 出 50% */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>① 10MA (出50%):</span>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8', fontSize: '0.82rem' }}>
+                                {cSign} {(item.target_stage1_price || item.ma10).toLocaleString()}
+                                <span style={{ color: item.exp_rebound_pct >= 0 ? '#34D399' : '#94A3B8', fontSize: '0.72rem', marginLeft: '3px' }}>
+                                  ({item.exp_rebound_pct >= 0 ? '+' : ''}{item.exp_rebound_pct}%)
+                                </span>
+                              </span>
+                            </div>
+
+                            {/* 次段: 20MA/+8% 全出 */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>② 20MA/+8% (全出):</span>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#C084FC', fontSize: '0.82rem' }}>
+                                {cSign} {(item.target_stage2_price || Math.round(item.close * 1.08 * 100) / 100).toLocaleString()}
+                                <span style={{ color: '#C084FC', fontSize: '0.72rem', marginLeft: '3px' }}>
+                                  (+{item.exp_rebound_ma20_pct > 8 ? item.exp_rebound_ma20_pct : '8.0'}%)
+                                </span>
+                              </span>
+                            </div>
+
+                            {/* 硬停損風控 */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '2px', marginTop: '1px' }}>
+                              <span style={{ fontSize: '0.68rem', color: '#F87171' }}>🛑 -6% 硬停損:</span>
+                              <span style={{ fontFamily: 'monospace', color: '#FCA5A5', fontSize: '0.72rem' }}>
+                                {cSign} {(item.stop_loss_price || Math.round(item.close * 0.94 * 100) / 100).toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* 6. ⚡ 明日 Z<-2 狙擊掛單價 */}
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle', background: 'rgba(239, 68, 68, 0.04)' }}>
                           {isTrig ? (
-                            <span style={{ fontSize: '0.74rem', color: '#EF4444', fontWeight: 'bold', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
-                              🔥 已在超賣區 (開盤進)
+                            <span style={{ fontSize: '0.74rem', color: '#EF4444', fontWeight: 'bold', background: 'rgba(239, 68, 68, 0.18)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '3px 8px', borderRadius: '4px' }}>
+                              🔥 已在超賣區 (開盤市價進)
                             </span>
                           ) : item.tomorrow_sniper_price ? (
                             <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '3px' }}>
@@ -869,13 +953,13 @@ export default function OversoldSniperDashboard() {
                                   [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_price }
                                 }))}
                                 title="點擊填入首筆 Z=-2.0 買價"
-                                style={{ cursor: 'pointer', background: 'rgba(252, 211, 77, 0.12)', border: '1px solid rgba(252, 211, 77, 0.3)', padding: '1px 6px', borderRadius: '4px' }}
+                                style={{ cursor: 'pointer', background: 'rgba(252, 211, 77, 0.12)', border: '1px solid rgba(252, 211, 77, 0.3)', padding: '2px 6px', borderRadius: '4px' }}
                               >
                                 <span style={{ fontSize: '0.68rem', color: '#CBD5E1' }}>Z=-2.0: </span>
-                                <strong style={{ color: '#FCD34D', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                                <strong style={{ color: '#FCD34D', fontFamily: 'monospace', fontSize: '0.8rem' }}>
                                   {cSign} {item.tomorrow_sniper_price}
                                 </strong>
-                                <span style={{ fontSize: '0.68rem', color: '#F87171', marginLeft: '3px', fontFamily: 'monospace' }}>
+                                <span style={{ fontSize: '0.66rem', color: '#F87171', marginLeft: '3px', fontFamily: 'monospace' }}>
                                   ({item.tomorrow_sniper_diff_pct > 0 ? '+' : ''}{item.tomorrow_sniper_diff_pct}%)
                                 </span>
                               </div>
@@ -888,13 +972,13 @@ export default function OversoldSniperDashboard() {
                                     [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_deep_price }
                                   }))}
                                   title="點擊填入深坑 Z=-2.2 加碼買價"
-                                  style={{ cursor: 'pointer', background: 'rgba(192, 132, 252, 0.12)', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '1px 6px', borderRadius: '4px' }}
+                                  style={{ cursor: 'pointer', background: 'rgba(192, 132, 252, 0.12)', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '2px 6px', borderRadius: '4px' }}
                                 >
                                   <span style={{ fontSize: '0.68rem', color: '#E9D5FF' }}>深坑-2.2: </span>
-                                  <strong style={{ color: '#C084FC', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                                  <strong style={{ color: '#C084FC', fontFamily: 'monospace', fontSize: '0.8rem' }}>
                                     {cSign} {item.tomorrow_sniper_deep_price}
                                   </strong>
-                                  <span style={{ fontSize: '0.68rem', color: '#F472B6', marginLeft: '3px', fontFamily: 'monospace' }}>
+                                  <span style={{ fontSize: '0.66rem', color: '#F472B6', marginLeft: '3px', fontFamily: 'monospace' }}>
                                     ({item.tomorrow_sniper_deep_diff_pct > 0 ? '+' : ''}{item.tomorrow_sniper_deep_diff_pct}%)
                                   </span>
                                 </div>
@@ -905,29 +989,8 @@ export default function OversoldSniperDashboard() {
                           )}
                         </td>
 
-                        <td style={{ textAlign: 'right', color: '#38BDF8', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                          {cSign} {item.ma10.toLocaleString()}
-                        </td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: item.exp_rebound_pct >= 0 ? '#34D399' : '#94A3B8' }}>
-                          {item.exp_rebound_pct >= 0 ? '+' : ''}{item.exp_rebound_pct}%
-                        </td>
-                        <td style={{ textAlign: 'center' }}>
-                          {item.is_strict_bull ? (
-                            <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(16, 185, 129, 0.22)', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                              👑 站穩年線上
-                            </span>
-                          ) : item.valid_trend ? (
-                            <span style={{ fontSize: '0.72rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
-                              🛡️ ≥0.85×年線
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '0.72rem', color: '#EF4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
-                              ⚠️ 破線嚴禁
-                            </span>
-                          )}
-                        </td>
-                        {/* ✍️ 直接輸入買入股價與股數 */}
-                        <td style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.05)' }}>
+                        {/* 7. ✍️ 快速跟單 */}
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle', background: 'rgba(56, 189, 248, 0.05)' }}>
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                               <input
@@ -941,7 +1004,7 @@ export default function OversoldSniperDashboard() {
                                 placeholder="買價"
                                 title="直接輸入買入股價"
                                 style={{
-                                  width: '85px',
+                                  width: '75px',
                                   padding: '2px 4px',
                                   fontSize: '0.78rem',
                                   borderRadius: '3px',
@@ -963,7 +1026,7 @@ export default function OversoldSniperDashboard() {
                                 placeholder="股數"
                                 title="直接輸入買入股數"
                                 style={{
-                                  width: '85px',
+                                  width: '75px',
                                   padding: '2px 4px',
                                   fontSize: '0.74rem',
                                   borderRadius: '3px',
@@ -1037,10 +1100,10 @@ export default function OversoldSniperDashboard() {
                   <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                     <th>標的代碼與名稱</th>
                     <th>🟢 買進時間 (進場)</th>
-                    <th style={{ textAlign: 'center' }}>持有天數 (上限10天)</th>
+                    <th style={{ textAlign: 'center' }}>持有天數 (上限12天)</th>
                     <th style={{ textAlign: 'right' }}>買入成本價</th>
                     <th style={{ textAlign: 'right' }}>最新現價</th>
-                    <th style={{ textAlign: 'right' }}>🎯 10MA 停利目標</th>
+                    <th style={{ textAlign: 'left', background: 'rgba(56, 189, 248, 0.08)' }}>🎯 兩段式停利目標</th>
                     <th style={{ textAlign: 'right' }}>未實現損益 (%)</th>
                     <th style={{ textAlign: 'center' }}>🔔 賣出出場訊號提示</th>
                     <th style={{ textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)' }}>
@@ -1058,7 +1121,7 @@ export default function OversoldSniperDashboard() {
 
                     const curExit = exitRowInputs[pos.id] || {};
                     const valExitPrice = curExit.price !== undefined ? curExit.price : pos.current_price;
-                    const valExitReason = curExit.reason || (pos.current_price >= pos.target_ma10 ? '🎯 觸及 10MA 停利' : (pos.days_held >= 10 ? '⏱️ 滿 10 天時間風控強制出場' : '🎯 手動獲利平倉'));
+                    const valExitReason = curExit.reason || (pos.current_price >= (pos.target_stage1 || pos.target_ma10) ? '🎯 觸及 10MA 第1階停利 50%' : (pos.days_held >= (pos.max_holding_days || 12) ? '⏱️ 滿 12 天時間風控強制出場' : '🎯 手動獲利平倉'));
 
                     return (
                       <tr key={pos.id} style={{ background: pos.can_sell ? 'rgba(16, 185, 129, 0.08)' : 'transparent' }}>
@@ -1079,12 +1142,12 @@ export default function OversoldSniperDashboard() {
                             fontSize: '0.82rem',
                             fontWeight: 'bold',
                             fontFamily: 'monospace',
-                            background: pos.days_held >= 10 ? '#DC2626' : (pos.days_held >= 8 ? '#D97706' : 'rgba(56, 189, 248, 0.2)'),
-                            color: pos.days_held >= 8 ? '#FFF' : '#38BDF8',
+                            background: pos.days_held >= 12 ? '#DC2626' : (pos.days_held >= 10 ? '#D97706' : 'rgba(56, 189, 248, 0.2)'),
+                            color: pos.days_held >= 10 ? '#FFF' : '#38BDF8',
                             padding: '2px 8px',
                             borderRadius: '4px'
                           }}>
-                            {pos.days_held} / 10 天
+                            {pos.days_held} / {pos.max_holding_days || 12} 天
                           </span>
                         </td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
@@ -1093,8 +1156,18 @@ export default function OversoldSniperDashboard() {
                         <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>
                           {cSign} {pos.current_price.toLocaleString()}
                         </td>
-                        <td style={{ textAlign: 'right', color: '#38BDF8', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                          {cSign} {pos.target_ma10.toLocaleString()}
+                        <td style={{ verticalAlign: 'middle', background: 'rgba(56, 189, 248, 0.03)' }}>
+                          <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ color: '#38BDF8', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                              ① 10MA: {cSign} {(pos.target_stage1 || pos.target_ma10)?.toLocaleString()}
+                            </div>
+                            <div style={{ color: '#C084FC', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                              ② 20MA/+8%: {cSign} {(pos.target_stage2 || pos.target_ma20)?.toLocaleString()}
+                            </div>
+                            <div style={{ color: '#F87171', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                              🛑 停損: {cSign} {pos.stop_loss_price?.toLocaleString()}
+                            </div>
+                          </div>
                         </td>
                         <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isPositive ? '#34D399' : '#F87171' }}>
                           <div>{isPositive ? '+' : ''}{gainPct.toFixed(2)}%</div>
