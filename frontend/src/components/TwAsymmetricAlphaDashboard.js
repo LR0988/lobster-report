@@ -26,6 +26,7 @@ export default function TwAsymmetricAlphaDashboard() {
   const [cbTradeYearFilter, setCbTradeYearFilter] = useState('all');
   const [cbTradeSearch, setCbTradeSearch] = useState('');
   const [cbTradePage, setCbTradePage] = useState(1);
+  const [cbMode, setCbMode] = useState('cbas'); // 'cbas' (62.5% CAGR) | 'cash_cb' (23.0% CAGR)
   const CB_TRADES_PAGE_SIZE = 25;
 
   const [sniperList, setSniperList] = useState(() => {
@@ -706,21 +707,67 @@ export default function TwAsymmetricAlphaDashboard() {
       {/* ============================================================== */}
       {activeSubTab === 'cb_yearly' && (
         <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8' }}>
+          {/* 回測模式切換器 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1.2rem', padding: '0.75rem 1rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#CBD5E1' }}>⚡ 選擇實證回測模式：</span>
+              <button
+                onClick={() => setCbMode('cbas')}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '6px',
+                  border: cbMode === 'cbas' ? '1px solid #F59E0B' : '1px solid rgba(255,255,255,0.15)',
+                  background: cbMode === 'cbas' ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(234, 88, 12, 0.35))' : 'rgba(255,255,255,0.04)',
+                  color: cbMode === 'cbas' ? '#FDE68A' : '#94A3B8',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                🚀 模式 A：全因子 CBAS 權利金暴擊 (CAGR +{cbBacktestSummary.cbas_cagr || 62.53}%)
+              </button>
+
+              <button
+                onClick={() => setCbMode('cash_cb')}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '6px',
+                  border: cbMode === 'cash_cb' ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.15)',
+                  background: cbMode === 'cash_cb' ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(2, 132, 199, 0.35))' : 'rgba(255,255,255,0.04)',
+                  color: cbMode === 'cash_cb' ? '#38BDF8' : '#94A3B8',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                🛡️ 模式 B：全額買進現貨 CB 隱形保底 (CAGR +{cbBacktestSummary.cagr || 23.02}%)
+              </button>
+            </div>
+
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
+              {cbMode === 'cbas'
+                ? '💡 CBAS 模式：以小博大，動用 15%~20% 資金買進權利金槓桿，80% 現金定存保本，年化達 62.53%！'
+                : '💡 現貨 CB 模式：100% 現金全額持有（10萬/張），下檔由 100 面額法定保底，適合保守大資金！'}
+            </div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.2rem' }}>
-            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #38BDF8' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>22年複合年化成長率 (CAGR)</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.2rem' }}>
-                +{cbBacktestSummary.cagr || 23.39}%
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: `4px solid ${cbMode === 'cbas' ? '#F59E0B' : '#38BDF8'}` }}>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
+                {cbMode === 'cbas' ? '🚀 CBAS 複合年化成長率 (CAGR)' : '🛡️ 現貨 CB 複合年化成長率 (CAGR)'}
+              </div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: cbMode === 'cbas' ? '#FDE68A' : '#38BDF8', marginTop: '0.2rem' }}>
+                +{cbMode === 'cbas' ? (cbBacktestSummary.cbas_cagr || 62.53) : (cbBacktestSummary.cagr || 23.02)}%
               </div>
               <div style={{ fontSize: '0.7rem', color: '#6EE7B7', marginTop: '0.2rem' }}>
-                ⚡ CBAS 槓桿模式達 <strong style={{ color: '#FCD34D' }}>+{cbBacktestSummary.cbas_cagr || 63.22}%</strong>
+                {cbMode === 'cbas' ? '5~8 倍槓桿・無保證金追繳' : '100% 契約保底・下檔鎖定在 100 元'}
               </div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>全局交易勝率 (500 筆)</div>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>全局交易勝率 ({allCbTrades.length} 筆)</div>
               <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.2rem' }}>
-                {cbBacktestSummary.win_rate || 94.80}%
+                {cbBacktestSummary.win_rate || 95.42}%
               </div>
               <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
                 100~102 買進・下檔由法定面額保底
@@ -730,7 +777,7 @@ export default function TwAsymmetricAlphaDashboard() {
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #C084FC' }}>
               <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>歷史最大回撤 (MDD)</div>
               <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#C084FC', marginTop: '0.2rem' }}>
-                {cbBacktestSummary.mdd || -0.74}%
+                {cbMode === 'cbas' ? '0.00% (年度全正)' : `${cbBacktestSummary.mdd || -0.74}%`}
               </div>
               <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
                 2008 / 2011 / 2015 / 2022 空頭年全正報酬
@@ -738,12 +785,12 @@ export default function TwAsymmetricAlphaDashboard() {
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>盈虧比 (Payoff Ratio)</div>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>平均單筆獲利 & 盈虧比</div>
               <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#FACC15', marginTop: '0.2rem' }}>
-                {cbBacktestSummary.payoff_ratio || 12.8} : 1
+                {cbMode === 'cbas' ? `+${cbBacktestSummary.avg_cbas_roi_pct || 105.4}%` : `+${cbBacktestSummary.avg_return_pct || 24.8}%`}
               </div>
               <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
-                贏賺暴擊 + 輸鎖死於 100 債底
+                盈虧比 {cbBacktestSummary.payoff_ratio || 12.8} : 1・贏大賺輸鎖死
               </div>
             </div>
 
@@ -763,42 +810,41 @@ export default function TwAsymmetricAlphaDashboard() {
               <thead>
                 <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <th style={{ textAlign: 'center' }}>年度 (Year)</th>
-                  <th style={{ textAlign: 'right', color: '#38BDF8' }}>策略年化報酬 (%)</th>
+                  <th style={{ textAlign: 'right', color: '#FBBF24' }}>🚀 CBAS 槓桿報酬 (%)</th>
+                  <th style={{ textAlign: 'right', color: '#38BDF8' }}>🛡️ 現貨 CB 報酬 (%)</th>
                   <th style={{ textAlign: 'right', color: '#94A3B8' }}>同期大盤 (TAIEX)</th>
-                  <th style={{ textAlign: 'right', color: '#FACC15' }}>超額 Alpha (%)</th>
+                  <th style={{ textAlign: 'right', color: '#FACC15' }}>CBAS 超額 Alpha (%)</th>
                   <th style={{ textAlign: 'center' }}>成交筆數</th>
                   <th style={{ textAlign: 'right', color: '#34D399' }}>年度勝率 (%)</th>
-                  <th style={{ textAlign: 'right', color: '#38BDF8' }}>平均單筆報酬 (%)</th>
                   <th style={{ textAlign: 'left', color: '#F472B6' }}>代表性暴擊獲利 CB</th>
                   <th style={{ textAlign: 'left' }}>歷史盤勢抗跌 / 逆勢暴賺點評</th>
                 </tr>
               </thead>
               <tbody>
                 {cbBacktestYearly.map(y => {
-                  const isHighRet = y.return_pct >= 30;
-                  const isBeatMarket = y.alpha_pct > 0;
+                  const isHighRet = (cbMode === 'cbas' ? y.cbas_return_pct : y.return_pct) >= 30;
                   return (
                     <tr key={y.year} style={{ background: isHighRet ? 'rgba(56, 189, 248, 0.04)' : 'transparent' }}>
                       <td style={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>
                         {y.year}
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.return_pct >= 0 ? '#34D399' : '#F87171', fontSize: '0.9rem' }}>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#FBBF24', fontSize: '0.92rem' }}>
+                        +{y.cbas_return_pct.toFixed(2)}%
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#38BDF8', fontSize: '0.88rem' }}>
                         +{y.return_pct.toFixed(2)}%
                       </td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: y.taiex_ret_pct >= 0 ? '#CBD5E1' : '#F87171' }}>
                         {y.taiex_ret_pct >= 0 ? `+${y.taiex_ret_pct.toFixed(1)}%` : `${y.taiex_ret_pct.toFixed(1)}%`}
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isBeatMarket ? '#FACC15' : '#94A3B8' }}>
-                        {y.alpha_pct >= 0 ? `+${y.alpha_pct.toFixed(1)}%` : `${y.alpha_pct.toFixed(1)}%`}
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.cbas_alpha_pct >= 0 ? '#FACC15' : '#94A3B8' }}>
+                        {y.cbas_alpha_pct >= 0 ? `+${y.cbas_alpha_pct.toFixed(1)}%` : `${y.cbas_alpha_pct.toFixed(1)}%`}
                       </td>
                       <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
                         {y.trades_count} 筆
                       </td>
                       <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.win_rate_pct >= 90 ? '#34D399' : '#FBBF24' }}>
                         {y.win_rate_pct.toFixed(1)}%
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#38BDF8' }}>
-                        +{y.avg_pnl_pct.toFixed(2)}%
                       </td>
                       <td style={{ textAlign: 'left', fontWeight: 'bold', color: '#F472B6', fontSize: '0.8rem' }}>
                         {y.top_trade}
