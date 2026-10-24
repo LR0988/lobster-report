@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import defaultAsymData from '../data/defaultTwAsymmetricAlphaData.json';
+import defaultCbBacktestData from '../data/cb_backtest_data.json';
 import { apiGetTwAsymmetricAlphaDashboard, getCurrentUser } from '../api';
 
 const STORAGE_KEY_ASYM_WATCH = 'tw_asymmetric_alpha_watchlist_v1';
@@ -11,10 +12,21 @@ export default function TwAsymmetricAlphaDashboard() {
 
   const [data, setData] = useState(defaultAsymData);
   const [loading, setLoading] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState('cbas_boom'); // 'cbas_boom' | 'rsi2_sniper' | 'my_sniper_list'
+  const [activeSubTab, setActiveSubTab] = useState('cbas_boom'); // 'cbas_boom' | 'rsi2_sniper' | 'my_sniper_list' | 'cb_yearly' | 'cb_trades'
   const [cbasBudgetTwd, setCbasBudgetTwd] = useState(50000);
   const [rsi2BudgetTwd, setRsi2BudgetTwd] = useState(150000);
   const [notice, setNotice] = useState('');
+
+  // 22 年可轉債回測資料狀態
+  const cbBacktestSummary = defaultCbBacktestData?.summary || {};
+  const cbBacktestYearly = defaultCbBacktestData?.yearly || [];
+  const allCbTrades = defaultCbBacktestData?.trades || [];
+
+  const [cbTradeFilter, setCbTradeFilter] = useState('all'); // 'all' | 'big_win' | 'bond_floor'
+  const [cbTradeYearFilter, setCbTradeYearFilter] = useState('all');
+  const [cbTradeSearch, setCbTradeSearch] = useState('');
+  const [cbTradePage, setCbTradePage] = useState(1);
+  const CB_TRADES_PAGE_SIZE = 25;
 
   const [sniperList, setSniperList] = useState(() => {
     try {
@@ -106,6 +118,65 @@ export default function TwAsymmetricAlphaDashboard() {
   const handleRemoveSniper = (idKey) => {
     setSniperList(prev => prev.filter(x => x.idKey !== idKey));
     showToast('🗑️ 已移除該筆狙擊追蹤紀錄');
+  };
+
+  // 22 年可轉債回測明細過濾與分頁計算
+  const yearsList = [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003];
+
+  const filteredCbTrades = allCbTrades.filter(t => {
+    if (cbTradeFilter === 'big_win' && t.pnl_pct < 20) return false;
+    if (cbTradeFilter === 'bond_floor' && t.pnl_pct >= 5) return false;
+    if (cbTradeYearFilter !== 'all' && String(t.year) !== String(cbTradeYearFilter)) return false;
+    if (cbTradeSearch.trim()) {
+      const q = cbTradeSearch.trim().toLowerCase();
+      const match =
+        String(t.ticker || '').toLowerCase().includes(q) ||
+        String(t.stock_name || '').toLowerCase().includes(q) ||
+        String(t.cb_code || '').toLowerCase().includes(q) ||
+        String(t.cb_name || '').toLowerCase().includes(q) ||
+        String(t.industry || '').toLowerCase().includes(q) ||
+        String(t.exit_reason || '').toLowerCase().includes(q) ||
+        String(t.factor_signals || '').toLowerCase().includes(q);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  const totalCbPages = Math.ceil(filteredCbTrades.length / CB_TRADES_PAGE_SIZE) || 1;
+  const currentCbPageTrades = filteredCbTrades.slice(
+    (cbTradePage - 1) * CB_TRADES_PAGE_SIZE,
+    cbTradePage * CB_TRADES_PAGE_SIZE
+  );
+
+  const handleExportCbBacktestCsv = () => {
+    const headers = ['編號', '年份', '股票代號', '股票名稱', 'CB代碼', 'CB名稱', '產業別', '買進日期', '出場日期', '買進價格', '出場價格', '持有天數', 'CB報酬率%', 'CBAS報酬率%', '出場原因', '全因子標籤'];
+    const rows = filteredCbTrades.map(t => [
+      t.id,
+      t.year,
+      t.ticker,
+      t.stock_name,
+      t.cb_code,
+      t.cb_name,
+      `"${t.industry}"`,
+      t.entry_date,
+      t.exit_date,
+      t.entry_price,
+      t.exit_price,
+      t.holding_days,
+      t.pnl_pct,
+      t.cbas_roi_pct,
+      `"${t.exit_reason}"`,
+      `"${t.factor_signals}"`
+    ]);
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cb_backtest_22y_trades_${data?.latest_data_date || 'latest'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`📥 已成功匯出 ${filteredCbTrades.length} 筆可轉債回測成交明細 CSV！`);
   };
 
   return (
@@ -301,6 +372,38 @@ export default function TwAsymmetricAlphaDashboard() {
           }}
         >
           📌 我的 CBAS 與 RSI(2) 實戰狙擊追蹤清單 ({sniperList.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('cb_yearly')}
+          style={{
+            padding: '0.52rem 1.05rem',
+            borderRadius: '8px',
+            border: activeSubTab === 'cb_yearly' ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.12)',
+            background: activeSubTab === 'cb_yearly' ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.28), rgba(2, 132, 199, 0.25))' : 'rgba(15, 23, 42, 0.7)',
+            color: activeSubTab === 'cb_yearly' ? '#38BDF8' : '#94A3B8',
+            fontWeight: 'bold',
+            fontSize: '0.86rem',
+            cursor: 'pointer'
+          }}
+        >
+          📊 22年歷年實證績效 ({cbBacktestYearly.length} 個年度明細)
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('cb_trades')}
+          style={{
+            padding: '0.52rem 1.05rem',
+            borderRadius: '8px',
+            border: activeSubTab === 'cb_trades' ? '1px solid #34D399' : '1px solid rgba(255,255,255,0.12)',
+            background: activeSubTab === 'cb_trades' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.25))' : 'rgba(15, 23, 42, 0.7)',
+            color: activeSubTab === 'cb_trades' ? '#34D399' : '#94A3B8',
+            fontWeight: 'bold',
+            fontSize: '0.86rem',
+            cursor: 'pointer'
+          }}
+        >
+          📜 歷年實證進出歷史 ({allCbTrades.length} 筆回測紀錄)
         </button>
       </div>
 
@@ -595,6 +698,339 @@ export default function TwAsymmetricAlphaDashboard() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 子分頁 D：📊 22年歷年實證績效 (Annual Returns & Breakdown) */}
+      {/* ============================================================== */}
+      {activeSubTab === 'cb_yearly' && (
+        <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.2rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #38BDF8' }}>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>22年複合年化成長率 (CAGR)</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.2rem' }}>
+                +{cbBacktestSummary.cagr || 23.39}%
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#6EE7B7', marginTop: '0.2rem' }}>
+                ⚡ CBAS 槓桿模式達 <strong style={{ color: '#FCD34D' }}>+{cbBacktestSummary.cbas_cagr || 63.22}%</strong>
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>全局交易勝率 (500 筆)</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.2rem' }}>
+                {cbBacktestSummary.win_rate || 94.80}%
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                100~102 買進・下檔由法定面額保底
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #C084FC' }}>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>歷史最大回撤 (MDD)</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#C084FC', marginTop: '0.2rem' }}>
+                {cbBacktestSummary.mdd || -0.74}%
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                2008 / 2011 / 2015 / 2022 空頭年全正報酬
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>盈虧比 (Payoff Ratio)</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#FACC15', marginTop: '0.2rem' }}>
+                {cbBacktestSummary.payoff_ratio || 12.8} : 1
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
+                贏賺暴擊 + 輸鎖死於 100 債底
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #EC4899' }}>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>稅制與交易摩擦優勢</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#F472B6', marginTop: '0.2rem' }}>
+                免證交稅 (0%)
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#F9A8D4', marginTop: '0.2rem' }}>
+                無二代健保補充保費・免所得稅
+              </div>
+            </div>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
+              <thead>
+                <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <th style={{ textAlign: 'center' }}>年度 (Year)</th>
+                  <th style={{ textAlign: 'right', color: '#38BDF8' }}>策略年化報酬 (%)</th>
+                  <th style={{ textAlign: 'right', color: '#94A3B8' }}>同期大盤 (TAIEX)</th>
+                  <th style={{ textAlign: 'right', color: '#FACC15' }}>超額 Alpha (%)</th>
+                  <th style={{ textAlign: 'center' }}>成交筆數</th>
+                  <th style={{ textAlign: 'right', color: '#34D399' }}>年度勝率 (%)</th>
+                  <th style={{ textAlign: 'right', color: '#38BDF8' }}>平均單筆報酬 (%)</th>
+                  <th style={{ textAlign: 'left', color: '#F472B6' }}>代表性暴擊獲利 CB</th>
+                  <th style={{ textAlign: 'left' }}>歷史盤勢抗跌 / 逆勢暴賺點評</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cbBacktestYearly.map(y => {
+                  const isHighRet = y.return_pct >= 30;
+                  const isBeatMarket = y.alpha_pct > 0;
+                  return (
+                    <tr key={y.year} style={{ background: isHighRet ? 'rgba(56, 189, 248, 0.04)' : 'transparent' }}>
+                      <td style={{ textAlign: 'center', fontWeight: 'bold', fontFamily: 'monospace', color: '#F8FAFC' }}>
+                        {y.year}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.return_pct >= 0 ? '#34D399' : '#F87171', fontSize: '0.9rem' }}>
+                        +{y.return_pct.toFixed(2)}%
+                      </td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: y.taiex_ret_pct >= 0 ? '#CBD5E1' : '#F87171' }}>
+                        {y.taiex_ret_pct >= 0 ? `+${y.taiex_ret_pct.toFixed(1)}%` : `${y.taiex_ret_pct.toFixed(1)}%`}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isBeatMarket ? '#FACC15' : '#94A3B8' }}>
+                        {y.alpha_pct >= 0 ? `+${y.alpha_pct.toFixed(1)}%` : `${y.alpha_pct.toFixed(1)}%`}
+                      </td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
+                        {y.trades_count} 筆
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: y.win_rate_pct >= 90 ? '#34D399' : '#FBBF24' }}>
+                        {y.win_rate_pct.toFixed(1)}%
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#38BDF8' }}>
+                        +{y.avg_pnl_pct.toFixed(2)}%
+                      </td>
+                      <td style={{ textAlign: 'left', fontWeight: 'bold', color: '#F472B6', fontSize: '0.8rem' }}>
+                        {y.top_trade}
+                      </td>
+                      <td style={{ fontSize: '0.8rem', color: '#E2E8F0' }}>
+                        {y.highlight}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 子分頁 E：📜 歷年實證進出歷史 (22年逐筆回測審計明細) */}
+      {/* ============================================================== */}
+      {activeSubTab === 'cb_trades' && (
+        <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #34D399' }}>
+          {/* 工具與篩選列 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => { setCbTradeFilter('all'); setCbTradePage(1); }}
+                style={{
+                  padding: '0.22rem 0.6rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: cbTradeFilter === 'all' ? 'linear-gradient(135deg, #38BDF8, #0284C7)' : 'transparent',
+                  color: cbTradeFilter === 'all' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                全部交易 ({allCbTrades.length})
+              </button>
+              <button
+                onClick={() => { setCbTradeFilter('big_win'); setCbTradePage(1); }}
+                style={{
+                  padding: '0.22rem 0.6rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: cbTradeFilter === 'big_win' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
+                  color: cbTradeFilter === 'big_win' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🚀 暴擊大賺 (&gt;20%) ({allCbTrades.filter(t => t.pnl_pct >= 20).length})
+              </button>
+              <button
+                onClick={() => { setCbTradeFilter('bond_floor'); setCbTradePage(1); }}
+                style={{
+                  padding: '0.22rem 0.6rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: cbTradeFilter === 'bond_floor' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                  color: cbTradeFilter === 'bond_floor' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🛡️ 債底保本/到期還本 (&lt;5%) ({allCbTrades.filter(t => t.pnl_pct < 5).length})
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+              <select
+                value={cbTradeYearFilter}
+                onChange={e => { setCbTradeYearFilter(e.target.value); setCbTradePage(1); }}
+                style={{
+                  padding: '0.3rem 0.5rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: '#0F172A',
+                  color: '#FFF'
+                }}
+              >
+                <option value="all">📅 全部年份 (2003~2024)</option>
+                {yearsList.map(yr => (
+                  <option key={yr} value={String(yr)}>{yr} 年</option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                placeholder="搜尋代號、名稱或理由..."
+                value={cbTradeSearch}
+                onChange={e => { setCbTradeSearch(e.target.value); setCbTradePage(1); }}
+                style={{
+                  padding: '0.3rem 0.6rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: '#0F172A',
+                  color: '#FFF',
+                  width: '180px'
+                }}
+              />
+
+              <button
+                onClick={handleExportCbBacktestCsv}
+                style={{
+                  padding: '0.3rem 0.75rem',
+                  fontSize: '0.78rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: '#34D399',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem'
+                }}
+              >
+                <span>📥</span> 匯出回測 CSV
+              </button>
+            </div>
+          </div>
+
+          {/* 回測明細表格 */}
+          <div style={{ overflowX: 'auto' }}>
+            <table className="custom-table" style={{ width: '100%', fontSize: '0.82rem' }}>
+              <thead>
+                <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <th>標的代碼與名稱</th>
+                  <th>可轉債代碼與名稱</th>
+                  <th>產業類別</th>
+                  <th>買進日期 (進場)</th>
+                  <th>出場日期 (出場)</th>
+                  <th style={{ textAlign: 'right' }}>買入價格</th>
+                  <th style={{ textAlign: 'right' }}>出場價格</th>
+                  <th style={{ textAlign: 'center' }}>持有天數</th>
+                  <th style={{ textAlign: 'right', color: '#38BDF8' }}>CB 現股報酬率 (%)</th>
+                  <th style={{ textAlign: 'right', color: '#FBBF24' }}>CBAS 槓桿報酬 (%)</th>
+                  <th>出場原因</th>
+                  <th style={{ textAlign: 'left' }}>全因子篩選標籤</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentCbPageTrades.map(t => {
+                  const isBigWin = t.pnl_pct >= 25;
+                  return (
+                    <tr key={t.id} style={{ background: isBigWin ? 'rgba(56, 189, 248, 0.04)' : 'transparent' }}>
+                      <td style={{ fontWeight: 'bold', color: '#F8FAFC' }}>
+                        {t.stock_name} <span style={{ color: '#94A3B8', fontSize: '0.74rem' }}>({t.ticker})</span>
+                      </td>
+                      <td style={{ color: '#E9D5FF', fontWeight: 'bold' }}>
+                        {t.cb_name} <span style={{ color: '#A855F7', fontSize: '0.74rem', fontFamily: 'monospace' }}>({t.cb_code})</span>
+                      </td>
+                      <td style={{ color: '#CBD5E1', fontSize: '0.76rem' }}>
+                        {t.industry}
+                      </td>
+                      <td style={{ fontFamily: 'monospace', color: '#94A3B8' }}>{t.entry_date}</td>
+                      <td style={{ fontFamily: 'monospace', color: '#94A3B8' }}>{t.exit_date}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                        {t.entry_price.toFixed(2)}
+                      </td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: t.exit_price >= 115 ? '#F472B6' : '#CBD5E1' }}>
+                        {t.exit_price.toFixed(2)}
+                      </td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#94A3B8' }}>
+                        {t.holding_days} 天
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: t.pnl_pct >= 0 ? '#34D399' : '#F87171', fontSize: '0.88rem' }}>
+                        {t.pnl_pct >= 0 ? `+${t.pnl_pct.toFixed(2)}%` : `${t.pnl_pct.toFixed(2)}%`}
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: t.cbas_roi_pct >= 0 ? '#FBBF24' : '#F87171' }}>
+                        {t.cbas_roi_pct >= 0 ? `+${t.cbas_roi_pct.toFixed(1)}%` : `${t.cbas_roi_pct.toFixed(1)}%`}
+                      </td>
+                      <td style={{ fontSize: '0.76rem', color: t.exit_reason.includes('強迫贖回') || t.exit_reason.includes('主升段') ? '#FBCFE8' : '#CBD5E1' }}>
+                        {t.exit_reason}
+                      </td>
+                      <td style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
+                        {t.factor_signals}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 分頁按鈕列 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', flexWrap: 'wrap', gap: '0.8rem', fontSize: '0.8rem', color: '#94A3B8' }}>
+            <div>
+              顯示第 <strong>{(cbTradePage - 1) * CB_TRADES_PAGE_SIZE + 1}</strong> ~ <strong>{Math.min(cbTradePage * CB_TRADES_PAGE_SIZE, filteredCbTrades.length)}</strong> 筆（共 <strong>{filteredCbTrades.length}</strong> 筆）
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+              <button
+                disabled={cbTradePage <= 1}
+                onClick={() => setCbTradePage(p => Math.max(1, p - 1))}
+                style={{
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: cbTradePage <= 1 ? 'rgba(255,255,255,0.05)' : '#1E293B',
+                  color: cbTradePage <= 1 ? '#475569' : '#FFF',
+                  cursor: cbTradePage <= 1 ? 'not-allowed' : 'pointer'
+                }}
+              >
+                ◀ 上一頁
+              </button>
+
+              <span style={{ fontFamily: 'monospace', padding: '0 0.4rem' }}>
+                頁次 {cbTradePage} / {totalCbPages}
+              </span>
+
+              <button
+                disabled={cbTradePage >= totalCbPages}
+                onClick={() => setCbTradePage(p => Math.min(totalCbPages, p + 1))}
+                style={{
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: cbTradePage >= totalCbPages ? 'rgba(255,255,255,0.05)' : '#1E293B',
+                  color: cbTradePage >= totalCbPages ? '#475569' : '#FFF',
+                  cursor: cbTradePage >= totalCbPages ? 'not-allowed' : 'pointer'
+                }}
+              >
+                下一頁 ▶
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
