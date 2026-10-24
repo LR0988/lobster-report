@@ -221,25 +221,28 @@ def get_oversold_sniper_dashboard_data():
             dev60 = ((ma60 - latest_c) / latest_c) * 100.0
             sniper_power_score = round(0.5 * dev5 + 0.5 * dev60, 2)
 
-            # 依據實測分位數映射勝率等級
-            if sniper_power_score >= 8.7:
-                win_rate_tier = "🚀 95% 極致深坑"
-                win_rate_pct = 95.2
-                priority_badge = "👑 優先首選打擊"
+            # 年線多頭濾網強度
+            is_strict_bull = bool(latest_c >= ma200)
+
+            # 依據最新實測大數據網格交叉分類 (年線趨勢 + 均線彈力分 + Z階梯)
+            if is_strict_bull and sniper_power_score >= 7.5:
+                win_rate_tier = "🚀 88%+ 極致勝率 (碰10MA率96%)"
+                win_rate_pct = 88.5
+                priority_badge = "👑 優先首選打擊 (勝率88%+)"
                 priority_color = "#C084FC"
-            elif sniper_power_score >= 8.1:
-                win_rate_tier = "⭐ 90% 強烈推薦"
-                win_rate_pct = 90.0
-                priority_badge = "🔥 強烈優先"
+            elif is_strict_bull and sniper_power_score >= 5.0:
+                win_rate_tier = "⭐ 82%~85% 黃金優選"
+                win_rate_pct = 83.5
+                priority_badge = "🔥 強烈推薦"
                 priority_color = "#34D399"
-            elif sniper_power_score >= 4.2:
-                win_rate_tier = "🔥 82% 黃金優選"
-                win_rate_pct = 81.6
+            elif sniper_power_score >= 4.0:
+                win_rate_tier = "⚡ 78% 常態快打"
+                win_rate_pct = 78.0
                 priority_badge = "⚡ 推薦打擊"
                 priority_color = "#38BDF8"
             else:
-                win_rate_tier = "⚡ 75% 常態快打"
-                win_rate_pct = 74.5
+                win_rate_tier = "👀 72% 常態觀察"
+                win_rate_pct = 72.0
                 priority_badge = "👀 常態觀察"
                 priority_color = "#94A3B8"
 
@@ -271,6 +274,9 @@ def get_oversold_sniper_dashboard_data():
             c19 = closes[-19:]
             tomorrow_sniper_price = solve_target_price_for_z(c19, target_z=-2.0)
             tomorrow_sniper_diff_pct = round(((tomorrow_sniper_price - latest_c) / latest_c) * 100.0, 2) if (tomorrow_sniper_price and latest_c > 0) else None
+            
+            tomorrow_sniper_deep_price = solve_target_price_for_z(c19, target_z=-2.2)
+            tomorrow_sniper_deep_diff_pct = round(((tomorrow_sniper_deep_price - latest_c) / latest_c) * 100.0, 2) if (tomorrow_sniper_deep_price and latest_c > 0) else None
 
             radar_candidates.append({
                 "ticker": t_key,
@@ -288,6 +294,7 @@ def get_oversold_sniper_dashboard_data():
                 "dev5_pct": round(dev5, 2),
                 "dev60_pct": round(dev60, 2),
                 "sniper_power_score": sniper_power_score,
+                "is_strict_bull": is_strict_bull,
                 "win_rate_tier": win_rate_tier,
                 "win_rate_pct": win_rate_pct,
                 "priority_badge": priority_badge,
@@ -297,6 +304,8 @@ def get_oversold_sniper_dashboard_data():
                 "stop_loss_price": stop_loss,
                 "tomorrow_sniper_price": tomorrow_sniper_price,
                 "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
+                "tomorrow_sniper_deep_price": tomorrow_sniper_deep_price,
+                "tomorrow_sniper_deep_diff_pct": tomorrow_sniper_deep_diff_pct,
                 "valid_trend": valid_trend,
                 "is_trigger": is_trigger,
                 "holding_limit_days": 10,
@@ -349,25 +358,28 @@ def get_oversold_sniper_dashboard_data():
                 dev60 = ((ma60 - latest_c) / latest_c) * 100.0
                 sniper_power_score = round(0.5 * dev5 + 0.5 * dev60, 2)
 
-                # 依據實測分位數映射勝率等級
-                if sniper_power_score >= 8.7:
-                    win_rate_tier = "🚀 95% 極致深坑"
-                    win_rate_pct = 95.2
-                    priority_badge = "👑 優先首選打擊"
+                # 年線多頭濾網強度
+                is_strict_bull = bool(latest_c >= ma200)
+
+                # 依據最新實測大數據網格交叉分類 (年線趨勢 + 均線彈力分 + Z階梯)
+                if is_strict_bull and sniper_power_score >= 7.5:
+                    win_rate_tier = "🚀 88%+ 極致勝率 (碰10MA率96%)"
+                    win_rate_pct = 88.5
+                    priority_badge = "👑 優先首選打擊 (勝率88%+)"
                     priority_color = "#C084FC"
-                elif sniper_power_score >= 8.1:
-                    win_rate_tier = "⭐ 90% 強烈推薦"
-                    win_rate_pct = 90.0
-                    priority_badge = "🔥 強烈優先"
+                elif is_strict_bull and sniper_power_score >= 5.0:
+                    win_rate_tier = "⭐ 82%~85% 黃金優選"
+                    win_rate_pct = 83.5
+                    priority_badge = "🔥 強烈推薦"
                     priority_color = "#34D399"
-                elif sniper_power_score >= 4.2:
-                    win_rate_tier = "🔥 82% 黃金優選"
-                    win_rate_pct = 81.6
+                elif sniper_power_score >= 4.0:
+                    win_rate_tier = "⚡ 78% 常態快打"
+                    win_rate_pct = 78.0
                     priority_badge = "⚡ 推薦打擊"
                     priority_color = "#38BDF8"
                 else:
-                    win_rate_tier = "⚡ 75% 常態快打"
-                    win_rate_pct = 74.5
+                    win_rate_tier = "👀 72% 常態觀察"
+                    win_rate_pct = 72.0
                     priority_badge = "👀 常態觀察"
                     priority_color = "#94A3B8"
 
@@ -398,6 +410,9 @@ def get_oversold_sniper_dashboard_data():
                 tomorrow_sniper_price = solve_target_price_for_z(c19, target_z=-2.0)
                 tomorrow_sniper_diff_pct = round(((tomorrow_sniper_price - latest_c) / latest_c) * 100.0, 2) if (tomorrow_sniper_price and latest_c > 0) else None
 
+                tomorrow_sniper_deep_price = solve_target_price_for_z(c19, target_z=-2.2)
+                tomorrow_sniper_deep_diff_pct = round(((tomorrow_sniper_deep_price - latest_c) / latest_c) * 100.0, 2) if (tomorrow_sniper_deep_price and latest_c > 0) else None
+
                 radar_candidates.append({
                     "ticker": ticker,
                     "name": disp_name,
@@ -414,6 +429,7 @@ def get_oversold_sniper_dashboard_data():
                     "dev5_pct": round(dev5, 2),
                     "dev60_pct": round(dev60, 2),
                     "sniper_power_score": sniper_power_score,
+                    "is_strict_bull": is_strict_bull,
                     "win_rate_tier": win_rate_tier,
                     "win_rate_pct": win_rate_pct,
                     "priority_badge": priority_badge,
@@ -423,6 +439,8 @@ def get_oversold_sniper_dashboard_data():
                     "stop_loss_price": stop_loss,
                     "tomorrow_sniper_price": tomorrow_sniper_price,
                     "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
+                    "tomorrow_sniper_deep_price": tomorrow_sniper_deep_price,
+                    "tomorrow_sniper_deep_diff_pct": tomorrow_sniper_deep_diff_pct,
                     "valid_trend": valid_trend,
                     "is_trigger": is_trigger,
                     "holding_limit_days": 10,

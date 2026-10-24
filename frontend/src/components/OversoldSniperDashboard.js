@@ -854,27 +854,51 @@ export default function OversoldSniperDashboard() {
                           </span>
                         </td>
 
-                        {/* ⚡ 明日 Z<-2 狙擊掛單價 */}
+                        {/* ⚡ 明日 Z<-2 狙擊掛單價 (含 Z=-2.2 深坑加碼點) */}
                         <td style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.05)' }}>
                           {isTrig ? (
                             <span style={{ fontSize: '0.74rem', color: '#EF4444', fontWeight: 'bold', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
                               🔥 已在超賣區 (開盤進)
                             </span>
                           ) : item.tomorrow_sniper_price ? (
-                            <div
-                              onClick={() => setRadarRowInputs(prev => ({
-                                ...prev,
-                                [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_price }
-                              }))}
-                              title="點擊直接填入買價掛單"
-                              style={{ cursor: 'pointer', display: 'inline-block' }}
-                            >
-                              <div style={{ color: '#FCD34D', fontWeight: 'bold', fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                                {cSign} {item.tomorrow_sniper_price}
+                            <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '3px' }}>
+                              {/* 首筆 Z=-2.0 掛單 */}
+                              <div
+                                onClick={() => setRadarRowInputs(prev => ({
+                                  ...prev,
+                                  [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_price }
+                                }))}
+                                title="點擊填入首筆 Z=-2.0 買價"
+                                style={{ cursor: 'pointer', background: 'rgba(252, 211, 77, 0.12)', border: '1px solid rgba(252, 211, 77, 0.3)', padding: '1px 6px', borderRadius: '4px' }}
+                              >
+                                <span style={{ fontSize: '0.68rem', color: '#CBD5E1' }}>Z=-2.0: </span>
+                                <strong style={{ color: '#FCD34D', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                                  {cSign} {item.tomorrow_sniper_price}
+                                </strong>
+                                <span style={{ fontSize: '0.68rem', color: '#F87171', marginLeft: '3px', fontFamily: 'monospace' }}>
+                                  ({item.tomorrow_sniper_diff_pct > 0 ? '+' : ''}{item.tomorrow_sniper_diff_pct}%)
+                                </span>
                               </div>
-                              <div style={{ fontSize: '0.7rem', color: '#F87171', fontFamily: 'monospace' }}>
-                                ({item.tomorrow_sniper_diff_pct > 0 ? '+' : ''}{item.tomorrow_sniper_diff_pct}%)
-                              </div>
+
+                              {/* 深坑 Z=-2.2 加碼掛單 */}
+                              {item.tomorrow_sniper_deep_price && (
+                                <div
+                                  onClick={() => setRadarRowInputs(prev => ({
+                                    ...prev,
+                                    [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_deep_price }
+                                  }))}
+                                  title="點擊填入深坑 Z=-2.2 加碼買價"
+                                  style={{ cursor: 'pointer', background: 'rgba(192, 132, 252, 0.12)', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '1px 6px', borderRadius: '4px' }}
+                                >
+                                  <span style={{ fontSize: '0.68rem', color: '#E9D5FF' }}>深坑-2.2: </span>
+                                  <strong style={{ color: '#C084FC', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                                    {cSign} {item.tomorrow_sniper_deep_price}
+                                  </strong>
+                                  <span style={{ fontSize: '0.68rem', color: '#F472B6', marginLeft: '3px', fontFamily: 'monospace' }}>
+                                    ({item.tomorrow_sniper_deep_diff_pct > 0 ? '+' : ''}{item.tomorrow_sniper_deep_diff_pct}%)
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <span style={{ color: '#64748B', fontSize: '0.74rem' }}>-</span>
@@ -888,13 +912,17 @@ export default function OversoldSniperDashboard() {
                           {item.exp_rebound_pct >= 0 ? '+' : ''}{item.exp_rebound_pct}%
                         </td>
                         <td style={{ textAlign: 'center' }}>
-                          {item.valid_trend ? (
-                            <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
-                              ✅ ≥0.85×200MA
+                          {item.is_strict_bull ? (
+                            <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(16, 185, 129, 0.22)', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                              👑 站穩年線上
+                            </span>
+                          ) : item.valid_trend ? (
+                            <span style={{ fontSize: '0.72rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
+                              🛡️ ≥0.85×年線
                             </span>
                           ) : (
                             <span style={{ fontSize: '0.72rem', color: '#EF4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 6px', borderRadius: '4px' }}>
-                              ⚠️ 破線
+                              ⚠️ 破線嚴禁
                             </span>
                           )}
                         </td>
