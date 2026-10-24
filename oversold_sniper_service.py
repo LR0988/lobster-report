@@ -303,10 +303,35 @@ def get_oversold_sniper_dashboard_data():
             stop_loss = round(float(latest_c * 0.94), 2) # -6% 硬停損
             target_stage1 = round(float(ma10), 2) # 第1階段 50% 目標 (10MA)
             target_stage2 = round(float(max(ma20, latest_c * 1.08)), 2) # 第2階段 50% 目標 (20MA 或 +8%)
-            is_trigger = bool(z <= -2.0 and valid_trend)
 
-            if is_trigger:
+            # 🎯 嚴格買進判定：必須同時滿足 Z<=-2.0 + 年線多頭 + 下影線>=45% + 籌碼鐵板
+            has_tail_support = bool(tail_ratio >= 45.0)
+            has_support = bool(vpvr_gap <= 2.0)
+            is_strict_buy = bool(z <= -2.0 and valid_trend and has_tail_support and has_support)
+            is_waiting_tail = bool(z <= -2.0 and valid_trend and not is_strict_buy)
+            is_trigger = is_strict_buy
+
+            if is_strict_buy:
                 trigger_count += 1
+                action_badge = "🎯 完美買進訊號 (下影線+籌碼通過)"
+                action_color = "#10B981"
+                sop_hint = "全部濾網通過！開盤市價進場，碰 10MA 出 50%，碰 20MA/+8% 全出；-6% 停損；上限 12 天"
+            elif is_waiting_tail:
+                action_badge = "⏳ 缺下影線確認 (急殺打底中·暫不接刀)"
+                action_color = "#F59E0B"
+                sop_hint = f"已達超賣區(Z={round(z,2)})但下影線僅 {tail_ratio}% (<45%)，實體黑K沉重，嚴禁盲目接刀！等待買盤收下影線打底"
+            elif not valid_trend and z <= -1.7:
+                action_badge = "🚫 破線排除 (跌破年線·嚴禁抄底)"
+                action_color = "#EF4444"
+                sop_hint = "跌破 200MA 年線，多頭結構破壞，嚴禁抄底空頭垃圾股"
+            elif z <= -1.7 and valid_trend:
+                action_badge = "⚡ 接近超賣預警 (明日掛單點位)"
+                action_color = "#38BDF8"
+                sop_hint = "接近超賣區，若明日盤中跌破狙擊價且收出下影線，即觸發進場"
+            else:
+                action_badge = "強勢多頭整理"
+                action_color = "#64748B"
+                sop_hint = "常態多頭震盪"
 
             disp_name = KNOWN_NAMES.get(sid, f"{sname} ({sid})")
             t_key = f"{sid}.TW"
@@ -368,9 +393,13 @@ def get_oversold_sniper_dashboard_data():
                 "tomorrow_sniper_deep_diff_pct": tomorrow_sniper_deep_diff_pct,
                 "valid_trend": valid_trend,
                 "is_trigger": is_trigger,
+                "is_strict_buy": is_strict_buy,
+                "is_waiting_tail": is_waiting_tail,
+                "can_buy": is_strict_buy,
+                "action_color": action_color,
                 "holding_limit_days": 12,
-                "action_badge": "🔥 極端超賣撈底" if is_trigger else ("🚫 破線排除 (跌破200MA)" if not valid_trend and z <= -1.7 else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理")),
-                "sop_hint": "兩段式出場：碰 10MA 出 50%，碰 20MA/+8% 全出；-6% 停損；上限 12 天市價清倉"
+                "action_badge": action_badge,
+                "sop_hint": sop_hint
             })
 
         # -------------------------------------------------------------
@@ -451,10 +480,35 @@ def get_oversold_sniper_dashboard_data():
                 stop_loss = round(float(latest_c * 0.94), 2) # -6% 硬停損
                 target_stage1 = round(float(ma10), 2) # 第1階段 50% 目標 (10MA)
                 target_stage2 = round(float(max(ma20, latest_c * 1.08)), 2) # 第2階段 50% 目標 (20MA 或 +8%)
-                is_trigger = bool(z <= -2.0 and valid_trend)
 
-                if is_trigger:
+                # 🎯 嚴格買進判定：必須同時滿足 Z<=-2.0 + 年線多頭 + 下影線>=45% + 籌碼鐵板
+                has_tail_support = bool(tail_ratio >= 45.0)
+                has_support = bool(vpvr_gap <= 2.0)
+                is_strict_buy = bool(z <= -2.0 and valid_trend and has_tail_support and has_support)
+                is_waiting_tail = bool(z <= -2.0 and valid_trend and not is_strict_buy)
+                is_trigger = is_strict_buy
+
+                if is_strict_buy:
                     trigger_count += 1
+                    action_badge = "🎯 完美買進訊號 (下影線+籌碼通過)"
+                    action_color = "#10B981"
+                    sop_hint = "全部濾網通過！開盤市價進場，碰 10MA 出 50%，碰 20MA/+8% 全出；-6% 停損；上限 12 天"
+                elif is_waiting_tail:
+                    action_badge = "⏳ 缺下影線確認 (急殺打底中·暫不接刀)"
+                    action_color = "#F59E0B"
+                    sop_hint = f"已達超賣區(Z={round(z,2)})但下影線僅 {tail_ratio}% (<45%)，實體黑K沉重，嚴禁盲目接刀！等待買盤收下影線打底"
+                elif not valid_trend and z <= -1.7:
+                    action_badge = "🚫 破線排除 (跌破年線·嚴禁抄底)"
+                    action_color = "#EF4444"
+                    sop_hint = "跌破 200MA 年線，多頭結構破壞，嚴禁抄底空頭垃圾股"
+                elif z <= -1.7 and valid_trend:
+                    action_badge = "⚡ 接近超賣預警 (明日掛單點位)"
+                    action_color = "#38BDF8"
+                    sop_hint = "接近超賣區，若明日盤中跌破狙擊價且收出下影線，即觸發進場"
+                else:
+                    action_badge = "強勢多頭整理"
+                    action_color = "#64748B"
+                    sop_hint = "常態多頭震盪"
 
                 meta = meta_map.get(ticker, {})
                 disp_name = KNOWN_NAMES.get(ticker, meta.get("name", ticker))
@@ -514,9 +568,13 @@ def get_oversold_sniper_dashboard_data():
                     "tomorrow_sniper_deep_diff_pct": tomorrow_sniper_deep_diff_pct,
                     "valid_trend": valid_trend,
                     "is_trigger": is_trigger,
+                    "is_strict_buy": is_strict_buy,
+                    "is_waiting_tail": is_waiting_tail,
+                    "can_buy": is_strict_buy,
+                    "action_color": action_color,
                     "holding_limit_days": 12,
-                    "action_badge": "🔥 極端超賣撈底" if is_trigger else ("🚫 破線排除 (跌破200MA)" if not valid_trend and z <= -1.7 else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理")),
-                    "sop_hint": "兩段式出場：碰 10MA 出 50%，碰 20MA/+8% 全出；-6% 停損；上限 12 天市價清倉"
+                    "action_badge": action_badge,
+                    "sop_hint": sop_hint
                 })
 
         # -------------------------------------------------------------
@@ -705,8 +763,16 @@ def get_oversold_sniper_dashboard_data():
     finally:
         conn.close()
 
-    # 排序雷達候選：觸發標的排最前，並嚴格依照「均線彈力評分 (預估勝率最高)」由大到小排序
-    radar_candidates.sort(key=lambda x: (not x.get("is_trigger", False), -x.get("sniper_power_score", 0), x.get("z_score", 0)))
+    # 排序雷達候選：嚴格符合買進標的排最前，其次為等待下影線者，其次依彈力分由大到小排序
+    radar_candidates.sort(key=lambda x: (
+        not x.get("is_strict_buy", False),
+        not x.get("is_waiting_tail", False),
+        -x.get("sniper_power_score", 0),
+        x.get("z_score", 0)
+    ))
+
+    strict_buys = [c for c in radar_candidates if c.get("is_strict_buy", False)]
+    waiting_tails = [c for c in radar_candidates if c.get("is_waiting_tail", False)]
 
     dashboard_data = {
         "status": "ok",
@@ -740,12 +806,17 @@ def get_oversold_sniper_dashboard_data():
         # 雷達清單
         "radar": {
             "total_scanned": total_scanned,
-            "trigger_count": trigger_count,
-            "triggers": [c for c in radar_candidates if c["is_trigger"]],
+            "trigger_count": len(strict_buys),
+            "strict_buy_count": len(strict_buys),
+            "waiting_tail_count": len(waiting_tails),
+            "strict_buy_triggers": strict_buys,
+            "waiting_tail_triggers": waiting_tails,
+            "triggers": strict_buys,
+            "all_oversold": [c for c in radar_candidates if c["z_score"] <= -2.0 and c["valid_trend"]],
             "watch_list": [c for c in radar_candidates if c["valid_trend"] and -2.0 < c["z_score"] <= -1.7][:25],
             "broken_trend_list": [c for c in radar_candidates if not c["valid_trend"] and c["z_score"] <= -1.7][:25],
-            "taiwan_triggers": [c for c in radar_candidates if c["is_trigger"] and c["country"] == "台灣"],
-            "global_triggers": [c for c in radar_candidates if c["is_trigger"] and c["country"] != "台灣"],
+            "taiwan_triggers": [c for c in strict_buys if c["country"] == "台灣"],
+            "global_triggers": [c for c in strict_buys if c["country"] != "台灣"],
             "all_ranked": radar_candidates[:60]
         }
     }

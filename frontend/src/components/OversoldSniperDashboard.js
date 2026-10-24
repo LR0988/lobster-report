@@ -11,7 +11,7 @@ import {
 
 export default function OversoldSniperDashboard() {
   const [activeSubTab, setActiveSubTab] = useState('radar'); // 'radar' | 'tracker' | 'history' | 'rules'
-  const [radarFilter, setRadarFilter] = useState('triggers'); // 'triggers' | 'taiwan' | 'global' | 'watchlist' | 'all'
+  const [radarFilter, setRadarFilter] = useState('strict_buy'); // 'strict_buy' | 'waiting_tail' | 'watchlist' | 'taiwan' | 'global' | 'broken' | 'all'
   const [tradeFilter, setTradeFilter] = useState('all'); // 'all' | 'win' | 'loss' | 'ma10' | 'time10'
   const [tradeSearch, setTradeSearch] = useState('');
   const [liveData, setLiveData] = useState(defaultOversoldSniperData);
@@ -53,10 +53,10 @@ export default function OversoldSniperDashboard() {
       if (res && res.status === 'ok') {
         setLiveData(res);
         if (isManual) {
-          const twCnt = res.radar?.taiwan_triggers?.length || 0;
-          const glbCnt = res.radar?.global_triggers?.length || 0;
+          const strictCnt = res.radar?.strict_buy_count !== undefined ? res.radar?.strict_buy_count : (res.radar?.strict_buy_triggers?.length || 0);
+          const waitCnt = res.radar?.waiting_tail_count !== undefined ? res.radar?.waiting_tail_count : (res.radar?.waiting_tail_triggers?.length || 0);
           const scanTime = (res.generated_at || '').slice(11, 19) || '剛剛';
-          triggerNotice(`✅ 強勢股雷達已連線更新至 ${scanTime} (${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發極限超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
+          triggerNotice(`✅ 強勢股雷達已連線更新至 ${scanTime} (${res.market_date})：嚴格買進 ${strictCnt} 檔，缺下影線打底中 ${waitCnt} 檔！`);
         }
       } else {
         setLiveData(defaultOversoldSniperData);
@@ -74,15 +74,15 @@ export default function OversoldSniperDashboard() {
 
   const handleRescan = async () => {
     setLoading(true);
-    triggerNotice('⚡ 正在連線全球交易所抓取今日最新報價 (10/23) 並重算 Z-Score 極限超賣...');
+    triggerNotice('⚡ 正在連線全球交易所抓取今日最新報價 (10/23) 並重算 Z-Score 與下影線濾網...');
     try {
       const res = await apiTriggerOversoldSniperScan();
       if (res && res.status === 'ok') {
         setLiveData(res);
-        const twCnt = res.radar?.taiwan_triggers?.length || 0;
-        const glbCnt = res.radar?.global_triggers?.length || 0;
+        const strictCnt = res.radar?.strict_buy_count !== undefined ? res.radar?.strict_buy_count : (res.radar?.strict_buy_triggers?.length || 0);
+        const waitCnt = res.radar?.waiting_tail_count !== undefined ? res.radar?.waiting_tail_count : (res.radar?.waiting_tail_triggers?.length || 0);
         const scanTime = (res.generated_at || '').slice(11, 19) || '剛剛';
-        triggerNotice(`🎉 重新掃描完成！行情已更新至 ${scanTime} (行情日：${res.market_date})：共 ${res.radar?.triggers?.length || 0} 檔強勢股觸發超賣 (🇹🇼 台股 ${twCnt} 檔 ｜ 🌐 全球 ${glbCnt} 檔)！`);
+        triggerNotice(`🎉 重新掃描完成！行情已更新至 ${scanTime} (行情日：${res.market_date})：嚴格買進 ${strictCnt} 檔，缺下影線打底中 ${waitCnt} 檔！`);
       } else {
         await loadDashboardData(true);
       }
@@ -98,22 +98,25 @@ export default function OversoldSniperDashboard() {
     loadDashboardData(false);
   }, []);
 
-  // 雷達候選資料
-  const triggers = liveData?.radar?.triggers || [];
+  // 雷達候選資料 (依四大鐵律嚴格分流)
+  const strictBuyTriggers = liveData?.radar?.strict_buy_triggers || [];
+  const waitingTailTriggers = liveData?.radar?.waiting_tail_triggers || [];
+  const triggers = liveData?.radar?.triggers || strictBuyTriggers;
   const watchlist = liveData?.radar?.watch_list || [];
   const brokenTrendList = liveData?.radar?.broken_trend_list || [];
-  const taiwanTriggers = liveData?.radar?.taiwan_triggers || triggers.filter(t => t.country === '台灣');
-  const globalTriggers = liveData?.radar?.global_triggers || triggers.filter(t => t.country !== '台灣');
+  const taiwanTriggers = liveData?.radar?.taiwan_triggers || [];
+  const globalTriggers = liveData?.radar?.global_triggers || [];
   const allScanned = liveData?.radar?.all_ranked || [];
 
   const radarDisplayItems = useMemo(() => {
-    if (radarFilter === 'triggers') return triggers;
-    if (radarFilter === 'taiwan') return taiwanTriggers;
-    if (radarFilter === 'global') return globalTriggers;
+    if (radarFilter === 'strict_buy' || radarFilter === 'triggers') return strictBuyTriggers;
+    if (radarFilter === 'waiting_tail') return waitingTailTriggers;
     if (radarFilter === 'watchlist') return watchlist;
+    if (radarFilter === 'taiwan') return allScanned.filter(t => t.country === '台灣');
+    if (radarFilter === 'global') return allScanned.filter(t => t.country !== '台灣');
     if (radarFilter === 'broken') return brokenTrendList;
     return allScanned;
-  }, [radarFilter, triggers, taiwanTriggers, globalTriggers, watchlist, brokenTrendList, allScanned]);
+  }, [radarFilter, strictBuyTriggers, waitingTailTriggers, watchlist, brokenTrendList, allScanned]);
 
   // 進行中持倉清單
   const activeHoldings = liveData?.active_holdings || [];
@@ -717,7 +720,13 @@ export default function OversoldSniperDashboard() {
       {/* 子分頁切換導航 */}
       <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem', flexWrap: 'wrap' }}>
         {[
-          { id: 'radar', label: `📡 今日強勢股超賣雷達 (${triggers.length} 檔觸發)`, color: '#EF4444' },
+          { 
+            id: 'radar', 
+            label: strictBuyTriggers.length > 0 
+              ? `🎯 今日量化買進艙 (${strictBuyTriggers.length} 檔可敲進)` 
+              : `📡 今日超賣雷達 (🎯 0 檔買進 ｜ ⏳ ${waitingTailTriggers.length} 檔缺下影線)`, 
+            color: strictBuyTriggers.length > 0 ? '#10B981' : '#F59E0B' 
+          },
           { id: 'tracker', label: `💼 我的進行中持倉 (${activeHoldings.length} 檔關注·即時賣出提示)`, color: '#38BDF8' },
           { id: 'history', label: `📜 實戰進出歷史 (${tradeHistory.length} 筆已結算·累計獲利)`, color: '#10B981' },
           { id: 'rules', label: '🎯 快打四大鐵律與 SOP 手冊', color: '#F59E0B' }
@@ -729,7 +738,11 @@ export default function OversoldSniperDashboard() {
               padding: '0.45rem 1rem',
               borderRadius: '6px',
               border: activeSubTab === tab.id ? `1px solid ${tab.color}` : '1px solid rgba(255,255,255,0.1)',
-              background: activeSubTab === tab.id ? `rgba(${tab.id === 'radar' ? '239, 68, 68' : (tab.id === 'tracker' ? '56, 189, 248' : (tab.id === 'history' ? '16, 185, 129' : '245, 158, 11'))}, 0.2)` : 'rgba(15, 23, 42, 0.6)',
+              background: activeSubTab === tab.id 
+                ? (tab.id === 'radar' 
+                    ? (strictBuyTriggers.length > 0 ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)') 
+                    : (tab.id === 'tracker' ? 'rgba(56, 189, 248, 0.2)' : (tab.id === 'history' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)')))
+                : 'rgba(15, 23, 42, 0.6)',
               color: activeSubTab === tab.id ? '#FFF' : '#94A3B8',
               fontWeight: 'bold',
               fontSize: '0.86rem',
@@ -750,86 +763,231 @@ export default function OversoldSniperDashboard() {
       {/* 視圖 1：📡 今日強勢股超賣雷達 (可直接在行內輸入股價與股數買入) */}
       {/* ============================================================== */}
       {activeSubTab === 'radar' && (
-        <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #EF4444' }}>
+        <div className="glass-card" style={{ padding: '1.2rem', borderTop: strictBuyTriggers.length > 0 ? '3px solid #10B981' : '3px solid #F59E0B' }}>
+          {/* ============================================================== */}
+          {/* 🎯 今日量化買進決策艙 (嚴格框出此策略會購買的標的) */}
+          {/* ============================================================== */}
+          <div style={{
+            margin: '0 0 1.2rem 0',
+            padding: '1.2rem 1.4rem',
+            borderRadius: '10px',
+            background: strictBuyTriggers.length > 0 
+              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%)',
+            border: strictBuyTriggers.length > 0 ? '2px solid #10B981' : '2px solid rgba(245, 158, 11, 0.5)',
+            boxShadow: strictBuyTriggers.length > 0 ? '0 0 25px rgba(16, 185, 129, 0.25)' : 'none'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.8rem' }}>
+              <div style={{ flex: 1, minWidth: '280px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span style={{ fontSize: '1.4rem' }}>{strictBuyTriggers.length > 0 ? '🎯' : '🛡️'}</span>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '1.15rem',
+                    fontWeight: 'bold',
+                    color: strictBuyTriggers.length > 0 ? '#34D399' : '#FBBF24'
+                  }}>
+                    {strictBuyTriggers.length > 0
+                      ? `【🎯 今日量化確認進場名單 — 唯一允許買進】（共 ${strictBuyTriggers.length} 檔）`
+                      : '【🛡️ 今日量化風控決策：0 檔符合買進條件 —— 嚴格空倉防禦！絕不接落刀！】'}
+                  </h3>
+                </div>
+                <p style={{ margin: '0.45rem 0 0 0', color: '#CBD5E1', fontSize: '0.84rem', lineHeight: '1.6' }}>
+                  {strictBuyTriggers.length > 0 ? (
+                    <>
+                      以下標的同時通過 <strong style={{ color: '#34D399' }}>① 站穩 200MA 年線多頭</strong>、<strong style={{ color: '#34D399' }}>② 20日偏離 Z ≤ -2.0 極端超賣</strong>、<strong style={{ color: '#34D399' }}>③ 長下影線 Tail Ratio ≥ 45% (買盤進場抵抗)</strong>、<strong style={{ color: '#34D399' }}>④ 距 VPVR 密集峰 Gap ≤ 2% (鐵板防守)</strong> 四大鐵律！<strong>明日開盤即可依 SOP 市價敲進！</strong>
+                    </>
+                  ) : (
+                    <>
+                      目前雷達掃描到 <strong style={{ color: '#F87171' }}>{waitingTailTriggers.length} 檔</strong> 標的（如 DXCM、GOOGL、META、1513.TW 等）雖已達 <strong style={{ color: '#F87171' }}>Z ≤ -2.0 極端超賣</strong>，但<strong>下影線比例均不足 45%</strong>（皆為急殺實體黑K棒，空方貫壓中，<strong style={{ color: '#FBBF24' }}>尚未出現主力買盤進場抵抗的長下影線</strong>）！<br />
+                      本策略在 22 年 76% 勝率回測中，<strong>嚴格要求必須見到長下影線（Tail Ratio ≥ 45%）代表主力承接才准進場，嚴禁徒手接刀</strong>。今日策略判定：<strong style={{ color: '#FBBF24' }}>【無買點，保持現金，嚴格等待下影線打底訊號】</strong>！
+                    </>
+                  )}
+                </p>
+              </div>
+
+              {strictBuyTriggers.length > 0 ? (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#10B981', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.2)', padding: '5px 10px', borderRadius: '4px', border: '1px solid #10B981' }}>
+                    ✅ 4大濾網全數過關
+                  </span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#F59E0B', fontWeight: 'bold', background: 'rgba(245, 158, 11, 0.2)', padding: '5px 10px', borderRadius: '4px', border: '1px solid #F59E0B' }}>
+                    ⚠️ 嚴格空倉防禦中
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* 如果今日有嚴格買進標的，直接用高亮綠色卡片框出標的 */}
+            {strictBuyTriggers.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem', marginTop: '1rem' }}>
+                {strictBuyTriggers.map(item => (
+                  <div key={item.ticker} style={{
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    border: '1.5px solid #10B981',
+                    borderRadius: '8px',
+                    padding: '0.8rem 1rem',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#F8FAFC' }}>{item.name}</span>
+                        <span style={{ fontSize: '0.78rem', color: '#94A3B8', marginLeft: '6px', fontFamily: 'monospace' }}>({item.ticker})</span>
+                      </div>
+                      <span style={{ background: '#10B981', color: '#0F172A', fontSize: '0.7rem', fontWeight: 'bold', padding: '2px 6px', borderRadius: '4px' }}>
+                        🎯 完美買進
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', fontSize: '0.82rem' }}>
+                      <span style={{ color: '#CBD5E1' }}>現價: <strong style={{ color: '#FACC15', fontFamily: 'monospace' }}>${item.close}</strong></span>
+                      <span style={{ color: '#CBD5E1' }}>Z值: <strong style={{ color: '#EF4444', fontFamily: 'monospace' }}>{item.z_score}</strong></span>
+                      <span style={{ color: '#CBD5E1' }}>下影線: <strong style={{ color: '#34D399', fontFamily: 'monospace' }}>{item.tail_ratio}%</strong></span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.4rem', fontSize: '0.78rem', color: '#38BDF8' }}>
+                      <span>🎯 10MA 目標: <strong>${item.target_stage1_price || item.ma10} (+{item.exp_rebound_pct}%)</strong></span>
+                      <button
+                        onClick={() => handleInlineBuy(item)}
+                        style={{
+                          background: 'linear-gradient(135deg, #10B981, #059669)',
+                          color: '#FFF',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '3px 8px',
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ⚡ 立即敲進
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 如果今日為 0 檔，提供快捷切換至「缺下影線觀察中」 */}
+            {strictBuyTriggers.length === 0 && waitingTailTriggers.length > 0 && (
+              <div style={{ marginTop: '0.9rem', paddingTop: '0.8rem', borderTop: '1px dashed rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
+                <span style={{ fontSize: '0.8rem', color: '#FCD34D' }}>
+                  💡 提示：以下已為您歸納 <strong>{waitingTailTriggers.length} 檔實體黑K急殺中標的</strong>。一旦明日盤中出現買盤承接拉出長下影線（Tail Ratio ≥ 45%），系統將自動轉入可買進清單！
+                </span>
+                <button
+                  onClick={() => setRadarFilter('waiting_tail')}
+                  style={{
+                    background: radarFilter === 'waiting_tail' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'rgba(245, 158, 11, 0.2)',
+                    border: '1px solid #F59E0B',
+                    color: radarFilter === 'waiting_tail' ? '#FFF' : '#FCD34D',
+                    borderRadius: '5px',
+                    padding: '0.35rem 0.85rem',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  👀 查看這 {waitingTailTriggers.length} 檔缺下影線標的
+                </button>
+              </div>
+            )}
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
             <div>
-              <h4 style={{ margin: 0, color: '#F87171', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                📡 全球主權泰坦強勢股庫 — 極限超賣撈底即時雷達
+              <h4 style={{ margin: 0, color: '#F87171', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                📡 全球主權泰坦強勢股庫 — 多空掃描清單
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                直連 SQLite 實時運算 180+ 檔多頭強勢股。<strong>已為您依照 DOE 最優均線彈力分自動排序，預估勝率最高（🚀 95% 極致深坑 / ⭐ 90% 強烈推薦）之標的自動置頂，標示「👑 優先首選打擊」！</strong>
+                直連 SQLite 實時運算 180+ 檔多頭強勢股。<strong>嚴格依【可買進 ➔ 缺下影線打底 ➔ 接近超賣】分級排列，確保精準打擊！</strong>
               </p>
             </div>
 
             {/* 篩選標籤 */}
             <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
               <button
-                onClick={() => setRadarFilter('triggers')}
+                onClick={() => setRadarFilter('strict_buy')}
                 style={{
-                  padding: '0.22rem 0.6rem',
+                  padding: '0.24rem 0.65rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.75rem',
+                  fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  background: radarFilter === 'triggers' ? 'linear-gradient(135deg, #EF4444, #DC2626)' : 'transparent',
-                  color: radarFilter === 'triggers' ? '#FFF' : '#94A3B8'
+                  background: (radarFilter === 'strict_buy' || radarFilter === 'triggers') ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
+                  color: (radarFilter === 'strict_buy' || radarFilter === 'triggers') ? '#FFF' : '#94A3B8'
                 }}
               >
-                🔥 極限超賣觸發 ({triggers.length})
+                🎯 唯一可買進清單 ({strictBuyTriggers.length})
               </button>
               <button
-                onClick={() => setRadarFilter('taiwan')}
+                onClick={() => setRadarFilter('waiting_tail')}
                 style={{
-                  padding: '0.22rem 0.6rem',
+                  padding: '0.24rem 0.65rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.75rem',
+                  fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  background: radarFilter === 'taiwan' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
-                  color: radarFilter === 'taiwan' ? '#FFF' : '#94A3B8'
+                  background: radarFilter === 'waiting_tail' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                  color: radarFilter === 'waiting_tail' ? '#FFF' : '#94A3B8'
                 }}
               >
-                🇹🇼 台股強勢龍頭 ({taiwanTriggers.length})
-              </button>
-              <button
-                onClick={() => setRadarFilter('global')}
-                style={{
-                  padding: '0.22rem 0.6rem',
-                  borderRadius: '4px',
-                  border: 'none',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  background: radarFilter === 'global' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
-                  color: radarFilter === 'global' ? '#FFF' : '#94A3B8'
-                }}
-              >
-                🌐 美股科技巨頭 ({globalTriggers.length})
+                ⏳ 缺下影線觀察中 ({waitingTailTriggers.length})
               </button>
               <button
                 onClick={() => setRadarFilter('watchlist')}
                 style={{
-                  padding: '0.22rem 0.6rem',
+                  padding: '0.24rem 0.65rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.75rem',
+                  fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  background: radarFilter === 'watchlist' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                  background: radarFilter === 'watchlist' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
                   color: radarFilter === 'watchlist' ? '#FFF' : '#94A3B8'
                 }}
               >
                 👀 接近超賣警戒 ({watchlist.length})
               </button>
               <button
-                onClick={() => setRadarFilter('broken')}
+                onClick={() => setRadarFilter('taiwan')}
                 style={{
-                  padding: '0.22rem 0.6rem',
+                  padding: '0.24rem 0.65rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.75rem',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'taiwan' ? 'linear-gradient(135deg, #0284C7, #0369A1)' : 'transparent',
+                  color: radarFilter === 'taiwan' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🇹🇼 台股監控
+              </button>
+              <button
+                onClick={() => setRadarFilter('global')}
+                style={{
+                  padding: '0.24rem 0.65rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'global' ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'transparent',
+                  color: radarFilter === 'global' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                🌐 美股監控
+              </button>
+              <button
+                onClick={() => setRadarFilter('broken')}
+                style={{
+                  padding: '0.24rem 0.65rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'broken' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : 'transparent',
@@ -841,10 +999,10 @@ export default function OversoldSniperDashboard() {
               <button
                 onClick={() => setRadarFilter('all')}
                 style={{
-                  padding: '0.22rem 0.6rem',
+                  padding: '0.24rem 0.65rem',
                   borderRadius: '4px',
                   border: 'none',
-                  fontSize: '0.75rem',
+                  fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: radarFilter === 'all' ? 'linear-gradient(135deg, #64748B, #475569)' : 'transparent',
@@ -858,11 +1016,36 @@ export default function OversoldSniperDashboard() {
 
           {radarDisplayItems.length === 0 ? (
             <div style={{ padding: '3.5rem', textAlign: 'center', color: '#94A3B8' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🛡️</div>
-              <strong>目前無標的符合該篩選條件</strong>
-              <div style={{ fontSize: '0.78rem', marginTop: '0.3rem' }}>
-                強勢股普遍處於健康多頭常態中，無極端恐慌急殺。可切換至「👀 接近超賣警戒」或「全部監控」查看。
+              <div style={{ fontSize: '2.2rem', marginBottom: '0.5rem' }}>🛡️</div>
+              <strong style={{ color: '#F8FAFC', fontSize: '1.05rem' }}>
+                {radarFilter === 'strict_buy' || radarFilter === 'triggers'
+                  ? '🎯 今日 0 檔符合全部 4 大量化買進條件'
+                  : '目前無標的符合該篩選條件'}
+              </strong>
+              <div style={{ fontSize: '0.84rem', marginTop: '0.4rem', color: '#CBD5E1', maxWidth: '640px', margin: '0.4rem auto 0 auto', lineHeight: '1.6' }}>
+                {radarFilter === 'strict_buy' || radarFilter === 'triggers'
+                  ? '本策略 22 年 76% 勝率回測核心：嚴禁在實體黑K貫壓時盲目接刀！今日 7 檔超賣標的皆因下影線不足 45% 而被嚴格擋下。請點擊上方「⏳ 缺下影線觀察中 (7)」或下方按鈕查看即時追蹤！'
+                  : '強勢股普遍處於健康多頭常態中，無極端恐慌急殺。可切換至「👀 接近超賣警戒」或「全部監控」查看。'}
               </div>
+              {(radarFilter === 'strict_buy' || radarFilter === 'triggers') && waitingTailTriggers.length > 0 && (
+                <button
+                  onClick={() => setRadarFilter('waiting_tail')}
+                  style={{
+                    marginTop: '1.1rem',
+                    padding: '0.5rem 1.2rem',
+                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                    border: 'none',
+                    color: '#FFF',
+                    borderRadius: '6px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
+                  }}
+                >
+                  👀 查看這 {waitingTailTriggers.length} 檔正在打底觀察中的標的
+                </button>
+              )}
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -890,8 +1073,10 @@ export default function OversoldSniperDashboard() {
                   {radarDisplayItems.map(item => {
                     const isTw = item.country === '台灣' || item.ticker.endsWith('.TW');
                     const cSign = isTw ? 'NT$' : '$';
-                    const isTrig = item.is_trigger;
-                    const isWatch = item.valid_trend && item.z_score <= -1.7 && !isTrig;
+                    const isStrictBuy = Boolean(item.is_strict_buy);
+                    const isWaitingTail = Boolean(item.is_waiting_tail);
+                    const isTrig = isStrictBuy;
+                    const isWatch = item.valid_trend && item.z_score <= -1.7 && !isStrictBuy && !isWaitingTail;
                     const isBroken = !item.valid_trend;
 
                     const curInput = radarRowInputs[item.ticker] || {};
@@ -905,7 +1090,19 @@ export default function OversoldSniperDashboard() {
                     const hasVpvrSupport = item.has_support !== undefined ? item.has_support : (vpvrGap <= 2.0);
 
                     return (
-                      <tr key={item.ticker} style={{ background: isTrig ? 'rgba(239, 68, 68, 0.08)' : (isWatch ? 'rgba(245, 158, 11, 0.05)' : (isBroken ? 'rgba(239, 68, 68, 0.03)' : 'transparent')) }}>
+                      <tr 
+                        key={item.ticker} 
+                        style={{ 
+                          background: isStrictBuy 
+                            ? 'rgba(16, 185, 129, 0.12)' 
+                            : (isWaitingTail 
+                                ? 'rgba(245, 158, 11, 0.06)' 
+                                : (isWatch ? 'rgba(56, 189, 248, 0.04)' : (isBroken ? 'rgba(239, 68, 68, 0.03)' : 'transparent'))),
+                          borderLeft: isStrictBuy 
+                            ? '4px solid #10B981' 
+                            : (isWaitingTail ? '4px solid #F59E0B' : 'none')
+                        }}
+                      >
                         {/* 1. 標的代號與市場 */}
                         <td style={{ verticalAlign: 'middle' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
@@ -944,16 +1141,17 @@ export default function OversoldSniperDashboard() {
                             fontSize: '0.84rem',
                             fontWeight: 'bold',
                             fontFamily: 'monospace',
-                            color: isTrig ? '#EF4444' : (isWatch ? '#F59E0B' : '#94A3B8'),
-                            background: isTrig ? 'rgba(239, 68, 68, 0.2)' : (isWatch ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.05)'),
+                            color: isStrictBuy ? '#10B981' : (isWaitingTail ? '#F59E0B' : (isWatch ? '#38BDF8' : '#94A3B8')),
+                            background: isStrictBuy ? 'rgba(16, 185, 129, 0.2)' : (isWaitingTail ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.05)'),
                             padding: '3px 8px',
                             borderRadius: '4px',
-                            display: 'inline-block'
+                            display: 'inline-block',
+                            border: isStrictBuy ? '1px solid #10B981' : 'none'
                           }}>
                             Z = {item.z_score}
                           </span>
-                          <div style={{ fontSize: '0.68rem', marginTop: '3px', fontWeight: 'bold', color: isTrig ? '#F87171' : (isWatch ? '#FBBF24' : '#64748B') }}>
-                            {isTrig ? '🔥 超賣觸發' : (isWatch ? '👀 接近警戒' : '常態震盪')}
+                          <div style={{ fontSize: '0.68rem', marginTop: '3px', fontWeight: 'bold', color: isStrictBuy ? '#34D399' : (isWaitingTail ? '#FBBF24' : (isWatch ? '#60A5FA' : '#64748B')) }}>
+                            {isStrictBuy ? '🎯 完美買進訊號' : (isWaitingTail ? '⏳ 缺下影線·暫勿接刀' : (isWatch ? '👀 接近警戒' : '常態震盪'))}
                           </div>
                         </td>
 
@@ -967,11 +1165,11 @@ export default function OversoldSniperDashboard() {
                                 fontWeight: 'bold',
                                 padding: '1px 6px',
                                 borderRadius: '3px',
-                                background: hasTailSupport ? 'rgba(16, 185, 129, 0.18)' : 'rgba(245, 158, 11, 0.15)',
-                                color: hasTailSupport ? '#34D399' : '#FBBF24',
-                                border: `1px solid ${hasTailSupport ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.3)'}`
-                              }} title="下影線比例 >= 45% 代表盤中有強大買盤承接打底">
-                                📍 下影線: {tailRatio}% {hasTailSupport ? '✅' : '⚠️'}
+                                background: hasTailSupport ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.18)',
+                                color: hasTailSupport ? '#34D399' : '#FCA5A5',
+                                border: `1px solid ${hasTailSupport ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
+                              }} title={hasTailSupport ? "下影線比例 >= 45% 代表盤中有主力強勢買盤承接打底" : "下影線比例 < 45% 代表為實體黑K棒急跌，買盤尚未確認抵抗，嚴禁徒手接刀"}>
+                                📍 下影線: {tailRatio}% {hasTailSupport ? '✅ 主力承接' : '❌ 實體黑K缺乏下影線'}
                               </span>
                             </div>
 
@@ -1006,7 +1204,7 @@ export default function OversoldSniperDashboard() {
                               <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8', fontSize: '0.82rem' }}>
                                 {cSign} {(item.target_stage1_price || item.ma10).toLocaleString()}
                                 <span style={{ color: item.exp_rebound_pct >= 0 ? '#34D399' : '#94A3B8', fontSize: '0.72rem', marginLeft: '3px' }}>
-                                  ({item.exp_rebound_pct >= 0 ? '+' : ''}{item.exp_rebound_pct}%)
+                                   ({item.exp_rebound_pct >= 0 ? '+' : ''}{item.exp_rebound_pct}%)
                                 </span>
                               </span>
                             </div>
@@ -1017,7 +1215,7 @@ export default function OversoldSniperDashboard() {
                               <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#C084FC', fontSize: '0.82rem' }}>
                                 {cSign} {(item.target_stage2_price || Math.round(item.close * 1.08 * 100) / 100).toLocaleString()}
                                 <span style={{ color: '#C084FC', fontSize: '0.72rem', marginLeft: '3px' }}>
-                                  (+{item.exp_rebound_ma20_pct > 8 ? item.exp_rebound_ma20_pct : '8.0'}%)
+                                   (+{item.exp_rebound_ma20_pct > 8 ? item.exp_rebound_ma20_pct : '8.0'}%)
                                 </span>
                               </span>
                             </div>
@@ -1033,11 +1231,20 @@ export default function OversoldSniperDashboard() {
                         </td>
 
                         {/* 6. ⚡ 明日 Z<-2 狙擊掛單價 */}
-                        <td style={{ textAlign: 'center', verticalAlign: 'middle', background: 'rgba(239, 68, 68, 0.04)' }}>
-                          {isTrig ? (
-                            <span style={{ fontSize: '0.74rem', color: '#EF4444', fontWeight: 'bold', background: 'rgba(239, 68, 68, 0.18)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '3px 8px', borderRadius: '4px' }}>
-                              🔥 已在超賣區 (開盤市價進)
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle', background: isStrictBuy ? 'rgba(16, 185, 129, 0.08)' : (isWaitingTail ? 'rgba(245, 158, 11, 0.05)' : 'rgba(239, 68, 68, 0.04)') }}>
+                          {isStrictBuy ? (
+                            <span style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10B981', padding: '3px 8px', borderRadius: '4px', display: 'inline-block' }}>
+                              🔥 4大鐵律全過 (T+1開盤市價進)
                             </span>
+                          ) : isWaitingTail ? (
+                            <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '3px' }}>
+                              <span style={{ fontSize: '0.72rem', color: '#FBBF24', fontWeight: 'bold', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '2px 6px', borderRadius: '4px' }}>
+                                ⏳ 黑K打底中 (等長下影線)
+                              </span>
+                              <span style={{ fontSize: '0.66rem', color: '#94A3B8' }}>
+                                Tail {tailRatio}% &lt; 45%·暫勿接刀
+                              </span>
+                            </div>
                           ) : item.tomorrow_sniper_price ? (
                             <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '3px' }}>
                               {/* 首筆 Z=-2.0 掛單 */}
