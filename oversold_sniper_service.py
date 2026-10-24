@@ -248,7 +248,9 @@ def get_oversold_sniper_dashboard_data():
 
             exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
             exp_rebound_20 = round(float(((ma20 - latest_c) / latest_c) * 100), 2)
-            stop_loss = round(float(latest_c * 0.90), 2)
+            stop_loss = round(float(latest_c * 0.94), 2) # -6% 硬停損
+            target_stage1 = round(float(ma10), 2) # 第1階段 50% 目標 (10MA)
+            target_stage2 = round(float(max(ma20, latest_c * 1.08)), 2) # 第2階段 50% 目標 (20MA 或 +8%)
             is_trigger = bool(z <= -2.0 and valid_trend)
 
             if is_trigger:
@@ -301,6 +303,8 @@ def get_oversold_sniper_dashboard_data():
                 "priority_color": priority_color,
                 "exp_rebound_pct": exp_rebound,
                 "exp_rebound_ma20_pct": exp_rebound_20,
+                "target_stage1_price": target_stage1,
+                "target_stage2_price": target_stage2,
                 "stop_loss_price": stop_loss,
                 "tomorrow_sniper_price": tomorrow_sniper_price,
                 "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
@@ -308,9 +312,9 @@ def get_oversold_sniper_dashboard_data():
                 "tomorrow_sniper_deep_diff_pct": tomorrow_sniper_deep_diff_pct,
                 "valid_trend": valid_trend,
                 "is_trigger": is_trigger,
-                "holding_limit_days": 10,
+                "holding_limit_days": 12,
                 "action_badge": "🔥 極端超賣撈底" if is_trigger else ("🚫 破線排除 (跌破200MA)" if not valid_trend and z <= -1.7 else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理")),
-                "sop_hint": "T+1開盤市價敲進，站上10MA停利一半，觸及+8%或20MA全清，最長持倉10天"
+                "sop_hint": "兩段式出場：碰 10MA 出 50%，碰 20MA/+8% 全出；-6% 停損；上限 12 天市價清倉"
             })
 
         # -------------------------------------------------------------
@@ -385,7 +389,9 @@ def get_oversold_sniper_dashboard_data():
 
                 exp_rebound = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
                 exp_rebound_20 = round(float(((ma20 - latest_c) / latest_c) * 100), 2)
-                stop_loss = round(float(latest_c * 0.90), 2)
+                stop_loss = round(float(latest_c * 0.94), 2) # -6% 硬停損
+                target_stage1 = round(float(ma10), 2) # 第1階段 50% 目標 (10MA)
+                target_stage2 = round(float(max(ma20, latest_c * 1.08)), 2) # 第2階段 50% 目標 (20MA 或 +8%)
                 is_trigger = bool(z <= -2.0 and valid_trend)
 
                 if is_trigger:
@@ -436,6 +442,8 @@ def get_oversold_sniper_dashboard_data():
                     "priority_color": priority_color,
                     "exp_rebound_pct": exp_rebound,
                     "exp_rebound_ma20_pct": exp_rebound_20,
+                    "target_stage1_price": target_stage1,
+                    "target_stage2_price": target_stage2,
                     "stop_loss_price": stop_loss,
                     "tomorrow_sniper_price": tomorrow_sniper_price,
                     "tomorrow_sniper_diff_pct": tomorrow_sniper_diff_pct,
@@ -443,9 +451,9 @@ def get_oversold_sniper_dashboard_data():
                     "tomorrow_sniper_deep_diff_pct": tomorrow_sniper_deep_diff_pct,
                     "valid_trend": valid_trend,
                     "is_trigger": is_trigger,
-                    "holding_limit_days": 10,
+                    "holding_limit_days": 12,
                     "action_badge": "🔥 極端超賣撈底" if is_trigger else ("🚫 破線排除 (跌破200MA)" if not valid_trend and z <= -1.7 else ("⚠️ 接近超賣警戒" if z <= -1.7 else "強勢多頭整理")),
-                    "sop_hint": "T+1開盤市價敲進，站上10MA停利一半，觸及+8%或20MA全清，最長持倉10天"
+                    "sop_hint": "兩段式出場：碰 10MA 出 50%，碰 20MA/+8% 全出；-6% 停損；上限 12 天市價清倉"
                 })
 
         # -------------------------------------------------------------
@@ -491,65 +499,69 @@ def get_oversold_sniper_dashboard_data():
                 unrealized_amt = round((c_price - e_price) * t_shares, 2)
 
                 # =====================================================
-                # 🎯 智慧賣出提示 (何時可以賣出了)
+                # 🎯 智慧兩段式賣出提示 (SOP 操作執行指引)
                 # =====================================================
                 sell_alerts = []
                 can_sell = False
                 sell_badge = "⏳ 均值回歸中"
                 sell_badge_color = "#38BDF8"
-                sell_instruction = "目前反彈進行中，請耐心等待站回 10MA 或波段達標。"
+                sell_instruction = f"目前反彈進行中 (持倉第 {calc_days}/12 天)，請等待站上 10MA ({cur_ma10}) 執行第1階段平倉50%。"
 
-                # 1. 站上 10MA 停利點
+                target_stage1 = round(cur_ma10, 2)
+                target_stage2 = round(max(cur_ma20, e_price * 1.08), 2)
+                hard_stop = round(e_price * 0.94, 2) # -6% 硬停損
+
+                # 1. 站上 10MA 停利點 (第 1 階段平倉 50%)
                 if c_price >= cur_ma10:
                     can_sell = True
-                    sell_badge = "🎯 10MA 停利達標"
+                    sell_badge = "🎯 第1階段 10MA 達標 (賣50%)"
                     sell_badge_color = "#10B981"
-                    sell_instruction = f"🎉 現價 ({c_price}) 已成功站上 10MA ({cur_ma10})！短線勝率 74.5%，建議立即獲利平倉或賣出一半！"
+                    sell_instruction = f"🎉 現價 ({c_price}) 碰觸 10MA ({cur_ma10})！請立即市價賣出 50% 部位鎖定勝率，剩餘 50% 移至成本價保本續抱衝 20MA ({target_stage2})！"
                     sell_alerts.append({
                         "level": "SUCCESS",
-                        "title": "🎯 10MA 均值回歸達標",
+                        "title": "🎯 第1階段 10MA 達標 (平倉50%)",
                         "text": sell_instruction
                     })
 
-                # 2. 觸及 +8% 或 20MA
+                # 2. 觸及 +8% 或 20MA (第 2 階段全數落袋)
                 if unrealized_pct >= 8.0 or c_price >= cur_ma20:
                     can_sell = True
-                    sell_badge = "🚀 +8% / 20MA 擴大停利"
+                    sell_badge = "🚀 第2階段 20MA/+8% 達標 (全出)"
                     sell_badge_color = "#3B82F6"
-                    sell_instruction = f"🔥 獲利達 {unrealized_pct:+.2f}% 或已碰 20MA ({cur_ma20})！深彈反抽動能已完全釋放，強烈建議全數獲利了結！"
+                    sell_instruction = f"🔥 獲利達 {unrealized_pct:+.2f}% 或已碰 20MA ({cur_ma20})！深彈反抽動能已完全釋放，請將剩餘 50% 部位全數獲利了結平倉！"
                     sell_alerts.append({
                         "level": "EXCELLENT",
-                        "title": "🚀 波段深彈停利目標",
+                        "title": "🚀 第2階段 20MA/+8% 暴利平倉",
                         "text": sell_instruction
                     })
 
-                # 3. 滿 10 天時間風控強制出場
-                if calc_days >= 10:
+                # 3. 滿 12 天時間風控強制出場
+                if calc_days >= 12:
                     can_sell = True
-                    sell_badge = "⏱️ 滿 10 天時間風控"
+                    sell_badge = "⏱️ 滿 12 天時間風控清倉"
                     sell_badge_color = "#DC2626"
-                    sell_instruction = f"⏱️ 已達到最長 10 天持有上限（當前第 {calc_days} 天）。依量化紀律請無條件市價平倉，釋放資金至下一檔！"
+                    sell_instruction = f"⏱️ 已達到最長 12 天持有上限（當前第 {calc_days} 天）。依量化半衰期紀律，請無條件市價全數平倉，釋放資金至下一檔！"
                     sell_alerts.append({
                         "level": "DANGER",
-                        "title": "⏱️ 時間到期強制出場",
+                        "title": "⏱️ 滿 12 天強制平倉",
                         "text": sell_instruction
                     })
-                elif calc_days >= 8:
-                    sell_badge = f"⚠️ 倒數第 {calc_days} 天"
+                elif calc_days >= 10:
+                    sell_badge = f"⚠️ 倒數第 {calc_days} 天 (上限12天)"
                     sell_badge_color = "#F59E0B"
-                    sell_instruction = f"⚠️ 已持倉 {calc_days} 天，即將在滿 10 天時強制平倉，請密切注意 10MA 停利機會。"
+                    sell_instruction = f"⚠️ 已持倉 {calc_days} 天，距 12 天時間停損僅剩 {12 - calc_days} 天，請密切留意 10MA 出場機會。"
                     sell_alerts.append({
                         "level": "WARNING",
                         "title": "⚠️ 時間出場倒數",
                         "text": sell_instruction
                     })
 
-                # 4. -10% 硬停損
-                if unrealized_pct <= -10.0:
+                # 4. -6% 硬停損
+                if unrealized_pct <= -6.0:
                     can_sell = True
-                    sell_badge = "🛑 觸發 -10% 硬停損"
+                    sell_badge = "🛑 觸發 -6% 硬停損"
                     sell_badge_color = "#EF4444"
-                    sell_instruction = f"🛑 虧損達 {unrealized_pct:.2f}%，已摜破 -10% 防守底線，建議嚴守紀律停損出場！"
+                    sell_instruction = f"🛑 虧損達 {unrealized_pct:.2f}%，已摜破 -6% 鐵板防守線 ({hard_stop})，請嚴守紀律立即市價全數平倉止血！"
                     sell_alerts.append({
                         "level": "STOP_LOSS",
                         "title": "🛑 硬停損風控",
@@ -570,7 +582,10 @@ def get_oversold_sniper_dashboard_data():
                     "shares": t_shares,
                     "target_ma10": cur_ma10,
                     "target_ma20": cur_ma20,
-                    "stop_loss_price": t_sl or round(e_price * 0.90, 2),
+                    "target_stage1": target_stage1,
+                    "target_stage2": target_stage2,
+                    "stop_loss_price": hard_stop,
+                    "max_holding_days": 12,
                     "days_held": calc_days,
                     "unrealized_pnl_pct": unrealized_pct,
                     "unrealized_pnl_amount": unrealized_amt,
