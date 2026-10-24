@@ -4229,17 +4229,6 @@ def delete_oversold_sniper_trade(trade_id: str):
     import oversold_sniper_service
     return oversold_sniper_service.delete_user_trade(trade_id)
 
-# ==========================================
-# 👑 MSCI 尾盤失衡隔日沖專屬戰情室 API
-# ==========================================
-@app.get("/api/msci_imbalance/dashboard")
-def get_msci_imbalance_dashboard():
-    """MSCI 尾盤失衡隔日沖：倒數計時器 + 歷年回測勝率報告 + 即時失衡雷達"""
-    import importlib
-    import msci_imbalance_service
-    importlib.reload(msci_imbalance_service)
-    return msci_imbalance_service.get_live_msci_dashboard()
-
 @app.get("/api/market_ml/status")
 @app.get("/api/market_ml/predict")
 def get_market_ml_status():
