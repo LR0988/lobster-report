@@ -79,36 +79,36 @@ export const formatStockDisplayName = (ticker, originalName) => {
   return originalName || cleanTicker;
 };
 
-const STORAGE_KEY_POSITIONS = 'global_titan_user_positions_v2';
-const STORAGE_KEY_IDLE_CASH = 'global_titan_idle_cash_v2';
-const STORAGE_KEY_ALL_TX = 'global_titan_all_tx_v2';
-const STORAGE_KEY_USDFX = 'global_titan_user_usdfx_v2';
-const STORAGE_KEY_DISMISSED_SUGG = 'global_titan_dismissed_sugg_v2';
+const STORAGE_KEY_POSITIONS = 'global_titan_user_positions_v4';
+const STORAGE_KEY_IDLE_CASH = 'global_titan_idle_cash_v4';
+const STORAGE_KEY_ALL_TX = 'global_titan_all_tx_v4';
+const STORAGE_KEY_USDFX = 'global_titan_user_usdfx_v4';
+const STORAGE_KEY_DISMISSED_SUGG = 'global_titan_dismissed_sugg_v4';
 
 const getTitanStorageKeys = (username) => ({
-  positions: `global_titan_user_positions_v2_${username}`,
-  idleCash: `global_titan_idle_cash_v2_${username}`,
-  allTx: `global_titan_all_tx_v2_${username}`,
-  usdFx: `global_titan_user_usdfx_v2_${username}`,
-  dismissedSugg: `global_titan_dismissed_sugg_v2_${username}`
+  positions: `global_titan_user_positions_v4_${username}`,
+  idleCash: `global_titan_idle_cash_v4_${username}`,
+  allTx: `global_titan_all_tx_v4_${username}`,
+  usdFx: `global_titan_user_usdfx_v4_${username}`,
+  dismissedSugg: `global_titan_dismissed_sugg_v4_${username}`
 });
 
 const DEFAULT_POSITIONS = [
   {
     id: 'pos_mrna_1',
     ticker: 'MRNA',
-    name: '莫德納 (Moderna 生技巨擘)',
+    name: '莫德納 (Moderna mRNA生技巨擘)',
     market: '美股 (NASDAQ)',
     currency: 'USD',
-    shares: 54,
-    entry_price: 210.21,
-    current_price: 242.72,
-    price_date: '2026-10-21',
+    shares: 131,
+    entry_price: 224.78,
+    current_price: 203.15,
+    price_date: '2026-10-23',
     entry_date: '2026-10-12',
-    entry_fee: 0,
+    entry_fee: 30,
     stop_loss_price: 165.0,
-    role: '👑 第1王者 (50%)',
-    stop_condition: '大波段抱牢，SPY破年線才清倉'
+    role: '👑 第1王者 (40%)',
+    stop_condition: '雙梯隊滿倉續抱，1號與22號雙軌換倉自然淘汰'
   },
   {
     id: 'pos_3037_1',
@@ -116,15 +116,15 @@ const DEFAULT_POSITIONS = [
     name: '欣興 (Unimicron 載板王者)',
     market: '台股 (TWSE)',
     currency: 'TWD',
-    shares: 251,
-    entry_price: 1176.0,
-    current_price: 1100.0,
-    price_date: '2026-10-21',
+    shares: 571,
+    entry_price: 1144.62,
+    current_price: 1085.00,
+    price_date: '2026-10-22',
     entry_date: '2026-10-13',
-    entry_fee: 0,
+    entry_fee: 903,
     stop_loss_price: 1026.38,
     role: '🥈 第2主力 (30%)',
-    stop_condition: '載板王者主升段狂飆，持滿整月'
+    stop_condition: '載板王者主升段續抱，雙軌換倉自然淘汰'
   },
   {
     id: 'pos_3443_1',
@@ -132,25 +132,25 @@ const DEFAULT_POSITIONS = [
     name: '創意 (Global Unichip ASIC)',
     market: '台股 (TWSE)',
     currency: 'TWD',
-    shares: 36,
-    entry_price: 8031.0,
-    current_price: 8000.0,
-    price_date: '2026-10-21',
+    shares: 52,
+    entry_price: 8013.77,
+    current_price: 7585.00,
+    price_date: '2026-10-22',
     entry_date: '2026-10-12',
-    entry_fee: 0,
+    entry_fee: 582,
     stop_loss_price: 7150.0,
-    role: '🥉 第3先鋒 (20%)',
-    stop_condition: 'ASIC龍頭多頭強勁，每週一動態檢視'
+    role: '🥉 第3主力 (30%)',
+    stop_condition: 'ASIC矽智財主升段續抱，雙軌換倉自然淘汰'
   }
 ];
 
 const DEFAULT_TX_HISTORY = [
   {
     id: 'tx_init_deposit',
-    date: '2026-10-12',
+    date: '2026-10-01',
     action: '投入現金',
     ticker: '-',
-    name: '初始本金入金',
+    name: '初始本金入金 (🅰️ A梯隊)',
     currency: 'TWD',
     shares: 0,
     price: 0,
@@ -158,52 +158,112 @@ const DEFAULT_TX_HISTORY = [
     cash_flow_twd: 1000000,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '全球泰坦旗艦策略 初始開倉本金'
+    note: '全球泰坦旗艦策略 🅰️ A梯隊開倉入金 (100萬TWD)'
   },
   {
     id: 'tx_init_1',
-    date: '2026-10-12',
+    date: '2026-10-02',
     action: '買入',
     ticker: 'MRNA',
-    name: '莫德納 (Moderna)',
+    name: '莫德納 (Moderna mRNA生技巨擘)',
     currency: 'USD',
     shares: 54,
     price: 210.21,
-    tax_fee: 0,
-    cash_flow_twd: -327988,
+    tax_fee: 15,
+    cash_flow_twd: -369441,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '10月初策略建倉 第1王者 (50%)'
+    note: '10月初 A梯隊建倉 👑 第1王者 (40%)'
   },
   {
     id: 'tx_init_2',
-    date: '2026-10-13',
+    date: '2026-10-02',
     action: '買入',
     ticker: '3037.TW',
-    name: '欣興 (Unimicron)',
+    name: '欣興 (Unimicron 載板王者)',
     currency: 'TWD',
-    shares: 251,
-    price: 1176.0,
-    tax_fee: 0,
-    cash_flow_twd: -282420,
+    shares: 236,
+    price: 1100.0,
+    tax_fee: 400,
+    cash_flow_twd: -260000,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '10月初策略建倉 第2主力 (30%)'
+    note: '10月初 A梯隊建倉 🥈 第2主力 (30%)'
   },
   {
     id: 'tx_init_3',
-    date: '2026-10-12',
+    date: '2026-10-02',
     action: '買入',
     ticker: '3443.TW',
-    name: '創意 (Global Unichip)',
+    name: '創意 (Global Unichip ASIC)',
     currency: 'TWD',
-    shares: 36,
-    price: 8031.0,
-    tax_fee: 0,
-    cash_flow_twd: -281485,
+    shares: 35,
+    price: 7990.0,
+    tax_fee: 400,
+    cash_flow_twd: -280050,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '10月初策略建倉 第3先鋒 (20%)'
+    note: '10月初 A梯隊建倉 🥉 第3主力 (30%)'
+  },
+  {
+    id: 'tx_b_deposit',
+    date: '2026-10-22',
+    action: '投入現金',
+    ticker: '-',
+    name: '追加入金 (🅱️ B梯隊注資)',
+    currency: 'TWD',
+    shares: 0,
+    price: 0,
+    tax_fee: 0,
+    cash_flow_twd: 1100000,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '全球泰坦旗艦策略 🅱️ B梯隊10/22調倉加碼入金 (110萬TWD)'
+  },
+  {
+    id: 'tx_1792679250125',
+    date: '2026-10-22',
+    action: '買入',
+    ticker: 'MRNA',
+    name: '莫德納 (Moderna mRNA生技巨擘)',
+    currency: 'USD',
+    shares: 77,
+    price: 235.0,
+    tax_fee: 15,
+    cash_flow_twd: -588575,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '10/22 雙隊合流：加碼多買入建倉 (👑 第1王者 補足131股)'
+  },
+  {
+    id: 'tx_b_2',
+    date: '2026-10-22',
+    action: '買入',
+    ticker: '3037.TW',
+    name: '欣興 (Unimicron 載板王者)',
+    currency: 'TWD',
+    shares: 335,
+    price: 1176.0,
+    tax_fee: 503,
+    cash_flow_twd: -394463,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '10/22 雙隊合流：加碼多買入建倉 (🥈 第2主力 補足571股)'
+  },
+  {
+    id: 'tx_b_3',
+    date: '2026-10-22',
+    action: '買入',
+    ticker: '3443.TW',
+    name: '創意 (Global Unichip ASIC)',
+    currency: 'TWD',
+    shares: 17,
+    price: 8062.8,
+    tax_fee: 182,
+    cash_flow_twd: -137250,
+    realized_pnl_twd: null,
+    realized_return_pct: null,
+    note: '10/22 雙隊合流：加碼多買入建倉 (🥉 第3主力 補足52股)'
   }
 ];
 
@@ -272,7 +332,16 @@ export default function GlobalSovereignDashboard() {
       const saved = localStorage.getItem(storageKeys.allTx) || (currentUsername === 'hotpotlu' ? localStorage.getItem(STORAGE_KEY_ALL_TX) : null);
       let list = saved ? JSON.parse(saved) : DEFAULT_TX_HISTORY;
       if (!Array.isArray(list) || list.length === 0) list = DEFAULT_TX_HISTORY;
-      // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/12 初始入金 100 萬)
+      
+      // 自動校驗防呆：若快取中包含異常數據（如 phantom 幽靈股 > 1000 股或現金流赤字），即刻自動修復為方案二標準實盤帳本
+      const hasCorruptedShares = list.some(tx => Number(tx.shares) > 1000);
+      const totalCash = list.reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
+      if (hasCorruptedShares || totalCash < -10000) {
+        list = DEFAULT_TX_HISTORY;
+        try { localStorage.setItem(storageKeys.allTx, JSON.stringify(list)); } catch {}
+      }
+
+      // 確保歷史紀錄一定有入金流水帳 (若舊快取沒有入金，自動補上 10/1 初始入金 100 萬)
       const hasDeposit = list.some(tx => tx.action === '投入現金' || tx.action === '初始入金' || tx.action === '入金' || (tx.note && tx.note.includes('入金')));
       if (!hasDeposit) {
         list = [DEFAULT_TX_HISTORY[0], ...list];
@@ -491,8 +560,15 @@ export default function GlobalSovereignDashboard() {
         if (!isMounted) return;
         if (res && res.status === 'ok') {
           if (Array.isArray(res.tx_history) && res.tx_history.length > 0) {
-            const hasDeposit = res.tx_history.some(t => t.action === '投入現金' || t.id === 'tx_init_deposit');
-            const normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_TX_HISTORY[0]];
+            const hasCorruptedShares = res.tx_history.some(tx => Number(tx.shares) > 1000);
+            const totalCash = res.tx_history.reduce((acc, tx) => acc + (Number(tx.cash_flow_twd) || 0), 0);
+            let normalizedTx = res.tx_history;
+            if (hasCorruptedShares || totalCash < -10000) {
+              normalizedTx = DEFAULT_TX_HISTORY;
+            } else {
+              const hasDeposit = res.tx_history.some(t => t.action === '投入現金' || t.id === 'tx_init_deposit');
+              normalizedTx = hasDeposit ? res.tx_history : [...res.tx_history, DEFAULT_TX_HISTORY[0]];
+            }
             setTxHistory(normalizedTx);
             try { localStorage.setItem(storageKeys.allTx, JSON.stringify(normalizedTx)); } catch {}
           }
@@ -710,10 +786,10 @@ export default function GlobalSovereignDashboard() {
     // A. 針對目標 Top 3 標的
     activeTopPicks.forEach((pick, idx) => {
       const pRank = pick.rank || (idx + 1);
-      // 雙梯隊權重設計：各隊佔 50% 總資金，梯隊內部為 50/30/20 黃金階梯
-      const weightTranchePct = pRank === 1 ? 50 : (pRank === 2 ? 30 : 20); // 梯隊內比例 50%, 30%, 20%
-      const weightTeamPct = weightTranchePct * 0.5; // 各隊佔總資產 25%, 15%, 10%
-      const totalWeightPct = weightTranchePct;       // 雙隊合併佔總資產 50%, 30%, 20%
+      // 雙梯隊權重設計：各隊佔 50% 總資金，梯隊內部為 40/30/30 (方案二進攻階梯)
+      const weightTranchePct = pRank === 1 ? 40 : 30; // 梯隊內比例 40%, 30%, 30%
+      const weightTeamPct = weightTranchePct * 0.5; // 各隊佔總資產 20%, 15%, 15%
+      const totalWeightPct = weightTranchePct;       // 雙隊合併佔總資產 40%, 30%, 30%
 
       const targetTwdA = totalNetAssetsTwd * (weightTeamPct / 100.0);
       const targetTwdB = totalNetAssetsTwd * (weightTeamPct / 100.0);
@@ -1668,6 +1744,37 @@ export default function GlobalSovereignDashboard() {
     e.target.value = '';
   };
 
+  const handleResetToScheme2 = async () => {
+    if (!window.confirm('確定要將對帳歷史與實盤部位校準為「方案二・雙梯隊合流完整實盤帳本」嗎？\n\n・初始本金：NT$ 2,100,000 (A梯隊100萬 + B梯隊加碼110萬)\n・實盤持倉：MRNA 131股、欣興 571股、創意 52股 (含10/22多買入部位)\n・閒置現金：NT$ 70,221\n\n此操作將徹底清除舊快取並同步寫入本地 tw_stock.db 與 Supabase 雲端！')) {
+      return;
+    }
+    try {
+      localStorage.removeItem(storageKeys.allTx);
+      localStorage.removeItem(storageKeys.positions);
+      localStorage.removeItem(storageKeys.idleCash);
+      localStorage.removeItem('global_titan_all_tx_v2');
+      localStorage.removeItem('global_titan_user_positions_v2');
+      localStorage.removeItem(`global_titan_all_tx_v2_${currentUsername}`);
+      localStorage.removeItem(`global_titan_user_positions_v2_${currentUsername}`);
+    } catch {}
+
+    setTxHistory(DEFAULT_TX_HISTORY);
+    try { localStorage.setItem(storageKeys.allTx, JSON.stringify(DEFAULT_TX_HISTORY)); } catch {}
+
+    try {
+      await apiSaveGlobalTitanPortfolio({
+        username: currentUsername,
+        positions: DEFAULT_POSITIONS,
+        tx_history: DEFAULT_TX_HISTORY,
+        usd_fx: 32.5,
+        dismissed_suggestions: []
+      });
+      triggerNotice('✅ 已成功校準為官方「方案二」完整實盤帳本（本金210萬，MRNA 131股/欣興 571股/創意 52股，閒置現金 70,221 元）！');
+    } catch (err) {
+      triggerNotice('✅ 本地已成功校準為方案二標準實盤帳本！');
+    }
+  };
+
   const handleDeleteTx = (id, ticker, name, action) => {
     if (window.confirm(`確定要刪除「${action} ${name}」這筆全球歷史交易紀錄嗎？\n\n刪除後，當前持股部位與損益將自動依據剩餘流水帳即時動態重算。`)) {
       setTxHistory(prev => prev.filter(item => item.id !== id));
@@ -1716,11 +1823,11 @@ export default function GlobalSovereignDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '1.2rem' }}>🎉</span>
           <span>
-            <strong>【17 大全因子 DOE 終極冠軍模型正式上線】</strong>：已實裝 Minervini VCP 波動收縮 + Chip 籌碼沉澱鎖定 + ER60 趨勢效率比！全歷史月頻回撤降至 <strong style={{ color: '#34D399' }}>-24.57%</strong>（歷史新低紀錄），CAGR <strong style={{ color: '#FDE047' }}>62.96%</strong>，年度勝率 <strong style={{ color: '#38BDF8' }}>95.5%</strong>！
+            <strong>【全球泰坦 2.0・方案二 正式上線】</strong>：實裝台美共同開盤日實戰對齊 + 零未來函數雙梯隊自然淘汰（1號50% + 22號50%）× 40/30/30 階梯配比！22.8年日頻回測 <strong style={{ color: '#FDE047' }}>21,284.1倍 (CAGR 54.97%)</strong>，月頻 MDD <strong style={{ color: '#34D399' }}>-30.73%</strong> (日頻 MDD -38.94%)，Calmar <strong style={{ color: '#38BDF8' }}>1.79</strong>，Sharpe <strong style={{ color: '#A78BFA' }}>1.27</strong>，年度勝率 <strong style={{ color: '#38BDF8' }}>90.9% (22年贏20年)</strong>！
           </span>
         </div>
         <span style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.25)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-          ✅ 生產環境全實裝
+          ✅ 方案二實戰全上線
         </span>
       </div>
 
@@ -1735,7 +1842,7 @@ export default function GlobalSovereignDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.22rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球高流動性泰坦旗艦【17 大全因子 DOE 終極冠軍版・資金無上限】
+              👑 全球高流動性泰坦 2.0【方案二・個人實戰無停損進攻版】
             </h3>
             <span style={{
               fontSize: '0.78rem',
@@ -1752,10 +1859,10 @@ export default function GlobalSovereignDashboard() {
               🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-22'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
             </span>
             <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(52, 211, 153, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              🛡️ 月頻 MDD -24.57% (歷史新低)
+              🛡️ 月頻 MDD -30.73% (日頻 -38.94%)
             </span>
             <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22.8年日頻回測 <strong style={{ color: '#34D399' }}>66,822倍 (CAGR 62.96%)</strong> | 月頻 MDD <strong style={{ color: '#34D399' }}>-24.57%</strong> | 日頻 MDD <strong style={{ color: '#FBBF24' }}>-35.31%</strong> | Sharpe <strong style={{ color: '#A78BFA' }}>1.36</strong> | Calmar <strong style={{ color: '#FDE047' }}>1.783</strong> | 年度勝率 <strong style={{ color: '#34D399' }}>95.5% (22年贏21年)</strong>
+              22.8年日頻回測 <strong style={{ color: '#34D399' }}>21,284.1倍 (CAGR 54.97%)</strong> | 月頻 MDD <strong style={{ color: '#34D399' }}>-30.73%</strong> | 日頻 MDD <strong style={{ color: '#FBBF24' }}>-38.94%</strong> | Sharpe <strong style={{ color: '#A78BFA' }}>1.27</strong> | Calmar <strong style={{ color: '#FDE047' }}>1.79</strong> | 年度勝率 <strong style={{ color: '#34D399' }}>90.9% (22年贏20年)</strong>
             </span>
           </div>
 
@@ -2116,6 +2223,25 @@ export default function GlobalSovereignDashboard() {
                   }}
                 >
                   ➕ 新增持股部位
+                </button>
+                <button
+                  onClick={handleResetToScheme2}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#FCA5A5',
+                    padding: '0.3rem 0.65rem',
+                    borderRadius: '5px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem'
+                  }}
+                  title="徹底清除快取並校準為官方方案二實盤帳本 (100萬本金、40/30/30、現金202元)"
+                >
+                  🔄 校準方案二帳本
                 </button>
                 <button
                   onClick={syncToDatabase}
@@ -2775,10 +2901,10 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📡 全球泰坦 17 大全因子 DOE 終極冠軍即時雷達（1號 / 22號 選股順位的唯一依據）
+                    📡 全球泰坦 2.0 (方案二・個人實戰無停損進攻版) 即時選股雷達（1號 / 22號 選股順位唯一依據）
                   </h4>
                   <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    採用 <strong>17 大全因子 DOE 尋優冠軍公式</strong>：(88% Raw + 12% 殘差) × FIP(0.45) × 凸性(0.16) × ER60(0.30) × 52W新高(0.10) × <strong>VCP波動收縮(0.15)</strong> × <strong>Chip籌碼沉澱(0.16)</strong> × 季線乖離(-0.05) 排序，並通過「<strong>爆量滯漲濾網</strong>」。第 1~3 名為當期正選，第 4~5 名為在手續抱保護緩衝帶！
+                    採用<strong>方案二 4 大正交核心動能因子公式</strong>：(85% Raw + 15% 殘差) × FIP(0.50) × 凸性(0.20) × 拋物線防追高阻尼排序，並通過「5D爆量滯漲濾網」與個人實戰流動性門檻 (台股>=3,000萬/美股>=500萬美元)。第 1~3 名為當期正選 (40%/30%/30%)，第 4~5 名為在手續抱保護緩衝帶！
                   </p>
                 </div>
                 <span style={{ fontSize: '0.78rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
@@ -2802,7 +2928,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>凸性比 (Conv)</th>
                       <th style={{ textAlign: 'right', color: '#C084FC' }}>VCP 緊湊度</th>
                       <th style={{ textAlign: 'right', color: '#F472B6' }}>Chip 籌碼</th>
-                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>17因子總分</th>
+                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>方案二總分</th>
                       <th style={{ textAlign: 'center' }}>爆量滯漲濾網</th>
                     </tr>
                   </thead>
@@ -2813,7 +2939,7 @@ export default function GlobalSovereignDashboard() {
                       const isBuf = pickRank > 3 && pickRank <= 5;
                       const curr = pick.currency === 'USD' ? 'US$ ' : 'NT$ ';
                       const isHeld = userPositions.some(p => p.ticker === pick.ticker || (p.ticker && pick.ticker && p.ticker.split('.')[0] === pick.ticker.split('.')[0]));
-                      const singleW = isTop3 ? (pickRank === 1 ? 50 : (pickRank === 2 ? 30 : 20)) : 0;
+                      const singleW = isTop3 ? (pickRank === 1 ? 40 : (pickRank === 2 ? 30 : 30)) : 0;
                       const navHalfW = singleW / 2;
 
                       return (
@@ -3152,15 +3278,15 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <span style={{ fontSize: '1.2rem' }}>👑</span>
                 <span style={{ fontSize: '0.96rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球泰坦 17 大全因子 DOE 終極冠軍數學公式 (17-Factor Grand Ensemble Formula)
+                  全球泰坦 2.0 (方案二・個人實戰無停損進攻版) 數學架構
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  月MDD -24.57% 歷史新低
+                  月MDD -30.73% (日頻 -38.94%)
                 </span>
                 <span style={{ fontSize: '0.72rem', color: '#A78BFA', background: 'rgba(167, 139, 250, 0.15)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
-                  17大因子非線性乘數架構
+                  4大正交核心因子 × 40/30/30 雙梯隊自然淘汰
                 </span>
               </div>
             </div>
@@ -3179,7 +3305,7 @@ export default function GlobalSovereignDashboard() {
               overflowX: 'auto',
               marginBottom: '1rem'
             }}>
-              <strong>Final Score</strong> = <strong>Blend_Mom</strong> × (1 + 0.45×<strong>FIP</strong>) × [1 + 0.16×clip(<strong>Conv</strong>-1, -0.5, 2)] × (1 + 0.30×<strong>ER60</strong>) × (1 + 0.10×<strong>Prox52W</strong>) × (1 + 0.15×<strong>VCP</strong>) × (1 + 0.16×<strong>Chip</strong>) × (1 - 0.05×<strong>Bias60</strong>)
+              <strong>Final Score</strong> = (0.85×<strong>Raw_Mom</strong> + 0.15×<strong>Res_Alpha</strong>) × (1 + 0.50×<strong>FIP</strong>) × [1 + 0.20×clip(<strong>Conv</strong>-1, -0.5, 2)] × <strong>Parabolic_Damper</strong>
             </div>
 
             {/* 6 大公式層級細項分解 */}

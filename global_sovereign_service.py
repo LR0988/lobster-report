@@ -124,33 +124,48 @@ def get_global_sovereign_dashboard_data():
             data["macro_status"]["spy_price"] = round(spy_latest, 2)
             data["macro_status"]["spy_ma200"] = round(spy_ma200, 2)
 
-        # 動態計算 15 國主權 ETF 雙頻複合寬幅 (75% 200MA + 25% 60MA)
+        # 動態計算 15 國主權 ETF 與美台核心 ETF (SPY/QQQ/EWT) 對齊雙頻複合寬幅
         candidate_etfs = ['QQQ', 'SPY', 'EWJ', 'EWG', 'EWU', 'EWC', 'EWA', 'EWL', 'EWN', 'EWD', 'EWT', 'EWY', 'EWZ', 'EWW', 'EWH']
+        core_etfs = {'SPY', 'QQQ', 'EWT'}
         br200_cnt, br60_cnt, valid_etf_cnt = 0, 0, 0
+        core200_cnt, core60_cnt, valid_core_cnt = 0, 0, 0
         for etf_code in candidate_etfs:
             c.execute("SELECT close FROM global_sovereign_daily WHERE ticker = ? AND close IS NOT NULL ORDER BY date DESC LIMIT 200", (etf_code,))
             erows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
             if len(erows) >= 60:
                 valid_etf_cnt += 1
-                if erows[0] > (sum(erows[:200]) / len(erows[:200])):
+                ab200 = erows[0] > (sum(erows[:200]) / len(erows[:200]))
+                ab60 = erows[0] > (sum(erows[:60]) / len(erows[:60]))
+                if ab200:
                     br200_cnt += 1
-                if erows[0] > (sum(erows[:60]) / len(erows[:60])):
+                if ab60:
                     br60_cnt += 1
+                if etf_code in core_etfs:
+                    valid_core_cnt += 1
+                    if ab200:
+                        core200_cnt += 1
+                    if ab60:
+                        core60_cnt += 1
         if valid_etf_cnt > 0:
             br200_ratio = br200_cnt / float(valid_etf_cnt)
             br60_ratio = br60_cnt / float(valid_etf_cnt)
-            comp_br = 0.75 * br200_ratio + 0.25 * br60_ratio
+            global15_br = 0.75 * br200_ratio + 0.25 * br60_ratio
+            if valid_core_cnt > 0:
+                core_br = 0.60 * (core200_cnt / float(valid_core_cnt)) + 0.40 * (core60_cnt / float(valid_core_cnt))
+                comp_br = 0.50 * global15_br + 0.50 * core_br
+            else:
+                comp_br = global15_br
             data["macro_status"]["global_breadth_pct"] = round(comp_br * 100.0, 1)
             data["macro_status"]["bull_countries"] = f"{int(round(comp_br * valid_etf_cnt))}/{valid_etf_cnt}"
             if comp_br >= 0.50:
                 data["macro_status"]["exposure_pct"] = 100
-                data["macro_status"]["regime"] = f"全球共振多頭 (雙頻複合寬幅 {comp_br*100:.1f}% >= 50% -> A/B雙梯隊100%滿倉進攻)"
+                data["macro_status"]["regime"] = f"全球共振多頭 (美台核心對齊寬幅 {comp_br*100:.1f}% >= 50% -> A/B雙梯隊100%滿倉進攻)"
             elif comp_br >= 0.30:
                 data["macro_status"]["exposure_pct"] = 70
-                data["macro_status"]["regime"] = f"全球宏觀分化警示 (雙頻複合寬幅 {comp_br*100:.1f}% -> 防禦型 70% 倉位)"
+                data["macro_status"]["regime"] = f"全球宏觀分化警示 (美台核心對齊寬幅 {comp_br*100:.1f}% -> 防禦型 70% 倉位)"
             else:
                 data["macro_status"]["exposure_pct"] = 0
-                data["macro_status"]["regime"] = f"全球系統性空頭 (雙頻複合寬幅 {comp_br*100:.1f}% < 30% -> 100% 現金避險)"
+                data["macro_status"]["regime"] = f"全球系統性空頭 (美台核心對齊寬幅 {comp_br*100:.1f}% < 30% -> 100% 轉入 GLD/BIL 避險池)"
 
         # 2. 候選清單 current_picks 與實盤持倉全部由資料庫即時運算覆蓋
         max_dt = ""
@@ -238,8 +253,8 @@ def get_global_sovereign_dashboard_data():
             vol_abs = min(5.0, max(0.2, mean_up_v / max(mean_dn_v, 1e-6)))
             chip_val = round(float(min(1.0, max(0.0, (vol_abs - 0.2) / 4.8))), 2)
 
-            # 計算 17 大全因子 DOE 終極冠軍複合動能分數:
-            # Blend_Mom * (1 + 0.45*FIP) * (1 + 0.16*Conv) * (1 + 0.30*ER60) * (1 + 0.10*Prox52W) * (1 - 0.05*Bias60) * (1 + 0.15*VCP) * (1 + 0.16*Chip)
+            # 計算精簡正交 4 大核心因子複合動能分數 (拔除 19 因子過擬合雜訊 + 加入拋物線防追高阻尼):
+            # Score = (85% Raw_Mom + 15% Residual_Alpha) * (1 + 0.50*FIP) * (1 + 0.20*Convexity) * Parabolic_Damper
             score_val = None
             if mom12m is not None and mom3m is not None:
                 raw_mom = (0.45 * mom12m + 0.35 * mom3m + 0.20 * mom1m) / 100.0
@@ -250,32 +265,17 @@ def get_global_sovereign_dashboard_data():
                     spy_12m = (spy_closes[0] / spy_closes[min(252, len(spy_closes)-1)] - 1.0)
                     spy_core = 0.45 * spy_12m + 0.35 * spy_3m + 0.20 * spy_1m
                     res_mom = raw_mom - 0.85 * spy_core
-                blend_mom = 0.88 * raw_mom + 0.12 * res_mom
+                blend_mom = 0.85 * raw_mom + 0.15 * res_mom
                 conv_clip = min(2.0, max(-0.5, convexity_val - 1.0))
 
-                # ER 60D 分形效率
-                er_len = min(60, len(closes) - 1)
-                net_er = abs(closes[0] - closes[er_len]) if er_len > 0 else 0.0
-                tot_er = sum(abs(closes[i] - closes[i+1]) for i in range(er_len)) if er_len > 0 else 1.0
-                er_val = min(1.0, max(0.0, net_er / max(tot_er, 1e-6)))
-
-                # 52W 新高接近度
-                p252_len = min(252, len(closes))
-                h252 = max(closes[:p252_len]) if p252_len > 0 else cur_px
-                prox_val = min(1.0, max(0.1, cur_px / max(h252, 1e-6)))
-
-                # 60MA 乖離
+                # 60MA 乖離與拋物線防追高阻尼 (Bias60 > 65% 時啟動平滑降權)
                 bias_val = (cur_px / max(1e-6, ma60)) - 1.0
+                parabolic_damper = 1.0 / (1.0 + 1.2 * (bias_val - 0.65)) if bias_val > 0.65 else 1.0
 
-                fip_m = 1.0 + 0.45 * fip_val
-                conv_m = 1.0 + 0.16 * conv_clip
-                er_m = 1.0 + 0.30 * (er_val - 0.5)
-                prox_m = 1.0 + 0.10 * (prox_val ** 2 - 0.5)
-                bias_m = 1.0 - 0.05 * bias_val
-                vcp_m = 1.0 + 0.15 * (vcp_val - 0.5)
-                chip_m = 1.0 + 0.16 * (chip_val - 0.5)
+                fip_m = 1.0 + 0.50 * fip_val
+                conv_m = 1.0 + 0.20 * conv_clip
 
-                score_val = round(blend_mom * fip_m * conv_m * er_m * prox_m * bias_m * vcp_m * chip_m, 4)
+                score_val = round(blend_mom * fip_m * conv_m * parabolic_damper, 4)
 
             # 爆量滯漲過濾 (Churn Filter: 5D均量 > 2.0倍60D均量 且 10D漲幅 < 2%)
             churn_safe = True
@@ -356,7 +356,7 @@ def get_global_sovereign_dashboard_data():
         # 依最新複合動能分數重新排序 Top 10 候選名單並更新排名與梯隊緩衝狀態
         if valid_picks:
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
-            weights_single_tranche = [50, 30, 20]
+            weights_single_tranche = [40, 30, 30]
             for idx_p, pick in enumerate(valid_picks, start=1):
                 pick["rank"] = idx_p
                 pick["is_active"] = (idx_p <= 3)

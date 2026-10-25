@@ -2035,28 +2035,34 @@ def sync_global_titan_live_state(req: GlobalTitanSyncRequest):
                     str(p.get('stop_condition', ''))
                 ))
         
-        if req.trades is not None:
-            c.execute("DELETE FROM global_sovereign_trades")
-            for t in req.trades:
-                c.execute("""
-                    INSERT INTO global_sovereign_trades (
-                        id, date, action, ticker, name, currency, shares, price, tax_fee, cash_flow_twd, realized_pnl_twd, realized_return_pct, note
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    str(t.get('id', '')),
-                    str(t.get('date', '')),
-                    str(t.get('action', '')),
-                    str(t.get('ticker', '')),
-                    str(t.get('name', '')),
-                    str(t.get('currency', 'USD')),
-                    float(t.get('shares', 0.0) or 0.0),
-                    float(t.get('price', 0.0) or 0.0),
-                    float(t.get('tax_fee', 0.0) or 0.0),
-                    float(t.get('cash_flow_twd', 0.0) or 0.0),
-                    float(t.get('realized_pnl_twd', 0.0) or 0.0) if t.get('realized_pnl_twd') is not None else None,
-                    float(t.get('realized_return_pct', 0.0) or 0.0) if t.get('realized_return_pct') is not None else None,
-                    str(t.get('note', ''))
-                ))
+        if req.trades is not None and len(req.trades) > 0:
+            # 防禦校驗：嚴防異常快取或幽靈部位反向污染資料庫
+            has_corrupt_shares = any(float(t.get('shares', 0.0) or 0.0) > 1000 for t in req.trades)
+            total_cash = sum(float(t.get('cash_flow_twd', 0.0) or 0.0) for t in req.trades)
+            if not has_corrupt_shares and total_cash >= -5000:
+                c.execute("DELETE FROM global_sovereign_trades")
+                for t in req.trades:
+                    c.execute("""
+                        INSERT INTO global_sovereign_trades (
+                            id, date, action, ticker, name, currency, shares, price, tax_fee, cash_flow_twd, realized_pnl_twd, realized_return_pct, note
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        str(t.get('id', '')),
+                        str(t.get('date', '')),
+                        str(t.get('action', '')),
+                        str(t.get('ticker', '')),
+                        str(t.get('name', '')),
+                        str(t.get('currency', 'USD')),
+                        float(t.get('shares', 0.0) or 0.0),
+                        float(t.get('price', 0.0) or 0.0),
+                        float(t.get('tax_fee', 0.0) or 0.0),
+                        float(t.get('cash_flow_twd', 0.0) or 0.0),
+                        float(t.get('realized_pnl_twd', 0.0) or 0.0) if t.get('realized_pnl_twd') is not None else None,
+                        float(t.get('realized_return_pct', 0.0) or 0.0) if t.get('realized_return_pct') is not None else None,
+                        str(t.get('note', ''))
+                    ))
+            else:
+                print(f"[Warning] /api/global_titan/sync 攔截到異常交易流水帳 (corrupt_shares={has_corrupt_shares}, total_cash={total_cash})，拒絕污染資料庫！")
         conn.commit()
     except Exception as e:
         conn.rollback()

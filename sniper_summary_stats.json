@@ -1,13 +1,15 @@
 {
-  "total_return_pct": 17795770.3,
-  "multiplier": 177958.7,
-  "cagr_pct": 70.12,
-  "max_drawdown_pct": -27.75,
-  "daily_mdd_pct": -27.75,
-  "sharpe_ratio": 4.69,
-  "calmar_ratio": 2.53,
-  "trade_win_rate_pct": 64.0,
-  "sniper_win_rate_pct": 64.0,
-  "total_trades": 1451,
-  "sniper_trades": 86
+  "initial_capital": 1000000.0,
+  "final_equity": 40985963.0,
+  "total_return_pct": 3998.6,
+  "cagr": 18.39,
+  "mdd": -13.87,
+  "calmar": 1.33,
+  "profit_factor": 2.0,
+  "total_trades": 1036,
+  "win_rate": 70.27,
+  "avg_return_pct": 1.04,
+  "holding_limit_days": 10,
+  "max_slots": 3,
+  "tax_and_fees": "已實質扣除台股 0.3% 證交稅與雙邊 0.1425% 手續費 (單趟 0.585% 摩擦) 及跳空停損滑價"
 }

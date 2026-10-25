@@ -2137,21 +2137,21 @@ export default function OversoldSniperDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.8rem' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>🎯</span> 極端超賣快打量化交易核心邏輯與每日跟單出場操作手冊
+              <span>🎯</span> 極端超賣快打 2.0 (零未來函數實盤版) 核心邏輯與每日預掛限價 SOP 手冊
             </h3>
             <div style={{ fontSize: '0.82rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-              基於 2005～2026 年（22年 5,675 個交易日）跨市場逐日實證審計 ｜ 嚴格扣除 0.3% 證交稅與手續費
+              基於 2005～2026 年（22年 5,660 個交易日）100% 零未來函數逐日審計 ｜ 嚴格扣除雙向手續費、0.3% 證交稅與跳空滑價
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.78rem', background: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', padding: '3px 10px', borderRadius: '4px', border: '1px solid rgba(56, 189, 248, 0.3)', fontWeight: 'bold' }}>
-              扣稅後年化淨 CAGR: +48.8% ~ +53.1%
+              實盤扣稅淨 CAGR: +18.39% (現貨) / +20.43% (個股期)
             </span>
             <span style={{ fontSize: '0.78rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '3px 10px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)', fontWeight: 'bold' }}>
-              歷史 MDD: -9.97%
+              歷史 MDD: -13.87% (Calmar 1.33)
             </span>
             <span style={{ fontSize: '0.78rem', background: 'rgba(192, 132, 252, 0.15)', color: '#C084FC', padding: '3px 10px', borderRadius: '4px', border: '1px solid rgba(192, 132, 252, 0.3)', fontWeight: 'bold' }}>
-              勝率: 76.4%
+              勝率: 70.3% (PF 2.00)
             </span>
           </div>
         </div>
@@ -2159,9 +2159,9 @@ export default function OversoldSniperDashboard() {
         {/* 手冊次分頁切換按鈕 */}
         <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.8rem', flexWrap: 'wrap' }}>
           {[
-            { id: 'sop', label: '📖 核心模型與每日跟單 SOP 手冊', icon: '🎯', badge: '必讀心法' },
-            { id: 'yearly', label: `📊 22年歷年實證績效 (${backtestYearly.length} 個年度明細)`, icon: '📈', badge: '無一年虧損' },
-            { id: 'trades', label: `📜 歷年實證進出歷史 (${allBacktestTrades.length} 筆回測紀錄)`, icon: '📜', badge: '逐筆審計' }
+            { id: 'sop', label: '📖 核心模型與每日預掛單 SOP 手冊', icon: '🎯', badge: '零未來函數' },
+            { id: 'yearly', label: `📊 22年歷年實證績效 (${backtestYearly.length} 個年度明細)`, icon: '📈', badge: '2008海嘯0回撤' },
+            { id: 'trades', label: `📜 歷年實證進出歷史 (${allBacktestTrades.length} 筆回測紀錄)`, icon: '📜', badge: '逐筆扣稅審計' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -2202,33 +2202,33 @@ export default function OversoldSniperDashboard() {
             {/* 左欄：🧠 量化選股與進場核心邏輯 */}
             <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
               <h4 style={{ margin: '0 0 0.8rem 0', color: '#FCD34D', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span>🧠</span> Part A：量化選股與進場核心數學模型
+                <span>🧠</span> Part A：100% 零未來函數量化選股與進場數學模型
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
-                  <strong style={{ color: '#F8FAFC' }}>1. 多頭趨勢護城河 (Price ≥ 200MA 年線)：</strong><br />
-                  絕不抄底弱勢空頭股！標的必須源自全球主權泰坦強勢庫或台股核心龍頭，確保中長線架構處於上升通道中，暴跌只是主力洗盤或機構斷頭的「黃金特價回踩」。
+                  <strong style={{ color: '#F8FAFC' }}>1. 總經大盤與個股雙重年線護城河 (Regime + Trend Filter)：</strong><br />
+                  嚴格要求大盤指數（台股 TAIEX / 美股 SPY）站上 200MA 年線，且個股昨日收盤滿足 <span style={{ color: '#38BDF8', fontFamily: 'monospace' }}>Close ≥ 200MA、60MA ≥ 200MA、半年動能 &gt; +5%</span>。2008 金融海嘯因大盤跌破年線全年 0 出手、0 回撤完美避險！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
-                  <strong style={{ color: '#F8FAFC' }}>2. 盤中限價單錨定 Z ≤ -2.0 打擊區：</strong><br />
-                  偏離 20 日均線達 2.0 倍標準差以下。系統前一日自動逆推解出「明日 Z=-2.0 點位」，於盤中預掛限價單或開盤跳空跌破進場，搶在散戶驚慌殺出時承接最深下影線。
+                  <strong style={{ color: '#F8FAFC' }}>2. T-1 收盤超賣預警 + T 日盤前預掛 Stretch-Limit 限價單：</strong><br />
+                  徹底拔除「盤中偷看收盤下影線」的未來函數！當昨日 (T-1) 收盤 <span style={{ color: '#F87171', fontFamily: 'monospace' }}>Z-Score ≤ -1.7</span> 且未爆出 &gt;2倍出貨巨量時，系統自動以解析解算出今日 (T) 盤前預掛買價 <span style={{ color: '#FACC15', fontFamily: 'monospace' }}>P_limit = min(Z=-2.0 目標價, 昨收 × 0.98)</span>，專接開盤後散戶恐慌再殺 -2% 的流動性錯殺尖端！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                  <strong style={{ color: '#F8FAFC' }}>3. 半年籌碼密集鐵板 (Volume Profile / VPVR 防守)：</strong><br />
-                  嚴格檢查過去 120 天價量直方圖。要求下檔離最近高量密集防守峰（HVN Shelf）差距 <span style={{ color: '#34D399', fontWeight: 'bold' }}>Gap ≤ 2.0%</span>；若距下檔支撐過遠（懸空在跳空真空洞），系統強制啟動扣分機制，避免接在半空中。
+                  <strong style={{ color: '#F8FAFC' }}>3. 黑天鵝開盤跳空保護閥 (Gap-Down Guard)：</strong><br />
+                  若個股遭遇重大法說利空或財報暴雷，開盤直接跳空暴跌超過 -7%（<span style={{ color: '#34D399', fontWeight: 'bold' }}>Open &lt; 昨收 × 0.93</span>），代表基本面結構改變，系統立即取消預掛單不予進場，避開斷頭連環殺。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #C084FC' }}>
-                  <strong style={{ color: '#F8FAFC' }}>4. 盤中 / 尾盤下影線確認 (Tail Ratio ≥ 0.45)：</strong><br />
-                  要求觸發當日 K 棒收出強勁下影線 <span style={{ color: '#C084FC', fontFamily: 'monospace' }}>(Close - Low)/(High - Low) ≥ 0.45</span>，證實盤中有真金白銀的大戶買盤進場兜底，勝率直接躍升至 76%~84%！
+                  <strong style={{ color: '#F8FAFC' }}>4. 半年籌碼密集鐵板 (Volume Profile / VPVR 輔助排序)：</strong><br />
+                  掃描過去 120 天價量直方圖（HVN 籌碼密集峰）。當同日有多檔強勢股觸發預掛條件時，優先排序 Z-Score 最深且貼近 VPVR 籌碼鐵板的龍頭標的。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
-                  <strong style={{ color: '#F8FAFC' }}>5. 嚴格 3 槽位資金管理 (Max 3 Slots)：</strong><br />
-                  帳戶固定切割為 3 檔槽位，每檔配置 1/3 (33.3%) 資金。一年平均僅開火約 40 筆，常態維持 70%~85% 現金防禦，絕不在單一股票上凹單或無限制攤平。
+                  <strong style={{ color: '#F8FAFC' }}>5. 嚴格 3 槽位資金管理 + 閒置資金停泊短債：</strong><br />
+                  帳戶固定切割為 3 檔槽位，每檔配置 1/3 (33.3%) 資金。22 年平均每年僅成交 47.1 筆，常態維持 70%~80% 現金防禦（停泊於 1.5% 短債/活定存），絕不凹單或無限攤平。
                 </div>
               </div>
             </div>
@@ -2236,43 +2236,44 @@ export default function OversoldSniperDashboard() {
             {/* 右欄：📋 跟單者每日監控出場價格操作手冊 */}
             <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
               <h4 style={{ margin: '0 0 0.8rem 0', color: '#34D399', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span>📋</span> Part B：跟單者每日監控出場操作手冊 (實戰 SOP)
+                <span>📋</span> Part B：跟單者每日預掛與兩階段出場操作手冊 (實戰 SOP)
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
                   <strong style={{ color: '#38BDF8' }}>Step 1：每天開盤前 (08:50) 看什麼？</strong><br />
-                  打開本看板切換至「💼 實盤持倉追蹤」，查看系統為您持倉即時計算的 4 個關鍵點位：
-                  <span style={{ color: '#FACC15', fontWeight: 'bold' }}>「10MA目標價」</span>、
-                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>「20MA/+8%目標價」</span>、
-                  <span style={{ color: '#F87171', fontWeight: 'bold' }}>「-6%停損價」</span> 與
-                  <span style={{ color: '#CBD5E1', fontWeight: 'bold' }}>「持倉天數進度 (第 X / 12 天)」</span>。
+                  1. 查看雷達清單中 <span style={{ color: '#34D399', fontWeight: 'bold' }}>T-1 Z ≤ -1.7</span> 的標的，於盤前直接掛入系統算好的「預掛限價買單」。<br />
+                  2. 切換至「💼 實盤持倉追蹤」，查看既有持倉的 4 個關鍵點位：
+                  <span style={{ color: '#FACC15', fontWeight: 'bold' }}>「5MA目標價」</span>、
+                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>「10MA/+8%目標價」</span>、
+                  <span style={{ color: '#F87171', fontWeight: 'bold' }}>「-10%災難停損價」</span> 與
+                  <span style={{ color: '#CBD5E1', fontWeight: 'bold' }}>「持倉天數 (第 X / 10 天)」</span>。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                  <strong style={{ color: '#34D399' }}>Step 2：盤中執行第 1 階段停利 (碰 10MA 賣出 50%)：</strong><br />
-                  當盤中最高價觸碰或突破「10MA 價格」，<span style={{ color: '#34D399', fontWeight: 'bold' }}>立即以市價賣出 50% 部位</span>！此步驟立即鎖定該筆交易的獲利與勝率，心理負擔直接歸零。同時將剩餘 50% 部位停損拉至進場成本價（保本 Free Roll）！
+                  <strong style={{ color: '#34D399' }}>Step 2：第 1 階段極速落袋 (碰 5MA 賣出 50%)：</strong><br />
+                  超賣反彈的最強爆發力集中在進場後 1~4 天！當盤中最高價觸碰或突破「5MA 價格」，<span style={{ color: '#34D399', fontWeight: 'bold' }}>立即賣出 50% 部位</span>，第一時間鎖定逾 70% 的高勝率現金流！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #3B82F6' }}>
-                  <strong style={{ color: '#60A5FA' }}>Step 3：盤中執行第 2 階段停利 (碰 20MA 或 +8% 全出)：</strong><br />
-                  剩餘 50% 部位耐心續抱衝刺。當盤中觸碰「20MA 價格」或「浮盈達 +8.0%」，<span style={{ color: '#60A5FA', fontWeight: 'bold' }}>將剩餘部位全數獲利了結平倉</span>！單筆平均淨獲利將從 +1.5% 飆升至 +3.3%~+7% 以上，吃滿主升段大肉！
+                  <strong style={{ color: '#60A5FA' }}>Step 3：第 2 階段波段停利 (碰 10MA 或 +8% 全出)：</strong><br />
+                  剩餘 50% 部位續抱等待均值回歸完成。當盤中觸碰「10MA 價格」或「浮盈達 +8.0%」（以先觸發之真實點位出場，絕無幽靈溢價），<span style={{ color: '#60A5FA', fontWeight: 'bold' }}>將剩餘部位全數獲利平倉</span>！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
-                  <strong style={{ color: '#F87171' }}>Step 4：硬停損紀律 (跌破 -6.0% 無條件砍倉)：</strong><br />
-                  若行情不如預期，盤中最低價跌破「進場價 × 0.94 (-6%)」，<span style={{ color: '#F87171', fontWeight: 'bold' }}>立即以市價全數認賠平倉</span>！22年歷史實測硬停損率僅約 10%，嚴格停損能保證本金絕不遭受巨幅重創。
+                  <strong style={{ color: '#F87171' }}>Step 4：災難硬停損紀律 (含買進當日跌破 -10.0% 無條件砍倉)：</strong><br />
+                  均值回歸策略給正常洗盤呼吸空間，但若買進當日或持倉期間最低價跌破「進場價 × 0.90 (-10%)」，<span style={{ color: '#F87171', fontWeight: 'bold' }}>立即全數認賠平倉（含隔夜跳空滑價保護）</span>，嚴防單一黑天鵝侵蝕本金。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #DC2626' }}>
-                  <strong style={{ color: '#FCA5A5' }}>Step 5：時間停損紀律 (持倉滿 12 天強制清倉)：</strong><br />
-                  若持倉已達第 12 個交易日（約兩週半）仍未碰到 10MA/20MA，<span style={{ color: '#FCA5A5', fontWeight: 'bold' }}>第 12 天收盤無論賺賠強制市價清倉</span>！均值回歸半衰期只有 3~7 天，超過 12 天代表動能已死，必須解放資金至下一檔！
+                  <strong style={{ color: '#FCA5A5' }}>Step 5：時間停損紀律 (持倉滿 10 天強制清倉)：</strong><br />
+                  若持倉已達第 10 個交易日（兩週）仍未完成 5MA/10MA 回歸，<span style={{ color: '#FCA5A5', fontWeight: 'bold' }}>第 10 天收盤無論賺賠強制市價清倉</span>！超賣反彈半衰期僅 3~5 天，滿 10 天不彈即代表動能鈍化，立即回收資金。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EAB308' }}>
-                  <strong style={{ color: '#FACC15' }}>Step 6：稅費工具建議與全球泰坦互補性：</strong><br />
-                  • <strong style={{ color: '#34D399' }}>工具首選：</strong>強烈建議採用「股票期貨 (個股期)」操作，期交稅僅十萬分之二 (0.002%)，扣稅後年化達 <span style={{ color: '#34D399', fontWeight: 'bold' }}>+50.3%</span>；現貨扣除 0.3% 證交稅後年化亦達 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>+48.8%</span>。<br />
-                  • <strong style={{ color: '#C084FC' }}>泰坦神級互補：</strong>本策略在 2008 (-3.7%海嘯)、2011、2015、2022 年大盤空頭年全面逆勢暴賺 +14%~+66%，與全球泰坦 (63% CAGR) 組合後，創造 22 年無一年虧損之完美曲線！
+                  <strong style={{ color: '#FACC15' }}>Step 6：真實稅費摩擦審計與工具建議：</strong><br />
+                  • <strong style={{ color: '#34D399' }}>工具對比：</strong>台股現貨（雙向手續費 + 0.3% 證交稅 + 1.5% 閒置短債）22年真實年化達 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>+18.39% (MDD -13.87%)</span>；若改用「個股期貨」（雙向摩擦僅 0.05%），真實年化躍升至 <span style={{ color: '#34D399', fontWeight: 'bold' }}>+20.43% (MDD -13.45%, Calmar 1.52)</span>！<br />
+                  • <strong style={{ color: '#C084FC' }}>泰坦互補引擎：</strong>本策略平均 75% 時間空手待命，專在多頭急殺時提供高勝率（70.3%）短線現金流，與長波段趨勢策略形成完美低相關互補！
                 </div>
               </div>
             </div>
@@ -2289,40 +2290,40 @@ export default function OversoldSniperDashboard() {
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #38BDF8' }}>
                 <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>22年複合年化成長率 (CAGR)</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#38BDF8', marginTop: '0.2rem' }}>
-                  +{backtestSummary.cagr || 53.13}%
+                  +{backtestSummary.cagr || 18.39}%
                 </div>
                 <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
-                  扣除 0.3% 證交稅與手續費
+                  零未來函數｜已扣 0.3% 證交稅與手續費
                 </div>
               </div>
 
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
-                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>全局交易勝率 (878 筆)</div>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>全局交易勝率 ({backtestSummary.total_trades || 1036} 筆)</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#34D399', marginTop: '0.2rem' }}>
-                  {backtestSummary.win_rate || 76.42}%
+                  {backtestSummary.win_rate || 70.27}%
                 </div>
                 <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
-                  兩段式停利 50% 10MA + 50% 20MA
+                  兩段式停利 50% 5MA + 50% 10MA/+8%
                 </div>
               </div>
 
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #C084FC' }}>
                 <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>歷史最大回撤 (MDD)</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#C084FC', marginTop: '0.2rem' }}>
-                  {backtestSummary.mdd || -9.97}%
+                  {backtestSummary.mdd || -13.87}%
                 </div>
                 <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
-                  2008 / 2011 / 2015 / 2022 全正報酬
+                  大盤 200MA 濾網｜2008 海嘯 0 回撤
                 </div>
               </div>
 
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.9rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
-                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>平均單筆獲利 & 風控</div>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>單筆淨均利 & 獲利因子</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#FACC15', marginTop: '0.2rem' }}>
-                  +{backtestSummary.avg_return_pct || 3.30}%
+                  +{backtestSummary.avg_return_pct || 1.04}% (PF {backtestSummary.profit_factor || 2.00})
                 </div>
                 <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '0.2rem' }}>
-                  -6% 硬停損 ｜ 最長持股 12 天
+                  -10% 災難停損 ｜ 最長持股 10 天
                 </div>
               </div>
             </div>
