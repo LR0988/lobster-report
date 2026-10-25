@@ -215,7 +215,7 @@ export default function TwAsymmetricAlphaDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.85rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#FBBF24', fontSize: '1.22rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              ⚡ 台股可轉債（CB / CBAS）主力鎖碼 × 強勢股 RSI(2) 急跌狙擊工作站
+              ⚡ 台股可轉債（CB / CBAS）主力鎖碼不對稱暴擊 【CB現貨：500萬～5,000萬 ｜ CBAS：50萬～300萬】
             </h3>
             <span style={{
               fontSize: '0.76rem',
@@ -230,14 +230,14 @@ export default function TwAsymmetricAlphaDashboard() {
             </span>
             <span style={{
               fontSize: '0.74rem',
-              background: 'rgba(168, 85, 247, 0.2)',
-              border: '1px solid rgba(168, 85, 247, 0.45)',
-              color: '#E9D5FF',
+              background: 'rgba(245, 158, 11, 0.2)',
+              border: '1px solid rgba(245, 158, 11, 0.45)',
+              color: '#FDE68A',
               padding: '0.2rem 0.6rem',
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              🛡️ 與長線動能策略「負相關互補」：大盤洗盤時靠 RSI(2) 低接提款，主升段靠 CBAS 鎖死風險翻倍
+              🛡️ CB現貨 (500萬~5000萬無上限保底) ｜ 🚀 CBAS (50萬~300萬槓桿暴擊) ｜ ⚡ RSI(2) (30萬~500萬快打)
             </span>
           </div>
 
