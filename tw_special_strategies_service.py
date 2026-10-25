@@ -748,6 +748,14 @@ def get_tw_event_radar_data():
 
 
 def get_tw_asymmetric_alpha_data():
+    if os.path.exists(ASYM_JSON_PATH):
+        try:
+            with open(ASYM_JSON_PATH, "r", encoding="utf-8") as f:
+                d = json.load(f)
+                if "titan_candidates" in d:
+                    return d
+        except Exception:
+            pass
     res = compute_tw_special_strategies(save_json=False)
     return res.get('tw_asymmetric_alpha', {})
 
