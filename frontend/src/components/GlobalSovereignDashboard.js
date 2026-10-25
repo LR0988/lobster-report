@@ -1735,19 +1735,8 @@ export default function GlobalSovereignDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.22rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球高流動性泰坦旗艦【17 大全因子 DOE 終極冠軍版】
+              👑 全球高流動性泰坦旗艦【17 大全因子 DOE 終極冠軍版・資金無上限】
             </h3>
-            <span style={{
-              fontSize: '0.78rem',
-              background: 'rgba(245, 158, 11, 0.2)',
-              border: '1px solid rgba(245, 158, 11, 0.45)',
-              color: '#FDE68A',
-              padding: '0.2rem 0.65rem',
-              borderRadius: '5px',
-              fontWeight: 'bold'
-            }}>
-              💰 適合資金：3,000萬 ～ 10億元以上（超大資金／家族辦公室／無流動性上限・零滑價）
-            </span>
             <span style={{
               fontSize: '0.78rem',
               background: 'rgba(56, 189, 248, 0.18)',

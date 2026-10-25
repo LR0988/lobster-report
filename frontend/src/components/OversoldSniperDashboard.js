@@ -593,7 +593,7 @@ export default function OversoldSniperDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.6rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#F87171', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              ⚡ AI 後期超賣快打・閃電低接狙擊艙 【適合資金：30 萬 ～ 500 萬】
+              🎯 強勢股極端超賣快打實戰艙 【上限：500萬】
             </h3>
             <span style={{
               fontSize: '0.78rem',
