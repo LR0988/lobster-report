@@ -1,0 +1,51 @@
+[
+  {
+    "label": "第1週(7天)",
+    "cash_cagr_era1": 40.4,
+    "cash_cagr_era2": 49.0,
+    "cash_cagr_era3": 97.2,
+    "cash_cagr_22y": 59.8
+  },
+  {
+    "label": "第2週(14天)",
+    "cash_cagr_era1": 64.3,
+    "cash_cagr_era2": 81.2,
+    "cash_cagr_era3": 160.1,
+    "cash_cagr_22y": 97.1
+  },
+  {
+    "label": "第3週(21天)",
+    "cash_cagr_era1": 79.9,
+    "cash_cagr_era2": 101.5,
+    "cash_cagr_era3": 204.2,
+    "cash_cagr_22y": 121.6
+  },
+  {
+    "label": "第4週(28天)",
+    "cash_cagr_era1": 89.8,
+    "cash_cagr_era2": 111.5,
+    "cash_cagr_era3": 227.3,
+    "cash_cagr_22y": 134.8
+  },
+  {
+    "label": "第5週(35天)",
+    "cash_cagr_era1": 99.1,
+    "cash_cagr_era2": 106.9,
+    "cash_cagr_era3": 226.0,
+    "cash_cagr_22y": 136.2
+  },
+  {
+    "label": "第6週(42天)",
+    "cash_cagr_era1": 99.3,
+    "cash_cagr_era2": 103.3,
+    "cash_cagr_era3": 216.1,
+    "cash_cagr_22y": 132.5
+  },
+  {
+    "label": "第7週(49天)",
+    "cash_cagr_era1": 94.5,
+    "cash_cagr_era2": 103.7,
+    "cash_cagr_era3": 214.3,
+    "cash_cagr_22y": 130.4
+  }
+]
