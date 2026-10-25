@@ -121,8 +121,8 @@ export default function TwAsymmetricAlphaDashboard() {
     showToast('🗑️ 已移除該筆狙擊追蹤紀錄');
   };
 
-  // 22 年可轉債回測明細過濾與分頁計算
-  const yearsList = [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003];
+  // 24 年最新可轉債回測明細過濾與分頁計算 (2003~2026)
+  const yearsList = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003];
 
   const filteredCbTrades = allCbTrades.filter(t => {
     if (cbTradeFilter === 'big_win' && t.pnl_pct < 20) return false;
@@ -392,7 +392,7 @@ export default function TwAsymmetricAlphaDashboard() {
             cursor: 'pointer'
           }}
         >
-          📊 22年歷年實證績效 ({cbBacktestYearly.length} 個年度明細)
+          📊 24年最新實證績效 (2003~2026, {cbBacktestYearly.length} 個年度明細)
         </button>
 
         <button
@@ -733,7 +733,7 @@ export default function TwAsymmetricAlphaDashboard() {
             </div>
             {/* 3 檔極致集中對比小列 */}
             <div style={{ marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px dashed rgba(245, 158, 11, 0.25)', fontSize: '0.75rem', color: '#94A3B8', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <span>⚡ <strong>對比【3 檔極致集中 (單檔 33.3%)】：</strong> 現貨 CAGR <strong>+{cbBacktestSummary.three_slots_comparison?.cagr || 21.21}%</strong> ｜ CBAS CAGR <strong>+{cbBacktestSummary.three_slots_comparison?.cbas_cagr || 52.76}%</strong> ｜ 22 年共 <strong>{cbBacktestSummary.three_slots_comparison?.total_trades || 82}</strong> 筆交易 ｜ MDD <strong>{cbBacktestSummary.three_slots_comparison?.cbas_mdd || -7.85}%</strong></span>
+              <span>⚡ <strong>對比【3 檔極致集中 (單檔 33.3%)】：</strong> 現貨 CAGR <strong>+{cbBacktestSummary.three_slots_comparison?.cagr || 22.6}%</strong> ｜ CBAS CAGR <strong>+{cbBacktestSummary.three_slots_comparison?.cbas_cagr || 55.32}%</strong> ｜ 24 年共 <strong>{cbBacktestSummary.three_slots_comparison?.total_trades || 90}</strong> 筆交易 ｜ MDD <strong>{cbBacktestSummary.three_slots_comparison?.cbas_mdd || -7.85}%</strong></span>
               <span style={{ color: '#FDE68A' }}>💡 3 檔模式因資金佔用高，新標的排隊摩擦略增，但黑馬爆發時單檔淨值拉抬更強</span>
             </div>
           </div>
@@ -755,7 +755,7 @@ export default function TwAsymmetricAlphaDashboard() {
                   cursor: 'pointer'
                 }}
               >
-                🚀 模式 A：全因子 CBAS 實戰輪動 (CAGR +{cbBacktestSummary.cbas_cagr || 52.49}%)
+                🚀 模式 A：全因子 CBAS 實戰輪動 (CAGR +{cbBacktestSummary.cbas_cagr || 55.57}%)
               </button>
 
               <button
@@ -771,14 +771,14 @@ export default function TwAsymmetricAlphaDashboard() {
                   cursor: 'pointer'
                 }}
               >
-                🛡️ 模式 B：全額買進現貨 CB 隱形保底 (CAGR +{cbBacktestSummary.cagr || 21.07}%)
+                🛡️ 模式 B：全額買進現貨 CB 隱形保底 (CAGR +{cbBacktestSummary.cagr || 22.35}%)
               </button>
             </div>
 
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
               {cbMode === 'cbas'
-                ? '💡 CBAS 實戰模式：同時持有最多 5 檔，已全額扣除券商手續費、OTC造市價差與年化 2.2% 融資利息，22年 CAGR 達 52.49%！'
-                : '💡 現貨 CB 模式：100% 現金全額持有（20萬/檔，共5檔），下檔由 100 面額法定保底，22年 CAGR 達 21.07%！'}
+                ? '💡 CBAS 實戰模式：同時持有最多 5 檔，已全額扣除券商手續費、OTC造市價差與年化 2.2% 融資利息，24年 CAGR 達 55.57%！'
+                : '💡 現貨 CB 模式：100% 現金全額持有（20萬/檔，共5檔），下檔由 100 面額法定保底，24年 CAGR 達 22.35%！'}
             </div>
           </div>
 
@@ -788,7 +788,7 @@ export default function TwAsymmetricAlphaDashboard() {
                 {cbMode === 'cbas' ? '🚀 CBAS 複合年化成長率 (CAGR)' : '🛡️ 現貨 CB 複合年化成長率 (CAGR)'}
               </div>
               <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: cbMode === 'cbas' ? '#FDE68A' : '#38BDF8', marginTop: '0.2rem' }}>
-                +{cbMode === 'cbas' ? (cbBacktestSummary.cbas_cagr || 52.49) : (cbBacktestSummary.cagr || 21.07)}%
+                +{cbMode === 'cbas' ? (cbBacktestSummary.cbas_cagr || 55.57) : (cbBacktestSummary.cagr || 22.35)}%
               </div>
               <div style={{ fontSize: '0.7rem', color: '#6EE7B7', marginTop: '0.2rem' }}>
                 {cbMode === 'cbas' ? '扣除 2.2% 年利息・無保證金追繳' : '100% 契約保底・下檔鎖定在 100 元'}
@@ -965,7 +965,7 @@ export default function TwAsymmetricAlphaDashboard() {
                   color: '#FFF'
                 }}
               >
-                <option value="all">📅 全部年份 (2003~2024)</option>
+                <option value="all">📅 全部年份 (2003~2026)</option>
                 {yearsList.map(yr => (
                   <option key={yr} value={String(yr)}>{yr} 年</option>
                 ))}
