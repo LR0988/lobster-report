@@ -4256,8 +4256,8 @@ function StockDashboard() {
           {[
             { id: 'screener', label: '🎯 智慧選股器' },
             { id: 'market_ml', label: '📊 股市策略總覽' },
-            { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦 【適合: 100萬~2000萬】' },
-            { id: 'global_sovereign', label: '👑 全球主權泰坦 【適合: 100萬~3000萬】' },
+            { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦 【適合: 1000萬~1億以上】' },
+            { id: 'global_sovereign', label: '👑 全球主權泰坦 【適合: 3000萬～10億以上·無流動性上限】' },
             { id: 'oversold_sniper', label: '⚡ 超賣快打狙擊 【適合: 30萬~500萬】' },
             { id: 'asymmetric_alpha', label: '⚡ 可轉債不對稱暴擊 【CB: 500萬~5000萬 | CBAS: 50萬~300萬】' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },

@@ -1739,6 +1739,17 @@ export default function GlobalSovereignDashboard() {
             </h3>
             <span style={{
               fontSize: '0.78rem',
+              background: 'rgba(245, 158, 11, 0.2)',
+              border: '1px solid rgba(245, 158, 11, 0.45)',
+              color: '#FDE68A',
+              padding: '0.2rem 0.65rem',
+              borderRadius: '5px',
+              fontWeight: 'bold'
+            }}>
+              💰 適合資金：3,000萬 ～ 10億元以上（超大資金／家族辦公室／無流動性上限・零滑價）
+            </span>
+            <span style={{
+              fontSize: '0.78rem',
               background: 'rgba(56, 189, 248, 0.18)',
               border: '1px solid rgba(56, 189, 248, 0.45)',
               color: '#38BDF8',

@@ -1269,6 +1269,19 @@ export default function TaiwanCausalTitanDashboard() {
               <h2 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 'bold', color: '#F8FAFC' }}>
                 👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10)
               </h2>
+              <span style={{
+                fontSize: '0.78rem',
+                background: 'rgba(56, 189, 248, 0.2)',
+                border: '1px solid rgba(56, 189, 248, 0.45)',
+                color: '#7DD3FC',
+                padding: '0.2rem 0.65rem',
+                borderRadius: '5px',
+                fontWeight: 'bold',
+                display: 'inline-block',
+                marginTop: '0.35rem'
+              }}>
+                💰 適合資金：1,000萬 ～ 1億元以上（台股市值前100大高流動性滾動池）
+              </span>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
               市值前 100 大滾動池 · 每月 11 號法定公告日建倉 · 4 大真因果 Alpha 因子 · 60MA 季線動態風控停損 · <strong>以歷史交易進出流水帳為唯一真實來源</strong>
