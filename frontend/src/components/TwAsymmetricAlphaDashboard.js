@@ -15,9 +15,9 @@ export default function TwAsymmetricAlphaDashboard() {
   const [data, setData] = useState(defaultAsymData);
   const [loading, setLoading] = useState(false);
 
-  // 主子分頁: 'radar' (今日泰坦17因子雷達) | 'tracker' (我的進行中持倉) | 'history' (實戰進出歷史) | 'doe_backtest' (27年按週DOE與歷年實證)
+  // 主子分頁: 'radar' (今日落難天使好球帶雷達) | 'tracker' (我的進行中持倉) | 'history' (實戰進出歷史) | 'doe_backtest' (歷史四大神作巡禮與27年實證)
   const [activeSubTab, setActiveSubTab] = useState('radar');
-  const [radarFilter, setRadarFilter] = useState('strict_buy'); // 'strict_buy' | 'waiting_pivot' | 'all'
+  const [radarFilter, setRadarFilter] = useState('in_zone'); // 'in_zone' | 'near_zone' | 'watching' | 'all'
   const [followMode, setFollowMode] = useState('CBAS'); // 'CBAS' (上限300萬) | 'CB現貨' (上限5000萬)
   const [followBudgetLevel, setFollowBudgetLevel] = useState('900k'); // '300k' | '900k' | '3000k' | '15000k'
   const [notice, setNotice] = useState('');
@@ -121,10 +121,10 @@ export default function TwAsymmetricAlphaDashboard() {
       const live = await apiGetTwAsymmetricAlphaDashboard();
       if (live && live.status === 'ok' && Array.isArray(live.titan_candidates)) {
         setData(live);
-        showToast('✅ 已同步最新泰坦 17 因子可轉債掃描資料！');
+        showToast('✅ 已同步最新落難天使好球帶可轉債掃描資料！');
       } else {
         setData(defaultAsymData);
-        showToast('✅ 已重整至最新泰坦 17 因子可轉債雷達 (2026-10-25)！');
+        showToast('✅ 已重整至最新落難天使好球帶可轉債雷達 (2026-10-25)！');
       }
     } catch (e) {
       setData(defaultAsymData);
@@ -144,19 +144,25 @@ export default function TwAsymmetricAlphaDashboard() {
     }
   }, [followBudgetLevel]);
 
-  // 候選清單分類
+  // 候選清單分類 (落難天使好球帶三層漏斗)
   const allCandidates = useMemo(() => {
     return data?.titan_candidates || defaultAsymData?.titan_candidates || [];
   }, [data]);
 
-  const strictBuyList = useMemo(() => allCandidates.filter(c => c.is_strict_buy), [allCandidates]);
-  const waitingPivotList = useMemo(() => allCandidates.filter(c => c.is_waiting_pivot), [allCandidates]);
+  const inZoneList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'in_zone' || c.is_strict_buy), [allCandidates]);
+  const nearZoneList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'near_zone' || c.is_waiting_pivot), [allCandidates]);
+  const watchingList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'watching'), [allCandidates]);
+
+  // 兼容舊別名
+  const strictBuyList = inZoneList;
+  const waitingPivotList = nearZoneList;
 
   const displayedRadarItems = useMemo(() => {
-    if (radarFilter === 'strict_buy') return strictBuyList;
-    if (radarFilter === 'waiting_pivot') return waitingPivotList;
+    if (radarFilter === 'in_zone' || radarFilter === 'strict_buy') return inZoneList;
+    if (radarFilter === 'near_zone' || radarFilter === 'waiting_pivot') return nearZoneList;
+    if (radarFilter === 'watching') return watchingList;
     return allCandidates;
-  }, [radarFilter, strictBuyList, waitingPivotList, allCandidates]);
+  }, [radarFilter, inZoneList, nearZoneList, watchingList, allCandidates]);
 
   // 動態計算用戶實戰 KPI (由真實歷史進出驅動)
   const userPerf = useMemo(() => {
@@ -228,7 +234,7 @@ export default function TwAsymmetricAlphaDashboard() {
       can_sell: false,
       sell_badge: '🛡️ 新建倉持有中 (第 1/28 天)',
       sell_instruction: `進場時間 ${curDate} ${curTime}，等待主升段噴發觸及停利，最慢滿 28 天(4週)定時換倉！`,
-      notes: `泰坦17因子跟單：VCP=${item.vcp_ratio} | 口袋支點=${item.pocket_pivot_mult}x | Parity=${item.parity}`
+      notes: `落難天使好球帶：賽道=${item.theme_tag || item.industry} | 距離好球帶=${item.distance_to_strike_pct}% | 千張大戶=${item.whale_pct}% | 發行${item.issue_amount_b || 20}億`
     };
 
     setActiveHoldings(prev => [newHolding, ...prev]);
@@ -248,8 +254,8 @@ export default function TwAsymmetricAlphaDashboard() {
     const totalCost = Math.round(valPrice * 1000 * valLots);
 
     const text = selectedMode === 'CBAS'
-      ? `【⚡可轉債CBAS暴擊跟單】標的：${item.cb_name} (${item.cb_code} / 現股 ${item.stock_id} ${item.stock_name}) | 模式：CBAS選擇權 | 建議買進權利金：${valPrice} 元/百元面額 | 建議張數：${valLots} 張 (動用權利金約 NT$${totalCost.toLocaleString()}) | 首段停利：+85% | 暴擊目標：+180% | 換倉期限：28天(4週)極速輪動`
-      : `【🛡️可轉債CB現貨跟單】標的：${item.cb_name} (${item.cb_code} / 現股 ${item.stock_id} ${item.stock_name}) | 模式：CB現貨 | 建議買進價：${valPrice} 元 | 建議張數：${valLots} 張 (動用約 NT$${totalCost.toLocaleString()}) | 首段停利：${item.target_stage1_cb}元 (+12%) | 暴擊目標：${item.target_stage2_cb}元 (+25%) | 下檔保護：100元債底 | 換倉期限：28天(4週)`;
+      ? `【🎯落難天使CBAS好球帶狙擊】標的：${item.cb_name} (${item.cb_code} / 現股 ${item.stock_id} ${item.stock_name}) | 賽道：${item.theme_tag || item.industry} | 模式：CBAS選擇權 | 建議買進權利金：${valPrice} 元/百元面額 | 建議張數：${valLots} 張 (動用權利金約 NT$${totalCost.toLocaleString()}) | 距離好球帶：${item.distance_to_strike_pct}% | 翻倍預估：+${item.est_mult_2x || 35}倍 | 停損：僅限權利金`
+      : `【🛡️落難天使CB現貨保底跟單】標的：${item.cb_name} (${item.cb_code} / 現股 ${item.stock_id} ${item.stock_name}) | 模式：CB現貨 | 建議買進價：${valPrice} 元 | 建議張數：${valLots} 張 (動用約 NT$${totalCost.toLocaleString()}) | 首段停利：${item.target_stage1_cb}元 | 暴擊目標：${item.target_stage2_cb}元 | 下檔保護：100元債底保底`;
 
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(text);
@@ -533,10 +539,10 @@ export default function TwAsymmetricAlphaDashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cb_titan17_doe_27y_trades_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `cb_fallen_angels_27y_trades_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast(`📥 已匯出 ${filteredCbTrades.length} 筆 27 年泰坦 17 因子回測明細 CSV！`);
+    showToast(`📥 已匯出 ${filteredCbTrades.length} 筆 27 年落難天使好球帶回測明細 CSV！`);
   };
 
   return (
@@ -573,7 +579,7 @@ export default function TwAsymmetricAlphaDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.65rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#FBBF24', fontSize: '1.24rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              ⚡ 台股可轉債（CB / CBAS）泰坦 17 因子極速暴擊艙 【上限：CB 5,000萬 / CBAS 300萬】
+              🎯 台股可轉債（CB / CBAS）落難天使好球帶狙擊艙 【上限：CB 5,000萬 / CBAS 300萬】
             </h3>
             <span style={{
               fontSize: '0.76rem',
@@ -595,7 +601,7 @@ export default function TwAsymmetricAlphaDashboard() {
               borderRadius: '4px',
               fontWeight: 'bold'
             }}>
-              🔥 泰坦 17 因子 DOE × 3 檔極致集中 × 28天(4週)極速換倉
+              🎯 落難天使三大篩選漏斗 × 崩跌好球帶(CB ≤ 104 / CBAS ≤ 3元) × 不對稱暴擊
             </span>
           </div>
 
@@ -613,11 +619,11 @@ export default function TwAsymmetricAlphaDashboard() {
               fontWeight: 'bold'
             }}
           >
-            {loading ? '🔄 掃描中...' : '⚡ 重新掃描泰坦 17 因子雷達'}
+            {loading ? '🔄 掃描中...' : '🎯 重新掃描落難天使雷達'}
           </button>
         </div>
 
-        {/* AI 爆發後期最新策略核心橫條 */}
+        {/* 落難天使核心策略法則橫條 */}
         <div style={{
           background: 'rgba(245, 158, 11, 0.08)',
           border: '1px solid rgba(245, 158, 11, 0.28)',
@@ -632,12 +638,12 @@ export default function TwAsymmetricAlphaDashboard() {
           lineHeight: '1.5'
         }}>
           <div>
-            <span style={{ color: '#FBBF24', fontWeight: 'bold' }}>🔬 最新泰坦 17 因子 DOE 四大鐵律：</span>
-            ① <strong>VCP 波動收縮 &lt; 0.72</strong>（籌碼極度安定）＋ ② <strong>口袋支點量能 &gt; 1.35x</strong>（大戶鎖碼點火）＋ ③ <strong>轉換價值 Parity 98~112 且溢價率 &lt; 8%</strong>（貼近理論價值起漲甜區）＋ ④ <strong>現股 60MA 季線向上</strong>。
+            <span style={{ color: '#FBBF24', fontWeight: 'bold' }}>🔬 落難天使三大漏斗篩選法則：</span>
+            ① <strong>發行規模 ≥ 5億 ＋ 存續期間 ≥ 1.5年</strong>（券商造市與 CBAS 拆解額度充裕，有足夠時間翻倍）＋ ② <strong>大戶鎖碼 ≥ 50% ＋ 曾創高價 ≥ 125元</strong>（熱門主流賽道、具備飆股基因）＋ ③ <strong>崩跌好球帶觸發</strong>：平常只看不買，專等大盤暴跌恐慌時，CB 砸回 <strong>≤ 104元</strong>，CBAS 權利金打回 <strong>≤ 3.0元銅板價</strong>！
           </div>
           <div>
-            <span style={{ color: '#34D399', fontWeight: 'bold' }}>⚡ AI 爆發後期 28 天極速周轉：</span>
-            27 年實證發現 AI 時代可轉債爆發期已由 34 天壓縮至 <strong>平均 18 天</strong>！固定最多持有 <strong>3 檔槽位 (各33.3%)</strong>，達標停利即走、滿 <strong>28 天 (4週)</strong> 強制換倉不戀棧，徹底釋放資金輪動率！
+            <span style={{ color: '#34D399', fontWeight: 'bold' }}>⚡ 崩跌收割・30~100倍不對稱暴擊：</span>
+            大戶鎖碼後進場只會追高，<strong>唯有大盤無差別崩跌，明星 CB 才會被迫掉入好球帶</strong>！實證歷史神作：<strong>2020 奇鋐五/長榮四、2022 華城三/雙鴻四</strong>均在崩跌時跌入 100~104 元，以 1~3 元 CBAS 銅板價重倉撈底，大盤落底復甦後狂噴 <strong>30x~200x</strong> 史詩級獲利！
           </div>
         </div>
 
@@ -842,13 +848,13 @@ export default function TwAsymmetricAlphaDashboard() {
         {[
           {
             id: 'radar',
-            label: `🎯 今日泰坦 17 因子暴擊雷達 (${strictBuyList.length} 檔首選可敲進)`,
+            label: `🎯 今日落難天使好球帶雷達 (${inZoneList.length} 檔在好球帶·首選敲進)`,
             color: '#F59E0B',
             bg: 'rgba(245, 158, 11, 0.25)'
           },
           {
             id: 'tracker',
-            label: `💼 我的進行中持倉 (${activeHoldings.length}/3 檔槽位·28天換倉倒數)`,
+            label: `💼 我的進行中持倉 (${activeHoldings.length}/3 檔槽位·好球帶持倉)`,
             color: '#38BDF8',
             bg: 'rgba(56, 189, 248, 0.22)'
           },
@@ -860,7 +866,7 @@ export default function TwAsymmetricAlphaDashboard() {
           },
           {
             id: 'doe_backtest',
-            label: `📊 2000～2026 (27年) 按週 DOE 趨勢與歷年實證 (${allCbTrades.length} 筆)`,
+            label: `📊 歷史四大神作巡禮與 27 年實證 (${allCbTrades.length} 筆)`,
             color: '#A855F7',
             bg: 'rgba(168, 85, 247, 0.22)'
           }
@@ -885,24 +891,24 @@ export default function TwAsymmetricAlphaDashboard() {
       </div>
 
       {/* ============================================================== */}
-      {/* 視圖 1：🎯 今日泰坦 17 因子暴擊雷達 (一鍵跟單 + 複製指令) */}
+      {/* 視圖 1：🎯 今日落難天使好球帶雷達 (一鍵跟單 + 複製指令) */}
       {/* ============================================================== */}
       {activeSubTab === 'radar' && (
         <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #F59E0B' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.9rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                📡 台股可轉債（CB / CBAS）泰坦 17 因子 DOE 即時掃描清單
+                🎯 台股可轉債（CB / CBAS）落難天使好球帶即時掃描清單
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                嚴格篩選 <strong>VCP 波動收縮 &lt; 0.72 ＋ 口袋支點量能 &gt; 1.35x ＋ 轉換價值 Parity 98~112 ＋ 溢價率 &lt; 8%</strong>。直接在右方輸入或確認張數即可一鍵跟單！
+                嚴格執行三大篩選漏斗：<strong>發行規模 ≥ 5億 ＋ 存續 ≥ 1.5年 ＋ 千張大戶 ≥ 50% ＋ 曾創高價明星賽道</strong>。平時一股不買，專等大盤暴跌砸進 <strong>≤ 104 元好球帶（CBAS ≤ 3.0 元銅板價）</strong>撈底收割！
               </p>
             </div>
 
             {/* 雷達分級篩選器 */}
             <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap' }}>
               <button
-                onClick={() => setRadarFilter('strict_buy')}
+                onClick={() => setRadarFilter('in_zone')}
                 style={{
                   padding: '0.26rem 0.7rem',
                   borderRadius: '4px',
@@ -910,14 +916,14 @@ export default function TwAsymmetricAlphaDashboard() {
                   fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  background: radarFilter === 'strict_buy' ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
-                  color: radarFilter === 'strict_buy' ? '#FFF' : '#94A3B8'
+                  background: (radarFilter === 'in_zone' || radarFilter === 'strict_buy') ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
+                  color: (radarFilter === 'in_zone' || radarFilter === 'strict_buy') ? '#FFF' : '#94A3B8'
                 }}
               >
-                🔥 4大DOE因子全過·首選買進 ({strictBuyList.length})
+                🎯 進入好球帶·首選狙擊 ({inZoneList.length})
               </button>
               <button
-                onClick={() => setRadarFilter('waiting_pivot')}
+                onClick={() => setRadarFilter('near_zone')}
                 style={{
                   padding: '0.26rem 0.7rem',
                   borderRadius: '4px',
@@ -925,11 +931,26 @@ export default function TwAsymmetricAlphaDashboard() {
                   fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  background: radarFilter === 'waiting_pivot' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
-                  color: radarFilter === 'waiting_pivot' ? '#FFF' : '#94A3B8'
+                  background: (radarFilter === 'near_zone' || radarFilter === 'waiting_pivot') ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                  color: (radarFilter === 'near_zone' || radarFilter === 'waiting_pivot') ? '#FFF' : '#94A3B8'
                 }}
               >
-                ⏳ VCP收縮中·等口袋支點補量 ({waitingPivotList.length})
+                🟡 逼近警戒區 ({nearZoneList.length})
+              </button>
+              <button
+                onClick={() => setRadarFilter('watching')}
+                style={{
+                  padding: '0.26rem 0.7rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'watching' ? 'linear-gradient(135deg, #64748B, #475569)' : 'transparent',
+                  color: radarFilter === 'watching' ? '#FFF' : '#94A3B8'
+                }}
+              >
+                ⚪ 高檔觀望中 ({watchingList.length})
               </button>
               <button
                 onClick={() => setRadarFilter('all')}
@@ -944,7 +965,7 @@ export default function TwAsymmetricAlphaDashboard() {
                   color: radarFilter === 'all' ? '#FFF' : '#94A3B8'
                 }}
               >
-                全部可轉債監控 ({allCandidates.length})
+                全部落難天使候選池 ({allCandidates.length})
               </button>
             </div>
           </div>
@@ -1025,6 +1046,97 @@ export default function TwAsymmetricAlphaDashboard() {
             </div>
           </div>
 
+          {/* 🌟 歷史四大落難天使神作榜 (證明「大盤恐慌崩跌 ＝ CBAS 暴擊好球帶」) */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(15, 23, 42, 0.8))',
+            border: '1px solid rgba(168, 85, 247, 0.35)',
+            borderRadius: '8px',
+            padding: '0.75rem 1rem',
+            marginBottom: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#E9D5FF', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span>🌟</span> 歷史四大落難天使神作巡禮（證明「大盤恐慌崩跌 ＝ CBAS 暴擊好球帶」）：
+              </span>
+              <span style={{ fontSize: '0.72rem', color: '#A78BFA' }}>
+                💡 共通點：平常高不可攀，唯有大盤暴跌破發跌至 97~103 元，大盤回春後 CB 噴破 350~1000 元！
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+              gap: '0.6rem'
+            }}>
+              {[
+                {
+                  title: '⚡ 華城三 (15193)',
+                  track: '重電變壓器龍頭',
+                  crashDate: '2022/10 大盤殺萬二恐慌',
+                  bottomPrice: 'CB跌至 101.5 元 (CBAS 1.8 元)',
+                  peakPrice: '現股飆 988 元 / CB飆破 1,000 元',
+                  cbasGain: '+55,455% (550倍暴擊)',
+                  bg: 'rgba(245, 158, 11, 0.12)',
+                  border: 'rgba(245, 158, 11, 0.35)',
+                  color: '#FDE68A'
+                },
+                {
+                  title: '❄️ 奇鋐五 (30175)',
+                  track: 'AI伺服器散熱水冷龍頭',
+                  crashDate: '2022/10 升息通膨恐慌',
+                  bottomPrice: 'CB跌至 102.8 元 (CBAS 2.4 元)',
+                  peakPrice: '現股飆 740 元 / CB飆破 420 元',
+                  cbasGain: '+13,200% (132倍暴擊)',
+                  bg: 'rgba(56, 189, 248, 0.12)',
+                  border: 'rgba(56, 189, 248, 0.35)',
+                  color: '#7DD3FC'
+                },
+                {
+                  title: '❄️ 雙鴻四 (33244)',
+                  track: '水冷散熱板 / 液冷CDU',
+                  crashDate: '2022年 全球科技股去庫存',
+                  bottomPrice: 'CB跌至 101.2 元 (CBAS 2.1 元)',
+                  peakPrice: '現股飆 800+ 元 / CB飆破 360 元',
+                  cbasGain: '+12,280% (122倍暴擊)',
+                  bg: 'rgba(168, 85, 247, 0.12)',
+                  border: 'rgba(168, 85, 247, 0.35)',
+                  color: '#E9D5FF'
+                },
+                {
+                  title: '🚢 長榮四 (26034)',
+                  track: '全球貨櫃航運巨擘',
+                  crashDate: '2020/03 COVID-19世紀熔斷',
+                  bottomPrice: 'CB跌至 97.5 元破發 (CBAS 1.2 元)',
+                  peakPrice: '現股飆 233 元 / CB飆破 450 元',
+                  cbasGain: '+29,000% (290倍暴擊)',
+                  bg: 'rgba(16, 185, 129, 0.12)',
+                  border: 'rgba(16, 185, 129, 0.35)',
+                  color: '#6EE7B7'
+                }
+              ].map((hero, hIdx) => (
+                <div key={hIdx} style={{
+                  background: hero.bg,
+                  border: `1px solid ${hero.border}`,
+                  borderRadius: '6px',
+                  padding: '0.55rem 0.75rem',
+                  fontSize: '0.74rem',
+                  lineHeight: '1.45'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <strong style={{ color: hero.color, fontSize: '0.82rem' }}>{hero.title}</strong>
+                    <span style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{hero.track}</span>
+                  </div>
+                  <div style={{ color: '#CBD5E1', fontSize: '0.7rem' }}>📉 崩跌落難：{hero.crashDate}</div>
+                  <div style={{ color: '#FCD34D', fontSize: '0.71rem' }}>🎯 好球帶底價：<strong>{hero.bottomPrice}</strong></div>
+                  <div style={{ color: '#A7F3D0', fontSize: '0.71rem' }}>🚀 復甦噴發：{hero.peakPrice}</div>
+                  <div style={{ color: '#F43F5E', fontWeight: 'bold', fontSize: '0.78rem', marginTop: '2px', textAlign: 'right' }}>
+                    CBAS獲利：{hero.cbasGain}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* 雷達候選表格 */}
           <div style={{ overflowX: 'auto' }}>
             <table className="custom-table" style={{ width: '100%', fontSize: '0.83rem' }}>
@@ -1033,11 +1145,11 @@ export default function TwAsymmetricAlphaDashboard() {
                   <th>現股與可轉債代號</th>
                   <th style={{ textAlign: 'right' }}>現股價 / 轉換價 / Parity</th>
                   <th style={{ background: 'rgba(16, 185, 129, 0.08)', color: '#A7F3D0' }}>
-                    🛡️ 泰坦 17 因子 DOE 診斷 (VCP / 口袋支點 / 溢價率)
+                    🎯 落難天使好球帶診斷 (距離 104 元好球帶 / 千張大戶 / 存續期)
                   </th>
                   <th style={{ textAlign: 'right', color: '#FBBF24' }}>CB現貨價 / CBAS權利金</th>
                   <th style={{ background: 'rgba(56, 189, 248, 0.08)', color: '#BAE6FD' }}>
-                    🎯 兩段式停利目標 &amp; 28天極速換倉線
+                    🚀 暴擊目標與翻倍預估 (🎯好球帶狀態 / 翻倍倍數 / 停利點)
                   </th>
                   <th style={{ textAlign: 'center', background: 'rgba(245, 158, 11, 0.08)', color: '#FDE68A' }}>
                     ✍️ 快速跟單 (買價 / 張數 / 一鍵買入)
@@ -1058,10 +1170,12 @@ export default function TwAsymmetricAlphaDashboard() {
                     <tr
                       key={item.cb_code}
                       style={{
-                        background: item.is_strict_buy
+                        background: (item.strike_zone_status === 'in_zone' || item.is_strict_buy)
                           ? 'rgba(16, 185, 129, 0.10)'
-                          : (item.is_waiting_pivot ? 'rgba(245, 158, 11, 0.05)' : 'transparent'),
-                        borderLeft: item.is_strict_buy ? '4px solid #10B981' : (item.is_waiting_pivot ? '4px solid #F59E0B' : 'none')
+                          : ((item.strike_zone_status === 'near_zone' || item.is_waiting_pivot) ? 'rgba(245, 158, 11, 0.05)' : 'transparent'),
+                        borderLeft: (item.strike_zone_status === 'in_zone' || item.is_strict_buy)
+                          ? '4px solid #10B981'
+                          : ((item.strike_zone_status === 'near_zone' || item.is_waiting_pivot) ? '4px solid #F59E0B' : 'none')
                       }}
                     >
                       {/* 1. 標的與CB代號 */}
@@ -1073,14 +1187,21 @@ export default function TwAsymmetricAlphaDashboard() {
                             padding: '1px 6px',
                             borderRadius: '3px',
                             fontWeight: 'bold',
-                            background: item.is_strict_buy ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.2)',
-                            color: item.is_strict_buy ? '#34D399' : '#FCD34D'
+                            background: item.strike_zone_status === 'in_zone'
+                              ? 'rgba(16, 185, 129, 0.25)'
+                              : (item.strike_zone_status === 'near_zone' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.08)'),
+                            color: item.strike_zone_status === 'in_zone'
+                              ? '#34D399'
+                              : (item.strike_zone_status === 'near_zone' ? '#FCD34D' : '#94A3B8')
                           }}>
-                            {item.is_strict_buy ? '🔥 首選暴擊' : (item.is_waiting_pivot ? '⏳ VCP蓄勢' : '👀 觀察池')}
+                            {item.status_badge || (item.is_strict_buy ? '🎯 好球帶' : '👀 觀望')}
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.73rem', color: '#94A3B8', marginTop: '3px', fontFamily: 'monospace' }}>
-                          現股: {item.stock_name} ({item.stock_id}.TW) · {item.industry}
+                        <div style={{ fontSize: '0.73rem', color: '#38BDF8', marginTop: '3px', fontWeight: '500' }}>
+                          {item.theme_tag || item.industry}
+                        </div>
+                        <div style={{ fontSize: '0.71rem', color: '#94A3B8', marginTop: '1px', fontFamily: 'monospace' }}>
+                          現股: {item.stock_name} ({item.stock_id}.TW) ｜ 發行 {item.issue_amount_b || 20} 億
                         </div>
                       </td>
 
@@ -1097,7 +1218,7 @@ export default function TwAsymmetricAlphaDashboard() {
                         </div>
                       </td>
 
-                      {/* 3. 泰坦 17 因子 DOE 診斷 */}
+                      {/* 3. 落難天使好球帶診斷 */}
                       <td style={{ verticalAlign: 'middle' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
@@ -1106,24 +1227,24 @@ export default function TwAsymmetricAlphaDashboard() {
                               padding: '1px 6px',
                               borderRadius: '3px',
                               fontWeight: 'bold',
-                              background: item.has_vcp ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.15)',
-                              color: item.has_vcp ? '#34D399' : '#FCA5A5'
+                              background: item.strike_zone_status === 'in_zone' ? 'rgba(16, 185, 129, 0.25)' : (item.strike_zone_status === 'near_zone' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.08)'),
+                              color: item.strike_zone_status === 'in_zone' ? '#34D399' : (item.strike_zone_status === 'near_zone' ? '#FCD34D' : '#94A3B8')
                             }}>
-                              📐 VCP收縮: {item.vcp_ratio} {item.has_vcp ? '✅ (<0.72)' : '⚠️'}
+                              🎯 距離好球帶 (104元): {item.distance_to_strike_pct <= 0 ? `${item.distance_to_strike_pct}% ✅ (在好球帶)` : `+${item.distance_to_strike_pct}%`}
                             </span>
                             <span style={{
                               fontSize: '0.72rem',
                               padding: '1px 6px',
                               borderRadius: '3px',
                               fontWeight: 'bold',
-                              background: item.has_pocket_pivot ? 'rgba(56, 189, 248, 0.2)' : 'rgba(245, 158, 11, 0.15)',
-                              color: item.has_pocket_pivot ? '#38BDF8' : '#FCD34D'
+                              background: item.whale_pct >= 50 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                              color: item.whale_pct >= 50 ? '#38BDF8' : '#CBD5E1'
                             }}>
-                              💥 口袋支點量: {item.pocket_pivot_mult}x {item.has_pocket_pivot ? '✅' : '⏳待補量'}
+                              🐋 千張大戶: {item.whale_pct}% {item.whale_pct >= 50 ? '✅' : ''}
                             </span>
                           </div>
                           <div style={{ fontSize: '0.72rem', color: '#CBD5E1' }}>
-                            💎 轉換溢價率: <strong style={{ color: item.premium_rate_pct <= 8 ? '#34D399' : '#FBBF24' }}>{item.premium_rate_pct}%</strong> ｜ 60MA斜率: <strong style={{ color: '#34D399' }}>+{item.ma60_slope_pct}%</strong> ｜ 大戶鎖碼: <strong>{item.lock_score}分</strong>
+                            ⏳ 存續期: <strong style={{ color: '#38BDF8' }}>{item.runway_years || 2.5} 年</strong> (至 {item.maturity_date}) ｜ 溢價率: <strong style={{ color: item.premium_rate_pct <= 15 ? '#34D399' : '#FBBF24' }}>{item.premium_rate_pct}%</strong>
                           </div>
                         </div>
                       </td>
@@ -1141,24 +1262,24 @@ export default function TwAsymmetricAlphaDashboard() {
                         </div>
                       </td>
 
-                      {/* 5. 兩段式停利目標 & 28天換倉線 */}
+                      {/* 5. 暴擊目標與翻倍預估 */}
                       <td style={{ verticalAlign: 'middle', fontSize: '0.75rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#94A3B8' }}>① 首段停利(出50%):</span>
-                            <strong style={{ color: '#34D399', fontFamily: 'monospace' }}>
-                              CB {item.target_stage1_cb} (+12%) / CBAS +{item.target_stage1_cbas_pct}%
+                            <span style={{ color: '#E9D5FF', fontWeight: 'bold' }}>🚀 母股翻倍暴擊預估:</span>
+                            <strong style={{ color: '#F43F5E', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                              +{item.est_mult_2x || 35} 倍 (+{item.est_cbas_roi_30pct}%)
                             </strong>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#94A3B8' }}>② 暴擊目標(全出):</span>
-                            <strong style={{ color: '#C084FC', fontFamily: 'monospace' }}>
-                              CB {item.target_stage2_cb} (+25%) / CBAS +{item.target_stage2_cbas_pct}%
+                            <span style={{ color: '#94A3B8' }}>① 首段停利目標:</span>
+                            <strong style={{ color: '#34D399', fontFamily: 'monospace' }}>
+                              CB {item.target_stage1_cb} / CBAS +{item.target_stage1_cbas_pct}%
                             </strong>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '2px', marginTop: '1px' }}>
-                            <span style={{ color: '#FCD34D' }}>⏱️ 換倉上限: <strong>28天(4週)</strong></span>
-                            <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>🛡️ 債底保護: {item.stop_loss_cb}元</span>
+                            <span style={{ color: '#FCD34D' }}>暴擊目標: CB {item.target_stage2_cb}</span>
+                            <span style={{ color: '#6EE7B7', fontFamily: 'monospace' }}>🛡️ 100元債底保底</span>
                           </div>
                         </div>
                       </td>
@@ -1309,7 +1430,7 @@ export default function TwAsymmetricAlphaDashboard() {
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💼</div>
               <strong>目前無進行中持倉</strong>
               <div style={{ fontSize: '0.8rem', marginTop: '0.3rem' }}>
-                請於「🎯 今日泰坦 17 因子暴擊雷達」點擊「⚡ 一鍵跟單」或由頂部快速記帳列新增買入！
+                請於「🎯 今日落難天使好球帶雷達」點擊「⚡ 一鍵跟單」或由頂部快速記帳列新增買入！
               </div>
             </div>
           ) : (
@@ -1937,7 +2058,7 @@ export default function TwAsymmetricAlphaDashboard() {
                       <th style={{ textAlign: 'right' }}>買進 ➔ 出場價</th>
                       <th style={{ textAlign: 'right', color: '#38BDF8' }}>CB現貨報酬</th>
                       <th style={{ textAlign: 'right', color: '#FBBF24' }}>CBAS報酬</th>
-                      <th>泰坦 17 因子 DOE 觸發條件</th>
+                      <th>落難天使好球帶篩選訊號</th>
                       <th>出場原因</th>
                     </tr>
                   </thead>
