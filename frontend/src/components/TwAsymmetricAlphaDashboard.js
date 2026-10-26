@@ -149,8 +149,9 @@ export default function TwAsymmetricAlphaDashboard() {
     return data?.titan_candidates || defaultAsymData?.titan_candidates || [];
   }, [data]);
 
-  const inZoneList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'in_zone' || c.is_strict_buy), [allCandidates]);
-  const nearZoneList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'near_zone' || c.is_waiting_pivot), [allCandidates]);
+  const inZoneList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'in_zone' || (c.is_strict_buy && !c.is_deep_otm_trap)), [allCandidates]);
+  const nearZoneList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'near_zone' || (c.is_waiting_pivot && !c.is_deep_otm_trap)), [allCandidates]);
+  const traplist = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'trap' || c.is_deep_otm_trap), [allCandidates]);
   const watchingList = useMemo(() => allCandidates.filter(c => c.strike_zone_status === 'watching'), [allCandidates]);
 
   // 兼容舊別名
@@ -160,9 +161,10 @@ export default function TwAsymmetricAlphaDashboard() {
   const displayedRadarItems = useMemo(() => {
     if (radarFilter === 'in_zone' || radarFilter === 'strict_buy') return inZoneList;
     if (radarFilter === 'near_zone' || radarFilter === 'waiting_pivot') return nearZoneList;
+    if (radarFilter === 'trap') return traplist;
     if (radarFilter === 'watching') return watchingList;
     return allCandidates;
-  }, [radarFilter, inZoneList, nearZoneList, watchingList, allCandidates]);
+  }, [radarFilter, inZoneList, nearZoneList, traplist, watchingList, allCandidates]);
 
   // 動態計算用戶實戰 KPI (由真實歷史進出驅動)
   const userPerf = useMemo(() => {
@@ -920,7 +922,7 @@ export default function TwAsymmetricAlphaDashboard() {
                   color: (radarFilter === 'in_zone' || radarFilter === 'strict_buy') ? '#FFF' : '#94A3B8'
                 }}
               >
-                🎯 進入好球帶·首選狙擊 ({inZoneList.length})
+                🎯 進入真好球帶 (Parity≥75) ({inZoneList.length})
               </button>
               <button
                 onClick={() => setRadarFilter('near_zone')}
@@ -935,7 +937,22 @@ export default function TwAsymmetricAlphaDashboard() {
                   color: (radarFilter === 'near_zone' || radarFilter === 'waiting_pivot') ? '#FFF' : '#94A3B8'
                 }}
               >
-                🟡 逼近警戒區 ({nearZoneList.length})
+                🟡 逼近警戒區 (Parity≥75) ({nearZoneList.length})
+              </button>
+              <button
+                onClick={() => setRadarFilter('trap')}
+                style={{
+                  padding: '0.26rem 0.7rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  background: radarFilter === 'trap' ? 'linear-gradient(135deg, #EF4444, #B91C1C)' : 'transparent',
+                  color: radarFilter === 'trap' ? '#FFF' : '#FCA5A5'
+                }}
+              >
+                ⚠️ 深度價外陷阱池 (Parity&lt;75) ({traplist.length})
               </button>
               <button
                 onClick={() => setRadarFilter('watching')}
@@ -1213,8 +1230,12 @@ export default function TwAsymmetricAlphaDashboard() {
                         <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
                           轉換價: {item.conv_price}
                         </div>
-                        <div style={{ fontSize: '0.73rem', color: item.parity >= 98 && item.parity <= 112 ? '#34D399' : '#38BDF8', fontWeight: 'bold' }}>
-                          Parity: {item.parity}
+                        <div style={{
+                          fontSize: '0.74rem',
+                          fontWeight: 'bold',
+                          color: item.parity >= 75.0 ? '#34D399' : '#F87171'
+                        }}>
+                          Parity: {item.parity} {item.parity >= 75.0 ? '✅ (≥75)' : '⚠️ (價外太深)'}
                         </div>
                       </td>
 
@@ -1230,15 +1251,25 @@ export default function TwAsymmetricAlphaDashboard() {
                               background: item.strike_zone_status === 'in_zone' ? 'rgba(16, 185, 129, 0.25)' : (item.strike_zone_status === 'near_zone' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.08)'),
                               color: item.strike_zone_status === 'in_zone' ? '#34D399' : (item.strike_zone_status === 'near_zone' ? '#FCD34D' : '#94A3B8')
                             }}>
-                              🎯 距離好球帶 (104元): {item.distance_to_strike_pct <= 0 ? `${item.distance_to_strike_pct}% ✅ (在好球帶)` : `+${item.distance_to_strike_pct}%`}
+                              🎯 距離好球帶 (104元): {item.distance_to_strike_pct <= 0 ? `${item.distance_to_strike_pct}% ✅` : `+${item.distance_to_strike_pct}%`}
                             </span>
                             <span style={{
                               fontSize: '0.72rem',
                               padding: '1px 6px',
                               borderRadius: '3px',
                               fontWeight: 'bold',
-                              background: item.whale_pct >= 50 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                              color: item.whale_pct >= 50 ? '#38BDF8' : '#CBD5E1'
+                              background: (item.titan_momentum_score || 50) >= 80 ? 'rgba(16, 185, 129, 0.25)' : ((item.titan_momentum_score || 50) >= 60 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.08)'),
+                              color: (item.titan_momentum_score || 50) >= 80 ? '#34D399' : ((item.titan_momentum_score || 50) >= 60 ? '#38BDF8' : '#CBD5E1')
+                            }}>
+                              ⚡ 泰坦動能: {item.titan_momentum_score || 65} 分
+                            </span>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              padding: '1px 6px',
+                              borderRadius: '3px',
+                              fontWeight: 'bold',
+                              background: item.whale_pct >= 50 ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                              color: item.whale_pct >= 50 ? '#C084FC' : '#CBD5E1'
                             }}>
                               🐋 千張大戶: {item.whale_pct}% {item.whale_pct >= 50 ? '✅' : ''}
                             </span>
