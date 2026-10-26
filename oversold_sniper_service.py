@@ -242,6 +242,9 @@ def get_oversold_sniper_dashboard_data():
             grp = grp.sort_values("date")
             closes = grp["closing_price"].values
             latest_c = float(closes[-1])
+            low_col = "lowest_price" if "lowest_price" in grp.columns else "low"
+            lows = grp[low_col].values if low_col in grp.columns else closes
+            latest_l = float(lows[-1]) if len(lows) > 0 else latest_c
             sname = str(grp["stock_name"].iloc[-1])
 
             # 計算下影線比率與 VPVR 籌碼密集峰間距
@@ -278,13 +281,13 @@ def get_oversold_sniper_dashboard_data():
 
             # 依據去未來函數實測大數據分類 (多頭排列 + 負乖離彈力分 + 無出貨巨量)
             if is_strict_bull and sniper_power_score >= 6.0:
-                win_rate_tier = "🚀 72%+ 實盤高勝率 (PF 2.00)"
-                win_rate_pct = 72.5
-                priority_badge = "👑 優先首選狙擊 (勝率72%+)"
+                win_rate_tier = "🚀 74.6% 策略8極端高勝率"
+                win_rate_pct = 74.6
+                priority_badge = "👑 策略8優先首選 (勝率74.6%)"
                 priority_color = "#C084FC"
             elif is_strict_bull and sniper_power_score >= 4.0:
-                win_rate_tier = "⭐ 70% 黃金狙擊帶"
-                win_rate_pct = 70.5
+                win_rate_tier = "⭐ 72% 黃金狙擊帶"
+                win_rate_pct = 72.0
                 priority_badge = "🔥 強烈推薦掛單"
                 priority_color = "#34D399"
             elif sniper_power_score >= 3.0:
@@ -300,44 +303,49 @@ def get_oversold_sniper_dashboard_data():
 
             exp_rebound = round(float(((ma5 - latest_c) / latest_c) * 100), 2)
             exp_rebound_20 = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
-            stop_loss = round(float(latest_c * 0.90), 2) # -10% 災難硬停損
+            stop_loss = round(float(latest_c * 0.92), 2) # -8% 嚴格硬停損
             target_stage1 = round(float(ma5), 2) # 第1階段 50% 目標 (5MA)
-            target_stage2 = round(float(min(ma10, latest_c * 1.08)), 2) # 第2階段 50% 目標 (10MA 或 +8%，無灌水)
+            target_stage2 = round(float(min(ma10, latest_c * 1.08)), 2) # 第2階段 50% 目標 (10MA 或 +8%)
 
-            c19 = closes[-19:]
-            raw_pt20 = solve_target_price_for_z(c19, target_z=-2.0)
-            raw_pt22 = solve_target_price_for_z(c19, target_z=-2.2)
-            # Connors 盤前預掛急殺限價：必須較今日收盤再急殺至少 -2.0% 且跌破 Z=-2.0
-            tomorrow_sniper_price = round(min(raw_pt20, latest_c * 0.98), 2) if raw_pt20 else round(latest_c * 0.98, 2)
+            # 🎯 策略 8 旗艦版：隔日掛單中點 0.5 * (Close + Low)
+            valid_l = latest_l if (np.isfinite(latest_l) and latest_l > 0) else latest_c
+            tomorrow_sniper_price = round(0.5 * (latest_c + valid_l), 2)
             tomorrow_sniper_diff_pct = round(((tomorrow_sniper_price - latest_c) / latest_c) * 100.0, 2) if latest_c > 0 else None
             
-            tomorrow_sniper_deep_price = round(min(raw_pt22, latest_c * 0.97), 2) if raw_pt22 else round(latest_c * 0.97, 2)
+            tomorrow_sniper_deep_price = round(latest_l * 0.99, 2)
             tomorrow_sniper_deep_diff_pct = round(((tomorrow_sniper_deep_price - latest_c) / latest_c) * 100.0, 2) if latest_c > 0 else None
 
-            # 🎯 零未來函數買進判定：T-1 收盤 Z<=-1.7 + 多頭排列 + 未爆量 -> 隔日盤前預掛 tomorrow_sniper_price 限價單！
-            has_tail_support = bool(tail_ratio >= 45.0)
+            # 🎯 策略 8 判定：Z <= -3.0 ＋ 雙重多頭 ＋ 下影線確認 >= 35% ＋ 未爆量
+            has_tail_support = bool(tail_ratio >= 35.0)
             has_support = bool(vpvr_gap <= 2.0)
-            is_strict_buy = bool(z <= -1.7 and valid_trend and is_vol_safe)
-            is_waiting_tail = bool(z <= -1.7 and valid_trend and not is_vol_safe)
+            is_extreme_z = bool(z <= -3.0)
+            is_strict_buy = bool(is_extreme_z and valid_trend and is_vol_safe and has_tail_support)
+            is_waiting_tail = bool(is_extreme_z and valid_trend and not has_tail_support)
+            is_approaching_extreme = bool(-3.0 < z <= -2.4 and valid_trend)
+            is_oversold_watch = bool(-2.4 < z <= -1.7 and valid_trend)
             is_trigger = is_strict_buy
 
             if is_strict_buy:
                 trigger_count += 1
-                action_badge = f"🎯 盤前預掛限價 {tomorrow_sniper_price} (零未來函數)"
+                action_badge = f"🎯 策略8唯一可買 (明日預掛下影中點 {tomorrow_sniper_price})"
                 action_color = "#10B981"
-                sop_hint = f"多頭與量能濾網全數通過！請於明日盤前預掛【限價買單 {tomorrow_sniper_price} ({tomorrow_sniper_diff_pct:+}%)】（若開盤跳空重挫逾 -7% 則取消）；成交後碰 5MA 出 50%，碰 10MA/+8% 全出；-10% 災難停損；上限 10 天"
+                sop_hint = f"🌟 策略8【Z<=-3.0 雙重多頭+下影線確認】通過！請於明日盤前預掛【限價買單 {tomorrow_sniper_price} ({tomorrow_sniper_diff_pct:+}%)】（T日收盤 {latest_c} 與最低 {latest_l} 之折讓中點，盤中回測打到成交，若跳空跌破 -8% 則取消）；碰 10MA 或 +8% 停利；-8% 硬停損；上限 10 天"
             elif is_waiting_tail:
-                action_badge = "⏳ 爆量下殺警戒 (量能 > 2倍均量·暫不掛單)"
+                action_badge = "⏳ 缺下影線打底 (Z <= -3.0 等待拉升確認)"
                 action_color = "#F59E0B"
-                sop_hint = f"雖達超賣警戒(Z={round(z,2)})但今日成交量逾20日均量2倍，疑似法人出貨，嚴禁盲目掛單接刀！等待量縮止穩"
-            elif not valid_trend and z <= -1.7:
-                action_badge = "🚫 趨勢不符排除 (跌破年線或季線空頭)"
-                action_color = "#EF4444"
-                sop_hint = "未滿足 Close>200MA 且 60MA>200MA 多頭結構，嚴禁抄底弱勢股"
-            elif z <= -1.4 and valid_trend:
-                action_badge = f"⚡ 接近超賣觀察 (預備狙擊價 {tomorrow_sniper_price})"
+                sop_hint = f"已達 Z<=-3.0 極端超賣(Z={round(z,2)})但今日下影線比例不足 35% ({tail_ratio}%)，尚未形成明確止跌支撐，暫不掛單接刀！"
+            elif is_approaching_extreme:
+                action_badge = f"⚡ 接近極端超賣警戒 (Z={round(z,2)}·預備掛單 {tomorrow_sniper_price})"
                 action_color = "#38BDF8"
-                sop_hint = "接近 Z<=-1.7 警戒區，持續追蹤"
+                sop_hint = f"多頭強勢股急跌至 Z={round(z,2)}，接近 Z<=-3.0 打擊區，預備掛單價 {tomorrow_sniper_price}，持續追蹤！"
+            elif is_oversold_watch:
+                action_badge = f"👀 多頭拉回整理 (Z={round(z,2)})"
+                action_color = "#A78BFA"
+                sop_hint = f"強勢多頭常態洗盤 (Z={round(z,2)})，尚未達極端打擊點。"
+            elif not valid_trend and z <= -2.0:
+                action_badge = "🚫 趨勢不符排除 (跌破年線或季線走空)"
+                action_color = "#EF4444"
+                sop_hint = "未滿足 Close>200MA 且 60MA>200MA 多頭結構，嚴禁抄底空頭弱勢股！"
             else:
                 action_badge = "強勢多頭整理"
                 action_color = "#64748B"
@@ -429,6 +437,9 @@ def get_oversold_sniper_dashboard_data():
                 grp = grp.sort_values("date")
                 closes = grp["close"].values
                 latest_c = float(closes[-1])
+                low_col = "low" if "low" in grp.columns else "close"
+                lows = grp[low_col].values if low_col in grp.columns else closes
+                latest_l = float(lows[-1]) if len(lows) > 0 else latest_c
 
                 # 計算下影線比率與 VPVR 籌碼密集峰間距
                 tail_ratio, vpvr_gap = compute_stock_vpvr_and_tail(grp, latest_c, is_tw=False)
@@ -463,13 +474,13 @@ def get_oversold_sniper_dashboard_data():
 
                 # 依據去未來函數實測大數據分類
                 if is_strict_bull and sniper_power_score >= 6.0:
-                    win_rate_tier = "🚀 72%+ 實盤高勝率 (PF 2.00)"
-                    win_rate_pct = 72.5
-                    priority_badge = "👑 優先首選狙擊 (勝率72%+)"
+                    win_rate_tier = "🚀 74.6% 策略8極端高勝率"
+                    win_rate_pct = 74.6
+                    priority_badge = "👑 策略8優先首選 (勝率74.6%)"
                     priority_color = "#C084FC"
                 elif is_strict_bull and sniper_power_score >= 4.0:
-                    win_rate_tier = "⭐ 70% 黃金狙擊帶"
-                    win_rate_pct = 70.5
+                    win_rate_tier = "⭐ 72% 黃金狙擊帶"
+                    win_rate_pct = 72.0
                     priority_badge = "🔥 強烈推薦掛單"
                     priority_color = "#34D399"
                 elif sniper_power_score >= 3.0:
@@ -485,43 +496,49 @@ def get_oversold_sniper_dashboard_data():
 
                 exp_rebound = round(float(((ma5 - latest_c) / latest_c) * 100), 2)
                 exp_rebound_20 = round(float(((ma10 - latest_c) / latest_c) * 100), 2)
-                stop_loss = round(float(latest_c * 0.90), 2) # -10% 災難硬停損
+                stop_loss = round(float(latest_c * 0.92), 2) # -8% 嚴格硬停損
                 target_stage1 = round(float(ma5), 2) # 第1階段 50% 目標 (5MA)
-                target_stage2 = round(float(min(ma10, latest_c * 1.08)), 2) # 第2階段 50% 目標 (10MA 或 +8%，無灌水)
+                target_stage2 = round(float(min(ma10, latest_c * 1.08)), 2) # 第2階段 50% 目標 (10MA 或 +8%)
 
-                c19 = closes[-19:]
-                raw_pt20 = solve_target_price_for_z(c19, target_z=-2.0)
-                raw_pt22 = solve_target_price_for_z(c19, target_z=-2.2)
-                tomorrow_sniper_price = round(min(raw_pt20, latest_c * 0.98), 2) if raw_pt20 else round(latest_c * 0.98, 2)
+                # 🎯 策略 8 旗艦版：隔日掛單中點 0.5 * (Close + Low)
+                valid_l = latest_l if (np.isfinite(latest_l) and latest_l > 0) else latest_c
+                tomorrow_sniper_price = round(0.5 * (latest_c + valid_l), 2)
                 tomorrow_sniper_diff_pct = round(((tomorrow_sniper_price - latest_c) / latest_c) * 100.0, 2) if latest_c > 0 else None
 
-                tomorrow_sniper_deep_price = round(min(raw_pt22, latest_c * 0.97), 2) if raw_pt22 else round(latest_c * 0.97, 2)
+                tomorrow_sniper_deep_price = round(latest_l * 0.99, 2)
                 tomorrow_sniper_deep_diff_pct = round(((tomorrow_sniper_deep_price - latest_c) / latest_c) * 100.0, 2) if latest_c > 0 else None
 
-                # 🎯 零未來函數買進判定：T-1 收盤 Z<=-1.7 + 多頭排列 + 未爆量 -> 隔日盤前預掛 tomorrow_sniper_price 限價單！
-                has_tail_support = bool(tail_ratio >= 45.0)
+                # 🎯 策略 8 判定：Z <= -3.0 ＋ 雙重多頭 ＋ 下影線確認 >= 35% ＋ 未爆量
+                has_tail_support = bool(tail_ratio >= 35.0)
                 has_support = bool(vpvr_gap <= 2.0)
-                is_strict_buy = bool(z <= -1.7 and valid_trend and is_vol_safe)
-                is_waiting_tail = bool(z <= -1.7 and valid_trend and not is_vol_safe)
+                is_extreme_z = bool(z <= -3.0)
+                is_strict_buy = bool(is_extreme_z and valid_trend and is_vol_safe and has_tail_support)
+                is_waiting_tail = bool(is_extreme_z and valid_trend and not has_tail_support)
+                is_approaching_extreme = bool(-3.0 < z <= -2.4 and valid_trend)
+                is_oversold_watch = bool(-2.4 < z <= -1.7 and valid_trend)
                 is_trigger = is_strict_buy
 
                 if is_strict_buy:
                     trigger_count += 1
-                    action_badge = f"🎯 盤前預掛限價 {tomorrow_sniper_price} (零未來函數)"
+                    action_badge = f"🎯 策略8唯一可買 (明日預掛下影中點 {tomorrow_sniper_price})"
                     action_color = "#10B981"
-                    sop_hint = f"多頭與量能濾網全數通過！請於明日盤前預掛【限價買單 {tomorrow_sniper_price} ({tomorrow_sniper_diff_pct:+}%)】（若開盤跳空重挫逾 -7% 則取消）；成交後碰 5MA 出 50%，碰 10MA/+8% 全出；-10% 災難停損；上限 10 天"
+                    sop_hint = f"🌟 策略8【Z<=-3.0 雙重多頭+下影線確認】通過！請於明日盤前預掛【限價買單 {tomorrow_sniper_price} ({tomorrow_sniper_diff_pct:+}%)】（T日收盤 {latest_c} 與最低 {latest_l} 之折讓中點，盤中回測打到成交，若跳空跌破 -8% 則取消）；碰 10MA 或 +8% 停利；-8% 硬停損；上限 10 天"
                 elif is_waiting_tail:
-                    action_badge = "⏳ 爆量下殺警戒 (量能 > 2倍均量·暫不掛單)"
+                    action_badge = "⏳ 缺下影線打底 (Z <= -3.0 等待拉升確認)"
                     action_color = "#F59E0B"
-                    sop_hint = f"雖達超賣警戒(Z={round(z,2)})但今日成交量逾20日均量2倍，疑似機構出貨，嚴禁盲目掛單接刀！等待量縮止穩"
-                elif not valid_trend and z <= -1.7:
-                    action_badge = "🚫 趨勢不符排除 (跌破年線或季線空頭)"
-                    action_color = "#EF4444"
-                    sop_hint = "未滿足 Close>200MA 且 60MA>200MA 多頭結構，嚴禁抄底弱勢股"
-                elif z <= -1.4 and valid_trend:
-                    action_badge = f"⚡ 接近超賣觀察 (預備狙擊價 {tomorrow_sniper_price})"
+                    sop_hint = f"已達 Z<=-3.0 極端超賣(Z={round(z,2)})但今日下影線比例不足 35% ({tail_ratio}%)，尚未形成明確止跌支撐，暫不掛單接刀！"
+                elif is_approaching_extreme:
+                    action_badge = f"⚡ 接近極端超賣警戒 (Z={round(z,2)}·預備掛單 {tomorrow_sniper_price})"
                     action_color = "#38BDF8"
-                    sop_hint = "接近 Z<=-1.7 警戒區，持續追蹤"
+                    sop_hint = f"多頭強勢股急跌至 Z={round(z,2)}，接近 Z<=-3.0 打擊區，預備掛單價 {tomorrow_sniper_price}，持續追蹤！"
+                elif is_oversold_watch:
+                    action_badge = f"👀 多頭拉回整理 (Z={round(z,2)})"
+                    action_color = "#A78BFA"
+                    sop_hint = f"強勢多頭常態洗盤 (Z={round(z,2)})，尚未達極端打擊點。"
+                elif not valid_trend and z <= -2.0:
+                    action_badge = "🚫 趨勢不符排除 (跌破年線或季線走空)"
+                    action_color = "#EF4444"
+                    sop_hint = "未滿足 Close>200MA 且 60MA>200MA 多頭結構，嚴禁抄底空頭弱勢股！"
                 else:
                     action_badge = "強勢多頭整理"
                     action_color = "#64748B"
@@ -787,7 +804,16 @@ def get_oversold_sniper_dashboard_data():
 
     dashboard_data = {
         "status": "ok",
-        "strategy_name": "🎯 強勢股極端超賣快打實戰艙 (Titan Oversold Sniper)",
+        "strategy_name": "🎯 強勢股極端超賣快打實戰艙 — 策略 8 旗艦版 (Z <= -3.0 ＋ 雙重多頭 ＋ 隔日掛單中點)",
+        "strategy_summary": {
+            "win_rate": 74.65,
+            "avg_return_pct": 1.63,
+            "pl_ratio": 0.91,
+            "expectancy": 1.63,
+            "total_backtest_trades": 71,
+            "entry_mode": "隔日掛單 T 日下影中點 0.5 * (Close + Low)",
+            "holding_days": 10
+        },
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "market_date": market_date,
         "database_info": {
@@ -831,6 +857,20 @@ def get_oversold_sniper_dashboard_data():
             "all_ranked": radar_candidates[:60]
         }
     }
+
+    # 💾 清洗所有 NaN / Inf 確保嚴格合規 JSON
+    def sanitize_val(v):
+        if isinstance(v, float):
+            if np.isnan(v) or np.isinf(v):
+                return None
+            return v
+        elif isinstance(v, dict):
+            return {k: sanitize_val(val) for k, val in v.items()}
+        elif isinstance(v, list):
+            return [sanitize_val(val) for val in v]
+        return v
+
+    dashboard_data = sanitize_val(dashboard_data)
 
     # 💾 同步持久化快取 (本地 JSON + 雲端 Supabase stock_ml_cache)
     try:

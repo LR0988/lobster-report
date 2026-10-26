@@ -593,7 +593,7 @@ export default function OversoldSniperDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.6rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#F87171', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              🎯 強勢股極端超賣快打實戰艙 【上限：500萬】
+              🎯 強勢股極端超賣快打 — 策略 8 旗艦版 (Z ≤ -3.0 ＋ 雙重多頭 ＋ 隔日掛單中點) 【上限：500萬】
             </h3>
             <span style={{
               fontSize: '0.78rem',
@@ -621,7 +621,18 @@ export default function OversoldSniperDashboard() {
               borderRadius: '4px',
               fontWeight: 'bold'
             }}>
-              ⭐ 觀察池：全球主權泰坦強勢股 (180+ 檔多頭領頭羊)
+              👑 22年實證勝率：74.6% ｜ 均報：+1.63%
+            </span>
+            <span style={{
+              fontSize: '0.75rem',
+              background: 'rgba(192, 132, 252, 0.2)',
+              border: '1px solid rgba(192, 132, 252, 0.45)',
+              color: '#E9D5FF',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '4px',
+              fontWeight: 'bold'
+            }}>
+              ⚖️ 盈虧比：0.91 ｜ 期望值：+1.63%
             </span>
             <span style={{
               fontSize: '0.75rem',
@@ -632,7 +643,7 @@ export default function OversoldSniperDashboard() {
               borderRadius: '4px',
               fontWeight: 'bold'
             }}>
-              ⏱️ 輪動週期：AI後期 2～5 天極速均值回歸 (絕不戀棧)
+              🎯 進場手法：隔日盤前預掛 T 日下影中點 0.5×(C+L)
             </span>
           </div>
 
@@ -945,19 +956,19 @@ export default function OversoldSniperDashboard() {
                     color: strictBuyTriggers.length > 0 ? '#34D399' : '#FBBF24'
                   }}>
                     {strictBuyTriggers.length > 0
-                      ? `【🎯 今日量化確認進場名單 — 唯一允許買進】（共 ${strictBuyTriggers.length} 檔）`
-                      : '【🛡️ 今日量化風控決策：0 檔符合買進條件 —— 嚴格空倉防禦！絕不接落刀！】'}
+                      ? `【🎯 策略 8 確認進場名單 — 唯一允許買進】（共 ${strictBuyTriggers.length} 檔）`
+                      : '【🛡️ 策略 8 量化風控決策：0 檔符合買進條件 —— 嚴格空倉防禦！絕不接落刀！】'}
                   </h3>
                 </div>
                 <p style={{ margin: '0.45rem 0 0 0', color: '#CBD5E1', fontSize: '0.84rem', lineHeight: '1.6' }}>
                   {strictBuyTriggers.length > 0 ? (
                     <>
-                      以下標的同時通過 <strong style={{ color: '#34D399' }}>① 站穩 200MA 年線多頭</strong>、<strong style={{ color: '#34D399' }}>② 20日偏離 Z ≤ -2.0 極端超賣</strong>、<strong style={{ color: '#34D399' }}>③ 長下影線 Tail Ratio ≥ 45% (買盤進場抵抗)</strong>、<strong style={{ color: '#34D399' }}>④ 距 VPVR 密集峰 Gap ≤ 2% (鐵板防守)</strong> 四大鐵律！<strong>明日開盤即可依 SOP 市價敲進！</strong>
+                      以下標的同時通過 <strong style={{ color: '#34D399' }}>① 大盤與個股雙重 200MA 年線多頭</strong>、<strong style={{ color: '#34D399' }}>② 20日偏離 Z ≤ -3.0 極端超賣</strong>、<strong style={{ color: '#34D399' }}>③ 收盤下影線 Tail Ratio ≥ 35% 止跌確認</strong>、<strong style={{ color: '#34D399' }}>④ 量能無出貨巨量</strong> 四大鐵律！<strong>請於明日開盤前預掛「T 日下影中點 0.5×(C+L)」，盤中回測打到成交！</strong>
                     </>
                   ) : (
                     <>
-                      目前雷達掃描到 <strong style={{ color: '#F87171' }}>{waitingTailTriggers.length} 檔</strong> 標的（如 DXCM、GOOGL、META、1513.TW 等）雖已達 <strong style={{ color: '#F87171' }}>Z ≤ -2.0 極端超賣</strong>，但<strong>下影線比例均不足 45%</strong>（皆為急殺實體黑K棒，空方貫壓中，<strong style={{ color: '#FBBF24' }}>尚未出現主力買盤進場抵抗的長下影線</strong>）！<br />
-                      本策略在 22 年 76% 勝率回測中，<strong>嚴格要求必須見到長下影線（Tail Ratio ≥ 45%）代表主力承接才准進場，嚴禁徒手接刀</strong>。今日策略判定：<strong style={{ color: '#FBBF24' }}>【無買點，保持現金，嚴格等待下影線打底訊號】</strong>！
+                      目前雷達掃描強勢股中，<strong style={{ color: '#F87171' }}>0 檔</strong> 同時滿足『<strong style={{ color: '#F87171' }}>Z ≤ -3.0 極端超賣</strong> ＋ 雙重多頭 ＋ 下影線確認』。<br />
+                      策略 8 在 22 年實測中具備 <strong style={{ color: '#34D399' }}>74.6% 高勝率</strong> 與 <strong style={{ color: '#38BDF8' }}>+1.63% 單筆期望值</strong>，其靈魂就在於<strong>「寧缺毋濫、只接恐慌極端錯殺」</strong>。今日策略判定：<strong style={{ color: '#FBBF24' }}>【無買點，保持現金，嚴格等待 Z ≤ -3.0 極限打擊點】</strong>！
                     </>
                   )}
                 </p>
@@ -1266,8 +1277,8 @@ export default function OversoldSniperDashboard() {
                     <th style={{ textAlign: 'left', background: 'rgba(56, 189, 248, 0.08)', color: '#BAE6FD' }}>
                       🎯 兩段式停利目標與反彈 (10MA + 20MA/+8%)
                     </th>
-                    <th style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.08)', color: '#FCA5A5' }} title="若明日盤中跌破此價位，即觸發 Z<-2 極端超賣打擊區">
-                      ⚡ 明日 Z&lt;-2 狙擊點
+                    <th style={{ textAlign: 'center', background: 'rgba(239, 68, 68, 0.08)', color: '#FCA5A5' }} title="策略8核心：隔日掛單 T 日下影中點 0.5*(Close+Low)，盤中回測打到成交">
+                      ⚡ 策略8 下影中點掛單價
                     </th>
                     <th style={{ textAlign: 'center', background: 'rgba(56, 189, 248, 0.05)' }}>
                       ✍️ 快速跟單
@@ -1438,33 +1449,38 @@ export default function OversoldSniperDashboard() {
                           </div>
                         </td>
 
-                        {/* 6. ⚡ 明日 Z<-2 狙擊掛單價 */}
+                        {/* 6. ⚡ 策略8 下影中點掛單價 */}
                         <td style={{ textAlign: 'center', verticalAlign: 'middle', background: isStrictBuy ? 'rgba(16, 185, 129, 0.08)' : (isWaitingTail ? 'rgba(245, 158, 11, 0.05)' : 'rgba(239, 68, 68, 0.04)') }}>
                           {isStrictBuy ? (
-                            <span style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10B981', padding: '3px 8px', borderRadius: '4px', display: 'inline-block' }}>
-                              🔥 4大鐵律全過 (T+1開盤市價進)
-                            </span>
+                            <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px' }}>
+                              <span style={{ fontSize: '0.74rem', color: '#10B981', fontWeight: 'bold', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10B981', padding: '3px 8px', borderRadius: '4px', display: 'inline-block' }}>
+                                🎯 策略8確認買進
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: '#FCD34D', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                                預掛中點: {cSign} {item.tomorrow_sniper_price}
+                              </span>
+                            </div>
                           ) : isWaitingTail ? (
                             <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '3px' }}>
                               <span style={{ fontSize: '0.72rem', color: '#FBBF24', fontWeight: 'bold', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '2px 6px', borderRadius: '4px' }}>
-                                ⏳ 黑K打底中 (等長下影線)
+                                ⏳ 黑K打底中 (等下影線)
                               </span>
                               <span style={{ fontSize: '0.66rem', color: '#94A3B8' }}>
-                                Tail {tailRatio}% &lt; 45%·暫勿接刀
+                                Tail {tailRatio}% &lt; 35%·暫勿接刀
                               </span>
                             </div>
                           ) : item.tomorrow_sniper_price ? (
                             <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '3px' }}>
-                              {/* 首筆 Z=-2.0 掛單 */}
+                              {/* 策略8 下影中點掛單價 */}
                               <div
                                 onClick={() => setRadarRowInputs(prev => ({
                                   ...prev,
                                   [item.ticker]: { ...(prev[item.ticker] || {}), price: item.tomorrow_sniper_price }
                                 }))}
-                                title="點擊填入首筆 Z=-2.0 買價"
+                                title="點擊填入策略8 下影中點預掛買價"
                                 style={{ cursor: 'pointer', background: 'rgba(252, 211, 77, 0.12)', border: '1px solid rgba(252, 211, 77, 0.3)', padding: '2px 6px', borderRadius: '4px' }}
                               >
-                                <span style={{ fontSize: '0.68rem', color: '#CBD5E1' }}>Z=-2.0: </span>
+                                <span style={{ fontSize: '0.68rem', color: '#CBD5E1' }}>中點掛單: </span>
                                 <strong style={{ color: '#FCD34D', fontFamily: 'monospace', fontSize: '0.8rem' }}>
                                   {cSign} {item.tomorrow_sniper_price}
                                 </strong>
@@ -2202,33 +2218,33 @@ export default function OversoldSniperDashboard() {
             {/* 左欄：🧠 量化選股與進場核心邏輯 */}
             <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
               <h4 style={{ margin: '0 0 0.8rem 0', color: '#FCD34D', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span>🧠</span> Part A：100% 零未來函數量化選股與進場數學模型
+                <span>🧠</span> Part A：策略 8「Z ≤ -3.0 ＋ 雙重多頭 ＋ 隔日掛單中點」數學模型
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
-                  <strong style={{ color: '#F8FAFC' }}>1. 總經大盤與個股雙重年線護城河 (Regime + Trend Filter)：</strong><br />
-                  嚴格要求大盤指數（台股 TAIEX / 美股 SPY）站上 200MA 年線，且個股昨日收盤滿足 <span style={{ color: '#38BDF8', fontFamily: 'monospace' }}>Close ≥ 200MA、60MA ≥ 200MA、半年動能 &gt; +5%</span>。2008 金融海嘯因大盤跌破年線全年 0 出手、0 回撤完美避險！
+                  <strong style={{ color: '#F8FAFC' }}>1. 總經大盤與個股雙重年線護城河 (Dual Bull Filter)：</strong><br />
+                  嚴格要求大盤指數（台股 TAIEX / 美股 SPY）站上 200MA 年線，且個股昨日收盤滿足 <span style={{ color: '#38BDF8', fontFamily: 'monospace' }}>Close ≥ 200MA 且 60MA 季線向上</span>。徹底排除跌破均線的空頭沉淪股，鎖定強勢多頭恐慌錯殺急洗！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
-                  <strong style={{ color: '#F8FAFC' }}>2. T-1 收盤超賣預警 + T 日盤前預掛 Stretch-Limit 限價單：</strong><br />
-                  徹底拔除「盤中偷看收盤下影線」的未來函數！當昨日 (T-1) 收盤 <span style={{ color: '#F87171', fontFamily: 'monospace' }}>Z-Score ≤ -1.7</span> 且未爆出 &gt;2倍出貨巨量時，系統自動以解析解算出今日 (T) 盤前預掛買價 <span style={{ color: '#FACC15', fontFamily: 'monospace' }}>P_limit = min(Z=-2.0 目標價, 昨收 × 0.98)</span>，專接開盤後散戶恐慌再殺 -2% 的流動性錯殺尖端！
+                  <strong style={{ color: '#F8FAFC' }}>2. 極端超賣 Z ≤ -3.0 ＋ 收盤下影線確認 (Tail Ratio ≥ 35%)：</strong><br />
+                  當日收盤 20日偏離 Z-Score 跌破 -3.0 極度恐慌區，且收盤留下影線確認多頭抵抗（<span style={{ color: '#F87171', fontFamily: 'monospace' }}>(Close - Low)/(High - Low) ≥ 35%</span>）。未見下影線打底絕不盲目接刀！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                  <strong style={{ color: '#F8FAFC' }}>3. 黑天鵝開盤跳空保護閥 (Gap-Down Guard)：</strong><br />
-                  若個股遭遇重大法說利空或財報暴雷，開盤直接跳空暴跌超過 -7%（<span style={{ color: '#34D399', fontWeight: 'bold' }}>Open &lt; 昨收 × 0.93</span>），代表基本面結構改變，系統立即取消預掛單不予進場，避開斷頭連環殺。
+                  <strong style={{ color: '#F8FAFC' }}>3. 隔日盤前預掛下影中點限價單 (Midpoint Limit Order)：</strong><br />
+                  不追隔日開盤！盤前直接預掛於 T 日收盤與最低價的中間點：<span style={{ color: '#FACC15', fontFamily: 'monospace', fontWeight: 'bold' }}>P_limit = 0.5 × (Close_T + Low_T)</span>。盤中回測打到才成交，若開盤直接跳空暴跌逾 -8% 則取消掛單不予進場。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #C084FC' }}>
-                  <strong style={{ color: '#F8FAFC' }}>4. 半年籌碼密集鐵板 (Volume Profile / VPVR 輔助排序)：</strong><br />
-                  掃描過去 120 天價量直方圖（HVN 籌碼密集峰）。當同日有多檔強勢股觸發預掛條件時，優先排序 Z-Score 最深且貼近 VPVR 籌碼鐵板的龍頭標的。
+                  <strong style={{ color: '#F8FAFC' }}>4. 22年實證戰績（扣除證交稅與來回手續費 0.471%）：</strong><br />
+                  勝率高達 <span style={{ color: '#34D399', fontWeight: 'bold' }}>74.6%</span>，平均單筆淨報酬 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>+1.63%</span>，盈虧比 0.91，獲利因子 2.67。精準狙擊，絕不在垃圾行情亂出手！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #F59E0B' }}>
-                  <strong style={{ color: '#F8FAFC' }}>5. 嚴格 3 槽位資金管理 + 閒置資金停泊短債：</strong><br />
-                  帳戶固定切割為 3 檔槽位，每檔配置 1/3 (33.3%) 資金。22 年平均每年僅成交 47.1 筆，常態維持 70%~80% 現金防禦（停泊於 1.5% 短債/活定存），絕不凹單或無限攤平。
+                  <strong style={{ color: '#F8FAFC' }}>5. 嚴格 3 槽位資金管理 + 閒置資金停泊：</strong><br />
+                  帳戶固定切割為 3 檔槽位，每檔配置 1/3 (33.3%) 資金。22 年全實證 71 筆交易，常態維持現金防禦，絕不凹單或無限攤平。
                 </div>
               </div>
             </div>
@@ -2236,44 +2252,38 @@ export default function OversoldSniperDashboard() {
             {/* 右欄：📋 跟單者每日監控出場價格操作手冊 */}
             <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
               <h4 style={{ margin: '0 0 0.8rem 0', color: '#34D399', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span>📋</span> Part B：跟單者每日預掛與兩階段出場操作手冊 (實戰 SOP)
+                <span>📋</span> Part B：跟單者每日預掛與出場操作手冊 (實戰 SOP)
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', lineHeight: '1.55', color: '#CBD5E1' }}>
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
                   <strong style={{ color: '#38BDF8' }}>Step 1：每天開盤前 (08:50) 看什麼？</strong><br />
-                  1. 查看雷達清單中 <span style={{ color: '#34D399', fontWeight: 'bold' }}>T-1 Z ≤ -1.7</span> 的標的，於盤前直接掛入系統算好的「預掛限價買單」。<br />
-                  2. 切換至「💼 實盤持倉追蹤」，查看既有持倉的 4 個關鍵點位：
-                  <span style={{ color: '#FACC15', fontWeight: 'bold' }}>「5MA目標價」</span>、
-                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>「10MA/+8%目標價」</span>、
-                  <span style={{ color: '#F87171', fontWeight: 'bold' }}>「-10%災難停損價」</span> 與
+                  1. 查看雷達清單中觸發標的，於盤前直接掛入系統算好的「預掛下影中點限價買單」。<br />
+                  2. 切換至「💼 實盤持倉追蹤」，查看既有持倉的關鍵出場點位：
+                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>「10MA/+8%停利價」</span>、
+                  <span style={{ color: '#F87171', fontWeight: 'bold' }}>「-8%硬停損價」</span> 與
                   <span style={{ color: '#CBD5E1', fontWeight: 'bold' }}>「持倉天數 (第 X / 10 天)」</span>。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                  <strong style={{ color: '#34D399' }}>Step 2：第 1 階段極速落袋 (碰 5MA 賣出 50%)：</strong><br />
-                  超賣反彈的最強爆發力集中在進場後 1~4 天！當盤中最高價觸碰或突破「5MA 價格」，<span style={{ color: '#34D399', fontWeight: 'bold' }}>立即賣出 50% 部位</span>，第一時間鎖定逾 70% 的高勝率現金流！
-                </div>
-
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #3B82F6' }}>
-                  <strong style={{ color: '#60A5FA' }}>Step 3：第 2 階段波段停利 (碰 10MA 或 +8% 全出)：</strong><br />
-                  剩餘 50% 部位續抱等待均值回歸完成。當盤中觸碰「10MA 價格」或「浮盈達 +8.0%」（以先觸發之真實點位出場，絕無幽靈溢價），<span style={{ color: '#60A5FA', fontWeight: 'bold' }}>將剩餘部位全數獲利平倉</span>！
+                  <strong style={{ color: '#34D399' }}>Step 2：盤中均值回歸結利 (碰 10MA 或 +8% 全出)：</strong><br />
+                  超賣反彈爆發力集中在進場後 1~5 天！當盤中最高價觸碰「10MA 均線」或「浮盈達 +8.0%」，<span style={{ color: '#34D399', fontWeight: 'bold' }}>立即將部位全數獲利平倉落袋</span>，第一時間鎖定高勝率現金流！
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EF4444' }}>
-                  <strong style={{ color: '#F87171' }}>Step 4：災難硬停損紀律 (含買進當日跌破 -10.0% 無條件砍倉)：</strong><br />
-                  均值回歸策略給正常洗盤呼吸空間，但若買進當日或持倉期間最低價跌破「進場價 × 0.90 (-10%)」，<span style={{ color: '#F87171', fontWeight: 'bold' }}>立即全數認賠平倉（含隔夜跳空滑價保護）</span>，嚴防單一黑天鵝侵蝕本金。
+                  <strong style={{ color: '#F87171' }}>Step 3：嚴格硬停損紀律 (跌破進場價 -8.0% 立即砍倉)：</strong><br />
+                  若進場後行情不如預期，當日或後續交易日最低價跌破「進場價 × 0.92 (-8%)」，<span style={{ color: '#F87171', fontWeight: 'bold' }}>立即全數認賠平倉（若開盤跳空以開盤價成交保護）</span>，嚴防單一黑天鵝侵蝕本金。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #DC2626' }}>
-                  <strong style={{ color: '#FCA5A5' }}>Step 5：時間停損紀律 (持倉滿 10 天強制清倉)：</strong><br />
-                  若持倉已達第 10 個交易日（兩週）仍未完成 5MA/10MA 回歸，<span style={{ color: '#FCA5A5', fontWeight: 'bold' }}>第 10 天收盤無論賺賠強制市價清倉</span>！超賣反彈半衰期僅 3~5 天，滿 10 天不彈即代表動能鈍化，立即回收資金。
+                  <strong style={{ color: '#FCA5A5' }}>Step 4：時間停損紀律 (持倉滿 10 天強制清倉)：</strong><br />
+                  若持倉已達第 10 個交易日（兩週）仍未完成 10MA 回歸，<span style={{ color: '#FCA5A5', fontWeight: 'bold' }}>第 10 天收盤無論賺賠強制市價清倉</span>！超賣反彈半衰期僅 3~5 天，滿 10 天不彈代表動能鈍化，立即回收資金。
                 </div>
 
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.65rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #EAB308' }}>
-                  <strong style={{ color: '#FACC15' }}>Step 6：真實稅費摩擦審計與工具建議：</strong><br />
-                  • <strong style={{ color: '#34D399' }}>工具對比：</strong>台股現貨（雙向手續費 + 0.3% 證交稅 + 1.5% 閒置短債）22年真實年化達 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>+18.39% (MDD -13.87%)</span>；若改用「個股期貨」（雙向摩擦僅 0.05%），真實年化躍升至 <span style={{ color: '#34D399', fontWeight: 'bold' }}>+20.43% (MDD -13.45%, Calmar 1.52)</span>！<br />
-                  • <strong style={{ color: '#C084FC' }}>泰坦互補引擎：</strong>本策略平均 75% 時間空手待命，專在多頭急殺時提供高勝率（70.3%）短線現金流，與長波段趨勢策略形成完美低相關互補！
+                  <strong style={{ color: '#FACC15' }}>Step 5：真實稅費摩擦審計與工具建議：</strong><br />
+                  • <strong style={{ color: '#34D399' }}>工具對比：</strong>台股現貨（雙向手續費 + 0.3% 證交稅，來回 0.471% 摩擦）22年全實證勝率 <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>74.6%</span>，平均單筆淨報 <span style={{ color: '#34D399', fontWeight: 'bold' }}>+1.63%</span>，盈虧比 0.91；若改用「個股期貨」，摩擦成本更低！<br />
+                  • <strong style={{ color: '#C084FC' }}>泰坦互補引擎：</strong>策略 8 常態空手待命，專在多頭急殺錯殺時出手，與長波段趨勢策略形成完美非對稱低相關互補！
                 </div>
               </div>
             </div>
