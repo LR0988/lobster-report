@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "strategy_name": "全球高流動性泰坦 2.0【方案二・個人實戰無停損進攻版：1號+22號雙梯隊自然淘汰 × 40/30/30 × 台股>=3千萬/美股>=500萬美元 × 實盤稅費扣除】",
-  "generated_at": "2026-10-27 09:54:38",
+  "generated_at": "2026-10-27 10:38:42",
   "latest_data_date": "2026-10-27",
   "doe_config": {
     "execution_mode": "dual_tranche_1_and_22 (每月1號 A梯隊50% + 每月22號 B梯隊50%，台美共同開盤日執行)",
@@ -27,12 +27,12 @@
     "spy_ma200": 727.37,
     "global_breadth_pct": 52.5,
     "bull_countries": "8/15",
-    "regime": "全球共振多頭 (美台寬幅 52.5% >= 50%，QQQ 2年線乖離 19.65% < 30% 未過熱 -> A/B雙梯隊 100% 滿倉進攻)",
+    "regime": "全球共振多頭 (美台寬幅 52.5% >= 50%，QQQ 2年線乖離 19.65% < 30% 估值健康 -> A/B雙梯隊 100% 滿倉進攻)",
     "exposure_pct": 100,
     "spy_bias1200": 45.82,
     "qqq_bias500": 19.65,
     "macro_bias_gate_active": false,
-    "active_defense_module": "模組 C 2.0：智慧宏觀四維過熱閥門 (QQQ 2年線乖離 >= 30% × [10Y美債殖利率 >= 3.5% 或 油價YoY >= 40% & 美元YoY >= 4%])",
+    "active_defense_module": "模組 C 2.0：DCF 股債折現雙因子閥門 (QQQ 2年線乖離 >= 30% × 10Y美債殖利率 >= 3.5%)",
     "us10y": 4.99,
     "oil_wti": 101.13,
     "oil_yoy": 72.9,

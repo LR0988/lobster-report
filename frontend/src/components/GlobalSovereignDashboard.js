@@ -2128,11 +2128,11 @@ export default function GlobalSovereignDashboard() {
           }}>
             {macro.macro_bias_gate_active ? (
               <span>
-                🛡️ <strong>模組 C 2.0 觸發高檔緊縮減持</strong> (QQQ 乖離 {macro.qqq_bias500}% &ge; 30% × 利率 {macro.us10y}% / 油價YoY {macro.oil_yoy >= 0 ? `+${macro.oil_yoy}` : macro.oil_yoy}%) ➔ <strong>70% 防禦進攻</strong>
+                🛡️ <strong>模組 C 2.0 觸發高利估值減持</strong> (QQQ 乖離 {macro.qqq_bias500}% &ge; 30% × 10Y美債 {macro.us10y}% &ge; 3.5%) ➔ <strong>70% 防禦進攻</strong>
               </span>
             ) : (
               <span>
-                🌍 宏觀四維監控：寬幅 {macro.global_breadth_pct || 52.5}% ｜ QQQ乖離 <strong>{macro.qqq_bias500 || 19.65}%</strong> (&lt;30% 未過熱) ｜ 10Y美債 {macro.us10y || 4.99}% ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
+                🌍 宏觀雙因子監控：寬幅 {macro.global_breadth_pct || 52.5}% ｜ QQQ乖離 <strong>{macro.qqq_bias500 || 19.65}%</strong> (&lt;30% 未過熱) × 10Y美債 {macro.us10y || 4.99}% ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
               </span>
             )}
           </div>
@@ -2198,7 +2198,7 @@ export default function GlobalSovereignDashboard() {
                 </span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>觸發條件</strong>：QQQ 2年線乖離 {macro.qqq_bias500}% &ge; 30% 且 伴隨高利率 ({macro.us10y}% &ge; 3.5%) 或 通膨美元抽水，自動啟動降載。<br/>
+                • <strong>觸發條件</strong>：QQQ 2年線乖離 {macro.qqq_bias500}% &ge; 30% 且 10Y美債殖利率 {macro.us10y}% &ge; 3.5%（DCF 股債折現雙因子模型），自動啟動降載。<br/>
                 • <strong>防守標的</strong>：30% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕估值修正風險。
               </div>
             </div>
