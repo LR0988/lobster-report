@@ -2,7 +2,7 @@
   "status": "ok",
   "strategy_group": "🎯 台股可轉債（CB / CBAS）落難天使好球帶狙擊艙 【上限：CB 5,000萬 / CBAS 300萬】",
   "latest_data_date": "2026-10-25",
-  "generated_at": "2026-10-27 11:02:08",
+  "generated_at": "2026-10-27 12:09:43",
   "data_source": "櫃買中心 (TPEx) 官方 OpenAPI + 集保所 TDCC 千張大戶資料庫 + 三大法人日線 + tw_stock.db",
   "titan_candidates": [
     {
