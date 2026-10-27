@@ -158,7 +158,7 @@ def get_global_sovereign_dashboard_data():
             data["macro_status"]["global_breadth_pct"] = round(comp_br * 100.0, 1)
             data["macro_status"]["bull_countries"] = f"{int(round(comp_br * valid_etf_cnt))}/{valid_etf_cnt}"
 
-            # 1.5 模組 C：大盤宏觀乖離減持防護閥門 (Macro Bias Gate)
+            # 1.5 模組 C 2.0：智慧宏觀四維過熱防護閥門 (QQQ 2年線乖離 × 利率 US10Y × 通膨 Oil × 美元資金流 DXY)
             c.execute("SELECT close FROM global_sovereign_daily WHERE ticker = 'SPY' AND close IS NOT NULL ORDER BY date DESC LIMIT 1200")
             spy_1200_rows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
             spy_bias1200 = 0.0
@@ -173,19 +173,43 @@ def get_global_sovereign_dashboard_data():
                 qqq_ma500 = sum(qqq_500_rows[:500]) / 500.0
                 qqq_bias500 = round((qqq_500_rows[0] / qqq_ma500 - 1.0) * 100.0, 2)
 
+            # 讀取利率 (US10Y)、通膨 (WTI Oil) 與 全球美元流動性 (DXY)
+            c.execute("SELECT us10y, oil_wti, dxy FROM macro_indicators WHERE us10y IS NOT NULL ORDER BY date DESC LIMIT 260")
+            macro_rows = c.fetchall()
+            us10y_now = round(float(macro_rows[0][0]), 2) if len(macro_rows) > 0 and macro_rows[0][0] is not None else 4.0
+            oil_now = round(float(macro_rows[0][1]), 2) if len(macro_rows) > 0 and macro_rows[0][1] is not None else 75.0
+            dxy_now = round(float(macro_rows[0][2]), 2) if len(macro_rows) > 0 and macro_rows[0][2] is not None else 100.0
+            oil_yoy = 0.0
+            dxy_yoy = 0.0
+            if len(macro_rows) >= 252:
+                oil_prev = float(macro_rows[251][1]) if macro_rows[251][1] else oil_now
+                dxy_prev = float(macro_rows[251][2]) if macro_rows[251][2] else dxy_now
+                if oil_prev > 0:
+                    oil_yoy = round((oil_now / oil_prev - 1.0) * 100.0, 1)
+                if dxy_prev > 0:
+                    dxy_yoy = round((dxy_now / dxy_prev - 1.0) * 100.0, 1)
+
+            macro_tightening = (us10y_now >= 3.5) or (oil_yoy >= 40.0 and dxy_yoy >= 4.0)
+            macro_bias_gate_active = (qqq_bias500 >= 30.0) and macro_tightening
+
             data["macro_status"]["spy_bias1200"] = spy_bias1200
             data["macro_status"]["qqq_bias500"] = qqq_bias500
-            macro_bias_gate_active = (spy_bias1200 >= 45.0) or (qqq_bias500 >= 30.0)
+            data["macro_status"]["us10y"] = us10y_now
+            data["macro_status"]["oil_wti"] = oil_now
+            data["macro_status"]["oil_yoy"] = oil_yoy
+            data["macro_status"]["dxy"] = dxy_now
+            data["macro_status"]["dxy_yoy"] = dxy_yoy
+            data["macro_status"]["macro_tightening"] = macro_tightening
             data["macro_status"]["macro_bias_gate_active"] = macro_bias_gate_active
-            data["macro_status"]["active_defense_module"] = "模組 C：大盤宏觀乖離減持防護 (SPY 5年線乖離 >= 45% 或 QQQ 2年線乖離 >= 30%)"
+            data["macro_status"]["active_defense_module"] = "模組 C 2.0：智慧宏觀四維過熱閥門 (QQQ 2年線乖離 >= 30% × [10Y美債殖利率 >= 3.5% 或 油價YoY >= 40% & 美元YoY >= 4%])"
 
             if comp_br >= 0.50:
                 if macro_bias_gate_active:
                     data["macro_status"]["exposure_pct"] = 70
-                    data["macro_status"]["regime"] = f"🛡️ 模組 C 觸發大盤過熱減持 (美台寬幅 {comp_br*100:.1f}% 多頭但 SPY 5年線乖離 {spy_bias1200}% >= 45% -> 依模組 C 自動防禦降至 70% 倉位，30% 資金停泊 GLD/BIL 避險池)"
+                    data["macro_status"]["regime"] = f"🛡️ 模組 C 2.0 觸發高檔緊縮減持 (QQQ 乖離 {qqq_bias500}% >= 30% 且 US10Y {us10y_now}% / 油價YoY {oil_yoy:+.1f}% 緊縮 -> 降至 70% 倉位，30% 停泊 GLD/BIL)"
                 else:
                     data["macro_status"]["exposure_pct"] = 100
-                    data["macro_status"]["regime"] = f"全球共振多頭 (美台核心對齊寬幅 {comp_br*100:.1f}% >= 50% -> A/B雙梯隊100%滿倉進攻)"
+                    data["macro_status"]["regime"] = f"全球共振多頭 (美台寬幅 {comp_br*100:.1f}% >= 50%，QQQ 2年線乖離 {qqq_bias500}% < 30% 未過熱 -> A/B雙梯隊 100% 滿倉進攻)"
             elif comp_br >= 0.30:
                 data["macro_status"]["exposure_pct"] = 70
                 data["macro_status"]["regime"] = f"全球宏觀分化警示 (美台核心對齊寬幅 {comp_br*100:.1f}% -> 防禦型 70% 倉位)"

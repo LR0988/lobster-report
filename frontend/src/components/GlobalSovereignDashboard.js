@@ -747,17 +747,18 @@ export default function GlobalSovereignDashboard() {
     let nextTrancheBadge = '';
     let daysUntilNext = 0;
 
+    const trancheShareLabel = macro.exposure_pct === 70 ? '35%防禦部位' : '50%進攻部位';
     if (day < 22) {
       daysUntilNext = 22 - day;
       nextActionLabel = `${yr}-${String(mo).padStart(2, '0')}-22 盤後`;
-      nextTrancheBadge = '🅱️ B梯隊 (每月22號・35%進攻部位)';
+      nextTrancheBadge = `🅱️ B梯隊 (每月22號・${trancheShareLabel})`;
     } else {
       const nextMo = mo === 12 ? 1 : mo + 1;
       const nextYr = mo === 12 ? yr + 1 : yr;
       const nextDate = new Date(nextYr, nextMo - 1, 1);
       daysUntilNext = Math.max(1, Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24)));
       nextActionLabel = `${nextYr}-${String(nextMo).padStart(2, '0')}-01 盤後`;
-      nextTrancheBadge = '🅰️ A梯隊 (每月1號・35%進攻部位)';
+      nextTrancheBadge = `🅰️ A梯隊 (每月1號・${trancheShareLabel})`;
     }
 
     return {
@@ -769,7 +770,7 @@ export default function GlobalSovereignDashboard() {
       nextTrancheBadge,
       daysUntilNext
     };
-  }, []);
+  }, [macro.exposure_pct]);
 
   // 3. 雙梯隊持倉更動建議演算法 (支援 100% 雙隊滿倉 / 1號 A梯隊 50% / 22號 B梯隊 50%，含 DOE 容差帶與前 5 名保護帶)
   const rebalanceSuggestions = useMemo(() => {
@@ -2121,17 +2122,17 @@ export default function GlobalSovereignDashboard() {
             fontSize: '0.74rem',
             color: macro.macro_bias_gate_active ? '#FDE68A' : '#A7F3D0',
             background: macro.macro_bias_gate_active ? 'rgba(245, 158, 11, 0.18)' : 'rgba(16, 185, 129, 0.12)',
-            border: macro.macro_bias_gate_active ? '1px solid rgba(245, 158, 11, 0.45)' : 'none',
+            border: macro.macro_bias_gate_active ? '1px solid rgba(245, 158, 11, 0.45)' : '1px solid rgba(16, 185, 129, 0.3)',
             padding: '0.2rem 0.6rem',
             borderRadius: '4px'
           }}>
             {macro.macro_bias_gate_active ? (
               <span>
-                🛡️ <strong>模組 C 觸發大盤過熱減持</strong> (SPY 5年線乖離 {macro.spy_bias1200}% &ge; 45%) ➔ <strong>70% 防禦進攻 (30% 避險/現金池)</strong>
+                🛡️ <strong>模組 C 2.0 觸發高檔緊縮減持</strong> (QQQ 乖離 {macro.qqq_bias500}% &ge; 30% × 利率 {macro.us10y}% / 油價YoY {macro.oil_yoy >= 0 ? `+${macro.oil_yoy}` : macro.oil_yoy}%) ➔ <strong>70% 防禦進攻</strong>
               </span>
             ) : (
               <span>
-                🌍 宏觀寬幅：{macro.bull_countries || '10/15'} 國 &gt; 200MA ({macro.global_breadth_pct || 66.7}%) ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
+                🌍 宏觀四維監控：寬幅 {macro.global_breadth_pct || 52.5}% ｜ QQQ乖離 <strong>{macro.qqq_bias500 || 19.65}%</strong> (&lt;30% 未過熱) ｜ 10Y美債 {macro.us10y || 4.99}% ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
               </span>
             )}
           </div>
@@ -2180,7 +2181,7 @@ export default function GlobalSovereignDashboard() {
             </div>
           </div>
 
-          {/* 模組 C 避險緩衝卡 */}
+          {/* 模組 C 2.0 避險緩衝卡 */}
           {macro.exposure_pct === 70 && (
             <div style={{
               background: 'rgba(245, 158, 11, 0.08)',
@@ -2190,15 +2191,15 @@ export default function GlobalSovereignDashboard() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
                 <strong style={{ color: '#FBBF24', fontSize: '0.86rem' }}>
-                  🛡️ 模組 C 防禦池（大盤過熱避險｜配比 30% 總資產）
+                  🛡️ 模組 C 2.0 防禦池（高檔緊縮避險｜配比 30% 總資產）
                 </strong>
                 <span style={{ fontSize: '0.7rem', color: '#FDE68A', fontFamily: 'monospace' }}>
                   避險緩衝 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()}
                 </span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>觸發條件</strong>：SPY 5年線乖離 {macro.spy_bias1200}% &ge; 45%（大盤歷史過熱閾值），自動啟動降載。<br/>
-                • <strong>防守標的</strong>：30% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕大盤極端乖離回落之系統性風險。
+                • <strong>觸發條件</strong>：QQQ 2年線乖離 {macro.qqq_bias500}% &ge; 30% 且 伴隨高利率 ({macro.us10y}% &ge; 3.5%) 或 通膨美元抽水，自動啟動降載。<br/>
+                • <strong>防守標的</strong>：30% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕估值修正風險。
               </div>
             </div>
           )}
