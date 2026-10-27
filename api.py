@@ -2908,10 +2908,38 @@ def run_scheduled_pipeline():
         except Exception as e:
             print(f"[Scheduler Pipeline] 各國本土股票池數據同步失敗: {str(e)}")
 
-        print("[Scheduler Pipeline] 大盤指數與宏觀指標自動化更新成功！")
+        # 執行全球泰坦 2.0、超跌狙擊手與可轉債好球帶自動化快照產出
+        try:
+            print("[Scheduler Pipeline] 開始執行全球泰坦 2.0 (模組 C 2.0 DCF 雙因子) 與戰情室快照產出...")
+            import global_sovereign_service
+            gs_data = global_sovereign_service.get_global_sovereign_dashboard_data()
+            with open(os.path.join(FRONTEND_DIR, 'src/data/defaultGlobalSovereignData.json'), 'w', encoding='utf-8') as f:
+                json.dump(gs_data, f, ensure_ascii=False, indent=2)
+            print("[Scheduler Pipeline] 全球泰坦 2.0 前端資料同步成功！")
+        except Exception as e:
+            print(f"[Scheduler Pipeline] 全球泰坦 2.0 快照產出失敗: {str(e)}")
+
+        try:
+            print("[Scheduler Pipeline] 開始執行超跌狙擊手 (Oversold Sniper) 快照產出...")
+            import oversold_sniper_service
+            os_data = oversold_sniper_service.get_oversold_sniper_data()
+            with open(os.path.join(FRONTEND_DIR, 'src/data/defaultOversoldSniperData.json'), 'w', encoding='utf-8') as f:
+                json.dump(os_data, f, ensure_ascii=False, indent=2)
+            print("[Scheduler Pipeline] 超跌狙擊手快照產出成功！")
+        except Exception as e:
+            print(f"[Scheduler Pipeline] 超跌狙擊手快照產出失敗: {str(e)}")
+
+        try:
+            print("[Scheduler Pipeline] 開始執行可轉債落難天使好球帶雷達快照產出...")
+            import generate_real_tpex_radar
+            generate_real_tpex_radar.generate_real_radar()
+            print("[Scheduler Pipeline] 可轉債雷達快照產出成功！")
+        except Exception as e:
+            print(f"[Scheduler Pipeline] 可轉債雷達快照產出失敗: {str(e)}")
+
+        print("[Scheduler Pipeline] 大盤指數、宏觀指標與策略快照自動化更新全部成功！")
     except Exception as e:
         print(f"[Scheduler Pipeline] 大盤指數/宏觀更新失敗: {str(e)}")
-        print(f"[Scheduler Pipeline] 自動化更新大盤指數失敗: {str(e)}")
 
 # ================================
 # 3.8 自動化每日排程器與 API
