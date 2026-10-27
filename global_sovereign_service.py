@@ -157,9 +157,35 @@ def get_global_sovereign_dashboard_data():
                 comp_br = global15_br
             data["macro_status"]["global_breadth_pct"] = round(comp_br * 100.0, 1)
             data["macro_status"]["bull_countries"] = f"{int(round(comp_br * valid_etf_cnt))}/{valid_etf_cnt}"
+
+            # 1.5 模組 C：大盤宏觀乖離減持防護閥門 (Macro Bias Gate)
+            c.execute("SELECT close FROM global_sovereign_daily WHERE ticker = 'SPY' AND close IS NOT NULL ORDER BY date DESC LIMIT 1200")
+            spy_1200_rows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
+            spy_bias1200 = 0.0
+            if len(spy_1200_rows) >= 1200:
+                spy_ma1200 = sum(spy_1200_rows[:1200]) / 1200.0
+                spy_bias1200 = round((spy_1200_rows[0] / spy_ma1200 - 1.0) * 100.0, 2)
+
+            c.execute("SELECT close FROM global_sovereign_daily WHERE ticker = 'QQQ' AND close IS NOT NULL ORDER BY date DESC LIMIT 500")
+            qqq_500_rows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
+            qqq_bias500 = 0.0
+            if len(qqq_500_rows) >= 500:
+                qqq_ma500 = sum(qqq_500_rows[:500]) / 500.0
+                qqq_bias500 = round((qqq_500_rows[0] / qqq_ma500 - 1.0) * 100.0, 2)
+
+            data["macro_status"]["spy_bias1200"] = spy_bias1200
+            data["macro_status"]["qqq_bias500"] = qqq_bias500
+            macro_bias_gate_active = (spy_bias1200 >= 45.0) or (qqq_bias500 >= 30.0)
+            data["macro_status"]["macro_bias_gate_active"] = macro_bias_gate_active
+            data["macro_status"]["active_defense_module"] = "模組 C：大盤宏觀乖離減持防護 (SPY 5年線乖離 >= 45% 或 QQQ 2年線乖離 >= 30%)"
+
             if comp_br >= 0.50:
-                data["macro_status"]["exposure_pct"] = 100
-                data["macro_status"]["regime"] = f"全球共振多頭 (美台核心對齊寬幅 {comp_br*100:.1f}% >= 50% -> A/B雙梯隊100%滿倉進攻)"
+                if macro_bias_gate_active:
+                    data["macro_status"]["exposure_pct"] = 70
+                    data["macro_status"]["regime"] = f"🛡️ 模組 C 觸發大盤過熱減持 (美台寬幅 {comp_br*100:.1f}% 多頭但 SPY 5年線乖離 {spy_bias1200}% >= 45% -> 依模組 C 自動防禦降至 70% 倉位，30% 資金停泊 GLD/BIL 避險池)"
+                else:
+                    data["macro_status"]["exposure_pct"] = 100
+                    data["macro_status"]["regime"] = f"全球共振多頭 (美台核心對齊寬幅 {comp_br*100:.1f}% >= 50% -> A/B雙梯隊100%滿倉進攻)"
             elif comp_br >= 0.30:
                 data["macro_status"]["exposure_pct"] = 70
                 data["macro_status"]["regime"] = f"全球宏觀分化警示 (美台核心對齊寬幅 {comp_br*100:.1f}% -> 防禦型 70% 倉位)"

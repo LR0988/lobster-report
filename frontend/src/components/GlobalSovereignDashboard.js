@@ -778,21 +778,25 @@ export default function GlobalSovereignDashboard() {
     const activeTopPicks = currentPicks.filter(p => p.is_active);
     const suggestions = [];
     const isHalfTranche = rebalanceMode === 'tranche_a_50' || rebalanceMode === 'tranche_b_50';
+    const exposureMultiplier = (macro.exposure_pct !== undefined ? macro.exposure_pct : 100) / 100.0;
+    const isModuleC = macro.macro_bias_gate_active || macro.exposure_pct === 70;
 
-    let modePrefix = '🔥 100%雙隊滿倉';
+    let modePrefix = isModuleC ? '🛡️ 70%雙隊防禦 (模組C)' : '🔥 100%雙隊滿倉';
     if (rebalanceMode === 'tranche_a_50') {
-      modePrefix = '🅰️ 1號A隊(50%)';
+      modePrefix = isModuleC ? '🅰️ 1號A隊(35%防禦)' : '🅰️ 1號A隊(50%)';
     } else if (rebalanceMode === 'tranche_b_50') {
-      modePrefix = '🅱️ 22號B隊(50%)';
+      modePrefix = isModuleC ? '🅱️ 22號B隊(35%防禦)' : '🅱️ 22號B隊(50%)';
     }
 
     // A. 針對目標 Top 3 標的
     activeTopPicks.forEach((pick, idx) => {
       const pRank = pick.rank || (idx + 1);
-      // 雙梯隊權重設計：各隊佔 50% 總資金，梯隊內部為 40/30/30 (方案二進攻階梯)
+      // 雙梯隊權重設計：各隊佔 50% * exposureMultiplier 總資金，梯隊內部為 40/30/30 (方案二進攻階梯)
+      // 若 100% 滿倉：各隊佔 20%, 15%, 15%，雙隊合計 40%, 30%, 30%
+      // 若 70% 減持：各隊佔 14%, 10.5%, 10.5%，雙隊合計 28%, 21%, 21%
       const weightTranchePct = pRank === 1 ? 40 : 30; // 梯隊內比例 40%, 30%, 30%
-      const weightTeamPct = weightTranchePct * 0.5; // 各隊佔總資產 20%, 15%, 15%
-      const totalWeightPct = weightTranchePct;       // 雙隊合併佔總資產 40%, 30%, 30%
+      const weightTeamPct = weightTranchePct * 0.5 * exposureMultiplier; // 各隊佔總資產
+      const totalWeightPct = weightTranchePct * exposureMultiplier;       // 雙隊合併佔總資產
 
       const targetTwdA = totalNetAssetsTwd * (weightTeamPct / 100.0);
       const targetTwdB = totalNetAssetsTwd * (weightTeamPct / 100.0);
@@ -2113,8 +2117,23 @@ export default function GlobalSovereignDashboard() {
                   : `⏳ 下次定期調倉日：${dualTrancheGuide.nextActionLabel} (${dualTrancheGuide.nextTrancheBadge}，倒數 ${dualTrancheGuide.daysUntilNext} 天)`}
             </span>
           </div>
-          <div style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.12)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
-            🌍 宏觀寬幅：{macro.bull_countries || '10/15'} 國 &gt; 200MA ({macro.global_breadth_pct || 66.7}%) ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
+          <div style={{
+            fontSize: '0.74rem',
+            color: macro.macro_bias_gate_active ? '#FDE68A' : '#A7F3D0',
+            background: macro.macro_bias_gate_active ? 'rgba(245, 158, 11, 0.18)' : 'rgba(16, 185, 129, 0.12)',
+            border: macro.macro_bias_gate_active ? '1px solid rgba(245, 158, 11, 0.45)' : 'none',
+            padding: '0.2rem 0.6rem',
+            borderRadius: '4px'
+          }}>
+            {macro.macro_bias_gate_active ? (
+              <span>
+                🛡️ <strong>模組 C 觸發大盤過熱減持</strong> (SPY 5年線乖離 {macro.spy_bias1200}% &ge; 45%) ➔ <strong>70% 防禦進攻 (30% 避險/現金池)</strong>
+              </span>
+            ) : (
+              <span>
+                🌍 宏觀寬幅：{macro.bull_countries || '10/15'} 國 &gt; 200MA ({macro.global_breadth_pct || 66.7}%) ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
+              </span>
+            )}
           </div>
         </div>
 
@@ -2127,14 +2146,16 @@ export default function GlobalSovereignDashboard() {
             padding: '0.7rem 0.9rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-              <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>🅰️ A 梯隊（每月 1 號調倉｜進攻配比 50% 總資產）</strong>
+              <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>
+                🅰️ A 梯隊（每月 1 號調倉｜{macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
+              </strong>
               <span style={{ fontSize: '0.7rem', color: '#7DD3FC', fontFamily: 'monospace' }}>
-                進攻預算 NT$ {Math.round(totalNetAssetsTwd * 0.5).toLocaleString()}
+                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct === 70 ? 0.35 : 0.5)).toLocaleString()}
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>25%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>10%</strong>（佔總淨值合計 50%，即梯隊內 50/30/20 黃金階梯）。<br/>
-              • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 才重新檢視。
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
+              • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 定期調倉日才執行調權！
             </div>
           </div>
 
@@ -2146,16 +2167,41 @@ export default function GlobalSovereignDashboard() {
             padding: '0.7rem 0.9rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-              <strong style={{ color: '#C084FC', fontSize: '0.86rem' }}>🅱️ B 梯隊（每月 22 號調倉｜進攻配比 50% 總資產）</strong>
+              <strong style={{ color: '#C084FC', fontSize: '0.86rem' }}>
+                🅱️ B 梯隊（每月 22 號調倉｜{macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
+              </strong>
               <span style={{ fontSize: '0.7rem', color: '#D8B4FE', fontFamily: 'monospace' }}>
-                進攻預算 NT$ {Math.round(totalNetAssetsTwd * 0.5).toLocaleString()}
+                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct === 70 ? 0.35 : 0.5)).toLocaleString()}
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>25%</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>15%</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>10%</strong>（佔總淨值合計 50%，即梯隊內 50/30/20 黃金階梯）。<br/>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
               • <strong>當期狀態</strong>：下次調倉日為 <strong style={{ color: '#FBBF24' }}>{dualTrancheGuide.nextActionLabel}</strong>。捕捉最新財報季後強勢動能黑馬！
             </div>
           </div>
+
+          {/* 模組 C 避險緩衝卡 */}
+          {macro.exposure_pct === 70 && (
+            <div style={{
+              background: 'rgba(245, 158, 11, 0.08)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              borderRadius: '8px',
+              padding: '0.7rem 0.9rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                <strong style={{ color: '#FBBF24', fontSize: '0.86rem' }}>
+                  🛡️ 模組 C 防禦池（大盤過熱避險｜配比 30% 總資產）
+                </strong>
+                <span style={{ fontSize: '0.7rem', color: '#FDE68A', fontFamily: 'monospace' }}>
+                  避險緩衝 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
+                • <strong>觸發條件</strong>：SPY 5年線乖離 {macro.spy_bias1200}% &ge; 45%（大盤歷史過熱閾值），自動啟動降載。<br/>
+                • <strong>防守標的</strong>：30% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕大盤極端乖離回落之系統性風險。
+              </div>
+            </div>
+          )}
 
           {/* 單一帳戶零摩擦跟單心法 */}
           <div style={{

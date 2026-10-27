@@ -10,7 +10,7 @@
     "entry_mode": "隔日掛單 T 日下影中點 0.5 * (Close + Low)",
     "holding_days": 10
   },
-  "generated_at": "2026-10-27 00:38:04",
+  "generated_at": "2026-10-27 06:30:36",
   "market_date": "2026-10-27",
   "database_info": {
     "source": "tw_stock.db (全球主權泰坦強勢股庫 + 台股新資料庫 daily_stock)",
