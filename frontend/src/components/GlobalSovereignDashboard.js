@@ -747,7 +747,7 @@ export default function GlobalSovereignDashboard() {
     let nextTrancheBadge = '';
     let daysUntilNext = 0;
 
-    const trancheShareLabel = macro.exposure_pct === 70 ? '35%防禦部位' : '50%進攻部位';
+    const trancheShareLabel = macro.exposure_pct === 50 ? '25%半倉防禦部位' : macro.exposure_pct === 70 ? '35%防禦部位' : '50%進攻部位';
     if (day < 22) {
       daysUntilNext = 22 - day;
       nextActionLabel = `${yr}-${String(mo).padStart(2, '0')}-22 盤後`;
@@ -780,13 +780,14 @@ export default function GlobalSovereignDashboard() {
     const suggestions = [];
     const isHalfTranche = rebalanceMode === 'tranche_a_50' || rebalanceMode === 'tranche_b_50';
     const exposureMultiplier = (macro.exposure_pct !== undefined ? macro.exposure_pct : 100) / 100.0;
-    const isModuleC = macro.macro_bias_gate_active || macro.exposure_pct === 70;
+    const isModuleC = macro.macro_bias_gate_active || macro.exposure_pct === 50 || macro.exposure_pct === 70;
+    const targetExp = macro.exposure_pct !== undefined ? macro.exposure_pct : 100;
 
-    let modePrefix = isModuleC ? '🛡️ 70%雙隊防禦 (模組C)' : '🔥 100%雙隊滿倉';
+    let modePrefix = isModuleC ? `🛡️ ${targetExp}%雙隊防禦 (模組C)` : '🔥 100%雙隊滿倉';
     if (rebalanceMode === 'tranche_a_50') {
-      modePrefix = isModuleC ? '🅰️ 1號A隊(35%防禦)' : '🅰️ 1號A隊(50%)';
+      modePrefix = isModuleC ? `🅰️ 1號A隊(${targetExp / 2}%防禦)` : '🅰️ 1號A隊(50%)';
     } else if (rebalanceMode === 'tranche_b_50') {
-      modePrefix = isModuleC ? '🅱️ 22號B隊(35%防禦)' : '🅱️ 22號B隊(50%)';
+      modePrefix = isModuleC ? `🅱️ 22號B隊(${targetExp / 2}%防禦)` : '🅱️ 22號B隊(50%)';
     }
 
     // A. 針對目標 Top 3 標的
@@ -2128,7 +2129,7 @@ export default function GlobalSovereignDashboard() {
           }}>
             {macro.macro_bias_gate_active ? (
               <span>
-                🛡️ <strong>模組 C 2.0 觸發高利估值減持</strong> (QQQ 乖離 {macro.qqq_bias500}% &ge; 30% × 10Y美債 {macro.us10y}% &ge; 3.5%) ➔ <strong>70% 防禦進攻</strong>
+                🛡️ <strong>模組 C 2.0 觸發高利估值半倉防守</strong> (QQQ 乖離 {macro.qqq_bias500}% &ge; 30% × 10Y美債 {macro.us10y}% &ge; 3.5%) ➔ <strong>50% 半倉防禦 (50% 現金收息避險)</strong>
               </span>
             ) : (
               <span>
@@ -2148,14 +2149,14 @@ export default function GlobalSovereignDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
               <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>
-                🅰️ A 梯隊（每月 1 號調倉｜{macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
+                🅰️ A 梯隊（每月 1 號調倉｜{macro.exposure_pct === 50 ? '半倉防禦配比 25%' : macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
               </strong>
               <span style={{ fontSize: '0.7rem', color: '#7DD3FC', fontFamily: 'monospace' }}>
-                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct === 70 ? 0.35 : 0.5)).toLocaleString()}
+                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct ? macro.exposure_pct / 200.0 : 0.5)).toLocaleString()}
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 50 ? '10%' : macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 50 ? '25%' : macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
               • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 定期調倉日才執行調權！
             </div>
           </div>
@@ -2169,20 +2170,20 @@ export default function GlobalSovereignDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
               <strong style={{ color: '#C084FC', fontSize: '0.86rem' }}>
-                🅱️ B 梯隊（每月 22 號調倉｜{macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
+                🅱️ B 梯隊（每月 22 號調倉｜{macro.exposure_pct === 50 ? '半倉防禦配比 25%' : macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
               </strong>
               <span style={{ fontSize: '0.7rem', color: '#D8B4FE', fontFamily: 'monospace' }}>
-                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct === 70 ? 0.35 : 0.5)).toLocaleString()}
+                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct ? macro.exposure_pct / 200.0 : 0.5)).toLocaleString()}
               </span>
             </div>
             <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
+              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 50 ? '10%' : macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 50 ? '25%' : macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
               • <strong>當期狀態</strong>：下次調倉日為 <strong style={{ color: '#FBBF24' }}>{dualTrancheGuide.nextActionLabel}</strong>。捕捉最新財報季後強勢動能黑馬！
             </div>
           </div>
 
           {/* 模組 C 2.0 避險緩衝卡 */}
-          {macro.exposure_pct === 70 && (
+          {(macro.exposure_pct === 50 || macro.exposure_pct === 70) && (
             <div style={{
               background: 'rgba(245, 158, 11, 0.08)',
               border: '1px solid rgba(245, 158, 11, 0.35)',
@@ -2191,15 +2192,15 @@ export default function GlobalSovereignDashboard() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
                 <strong style={{ color: '#FBBF24', fontSize: '0.86rem' }}>
-                  🛡️ 模組 C 2.0 防禦池（高檔緊縮避險｜配比 30% 總資產）
+                  🛡️ 模組 C 2.0 防禦池（高檔緊縮避險｜配比 {100 - macro.exposure_pct}% 總資產）
                 </strong>
                 <span style={{ fontSize: '0.7rem', color: '#FDE68A', fontFamily: 'monospace' }}>
-                  避險緩衝 NT$ {Math.round(totalNetAssetsTwd * 0.3).toLocaleString()}
+                  避險緩衝 NT$ {Math.round(totalNetAssetsTwd * ((100 - macro.exposure_pct) / 100.0)).toLocaleString()}
                 </span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>觸發條件</strong>：QQQ 2年線乖離 {macro.qqq_bias500}% &ge; 30% 且 10Y美債殖利率 {macro.us10y}% &ge; 3.5%（DCF 股債折現雙因子模型），自動啟動降載。<br/>
-                • <strong>防守標的</strong>：30% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕估值修正風險。
+                • <strong>觸發條件</strong>：QQQ 2年線乖離 {macro.qqq_bias500}% &ge; 30% 且 10Y美債殖利率 {macro.us10y}% &ge; 3.5%（DCF 股債折現雙因子模型），自動啟動 {macro.exposure_pct}% 半倉防禦。<br/>
+                • <strong>防守標的</strong>：{100 - macro.exposure_pct}% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕估值修正風險。
               </div>
             </div>
           )}

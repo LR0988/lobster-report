@@ -191,8 +191,8 @@ def get_global_sovereign_dashboard_data():
 
             if comp_br >= 0.50:
                 if macro_bias_gate_active:
-                    data["macro_status"]["exposure_pct"] = 70
-                    data["macro_status"]["regime"] = f"🛡️ 模組 C 2.0 觸發高利估值減持 (QQQ 2年線乖離 {qqq_bias500}% >= 30% 且 10Y美債殖利率 {us10y_now}% >= 3.5% 高折現壓制 -> 降至 70% 倉位，30% 停泊 GLD/BIL)"
+                    data["macro_status"]["exposure_pct"] = 50
+                    data["macro_status"]["regime"] = f"🛡️ 模組 C 2.0 觸發高利估值半倉防守 (QQQ 2年線乖離 {qqq_bias500}% >= 30% 且 10Y美債殖利率 {us10y_now}% >= 3.5% 高折現壓制 -> 降至 50% 半倉防守，50% 停泊 GLD/BIL 避險收息)"
                 else:
                     data["macro_status"]["exposure_pct"] = 100
                     data["macro_status"]["regime"] = f"全球共振多頭 (美台寬幅 {comp_br*100:.1f}% >= 50%，QQQ 2年線乖離 {qqq_bias500}% < 30% 估值健康 -> A/B雙梯隊 100% 滿倉進攻)"
