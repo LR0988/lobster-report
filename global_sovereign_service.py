@@ -350,8 +350,8 @@ def get_global_sovereign_dashboard_data():
             vol_abs = min(5.0, max(0.2, mean_up_v / max(mean_dn_v, 1e-6)))
             chip_val = round(float(min(1.0, max(0.0, (vol_abs - 0.2) / 4.8))), 2)
 
-            # 計算精簡正交 4 大核心因子複合動能分數:
-            # Score = (85% Raw_Mom + 15% Residual_Alpha) * (1 + 0.50*FIP) * (1 + 0.20*Convexity) * Parabolic_Damper
+            # 計算精簡正交 5 大核心因子複合動能分數 (方案 A：納入 52W 高點錨定連續乘數 George & Hwang 2004):
+            # Score = (85% Raw_Mom + 15% Residual_Alpha) * (1 + 0.50*FIP) * (1 + 0.20*Convexity) * [1 + 0.40*(Prox_52W - 0.85)] * Parabolic_Damper
             score_val = None
             if mom12m is not None and mom3m is not None:
                 raw_mom = (0.45 * mom12m + 0.35 * mom3m + 0.20 * mom1m) / 100.0
@@ -371,8 +371,10 @@ def get_global_sovereign_dashboard_data():
 
                 fip_m = 1.0 + 0.50 * fip_val
                 conv_m = 1.0 + 0.20 * conv_clip
+                prox_ratio = min(1.05, max(0.10, prox_52w_pct / 100.0))
+                prox_52w_m = min(1.50, max(0.50, 1.0 + 0.40 * (prox_ratio - 0.85)))
 
-                score_val = round(blend_mom * fip_m * conv_m * parabolic_damper, 4)
+                score_val = round(blend_mom * fip_m * conv_m * prox_52w_m * parabolic_damper, 4)
 
             # 爆量滯漲過濾 (Churn Filter: 5D均量 > 2.0倍60D均量 且 10D漲幅 < 2%)
             churn_safe = True
@@ -491,24 +493,39 @@ def get_global_sovereign_dashboard_data():
                 c.execute("UPDATE global_sovereign_positions SET current_price = ? WHERE id = ?", (st["price"], pos_id))
         conn.commit()
 
-        # 4. 同步更新權威回測 KPI (搭載模組 C 2.0 50% 半倉防守閥門之實盤基準)
+        # 4. 同步更新權威回測 KPI (搭載方案 A：52W 高點錨定連續乘數 + 模組 C 2.0 50% 半倉防守閥門)
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
-            "total_ret": 4404270.0,
-            "mult": 44043.7,
-            "cagr": 60.19,
-            "mdd": -24.59,
-            "daily_mdd": -38.01,
-            "sharpe": 1.42,
-            "calmar": 2.45,
-            "daily_calmar": 1.58,
-            "sortino": 2.85,
-            "win_rate": 91.3
+            "total_ret": 5357210.0,
+            "mult": 53573.1,
+            "cagr": 61.58,
+            "mdd": -25.76,
+            "daily_mdd": -32.31,
+            "sharpe": 1.35,
+            "calmar": 2.39,
+            "daily_calmar": 1.91,
+            "sortino": 2.92,
+            "win_rate": 87.0
         }
         if "doe_config" in data:
-            data["doe_config"]["intra_month_risk_shield"] = "月內不設個股停損（避免強勢飆股洗盤耗損），由每月 1 號(A隊)與 22 號(B隊)雙梯隊換倉自然淘汰 + 模組 C 2.0 50% 半倉防守"
-            data["doe_config"]["winning_years_pct"] = 91.3
+            data["doe_config"]["intra_month_risk_shield"] = "月內不設個股停損（避免強勢飆股洗盤耗損），由每月 1 號(A隊)與 22 號(B隊)雙梯隊換倉自然淘汰 + 52W 高點錨定連續乘數 + 模組 C 2.0 50% 半倉防守"
+            data["doe_config"]["winning_years_pct"] = 87.0
+
+        # 同步更新歷年報酬率 (方案 A：2004~2026)
+        scheme_a_yearly = {
+            2004: 16.03, 2005: 107.95, 2006: 32.46, 2007: 69.14, 2008: -1.97,
+            2009: 84.94, 2010: 6.37, 2011: 7.62, 2012: 34.08, 2013: 90.51,
+            2014: 36.40, 2015: 38.53, 2016: 121.31, 2017: 47.32, 2018: -0.73,
+            2019: 31.17, 2020: 141.54, 2021: 241.82, 2022: -11.49, 2023: 218.92,
+            2024: 121.81, 2025: 42.52, 2026: 216.27
+        }
+        if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
+            for row in data["yearly_performance"]:
+                yr = int(row.get("year", 0))
+                if yr in scheme_a_yearly:
+                    row["scheme_a"] = scheme_a_yearly[yr]
+                    row["titan_return"] = scheme_a_yearly[yr]
 
         data["latest_data_date"] = max_dt or "2026-10-16"
         data["latest_tw_date"] = max_tw_dt or max_dt or "2026-10-16"

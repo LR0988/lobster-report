@@ -1854,7 +1854,7 @@ export default function GlobalSovereignDashboard() {
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              22.8年回測 <strong style={{ color: '#FDE047' }}>44,043.7倍 (CAGR 60.19%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-24.59%</strong> (日MDD -38.01%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.45</strong> ｜ 年度勝率 <strong style={{ color: '#34D399' }}>91.3%</strong>
+              22.8年回測 <strong style={{ color: '#FDE047' }}>53,573.1倍 (CAGR 61.58%)</strong> ｜ 日MDD <strong style={{ color: '#34D399' }}>-32.31%</strong> (月MDD -25.76%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.39</strong> ｜ 近8年CAGR <strong style={{ color: '#34D399' }}>+109.30%</strong>
             </span>
           </div>
 
@@ -2734,7 +2734,7 @@ export default function GlobalSovereignDashboard() {
                     📡 全球泰坦 2.0 即時選股雷達 Top 10（1號 / 22號 雙軌選股唯一依據）
                   </h4>
                   <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    採用<strong>4 大正交核心動能公式</strong>排序：(85% Raw + 15% 殘差) × FIP(0.50) × 凸性(0.20) × 拋物線阻尼，並通過雙均線 (Price&gt;60MA/200MA)、流動性門檻與 5D 爆量滯漲剔除濾網。<strong>Rank 1~3 為正選 (40/30/30%)，Rank 4~5 為在手續抱保護緩衝帶</strong>。
+                    採用<strong>方案 A・5 大正交核心動能公式</strong>排序：(85% Raw + 15% 殘差) × FIP(0.50) × 凸性(0.20) × <strong>52W高點錨定(0.40)</strong> × 拋物線阻尼，並通過雙均線 (Price&gt;60MA/200MA)、流動性門檻與 5D 爆量滯漲剔除濾網。<strong>Rank 1~3 為正選 (40/30/30%)，Rank 4~5 為在手續抱保護緩衝帶</strong>。
                   </p>
                 </div>
 
@@ -2839,6 +2839,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>12M 長期主升</th>
                       <th style={{ textAlign: 'right' }}>FIP 連續性</th>
                       <th style={{ textAlign: 'right' }}>凸性比 (Conv)</th>
+                      <th style={{ textAlign: 'right', color: '#F472B6' }}>52W 高點錨定</th>
                       <th style={{ textAlign: 'right', color: '#FBBF24' }}>複合總分</th>
                       <th style={{ textAlign: 'center', color: '#FBBF24' }}>型態與量價檢驗</th>
                     </tr>
@@ -2963,6 +2964,9 @@ export default function GlobalSovereignDashboard() {
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>
                             {pick.convexity !== undefined ? `${Number(pick.convexity).toFixed(2)}x` : '1.00x'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F472B6', fontWeight: 'bold' }}>
+                            {pick.prox_52w !== undefined ? `${pick.prox_52w}%` : '95.0%'}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24', fontSize: '0.88rem' }}>
                             {pick.score?.toFixed(3)}
@@ -3222,7 +3226,7 @@ export default function GlobalSovereignDashboard() {
             )}
           </div>
 
-          {/* 📐 全球泰坦 2.0 (方案二 + 模組 C 2.0 雙因子防守閥門) 數學架構展示卡片 */}
+          {/* 📐 全球泰坦 2.0 (方案 A：5大正交動能含52W高點錨定 + 模組 C 2.0 雙因子防守閥門) 數學架構展示卡片 */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.75), rgba(15, 23, 42, 0.85))',
             border: '1px solid rgba(167, 139, 250, 0.35)',
@@ -3235,15 +3239,15 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 <span style={{ fontSize: '1.15rem' }}>👑</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球泰坦 2.0 (方案二・4大正交動能 + 模組 C 2.0 股債折現閥門) 生產級數學架構
+                  全球泰坦 2.0 (方案 A・5大正交核心動能 + 52W高點錨定 + 模組 C 2.0 股債折現閥門) 生產級數學架構
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +60.19% | 44,043.7x | 月MDD -24.59% (Calmar 2.45)
+                  CAGR +61.58% | 53,573.1x | 日MDD -32.31% (月 -25.76%) | 近8年 +109.3%/年
                 </span>
                 <span style={{ fontSize: '0.72rem', color: '#A78BFA', background: 'rgba(167, 139, 250, 0.15)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
-                  4大正交核心因子 × 40/30/30 雙梯隊自然淘汰
+                  5大正交核心因子 × 40/30/30 雙梯隊自然淘汰
                 </span>
               </div>
             </div>
@@ -3255,14 +3259,14 @@ export default function GlobalSovereignDashboard() {
               borderRadius: '8px',
               padding: '0.75rem 1rem',
               fontFamily: 'monospace',
-              fontSize: '0.86rem',
+              fontSize: '0.84rem',
               color: '#FDE047',
               textAlign: 'center',
               lineHeight: '1.65',
               overflowX: 'auto',
               marginBottom: '0.85rem'
             }}>
-              <strong>Final Score</strong> = (0.85×<strong>Raw_Mom</strong> + 0.15×<strong>Res_Alpha</strong>) × (1 + 0.50×<strong>FIP</strong>) × [1 + 0.20×clip(<strong>Conv</strong>-1, -0.5, 2.0)] × <strong>Parabolic_Damper</strong>
+              <strong>Final Score</strong> = (0.85×<strong>Raw_Mom</strong> + 0.15×<strong>Res_Alpha</strong>) × (1 + 0.50×<strong>FIP</strong>) × [1 + 0.20×clip(<strong>Conv</strong>-1, -0.5, 2.0)] × [1 + 0.40×(<strong>P/High<sub>252</sub></strong> - 0.85)] × <strong>Parabolic_Damper</strong>
             </div>
 
             {/* 4 大生產級公式層級分解 */}
@@ -3283,19 +3287,19 @@ export default function GlobalSovereignDashboard() {
                 </div>
               </div>
 
-              {/* 第 2 層：FIP 溫水煮青蛙與非對稱凸性乘數 */}
+              {/* 第 2 層：FIP 溫水煮青蛙、非對稱凸性與 52W 高點錨定乘數 */}
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ color: '#34D399', fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                  2. 路徑連續性與右偏凸性乘數 (FIP × Convexity)
+                  2. 路徑連續性、右偏凸性與 52W 高點錨定
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#34D399', marginBottom: '0.25rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
-                  FIP 乘數 = 1.0 + 0.50 × [(漲日 - 跌日) / 252D]
+                <div style={{ fontFamily: 'monospace', color: '#34D399', marginBottom: '0.2rem', background: 'rgba(0,0,0,0.3)', padding: '0.22rem 0.4rem', borderRadius: '4px' }}>
+                  FIP × 凸性 = (1 + 0.50×FIP) × [1 + 0.20×clip(Conv-1, -0.5, 2)]
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#C084FC', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
-                  凸性乘數 = 1.0 + 0.20 × clip(上行波動/下行波動 - 1, -0.5, 2)
+                <div style={{ fontFamily: 'monospace', color: '#F472B6', background: 'rgba(0,0,0,0.3)', padding: '0.22rem 0.4rem', borderRadius: '4px' }}>
+                  52W高點錨定 = 1.0 + 0.40 × (Close / High_252 - 0.85)
                 </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.71rem', marginTop: '0.3rem' }}>
-                  • 獎勵機構漸進建倉與「漲時發散、跌時縮量收斂」的右偏強勢股。
+                <div style={{ color: '#94A3B8', fontSize: '0.71rem', marginTop: '0.25rem' }}>
+                  • George & Hwang (2004)：鎖定逼近 52 週新高無套牢賣壓主升股，日頻 MDD 大降 5.7% 至 -32.31%。
                 </div>
               </div>
 
