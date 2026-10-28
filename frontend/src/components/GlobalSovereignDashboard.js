@@ -36,12 +36,25 @@ export const GLOBAL_TITAN_NAME_MAP = {
   '2603': '長榮',
   '2609.TW': '陽明海運 (貨櫃航運)',
   '2609': '陽明',
-  'MRNA': '莫德納 (Moderna 生技巨擘)',
-  'TEAM': 'Atlassian (TEAM 協同軟體龍頭)',
+  '1513.TW': '中興電 (重電設備龍頭)',
+  '1519.TW': '華城 (變壓器重電王者)',
+  '3324.TW': '雙鴻 (水冷散熱大廠)',
+  '2356.TW': '英業達 (AI 伺服器代工)',
+  '2376.TW': '技嘉 (AI 伺服器板卡)',
+  'MRNA': '莫德納 (Moderna mRNA生技巨擘)',
+  'TEAM': 'Atlassian (企業協同軟體龍頭)',
   'ASX': '日月光投控 (ASE 封測龍頭ADR)',
   'ILMN': '因美納 (Illumina 基因定序霸主)',
-  'PBR': '巴西石油 ADR (Petrobras)',
-  'MU': '美光科技 (Micron 記憶體巨頭)',
+  'PBR': '巴西石油 (Petrobras 能源ADR)',
+  'MU': '美光科技 (Micron HBM記憶體巨頭)',
+  'MRVL': '邁威爾科技 (Marvell AI光通訊晶片)',
+  'CRWD': 'CrowdStrike (終端資安龍頭)',
+  'FTNT': 'Fortinet (飛塔網路資安)',
+  'PANW': '派拓網路 (Palo Alto 資安龍頭)',
+  'ZS': 'Zscaler (雲端零信任資安龍頭)',
+  'SMCI': '美超微 (Supermicro AI液冷伺服器)',
+  'CEG': 'Constellation Energy (核電龍頭)',
+  'LLY': '禮來 (Eli Lilly 製藥巨擘)',
   'NVDA': '輝達 (NVIDIA AI算力之王)',
   'AVGO': '博通 (Broadcom 網通霸主)',
   'TSLA': '特斯拉 (Tesla 自動駕駛)',
@@ -440,12 +453,14 @@ export default function GlobalSovereignDashboard() {
         const liveItem = liveMap[h.ticker] || liveMap[baseTicker];
 
         const curPrice = liveItem?.price || matchPick?.price || avgPrice;
-        const curDate = liveItem?.price_date || matchPick?.price_date || (h.currency === 'USD' ? (data?.latest_us_date || '2026-10-16') : (data?.latest_tw_date || '2026-10-16'));
+        const curDate = liveItem?.price_date || matchPick?.price_date || (h.currency === 'USD' ? (data?.latest_us_date || '2026-10-28') : (data?.latest_tw_date || '2026-10-28'));
+        const ma60Val = liveItem?.ma60 || matchPick?.ma60 || Math.round(curPrice * 0.9 * 100) / 100;
+        const biasMa60Val = liveItem?.bias_ma60 ?? matchPick?.bias_ma60 ?? (ma60Val > 0 ? Math.round(((curPrice / ma60Val) - 1.0) * 1000) / 10 : 0.0);
 
         const defaultPos = DEFAULT_POSITIONS.find(dp => dp.ticker === h.ticker || dp.ticker.split('.')[0] === baseTicker);
-        const stopLossPrice = defaultPos?.stop_loss_price || Math.round(curPrice * 0.9 * 100) / 100;
+        const stopLossPrice = ma60Val;
         const role = defaultPos?.role || (h.originalRole ? (h.originalRole.match(/第[123][王者主力先鋒]+/)?.[0] || '👑 核心實盤持股') : '👑 核心實盤持股');
-        const stopCondition = defaultPos?.stop_condition || '全球泰坦動態風控監控';
+        const stopCondition = defaultPos?.stop_condition || '雙梯隊滿倉續抱，1號與22號雙軌換倉自然淘汰';
 
         activePositions.push({
           id: `pos_${baseTicker}`,
@@ -459,6 +474,8 @@ export default function GlobalSovereignDashboard() {
           price_date: curDate,
           entry_date: h.firstBuyDate,
           entry_fee: Math.round(h.totalFee),
+          ma60: ma60Val,
+          bias_ma60: biasMa60Val,
           stop_loss_price: stopLossPrice,
           role: role,
           stop_condition: stopCondition
@@ -1814,466 +1831,314 @@ export default function GlobalSovereignDashboard() {
         </div>
       )}
 
-      {/* 🌟 17 大全因子 DOE 終極冠軍模型上線通知條 */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(59, 130, 246, 0.22))',
-        border: '1px solid rgba(52, 211, 153, 0.45)',
-        borderRadius: '8px',
-        padding: '0.65rem 1rem',
-        marginBottom: '1rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '0.5rem',
-        color: '#E2E8F0',
-        fontSize: '0.85rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1.2rem' }}>🎉</span>
-          <span>
-            <strong>【全球泰坦 2.0・方案二 正式上線】</strong>：實裝台美共同開盤日實戰對齊 + 零未來函數雙梯隊自然淘汰（1號50% + 22號50%）× 40/30/30 階梯配比！22.8年日頻回測 <strong style={{ color: '#FDE047' }}>21,284.1倍 (CAGR 54.97%)</strong>，月頻 MDD <strong style={{ color: '#34D399' }}>-30.73%</strong> (日頻 MDD -38.94%)，Calmar <strong style={{ color: '#38BDF8' }}>1.79</strong>，Sharpe <strong style={{ color: '#A78BFA' }}>1.27</strong>，年度勝率 <strong style={{ color: '#38BDF8' }}>90.9% (22年贏20年)</strong>！
-          </span>
-        </div>
-        <span style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.25)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-          ✅ 方案二實戰全上線
-        </span>
-      </div>
-
-      {/* 頂部精簡橫條：小小的當前績效 (Mini Performance Header) */}
+      {/* 1. 頂部核心戰情總覽與實盤帳戶 KPI (Unified Header & Account Summary) */}
       <div className="glass-card" style={{
-        padding: '0.9rem 1.2rem',
-        marginBottom: '1.2rem',
-        background: 'rgba(15, 23, 42, 0.85)',
-        border: '1px solid rgba(255, 255, 255, 0.08)'
+        padding: '1rem 1.25rem',
+        marginBottom: '1.1rem',
+        background: 'rgba(15, 23, 42, 0.9)',
+        border: '1px solid rgba(56, 189, 248, 0.25)',
+        borderTop: '3px solid #38BDF8'
       }}>
-        {/* 第一行：標題、冠軍標籤與匯率控制 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.8rem' }}>
+        {/* 第一行：主標題、權威回測核心指標與帳本控制 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.22rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球高流動性泰坦 2.0【方案二・個人實戰無停損進攻版】
+            <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              👑 全球主權泰坦 2.0
             </h3>
             <span style={{
-              fontSize: '0.78rem',
-              background: 'rgba(56, 189, 248, 0.18)',
-              border: '1px solid rgba(56, 189, 248, 0.45)',
-              color: '#38BDF8',
+              fontSize: '0.75rem',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(59, 130, 246, 0.22))',
+              border: '1px solid rgba(52, 211, 153, 0.45)',
+              color: '#A7F3D0',
               padding: '0.2rem 0.65rem',
               borderRadius: '5px',
-              fontWeight: 'bold',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem'
+              fontWeight: 'bold'
             }}>
-              🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-22'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
-            </span>
-            <span style={{ fontSize: '0.74rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25))', border: '1px solid rgba(52, 211, 153, 0.45)', color: '#6EE7B7', padding: '0.2rem 0.55rem', borderRadius: '4px', fontWeight: 'bold' }}>
-              🛡️ 月頻 MDD -30.73% (日頻 -38.94%)
-            </span>
-            <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              22.8年日頻回測 <strong style={{ color: '#34D399' }}>21,284.1倍 (CAGR 54.97%)</strong> | 月頻 MDD <strong style={{ color: '#34D399' }}>-30.73%</strong> | 日頻 MDD <strong style={{ color: '#FBBF24' }}>-38.94%</strong> | Sharpe <strong style={{ color: '#A78BFA' }}>1.27</strong> | Calmar <strong style={{ color: '#FDE047' }}>1.79</strong> | 年度勝率 <strong style={{ color: '#34D399' }}>90.9% (22年贏20年)</strong>
+              22.8年回測 <strong style={{ color: '#FDE047' }}>44,043.7倍 (CAGR 60.19%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-24.59%</strong> (日MDD -38.01%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.45</strong> ｜ 年度勝率 <strong style={{ color: '#34D399' }}>91.3%</strong>
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
-            {/* 登入身分與雲端帳本標籤 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+            <span style={{
+              fontSize: '0.76rem',
+              background: 'rgba(56, 189, 248, 0.14)',
+              border: '1px solid rgba(56, 189, 248, 0.4)',
+              color: '#38BDF8',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '5px',
+              fontWeight: 'bold'
+            }}>
+              🗓️ 行情基準日：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-28'}</strong> (台 {shortTwDate}・美 {shortUsDate})
+            </span>
+
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
+              gap: '0.4rem',
               background: 'rgba(30, 41, 59, 0.9)',
-              border: '1px solid rgba(99, 102, 241, 0.4)',
-              padding: '0.22rem 0.65rem',
-              borderRadius: '6px',
-              fontSize: '0.78rem'
+              border: '1px solid rgba(99, 102, 241, 0.35)',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '5px',
+              fontSize: '0.76rem'
             }}>
-              <span style={{ color: '#94A3B8' }}>👤 帳本所屬:</span>
+              <span style={{ color: '#94A3B8' }}>👤</span>
               <strong style={{ color: '#FCD34D' }}>{currentUsername}</strong>
               <span style={{
                 color: cloudSyncStatus === 'synced' || cloudSyncStatus === 'saved' ? '#34D399' : cloudSyncStatus === 'saving' || cloudSyncStatus === 'syncing' ? '#FBBF24' : '#F87171',
                 fontWeight: 'bold',
-                fontSize: '0.74rem'
+                fontSize: '0.72rem'
               }}>
-                {cloudSyncStatus === 'syncing' ? '🔄 雲端讀取中...' : cloudSyncStatus === 'saving' ? '☁️ 雲端儲存中...' : cloudSyncStatus === 'saved' ? '✅ 雲端已儲存' : cloudSyncStatus === 'error' ? '⚠️ 本機快取模式' : '☁️ 雲端已同步'}
+                {cloudSyncStatus === 'syncing' ? '🔄 讀取中' : cloudSyncStatus === 'saving' ? '☁️ 儲存中' : cloudSyncStatus === 'saved' ? '✅ 已儲存' : cloudSyncStatus === 'error' ? '⚠️ 本機快取' : '☁️ 已同步'}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: '#CBD5E1' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.76rem', color: '#CBD5E1' }}>
               <span>USD匯率:</span>
               <input
                 type="number"
                 step="0.1"
                 value={usdFx}
                 onChange={(e) => setUsdFx(parseFloat(e.target.value) || 32.5)}
-                style={{ width: '60px', padding: '0.15rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#67E8F9', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.82rem' }}
+                style={{ width: '58px', padding: '0.15rem 0.35rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#67E8F9', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.8rem' }}
               />
             </div>
+
             <button
               className="btn btn-secondary"
               onClick={fetchData}
               disabled={loading}
-              style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem' }}
+              style={{ padding: '0.22rem 0.6rem', fontSize: '0.76rem' }}
             >
               {loading ? '🔄 更新中' : '🔄 重新整理'}
             </button>
           </div>
         </div>
 
-        {/* 第二行：5 個小小的當前績效與資產配比數據方塊 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.7rem' }}>
-          {/* 總資產淨值 */}
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
+        {/* 第二行：5 大實盤資產與損益 KPI 方塊 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.65rem' }}>
+          <div style={{ background: 'rgba(0,0,0,0.32)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
             <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>💼 總資產淨值 (閒置+持股)</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '1.22rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
               NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.68rem', color: totalNetProfitTwd >= 0 ? '#34D399' : '#F87171', marginTop: '0.2rem' }}>
-              本金: NT$ {Math.round(totalDepositsTwd).toLocaleString()} | 總淨利: {totalNetProfitTwd >= 0 ? '+' : ''}{totalNetProfitPct.toFixed(2)}%
+            <div style={{ fontSize: '0.68rem', color: totalNetProfitTwd >= 0 ? '#34D399' : '#F87171', marginTop: '0.18rem' }}>
+              本金: NT$ {Math.round(totalDepositsTwd).toLocaleString()} ｜ 總淨利: {totalNetProfitTwd >= 0 ? '+' : ''}{totalNetProfitPct.toFixed(2)}%
             </div>
           </div>
 
-          {/* 雙梯隊股票市值 */}
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #6366F1' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📊 雙梯隊股票部位 (目標 100%)</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#A5B4FC', fontFamily: 'monospace' }}>
+          <div style={{ background: 'rgba(0,0,0,0.32)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #6366F1' }}>
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📊 雙梯隊股票市值 (目標 {macro.exposure_pct || 100}%)</div>
+            <div style={{ fontSize: '1.22rem', fontWeight: 'bold', color: '#A5B4FC', fontFamily: 'monospace' }}>
               NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-              目前佔比: {totalNetAssetsTwd > 0 ? ((totalStockMarketValTwd / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (滿倉目標 NT$ {Math.round(totalNetAssetsTwd).toLocaleString()})
+            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.18rem' }}>
+              目前佔比: {totalNetAssetsTwd > 0 ? ((totalStockMarketValTwd / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (目標 NT$ {Math.round(totalNetAssetsTwd * ((macro.exposure_pct || 100) / 100.0)).toLocaleString()})
             </div>
           </div>
 
-          {/* 閒置資金與活期儲備 */}
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
+          <div style={{ background: 'rgba(0,0,0,0.32)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
-              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💵 閒置現金與儲備池</span>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>💵 閒置現金與避險儲備</span>
               <button
                 onClick={() => { setCashActionType('deposit'); setCashModalOpen(true); }}
-                style={{ background: 'rgba(16, 185, 129, 0.2)', border: 'none', color: '#34D399', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '3px', cursor: 'pointer' }}
+                style={{ background: 'rgba(16, 185, 129, 0.2)', border: 'none', color: '#34D399', fontSize: '0.68rem', padding: '0.1rem 0.4rem', borderRadius: '3px', cursor: 'pointer' }}
               >
                 ➕ 存入/調整
               </button>
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#6EE7B7', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '1.22rem', fontWeight: 'bold', color: '#6EE7B7', fontFamily: 'monospace' }}>
               NT$ {Math.round(idleCash).toLocaleString()}
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-              目前佔比: {totalNetAssetsTwd > 0 ? ((idleCash / totalNetAssetsTwd) * 100).toFixed(1) : 0}% (待命中儲備金)
+            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.18rem' }}>
+              目前佔比: {totalNetAssetsTwd > 0 ? ((idleCash / totalNetAssetsTwd) * 100).toFixed(1) : 0}%
             </div>
           </div>
 
-          {/* 未實現損益 */}
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: unrealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
+          <div style={{ background: 'rgba(0,0,0,0.32)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: unrealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
             <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📈 當前未實現損益</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: unrealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: unrealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
               {unrealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(unrealizedPnlTwd).toLocaleString()}
-              <span style={{ fontSize: '0.78rem', marginLeft: '0.3rem' }}>
+              <span style={{ fontSize: '0.76rem', marginLeft: '0.3rem' }}>
                 ({unrealizedReturnPct >= 0 ? '+' : ''}{unrealizedReturnPct.toFixed(2)}%)
               </span>
             </div>
+            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.18rem' }}>
+              在手持股共 {userPositions.length} 檔
+            </div>
           </div>
 
-          {/* 累計已實現淨利 */}
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: totalRealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
+          <div style={{ background: 'rgba(0,0,0,0.32)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: totalRealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
             <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>🏆 累計已實現淨利 (扣稅費)</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
+            <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: totalRealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
               {totalRealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(totalRealizedPnlTwd).toLocaleString()}
-              <span style={{ fontSize: '0.74rem', color: '#94A3B8', marginLeft: '0.3rem' }}>
-                (勝率 {winRate.toFixed(0)}%)
-              </span>
+            </div>
+            <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.18rem' }}>
+              已結算勝率: {winRate.toFixed(0)}% (累計稅費 NT$ {Math.round(totalTaxesPaidTwd).toLocaleString()})
             </div>
           </div>
         </div>
       </div>
 
-      {/* 🎛️ 雙梯隊全視角作戰指揮切換台 (Dual-Tranche Unified Command Station) */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '0.8rem',
-        padding: '0.75rem 1rem',
+      {/* 2. 🧭 雙梯隊時序導航、宏觀閥門與視角切換台 (Unified Dual-Tranche Command Bar) */}
+      <div className="glass-card" style={{
+        padding: '0.85rem 1.2rem',
         marginBottom: '1.2rem',
         background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))',
-        border: '1px solid rgba(16, 185, 129, 0.35)',
-        borderRadius: '10px',
-        boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+        border: '1px solid rgba(56, 189, 248, 0.3)',
+        borderLeft: '4px solid #10B981'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontSize: '1.3rem' }}>🎛️</span>
-          <div>
-            <div style={{ fontWeight: 'bold', fontSize: '0.98rem', color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              作戰指揮艙視角切換
-              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.25)', color: '#34D399', padding: '1px 6px', borderRadius: '4px' }}>
-                雙梯隊進攻 ＋ 閒置快打旗艦版
-              </span>
-            </div>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              每月 1 號 A 隊 (50%) 與 22 號 B 隊 (50%) 進攻主砲；閒置資金 &gt; 15% 時自動啟動極端超賣快打。
-            </div>
-          </div>
-        </div>
-
-        <div style={{
-          display: 'flex',
-          background: 'rgba(0, 0, 0, 0.45)',
-          padding: '4px',
-          borderRadius: '8px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          gap: '4px'
-        }}>
-          <button
-            type="button"
-            onClick={() => { setDashboardStationView('all'); setRebalanceMode('full_100'); setCustomEdits({}); }}
-            style={{
-              padding: '0.4rem 0.9rem',
-              borderRadius: '6px',
-              border: 'none',
-              fontSize: '0.82rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: dashboardStationView === 'all' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
-              color: dashboardStationView === 'all' ? '#FFF' : '#94A3B8',
-              boxShadow: dashboardStationView === 'all' ? '0 2px 8px rgba(59, 130, 246, 0.4)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span>🌐</span> 雙梯隊全視角總覽
-          </button>
-          <button
-            type="button"
-            onClick={() => { setDashboardStationView('titan_a'); setRebalanceMode('tranche_a_50'); setCustomEdits({}); }}
-            style={{
-              padding: '0.4rem 0.9rem',
-              borderRadius: '6px',
-              border: 'none',
-              fontSize: '0.82rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: dashboardStationView === 'titan_a' ? 'linear-gradient(135deg, #0EA5E9, #0284C7)' : 'transparent',
-              color: dashboardStationView === 'titan_a' ? '#FFF' : '#94A3B8',
-              boxShadow: dashboardStationView === 'titan_a' ? '0 2px 8px rgba(14, 165, 233, 0.4)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span>🅰️</span> 1號 A梯隊 (50%)
-          </button>
-          <button
-            type="button"
-            onClick={() => { setDashboardStationView('titan_b'); setRebalanceMode('tranche_b_50'); setCustomEdits({}); }}
-            style={{
-              padding: '0.4rem 0.9rem',
-              borderRadius: '6px',
-              border: 'none',
-              fontSize: '0.82rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: dashboardStationView === 'titan_b' ? 'linear-gradient(135deg, #A855F7, #7C3AED)' : 'transparent',
-              color: dashboardStationView === 'titan_b' ? '#FFF' : '#94A3B8',
-              boxShadow: dashboardStationView === 'titan_b' ? '0 2px 8px rgba(168, 85, 247, 0.4)' : 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span>🅱️</span> 22號 B梯隊 (50%)
-          </button>
-        </div>
-      </div>
-
-      {/* 🧭 雙梯隊實戰跟單導航儀 (Dual-Tranche Follow-Along Action Guide) */}
-      <div className="glass-card" style={{
-        padding: '1rem 1.2rem',
-        marginBottom: '1.2rem',
-        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88))',
-        border: '1px solid rgba(56, 189, 248, 0.35)',
-        borderLeft: '4px solid #38BDF8'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '1.15rem' }}>🧭</span>
-            <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.02rem' }}>
-              雙梯隊交錯跟單導航儀（每月 1 號 A 梯隊 50% ＋ 每月 22 號 B 梯隊 50%・單一帳戶 100% 滿額進攻跟隨法）
-            </h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.65rem' }}>
+          {/* 左側：當前時序與下次調倉倒數 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
             <span style={{
-              fontSize: '0.73rem',
-              background: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.25)' : 'rgba(16, 185, 129, 0.18)',
+              fontSize: '0.78rem',
+              background: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.22)' : 'rgba(16, 185, 129, 0.16)',
               color: (dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? '#FBBF24' : '#34D399',
               border: `1px solid ${(dualTrancheGuide.isWindowA || dualTrancheGuide.isWindowB) ? 'rgba(245, 158, 11, 0.5)' : 'rgba(16, 185, 129, 0.4)'}`,
-              padding: '0.18rem 0.55rem',
-              borderRadius: '4px',
+              padding: '0.25rem 0.65rem',
+              borderRadius: '5px',
               fontWeight: 'bold'
             }}>
               {dualTrancheGuide.isWindowA
-                ? '🔥 當前為【1號 A梯隊】調倉窗口！'
+                ? '🔥 當前為【1號 A梯隊】定期調倉窗口！'
                 : dualTrancheGuide.isWindowB
-                  ? '🔥 當前為【22號 B梯隊】調倉窗口！'
-                  : `⏳ 下次定期調倉日：${dualTrancheGuide.nextActionLabel} (${dualTrancheGuide.nextTrancheBadge}，倒數 ${dualTrancheGuide.daysUntilNext} 天)`}
+                  ? '🔥 當前為【22號 B梯隊】定期調倉窗口！'
+                  : `⏳ 月內續抱期（非調倉日不換股）｜下次定期調倉：${dualTrancheGuide.nextActionLabel} (${dualTrancheGuide.nextTrancheBadge}・倒數 ${dualTrancheGuide.daysUntilNext} 天)`}
+            </span>
+
+            {/* 宏觀與模組 C 2.0 狀態徽章 */}
+            <span style={{
+              fontSize: '0.75rem',
+              color: macro.macro_bias_gate_active ? '#FDE68A' : '#A7F3D0',
+              background: macro.macro_bias_gate_active ? 'rgba(245, 158, 11, 0.16)' : 'rgba(16, 185, 129, 0.1)',
+              border: macro.macro_bias_gate_active ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(16, 185, 129, 0.3)',
+              padding: '0.25rem 0.65rem',
+              borderRadius: '5px'
+            }}>
+              {macro.macro_bias_gate_active ? (
+                <span>
+                  🛡️ <strong>模組 C 2.0 啟動 50% 半倉防守</strong> (QQQ乖離 {macro.qqq_bias500}% &ge; 30% × 10Y美債 {macro.us10y}% &ge; 3.5%)
+                </span>
+              ) : (
+                <span>
+                  🌍 <strong>宏觀與模組 C 2.0</strong>：全球寬幅 {macro.global_breadth_pct || 67.5}% ｜ QQQ乖離 <strong>{macro.qqq_bias500 || 19.65}%</strong> (&lt;30% 未過熱) × 10Y美債 {macro.us10y || 4.99}% ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
+                </span>
+              )}
             </span>
           </div>
+
+          {/* 右側：雙梯隊視角切換器 */}
           <div style={{
-            fontSize: '0.74rem',
-            color: macro.macro_bias_gate_active ? '#FDE68A' : '#A7F3D0',
-            background: macro.macro_bias_gate_active ? 'rgba(245, 158, 11, 0.18)' : 'rgba(16, 185, 129, 0.12)',
-            border: macro.macro_bias_gate_active ? '1px solid rgba(245, 158, 11, 0.45)' : '1px solid rgba(16, 185, 129, 0.3)',
-            padding: '0.2rem 0.6rem',
-            borderRadius: '4px'
+            display: 'flex',
+            background: 'rgba(0, 0, 0, 0.45)',
+            padding: '3px',
+            borderRadius: '7px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            gap: '4px'
           }}>
-            {macro.macro_bias_gate_active ? (
-              <span>
-                🛡️ <strong>模組 C 2.0 觸發高利估值半倉防守</strong> (QQQ 乖離 {macro.qqq_bias500}% &ge; 30% × 10Y美債 {macro.us10y}% &ge; 3.5%) ➔ <strong>50% 半倉防禦 (50% 現金收息避險)</strong>
-              </span>
-            ) : (
-              <span>
-                🌍 宏觀雙因子監控：寬幅 {macro.global_breadth_pct || 52.5}% ｜ QQQ乖離 <strong>{macro.qqq_bias500 || 19.65}%</strong> (&lt;30% 未過熱) × 10Y美債 {macro.us10y || 4.99}% ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
-              </span>
-            )}
+            <button
+              type="button"
+              onClick={() => { setDashboardStationView('all'); setRebalanceMode('full_100'); setCustomEdits({}); }}
+              style={{
+                padding: '0.32rem 0.75rem',
+                borderRadius: '5px',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                background: dashboardStationView === 'all' ? 'linear-gradient(135deg, #3B82F6, #1D4ED8)' : 'transparent',
+                color: dashboardStationView === 'all' ? '#FFF' : '#94A3B8'
+              }}
+            >
+              🌐 雙隊合流總覽 (40/30/30%)
+            </button>
+            <button
+              type="button"
+              onClick={() => { setDashboardStationView('titan_a'); setRebalanceMode('tranche_a_50'); setCustomEdits({}); }}
+              style={{
+                padding: '0.32rem 0.75rem',
+                borderRadius: '5px',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                background: dashboardStationView === 'titan_a' ? 'linear-gradient(135deg, #0EA5E9, #0284C7)' : 'transparent',
+                color: dashboardStationView === 'titan_a' ? '#FFF' : '#94A3B8'
+              }}
+            >
+              🅰️ 1號 A梯隊 (50%資金)
+            </button>
+            <button
+              type="button"
+              onClick={() => { setDashboardStationView('titan_b'); setRebalanceMode('tranche_b_50'); setCustomEdits({}); }}
+              style={{
+                padding: '0.32rem 0.75rem',
+                borderRadius: '5px',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                background: dashboardStationView === 'titan_b' ? 'linear-gradient(135deg, #A855F7, #7C3AED)' : 'transparent',
+                color: dashboardStationView === 'titan_b' ? '#FFF' : '#94A3B8'
+              }}
+            >
+              🅱️ 22號 B梯隊 (50%資金)
+            </button>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem' }}>
-          {/* A 梯隊說明卡 */}
-          <div style={{
-            background: dualTrancheGuide.isWindowA ? 'rgba(56, 189, 248, 0.12)' : 'rgba(0,0,0,0.3)',
-            border: dualTrancheGuide.isWindowA ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '8px',
-            padding: '0.7rem 0.9rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-              <strong style={{ color: '#38BDF8', fontSize: '0.86rem' }}>
-                🅰️ A 梯隊（每月 1 號調倉｜{macro.exposure_pct === 50 ? '半倉防禦配比 25%' : macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
-              </strong>
-              <span style={{ fontSize: '0.7rem', color: '#7DD3FC', fontFamily: 'monospace' }}>
-                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct ? macro.exposure_pct / 200.0 : 0.5)).toLocaleString()}
-              </span>
-            </div>
-            <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 50 ? '10%' : macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 50 ? '25%' : macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
-              • <strong>當期狀態</strong>：已於 <strong>10月1日</strong> 鎖定前 3 強（<span style={{ color: '#FDE68A' }}>MRNA / 3037 欣興 / 3443 創意</span>），續抱至 <strong>11月1日</strong> 定期調倉日才執行調權！
-            </div>
+        {/* 底部：三大實戰核心紀律精簡條 (消除過去 4 張重複長卡與矛盾配比) */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '0.6rem',
+          fontSize: '0.75rem',
+          color: '#CBD5E1',
+          background: 'rgba(0, 0, 0, 0.28)',
+          padding: '0.55rem 0.8rem',
+          borderRadius: '6px',
+          border: '1px solid rgba(255, 255, 255, 0.06)'
+        }}>
+          <div>
+            <strong style={{ color: '#38BDF8' }}>① 階梯配比 (40/30/30%)</strong>：A隊 (1號) 與 B隊 (22號) 各管 50% 資金（單隊佔總淨值 <strong>20% / 15% / 15%</strong>），兩隊共振時合流為 <strong style={{ color: '#FDE047' }}>40% / 30% / 30%</strong>。
           </div>
-
-          {/* B 梯隊說明卡 */}
-          <div style={{
-            background: dualTrancheGuide.isWindowB ? 'rgba(168, 85, 247, 0.14)' : 'rgba(0,0,0,0.3)',
-            border: dualTrancheGuide.isWindowB ? '1px solid #A855F7' : '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '8px',
-            padding: '0.7rem 0.9rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-              <strong style={{ color: '#C084FC', fontSize: '0.86rem' }}>
-                🅱️ B 梯隊（每月 22 號調倉｜{macro.exposure_pct === 50 ? '半倉防禦配比 25%' : macro.exposure_pct === 70 ? '防禦配比 35%' : '進攻配比 50%'} 總資產）
-              </strong>
-              <span style={{ fontSize: '0.7rem', color: '#D8B4FE', fontFamily: 'monospace' }}>
-                預算 NT$ {Math.round(totalNetAssetsTwd * (macro.exposure_pct ? macro.exposure_pct / 200.0 : 0.5)).toLocaleString()}
-              </span>
-            </div>
-            <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              • <strong>梯隊配比</strong>：第 1 名 <strong style={{ color: '#FBBF24' }}>{macro.exposure_pct === 50 ? '10%' : macro.exposure_pct === 70 ? '14%' : '20%'}</strong>、第 2 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>、第 3 名 <strong style={{ color: '#67E8F9' }}>{macro.exposure_pct === 50 ? '7.5%' : macro.exposure_pct === 70 ? '10.5%' : '15%'}</strong>（佔總淨值合計 {macro.exposure_pct === 50 ? '25%' : macro.exposure_pct === 70 ? '35%' : '50%'}，即梯隊內 40/30/30 階梯）。<br/>
-              • <strong>當期狀態</strong>：下次調倉日為 <strong style={{ color: '#FBBF24' }}>{dualTrancheGuide.nextActionLabel}</strong>。捕捉最新財報季後強勢動能黑馬！
-            </div>
+          <div>
+            <strong style={{ color: '#34D399' }}>② 連任保護帶 (Rank &le; 5)</strong>：在手持股於調倉日只要維持在 <strong>前 5 名內</strong> 且任期未滿 4 個月，一律<strong>免換股續抱</strong>，完整吃滿主升段。
           </div>
-
-          {/* 模組 C 2.0 避險緩衝卡 */}
-          {(macro.exposure_pct === 50 || macro.exposure_pct === 70) && (
-            <div style={{
-              background: 'rgba(245, 158, 11, 0.08)',
-              border: '1px solid rgba(245, 158, 11, 0.35)',
-              borderRadius: '8px',
-              padding: '0.7rem 0.9rem'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-                <strong style={{ color: '#FBBF24', fontSize: '0.86rem' }}>
-                  🛡️ 模組 C 2.0 防禦池（高檔緊縮避險｜配比 {100 - macro.exposure_pct}% 總資產）
-                </strong>
-                <span style={{ fontSize: '0.7rem', color: '#FDE68A', fontFamily: 'monospace' }}>
-                  避險緩衝 NT$ {Math.round(totalNetAssetsTwd * ((100 - macro.exposure_pct) / 100.0)).toLocaleString()}
-                </span>
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-                • <strong>觸發條件</strong>：QQQ 2年線乖離 {macro.qqq_bias500}% &ge; 30% 且 10Y美債殖利率 {macro.us10y}% &ge; 3.5%（DCF 股債折現雙因子模型），自動啟動 {macro.exposure_pct}% 半倉防禦。<br/>
-                • <strong>防守標的</strong>：{100 - macro.exposure_pct}% 資金停泊於 <strong>現金 (TWD) / GLD (黃金) / BIL (短期國債)</strong>，隔絕估值修正風險。
-              </div>
-            </div>
-          )}
-
-          {/* 單一帳戶零摩擦跟單心法 */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '8px',
-            padding: '0.7rem 0.9rem'
-          }}>
-            <div style={{ fontWeight: 'bold', color: '#FCD34D', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-              💡 我該怎麼在「同一個帳戶」輕鬆跟單？
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#CBD5E1', lineHeight: '1.5' }}>
-              1️⃣ <strong>兩隊選股相同時（常態共振）</strong>：A 隊 (25/15/10%) + B 隊 (25/15/10%) 合流為 <strong>50% / 30% / 20%（只買 3 檔，合計 100% 滿額進攻）</strong>。<br/>
-              2️⃣ <strong>22 號出現新黑馬時</strong>：若舊股跌出前 5 名，只賣出該舊股<strong>一半部位換入新黑馬</strong>，另一半留待 1 號調倉再決定。<br/>
-              3️⃣ <strong>下方一鍵切換試算</strong>：下方調倉表已內建「🔥 100% 雙隊滿倉」與「🅰️/🅱️ 50% 單梯隊」按鈕，自動幫您精算真實股數！
-            </div>
+          <div>
+            <strong style={{ color: '#FBBF24' }}>③ 定時換倉鐵律</strong>：<strong>月內不設個股停損、不盤中換股</strong>；僅於 <strong>1 號與 22 號盤後確認訊號、次日 (T+1) 開盤</strong>執行該梯隊換血。
           </div>
         </div>
       </div>
 
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
 
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-          {/* 1. 目前持倉 (Current Live Holdings) */}
-          <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #10B981' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+          {/* 3. 目前持倉 (Current Live Holdings) */}
+          <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #10B981' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   💼 當前實戰持有中部位 ({userPositions.length} 檔)
                 </h4>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  目前實戰帳戶真實持倉。可點擊「➕ 新增持股部位」手動建倉，或點擊操作欄進行「✏️ 編輯修改」、「🚪 出場」與「🗑️ 刪除」。
+                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.76rem' }}>
+                  100% 由下方歷史交易流水帳自動推導。月內安心續抱，於每月 1 號 (A隊) 與 22 號 (B隊) 調倉日檢視排名與季線狀態。
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{
-                  fontSize: '0.78rem',
-                  color: '#38BDF8',
-                  background: 'rgba(56, 189, 248, 0.15)',
-                  border: '1px solid rgba(56, 189, 248, 0.4)',
-                  padding: '0.28rem 0.65rem',
-                  borderRadius: '5px',
-                  fontWeight: 'bold',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.3rem'
-                }}>
-                  🗓️ 最新報價日期：<strong style={{ color: '#FCD34D' }}>{data?.latest_data_date || '2026-10-16'}</strong> (台股 {shortTwDate}・美股 {shortUsDate})
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#A7F3D0', background: 'rgba(16, 185, 129, 0.1)', padding: '0.28rem 0.6rem', borderRadius: '4px' }}>
-                  當前持股市值合計: <strong>NT$ {Math.round(totalStockMarketValTwd).toLocaleString()}</strong>
-                </div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button
                   onClick={handleOpenAddPosition}
                   style={{
                     background: 'linear-gradient(135deg, #10B981, #059669)',
                     border: 'none',
                     color: '#FFF',
-                    padding: '0.3rem 0.75rem',
+                    padding: '0.28rem 0.7rem',
                     borderRadius: '5px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
+                    cursor: 'pointer'
                   }}
                 >
-                  ➕ 新增持股部位
+                  ➕ 新增持股
                 </button>
                 <button
                   onClick={handleResetToScheme2}
@@ -2281,18 +2146,15 @@ export default function GlobalSovereignDashboard() {
                     background: 'rgba(239, 68, 68, 0.15)',
                     border: '1px solid rgba(239, 68, 68, 0.4)',
                     color: '#FCA5A5',
-                    padding: '0.3rem 0.65rem',
+                    padding: '0.28rem 0.6rem',
                     borderRadius: '5px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
+                    cursor: 'pointer'
                   }}
-                  title="徹底清除快取並校準為官方方案二實盤帳本 (100萬本金、40/30/30、現金202元)"
+                  title="校準為官方實盤帳本 (本金210萬、MRNA 131股/欣興 571股/創意 52股、閒置現金70,221元)"
                 >
-                  🔄 校準方案二帳本
+                  🔄 校準實盤帳本
                 </button>
                 <button
                   onClick={syncToDatabase}
@@ -2300,16 +2162,12 @@ export default function GlobalSovereignDashboard() {
                     background: 'rgba(99, 102, 241, 0.2)',
                     border: '1px solid rgba(99, 102, 241, 0.5)',
                     color: '#A5B4FC',
-                    padding: '0.3rem 0.75rem',
+                    padding: '0.28rem 0.7rem',
                     borderRadius: '5px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
+                    cursor: 'pointer'
                   }}
-                  title="立即將全球泰坦持股部位與交易歷史持久化寫入筆電本機資料庫 (tw_stock.db)"
                 >
                   💾 儲存帳本
                 </button>
@@ -2319,18 +2177,14 @@ export default function GlobalSovereignDashboard() {
                     background: 'rgba(56, 189, 248, 0.15)',
                     border: '1px solid rgba(56, 189, 248, 0.4)',
                     color: '#7DD3FC',
-                    padding: '0.3rem 0.65rem',
+                    padding: '0.28rem 0.6rem',
                     borderRadius: '5px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
+                    cursor: 'pointer'
                   }}
-                  title="將目前帳本的全部持股與流水帳匯出為 JSON 備份檔"
                 >
-                  📤 匯出備份
+                  📤 匯出
                 </button>
                 <button
                   onClick={() => fileInputRef.current?.click()}
@@ -2338,18 +2192,14 @@ export default function GlobalSovereignDashboard() {
                     background: 'rgba(234, 179, 8, 0.15)',
                     border: '1px solid rgba(234, 179, 8, 0.4)',
                     color: '#FDE047',
-                    padding: '0.3rem 0.65rem',
+                    padding: '0.28rem 0.6rem',
                     borderRadius: '5px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem'
+                    cursor: 'pointer'
                   }}
-                  title="從電腦中選擇先前的 JSON 備份檔匯入並同步至雲端"
                 >
-                  📥 匯入備份
+                  📥 匯入
                 </button>
                 <input
                   type="file"
@@ -2361,77 +2211,28 @@ export default function GlobalSovereignDashboard() {
               </div>
             </div>
 
-            {/* 策略月中抱牢紀律與風控狀態看板 */}
-            <div style={{
-              background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: '8px',
-              padding: '0.65rem 0.95rem',
-              marginBottom: '1rem',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '0.6rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
-                <span style={{ fontSize: '1.15rem' }}>🛡️</span>
-                <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>【👑 全球主權泰坦・純雙梯隊進攻旗艦紀律】</span>
-                <span style={{ color: '#CBD5E1' }}>
-                  ① <strong>100% 雙梯隊滿額進攻</strong>（1 號 A 隊 50% + 22 號 B 隊 50% 各自 25/15/10%，共振時合流為 50/30/20%）；
-                  ② <strong>45/35/20 敏銳動能</strong>（12M 45% + 3M 35% + 1M 20% × FIP 資訊離散度）；
-                  ③ <strong>爆量滯漲防護</strong>（5D均量 &gt; 2倍60D均量且10D漲幅 &lt; 2% 自動剔除高檔出貨陷阱）；
-                  ④ <strong>前 5 名保護帶 + 滿 4 月換血 + 容差免頻繁換股</strong>；
-                  ⑤ <strong>嚴格次日 T+1 開盤成交扣除手續費與摩擦成本</strong>。
-                </span>
-              </div>
-              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                ● 雙梯隊監控中：MRNA / 欣興 / 創意 通過爆量滯漲檢驗並站穩 60MA
-              </span>
-            </div>
-
-            {/* 持倉分類篩選列 */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '0.6rem',
-              marginBottom: '0.85rem'
-            }}>
-              <div style={{ fontSize: '0.78rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', background: '#10B981' }}></span>
-                <span>📊 當前實戰持股部位（共 {userPositions.length} 檔，100% 嚴格由歷史交易流水帳即時推導）</span>
-              </div>
-
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                💡 雙梯隊進攻：每月 1 號 (A梯隊 50%) 與 22 號 (B梯隊 50%) 週期調倉，緊扣全球最強龍頭進攻！
-              </div>
-            </div>
-
             {userPositions.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-                目前尚無任何持股部位。資金 100% 待命中，可點擊上方「➕ 新增持股部位」或於下方「雙梯隊持倉更動建議」執行買入！
+                目前尚無任何持股部位。可點擊上方「➕ 新增持股」或於下方「雙梯隊調倉試算」執行建倉。
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.83rem' }}>
                   <thead>
                     <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                      <th>標的代碼與名稱</th>
-                      <th style={{ textAlign: 'center' }}>梯隊與配置角色</th>
+                      <th>標的名稱與代碼</th>
+                      <th style={{ textAlign: 'center' }}>梯隊與角色</th>
                       <th style={{ textAlign: 'center' }}>當期排名 / 任期</th>
                       <th style={{ textAlign: 'center' }}>建倉日期</th>
                       <th style={{ textAlign: 'right' }}>持有股數</th>
                       <th style={{ textAlign: 'right' }}>成本均價</th>
-                      <th style={{ textAlign: 'right' }}>最新現價</th>
-                      <th style={{ textAlign: 'center' }}>最新報價日期</th>
-                      <th style={{ textAlign: 'right' }}>目前市值 (折合NT$)</th>
+                      <th style={{ textAlign: 'right' }}>最新現價 (報價日)</th>
+                      <th style={{ textAlign: 'right' }}>目前市值 (NT$)</th>
                       <th style={{ textAlign: 'right' }}>未實現損益</th>
-                      <th style={{ textAlign: 'right' }}>佔總淨值%</th>
-                      <th style={{ textAlign: 'center' }}>防守線 (60MA/止損)</th>
-                      <th style={{ textAlign: 'center' }}>量價/風控狀態</th>
-                      <th style={{ textAlign: 'center', minWidth: '135px' }}>操作</th>
+                      <th style={{ textAlign: 'right' }}>佔總淨值</th>
+                      <th style={{ textAlign: 'right' }}>60MA 季線 (乖離%)</th>
+                      <th style={{ textAlign: 'center' }}>量價與續抱狀態</th>
+                      <th style={{ textAlign: 'center', minWidth: '130px' }}>操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2447,42 +2248,38 @@ export default function GlobalSovereignDashboard() {
                       const allocPct = totalNetAssetsTwd > 0 ? (valTwd / totalNetAssetsTwd) * 100 : 0;
                       const isWin = pnlTwd >= 0;
 
-                      // 查找該持股在最新 Top 10 雷達中的排名與量價狀態
                       const pickMatch = currentPicks.find(cp => cp.ticker === pos.ticker || (cp.ticker && pos.ticker && cp.ticker.split('.')[0] === pos.ticker.split('.')[0]));
                       const liveRank = pickMatch ? pickMatch.rank : null;
                       const churnSafe = pickMatch ? pickMatch.churn_safe !== false : true;
 
-                      // 計算持有月數 (任期上限 4 個月)
                       const daysHeld = pos.entry_date ? Math.max(1, Math.floor((new Date() - new Date(pos.entry_date)) / (1000 * 60 * 60 * 24))) : 12;
                       const monthsHeld = Math.min(4, Math.max(1, Math.ceil(daysHeld / 30)));
 
-                      // 停損價與安全邊界計算
-                      const stopPrice = pos.stop_loss_price || (pickMatch ? pickMatch.ma60 : (pos.entry_price * 0.85));
-                      const distToStopPct = stopPrice > 0 ? ((curPrice - stopPrice) / curPrice) * 100 : 10;
-                      const isBroken = curPrice <= stopPrice;
-                      const isWarning = !isBroken && distToStopPct <= 5;
+                      const ma60Price = pos.ma60 || (pickMatch ? pickMatch.ma60 : (pos.entry_price * 0.9));
+                      const biasMa60Pct = ma60Price > 0 ? ((curPrice / ma60Price) - 1.0) * 100 : 0;
+                      const isBelowMa60 = curPrice < ma60Price;
+                      const isNearMa60 = !isBelowMa60 && biasMa60Pct <= 4.0;
 
-                      // 自動推斷標籤
                       const trancheTag = allocPct >= 23
                         ? '🔥 A+B雙隊共振'
                         : (pos.entry_date && parseInt(pos.entry_date.split('-')[2], 10) >= 18 ? '🅱️ B梯隊(22號)' : '🅰️ A梯隊(1號)');
 
                       return (
-                        <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255,255,255,0.015)' }}>
+                        <tr key={pos.id} style={{ background: isBelowMa60 ? 'rgba(245, 158, 11, 0.06)' : 'rgba(255,255,255,0.015)' }}>
                           <td>
                             <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(pos.ticker, pos.name)}</strong>
-                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
+                            <div style={{ fontSize: '0.73rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: '0.68rem', color: '#A5B4FC', marginBottom: '2px', fontWeight: 'bold' }}>
                               {trancheTag}
                             </div>
                             <span style={{
-                              fontSize: '0.72rem',
-                              padding: '0.15rem 0.45rem',
+                              fontSize: '0.71rem',
+                              padding: '0.12rem 0.45rem',
                               borderRadius: '4px',
                               fontWeight: 'bold',
-                              background: pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.25)' : 'rgba(14, 165, 233, 0.25)',
+                              background: pos.role?.includes('王者') ? 'rgba(245, 158, 11, 0.22)' : 'rgba(14, 165, 233, 0.22)',
                               color: pos.role?.includes('王者') ? '#FBBF24' : '#38BDF8'
                             }}>
                               {pos.role}
@@ -2495,73 +2292,63 @@ export default function GlobalSovereignDashboard() {
                                 padding: '2px 6px',
                                 borderRadius: '4px',
                                 fontWeight: 'bold',
-                                background: liveRank <= 3 ? 'rgba(16, 185, 129, 0.2)' : (liveRank <= 5 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(239, 68, 68, 0.2)'),
-                                color: liveRank <= 3 ? '#34D399' : (liveRank <= 5 ? '#60A5FA' : '#F87171')
+                                background: liveRank <= 3 ? 'rgba(16, 185, 129, 0.2)' : (liveRank <= 5 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(245, 158, 11, 0.2)'),
+                                color: liveRank <= 3 ? '#34D399' : (liveRank <= 5 ? '#60A5FA' : '#FBBF24')
                               }}>
-                                {liveRank <= 3 ? `👑 Rank #${liveRank} 正選` : (liveRank <= 5 ? `🛡️ Rank #${liveRank} 保護帶` : `⚠️ Rank #${liveRank}`)}
+                                {liveRank <= 3 ? `👑 Rank #${liveRank} 正選` : (liveRank <= 5 ? `🛡️ Rank #${liveRank} 保護帶` : `Rank #${liveRank} 觀察`)}
                               </span>
                             ) : (
-                              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>觀察中</span>
+                              <span style={{ fontSize: '0.72rem', color: '#FBBF24' }}>⚠️ 季線外觀察</span>
                             )}
                             <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '2px' }}>
                               任期: 第 {monthsHeld}/4 月 ({daysHeld}天)
                             </div>
                           </td>
-                          <td style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.78rem' }}>{pos.entry_date}</td>
+                          <td style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.77rem', fontFamily: 'monospace' }}>{pos.entry_date}</td>
                           <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: '#F1F5F9' }}>
                             {pos.shares?.toLocaleString()} 股
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
                             {curr}{pos.entry_price?.toLocaleString()}
                           </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            {curr}{curPrice?.toLocaleString()}
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <span style={{
-                              fontSize: '0.78rem',
-                              color: '#FCD34D',
-                              background: 'rgba(245, 158, 11, 0.15)',
-                              border: '1px solid rgba(245, 158, 11, 0.35)',
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              fontFamily: 'monospace',
-                              fontWeight: 'bold',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px'
-                            }}>
-                              📅 {pos.price_date || pickMatch?.price_date || (pos.currency === 'USD' ? '2026-10-14' : '2026-10-15')}
-                            </span>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{curr}{curPrice?.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.67rem', color: '#94A3B8' }}>
+                              {(pos.price_date || pickMatch?.price_date || '').slice(5)}
+                            </div>
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#67E8F9' }}>
                             NT$ {Math.round(valTwd).toLocaleString()}
                           </td>
                           <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace', color: isWin ? '#34D399' : '#F87171' }}>
-                            {isWin ? '+' : ''}NT$ {Math.round(pnlTwd).toLocaleString()} ({isWin ? '+' : ''}{retPct.toFixed(2)}%)
+                            <div>{isWin ? '+' : ''}NT$ {Math.round(pnlTwd).toLocaleString()}</div>
+                            <div style={{ fontSize: '0.72rem' }}>({isWin ? '+' : ''}{retPct.toFixed(2)}%)</div>
                           </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1', fontWeight: 'bold' }}>
                             {allocPct.toFixed(1)}%
                           </td>
-                          <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FCA5A5', fontSize: '0.8rem' }}>
-                            {curr}{Number(stopPrice)?.toFixed(2)}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.79rem' }}>
+                            <div style={{ color: '#CBD5E1' }}>{curr}{Number(ma60Price)?.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.7rem', color: isBelowMa60 ? '#FBBF24' : '#34D399', fontWeight: 'bold' }}>
+                              ({biasMa60Pct >= 0 ? '+' : ''}{biasMa60Pct.toFixed(1)}%)
+                            </div>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            {isBroken ? (
-                              <span style={{ fontSize: '0.72rem', background: '#EF4444', color: '#FFF', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                🚨 破線停損離場
+                            {isBelowMa60 ? (
+                              <span style={{ fontSize: '0.71rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                ⚠️ 季線攻防 (調倉日檢驗)
                               </span>
                             ) : !churnSafe ? (
-                              <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.25)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                              <span style={{ fontSize: '0.71rem', background: 'rgba(245, 158, 11, 0.25)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
                                 ⚠️ 爆量滯漲警示
                               </span>
-                            ) : isWarning ? (
-                              <span style={{ fontSize: '0.72rem', background: 'rgba(245, 158, 11, 0.2)', color: '#FBBF24', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                ⚠️ 逼近防守線 (+{distToStopPct.toFixed(1)}%)
+                            ) : isNearMa60 ? (
+                              <span style={{ fontSize: '0.71rem', background: 'rgba(56, 189, 248, 0.18)', color: '#38BDF8', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                🛡️ 季線支撐甜點區
                               </span>
                             ) : (
-                              <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                🟢 量價健康 (+{distToStopPct.toFixed(1)}%)
+                              <span style={{ fontSize: '0.71rem', background: 'rgba(16, 185, 129, 0.15)', color: '#34D399', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                🟢 站穩季線續抱
                               </span>
                             )}
                           </td>
@@ -2569,8 +2356,8 @@ export default function GlobalSovereignDashboard() {
                             <button
                               onClick={() => handleOpenEditPosition(pos)}
                               style={{
-                                padding: '0.22rem 0.45rem',
-                                fontSize: '0.72rem',
+                                padding: '0.2rem 0.42rem',
+                                fontSize: '0.71rem',
                                 background: 'rgba(56, 189, 248, 0.15)',
                                 border: '1px solid rgba(56, 189, 248, 0.4)',
                                 color: '#38BDF8',
@@ -2578,32 +2365,31 @@ export default function GlobalSovereignDashboard() {
                                 cursor: 'pointer',
                                 marginRight: '4px'
                               }}
-                              title="編輯修改全球持股股數、成本均價與條件"
+                              title="編輯修改持股股數或成本均價"
                             >
                               ✏️ 編輯
                             </button>
                             <button
                               onClick={() => handleOpenExitModal(pos)}
-                                style={{
-                                  padding: '0.22rem 0.45rem',
-                                  fontSize: '0.72rem',
-                                  background: 'linear-gradient(135deg, #F59E0B, #D97706)',
-                                  color: '#FFF',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  marginRight: '4px'
-                                }}
-                                title="平倉出場"
-                              >
-                                🚪 出場
-                              </button>
-                            )}
+                              style={{
+                                padding: '0.2rem 0.42rem',
+                                fontSize: '0.71rem',
+                                background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                                color: '#FFF',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginRight: '4px'
+                              }}
+                              title="手動平倉出場"
+                            >
+                              🚪 出場
+                            </button>
                             <button
                               onClick={() => handleDeletePosition(pos)}
                               style={{
-                                padding: '0.22rem 0.45rem',
-                                fontSize: '0.72rem',
+                                padding: '0.2rem 0.42rem',
+                                fontSize: '0.71rem',
                                 background: 'rgba(239, 68, 68, 0.15)',
                                 border: '1px solid rgba(239, 68, 68, 0.4)',
                                 color: '#F87171',
@@ -2612,7 +2398,7 @@ export default function GlobalSovereignDashboard() {
                               }}
                               title="自持股清單中移除此部位"
                             >
-                              🗑️ 刪除
+                              🗑️
                             </button>
                           </td>
                         </tr>
@@ -2624,36 +2410,35 @@ export default function GlobalSovereignDashboard() {
             )}
           </div>
 
-          {/* 2. 雙梯隊持倉更動建議 (Dual-Tranche Rebalance Recommendations) */}
+          {/* 4. 雙梯隊調倉試算與執行建議 (Dual-Tranche Rebalance Calculator) */}
           {(dashboardStationView === 'all' || dashboardStationView === 'titan_attack' || dashboardStationView === 'titan_a' || dashboardStationView === 'titan_b') && (
-            <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+            <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.04)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  🔄 雙梯隊持倉更動建議（A隊優先補滿 ＋ B隊缺額買入補齊）
-                </h4>
-                <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  目前為【👑 雙梯隊交錯進攻總覽 (動用 100% 總淨值 NT$ {Math.round(totalNetAssetsTwd).toLocaleString()})】：同一標的優先以 🅰️ A隊(每月1號・50%預算) 為主補滿，🅱️ B隊(每月22號・50%預算) 不滿的部分即建議買入補齊！雙隊皆補滿時安心續抱。
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    🔄 雙梯隊調倉試算與執行建議（目標 40% / 30% / 30%）
+                  </h4>
+                  {(!dualTrancheGuide.isWindowA && !dualTrancheGuide.isWindowB) && (
+                    <span style={{
+                      fontSize: '0.72rem',
+                      background: 'rgba(245, 158, 11, 0.18)',
+                      border: '1px solid rgba(245, 158, 11, 0.45)',
+                      color: '#FDE68A',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 'bold'
+                    }}>
+                      ⏳ 目前為月內續抱期：下方僅為盤後即時預演，實盤請於 {dualTrancheGuide.nextActionLabel} 窗口再執行換股
+                    </span>
+                  )}
+                </div>
+                <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.76rem' }}>
+                  同一正選標的優先以 🅰️ A隊 (1號・50%預算) 補滿，多出股數歸入 🅱️ B隊 (22號・50%預算)；若在手持股位列 Top 5 保護帶內則自動保護免賣。
                 </p>
               </div>
 
-              {/* 🎛️ 雙梯隊模式標籤與操作按鈕 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  background: 'rgba(16, 185, 129, 0.12)',
-                  padding: '0.35rem 0.8rem',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(16, 185, 129, 0.45)',
-                  color: '#34D399',
-                  fontSize: '0.78rem',
-                  fontWeight: 'bold',
-                  gap: '5px'
-                }}>
-                  🔥 雙隊合流 (A隊補滿 + B隊補齊)
-                </div>
-
                 <button
                   type="button"
                   onClick={handleCopyAllOrders}
@@ -2661,15 +2446,14 @@ export default function GlobalSovereignDashboard() {
                     background: 'rgba(56, 189, 248, 0.2)',
                     border: '1px solid #38BDF8',
                     color: '#67E8F9',
-                    padding: '0.35rem 0.75rem',
+                    padding: '0.32rem 0.7rem',
                     borderRadius: '5px',
-                    fontSize: '0.76rem',
+                    fontSize: '0.75rem',
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
-                  title="一鍵複製目前所有需要調整的下單指令"
                 >
-                  📋 一鍵複製調倉委託
+                  📋 複製調倉委託
                 </button>
 
                 {dismissedSuggestions.length > 0 && (
@@ -2683,31 +2467,26 @@ export default function GlobalSovereignDashboard() {
                       background: 'rgba(239, 68, 68, 0.18)',
                       border: '1px solid #EF4444',
                       color: '#FCA5A5',
-                      padding: '0.35rem 0.75rem',
+                      padding: '0.32rem 0.7rem',
                       borderRadius: '5px',
-                      fontSize: '0.76rem',
+                      fontSize: '0.75rem',
                       fontWeight: 'bold',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
+                      cursor: 'pointer'
                     }}
-                    title="清空歷史消掉記錄，重新強制運算所有標的之即時缺額與調倉建議"
                   >
-                    ↺ 重新產生建議 ({dismissedSuggestions.length} 筆已標記)
+                    ↺ 重設已標記 ({dismissedSuggestions.length})
                   </button>
                 )}
               </div>
             </div>
 
             {rebalanceSuggestions.length === 0 ? (
-              <div style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px dashed #10B981' }}>
-                <span style={{ fontSize: '1.1rem' }}>✨</span>
-                <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.92rem', marginTop: '0.2rem' }}>
-                  目前持倉與選定模式（{rebalanceMode === 'full_100' ? '100% 雙隊純滿倉 50/30/20%' : (rebalanceMode === 'tranche_a_50' ? '1號 A梯隊 (50%)' : '22號 B梯隊 (50%)')}）已處於平衡容差帶內，無須進行任何調倉！
+              <div style={{ padding: '1.35rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px dashed #10B981' }}>
+                <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                  ✨ 目前持倉與目標模式（{rebalanceMode === 'full_100' ? '雙隊合流 40/30/30%' : (rebalanceMode === 'tranche_a_50' ? '1號 A梯隊 (50%)' : '22號 B梯隊 (50%)')}）已完全對齊且處於容差保護帶內，無須任何調倉！
                 </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.76rem', marginTop: '0.2rem' }}>
-                  下次定期調倉窗口為 <strong>{dualTrancheGuide.nextActionLabel} ({dualTrancheGuide.nextTrancheBadge})</strong>，屆時系統將自動依據最新排名試算換股建議。
+                <div style={{ color: '#94A3B8', fontSize: '0.75rem', marginTop: '0.2rem' }}>
+                  下次定期調倉窗口為 <strong>{dualTrancheGuide.nextActionLabel} ({dualTrancheGuide.nextTrancheBadge})</strong>。
                 </div>
               </div>
             ) : (
@@ -2947,141 +2726,103 @@ export default function GlobalSovereignDashboard() {
           )}
 
           {/* 2.5 📡 全球泰坦 Top 10 敏銳動能與爆量滯漲即時雷達表 (Live Top 10 Ranking & Churn Filter Radar) */}
-          {(dashboardStationView === 'all' || dashboardStationView === 'titan_attack') && currentPicks.length > 0 && (
+          {(dashboardStationView === 'all' || dashboardStationView === 'titan_a' || dashboardStationView === 'titan_b') && currentPicks.length > 0 && (
             <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #F59E0B', background: 'rgba(245, 158, 11, 0.03)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📡 全球泰坦 2.0 (方案二・個人實戰無停損進攻版) 即時選股雷達（1號 / 22號 選股順位唯一依據）
+                    📡 全球泰坦 2.0 即時選股雷達 Top 10（1號 / 22號 雙軌選股唯一依據）
                   </h4>
                   <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    採用<strong>方案二 4 大正交核心動能因子公式</strong>：(85% Raw + 15% 殘差) × FIP(0.50) × 凸性(0.20) × 拋物線防追高阻尼排序，並通過「5D爆量滯漲濾網」與個人實戰流動性門檻 (台股>=3,000萬/美股>=500萬美元)。第 1~3 名為當期正選 (40%/30%/30%)，第 4~5 名為在手續抱保護緩衝帶！
+                    採用<strong>4 大正交核心動能公式</strong>排序：(85% Raw + 15% 殘差) × FIP(0.50) × 凸性(0.20) × 拋物線阻尼，並通過雙均線 (Price&gt;60MA/200MA)、流動性門檻與 5D 爆量滯漲剔除濾網。<strong>Rank 1~3 為正選 (40/30/30%)，Rank 4~5 為在手續抱保護緩衝帶</strong>。
                   </p>
                 </div>
-                <span style={{ fontSize: '0.78rem', color: '#FDE68A', background: 'rgba(245, 158, 11, 0.18)', border: '1px solid rgba(245, 158, 11, 0.45)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                  🗓️ 最新行情基準日：{data?.latest_data_date || '2026-10-16'} (台股 {shortTwDate}・美股 {shortUsDate})
-                </span>
+
+                {/* 一鍵篩選按鈕列 */}
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button
+                    onClick={() => setRadarWinrateFilter('all')}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '4px 9px',
+                      borderRadius: '4px',
+                      border: radarWinrateFilter === 'all' ? '1px solid #F59E0B' : '1px solid rgba(255,255,255,0.15)',
+                      background: radarWinrateFilter === 'all' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255,255,255,0.03)',
+                      color: radarWinrateFilter === 'all' ? '#FBBF24' : '#94A3B8',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    全部 Top 10
+                  </button>
+                  <button
+                    onClick={() => setRadarWinrateFilter('top3')}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '4px 9px',
+                      borderRadius: '4px',
+                      border: radarWinrateFilter === 'top3' ? '1px solid #3B82F6' : '1px solid rgba(59, 130, 246, 0.3)',
+                      background: radarWinrateFilter === 'top3' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.08)',
+                      color: '#60A5FA',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    👑 僅看 Rank 1~3 正選
+                  </button>
+                  <button
+                    onClick={() => setRadarWinrateFilter('golden_safe')}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '4px 9px',
+                      borderRadius: '4px',
+                      border: radarWinrateFilter === 'golden_safe' ? '1px solid #10B981' : '1px solid rgba(16, 185, 129, 0.3)',
+                      background: radarWinrateFilter === 'golden_safe' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.08)',
+                      color: '#34D399',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    🎯 黃金蓄勢 / 甜點支撐
+                  </button>
+                  <button
+                    onClick={() => setRadarWinrateFilter('caution')}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '4px 9px',
+                      borderRadius: '4px',
+                      border: radarWinrateFilter === 'caution' ? '1px solid #EF4444' : '1px solid rgba(239, 68, 68, 0.3)',
+                      background: radarWinrateFilter === 'caution' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.08)',
+                      color: '#F87171',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    ⚠️ 標記短線過熱組
+                  </button>
+                </div>
               </div>
 
-              {/* 🎯 22年大數據實證：兩週勝率極限強化與選股端倪指引卡 */}
+              {/* 精簡版 22年大數據勝率與型態速覽條 */}
               <div style={{
-                background: 'rgba(15, 23, 42, 0.75)',
-                border: '1px solid rgba(245, 158, 11, 0.35)',
-                borderRadius: '8px',
-                padding: '0.85rem 1rem',
-                marginBottom: '1rem',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+                alignItems: 'center',
+                background: 'rgba(15, 23, 42, 0.65)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                borderRadius: '6px',
+                padding: '0.5rem 0.85rem',
+                marginBottom: '0.85rem',
+                fontSize: '0.74rem',
+                color: '#CBD5E1'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <span style={{ fontSize: '1.05rem' }}>🎯</span>
-                    <strong style={{ color: '#FDE68A', fontSize: '0.88rem' }}>
-                      22年 5,381 筆 Top 10 大數據歸因：兩週後狂飆 vs 踩雷的 5 大關鍵端倪
-                    </strong>
-                    <span style={{ fontSize: '0.7rem', color: '#94A3B8', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px' }}>
-                      基準盲買勝率 53.84% · 平均 +0.97%
-                    </span>
-                  </div>
-                  {/* 一鍵篩選按鈕列 */}
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => setRadarWinrateFilter('all')}
-                      style={{
-                        fontSize: '0.72rem',
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        border: radarWinrateFilter === 'all' ? '1px solid #F59E0B' : '1px solid rgba(255,255,255,0.15)',
-                        background: radarWinrateFilter === 'all' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255,255,255,0.03)',
-                        color: radarWinrateFilter === 'all' ? '#FBBF24' : '#94A3B8',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      全部 Top 10
-                    </button>
-                    <button
-                      onClick={() => setRadarWinrateFilter('golden_safe')}
-                      style={{
-                        fontSize: '0.72rem',
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        border: radarWinrateFilter === 'golden_safe' ? '1px solid #10B981' : '1px solid rgba(16, 185, 129, 0.3)',
-                        background: radarWinrateFilter === 'golden_safe' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.08)',
-                        color: '#34D399',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      🎯 黃金蓄勢 / 防守甜點 (勝率 57~58%)
-                    </button>
-                    <button
-                      onClick={() => setRadarWinrateFilter('top3')}
-                      style={{
-                        fontSize: '0.72rem',
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        border: radarWinrateFilter === 'top3' ? '1px solid #3B82F6' : '1px solid rgba(59, 130, 246, 0.3)',
-                        background: radarWinrateFilter === 'top3' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.08)',
-                        color: '#60A5FA',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      👑 僅看 Rank 1~3 核心梯隊
-                    </button>
-                    <button
-                      onClick={() => setRadarWinrateFilter('caution')}
-                      style={{
-                        fontSize: '0.72rem',
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        border: radarWinrateFilter === 'caution' ? '1px solid #EF4444' : '1px solid rgba(239, 68, 68, 0.3)',
-                        background: radarWinrateFilter === 'caution' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.08)',
-                        color: '#F87171',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      ⚠️ 標記過熱透支組
-                    </button>
-                  </div>
-                </div>
-
-                {/* 4 大量化強化矩陣小卡 */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.5rem', fontSize: '0.74rem' }}>
-                  <div style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '6px', padding: '0.45rem 0.6rem' }}>
-                    <div style={{ color: '#FCD34D', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>🎯</span> 黃金蓄勢突破 (勝率 57.42%)
-                    </div>
-                    <div style={{ color: '#CBD5E1', marginTop: '2px', lineHeight: '1.3' }}>
-                      長線大牛 + 2W衝刺 &le; 5% (橫盤未透支) + 季線乖離 &le; 20%，兩週中位數報酬翻 2.6 倍 (+1.58%)。
-                    </div>
-                  </div>
-                  <div style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: '6px', padding: '0.45rem 0.6rem' }}>
-                    <div style={{ color: '#93C5FD', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>👑</span> 宏觀迎風 Rank 1~3 (平均 +2.01%)
-                    </div>
-                    <div style={{ color: '#CBD5E1', marginTop: '2px', lineHeight: '1.3' }}>
-                      全球寬幅 &ge; 50% 共振期 + 鎖定前三名，平均報酬是 Rank 4~5 的近 4 倍，歷史神級黑馬全在此區。
-                    </div>
-                  </div>
-                  <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '6px', padding: '0.45rem 0.6rem' }}>
-                    <div style={{ color: '#6EE7B7', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>🛡️</span> 季線防守甜點 (勝率 58.50%)
-                    </div>
-                    <div style={{ color: '#CBD5E1', marginTop: '2px', lineHeight: '1.3' }}>
-                      季線乖離 &le; 4.0% 剛突破或回踩支撐，下檔防守堅實，踩雷大跌率降至全體最低 (16.5%)。
-                    </div>
-                  </div>
-                  <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '6px', padding: '0.45rem 0.6rem' }}>
-                    <div style={{ color: '#FCA5A5', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>⚠️</span> 兩大絕對禁忌 (踩雷率 25.0%)
-                    </div>
-                    <div style={{ color: '#CBD5E1', marginTop: '2px', lineHeight: '1.3' }}>
-                      2W衝刺 &gt; 11% 或季線乖離 &gt; 26% 嚴禁追高；全球寬幅 &lt; 40% 時動能失效，平均報酬轉負。
-                    </div>
-                  </div>
-                </div>
+                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>📊 22年 5,381 筆大數據型態參考：</span>
+                <span>🎯 <strong style={{ color: '#FCD34D' }}>黃金蓄勢</strong> (2W&le;5% 且 季線乖離&le;20% ➔ 勝率 57.4%)</span>
+                <span style={{ color: '#475569' }}>|</span>
+                <span>🛡️ <strong style={{ color: '#6EE7B7' }}>季線甜點</strong> (季線乖離&le;4.5% 剛突破或回踩 ➔ 勝率 58.5%)</span>
+                <span style={{ color: '#475569' }}>|</span>
+                <span>⚠️ <strong style={{ color: '#FCA5A5' }}>短線過熱</strong> (2W&gt;11% 或 季線乖離&gt;26% ➔ 新倉不宜追高)</span>
               </div>
 
               <div style={{ overflowX: 'auto' }}>
@@ -3090,22 +2831,16 @@ export default function GlobalSovereignDashboard() {
                     <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                       <th style={{ textAlign: 'center', width: '115px' }}>順位與保護帶</th>
                       <th>標的名稱 (代碼 / 市場)</th>
-                      <th style={{ textAlign: 'center', color: '#FBBF24' }}>🎯 勝率加強評級</th>
-                      <th style={{ textAlign: 'center' }}>單梯隊配比 (總資金佔比)</th>
+                      <th style={{ textAlign: 'center' }}>配比規則 (單隊 / 雙隊)</th>
                       <th style={{ textAlign: 'right' }}>最新現價</th>
-                      <th style={{ textAlign: 'right', color: '#34D399' }}>2W 短線衝刺</th>
-                      <th style={{ textAlign: 'right', color: '#60A5FA' }}>60MA 季線乖離</th>
-                      <th style={{ textAlign: 'right', color: '#F472B6' }}>52W 接近度</th>
-                      <th style={{ textAlign: 'center' }}>最新報價日期</th>
-                      <th style={{ textAlign: 'right' }}>防守季線 (60MA)</th>
-                      <th style={{ textAlign: 'right' }}>3M 短期爆發</th>
+                      <th style={{ textAlign: 'right', color: '#60A5FA' }}>60MA 季線 (乖離%)</th>
+                      <th style={{ textAlign: 'right', color: '#34D399' }}>2W 短線</th>
+                      <th style={{ textAlign: 'right' }}>3M 中期爆發</th>
                       <th style={{ textAlign: 'right' }}>12M 長期主升</th>
-                      <th style={{ textAlign: 'right' }}>FIP 品質</th>
+                      <th style={{ textAlign: 'right' }}>FIP 連續性</th>
                       <th style={{ textAlign: 'right' }}>凸性比 (Conv)</th>
-                      <th style={{ textAlign: 'right', color: '#C084FC' }}>VCP 緊湊度</th>
-                      <th style={{ textAlign: 'right', color: '#F472B6' }}>Chip 籌碼</th>
-                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>方案二總分</th>
-                      <th style={{ textAlign: 'center' }}>爆量滯漲濾網</th>
+                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>複合總分</th>
+                      <th style={{ textAlign: 'center', color: '#FBBF24' }}>型態與量價檢驗</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3127,7 +2862,7 @@ export default function GlobalSovereignDashboard() {
                       const isBuf = pickRank > 3 && pickRank <= 5;
                       const curr = pick.currency === 'USD' ? 'US$ ' : 'NT$ ';
                       const isHeld = userPositions.some(p => p.ticker === pick.ticker || (p.ticker && pick.ticker && p.ticker.split('.')[0] === pick.ticker.split('.')[0]));
-                      const singleW = isTop3 ? (pickRank === 1 ? 40 : (pickRank === 2 ? 30 : 30)) : 0;
+                      const singleW = isTop3 ? (pickRank === 1 ? 40 : 30) : 0;
                       const navHalfW = singleW / 2;
 
                       const grade = pick.winrate_grade || 'steady';
@@ -3181,31 +2916,10 @@ export default function GlobalSovereignDashboard() {
                               </span>
                             )}
                           </td>
-                          {/* 🎯 勝率加強評級徽章 */}
-                          <td style={{ textAlign: 'center' }}>
-                            <span
-                              title={pick.winrate_desc || ''}
-                              style={{
-                                fontSize: '0.72rem',
-                                padding: '2px 7px',
-                                borderRadius: '4px',
-                                fontWeight: 'bold',
-                                background: badgeBg,
-                                color: badgeColor,
-                                border: `1px solid ${badgeBorder}`,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '3px',
-                                cursor: 'help'
-                              }}
-                            >
-                              {pick.winrate_tag || '🚀 穩健主升推進'}
-                            </span>
-                          </td>
                           <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
                             {isTop3 ? (
                               <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>
-                                單隊 {singleW}% <span style={{ color: '#94A3B8', fontSize: '0.73rem' }}>(半倉 {navHalfW}% / 滿倉 {singleW}%)</span>
+                                單隊 {navHalfW}% <span style={{ color: '#94A3B8', fontSize: '0.73rem' }}>/ 雙隊 {singleW}%</span>
                               </span>
                             ) : isBuf ? (
                               <span style={{ color: '#93C5FD', fontSize: '0.75rem' }}>在手續抱免賣 (新倉不買)</span>
@@ -3216,6 +2930,20 @@ export default function GlobalSovereignDashboard() {
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
                             {curr}{pick.price?.toLocaleString()}
                           </td>
+                          {/* 60MA 季線與乖離率合併 */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            <span style={{ color: '#CBD5E1' }}>{curr}{pick.ma60?.toLocaleString()}</span>
+                            {pick.bias_ma60 !== undefined && (
+                              <span style={{
+                                marginLeft: '5px',
+                                fontSize: '0.73rem',
+                                fontWeight: 'bold',
+                                color: pick.bias_ma60 <= 4.5 ? '#34D399' : (pick.bias_ma60 > 25.0 ? '#F87171' : '#93C5FD')
+                              }}>
+                                ({pick.bias_ma60 >= 0 ? '+' : ''}{pick.bias_ma60}%)
+                              </span>
+                            )}
+                          </td>
                           {/* 2W 短線衝刺 */}
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
                             <span style={{
@@ -3223,38 +2951,6 @@ export default function GlobalSovereignDashboard() {
                             }}>
                               {pick.mom_2w !== undefined ? `${pick.mom_2w > 0 ? '+' : ''}${pick.mom_2w}%` : '-'}
                             </span>
-                          </td>
-                          {/* 60MA 季線乖離 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                            <span style={{
-                              color: (pick.bias_ma60 !== undefined && pick.bias_ma60 <= 4.5) ? '#34D399' : (pick.bias_ma60 > 25.0 ? '#F87171' : '#93C5FD')
-                            }}>
-                              {pick.bias_ma60 !== undefined ? `+${pick.bias_ma60}%` : '-'}
-                            </span>
-                          </td>
-                          {/* 52W 接近度 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F472B6', fontWeight: 'bold' }}>
-                            {pick.prox_52w !== undefined ? `${pick.prox_52w}%` : '95.0%'}
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <span style={{
-                              fontSize: '0.76rem',
-                              color: '#FCD34D',
-                              background: 'rgba(245, 158, 11, 0.15)',
-                              border: '1px solid rgba(245, 158, 11, 0.35)',
-                              padding: '2px 7px',
-                              borderRadius: '4px',
-                              fontFamily: 'monospace',
-                              fontWeight: 'bold',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px'
-                            }}>
-                              📅 {pick.price_date || (pick.currency === 'USD' ? '2026-10-16' : '2026-10-16')}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
-                            {curr}{pick.ma60?.toLocaleString()}
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: pick.mom_3m >= 0 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
                             {pick.mom_3m >= 0 ? '+' : ''}{pick.mom_3m}%
@@ -3268,23 +2964,32 @@ export default function GlobalSovereignDashboard() {
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>
                             {pick.convexity !== undefined ? `${Number(pick.convexity).toFixed(2)}x` : '1.00x'}
                           </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#C084FC', fontWeight: 'bold' }}>
-                            {pick.vcp !== undefined ? `${Number(pick.vcp).toFixed(2)}` : '0.65'}
-                          </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F472B6', fontWeight: 'bold' }}>
-                            {pick.chip !== undefined ? `${Number(pick.chip).toFixed(2)}` : '0.20'}
-                          </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24' }}>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24', fontSize: '0.88rem' }}>
                             {pick.score?.toFixed(3)}
                           </td>
-                          <td style={{ textAlign: 'center' }}>
-                            {pick.churn_safe !== false ? (
-                              <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(16, 185, 129, 0.14)', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                🟢 量價健康
-                              </span>
-                            ) : (
-                              <span style={{ fontSize: '0.72rem', color: '#F87171', background: 'rgba(239, 68, 68, 0.18)', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                🚨 爆量滯漲剔除
+                          {/* 型態與量價檢驗合併 */}
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <span
+                              title={pick.winrate_desc || ''}
+                              style={{
+                                fontSize: '0.71rem',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                background: badgeBg,
+                                color: badgeColor,
+                                border: `1px solid ${badgeBorder}`,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'help'
+                              }}
+                            >
+                              {pick.winrate_tag || '🚀 穩健主升推進'}
+                            </span>
+                            {pick.churn_safe === false && (
+                              <span style={{ marginLeft: '4px', fontSize: '0.68rem', color: '#F87171', background: 'rgba(239, 68, 68, 0.18)', padding: '2px 5px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                🚨 爆量滯漲
                               </span>
                             )}
                           </td>
@@ -3517,25 +3222,25 @@ export default function GlobalSovereignDashboard() {
             )}
           </div>
 
-          {/* 📐 全球泰坦 17 大全因子 DOE 終極冠軍複合動能公式展示卡片 */}
+          {/* 📐 全球泰坦 2.0 (方案二 + 模組 C 2.0 雙因子防守閥門) 數學架構展示卡片 */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.75), rgba(15, 23, 42, 0.85))',
             border: '1px solid rgba(167, 139, 250, 0.35)',
             borderRadius: '10px',
-            padding: '1.2rem 1.4rem',
-            marginBottom: '1.5rem',
+            padding: '1.1rem 1.3rem',
+            marginBottom: '1.35rem',
             boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 20px rgba(0,0,0,0.3)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.6rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <span style={{ fontSize: '1.2rem' }}>👑</span>
-                <span style={{ fontSize: '0.96rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球泰坦 2.0 (方案二・個人實戰無停損進攻版) 數學架構
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.55rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                <span style={{ fontSize: '1.15rem' }}>👑</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
+                  全球泰坦 2.0 (方案二・4大正交動能 + 模組 C 2.0 股債折現閥門) 生產級數學架構
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.72rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  月MDD -30.73% (日頻 -38.94%)
+                  CAGR +60.19% | 44,043.7x | 月MDD -24.59% (Calmar 2.45)
                 </span>
                 <span style={{ fontSize: '0.72rem', color: '#A78BFA', background: 'rgba(167, 139, 250, 0.15)', padding: '2px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
                   4大正交核心因子 × 40/30/30 雙梯隊自然淘汰
@@ -3548,109 +3253,74 @@ export default function GlobalSovereignDashboard() {
               background: 'rgba(0, 0, 0, 0.55)',
               border: '1px solid rgba(253, 224, 71, 0.35)',
               borderRadius: '8px',
-              padding: '0.85rem 1.1rem',
+              padding: '0.75rem 1rem',
               fontFamily: 'monospace',
-              fontSize: '0.88rem',
+              fontSize: '0.86rem',
               color: '#FDE047',
               textAlign: 'center',
-              lineHeight: '1.7',
+              lineHeight: '1.65',
               overflowX: 'auto',
-              marginBottom: '1rem'
+              marginBottom: '0.85rem'
             }}>
-              <strong>Final Score</strong> = (0.85×<strong>Raw_Mom</strong> + 0.15×<strong>Res_Alpha</strong>) × (1 + 0.50×<strong>FIP</strong>) × [1 + 0.20×clip(<strong>Conv</strong>-1, -0.5, 2)] × <strong>Parabolic_Damper</strong>
+              <strong>Final Score</strong> = (0.85×<strong>Raw_Mom</strong> + 0.15×<strong>Res_Alpha</strong>) × (1 + 0.50×<strong>FIP</strong>) × [1 + 0.20×clip(<strong>Conv</strong>-1, -0.5, 2.0)] × <strong>Parabolic_Damper</strong>
             </div>
 
-            {/* 6 大公式層級細項分解 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem', fontSize: '0.78rem' }}>
+            {/* 4 大生產級公式層級分解 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.7rem', fontSize: '0.76rem' }}>
               {/* 第 1 層：多週期混合動能基底 */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ color: '#38BDF8', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  1. 混合動能基底 (Blend Momentum)
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#38BDF8', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                  1. 多週期混合動能基底 (85% Raw + 15% Res)
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  Raw_Mom = 0.45 × R(12M) + 0.35 × R(3M) + 0.20 × R(1M)
+                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.25rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
+                  Raw_Mom = 0.45×R(12M) + 0.35×R(3M) + 0.20×R(1M)
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  Res_Alpha = Raw_Mom - β(126D) × Raw_Mom(SPY)
+                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
+                  Res_Alpha = Raw_Mom - β(126D)×Raw_Mom(SPY)
                 </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
-                  • 88% 總收益動能 + 12% 剝離大盤 Beta 之純特質 Alpha (Blitz et al. 2011)。
-                </div>
-              </div>
-
-              {/* 第 2 層：FIP 溫水煮青蛙連續性乘數 */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ color: '#34D399', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  2. 溫水煮青蛙乘數 (Frog-in-the-Pan, FIP)
-                </div>
-                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  FIP = (上漲天數 - 下跌天數) / 總交易日 (252D)
-                </div>
-                <div style={{ fontFamily: 'monospace', color: '#34D399', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  乘數因子: (1.0 + 0.45 × FIP)
-                </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
-                  • Da et al. (2014 RFS)：獎勵機構低調漸進買盤，懲罰暴漲一日隨後陰跌之假妖股。
+                <div style={{ color: '#94A3B8', fontSize: '0.71rem', marginTop: '0.3rem' }}>
+                  • 融合長中短三週期總動能與剝離大盤 Beta 之純特質 Alpha (Blitz et al. 2011)。
                 </div>
               </div>
 
-              {/* 第 3 層：非對稱波動凸性比乘數 */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ color: '#C084FC', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  3. 非對稱波動凸性乘數 (Asymmetric Convexity)
+              {/* 第 2 層：FIP 溫水煮青蛙與非對稱凸性乘數 */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#34D399', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                  2. 路徑連續性與右偏凸性乘數 (FIP × Convexity)
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  Convexity = 上行爆發波動(60D) / 下行收斂波動(60D)
+                <div style={{ fontFamily: 'monospace', color: '#34D399', marginBottom: '0.25rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
+                  FIP 乘數 = 1.0 + 0.50 × [(漲日 - 跌日) / 252D]
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#C084FC', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  乘數因子: 1.0 + 0.16 × clip(Convexity - 1.0, -0.5, 2.0)
+                <div style={{ fontFamily: 'monospace', color: '#C084FC', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
+                  凸性乘數 = 1.0 + 0.20 × clip(上行波動/下行波動 - 1, -0.5, 2)
                 </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
-                  • 鎖定「上漲時劇烈發散暴衝、回檔時收斂縮量」的極品右偏資產。
-                </div>
-              </div>
-
-              {/* 第 4 層：🌪️ VCP 波動收縮緊湊度乘數 */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ color: '#FBBF24', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  4. 🌪️ 波動收縮型態 (VCP Tightness Pivot)
-                </div>
-                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  VCP = 0.40(1-Tightness) + 0.30(VolDry) + 0.30(PivotProx)
-                </div>
-                <div style={{ fontFamily: 'monospace', color: '#FBBF24', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  乘數因子: 1.0 + 0.15 × (VCP_Norm - 0.5)
-                </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
-                  • Minervini 經典起漲點：浮額洗淨、量縮極致收斂後的起漲樞紐點 (Low Risk Pivot)。
+                <div style={{ color: '#94A3B8', fontSize: '0.71rem', marginTop: '0.3rem' }}>
+                  • 獎勵機構漸進建倉與「漲時發散、跌時縮量收斂」的右偏強勢股。
                 </div>
               </div>
 
-              {/* 第 5 層：💎 Chip 籌碼沉澱與吸籌乘數 */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ color: '#EC4899', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  5. 💎 籌碼沉澱吸籌 (Chip Concentration)
+              {/* 第 3 層：拋物線防追高阻尼與前置硬濾網 */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#FBBF24', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                  3. 拋物線阻尼與三大前置硬濾網 (Pre-Filters)
                 </div>
-                <div style={{ fontFamily: 'monospace', color: '#E2E8F0', marginBottom: '0.3rem', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  Chip = 0.50 × (UpVol/DownVol) + 0.25 × (CMF_20D + 1)
-                </div>
-                <div style={{ fontFamily: 'monospace', color: '#EC4899', background: 'rgba(0,0,0,0.3)', padding: '0.3rem', borderRadius: '4px' }}>
-                  乘數因子: 1.0 + 0.16 × (Chip_Norm - 0.5)
-                </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.72rem', marginTop: '0.35rem' }}>
-                  • 鎖定大戶拉抬有量、回檔洗盤無人賣的籌碼鎖定股，排除主力高檔倒貨。
+                <div style={{ color: '#E2E8F0', fontSize: '0.73rem', lineHeight: '1.45' }}>
+                  <div>🛡️ <strong>雙均線多頭</strong>: Price &gt; 60MA 且 Price &gt; 200MA (調倉日檢驗)</div>
+                  <div>🚨 <strong>爆量滯漲剔除</strong>: 5D均量 &gt; 1.8倍60D均量 且 10D漲幅 &lt; 2% 淘汰</div>
+                  <div>💧 <strong>拋物線阻尼</strong>: 季線乖離 &gt; 65% 打 0.60 折，防範末端噴出追高</div>
                 </div>
               </div>
 
-              {/* 第 6 層：三大硬性過濾門檻 */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.7rem 0.9rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ color: '#F87171', fontWeight: 'bold', marginBottom: '0.3rem' }}>
-                  6. 三大前置硬風控門檻 (Hard Pre-Filters)
+              {/* 第 4 層：模組 C 2.0 股債折現雙因子宏觀防守閥門 */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#F87171', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                  4. 模組 C 2.0 股債折現閥門 (50% 半倉保護)
                 </div>
-                <div style={{ color: '#E2E8F0', fontSize: '0.74rem', lineHeight: '1.5' }}>
-                  <div>🛡️ <strong>雙均線多頭</strong>: Price &gt; 60MA 且 Price &gt; 200MA</div>
-                  <div>🌊 <strong>分形趨勢效率</strong>: 0.30 × (ER_60 - 0.5) 獎勵低雜訊平滑趨勢</div>
-                  <div>🚨 <strong>爆量滯漲剔除</strong>: 5D均量 &gt; 2倍60D均量 且 10D漲幅 &lt; 2% 強制淘汰</div>
+                <div style={{ fontFamily: 'monospace', color: '#FCA5A5', marginBottom: '0.25rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
+                  觸發條件: QQQ 500MA乖離 &ge; +30% 且 US10Y &ge; 3.5%
+                </div>
+                <div style={{ color: '#94A3B8', fontSize: '0.71rem', lineHeight: '1.45' }}>
+                  • 雙因子同時觸發時總倉位自動折減至 <strong>50% (各隊 25%)</strong>，精準閃避 2007Q4、2018Q4 與 2022 升息泡沫崩盤，月 MDD 壓降至 -24.59%。
                 </div>
               </div>
             </div>
@@ -4739,9 +4409,9 @@ export default function GlobalSovereignDashboard() {
                       borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
                     }}
                   >
-                    <option value="👑 第1王者 (50%)">👑 第1王者 (50%)</option>
+                    <option value="👑 第1王者 (40%)">👑 第1王者 (40%)</option>
                     <option value="🥈 第2主力 (30%)">🥈 第2主力 (30%)</option>
-                    <option value="🥉 第3先鋒 (20%)">🥉 第3先鋒 (20%)</option>
+                    <option value="🥉 第3主力 (30%)">🥉 第3主力 (30%)</option>
                     <option value="🛡️ 現金避險">🛡️ 現金避險</option>
                   </select>
                 </div>

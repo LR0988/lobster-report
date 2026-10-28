@@ -131,7 +131,7 @@ def check_system_health():
         qqq_bias500 = round((qqq_closes[0] / ma500 - 1.0) * 100.0, 2)
     report["qqq_bias500"] = qqq_bias500
     report["module_c_active"] = (qqq_bias500 >= 30.0) and (row[0] >= 3.5)
-    report["recommended_exposure"] = "70% (防禦)" if report["module_c_active"] else "100% (滿倉)"
+    report["recommended_exposure"] = "50% (半倉防禦)" if report["module_c_active"] else "100% (滿倉)"
 
     # 4. 實盤帳戶持股與淨值
     c.execute("SELECT ticker, shares, current_price, currency FROM global_sovereign_positions")
@@ -211,7 +211,7 @@ def main():
     print(f"1. 📅 資料庫最新日期：宏觀 {health['macro_indicators_latest']} ｜ 美股 {health['qqq_latest']} ｜ 台股 {health['tw_stock_latest']}")
     print(f"2. 📈 10年期美債殖利率 (US10Y)：{health['us10y']}%（折現率基準閥值: 3.5%）")
     print(f"3. ⚡ 那斯達克 (QQQ) 2年線乖離率：{health['qqq_bias500']}%（過熱門檻: 30.0%）")
-    print(f"4. 🛡️ 模組 C 2.0 (DCF 雙因子過熱閥門)：{'觸發防禦 (70%)' if health['module_c_active'] else '未過熱，健康進攻 (100% 滿倉)'}")
+    print(f"4. 🛡️ 模組 C 2.0 (DCF 雙因子過熱閥門)：{'觸發防禦 (50% 半倉)' if health['module_c_active'] else '未過熱，健康進攻 (100% 滿倉)'}")
     print(f"5. 💰 建議總持股曝險：{health['recommended_exposure']}")
     print(f"6. 💵 實盤總資產淨值：NT$ {health['total_nav_twd']:,.0f}（股票 NT$ {health['stock_value_twd']:,.0f} ＋ 現金 NT$ {health['cash_twd']:,.0f}）")
     print(f"7. 📦 目前實盤持倉明細：{', '.join(health['positions'])}")
