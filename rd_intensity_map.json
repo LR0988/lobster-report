@@ -1,0 +1,2727 @@
+{
+  "2325.TW": {
+    "rd_pct_median": 4.8,
+    "rd_pct_latest": 4.8,
+    "source": "historical_verified"
+  },
+  "1303.TW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "1301.TW": {
+    "rd_pct_median": 0.83,
+    "rd_pct_latest": 0.84,
+    "yearly": {
+      "2025": 0.84,
+      "2024": 0.82,
+      "2023": 0.89,
+      "2022": 0.75
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2049.TW": {
+    "rd_pct_median": 3.9,
+    "rd_pct_latest": 4.22,
+    "yearly": {
+      "2025": 4.22,
+      "2024": 3.95,
+      "2023": 3.83,
+      "2022": 3.85
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2354.TW": {
+    "rd_pct_median": 1.69,
+    "rd_pct_latest": 0.88,
+    "yearly": {
+      "2025": 0.88,
+      "2024": 1.73,
+      "2023": 2.12,
+      "2022": 1.66
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2357.TW": {
+    "rd_pct_median": 3.8,
+    "rd_pct_latest": 3.36,
+    "yearly": {
+      "2025": 3.36,
+      "2024": 3.75,
+      "2023": 4.49,
+      "2022": 3.84
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "1476.TW": {
+    "rd_pct_median": 0.46,
+    "rd_pct_latest": 0.46,
+    "yearly": {
+      "2025": 0.46,
+      "2024": 0.47,
+      "2023": 0.5,
+      "2022": 0.4
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2353.TW": {
+    "rd_pct_median": 0.87,
+    "rd_pct_latest": 0.78,
+    "yearly": {
+      "2025": 0.78,
+      "2024": 0.86,
+      "2023": 0.88,
+      "2022": 0.89
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2308.TW": {
+    "rd_pct_median": 8.88,
+    "rd_pct_latest": 8.78,
+    "yearly": {
+      "2025": 8.78,
+      "2024": 9.87,
+      "2023": 8.98,
+      "2022": 8.26
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2345.TW": {
+    "rd_pct_median": 4.05,
+    "rd_pct_latest": 2.81,
+    "yearly": {
+      "2025": 2.81,
+      "2024": 4.26,
+      "2023": 4.49,
+      "2022": 3.85
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2105.TW": {
+    "rd_pct_median": 3.96,
+    "rd_pct_latest": 4.08,
+    "yearly": {
+      "2025": 4.08,
+      "2024": 3.85,
+      "2023": 3.93,
+      "2022": 4.0
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "1326.TW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "1722.TW": {
+    "rd_pct_median": 0.29,
+    "rd_pct_latest": 0.29,
+    "yearly": {
+      "2025": 0.29,
+      "2024": 0.33,
+      "2023": 0.3,
+      "2022": 0.28
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2330.TW": {
+    "rd_pct_median": 7.13,
+    "rd_pct_latest": 6.47,
+    "yearly": {
+      "2025": 6.47,
+      "2024": 7.05,
+      "2023": 8.44,
+      "2022": 7.21
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2327.TW": {
+    "rd_pct_median": 2.71,
+    "rd_pct_latest": 2.57,
+    "yearly": {
+      "2025": 2.57,
+      "2024": 2.85,
+      "2023": 2.85,
+      "2022": 2.33
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2317.TW": {
+    "rd_pct_median": 1.71,
+    "rd_pct_latest": 1.5,
+    "yearly": {
+      "2025": 1.5,
+      "2024": 1.69,
+      "2023": 1.79,
+      "2022": 1.72
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2382.TW": {
+    "rd_pct_median": 1.9,
+    "rd_pct_latest": 1.75,
+    "yearly": {
+      "2025": 1.75,
+      "2024": 2.05,
+      "2023": 2.15,
+      "2022": 1.67
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2379.TW": {
+    "rd_pct_median": 28.2,
+    "rd_pct_latest": 28.63,
+    "yearly": {
+      "2025": 28.63,
+      "2024": 29.58,
+      "2023": 27.77,
+      "2022": 26.91
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2446.TW": {
+    "rd_pct_median": 5.2,
+    "rd_pct_latest": 5.2,
+    "source": "historical_verified"
+  },
+  "2412.TW": {
+    "rd_pct_median": 1.79,
+    "rd_pct_latest": 1.86,
+    "yearly": {
+      "2025": 1.86,
+      "2024": 1.82,
+      "2023": 1.76,
+      "2022": 1.75
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2393.TW": {
+    "rd_pct_median": 4.21,
+    "rd_pct_latest": 4.32,
+    "yearly": {
+      "2025": 4.32,
+      "2024": 4.09,
+      "2023": 4.41,
+      "2022": 3.59
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2448.TW": {
+    "rd_pct_median": 9.5,
+    "rd_pct_latest": 9.5,
+    "source": "historical_verified"
+  },
+  "2409.TW": {
+    "rd_pct_median": 5.51,
+    "rd_pct_latest": 5.68,
+    "yearly": {
+      "2025": 5.68,
+      "2024": 5.72,
+      "2023": 5.34,
+      "2022": 5.21
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2383.TW": {
+    "rd_pct_median": 2.59,
+    "rd_pct_latest": 2.27,
+    "yearly": {
+      "2025": 2.27,
+      "2024": 2.71,
+      "2023": 3.07,
+      "2022": 2.46
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2454.TW": {
+    "rd_pct_median": 24.88,
+    "rd_pct_latest": 24.89,
+    "yearly": {
+      "2025": 24.89,
+      "2024": 24.88,
+      "2023": 25.7,
+      "2022": 21.3
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2882.TW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "2474.TW": {
+    "rd_pct_median": 6.09,
+    "rd_pct_latest": 6.34,
+    "yearly": {
+      "2025": 6.34,
+      "2024": 5.85,
+      "2023": 6.91,
+      "2022": 5.37
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2439.TW": {
+    "rd_pct_median": 5.07,
+    "rd_pct_latest": 5.06,
+    "yearly": {
+      "2025": 5.06,
+      "2024": 4.89,
+      "2023": 5.35,
+      "2022": 5.09
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3008.TW": {
+    "rd_pct_median": 8.68,
+    "rd_pct_latest": 8.66,
+    "yearly": {
+      "2025": 8.66,
+      "2024": 8.82,
+      "2023": 8.58,
+      "2022": 8.71
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3017.TW": {
+    "rd_pct_median": 5.22,
+    "rd_pct_latest": 3.86,
+    "yearly": {
+      "2025": 3.86,
+      "2024": 5.72,
+      "2023": 5.29,
+      "2022": 5.15
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "2498.TW": {
+    "rd_pct_median": 4.5,
+    "rd_pct_latest": 4.5,
+    "source": "historical_verified"
+  },
+  "3034.TW": {
+    "rd_pct_median": 15.78,
+    "rd_pct_latest": 16.61,
+    "yearly": {
+      "2025": 16.61,
+      "2024": 16.35,
+      "2023": 15.21,
+      "2022": 14.01
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3105.TW": {
+    "rd_pct_median": 9.65,
+    "rd_pct_latest": 9.62,
+    "source": "yfinance_two"
+  },
+  "3035.TW": {
+    "rd_pct_median": 19.14,
+    "rd_pct_latest": 17.85,
+    "yearly": {
+      "2025": 17.85,
+      "2024": 26.72,
+      "2023": 19.74,
+      "2022": 18.54
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3045.TW": {
+    "rd_pct_median": 0.31,
+    "rd_pct_latest": 0.42,
+    "yearly": {
+      "2025": 0.42,
+      "2024": 0.34,
+      "2023": 0.28,
+      "2022": 0.23
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3293.TW": {
+    "rd_pct_median": 21.82,
+    "rd_pct_latest": 20.81,
+    "source": "yfinance_two"
+  },
+  "3189.TW": {
+    "rd_pct_median": 7.59,
+    "rd_pct_latest": 6.63,
+    "yearly": {
+      "2025": 6.63,
+      "2024": 8.55,
+      "2023": 8.93,
+      "2022": 5.92
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3324.TW": {
+    "rd_pct_median": 5.56,
+    "rd_pct_latest": 6.06,
+    "source": "yfinance_two"
+  },
+  "3231.TW": {
+    "rd_pct_median": 2.51,
+    "rd_pct_latest": 1.43,
+    "yearly": {
+      "2025": 1.43,
+      "2024": 2.48,
+      "2023": 2.76,
+      "2022": 2.54
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3443.TW": {
+    "rd_pct_median": 12.37,
+    "rd_pct_latest": 9.75,
+    "yearly": {
+      "2025": 9.75,
+      "2024": 12.87,
+      "2023": 11.88,
+      "2022": 13.68
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3697.TW": {
+    "rd_pct_median": 22.0,
+    "rd_pct_latest": 22.0,
+    "source": "historical_verified"
+  },
+  "3661.TW": {
+    "rd_pct_median": 5.5,
+    "rd_pct_latest": 5.92,
+    "yearly": {
+      "2025": 5.92,
+      "2024": 4.12,
+      "2023": 5.07,
+      "2022": 8.53
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3406.TW": {
+    "rd_pct_median": 9.67,
+    "rd_pct_latest": 8.36,
+    "yearly": {
+      "2025": 8.36,
+      "2024": 8.64,
+      "2023": 10.7,
+      "2022": 13.13
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3665.TW": {
+    "rd_pct_median": 2.68,
+    "rd_pct_latest": 2.55,
+    "yearly": {
+      "2025": 2.55,
+      "2024": 2.79,
+      "2023": 3.01,
+      "2022": 2.57
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "6286.TW": {
+    "rd_pct_median": 16.5,
+    "rd_pct_latest": 16.5,
+    "source": "historical_verified"
+  },
+  "6239.TW": {
+    "rd_pct_median": 3.62,
+    "rd_pct_latest": 3.75,
+    "yearly": {
+      "2025": 3.75,
+      "2024": 3.83,
+      "2023": 3.49,
+      "2022": 2.93
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "6176.TW": {
+    "rd_pct_median": 4.71,
+    "rd_pct_latest": 6.06,
+    "yearly": {
+      "2025": 6.06,
+      "2024": 4.79,
+      "2023": 4.63,
+      "2022": 3.89
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "3673.TW": {
+    "rd_pct_median": 0.78,
+    "rd_pct_latest": 0.89,
+    "yearly": {
+      "2025": 0.89,
+      "2024": 0.73,
+      "2023": 0.84,
+      "2022": 0.72
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "5522.TW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "6462.TW": {
+    "rd_pct_median": 42.07,
+    "rd_pct_latest": 42.31,
+    "source": "yfinance_two"
+  },
+  "6472.TW": {
+    "rd_pct_median": 2.82,
+    "rd_pct_latest": 3.54,
+    "yearly": {
+      "2025": 3.54,
+      "2024": 3.67,
+      "2023": 2.1,
+      "2022": 1.23
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "6488.TW": {
+    "rd_pct_median": 3.5,
+    "rd_pct_latest": 3.66,
+    "source": "yfinance_two"
+  },
+  "8078.TW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "fallback_zero"
+  },
+  "8436.TW": {
+    "rd_pct_median": 8.39,
+    "rd_pct_latest": 8.26,
+    "source": "yfinance_two"
+  },
+  "6531.TW": {
+    "rd_pct_median": 14.66,
+    "rd_pct_latest": 15.51,
+    "yearly": {
+      "2025": 15.51,
+      "2024": 18.62,
+      "2023": 13.81,
+      "2022": 9.07
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "8046.TW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "A": {
+    "rd_pct_median": 6.93,
+    "rd_pct_latest": 6.55,
+    "yearly": {
+      "2025": 6.55,
+      "2024": 7.36,
+      "2023": 7.04,
+      "2022": 6.82
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ABMD": {
+    "rd_pct_median": 16.2,
+    "rd_pct_latest": 16.2,
+    "source": "historical_verified"
+  },
+  "AAPL": {
+    "rd_pct_median": 7.91,
+    "rd_pct_latest": 8.3,
+    "yearly": {
+      "2025": 8.3,
+      "2024": 8.02,
+      "2023": 7.8,
+      "2022": 6.66
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "6669.TW": {
+    "rd_pct_median": 1.43,
+    "rd_pct_latest": 0.99,
+    "yearly": {
+      "2025": 0.99,
+      "2024": 1.68,
+      "2023": 1.66,
+      "2022": 1.2
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ABBV": {
+    "rd_pct_median": 14.5,
+    "rd_pct_latest": 14.87,
+    "yearly": {
+      "2025": 14.87,
+      "2024": 22.71,
+      "2023": 14.13,
+      "2022": 11.21
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AAL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ADI": {
+    "rd_pct_median": 14.97,
+    "rd_pct_latest": 16.03,
+    "yearly": {
+      "2025": 16.03,
+      "2024": 15.78,
+      "2023": 13.49,
+      "2022": 14.15
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AET": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "ACN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ABT": {
+    "rd_pct_median": 6.71,
+    "rd_pct_latest": 6.64,
+    "yearly": {
+      "2025": 6.64,
+      "2024": 6.78,
+      "2023": 6.83,
+      "2022": 6.62
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ADBE": {
+    "rd_pct_median": 17.98,
+    "rd_pct_latest": 18.07,
+    "yearly": {
+      "2025": 18.07,
+      "2024": 18.34,
+      "2023": 17.89,
+      "2022": 16.97
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ADM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ADP": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ALXN": {
+    "rd_pct_median": 22.4,
+    "rd_pct_latest": 22.4,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "AFL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "AKAM": {
+    "rd_pct_median": 11.31,
+    "rd_pct_latest": 12.2,
+    "yearly": {
+      "2025": 12.2,
+      "2024": 11.8,
+      "2023": 10.65,
+      "2022": 10.82
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AIG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ANDV": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "AMD": {
+    "rd_pct_median": 24.2,
+    "rd_pct_latest": 23.36,
+    "yearly": {
+      "2025": 23.36,
+      "2024": 25.04,
+      "2023": 25.89,
+      "2022": 21.21
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AMAT": {
+    "rd_pct_median": 11.8,
+    "rd_pct_latest": 12.58,
+    "yearly": {
+      "2025": 12.58,
+      "2024": 11.9,
+      "2023": 11.7,
+      "2022": 10.75
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AMZN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ANTM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "AMT": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ANET": {
+    "rd_pct_median": 14.41,
+    "rd_pct_latest": 13.74,
+    "yearly": {
+      "2025": 13.74,
+      "2024": 14.23,
+      "2023": 14.59,
+      "2022": 16.63
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AMGN": {
+    "rd_pct_median": 17.41,
+    "rd_pct_latest": 19.79,
+    "yearly": {
+      "2025": 19.79,
+      "2024": 17.84,
+      "2023": 16.97,
+      "2022": 16.84
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AON": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "APA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ALL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ATVI": {
+    "rd_pct_median": 16.5,
+    "rd_pct_latest": 16.5,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "APO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ATI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "AVGO": {
+    "rd_pct_median": 16.0,
+    "rd_pct_latest": 17.18,
+    "yearly": {
+      "2025": 17.18,
+      "2024": 18.05,
+      "2023": 14.67,
+      "2022": 14.81
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "AXP": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BAC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "AZO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BBY": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BK": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "BAX": {
+    "rd_pct_median": 4.8,
+    "rd_pct_latest": 4.61,
+    "yearly": {
+      "2025": 4.61,
+      "2024": 5.55,
+      "2023": 5.0,
+      "2022": 4.47
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "APH": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BIIB": {
+    "rd_pct_median": 21.2,
+    "rd_pct_latest": 17.98,
+    "yearly": {
+      "2025": 17.98,
+      "2024": 20.47,
+      "2023": 24.86,
+      "2022": 21.93
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "BRK.B": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "BLK": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BKNG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BMY": {
+    "rd_pct_median": 20.65,
+    "rd_pct_latest": 20.65,
+    "yearly": {
+      "2025": 20.65,
+      "2024": 23.1,
+      "2023": 20.66,
+      "2022": 20.6
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "BKR": {
+    "rd_pct_median": 2.31,
+    "rd_pct_latest": 2.16,
+    "yearly": {
+      "2025": 2.16,
+      "2024": 2.31,
+      "2023": 2.55
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "BA": {
+    "rd_pct_median": 4.31,
+    "rd_pct_latest": 4.04,
+    "yearly": {
+      "2025": 4.04,
+      "2024": 5.73,
+      "2023": 4.34,
+      "2022": 4.28
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "BX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "BSX": {
+    "rd_pct_median": 10.08,
+    "rd_pct_latest": 10.22,
+    "yearly": {
+      "2025": 10.22,
+      "2024": 9.64,
+      "2023": 9.93,
+      "2022": 10.43
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CAH": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CAT": {
+    "rd_pct_median": 3.16,
+    "rd_pct_latest": 3.18,
+    "yearly": {
+      "2025": 3.18,
+      "2024": 3.25,
+      "2023": 3.14,
+      "2022": 3.05
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CAR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CCL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CHK": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "C": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CB": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CEG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CF": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CHTR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CIEN": {
+    "rd_pct_median": 17.49,
+    "rd_pct_latest": 17.79,
+    "yearly": {
+      "2025": 17.79,
+      "2024": 19.12,
+      "2023": 17.11,
+      "2022": 17.2
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CLF": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CMCSA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CMI": {
+    "rd_pct_median": 4.35,
+    "rd_pct_latest": 4.15,
+    "yearly": {
+      "2025": 4.15,
+      "2024": 4.29,
+      "2023": 4.4,
+      "2022": 4.55
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CME": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CNX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "COF": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CMG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "COHR": {
+    "rd_pct_median": 10.09,
+    "rd_pct_latest": 10.16,
+    "yearly": {
+      "2026": 10.16,
+      "2025": 10.02,
+      "2024": 10.17,
+      "2023": 9.68
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "COP": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "COIN": {
+    "rd_pct_median": 32.94,
+    "rd_pct_latest": 23.26,
+    "yearly": {
+      "2025": 23.26,
+      "2024": 22.37,
+      "2023": 42.61,
+      "2022": 72.83
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "COST": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CPRI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CRM": {
+    "rd_pct_median": 14.46,
+    "rd_pct_latest": 14.43,
+    "yearly": {
+      "2026": 14.43,
+      "2025": 14.5,
+      "2024": 14.07,
+      "2023": 16.12
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CRWD": {
+    "rd_pct_median": 27.17,
+    "rd_pct_latest": 28.78,
+    "yearly": {
+      "2026": 28.78,
+      "2025": 27.21,
+      "2024": 25.54,
+      "2023": 27.14
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CTXS": {
+    "rd_pct_median": 15.8,
+    "rd_pct_latest": 15.8,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "CSX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CSCO": {
+    "rd_pct_median": 14.97,
+    "rd_pct_latest": 15.1,
+    "yearly": {
+      "2026": 15.1,
+      "2025": 16.42,
+      "2024": 14.84,
+      "2023": 13.25
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "CVS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CVNA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "DAL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "CVX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "DASH": {
+    "rd_pct_median": 11.25,
+    "rd_pct_latest": 10.43,
+    "yearly": {
+      "2025": 10.43,
+      "2024": 10.89,
+      "2023": 11.62,
+      "2022": 12.59
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "DFS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "DDOG": {
+    "rd_pct_median": 45.05,
+    "rd_pct_latest": 45.18,
+    "yearly": {
+      "2025": 45.18,
+      "2024": 42.94,
+      "2023": 45.22,
+      "2022": 44.91
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "DE": {
+    "rd_pct_median": 4.13,
+    "rd_pct_latest": 5.17,
+    "yearly": {
+      "2025": 5.17,
+      "2024": 4.53,
+      "2023": 3.61,
+      "2022": 3.73
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "DELL": {
+    "rd_pct_median": 2.97,
+    "rd_pct_latest": 2.77,
+    "yearly": {
+      "2026": 2.77,
+      "2025": 3.2,
+      "2024": 3.17,
+      "2023": 2.72
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "DHR": {
+    "rd_pct_median": 6.4,
+    "rd_pct_latest": 6.5,
+    "yearly": {
+      "2025": 6.5,
+      "2024": 6.63,
+      "2023": 6.29,
+      "2022": 5.74
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "DD": {
+    "rd_pct_median": 2.96,
+    "rd_pct_latest": 2.82,
+    "yearly": {
+      "2025": 2.82,
+      "2024": 3.02,
+      "2023": 2.9,
+      "2022": 4.12
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "DLTR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "DLR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "DIS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "DUK": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "DVN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ESRX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "DXCM": {
+    "rd_pct_median": 13.83,
+    "rd_pct_latest": 12.85,
+    "yearly": {
+      "2025": 12.85,
+      "2024": 13.7,
+      "2023": 13.96,
+      "2022": 16.64
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "EBAY": {
+    "rd_pct_median": 14.59,
+    "rd_pct_latest": 14.79,
+    "yearly": {
+      "2025": 14.79,
+      "2024": 14.38,
+      "2023": 15.27,
+      "2022": 13.58
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ENPH": {
+    "rd_pct_median": 11.38,
+    "rd_pct_latest": 12.84,
+    "yearly": {
+      "2025": 12.84,
+      "2024": 15.13,
+      "2023": 9.92,
+      "2022": 7.24
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "EOG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "EXPE": {
+    "rd_pct_median": 9.86,
+    "rd_pct_latest": 8.67,
+    "yearly": {
+      "2025": 8.67,
+      "2024": 9.6,
+      "2023": 10.58,
+      "2022": 10.12
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ETSY": {
+    "rd_pct_median": 15.92,
+    "rd_pct_latest": 15.61,
+    "yearly": {
+      "2025": 15.61,
+      "2024": 15.78,
+      "2023": 17.08,
+      "2022": 16.07
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "EQIX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FCX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ETN": {
+    "rd_pct_median": 3.2,
+    "rd_pct_latest": 2.9,
+    "yearly": {
+      "2025": 2.9,
+      "2024": 3.19,
+      "2023": 3.25,
+      "2022": 3.2
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "F": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FFIV": {
+    "rd_pct_median": 18.34,
+    "rd_pct_latest": 17.48,
+    "yearly": {
+      "2025": 17.48,
+      "2024": 17.4,
+      "2023": 19.21,
+      "2022": 20.16
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "FDX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FIS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FISV": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FITB": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FLR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FMCC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "FNMA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "GE": {
+    "rd_pct_median": 3.09,
+    "rd_pct_latest": 3.45,
+    "yearly": {
+      "2025": 3.45,
+      "2024": 3.32,
+      "2023": 2.86,
+      "2022": 2.77
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "GILD": {
+    "rd_pct_median": 20.12,
+    "rd_pct_latest": 19.7,
+    "yearly": {
+      "2025": 19.7,
+      "2024": 20.54,
+      "2023": 21.09,
+      "2022": 18.24
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "FSLR": {
+    "rd_pct_median": 4.51,
+    "rd_pct_latest": 4.47,
+    "yearly": {
+      "2025": 4.47,
+      "2024": 4.55,
+      "2023": 4.59,
+      "2022": 4.31
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "GEV": {
+    "rd_pct_median": 2.98,
+    "rd_pct_latest": 3.14,
+    "yearly": {
+      "2025": 3.14,
+      "2024": 2.81,
+      "2023": 2.7,
+      "2022": 3.3
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "GPS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "GPN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "GIS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "GOOGL": {
+    "rd_pct_median": 14.44,
+    "rd_pct_latest": 15.16,
+    "yearly": {
+      "2025": 15.16,
+      "2024": 14.09,
+      "2023": 14.78,
+      "2022": 13.97
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "GM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "HCA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "HES": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "HAL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "GS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "HD": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "GLW": {
+    "rd_pct_median": 7.84,
+    "rd_pct_latest": 7.1,
+    "yearly": {
+      "2025": 7.1,
+      "2024": 8.3,
+      "2023": 8.55,
+      "2022": 7.38
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "HIG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "HOG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "HON": {
+    "rd_pct_median": 4.18,
+    "rd_pct_latest": 4.84,
+    "yearly": {
+      "2025": 4.84,
+      "2024": 4.19,
+      "2023": 4.17,
+      "2022": 4.17
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "HOOD": {
+    "rd_pct_median": 35.44,
+    "rd_pct_latest": 20.05,
+    "yearly": {
+      "2025": 20.05,
+      "2024": 27.72,
+      "2023": 43.16,
+      "2022": 64.65
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "HUM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "HPE": {
+    "rd_pct_median": 7.4,
+    "rd_pct_latest": 7.34,
+    "yearly": {
+      "2025": 7.34,
+      "2024": 7.46,
+      "2023": 8.06,
+      "2022": 7.18
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "IBM": {
+    "rd_pct_median": 11.44,
+    "rd_pct_latest": 12.31,
+    "yearly": {
+      "2025": 12.31,
+      "2024": 11.92,
+      "2023": 10.95,
+      "2022": 10.85
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "HPQ": {
+    "rd_pct_median": 2.92,
+    "rd_pct_latest": 2.9,
+    "yearly": {
+      "2025": 2.9,
+      "2024": 3.06,
+      "2023": 2.94,
+      "2022": 2.63
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ICE": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "IGT": {
+    "rd_pct_median": 8.5,
+    "rd_pct_latest": 8.5,
+    "source": "historical_verified"
+  },
+  "INCY": {
+    "rd_pct_median": 45.38,
+    "rd_pct_latest": 39.88,
+    "yearly": {
+      "2025": 39.88,
+      "2024": 61.46,
+      "2023": 44.04,
+      "2022": 46.72
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "JCI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "INTC": {
+    "rd_pct_median": 28.69,
+    "rd_pct_latest": 26.06,
+    "yearly": {
+      "2025": 26.06,
+      "2024": 31.16,
+      "2023": 29.59,
+      "2022": 27.8
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ISRG": {
+    "rd_pct_median": 13.87,
+    "rd_pct_latest": 13.03,
+    "yearly": {
+      "2025": 13.03,
+      "2024": 13.71,
+      "2023": 14.02,
+      "2022": 14.13
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "JNPR": {
+    "rd_pct_median": 21.0,
+    "rd_pct_latest": 21.0,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "INTU": {
+    "rd_pct_median": 16.33,
+    "rd_pct_latest": 15.74,
+    "yearly": {
+      "2026": 15.74,
+      "2025": 15.55,
+      "2024": 16.91,
+      "2023": 17.67
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ITW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "JNJ": {
+    "rd_pct_median": 17.69,
+    "rd_pct_latest": 15.57,
+    "yearly": {
+      "2025": 15.57,
+      "2024": 19.4,
+      "2023": 17.71,
+      "2022": 17.67
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "KBH": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "KR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "JPM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "KLAC": {
+    "rd_pct_median": 11.82,
+    "rd_pct_latest": 11.28,
+    "yearly": {
+      "2026": 11.28,
+      "2025": 11.19,
+      "2024": 13.03,
+      "2023": 12.35
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "KMB": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "KO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "KSS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "KKR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "LEN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "LHX": {
+    "rd_pct_median": 2.46,
+    "rd_pct_latest": 2.45,
+    "yearly": {
+      "2025": 2.45,
+      "2024": 2.42,
+      "2023": 2.47,
+      "2022": 3.53
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "LIN": {
+    "rd_pct_median": 0.44,
+    "rd_pct_latest": 0.43,
+    "yearly": {
+      "2025": 0.43,
+      "2024": 0.45,
+      "2023": 0.44,
+      "2022": 0.43
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "LOW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "LITE": {
+    "rd_pct_median": 17.95,
+    "rd_pct_latest": 11.83,
+    "yearly": {
+      "2026": 11.83,
+      "2025": 18.47,
+      "2024": 22.23,
+      "2023": 17.42
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "LLY": {
+    "rd_pct_median": 24.8,
+    "rd_pct_latest": 20.46,
+    "yearly": {
+      "2025": 20.46,
+      "2024": 24.4,
+      "2023": 27.29,
+      "2022": 25.19
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "LMT": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "LULU": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "LRCX": {
+    "rd_pct_median": 10.8,
+    "rd_pct_latest": 10.23,
+    "yearly": {
+      "2026": 10.23,
+      "2025": 11.37,
+      "2024": 12.76,
+      "2023": 9.91
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "LUV": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "M": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MDLZ": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "LYB": {
+    "rd_pct_median": 0.4,
+    "rd_pct_latest": 0.45,
+    "yearly": {
+      "2025": 0.45,
+      "2024": 0.4,
+      "2023": 0.39,
+      "2022": 0.25
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "MDT": {
+    "rd_pct_median": 8.3,
+    "rd_pct_latest": 7.9,
+    "yearly": {
+      "2026": 7.9,
+      "2025": 8.15,
+      "2024": 8.45,
+      "2023": 8.63
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "MCK": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MCD": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MET": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MON": {
+    "rd_pct_median": 10.8,
+    "rd_pct_latest": 10.8,
+    "source": "historical_verified"
+  },
+  "MMM": {
+    "rd_pct_median": 4.56,
+    "rd_pct_latest": 4.69,
+    "yearly": {
+      "2025": 4.69,
+      "2024": 4.42,
+      "2023": 4.69,
+      "2022": 4.43
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "META": {
+    "rd_pct_median": 28.54,
+    "rd_pct_latest": 28.55,
+    "yearly": {
+      "2025": 28.55,
+      "2024": 26.67,
+      "2023": 28.53,
+      "2022": 30.3
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "MRO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "MRK": {
+    "rd_pct_median": 26.12,
+    "rd_pct_latest": 24.29,
+    "yearly": {
+      "2025": 24.29,
+      "2024": 27.95,
+      "2023": 50.79,
+      "2022": 22.85
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "MOS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MRNA": {
+    "rd_pct_median": 106.87,
+    "rd_pct_latest": 162.96,
+    "yearly": {
+      "2025": 162.96,
+      "2024": 142.01,
+      "2023": 71.74,
+      "2022": 17.46
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "MYL": {
+    "rd_pct_median": 6.2,
+    "rd_pct_latest": 6.2,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "MRVL": {
+    "rd_pct_median": 31.98,
+    "rd_pct_latest": 25.32,
+    "yearly": {
+      "2026": 25.32,
+      "2025": 33.82,
+      "2024": 34.43,
+      "2023": 30.14
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "MS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MSFT": {
+    "rd_pct_median": 11.79,
+    "rd_pct_latest": 10.72,
+    "yearly": {
+      "2026": 10.72,
+      "2025": 11.53,
+      "2024": 12.04,
+      "2023": 12.83
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NCLH": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MSI": {
+    "rd_pct_median": 8.51,
+    "rd_pct_latest": 8.3,
+    "yearly": {
+      "2025": 8.3,
+      "2024": 8.48,
+      "2023": 8.6,
+      "2022": 8.55
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NE": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MPC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "MU": {
+    "rd_pct_median": 11.91,
+    "rd_pct_latest": 4.24,
+    "yearly": {
+      "2026": 4.24,
+      "2025": 10.16,
+      "2024": 13.66,
+      "2023": 20.04
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NBR": {
+    "rd_pct_median": 1.88,
+    "rd_pct_latest": 1.67,
+    "yearly": {
+      "2025": 1.67,
+      "2024": 1.95,
+      "2023": 1.87,
+      "2022": 1.88
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NEM": {
+    "rd_pct_median": 1.37,
+    "rd_pct_latest": 0.73,
+    "yearly": {
+      "2025": 0.73,
+      "2024": 1.05,
+      "2023": 1.69,
+      "2022": 1.92
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NLOK": {
+    "rd_pct_median": 10.5,
+    "rd_pct_latest": 10.5,
+    "source": "historical_verified"
+  },
+  "NEE": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "NKE": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "NFLX": {
+    "rd_pct_median": 7.72,
+    "rd_pct_latest": 7.51,
+    "yearly": {
+      "2025": 7.51,
+      "2024": 7.5,
+      "2023": 7.93,
+      "2022": 8.58
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NTAP": {
+    "rd_pct_median": 15.21,
+    "rd_pct_latest": 14.31,
+    "yearly": {
+      "2026": 14.31,
+      "2025": 15.4,
+      "2024": 16.42,
+      "2023": 15.03
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NOV": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "NOW": {
+    "rd_pct_median": 23.41,
+    "rd_pct_latest": 22.29,
+    "yearly": {
+      "2025": 22.29,
+      "2024": 23.15,
+      "2023": 23.68,
+      "2022": 24.4
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NTRS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "NVDA": {
+    "rd_pct_median": 12.07,
+    "rd_pct_latest": 8.57,
+    "yearly": {
+      "2026": 8.57,
+      "2025": 9.9,
+      "2024": 14.24,
+      "2023": 27.21
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NUE": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "NXPI": {
+    "rd_pct_median": 18.41,
+    "rd_pct_latest": 19.24,
+    "yearly": {
+      "2025": 19.24,
+      "2024": 18.61,
+      "2023": 18.21,
+      "2022": 16.27
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ON": {
+    "rd_pct_median": 7.93,
+    "rd_pct_latest": 9.73,
+    "yearly": {
+      "2025": 9.73,
+      "2024": 8.65,
+      "2023": 7.0,
+      "2022": 7.21
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ORCL": {
+    "rd_pct_median": 17.01,
+    "rd_pct_latest": 15.25,
+    "yearly": {
+      "2026": 15.25,
+      "2025": 17.18,
+      "2024": 16.83,
+      "2023": 17.26
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "NOC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PANW": {
+    "rd_pct_median": 22.39,
+    "rd_pct_latest": 22.23,
+    "yearly": {
+      "2026": 22.23,
+      "2025": 21.52,
+      "2024": 22.55,
+      "2023": 23.27
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "PEP": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "OXY": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PENN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PFE": {
+    "rd_pct_median": 16.84,
+    "rd_pct_latest": 16.68,
+    "yearly": {
+      "2025": 16.68,
+      "2024": 17.01,
+      "2023": 17.93,
+      "2022": 11.3
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "PG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PHM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PNC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PGR": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PLTR": {
+    "rd_pct_median": 17.95,
+    "rd_pct_latest": 12.46,
+    "yearly": {
+      "2025": 12.46,
+      "2024": 17.72,
+      "2023": 18.19,
+      "2022": 18.87
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "PPG": {
+    "rd_pct_median": 2.67,
+    "rd_pct_latest": 2.66,
+    "yearly": {
+      "2025": 2.66,
+      "2024": 2.67,
+      "2023": 2.61,
+      "2022": 2.78
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "PM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PXD": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "PRU": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "PRGO": {
+    "rd_pct_median": 2.6,
+    "rd_pct_latest": 2.24,
+    "yearly": {
+      "2025": 2.24,
+      "2024": 2.57,
+      "2023": 2.63,
+      "2022": 2.77
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "PSX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "RCL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "REGN": {
+    "rd_pct_median": 36.05,
+    "rd_pct_latest": 40.79,
+    "yearly": {
+      "2025": 40.79,
+      "2024": 36.85,
+      "2023": 35.26,
+      "2022": 31.61
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "QCOM": {
+    "rd_pct_median": 21.62,
+    "rd_pct_latest": 20.42,
+    "yearly": {
+      "2025": 20.42,
+      "2024": 22.82,
+      "2023": 24.62,
+      "2022": 18.54
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "PYPL": {
+    "rd_pct_median": 9.68,
+    "rd_pct_latest": 9.35,
+    "yearly": {
+      "2025": 9.35,
+      "2024": 9.37,
+      "2023": 9.99,
+      "2022": 11.82
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "RIG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "SBUX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "SCHW": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "RTX": {
+    "rd_pct_median": 3.84,
+    "rd_pct_latest": 3.17,
+    "yearly": {
+      "2025": 3.17,
+      "2024": 3.63,
+      "2023": 4.07,
+      "2022": 4.04
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "SLB": {
+    "rd_pct_median": 2.1,
+    "rd_pct_latest": 1.99,
+    "yearly": {
+      "2025": 1.99,
+      "2024": 2.06,
+      "2023": 2.15,
+      "2022": 2.26
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "SNDK": {
+    "rd_pct_median": 15.66,
+    "rd_pct_latest": 6.56,
+    "yearly": {
+      "2026": 6.56,
+      "2025": 15.39,
+      "2024": 15.92,
+      "2023": 19.18
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "SO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "SMCI": {
+    "rd_pct_median": 2.99,
+    "rd_pct_latest": 1.97,
+    "yearly": {
+      "2026": 1.97,
+      "2025": 2.9,
+      "2024": 3.09,
+      "2023": 4.31
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "SPG": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "SPGI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "STI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "SWN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "STT": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "SWKS": {
+    "rd_pct_median": 13.92,
+    "rd_pct_latest": 19.22,
+    "yearly": {
+      "2025": 19.22,
+      "2024": 15.12,
+      "2023": 12.71,
+      "2022": 11.26
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "STZ": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "STX": {
+    "rd_pct_median": 8.97,
+    "rd_pct_latest": 6.19,
+    "yearly": {
+      "2026": 6.19,
+      "2025": 7.96,
+      "2024": 9.98,
+      "2023": 10.79
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "TER": {
+    "rd_pct_median": 15.72,
+    "rd_pct_latest": 15.82,
+    "yearly": {
+      "2025": 15.82,
+      "2024": 16.34,
+      "2023": 15.62,
+      "2022": 13.96
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "TGT": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "TIF": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "T": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "TWTR": {
+    "rd_pct_median": 24.5,
+    "rd_pct_latest": 24.5,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "TJX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "TMUS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "TMO": {
+    "rd_pct_median": 3.19,
+    "rd_pct_latest": 3.14,
+    "yearly": {
+      "2025": 3.14,
+      "2024": 3.24,
+      "2023": 3.12,
+      "2022": 3.28
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "TWX": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "TRV": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "TSLA": {
+    "rd_pct_median": 4.37,
+    "rd_pct_latest": 6.76,
+    "yearly": {
+      "2025": 6.76,
+      "2024": 4.65,
+      "2023": 4.1,
+      "2022": 3.77
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "UAA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "TXN": {
+    "rd_pct_median": 11.21,
+    "rd_pct_latest": 11.78,
+    "yearly": {
+      "2025": 11.78,
+      "2024": 12.52,
+      "2023": 10.63,
+      "2022": 8.34
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "TFC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "UBER": {
+    "rd_pct_median": 7.78,
+    "rd_pct_latest": 6.54,
+    "yearly": {
+      "2025": 6.54,
+      "2024": 7.07,
+      "2023": 8.49,
+      "2022": 8.78
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "ULTA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "UAL": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "UPS": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "UNP": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "UNH": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "USB": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "V": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "VICI": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "VLO": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "VRT": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "VIAV": {
+    "rd_pct_median": 18.98,
+    "rd_pct_latest": 17.3,
+    "yearly": {
+      "2026": 17.3,
+      "2025": 19.25,
+      "2024": 20.18,
+      "2023": 18.71
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "WBA": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "source": "historical_verified"
+  },
+  "VST": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "VZ": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "VRTX": {
+    "rd_pct_median": 35.54,
+    "rd_pct_latest": 33.68,
+    "yearly": {
+      "2025": 33.68,
+      "2024": 74.94,
+      "2023": 37.39,
+      "2022": 29.74
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "WFC": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "WDC": {
+    "rd_pct_median": 12.74,
+    "rd_pct_latest": 8.99,
+    "yearly": {
+      "2026": 8.99,
+      "2025": 10.44,
+      "2024": 15.04,
+      "2023": 15.76
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "X": {
+    "rd_pct_median": 0.3,
+    "rd_pct_latest": 0.3,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "WMB": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "XLNX": {
+    "rd_pct_median": 25.8,
+    "rd_pct_latest": 25.8,
+    "yearly": {},
+    "source": "historical_10k"
+  },
+  "WMT": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "WY": {
+    "rd_pct_median": 0.08,
+    "rd_pct_latest": 0.07,
+    "yearly": {
+      "2025": 0.07,
+      "2024": 0.1,
+      "2023": 0.09,
+      "2022": 0.06
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "WYNN": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "XOM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "ZBH": {
+    "rd_pct_median": 5.77,
+    "rd_pct_latest": 5.57,
+    "yearly": {
+      "2025": 5.57,
+      "2024": 5.7,
+      "2023": 6.2,
+      "2022": 5.85
+    },
+    "source": "yfinance_income_stmt"
+  },
+  "YUM": {
+    "rd_pct_median": 0.0,
+    "rd_pct_latest": 0.0,
+    "yearly": {},
+    "source": "yfinance_no_rd_line"
+  },
+  "9910.TW": {
+    "rd_pct_median": 3.25,
+    "rd_pct_latest": 3.54,
+    "yearly": {
+      "2025": 3.54,
+      "2024": 3.38,
+      "2023": 3.12,
+      "2022": 3.05
+    },
+    "source": "yfinance_income_stmt"
+  }
+}

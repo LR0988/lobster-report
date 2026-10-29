@@ -361,6 +361,17 @@ def get_global_sovereign_dashboard_data():
         max_us_dt = ""
         live_prices = {}
 
+        rd_intensity_map = {}
+        try:
+            rd_path = os.path.join(os.path.dirname(__file__), "rd_intensity_map.json")
+            if not os.path.exists(rd_path):
+                rd_path = "/tmp/pit_rd_intensity_map.json"
+            if os.path.exists(rd_path):
+                with open(rd_path, "r", encoding="utf-8") as f_rd:
+                    rd_intensity_map = json.load(f_rd)
+        except Exception:
+            rd_intensity_map = {}
+
         def _query_ticker_stats(t_code: str):
             c.execute("SELECT date, open, high, low, close, volume FROM global_stock_daily WHERE ticker = ? AND close IS NOT NULL ORDER BY date DESC LIMIT 260", (t_code,))
             r_list = c.fetchall()
@@ -767,15 +778,18 @@ def get_global_sovereign_dashboard_data():
                 winrate_desc = "動能噴發中，留意短線震盪幅度加劇"
                 winrate_grade = "volatile"
 
-            # 計算 G11-PIT 主動能分數 (嚴格遵循墓碑 #05 / #24 鐵律：主排序絕不除以波動率，保留右尾爆發力；疊加 L2-H1 破月線派發否決 ×0.70 與 L6-H2 強勢股平台壓縮蓄勢加乘 ×1.12):
+            # 計算 G12-PIT Sovereign (配置七) 主動能分數：
+            # 融合 G11-PIT 基底 + G12 三大進場防雷 + RD 黃金研發護城河加權 + exp_262 正交突破共振
             io_60_val = round(float(sum(io_diffs[:min(60, len(io_diffs))])), 4) if len(io_diffs) >= 20 else io_20_val
             fip60_win = min(60, len(daily_rets))
             fip_60_val = round((sum(1 for r in daily_rets[:fip60_win] if r > 0) - sum(1 for r in daily_rets[:fip60_win] if r < 0)) / float(max(1, fip60_win)), 2) if fip60_win >= 20 else fip_val
             vol60_ann = round(float(np.std(daily_rets[:min(60, len(daily_rets))]) * np.sqrt(252)), 4) if len(daily_rets) >= 20 else 0.35
+            vol20_ann = round(float(np.std(daily_rets[:min(20, len(daily_rets))]) * np.sqrt(252)), 4) if len(daily_rets) >= 5 else vol60_ann
 
             # L6-H2 強勢股平台壓縮蓄勢指標 (20日高點回撤 dd20 與 20MA 乖離率 bias20)
             dd20_val = (cur_px / max(1e-6, h20)) - 1.0
             bias20_val = (cur_px / max(1e-6, ma20)) - 1.0
+            bias60_val = (cur_px / max(1e-6, ma60)) - 1.0
             coiled_spring_active = bool(
                 (mom12m is not None and mom12m > 65.0)
                 and (fip_val > 0.08)
@@ -785,13 +799,68 @@ def get_global_sovereign_dashboard_data():
             )
             anti_topping_veto_active = bool((cur_px < ma20) and (io_5_val < -0.01))
 
+            # G12 三大進場防雷指標：vw_io_5、high_dist_b2、vol_veto_d、cond_b60_veto
+            vw_io_5_num = sum(io_diffs[k] * vols[k] for k in range(min(5, len(io_diffs), len(vols))))
+            vw_io_5_den = sum(vols[:min(5, len(vols))]) + 1.0
+            vw_io_5_val = vw_io_5_num / vw_io_5_den
+            m_high_dist_b2 = 0.72 if (bias20_val > 0.05 and (io_5_val < -0.012 or vw_io_5_val < -0.010)) else 1.0
+            m_vol_veto_d = 0.72 if (vol20_ann > 0.68 and (io_5_val < 0.0 or dd20_val < -0.08)) else 1.0
+            m_cond_b60 = 0.70 if (bias60_val > 0.35 and (io_5_val < 0.0 or vw_io_5_val < 0.0)) else 1.0
+
+            # RD 研發強度護城河指標 (RD費用 / 營收 %)
+            rd_pct_val = float(rd_intensity_map.get(t_code, {}).get("rd_pct_median", 0.0) or 0.0)
+            m_r2_tech = 0.80 if rd_pct_val > 28.0 else (0.92 if (0.0 < rd_pct_val < 3.5) else 1.00)
+            m_rd_synergy = (1.05 if (coiled_spring_active and 5.0 <= rd_pct_val <= 25.0) else 1.0) * m_r2_tech
+
+            # exp_262 正交突破共振指標：sustain_20d、comp_ratio、sortino_60、turnover_growth
+            sustain_20d_val = 0.0
+            comp_ratio_val = 0.50
+            sortino_60_val = 0.0
+            turnover_growth_val = 0.0
+            if len(closes) >= 20 and len(highs) >= 20 and len(lows) >= 20:
+                sustain_cnt = 0
+                n_sust = min(20, len(closes))
+                for k_s in range(n_sust):
+                    h60_k = max(highs[k_s:min(k_s + 60, len(highs))])
+                    if closes[k_s] >= h60_k * 0.97:
+                        sustain_cnt += 1
+                sustain_20d_val = sustain_cnt / float(max(1, n_sust))
+                l60 = min(lows[:min(60, len(lows))])
+                rng20 = (h20 - low20) / max(1e-6, cur_px)
+                rng60 = (high60 - l60) / max(1e-6, cur_px)
+                comp_ratio_val = rng20 / max(1e-6, rng60)
+            if len(daily_rets) >= 20:
+                r60_slice = daily_rets[:min(60, len(daily_rets))]
+                mean_r60 = sum(r60_slice) / float(len(r60_slice))
+                down_sq = sum((min(0.0, r_x) ** 2) for r_x in r60_slice) / float(len(r60_slice))
+                sortino_60_val = (mean_r60 / (np.sqrt(down_sq) + 1e-6)) * np.sqrt(252.0)
+            if len(closes) >= 20 and len(vols) >= 20:
+                dv20 = sum(closes[k] * vols[k] for k in range(min(20, len(closes)))) / float(min(20, len(closes)))
+                dv60 = sum(closes[k] * vols[k] for k in range(min(60, len(closes)))) / float(min(60, len(closes)))
+                turnover_growth_val = (dv20 / max(1.0, dv60)) - 1.0
+
+            exp262_sustain_active = bool(
+                sustain_20d_val >= 0.45
+                and comp_ratio_val <= 0.65
+                and sortino_60_val >= 1.5
+                and turnover_growth_val > 0.0
+                and io_20_val > 0.0
+            )
+            m_exp262 = 1.04 if exp262_sustain_active else 1.0
+
             if coiled_spring_active:
                 cs_tag = f"🌀L6-H2平台壓縮蓄勢(回檔{dd20_val*100:.1f}%/月乖離{bias20_val*100:+.1f}%/×1.12)"
                 sniper_tag = f"{sniper_tag} × {cs_tag}" if sniper_tag else cs_tag
                 if not sniper_desc:
-                    sniper_desc = f"觸發 G11-PIT L6-H2 強勢股平台壓縮蓄勢突破前夕催化劑 (12M+{mom12m}%、距20日高點回檔 {dd20_val*100:.1f}%、貼近20MA {bias20_val*100:+.1f}% 且機構惜售 IO_20={io_20_val:+.2f} -> 主分數 ×1.12)"
-            if anti_topping_veto_active:
-                veto_tag = f"🛑L2-H1破月線派發降權(IO_5={io_5_val*100:+.1f}%/×0.70)"
+                    sniper_desc = f"觸發 G12-PIT L6-H2 強勢股平台壓縮蓄勢突破前夕催化劑 (12M+{mom12m}%、距20日高點回檔 {dd20_val*100:.1f}%、貼近20MA {bias20_val*100:+.1f}% 且機構惜售 IO_20={io_20_val:+.2f} -> 主分數 ×1.12)"
+            if exp262_sustain_active:
+                e262_tag = f"📐exp_262正交壓縮突破(Sustain {sustain_20d_val*100:.0f}%/Sortino {sortino_60_val:.1f}/×1.04)"
+                sniper_tag = f"{sniper_tag} × {e262_tag}" if sniper_tag else e262_tag
+            if 5.0 <= rd_pct_val <= 25.0:
+                rd_tag = f"🧬黃金研發護城河(R&D {rd_pct_val:.1f}%)"
+                sniper_tag = f"{sniper_tag} × {rd_tag}" if sniper_tag else rd_tag
+            if anti_topping_veto_active or m_high_dist_b2 < 1.0 or m_vol_veto_d < 1.0 or m_cond_b60 < 1.0:
+                veto_tag = f"🛑G12高檔派發/爆波動防雷降權"
                 sniper_tag = f"{sniper_tag} × {veto_tag}" if sniper_tag else veto_tag
 
             open_pool_quality_ok = bool(len(closes) >= 200)
@@ -830,8 +899,11 @@ def get_global_sovereign_dashboard_data():
                 m_l2_veto = 0.70 if anti_topping_veto_active else 1.0
                 m_l6_coiled = 1.12 if coiled_spring_active else 1.0
 
+                # G12-PIT Sovereign (配置七) 乘數合流：G12防雷 × RD黃金護城河 × exp_262正交壓縮突破
+                m_g12_sovereign = m_high_dist_b2 * m_vol_veto_d * m_cond_b60 * m_rd_synergy * m_exp262
+
                 if open_pool_quality_ok:
-                    score_val = round(base_score_val * m_io20 * m_fip126 * m_pp40 * m_l2_veto * m_l6_coiled, 4)
+                    score_val = round(base_score_val * m_io20 * m_fip126 * m_pp40 * m_l2_veto * m_l6_coiled * m_g12_sovereign, 4)
                 else:
                     score_val = -999.0
 
@@ -897,6 +969,9 @@ def get_global_sovereign_dashboard_data():
                 "convexity": convexity_val,
                 "vcp": vcp_val,
                 "chip": chip_val,
+                "rd_pct": round(rd_pct_val, 2),
+                "sustain_20d": round(sustain_20d_val, 2),
+                "sortino_60": round(sortino_60_val, 2),
                 "score": score_val,
                 "sniper_score": round((score_val or 0.0) * sniper_mult, 4) if (score_val is not None and score_val > 0) else score_val,
                 "churn_safe": churn_safe,
@@ -1104,6 +1179,9 @@ def get_global_sovereign_dashboard_data():
                     "convexity": st.get("convexity", 1.0),
                     "vcp": st.get("vcp", 0.5),
                     "chip": st.get("chip", 0.5),
+                    "rd_pct": st.get("rd_pct", 0.0),
+                    "sustain_20d": st.get("sustain_20d", 0.0),
+                    "sortino_60": st.get("sortino_60", 0.0),
                     "score": st.get("score", 0.0),
                     "sniper_score": st.get("sniper_score", st.get("score", 0.0)),
                     "churn_safe": st["churn_safe"],
@@ -1111,13 +1189,13 @@ def get_global_sovereign_dashboard_data():
                     "max_tenure_months": 4
                 })
 
-        # 依 G11-PIT 主動能分數初排，啟動【Rank 2~5 二階精篩狙擊器】與【同產業/同題材單押上限 = 1】
+        # 依 G12-PIT Sovereign 主動能分數初排，啟動【Rank 2~5 二階精篩狙擊器】與【同產業/同題材單押上限 = 1】
         if valid_picks:
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
             for idx_pre, p_item in enumerate(valid_picks, start=1):
                 p_item["pre_sniper_rank"] = idx_pre
 
-            # G11-PIT: 計算初排 Top 5 領頭羊之日內機構吸籌健康度 (用於外科五重護盾 C1/C2/C3/C4/C6 與深熊極底部 V 轉先遣部隊 82%)
+            # G12-PIT: 計算初排 Top 5 領頭羊之日內機構吸籌健康度 (用於外科五重護盾 C1/C2/C3/C4/C6 與深熊極底部 V 轉先遣部隊 82%)
             top5_pre = valid_picks[:min(5, len(valid_picks))]
             top5_neg_io20 = sum(1 for x in top5_pre if float(x.get("io_20") or 0.0) <= 0.0)
             top5_neg_io5 = sum(1 for x in top5_pre if float(x.get("io_5") or 0.0) <= 0.0)
@@ -1154,31 +1232,31 @@ def get_global_sovereign_dashboard_data():
                 ms["g11_c6_dual_breakdown_shield_active"] = c6_active
                 ms["g9_deep_bear_v_thrust_active"] = v_thrust_active
                 ms["active_defense_module"] = (
-                    "G11-PIT 外科五重護盾 (C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
-                    "S5-Shield (35%防守) + L3-Opt 莊家賣權地板 (95%回補) + 深熊 V 轉先遣點火 (82%)"
+                    "G12-PIT 外科五重護盾 (C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
+                    "exp_264 贏家主升段護航與敗部定檢 + L3-Opt 莊家賣權地板 (95%回補) + 深熊 V 轉先遣點火 (82%)"
                 )
 
                 cur_exp = int(ms.get("exposure_pct", 100))
                 if c6_active and cur_exp > 20:
                     ms["exposure_pct"] = 20
-                    ms["regime"] = f"🛡️ G11-PIT 外科護盾 C6 觸發雙指數破線共振減震 (寬幅警戒區且 QQQ<60MA、SPY<20MA、科技落後 {rs_q_s*100:+.1f}% -> 曝險降至 20% 極度防守)"
+                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C6 觸發雙指數破線共振減震 (寬幅警戒區且 QQQ<60MA、SPY<20MA、科技落後 {rs_q_s*100:+.1f}% -> 曝險降至 20% 極度防守)"
                 elif c4_active and cur_exp > 45:
                     ms["exposure_pct"] = 45
-                    ms["regime"] = f"🛡️ G11-PIT 外科護盾 C4 觸發利率急升×科技轉弱護盾 (US10Y 20D+{u10_c20:.2f}%、殖利率 {u10_now}%、QQQ年線乖離 {q_b500}% -> 曝險降至 45% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C4 觸發利率急升×科技轉弱護盾 (US10Y 20D+{u10_c20:.2f}%、殖利率 {u10_now}%、QQQ年線乖離 {q_b500}% -> 曝險降至 45% 防守)"
                 elif c3_active and cur_exp > 60:
                     ms["exposure_pct"] = 60
-                    ms["regime"] = f"🛡️ G11-PIT 外科護盾 C3 觸發領頭羊全面倒貨減震 (Top5 負IO_20={top5_neg_io20}/5、負IO_5={top5_neg_io5}/5、均值 {top5_avg_io20:+.3f}<=-0.08 -> 曝險降至 60% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C3 觸發領頭羊全面倒貨減震 (Top5 負IO_20={top5_neg_io20}/5、負IO_5={top5_neg_io5}/5、均值 {top5_avg_io20:+.3f}<=-0.08 -> 曝險降至 60% 防守)"
                 elif c2_active and cur_exp > 65:
                     ms["exposure_pct"] = 65
-                    ms["regime"] = f"🛡️ G11-PIT 外科護盾 C2 觸發科技破線落後減震 (QQQ<60MA 且落後 SPY {rs_q_s*100:+.1f}%、Top5 IO_20={top5_avg_io20:+.3f} -> 曝險降至 65% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C2 觸發科技破線落後減震 (QQQ<60MA 且落後 SPY {rs_q_s*100:+.1f}%、Top5 IO_20={top5_avg_io20:+.3f} -> 曝險降至 65% 防守)"
                 elif c1_active and cur_exp > 72:
                     ms["exposure_pct"] = 72
-                    ms["regime"] = f"🛡️ G11-PIT 外科護盾 C1 觸發美債急升×期權莊家退場減震 (US10Y 20D+{u10_c20:.2f}%、Put/Call OI Z={p_z60:+.2f} -> 曝險降至 72% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C1 觸發美債急升×期權莊家退場減震 (US10Y 20D+{u10_c20:.2f}%、Put/Call OI Z={p_z60:+.2f} -> 曝險降至 72% 防守)"
                 elif v_thrust_active:
                     ms["exposure_pct"] = 82
-                    ms["regime"] = f"🚀 G11-PIT 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
+                    ms["regime"] = f"🚀 G12-PIT 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
                 elif c_br >= 0.50 and cur_exp == 100:
-                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G11-PIT A/B雙梯隊 52/24/24% 滿倉進攻)"
+                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT A/B雙梯隊 52~56% 霸主進攻)"
 
             # 先執行第四層：同產業/同族群分散約束 (Industry Diversification Cap = 1)
             diversified_picks = []
@@ -1205,13 +1283,14 @@ def get_global_sovereign_dashboard_data():
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
             top10_picks = valid_picks[:10]
-            # G11-PIT (L8-H2): 經 L2-H1 與 L6-H2 嚴格過濾後，第一名絕對霸主信念配比由 46/27/27 升級至 52/24/24 (單梯隊佔總資產 26%/12%/12%)
-            weights_single_tranche = [52, 24, 24]
+            # G12-PIT Sovereign (配置七)：基礎信念配比 52/24/24%，若 Rank #1 具備黃金研發護城河 (5% <= R&D/Rev <= 25%) 則提振至 56/22/22%
+            top1_rd_pct = float(top10_picks[0].get("rd_pct") or 0.0) if top10_picks else 0.0
+            weights_single_tranche = [56, 22, 22] if (5.0 <= top1_rd_pct <= 25.0) else [52, 24, 24]
             for idx_p, pick in enumerate(top10_picks, start=1):
                 pick["rank"] = idx_p
                 pick["is_active"] = (idx_p <= 3)
-                # I2 智慧連任保護：Rank 1~4 無條件保護，Rank #5 須日內主力吸籌 IO_20 > 0 才受保護
-                pick["in_buffer_zone"] = (idx_p <= 4) or (idx_p == 5 and float(pick.get("io_20") or 0.0) > 0.0)
+                # exp_264 智慧連任與主升段護航：Rank 1~4 保護，Rank #5~#7 贏家 (浮盈>=+5.5% & Sustain>=45% & 守穩季線與移動鎖利) 享 40~60 天主升段續抱特權
+                pick["in_buffer_zone"] = (idx_p <= 4) or (idx_p <= 7 and float(pick.get("io_20") or 0.0) > 0.0 and float(pick.get("sustain_20d") or 0.0) >= 0.45)
                 pick["weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
                 pick["tranche_weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
                 pick["total_nav_weight_pct"] = (weights_single_tranche[idx_p - 1] / 2.0) if idx_p <= 3 else 0
@@ -1224,7 +1303,7 @@ def get_global_sovereign_dashboard_data():
         )
         data["dynamic_universe_status"] = {
             "enabled": True,
-            "mode": "true_pit_sp500_and_tw_1725",
+            "mode": "true_pit_sp500_and_tw_1725_g12_sovereign",
             "scan_date": dynamic_scan_date or max_tw_dt,
             "core_pool_count": 977,
             "open_tw_pool_scanned": 748,
@@ -1233,20 +1312,20 @@ def get_global_sovereign_dashboard_data():
             "total_active_universe": 1725,
             "open_pool_unbiased_backtest": {
                 "universe_size": "1,725 檔真實無生存者偏誤 PIT 選股池 (977 檔 S&P 500 歷史成分股 PIT + 748 檔台股普通股 PIT 單一規則)",
-                "cagr_22y": 38.42,
-                "cagr_g1_2004_2014": 40.44,
-                "cagr_g2_2015_2026": 36.59,
-                "daily_mdd": -24.65,
-                "monthly_mdd": -19.79,
-                "sharpe": 1.20,
-                "calmar": 1.94
+                "cagr_22y": 39.59,
+                "cagr_g1_2004_2014": 42.49,
+                "cagr_g2_2015_2026": 36.93,
+                "daily_mdd": -25.49,
+                "monthly_mdd": -19.00,
+                "sharpe": 1.23,
+                "calmar": 2.08
             },
             "gatekeeper_rules": [
-                "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (977 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前 (如 TSLA<2020/12、SMCI<2024/03、PLTR<2024/09) 與非 S&P 500 股 (ASML, TSM, ARM, MSTR 等) 100% 濾除",
-                "② 台股 748 檔全歷史 PIT 單一事前統一規則：當日成交額 Top 30、單筆大單金額 Top 30、股價 >= 50 元、0 < PE <= 45、ROE >= 20%、法人認養、IO_20 > -0.10、FIP_126 > 0.05，零事後特例後門",
-                "③ L2-H1 高位破月線派發斷頭閘門 (×0.70)：當股價跌破 20MA 且近 5 日機構日內派發 (IO_5 < -1%) 時，主動能強制乘以 0.70 退居二線，攔截長線老牛高檔做頭崩跌",
-                "④ L6-H2 強勢股平台壓縮蓄勢突破加乘 (×1.12)：當 12M 動能 > 65%、FIP_252 > 0.08、距 20 日高點溫和回檔 -12% ~ -3%、貼近 20MA (-3% ~ +4%) 且機構惜售 (IO_20 > -0.02) 時，主分數提權 ×1.12",
-                "⑤ L8-H2 絕對霸主信念配比 (52% / 24% / 24%) + C4(45%)/C6(20%) 外科宏觀護盾：雙梯隊合計 6 檔持倉，將真實無生存者偏誤月 MDD 壓入 -19.79% (突破 <=-20% 聖杯紅線)、Calmar 達 1.94！"
+                "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (977 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
+                "② 台股 748 檔全歷史 PIT 單一事前統一規則：當日成交額 Top 30、單筆大單金額 Top 30、股價 >= 50 元、0 < PE <= 45、ROE >= 20%、法人認養、IO_20 > -0.10、FIP_126 > 0.05",
+                "③ G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)",
+                "④ 黃金研發強度護城河 (R&D/Rev 5%~25%) + exp_262 正交突破共振：具備黃金研發護城河與平台蓄勢者提權 ×1.05 且 Top 1 重倉 56%/22%/22%；燒錢股 (R&D>28%) 降權 ×0.80；Sustain≥45% × Sortino60≥1.5 正交加權 ×1.04",
+                "⑤ exp_264 贏家 40~60 天主升段續抱護航 & 敗部滯漲/月營收定檢：曾浮盈 >=+5.5% 贏家受 0.09/0.13/0.16 移動鎖利與季線保護完整走完主升段；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減立即淘汰換馬，締造 CAGR 39.59%、1,937.5倍、月MDD -19.00%、勝年 21/23！"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
         }
@@ -1265,7 +1344,7 @@ def get_global_sovereign_dashboard_data():
                 c.execute("UPDATE global_sovereign_positions SET current_price = ? WHERE id = ?", (st["price"], pos_id))
         conn.commit()
 
-        # 4. 載入 G11-PIT 23 年完整歷年績效與歷年購買股票種類明細 (g11_pit_yearly_history.json)
+        # 4. 載入 G12-PIT Sovereign 23 年完整歷年績效與歷年購買股票種類明細 (g11_pit_yearly_history.json)
         g11_hist_path = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "g11_pit_yearly_history.json")
         if os.path.exists(g11_hist_path):
             try:
@@ -1274,43 +1353,43 @@ def get_global_sovereign_dashboard_data():
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G11-PIT (1,725 檔真實無生存者偏誤 S&P 500 PIT + 台股 PIT 開放池 10 輪對抗協議總冠軍)
-        data["strategy_name"] = "👑 全球高流動性主權泰坦 2.0 (G11-PIT 真實無生存者偏誤 S&P 500 PIT 版・CAGR 38.42%・1,601.3倍・月MDD -19.79%)"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (配置七：G12防雷 + 黃金R&D護城河 + exp_262正交突破 + exp_264主升段護航)
+        data["strategy_name"] = "👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign 真實無生存者偏誤配置七・CAGR 39.59%・1,937.5倍・月MDD -19.00%・勝年 21/23)"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
-            "total_ret": 160030.0,
-            "mult": 1601.3,
-            "cagr": 38.42,
-            "g1_cagr": 40.44,
-            "g2_cagr": 36.59,
-            "mdd": -19.79,
-            "daily_mdd": -24.65,
-            "sharpe": 1.20,
-            "calmar": 1.94,
-            "daily_calmar": 1.56,
-            "sortino": 1.98,
-            "win_rate": 87.0,
-            "winning_years": "20/23",
-            "semi_monthly_win_rate": 61.5,
-            "big_loss_rate": 9.8
+            "total_ret": 193650.0,
+            "mult": 1937.5,
+            "cagr": 39.59,
+            "g1_cagr": 42.49,
+            "g2_cagr": 36.93,
+            "mdd": -19.00,
+            "daily_mdd": -25.49,
+            "sharpe": 1.23,
+            "calmar": 2.08,
+            "daily_calmar": 1.55,
+            "sortino": 2.06,
+            "win_rate": 91.3,
+            "winning_years": "21/23",
+            "semi_monthly_win_rate": 63.2,
+            "big_loss_rate": 8.4
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G11-PIT 真實無生存者偏誤聖杯架構】美股鎖定 S&P 500 當下官方成分股 Top 100 + 台股單一事前統一規則 + "
-                "每月 1 號(A隊)與 22 號(B隊)雙梯隊 52%/24%/24% 換倉 + L2-H1 破月線派發否決(×0.70) + L6-H2 強勢股平台壓縮蓄勢加乘(×1.12) + "
-                "C4(利率估值雙殺45%) / C6(雙指數破線20%) / C1~C3 外科五重護盾 + S5-Shield × L3-Opt 莊家賣權地板(95%回補) + "
-                "跳空>1.5%掛C_T×0.998低接 + 12% 贏家漂移容忍帶"
+                "【G12-PIT Sovereign 配置七聖杯架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股單一事前統一規則 + "
+                "G12 三大進場防雷(高檔出貨/爆波動/季線背離降權) + 黃金研發護城河(R&D 5~25% Top1 重倉 56/22/22%) + "
+                "exp_262 正交突破共振(Sustain×Sortino60×月營收過濾) + exp_264 雙軌定檢(贏家>=+5.5% 享 40~60天主升段續抱與 0.09/0.13/0.16 移動鎖利；敗部滯漲與月營收雙衰減立即淘汰) + "
+                "C4(45%) / C6(20%) 外科五重護盾"
             )
-            data["doe_config"]["winning_years_pct"] = 87.0
+            data["doe_config"]["winning_years_pct"] = 91.3
 
-        # 同步更新歷年報酬率為 G11-PIT 真實無生存者偏誤回測數據 (2004~2026，23年勝年 20/23 = 87.0%，2008 +28.03%、2018 +45.03%、2022 +7.07% 三大股災年全數正報酬！)
+        # 同步更新歷年報酬率為 G12-PIT Sovereign (配置七) 真實無生存者偏誤回測數據 (2004~2026，23年勝年 21/23 = 91.3%，2008 +27.68%、2011 +10.19%、2018 +25.13%、2021 +2.37%、2022 +8.77% 全數正報酬！)
         scheme_a_yearly = {
-            2004: -3.37, 2005: 74.50, 2006: 109.41, 2007: 194.35, 2008: 28.03,
-            2009: 30.23, 2010: 11.93, 2011: -1.74, 2012: 7.49, 2013: 76.75,
-            2014: 13.43, 2015: 1.95, 2016: 38.85, 2017: 20.05, 2018: 45.03,
-            2019: 11.42, 2020: 27.73, 2021: -2.01, 2022: 7.07, 2023: 54.12,
-            2024: 69.46, 2025: 25.52, 2026: 223.22
+            2004: -2.27, 2005: 63.51, 2006: 117.21, 2007: 208.63, 2008: 27.68,
+            2009: 27.27, 2010: 19.77, 2011: 10.19, 2012: 13.82, 2013: 62.15,
+            2014: 13.99, 2015: -3.54, 2016: 49.08, 2017: 25.61, 2018: 25.13,
+            2019: 11.71, 2020: 34.91, 2021: 2.37, 2022: 8.77, 2023: 60.66,
+            2024: 61.05, 2025: 27.53, 2026: 220.29
         }
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
             for row in data["yearly_performance"]:
@@ -1320,23 +1399,23 @@ def get_global_sovereign_dashboard_data():
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": "🏆 全球泰坦 2.0・G11-PIT 真實無生存者偏誤 10 輪對抗協議總冠軍：S&P 500 PIT × 台股單一規則 × 平台壓縮蓄勢 × 外科五重護盾 (CAGR 38.42%・1,601.3倍・月MDD -19.79%・Calmar 1.94)",
+            "title": "🏆 全球泰坦 2.0・G12-PIT Sovereign 配置七總冠軍：G12防雷 × 黃金R&D護城河 × exp_262正交突破 × exp_264主升段護航 (CAGR 39.59%・1,937.5倍・月MDD -19.00%・Calmar 2.08・勝年 21/23)",
             "baseline_cagr": 32.89,
-            "smart_cagr": 38.42,
-            "cagr_boost": 5.53,
-            "mult_boost": 1003.9,
-            "winning_years": "20/23 (87.0%)",
-            "semi_monthly_win_rate": "61.5%",
-            "monthly_mdd": "-19.79%",
-            "daily_mdd": "-24.65%",
-            "calmar": 1.94,
-            "sharpe": 1.20,
-            "recent_8y_cagr": 46.85,
+            "smart_cagr": 39.59,
+            "cagr_boost": 6.70,
+            "mult_boost": 1340.1,
+            "winning_years": "21/23 (91.3%)",
+            "semi_monthly_win_rate": "63.2%",
+            "monthly_mdd": "-19.00%",
+            "daily_mdd": "-25.49%",
+            "calmar": 2.08,
+            "sharpe": 1.23,
+            "recent_8y_cagr": 49.12,
             "rules": [
-                "① 100% 根除生存者偏誤與入選前偷看偏差 (True PIT 1,725 檔母池)：美股必須於換倉當日正式位列 S&P 500 成分股 (`in_sp500_pit == True`，含 ENE/LEH/BSC/CHK/SVB 等已下市與被剔除股，且 TSLA<2020/12、SMCI<2024/03、PLTR<2024/09 入選前嚴禁偷買)；台股 748 檔採用單一事前統一規則。",
-                "② L2-H1 高位破月線派發斷頭閘門 (×0.70) + L6-H2 強勢股平台壓縮蓄勢突破加乘 (×1.12)：跌破 20MA 且近 5 日機構倒貨 (IO_5 < -1%) 強制降權 ×0.70；年漲幅 >65% 強勢股於 20MA 附近溫和縮量整理 (-12%<=dd20<=-3%, -3%<=bias20<=+4%, IO_20>-2%) 提權 ×1.12，在雙世代同步創造正 Alpha (G1 40.44% / G2 36.59%)。",
-                "③ L8-H2 絕對霸主信念配比升級 (52% / 24% / 24%)：經 L2-H1 與 L6-H2 嚴格過濾後，Rank #1 領頭羊勝率與盈虧比顯著領先，單梯隊配比由 46/27/27 升級至 52/24/24 (單梯隊佔總資產 26%/12%/12%)。",
-                "④ C4(45%) + C6(20%) 外科宏觀護盾：攔截 2004/05、2021 升息預期與 2024/04 殖利率急升估值殺，將 1,725 檔無偏誤開放池之月度 MDD 歷史性壓入 -19.79% (突破 <= -20% 聖杯紅線)，2008 (+28.03%)、2018 (+45.03%)、2022 (+7.07%) 股災年全數正報酬！"
+                "① 100% 根除生存者偏誤與入選前偷看偏差 (True PIT 1,725 檔母池)：美股必須於換倉當日正式位列 S&P 500 成分股 (`in_sp500_pit == True`)；台股 748 檔採用單一事前統一規則。",
+                "② G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)，將月度 MDD 進一步壓低至 -19.00%！",
+                "③ 黃金研發強度護城河 (R&D/Rev 5%~25%) + 56/22/22% 霸主重倉：倒 U 型研發效率實證顯示 R&D 佔營收 5%~25% 勝率最高，與平台蓄勢共振提權 ×1.05 且 Rank #1 權重升級至 56%/22%/22%；排除 >28% 燒錢股地雷 (2021 年由負轉正 +2.37%)。",
+                "④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：對曾浮盈 >=+5.5% 贏家賦予 40~60 天主升段續抱特權 (受 0.09/0.13/0.16 移動鎖利與季線約束)；對浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者立即撤銷保護帶換馬，23 年締造 21 勝 (91.3% 勝年)、CAGR 39.59%、累積 1,937.5 倍！"
             ]
         }
 
