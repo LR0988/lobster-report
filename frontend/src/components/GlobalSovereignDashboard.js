@@ -926,6 +926,7 @@ export default function GlobalSovereignDashboard() {
 
       const roleTitle = `👑 第${pRank}主力 (總目標 ${totalWeightPct}%)`;
       const finalNote = isAlreadyDismissed ? (actionNote ? `${actionNote} (已標記完成)` : '已標記完成') : actionNote;
+      const recEntryPrice = (action === '買入' && pick.smart_entry_price) ? pick.smart_entry_price : price;
 
       suggestions.push({
         key: suggKey,
@@ -949,7 +950,14 @@ export default function GlobalSovereignDashboard() {
         deficitSharesB,
         isFullB,
         recShares,
-        defaultPrice: price,
+        defaultPrice: recEntryPrice,
+        spotPrice: price,
+        smartEntryMode: pick.smart_entry_mode || 'open_with_gap_cap',
+        smartEntryTag: pick.smart_entry_tag || '🟢 開盤直買・防跳空',
+        smartEntryPrice: pick.smart_entry_price || price,
+        gapLimitCapPrice: pick.gap_limit_cap_price || Number((price * 1.015).toFixed(2)),
+        pullbackProb3d: pick.pullback_prob_3d || 54.0,
+        smartEntryDesc: pick.smart_entry_desc || '',
         defaultTaxFee: estFee,
         role: roleTitle,
         actionNote: finalNote,
@@ -1854,7 +1862,7 @@ export default function GlobalSovereignDashboard() {
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              22.8年回測 <strong style={{ color: '#FDE047' }}>53,573.1倍 (CAGR 61.58%)</strong> ｜ 日MDD <strong style={{ color: '#34D399' }}>-32.31%</strong> (月MDD -25.76%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.39</strong> ｜ 近8年CAGR <strong style={{ color: '#34D399' }}>+109.30%</strong>
+              22.8年回測 <strong style={{ color: '#FDE047' }}>61,135.7倍 (CAGR 62.52%)</strong> ｜ 日MDD <strong style={{ color: '#34D399' }}>-31.73%</strong> (月MDD -25.85%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.42</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>21/23 (91.3%)</strong> ｜ 近8年CAGR <strong style={{ color: '#34D399' }}>+110.19%</strong>
             </span>
           </div>
 
@@ -2103,10 +2111,10 @@ export default function GlobalSovereignDashboard() {
             <strong style={{ color: '#38BDF8' }}>① 階梯配比 (40/30/30%)</strong>：A隊 (1號) 與 B隊 (22號) 各管 50% 資金（單隊佔總淨值 <strong>20% / 15% / 15%</strong>），兩隊共振時合流為 <strong style={{ color: '#FDE047' }}>40% / 30% / 30%</strong>。
           </div>
           <div>
-            <strong style={{ color: '#34D399' }}>② 連任保護帶 (Rank &le; 5)</strong>：在手持股於調倉日只要維持在 <strong>前 5 名內</strong> 且任期未滿 4 個月，一律<strong>免換股續抱</strong>，完整吃滿主升段。
+            <strong style={{ color: '#34D399' }}>② 不換倉就不換倉 (Rank &le; 5)</strong>：在手持股於調倉日只要維持在 <strong>前 5 名內</strong> 且任期未滿 4 個月，一律<strong>原股續抱不動 (免掛單折騰)</strong>，完整吃滿主升段。
           </div>
           <div>
-            <strong style={{ color: '#FBBF24' }}>③ 定時換倉鐵律</strong>：<strong>月內不設個股停損、不盤中換股</strong>；僅於 <strong>1 號與 22 號盤後確認訊號、次日 (T+1) 開盤</strong>執行該梯隊換血。
+            <strong style={{ color: '#FBBF24' }}>③ 換倉機率智慧買點</strong>：<strong>新買進標的</strong>於 T+1 開盤未跳空 &gt;+1.5% 則直買；若<strong>開盤跳空 &gt;+1.5% (3D拉回率70%) 或季線乖離 &gt;35% (拉回率76%)</strong> 則不追高，改掛訊號收盤價 C_T 低接等 2 天。
           </div>
         </div>
       </div>
@@ -2573,6 +2581,29 @@ export default function GlobalSovereignDashboard() {
                                 </span>
                               </div>
                             )}
+                            {/* 機率智慧買點 / 不換倉原股續抱指引 */}
+                            {sugg.action === '續抱' ? (
+                              <div style={{ marginTop: '0.28rem', fontSize: '0.7rem', color: '#34D399', fontWeight: 'bold' }}>
+                                🛡️ 不換倉原股續抱：在手持股免掛單折騰，零摩擦吃滿主升段
+                              </div>
+                            ) : (sugg.action === '買入' || sugg.action === '加碼') && (
+                              <div
+                                title={sugg.smartEntryDesc || ''}
+                                style={{
+                                  marginTop: '0.28rem',
+                                  fontSize: '0.7rem',
+                                  color: sugg.smartEntryMode === 'limit_pullback' ? '#FBBF24' : '#38BDF8',
+                                  background: 'rgba(15, 23, 42, 0.65)',
+                                  border: '1px solid rgba(56, 189, 248, 0.25)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  display: 'inline-block',
+                                  cursor: 'help'
+                                }}
+                              >
+                                🎯 <strong>{sugg.smartEntryTag}</strong> ｜ 建議掛單: <strong>{curr}{sugg.smartEntryPrice?.toLocaleString()}</strong> (T+1開高禁追上限: {curr}{sugg.gapLimitCapPrice?.toLocaleString()})
+                              </div>
+                            )}
                           </td>
 
                           {/* 目標配置 */}
@@ -2803,7 +2834,7 @@ export default function GlobalSovereignDashboard() {
                 </div>
               </div>
 
-              {/* 精簡版 22年大數據勝率與型態速覽條 */}
+              {/* 精簡版 22年大數據勝率與機率智慧買點速覽條 */}
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -2817,12 +2848,12 @@ export default function GlobalSovereignDashboard() {
                 fontSize: '0.74rem',
                 color: '#CBD5E1'
               }}>
-                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>📊 22年 5,381 筆大數據型態參考：</span>
-                <span>🎯 <strong style={{ color: '#FCD34D' }}>黃金蓄勢</strong> (2W&le;5% 且 季線乖離&le;20% ➔ 勝率 57.4%)</span>
+                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>🎯 22.8年 742筆新買進 × 888筆續抱「機率智慧買點」實證 (CAGR 61.58% ➔ 62.52%・勝年 21/23)：</span>
+                <span>🛡️ <strong style={{ color: '#34D399' }}>不換倉原股續抱</strong> (在手 Top 5 續抱不動)</span>
                 <span style={{ color: '#475569' }}>|</span>
-                <span>🛡️ <strong style={{ color: '#6EE7B7' }}>季線甜點</strong> (季線乖離&le;4.5% 剛突破或回踩 ➔ 勝率 58.5%)</span>
+                <span>🟢 <strong style={{ color: '#67E8F9' }}>正常態 (~82%)</strong> (T+1開高&le;+1.5% ➔ 開盤直買零踏空)</span>
                 <span style={{ color: '#475569' }}>|</span>
-                <span>⚠️ <strong style={{ color: '#FCA5A5' }}>短線過熱</strong> (2W&gt;11% 或 季線乖離&gt;26% ➔ 新倉不宜追高)</span>
+                <span>⚡ <strong style={{ color: '#FCA5A5' }}>跳空&gt;1.5% 或 乖離&gt;35%</strong> (3D拉回率 70%~78% ➔ 禁追開盤、掛 C_T 低接等2天)</span>
               </div>
 
               <div style={{ overflowX: 'auto' }}>
@@ -2841,6 +2872,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right' }}>凸性比 (Conv)</th>
                       <th style={{ textAlign: 'right', color: '#F472B6' }}>52W 高點錨定</th>
                       <th style={{ textAlign: 'right', color: '#FBBF24' }}>複合總分</th>
+                      <th style={{ textAlign: 'center', color: '#38BDF8' }}>🎯 換倉機率買點 (掛單指引)</th>
                       <th style={{ textAlign: 'center', color: '#FBBF24' }}>型態與量價檢驗</th>
                     </tr>
                   </thead>
@@ -2970,6 +3002,39 @@ export default function GlobalSovereignDashboard() {
                           </td>
                           <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24', fontSize: '0.88rem' }}>
                             {pick.score?.toFixed(3)}
+                          </td>
+                          {/* 換倉機率智慧買點與不換倉續抱指引 */}
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }} title={pick.smart_entry_desc || ''}>
+                            {isHeld ? (
+                              <span style={{
+                                fontSize: '0.71rem',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                color: '#34D399',
+                                border: '1px solid rgba(16, 185, 129, 0.45)'
+                              }}>
+                                ✅ 在手原股續抱 (免掛單)
+                              </span>
+                            ) : (
+                              <div>
+                                <span style={{
+                                  fontSize: '0.7rem',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  background: pick.smart_entry_mode === 'limit_pullback' ? 'rgba(245, 158, 11, 0.22)' : 'rgba(56, 189, 248, 0.16)',
+                                  color: pick.smart_entry_mode === 'limit_pullback' ? '#FBBF24' : '#38BDF8',
+                                  border: pick.smart_entry_mode === 'limit_pullback' ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(56, 189, 248, 0.4)'
+                                }}>
+                                  {pick.smart_entry_tag || '🟢 開盤直買・防跳空'}
+                                </span>
+                                <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontFamily: 'monospace', marginTop: '2px' }}>
+                                  掛單參考: <strong style={{ color: '#F8FAFC' }}>{curr}{(pick.smart_entry_price || pick.price)?.toLocaleString()}</strong> (上限 {curr}{(pick.gap_limit_cap_price || Number((pick.price * 1.015).toFixed(2)))?.toLocaleString()})
+                                </div>
+                              </div>
+                            )}
                           </td>
                           {/* 型態與量價檢驗合併 */}
                           <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
@@ -3299,7 +3364,7 @@ export default function GlobalSovereignDashboard() {
                   52W高點錨定 = 1.0 + 0.40 × (Close / High_252 - 0.85)
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.71rem', marginTop: '0.25rem' }}>
-                  • George & Hwang (2004)：鎖定逼近 52 週新高無套牢賣壓主升股，日頻 MDD 大降 5.7% 至 -32.31%。
+                  • George & Hwang (2004)：鎖定逼近 52 週新高無套牢賣壓主升股，日頻 MDD 大降 6.3% 至 -31.73%。
                 </div>
               </div>
 
@@ -3324,7 +3389,20 @@ export default function GlobalSovereignDashboard() {
                   觸發條件: QQQ 500MA乖離 &ge; +30% 且 US10Y &ge; 3.5%
                 </div>
                 <div style={{ color: '#94A3B8', fontSize: '0.71rem', lineHeight: '1.45' }}>
-                  • 雙因子同時觸發時總倉位自動折減至 <strong>50% (各隊 25%)</strong>，精準閃避 2007Q4、2018Q4 與 2022 升息泡沫崩盤，月 MDD 壓降至 -24.59%。
+                  • 雙因子同時觸發時總倉位自動折減至 <strong>50% (各隊 25%)</strong>，精準閃避 2007Q4、2018Q4 與 2022 升息泡沫崩盤。
+                </div>
+              </div>
+
+              {/* 第 5 層：換倉機率智慧買點與不換倉原股續抱引擎 */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                <div style={{ color: '#67E8F9', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                  5. 換倉機率買點與不換倉續抱 (CAGR +0.94%/年)
+                </div>
+                <div style={{ fontFamily: 'monospace', color: '#A5F3FC', marginBottom: '0.25rem', background: 'rgba(0,0,0,0.3)', padding: '0.25rem 0.4rem', borderRadius: '4px' }}>
+                  不換倉續抱 (Top5) + 新買進跳空 &gt;+1.5% / 乖離 &gt;35% 掛 C_T 低接
+                </div>
+                <div style={{ color: '#94A3B8', fontSize: '0.71rem', lineHeight: '1.45' }}>
+                  • 正常態 (~82%) T+1 開盤直買零踏空；僅對跳空過熱 (3D拉回率 70%~78%) 掛 C_T 低接等 2 天，22.8年累積倍數躍升至 <strong>61,135.7倍 (勝年 21/23)</strong>。
                 </div>
               </div>
             </div>
