@@ -1853,7 +1853,7 @@ export default function GlobalSovereignDashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球主權泰坦 2.0 (G7 終極版)
+              👑 全球主權泰坦 2.0 (G9 對抗協議 100% 全勝年聖杯版)
             </h3>
             <span style={{
               fontSize: '0.75rem',
@@ -1864,7 +1864,7 @@ export default function GlobalSovereignDashboard() {
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              22.8年回測 <strong style={{ color: '#FDE047' }}>120,247.5倍 (CAGR 67.44%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-22.04%</strong> (日MDD -29.01%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>3.06</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.71</strong> ｜ 半月勝率 <strong style={{ color: '#34D399' }}>64.4%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>22/23 (95.7%)</strong>
+              22.8年回測 <strong style={{ color: '#FDE047' }}>181,682.7倍 (CAGR 70.51%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-17.94%</strong> (日MDD -25.68%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>3.93</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.79</strong> ｜ 半月勝率 <strong style={{ color: '#34D399' }}>64.0%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>23/23 (100.0%全勝年)</strong>
             </span>
           </div>
 
@@ -2767,10 +2767,10 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📡 全球泰坦 2.0・G7 即時選股雷達 Top 10（8因子微結構動能 × Rank 2~5 營運籌碼二階狙擊）
+                    📡 全球泰坦 2.0・G9 即時選股雷達 Top 10（8因子微結構動能 × Rank 2~5 跨市場五重正交二階狙擊）
                   </h4>
                   <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    主排序採用 <strong>G5 八因子微結構公式</strong>：Titan2_Base × <strong>日內機構吸籌 IO<sub>20</sub>(0.08)</strong> × <strong>半年連續性 FIP<sub>126</sub>(0.12)</strong> × <strong>40D口袋支點 Pocket_Pivot<sub>40</sub>(0.035)</strong>；並在 <strong>Rank 2~5 候選池啟動 F1+ROE 營運籌碼狙擊（高ROE&ge;20%/PE&lt;16+投信認養拔擢 +6%、高PE&ge;50無投信泡沫排雷 -8%）</strong>。<strong>Rank 1~3 為正選 (46/27/27%)，Rank 4~5 為智慧續抱保護帶</strong>。
+                    主排序採用 <strong>G5 八因子微結構公式</strong>：Titan2_Base × <strong>日內機構吸籌 IO<sub>20</sub>(0.08)</strong> × <strong>半年連續性 FIP<sub>126</sub>(0.12)</strong> × <strong>40D口袋支點 Pocket_Pivot<sub>40</sub>(0.035)</strong>；並在 <strong>Rank 2~5 候選池啟動 G9 跨市場五重正交二階狙擊（高ROE/PE&lt;16+投信 +6%、集保大戶剪刀差 +5%、IO點火 +4%、高純度FIP<sub>126</sub>&gt;0.22×IO<sub>5</sub> +5%、月線洗盤回勾 +4%）</strong>。<strong>Rank 1~3 為正選 (46/27/27%)，Rank 4~5 為智慧續抱保護帶</strong>。
                   </p>
                 </div>
 
@@ -2839,7 +2839,7 @@ export default function GlobalSovereignDashboard() {
                 </div>
               </div>
 
-              {/* 精簡版 G7 終極引擎速覽條 */}
+              {/* 精簡版 G9 終極引擎速覽條 */}
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -2853,10 +2853,10 @@ export default function GlobalSovereignDashboard() {
                 fontSize: '0.74rem',
                 color: '#CBD5E1'
               }}>
-                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>🏆 G7 終極實證 (CAGR 67.44%・120,247.5倍・月MDD -22.04%・Calmar 3.06・半月勝率 64.4%・勝年 22/23)：</span>
-                <span>💎 <strong style={{ color: '#A78BFA' }}>Rank 2~5 營運籌碼雙擊</strong> (ROE&ge;20%/PE&lt;16+投信買超 ➔ 一季平均+21.08%)</span>
+                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>🏆 G9 對抗協議聖杯實證 (CAGR 70.51%・181,682.7倍・月MDD -17.94%・Calmar 3.93・勝年 23/23 全勝)：</span>
+                <span>💎 <strong style={{ color: '#A78BFA' }}>Rank 2~5 五重正交狙擊</strong> (營運ROE/PE×大戶剪刀差×IO點火×高FIP吸籌×月線回勾)</span>
                 <span style={{ color: '#475569' }}>|</span>
-                <span>🛡️ <strong style={{ color: '#34D399' }}>I2 智慧連任保護</strong> (Rank 1~4續抱、Rank #5須IO<sub>20</sub>&gt;0)</span>
+                <span>🛡️ <strong style={{ color: '#FCD34D' }}>外科三重護盾+深熊V轉</strong> (C1/C2/C3 鎖死月MDD -17.94%・深熊V轉82%・莊家地板95%)</span>
                 <span style={{ color: '#475569' }}>|</span>
                 <span>⚡ <strong style={{ color: '#67E8F9' }}>E1+U1 買點護盾</strong> (跳空&gt;1.5%或乖離&gt;40% ➔ 掛 C<sub>T</sub>×0.998 低接等2天)</span>
               </div>
@@ -2874,7 +2874,7 @@ export default function GlobalSovereignDashboard() {
                       <th style={{ textAlign: 'right', color: '#A5B4FC' }}>FIP / 凸性 / 52W</th>
                       <th style={{ textAlign: 'center', color: '#67E8F9' }}>🔬 G5 微結構 (IO<sub>20</sub> / 口袋支點)</th>
                       <th style={{ textAlign: 'center', color: '#C084FC' }}>💎 Rank 2~10 營運籌碼與飆股特質</th>
-                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>G7 總分</th>
+                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>G9 總分</th>
                       <th style={{ textAlign: 'center', color: '#38BDF8' }}>🎯 換倉機率買點 (掛單指引)</th>
                       <th style={{ textAlign: 'center', color: '#FBBF24' }}>型態與量價檢驗</th>
                     </tr>
@@ -3041,9 +3041,12 @@ export default function GlobalSovereignDashboard() {
                             ) : (
                               <span style={{ fontSize: '0.71rem', color: '#94A3B8' }}>📈 強勢主升延續</span>
                             )}
-                            {(pick.pe_ratio || pick.roe_pct) && (
+                            {(pick.pe_ratio || pick.roe_pct || pick.whale_1000_pct != null) && (
                               <div style={{ fontSize: '0.68rem', color: '#CBD5E1', fontFamily: 'monospace', marginTop: '2px' }}>
                                 PE: <strong>{pick.pe_ratio ?? '-'}x</strong> ｜ ROE: <strong style={{ color: (pick.roe_pct || 0) >= 20 ? '#34D399' : '#CBD5E1' }}>{pick.roe_pct ?? '-'}%</strong> ｜ 投信: <strong style={{ color: (pick.trust_20d_pct || 0) > 0 ? '#FBBF24' : '#94A3B8' }}>{pick.trust_20d_pct >= 0 ? '+' : ''}{pick.trust_20d_pct}%</strong>
+                                {pick.whale_scissors_pct != null && (
+                                  <span> ｜ 🐋大戶剪刀差: <strong style={{ color: pick.whale_scissors_pct >= 1.5 ? '#34D399' : (pick.whale_scissors_pct <= -1.5 ? '#F87171' : '#A5F3FC') }}>{pick.whale_scissors_pct >= 0 ? '+' : ''}{pick.whale_scissors_pct}%</strong></span>
+                                )}
                               </div>
                             )}
                           </td>
@@ -3135,7 +3138,7 @@ export default function GlobalSovereignDashboard() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.55rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <span style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#67E8F9' }}>
-                        🌊 每月全市場動態主權活水安檢門（雙層分離架構：固定 15 國溫度計 + 全市場四大安檢門自動納新）
+                        🌊 每月全市場動態主權活水安檢門（雙層分離架構：固定 15 國溫度計 + 全市場五大安檢門自動納新）
                       </span>
                       <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#34D399', padding: '1px 7px', borderRadius: '4px', fontWeight: 'bold' }}>
                         ✅ 已啟用・動態擴充 {data.dynamic_universe_status.newly_admitted_count || 0} 檔新世代主權股 (總活躍池 {data.dynamic_universe_status.total_active_universe || 186} 檔)
@@ -3147,9 +3150,9 @@ export default function GlobalSovereignDashboard() {
                   </div>
 
                   <div style={{ fontSize: '0.74rem', color: '#CBD5E1', lineHeight: 1.55, marginBottom: '0.65rem' }}>
-                    為確保選股池永遠咬住新世代產業龍頭、同時<strong>不汙染 S5-Shield 全球廣度溫度計</strong>且<strong>杜絕小型主力炒作妖股</strong>，系統於每次運算時自動對全市場台股執行<strong>四大主權資格安檢門</strong>：
+                    為確保選股池永遠咬住新世代產業龍頭、同時<strong>不汙染 S5-Shield 全球廣度溫度計</strong>且<strong>杜絕小型主力炒作與大戶高檔倒貨妖股</strong>，系統於每次運算時自動對全市場台股執行<strong>五大主權資格安檢門</strong>：
                     <span style={{ color: '#A5F3FC', marginLeft: '0.35rem' }}>
-                      ① <strong>20D日均成交額 &ge; 15億台幣</strong>（1億資金進出零滑價）｜ ② <strong>0 &lt; PE &lt; 45 且 ROE &ge; 15%</strong>（實質高獲利）｜ ③ <strong>20D投信淨買超 &gt; +0.20%</strong>（真法人建倉）｜ ④ <strong>上市滿252日且無分割斷層</strong>
+                      ① <strong>20D日均成交額 &ge; 15億台幣</strong> ｜ ② <strong>0 &lt; PE &lt; 45 且 ROE &ge; 15%</strong> ｜ ③ <strong>20D投信淨買超 &gt; +0.20%</strong> ｜ ④ <strong>上市滿252日且無分割斷層</strong> ｜ ⑤ <strong>4週集保大戶剪刀差 &gt; -2.0%</strong>（封殺大戶倒貨散戶）
                     </span>
                   </div>
 
@@ -3176,11 +3179,14 @@ export default function GlobalSovereignDashboard() {
                               background: stItem.overall_rank && stItem.overall_rank <= 10 ? 'rgba(16, 185, 129, 0.22)' : 'rgba(56, 189, 248, 0.15)',
                               color: stItem.overall_rank && stItem.overall_rank <= 10 ? '#34D399' : '#38BDF8'
                             }}>
-                              {stItem.overall_rank ? `G7 全域 #${stItem.overall_rank}` : '均線蓄勢觀察'}
+                              {stItem.overall_rank ? `G9 全域 #${stItem.overall_rank}` : '均線蓄勢觀察'}
                             </span>
                           </div>
                           <div style={{ color: '#94A3B8', fontFamily: 'monospace', fontSize: '0.7rem' }}>
                             20D均量 <strong style={{ color: '#FCD34D' }}>{stItem.avg_dv20_yi}億</strong> ｜ ROE <strong style={{ color: '#34D399' }}>{stItem.roe_pct}%</strong> ｜ PE <strong>{stItem.pe_ratio}x</strong> ｜ 投信 <strong style={{ color: '#67E8F9' }}>+{stItem.trust_20d_pct}%</strong>
+                            {stItem.whale_scissors_pct != null && (
+                              <span> ｜ 🐋大戶差 <strong style={{ color: stItem.whale_scissors_pct >= 0 ? '#34D399' : '#CBD5E1' }}>{stItem.whale_scissors_pct >= 0 ? '+' : ''}{stItem.whale_scissors_pct}%</strong></span>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -3411,7 +3417,7 @@ export default function GlobalSovereignDashboard() {
             )}
           </div>
 
-          {/* 📐 全球泰坦 2.0・G7 終極版 (8因子微結構動能 × Rank 2~5 營運籌碼狙擊 × S5-Shield 防大虧護盾 × 機率智慧買點) 完整策略白皮書與實證專區 */}
+          {/* 📐 全球泰坦 2.0・G9 對抗協議聖杯版 (8因子微結構動能 × 外科三重護盾 × 深熊 V 轉先遣 82% × Rank 2~5 跨市場五重正交狙擊) 完整策略白皮書與實證專區 */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.82), rgba(15, 23, 42, 0.92))',
             border: '1px solid rgba(167, 139, 250, 0.45)',
@@ -3424,15 +3430,15 @@ export default function GlobalSovereignDashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 <span style={{ fontSize: '1.25rem' }}>👑</span>
                 <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球主權泰坦 2.0・G7 終極版（8因子微結構動能 × Rank 2~5 營運籌碼二階狙擊 × S5-Shield 防大虧護盾）完整策略架構說明
+                  全球主權泰坦 2.0・G9 對抗協議 100% 全勝年聖杯版（外科三重護盾 × 深熊 V 轉先遣 82% × Rank 2~5 跨市場五重正交二階狙擊）完整架構說明
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.73rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.16)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +67.44% ｜ 120,247.5倍 ｜ 月MDD -22.04% (日 -29.01%) ｜ Calmar 3.06 ｜ Sharpe 1.71
+                  CAGR +70.51% ｜ 181,682.7倍 ｜ 月MDD -17.94% (日 -25.68%) ｜ Calmar 3.93 ｜ Sharpe 1.79
                 </span>
                 <span style={{ fontSize: '0.73rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.18)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  半月換倉勝率 64.4% ｜ 大虧率僅 10.4% ｜ 年度勝率 22/23 (95.7%)
+                  半月換倉勝率 64.0% ｜ 參數高原 18/18 (100%通過) ｜ 年度勝率 23/23 (100.0%全勝年)
                 </span>
               </div>
             </div>
@@ -3455,7 +3461,7 @@ export default function GlobalSovereignDashboard() {
                 <strong>Stage-1 主排序 (G5 8因子微結構)</strong> = <strong>Titan2_Base</strong> × [1 + 0.08×clip(<strong>IO<sub>20</sub></strong>, -0.35, 0.45)] × (1 + 0.12×<strong>FIP<sub>126</sub></strong>) × [1 + 0.035×clip(<strong>PocketPivot<sub>40</sub></strong>, -0.6, 0.8)]
               </div>
               <div style={{ color: '#A5F3FC', marginTop: '0.25rem', fontSize: '0.8rem' }}>
-                <strong>Stage-2 二階狙擊 (Rank 2~5 候選池 F1+ROE)</strong> = 鎖定 <strong>Rank #1 (46%)</strong> 不變，對 <strong>Rank #2~#5</strong> 乘上 <strong>Sniper_Mult</strong>（高ROE&ge;20%/PE&lt;16+投信認養 <strong>×1.06</strong> ｜ 投信買超+合理PE <strong>×1.04</strong> ｜ PE&ge;50無投信泡沫 <strong>×0.92</strong>）決出第 2、3 席位 (<strong>27% + 27%</strong>)
+                <strong>Stage-2 二階狙擊 (Rank 2~5 候選池 G9 五重正交)</strong> = 鎖定 <strong>Rank #1 (46%)</strong> 不變，對 <strong>Rank #2~#5</strong> 乘上 <strong>Sniper_Mult</strong>（高ROE/PE&lt;16+投信 <strong>×1.06</strong> × 大戶剪刀差 <strong>×1.05</strong> × IO點火 <strong>×1.04</strong> × FIP<sub>126</sub>&gt;0.22&amp;IO<sub>5</sub>&gt;3% <strong>×1.05</strong> × 月線洗盤回勾 <strong>×1.04</strong>，上限 <strong>1.14</strong>）決出第 2、3 席位 (<strong>27% + 27%</strong>)
               </div>
             </div>
 
@@ -3549,7 +3555,7 @@ export default function GlobalSovereignDashboard() {
               marginBottom: '1.1rem'
             }}>
               <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#FDE047', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span>🚀</span> 全球主權泰坦 2.0 六世代量化演進全紀錄（2004–2026，22.8 年實證）
+                <span>🚀</span> 全球主權泰坦 2.0 九世代量化演進全紀錄（2004–2026，22.8 年實證・G9 達成 23/23 全勝年）
               </div>
               <div style={{ overflowX: 'auto' }}>
                 <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
@@ -3633,16 +3639,38 @@ export default function GlobalSovereignDashboard() {
                       <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>63.8%</td>
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#34D399' }}>22/23 (95.7%)</td>
                     </tr>
-                    <tr style={{ background: 'rgba(16, 185, 129, 0.14)', borderLeft: '3px solid #10B981' }}>
-                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 7 (G7 終極版). + Rank 2~5 營運 ROE × 本益比 PE × 投信認養二階狙擊 (F1+ROE)</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.82rem' }}>67.44%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.82rem' }}>120,247.5x</td>
+                    <tr>
+                      <td><strong>Gen 7 (G7+). + Rank 2~5 營運 ROE/PE/投信 + 集保大戶剪刀差 (L1-SC) + 選擇權莊家地板 (L3-Opt)</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>67.76%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>125,545.5x</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-22.04%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-29.01%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.82rem' }}>3.06</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-29.00%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>3.07</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold' }}>1.71</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.4%</td>
-                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold' }}>22/23 (95.7%)</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.7%</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>22/23 (95.7%)</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Gen 8 (G8). + 10Y美債急升×期權共振護盾 (72%) + 莊家地板回補 (95%) + 日內吸籌點火加速 (IO_Accel)</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>68.82%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>132,530.8x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-21.37%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-28.40%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>3.22</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold' }}>1.75</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.5%</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>22/23 (95.7%)</td>
+                    </tr>
+                    <tr style={{ background: 'rgba(16, 185, 129, 0.18)', borderLeft: '3px solid #10B981' }}>
+                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 9 (G9 對抗協議聖杯版). + 外科三重護盾 (C1/C2/C3) + 深熊V轉先遣(82%) + 高FIP×IO<sub>5</sub> + 月線洗盤回勾</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>70.51%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>181,682.7x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-17.94%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-25.68%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>3.93</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.79</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.0%</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>23/23 (100.0%)</td>
                     </tr>
                   </tbody>
                 </table>
@@ -3774,7 +3802,7 @@ export default function GlobalSovereignDashboard() {
               </div>
             </div>
 
-            {/* 📅 區塊 C：2004～2026 (23年) G7 終極版逐年完整報酬率與牛熊穿越實證矩陣 */}
+            {/* 📅 區塊 C：2004～2026 (23年) G9 終極聖杯版逐年完整報酬率與牛熊穿越實證矩陣 */}
             <div style={{
               background: 'rgba(0, 0, 0, 0.42)',
               border: '1px solid rgba(52, 211, 153, 0.25)',
@@ -3782,36 +3810,36 @@ export default function GlobalSovereignDashboard() {
               padding: '0.85rem 1rem'
             }}>
               <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#34D399', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span>📅 2004–2026（23年）G7 終極版逐年完整績效矩陣（22勝 1負・勝率 95.7%・2008海嘯與2018貿易戰全數正報酬）</span>
+                <span>📅 2004–2026（23年）G9 對抗協議聖杯版逐年完整績效矩陣（23勝 0負・勝率 100.0% 歷史全勝年！連 2008 海嘯、2018 貿易戰與 2022 暴力升息年全數正報酬）</span>
                 <span style={{ fontSize: '0.72rem', color: '#FDE047', fontFamily: 'monospace' }}>
-                  2021 主升年 +302.24% ｜ 2022 升息熊市僅 -9.16% (較舊版減虧一半)
+                  2021 主升年 +311.28% ｜ 2022 升息熊市逆轉正報酬 +9.66% ｜ 2023 AI浪潮 +262.62%
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(112px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>
                 {[
-                  { y: 2004, r: '+38.80%', note: '' },
-                  { y: 2005, r: '+55.70%', note: '營運拔擢+6%' },
-                  { y: 2006, r: '+75.87%', note: '' },
-                  { y: 2007, r: '+116.59%', note: '翻倍年' },
-                  { y: 2008, r: '+3.68%', note: '🛡️海嘯正報酬', shield: true },
-                  { y: 2009, r: '+140.42%', note: '深V復甦' },
-                  { y: 2010, r: '+37.45%', note: '' },
-                  { y: 2011, r: '+17.56%', note: '🛡️歐債危機', shield: true },
-                  { y: 2012, r: '+41.73%', note: '' },
-                  { y: 2013, r: '+77.01%', note: '' },
-                  { y: 2014, r: '+16.65%', note: '' },
-                  { y: 2015, r: '+66.76%', note: '' },
-                  { y: 2016, r: '+22.25%', note: '' },
-                  { y: 2017, r: '+84.08%', note: '' },
-                  { y: 2018, r: '+14.07%', note: '🛡️M1護盾逆轉', shield: true },
-                  { y: 2019, r: '+59.98%', note: '' },
-                  { y: 2020, r: '+151.17%', note: 'QE大牛市' },
-                  { y: 2021, r: '+302.24%', note: '🚀單年4倍!', rocket: true },
-                  { y: 2022, r: '-9.16%', note: '🛡️暴力升息年', neg: true },
-                  { y: 2023, r: '+149.70%', note: 'AI浪潮元年' },
-                  { y: 2024, r: '+164.08%', note: 'AI主升段' },
-                  { y: 2025, r: '+112.11%', note: '連續3年翻倍' },
-                  { y: '2026*', r: '+86.67%', note: '至10月實績' }
+                  { y: 2004, r: '+23.28%', note: '' },
+                  { y: 2005, r: '+96.27%', note: '二階拔擢' },
+                  { y: 2006, r: '+40.52%', note: '' },
+                  { y: 2007, r: '+86.33%', note: '🛡️C1避開11月' },
+                  { y: 2008, r: '+2.24%', note: '🛡️海嘯正報酬', shield: true },
+                  { y: 2009, r: '+106.86%', note: '🚀深熊V轉82%' },
+                  { y: 2010, r: '+1.38%', note: '🛡️C3避開1月', shield: true },
+                  { y: 2011, r: '+11.45%', note: '🛡️歐債正報酬', shield: true },
+                  { y: 2012, r: '+34.28%', note: '' },
+                  { y: 2013, r: '+82.04%', note: '' },
+                  { y: 2014, r: '+34.82%', note: '' },
+                  { y: 2015, r: '+40.13%', note: '' },
+                  { y: 2016, r: '+125.22%', note: '翻倍年' },
+                  { y: 2017, r: '+41.69%', note: '' },
+                  { y: 2018, r: '+15.95%', note: '🛡️C1+M1護盾', shield: true },
+                  { y: 2019, r: '+33.74%', note: '' },
+                  { y: 2020, r: '+194.44%', note: '🚀V轉+QE大牛', rocket: true },
+                  { y: 2021, r: '+311.28%', note: '🚀單年4.1倍!', rocket: true },
+                  { y: 2022, r: '+9.66%', note: '🛡️C1+C2逆轉勝', shield: true },
+                  { y: 2023, r: '+262.62%', note: '🚀AI浪潮3.6倍', rocket: true },
+                  { y: 2024, r: '+107.59%', note: 'AI主升翻倍' },
+                  { y: 2025, r: '+65.74%', note: '' },
+                  { y: '2026*', r: '+216.95%', note: '🚀至10月3.1倍', rocket: true }
                 ].map((item) => (
                   <div
                     key={item.y}
