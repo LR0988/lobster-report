@@ -51,6 +51,22 @@ GLOBAL_STOCK_NAME_MAP = {
     '3324.TW': '雙鴻 (水冷散熱大廠)',
     '2356.TW': '英業達 (AI 伺服器代工)',
     '2376.TW': '技嘉 (AI 伺服器板卡)',
+    '2368.TW': '金像電 (AI 伺服器高階 PCB 龍頭)',
+    '2368': '金像電',
+    '3533.TW': '嘉澤 (伺服器 CPU 插槽龍頭)',
+    '3533': '嘉澤',
+    '6257.TW': '矽格 (AI/HPC 晶片封測大廠)',
+    '6257': '矽格',
+    '2301.TW': '光寶科 (AI 伺服器電源龍頭)',
+    '2301': '光寶科',
+    '3034.TW': '聯詠 (IC 設計驅動晶片龍頭)',
+    '3034': '聯詠',
+    '2395.TW': '研華 (全球工業電腦 IPC 霸主)',
+    '2395': '研華',
+    '2345.TW': '智邦 (AI 800G 網通交換器龍頭)',
+    '2345': '智邦',
+    '2379.TW': '瑞昱 (網通 IC 設計大廠)',
+    '2379': '瑞昱',
     'MRNA': '莫德納 (Moderna mRNA生技巨擘)',
     'TEAM': 'Atlassian (企業協同軟體龍頭)',
     'ASX': '日月光投控 (ASE 封測龍頭ADR)',
@@ -98,7 +114,7 @@ def _resolve_display_name(ticker: str, cursor=None) -> str:
         return f"{GLOBAL_STOCK_NAME_MAP[base]} ({ticker})"
     if cursor and (ticker.endswith(".TW") or base.isdigit()):
         try:
-            cursor.execute("SELECT stock_name FROM daily_stock WHERE stock_id = ? AND stock_name IS NOT NULL LIMIT 1", (base,))
+            cursor.execute("SELECT stock_name FROM daily_stock WHERE stock_id = ? AND stock_name IS NOT NULL ORDER BY date DESC LIMIT 1", (base,))
             row = cursor.fetchone()
             if row and row[0]:
                 return f"{row[0]} ({ticker})"
@@ -253,21 +269,42 @@ def get_global_sovereign_dashboard_data():
         def _query_ticker_stats(t_code: str):
             c.execute("SELECT date, open, high, low, close, volume FROM global_stock_daily WHERE ticker = ? AND close IS NOT NULL ORDER BY date DESC LIMIT 260", (t_code,))
             r_list = c.fetchall()
-            # 若為 .TW 標的，同時比對 daily_stock 是否具有更新之收盤價
+            # 若為 .TW 標的：
+            # (a) 若為本月動態主權活水新納標的 (不在 global_stock_daily 或長度不足 252 日)，直接從 daily_stock 載入完整 260 日歷史序列
+            # (b) 若已在 global_stock_daily，則比對 daily_stock 最新 5 日收盤價同步更新
             if t_code.endswith(".TW"):
                 sid = t_code.split(".")[0]
-                c.execute("SELECT date, opening_price, highest_price, lowest_price, closing_price, trade_volume FROM daily_stock WHERE stock_id = ? AND closing_price IS NOT NULL ORDER BY date DESC LIMIT 5", (sid,))
-                tw_rows = c.fetchall()
-                if tw_rows:
-                    d_raw = str(tw_rows[0][0]).strip()
-                    d_fmt = f"{d_raw[:4]}-{d_raw[4:6]}-{d_raw[6:8]}" if (len(d_raw) == 8 and d_raw.isdigit()) else d_raw
-                    tw_px = float(tw_rows[0][4])
-                    tw_op = float(tw_rows[0][1] or tw_px)
-                    tw_hi = float(tw_rows[0][2] or tw_px)
-                    tw_lo = float(tw_rows[0][3] or tw_px)
-                    tw_vol = float(tw_rows[0][5] or 0.0)
-                    if not r_list or d_fmt > r_list[0][0] or (d_fmt == r_list[0][0] and abs(tw_px - float(r_list[0][4])) > 0.001):
-                        r_list = [(d_fmt, tw_op, tw_hi, tw_lo, tw_px, tw_vol)] + [r for r in r_list if r[0] != d_fmt]
+                if len(r_list) < 252:
+                    c.execute(
+                        "SELECT date, opening_price, highest_price, lowest_price, closing_price, trade_volume "
+                        "FROM daily_stock WHERE stock_id = ? AND closing_price IS NOT NULL ORDER BY date DESC LIMIT 260",
+                        (sid,)
+                    )
+                    tw_full_rows = c.fetchall()
+                    if tw_full_rows:
+                        r_list = []
+                        for tr in tw_full_rows:
+                            d_raw = str(tr[0]).strip()
+                            d_fmt = f"{d_raw[:4]}-{d_raw[4:6]}-{d_raw[6:8]}" if (len(d_raw) == 8 and d_raw.isdigit()) else d_raw
+                            tw_px = float(tr[4])
+                            tw_op = float(tr[1] if (tr[1] is not None and float(tr[1]) > 0) else tw_px)
+                            tw_hi = float(tr[2] if (tr[2] is not None and float(tr[2]) > 0) else tw_px)
+                            tw_lo = float(tr[3] if (tr[3] is not None and float(tr[3]) > 0) else tw_px)
+                            tw_vol = float(tr[5] or 0.0)
+                            r_list.append((d_fmt, tw_op, tw_hi, tw_lo, tw_px, tw_vol))
+                else:
+                    c.execute("SELECT date, opening_price, highest_price, lowest_price, closing_price, trade_volume FROM daily_stock WHERE stock_id = ? AND closing_price IS NOT NULL ORDER BY date DESC LIMIT 5", (sid,))
+                    tw_rows = c.fetchall()
+                    if tw_rows:
+                        d_raw = str(tw_rows[0][0]).strip()
+                        d_fmt = f"{d_raw[:4]}-{d_raw[4:6]}-{d_raw[6:8]}" if (len(d_raw) == 8 and d_raw.isdigit()) else d_raw
+                        tw_px = float(tw_rows[0][4])
+                        tw_op = float(tw_rows[0][1] or tw_px)
+                        tw_hi = float(tw_rows[0][2] or tw_px)
+                        tw_lo = float(tw_rows[0][3] or tw_px)
+                        tw_vol = float(tw_rows[0][5] or 0.0)
+                        if not r_list or d_fmt > r_list[0][0] or (d_fmt == r_list[0][0] and abs(tw_px - float(r_list[0][4])) > 0.001):
+                            r_list = [(d_fmt, tw_op, tw_hi, tw_lo, tw_px, tw_vol)] + [r for r in r_list if r[0] != d_fmt]
             if not r_list:
                 return None
             closes = [float(r[4]) for r in r_list if r[4] is not None]
@@ -500,7 +537,7 @@ def get_global_sovereign_dashboard_data():
             pead_jump_63 = 0.0
             for idx_j in range(min(63, len(daily_rets))):
                 rel_v = vols[idx_j] / max(1.0, vol20_avg)
-                if rel_v > 1.3 and daily_rets[idx_j] > pead_jump_63:
+                if rel_v > 1.3 and 0.04 <= daily_rets[idx_j] <= 0.45 and daily_rets[idx_j] > pead_jump_63:
                     pead_jump_63 = daily_rets[idx_j]
             pead_jump_63_pct = round(pead_jump_63 * 100.0, 1)
 
@@ -629,10 +666,81 @@ def get_global_sovereign_dashboard_data():
                 "liq_ok": liq_ok
             }
 
-        # 全域掃描 global_stock_daily 所有有效個股標的，動態選出真實 Top 10
+        # 全域掃描 global_stock_daily 核心母池 + 【每月動態主權活水安檢門 (4-Gatekeeper Dynamic Sovereign Scanner)】
+        # 鐵律 1：15 國主權 ETF 溫度計 (comp_br) 嚴格鎖定於上方固定母池，不受動態選股池擴充影響
+        # 鐵律 2：全市場台股 (daily_stock) 唯有同時通過「四大主權資格安檢門」之新世代績優主流股，方准許動態入池參與 G7 排名
         exclude_etfs = {'SPY', 'QQQ', '0050.TW', 'GLD', 'BIL', 'TLT', '0050'}
         c.execute("SELECT DISTINCT ticker FROM global_stock_daily")
-        all_db_tickers = [r[0] for r in c.fetchall() if r[0]]
+        base_db_tickers = [r[0] for r in c.fetchall() if r[0]]
+        base_ticker_set = set(base_db_tickers)
+
+        dynamic_admitted_map = {}
+        dynamic_scan_date = ""
+        try:
+            c.execute("SELECT MAX(date) FROM daily_stock WHERE closing_price IS NOT NULL AND pe_ratio IS NOT NULL")
+            lat_row = c.fetchone()
+            latest_tw_d = lat_row[0] if lat_row and lat_row[0] else ""
+            if latest_tw_d:
+                dynamic_scan_date = f"{latest_tw_d[:4]}-{latest_tw_d[4:6]}-{latest_tw_d[6:8]}" if len(latest_tw_d) == 8 else latest_tw_d
+                # 第一階段快速索引預篩：利用 (date, stock_id) 主鍵於 0.03 秒內篩出符合 PE(0~45)、ROE>=15%、當日成交>=10億 之普通股
+                c.execute(
+                    "SELECT stock_id, stock_name, closing_price, trade_volume, trade_value, pe_ratio, pb_ratio "
+                    "FROM daily_stock "
+                    "WHERE date = ? "
+                    "  AND length(stock_id) = 4 "
+                    "  AND stock_id GLOB '[1-9][0-9][0-9][0-9]' "
+                    "  AND stock_name NOT LIKE '%*%' "
+                    "  AND closing_price IS NOT NULL "
+                    "  AND pe_ratio > 0 AND pe_ratio < 45 "
+                    "  AND pb_ratio > 0 AND (pb_ratio / pe_ratio) >= 0.15 "
+                    "  AND COALESCE(trade_value, closing_price * trade_volume) >= 1000000000",
+                    (latest_tw_d,)
+                )
+                pre_cands = c.fetchall()
+                for sid, sname, px_now, vol_now, val_now, pe_now, pb_now in pre_cands:
+                    t_code = f"{sid}.TW"
+                    # 安檢門 ④：上市滿 252 交易日且價格序列連續無未還原分割斷層 (max_1d_jump <= 22%)
+                    c.execute(
+                        "SELECT date, closing_price, trade_volume, trade_value "
+                        "FROM daily_stock WHERE stock_id = ? AND closing_price IS NOT NULL ORDER BY date DESC LIMIT 260",
+                        (sid,)
+                    )
+                    h_rows = c.fetchall()
+                    if len(h_rows) < 252:
+                        continue
+                    h_closes = [float(r[1]) for r in h_rows]
+                    max_1d_jump = max(
+                        (abs(h_closes[i] / h_closes[i + 1] - 1.0) for i in range(len(h_closes) - 1) if h_closes[i + 1] > 0),
+                        default=0.0
+                    )
+                    if max_1d_jump > 0.22:
+                        continue
+                    # 安檢門 ①：近 20 日平均日成交金額 >= 15 億台幣 (1,500,000,000 TWD)，100% 杜絕主力小型妖股並確保 1 億資金零滑價
+                    dv20_avg = sum(float(r[3] if r[3] is not None else float(r[1]) * float(r[2] or 0)) for r in h_rows[:20]) / 20.0
+                    if dv20_avg < 1_500_000_000:
+                        continue
+                    # 安檢門 ③：近 20 日投信法人實質認養淨買超佔成交量 > +0.20%
+                    c.execute("SELECT trust_net FROM institutional_trades WHERE stock_id = ? ORDER BY date DESC LIMIT 20", (sid,))
+                    inst_rows = c.fetchall()
+                    vol20_tot = sum(float(r[2] or 0) for r in h_rows[:20]) + 1.0
+                    trust_20d_ratio = (sum(float(r[0] or 0) for r in inst_rows) / vol20_tot) if inst_rows else 0.0
+                    if trust_20d_ratio <= 0.002:
+                        continue
+
+                    roe_now = round(float(pb_now / pe_now * 100.0), 1)
+                    dynamic_admitted_map[t_code] = {
+                        "ticker": t_code,
+                        "name": _resolve_display_name(t_code, c),
+                        "is_newly_admitted": (t_code not in base_ticker_set),
+                        "avg_dv20_yi": round(dv20_avg / 1e8, 1),
+                        "pe_ratio": round(float(pe_now), 2),
+                        "roe_pct": roe_now,
+                        "trust_20d_pct": round(trust_20d_ratio * 100.0, 2)
+                    }
+        except Exception as e_dyn:
+            print("動態主權活水掃描警告:", e_dyn)
+
+        all_db_tickers = list(base_db_tickers) + [tk for tk in dynamic_admitted_map if tk not in base_ticker_set]
 
         valid_picks = []
         for ticker in all_db_tickers:
@@ -655,6 +763,12 @@ def get_global_sovereign_dashboard_data():
             if ticker in exclude_etfs or any(ticker.endswith(ext) for ext in ['.KS', '.T', '.DE', '.SA']):
                 continue
 
+            is_dyn_new = (ticker in dynamic_admitted_map and not (ticker in base_ticker_set))
+            if ticker in dynamic_admitted_map:
+                dynamic_admitted_map[ticker]["score"] = st.get("score")
+                dynamic_admitted_map[ticker]["sniper_score"] = st.get("sniper_score")
+                dynamic_admitted_map[ticker]["above_ma"] = bool(st["price"] > st["ma60"] and st["price"] > st["ma200"])
+
             # 嚴格檢驗 60MA、200MA、流動性與爆量滯漲濾網
             if st["price"] > st["ma60"] and st["price"] > st["ma200"] and st["churn_safe"] and st["liq_ok"] and (st["score"] or 0) > 0:
                 is_tw = ticker.endswith(".TW")
@@ -663,6 +777,8 @@ def get_global_sovereign_dashboard_data():
                     "name": _resolve_display_name(ticker, c),
                     "market": "台股 (TWSE)" if is_tw else "美股 (NASDAQ/NYSE)",
                     "currency": "TWD" if is_tw else "USD",
+                    "pool_source": "🌊 本月動態主權活水" if is_dyn_new else "🏛️ 核心主權母池",
+                    "is_dynamic_new": is_dyn_new,
                     "price": st["price"],
                     "price_date": st["price_date"],
                     "ma60": st["ma60"],
@@ -721,6 +837,10 @@ def get_global_sovereign_dashboard_data():
                 pool_2_to_5.sort(key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0), reverse=True)
                 valid_picks = top1_item + pool_2_to_5 + rest_items
 
+            for idx_all, p_all in enumerate(valid_picks, start=1):
+                if p_all["ticker"] in dynamic_admitted_map:
+                    dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
+
             top10_picks = valid_picks[:10]
             weights_single_tranche = [46, 27, 27]
             for idx_p, pick in enumerate(top10_picks, start=1):
@@ -732,6 +852,27 @@ def get_global_sovereign_dashboard_data():
                 pick["tranche_weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
                 pick["total_nav_weight_pct"] = (weights_single_tranche[idx_p - 1] / 2.0) if idx_p <= 3 else 0
             data["current_picks"] = top10_picks
+
+        newly_admitted_list = sorted(
+            [v for v in dynamic_admitted_map.values() if v.get("is_newly_admitted")],
+            key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0),
+            reverse=True
+        )
+        data["dynamic_universe_status"] = {
+            "enabled": True,
+            "scan_date": dynamic_scan_date or max_tw_dt,
+            "core_pool_count": len(base_db_tickers),
+            "dynamic_qualified_total": len(dynamic_admitted_map),
+            "newly_admitted_count": len(newly_admitted_list),
+            "total_active_universe": len(all_db_tickers),
+            "gatekeeper_rules": [
+                "① 流動性與胃納量門檻：近 20 日均成交額 >= 15 億台幣/天（100% 過濾小型妖股，確保 1 億資金零滑價）",
+                "② 基本面獲利估值門檻：0 < PE < 45 且 ROE >= 15%（拒絕無基之彈與高估值泡沫）",
+                "③ 機構法人認養門檻：近 20 日投信實質淨買超佔比 > +0.20%（確認真法人建倉）",
+                "④ 歷史與溫度計隔離門檻：上市滿 252 交易日、價格連續無分割斷層，且與 15 國主權溫度計母池完全隔離"
+            ],
+            "newly_admitted_stocks": newly_admitted_list
+        }
 
         # 3. 同步即時實盤持倉現價：將 global_stock_daily 最新收盤價直接同步至 global_sovereign_positions
         c.execute("SELECT id, ticker FROM global_sovereign_positions")

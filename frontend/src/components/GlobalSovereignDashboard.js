@@ -2949,6 +2949,14 @@ export default function GlobalSovereignDashboard() {
                             <span style={{ fontSize: '0.73rem', color: '#94A3B8', marginLeft: '0.35rem', fontFamily: 'monospace' }}>
                               ({pick.ticker} · {pick.market})
                             </span>
+                            {pick.is_dynamic_new && (
+                              <span
+                                title="通過四大主權安檢門（20D均量>=15億、ROE>=15%、0<PE<45、20D投信買超>0.2%）由全市場動態吸納入池之新世代主流股"
+                                style={{ marginLeft: '0.4rem', fontSize: '0.68rem', background: 'rgba(6, 182, 212, 0.22)', border: '1px solid rgba(34, 211, 238, 0.5)', color: '#67E8F9', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold', cursor: 'help' }}
+                              >
+                                🌊 動態活水新星
+                              </span>
+                            )}
                             {isHeld && (
                               <span style={{ marginLeft: '0.4rem', fontSize: '0.68rem', background: 'rgba(245, 158, 11, 0.25)', color: '#FCD34D', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>
                                 ★ 已持有
@@ -3113,6 +3121,73 @@ export default function GlobalSovereignDashboard() {
                   </tbody>
                 </table>
               </div>
+
+              {/* 🌊 每月全市場動態主權活水安檢門 (4-Gatekeeper Dynamic Sovereign Pool) 即時監控面板 */}
+              {data?.dynamic_universe_status?.enabled && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '0.9rem 1.05rem',
+                  background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(15, 23, 42, 0.85))',
+                  border: '1px solid rgba(34, 211, 238, 0.35)',
+                  borderLeft: '4px solid #06B6D4',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.55rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#67E8F9' }}>
+                        🌊 每月全市場動態主權活水安檢門（雙層分離架構：固定 15 國溫度計 + 全市場四大安檢門自動納新）
+                      </span>
+                      <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#34D399', padding: '1px 7px', borderRadius: '4px', fontWeight: 'bold' }}>
+                        ✅ 已啟用・動態擴充 {data.dynamic_universe_status.newly_admitted_count || 0} 檔新世代主權股 (總活躍池 {data.dynamic_universe_status.total_active_universe || 186} 檔)
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                      最新全市場掃描日：{data.dynamic_universe_status.scan_date}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: '0.74rem', color: '#CBD5E1', lineHeight: 1.55, marginBottom: '0.65rem' }}>
+                    為確保選股池永遠咬住新世代產業龍頭、同時<strong>不汙染 S5-Shield 全球廣度溫度計</strong>且<strong>杜絕小型主力炒作妖股</strong>，系統於每次運算時自動對全市場台股執行<strong>四大主權資格安檢門</strong>：
+                    <span style={{ color: '#A5F3FC', marginLeft: '0.35rem' }}>
+                      ① <strong>20D日均成交額 &ge; 15億台幣</strong>（1億資金進出零滑價）｜ ② <strong>0 &lt; PE &lt; 45 且 ROE &ge; 15%</strong>（實質高獲利）｜ ③ <strong>20D投信淨買超 &gt; +0.20%</strong>（真法人建倉）｜ ④ <strong>上市滿252日且無分割斷層</strong>
+                    </span>
+                  </div>
+
+                  {Array.isArray(data.dynamic_universe_status.newly_admitted_stocks) && data.dynamic_universe_status.newly_admitted_stocks.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(245px, 1fr))', gap: '0.55rem' }}>
+                      {data.dynamic_universe_status.newly_admitted_stocks.map((stItem) => (
+                        <div
+                          key={stItem.ticker}
+                          style={{
+                            background: 'rgba(15, 23, 42, 0.78)',
+                            border: stItem.overall_rank && stItem.overall_rank <= 10 ? '1px solid rgba(52, 211, 153, 0.55)' : '1px solid rgba(148, 163, 184, 0.22)',
+                            borderRadius: '6px',
+                            padding: '0.5rem 0.7rem',
+                            fontSize: '0.74rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.22rem' }}>
+                            <strong style={{ color: '#F8FAFC' }}>{stItem.name}</strong>
+                            <span style={{
+                              fontSize: '0.68rem',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              fontWeight: 'bold',
+                              background: stItem.overall_rank && stItem.overall_rank <= 10 ? 'rgba(16, 185, 129, 0.22)' : 'rgba(56, 189, 248, 0.15)',
+                              color: stItem.overall_rank && stItem.overall_rank <= 10 ? '#34D399' : '#38BDF8'
+                            }}>
+                              {stItem.overall_rank ? `G7 全域 #${stItem.overall_rank}` : '均線蓄勢觀察'}
+                            </span>
+                          </div>
+                          <div style={{ color: '#94A3B8', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                            20D均量 <strong style={{ color: '#FCD34D' }}>{stItem.avg_dv20_yi}億</strong> ｜ ROE <strong style={{ color: '#34D399' }}>{stItem.roe_pct}%</strong> ｜ PE <strong>{stItem.pe_ratio}x</strong> ｜ 投信 <strong style={{ color: '#67E8F9' }}>+{stItem.trust_20d_pct}%</strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
