@@ -5,32 +5,32 @@
   "version": "exp_264 (非對稱贏家豁免定檢 × 月營收窗口 × Sustain 正交護航)",
   "rebalance_freq": "每 60 個交易日週期換股 + 每 15 日/每月 10~12 日營收窗口定檢",
   "next_rebalance_date": "2026-11-11",
-  "current_rebalance_date": "2026-10-22",
+  "current_rebalance_date": "2026-10-30",
   "holding_count": 0,
   "allocation_type": "動態權重 (波動自適應 · 單檔 ≤ 20 日均成交值 10% · 總部位 ≤ 1.0x 現貨，資金上限 1 億)",
   "exit_rule": "贏家(浮盈≥5.5%)移動停利 9%/13%/16% 並於 sustain/ortho 護航下續抱；滯漲股 hd≥15 日跌入後段班或營收雙衰減即淘汰",
   "transaction_friction": "0.25% 雙邊換手摩擦 (引擎標準)",
-  "latest_data_date": "2026-10-22",
+  "latest_data_date": "2026-10-30",
   "capital_cap_twd": 100000000
  },
  "kpis": {
-  "cagr": 32.88,
+  "cagr": 32.84,
   "sharpe": 1.51,
   "max_drawdown": -27.08,
   "calmar": 1.21,
-  "annual_vol": 20.89,
+  "annual_vol": 20.88,
   "win_rate": 51.77,
   "total_multiple": 490.93,
-  "taiex_cagr": 9.68,
-  "taiex_sharpe": 0.6,
+  "taiex_cagr": 9.58,
+  "taiex_sharpe": 0.59,
   "taiex_mdd": -58.31,
-  "taiex_multiple": 7.49,
-  "alpha_cagr": 23.2,
+  "taiex_multiple": 7.36,
+  "alpha_cagr": 23.26,
   "sortino": 2.44,
   "profit_factor": 3.75,
   "total_trades": 564,
   "total_return_pct": 48992.7,
-  "alpha_total_pct": 48343.2
+  "alpha_total_pct": 48356.7
  },
  "current_positions": [],
  "curve": [
@@ -1862,11 +1862,11 @@
    "taiex_ret": 3.93
   },
   {
-   "date": "2026-10-22",
+   "date": "2026-10-30",
    "strategy_nav": 490.927,
-   "taiex_nav": 7.495,
+   "taiex_nav": 7.36,
    "monthly_ret": -0.59,
-   "taiex_ret": -3.96
+   "taiex_ret": -5.69
   }
  ],
  "yearly_stats": [
@@ -2062,11 +2062,11 @@
   {
    "year": 2026,
    "strategy_ret": 186.04,
-   "taiex_ret": 58.96,
-   "alpha": 127.08,
+   "taiex_ret": 56.1,
+   "alpha": 129.94,
    "is_positive": true,
    "return_pct": 186.04,
-   "taiex_pct": 58.96
+   "taiex_pct": 56.1
   }
  ],
  "trades": [
@@ -10046,8 +10046,8 @@
    "f7_vcp_pivot"
   ],
   "num_factors": 7,
-  "max_raw_abs_corr": 0.7467,
-  "max_ortho_abs_corr": 0.00385,
+  "max_raw_abs_corr": 0.7466,
+  "max_ortho_abs_corr": 0.003862,
   "max_raw_vif": 3.401,
   "max_ortho_vif": 1.0,
   "effective_factor_rank": 7.0,

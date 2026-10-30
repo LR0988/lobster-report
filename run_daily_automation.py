@@ -84,6 +84,10 @@ def update_cb_radar():
     import generate_real_tpex_radar
     generate_real_tpex_radar.generate_real_radar()
 
+def update_causal_titan():
+    import exp264_titan_sync
+    return exp264_titan_sync.run()
+
 def git_sync():
     # 檢查是否有 JSON 變動，若有則自動 commit 並 push
     status = subprocess.check_output(["git", "status", "--porcelain", "frontend/src/data/"], cwd=BASE_DIR).decode("utf-8")
@@ -196,6 +200,8 @@ def main():
         run_step("4. 運算超跌狙擊手 (Oversold Sniper) 候選池", update_oversold_sniper)
         # 步驟 5: 運算可轉債 (CB/CBAS) 落難天使好球帶
         run_step("5. 運算可轉債 (CB/CBAS) 落難天使好球帶雷達", update_cb_radar)
+        # 步驟 5.5: 台股因果泰坦 (exp_264，上限1億) 以最新資料庫重算
+        run_step("5b. 重算台股因果泰坦 (exp_264 · 上限1億) 儀表板數據", update_causal_titan)
         # 步驟 6: Git 同步與 Vercel 觸發
         run_step("6. Git 同步與 Vercel 觸發部署", git_sync)
 

@@ -1145,6 +1145,14 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步全球泰坦個股警告: {e}")
                 print(f"[x] [API Scraper] 同步全球泰坦個股失敗: {e}")
                 
+            try:
+                import exp264_titan_sync
+                add_scraper_log("⏳ 正在以最新資料庫重算台股因果泰坦 (exp_264，上限1億)...")
+                add_scraper_log("✓ " + exp264_titan_sync.run())
+            except Exception as e:
+                add_scraper_log(f"⚠️ 台股因果泰坦 (exp_264) 更新警告: {e}")
+                print(f"[x] [API Scraper] 台股因果泰坦更新失敗: {e}")
+
             set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '全資料庫雲端預覽快照、泰坦實盤與總筆數同步', '步驟 7/7：正在將全市場 24 表最新快照、全球泰坦看板與實盤持倉報價同步至雲端 Supabase...', 7, 7, 95)
             try:
                 from stock_sync import run_full_sync
