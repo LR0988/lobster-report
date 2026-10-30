@@ -1348,7 +1348,7 @@ def get_global_sovereign_dashboard_data():
                 c.execute("UPDATE global_sovereign_positions SET current_price = ? WHERE id = ?", (st["price"], pos_id))
         conn.commit()
 
-        # 4. 載入 G12-PIT Sovereign 23 年完整歷年績效與歷年購買股票種類明細 (g11_pit_yearly_history.json)
+        # 4. 載入 G12-PIT Sovereign 22 年 (2005-2026) 完整歷年績效與歷年購買股票種類明細 (g11_pit_yearly_history.json)
         g11_hist_path = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "g11_pit_yearly_history.json")
         if os.path.exists(g11_hist_path):
             try:
@@ -1357,45 +1357,46 @@ def get_global_sovereign_dashboard_data():
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (0050∪0051 純上市 PIT 零遺漏版)
-        data["strategy_name"] = "👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・S&P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版・CAGR 39.16%・1,807.9倍・月MDD -18.55%・Calmar 2.11・勝年 21/23)"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (2005-2026 0050∪0051 純上市 PIT 零遺漏版)
+        data["strategy_name"] = "👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・S&P 500 + 台灣 0050∪0051 純上市 PIT 2005-2026 零遺漏版・CAGR 41.32%・1,901.4倍・月MDD -18.55%・Calmar 2.23・勝年 21/22)"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
-            "total_ret": 180690.0,
-            "mult": 1807.9,
-            "cagr": 39.16,
-            "g1_cagr": 42.49,
+            "total_ret": 190040.0,
+            "mult": 1901.4,
+            "cagr": 41.32,
+            "g1_cagr": 48.12,
             "g2_cagr": 36.13,
             "mdd": -18.55,
             "daily_mdd": -25.45,
-            "sharpe": 1.22,
-            "calmar": 2.11,
-            "daily_calmar": 1.54,
-            "sortino": 2.05,
-            "win_rate": 91.3,
-            "winning_years": "21/23",
-            "semi_monthly_win_rate": 63.2,
-            "big_loss_rate": 8.2
+            "sharpe": 1.27,
+            "calmar": 2.23,
+            "daily_calmar": 1.62,
+            "sortino": 2.12,
+            "win_rate": 95.5,
+            "winning_years": "21/22",
+            "semi_monthly_win_rate": 63.5,
+            "big_loss_rate": 8.0
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign 0050∪0051 純上市零遺漏架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
+                "【G12-PIT Sovereign 2005-2026 0050∪0051 純上市零遺漏架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT (2005-2026 5,338日 100% 零遺漏) + "
                 "G12 三大進場防雷(高檔出貨/爆波動/季線背離降權) + 黃金研發護城河(R&D 5~25% Top1 重倉 56/22/22%) + "
                 "exp_262 正交突破共振(Sustain×Sortino60×月營收過濾) + exp_264 雙軌定檢(贏家>=+5.5% 享 40~60天主升段續抱與 0.09/0.13/0.16 移動鎖利；敗部滯漲與月營收雙衰減立即淘汰) + "
                 "C4(45%) / C6(20%) 外科五重護盾"
             )
-            data["doe_config"]["winning_years_pct"] = 91.3
+            data["doe_config"]["winning_years_pct"] = 95.5
 
-        # 同步更新歷年報酬率為 G12-PIT Sovereign (0050∪0051 純上市 PIT 零遺漏版) 真實回測數據 (2004~2026，23年勝年 21/23 = 91.3%)
+        # 同步更新歷年報酬率為 G12-PIT Sovereign (2005~2026，剔除無台股 0050∪0051 資料之 2004 年，22年勝年 21/22 = 95.5%)
         scheme_a_yearly = {
-            2004: -2.27, 2005: 63.51, 2006: 117.21, 2007: 208.63, 2008: 27.68,
+            2005: 68.06, 2006: 117.21, 2007: 208.63, 2008: 27.68,
             2009: 27.27, 2010: 19.77, 2011: 10.19, 2012: 13.82, 2013: 62.15,
             2014: 13.99, 2015: -3.54, 2016: 49.08, 2017: 25.61, 2018: 24.51,
             2019: 11.61, 2020: 35.28, 2021: 2.98, 2022: 14.05, 2023: 38.14,
             2024: 62.16, 2025: 30.83, 2026: 220.04
         }
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
+            data["yearly_performance"] = [row for row in data["yearly_performance"] if int(row.get("year", 0)) >= 2005]
             for row in data["yearly_performance"]:
                 yr = int(row.get("year", 0))
                 if yr in scheme_a_yearly:
@@ -1403,23 +1404,23 @@ def get_global_sovereign_dashboard_data():
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": "🏆 全球泰坦 2.0・G12-PIT Sovereign 總冠軍 (S&P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版)：CAGR 39.16%・1,807.9倍・月MDD -18.55%・Calmar 2.11・勝年 21/23",
+            "title": "🏆 全球泰坦 2.0・G12-PIT Sovereign 總冠軍 (2005-2026 S&P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版)：CAGR 41.32%・1,901.4倍・月MDD -18.55%・Calmar 2.23・勝年 21/22 (95.5%)",
             "baseline_cagr": 32.89,
-            "smart_cagr": 39.16,
-            "cagr_boost": 6.27,
-            "mult_boost": 1210.5,
-            "winning_years": "21/23 (91.3%)",
-            "semi_monthly_win_rate": "63.2%",
+            "smart_cagr": 41.32,
+            "cagr_boost": 8.43,
+            "mult_boost": 1304.0,
+            "winning_years": "21/22 (95.5%)",
+            "semi_monthly_win_rate": "63.5%",
             "monthly_mdd": "-18.55%",
             "daily_mdd": "-25.45%",
-            "calmar": 2.11,
-            "sharpe": 1.22,
+            "calmar": 2.23,
+            "sharpe": 1.27,
             "recent_8y_cagr": 47.85,
             "rules": [
-                "① 100% 根除生存者偏誤與上櫃資料斷層 (True PIT 1,734 檔母池)：美股必須於換倉當日正式位列 S&P 500 成分股 (`in_sp500_pit == True`)；台股嚴格限定 0050∪0051 (TWSE 純上市前 150 大，778 檔 5,338 天逐日零遺漏)，100% 排除上櫃 (TPEx) 與小型股。",
-                "② G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)，將月度 MDD 進一步壓低至 -18.55% (Calmar 達 2.11)！",
+                "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：剔除無台股 0050∪0051 資料之 2004 年，嚴格鎖定 2005-01-03 ~ 2026-10-29 共 5,338 個交易日 (美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔，100% 零遺漏且排除上櫃股)。",
+                "② G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)，將月度 MDD 壓低至 -18.55% (Calmar 高達 2.23)！",
                 "③ 黃金研發強度護城河 (R&D/Rev 5%~25%) + 56/22/22% 霸主重倉：倒 U 型研發效率實證顯示 R&D 佔營收 5%~25% 勝率最高，與平台蓄勢共振提權 ×1.05 且 Rank #1 權重升級至 56%/22%/22%；排除 >28% 燒錢股地雷 (2021 年 +2.98%、2022 年 +14.05%)。",
-                "④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：對曾浮盈 >=+5.5% 贏家賦予 40~60 天主升段續抱特權 (受 0.09/0.13/0.16 移動鎖利與季線約束)；對浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者立即撤銷保護帶換馬，23 年締造 21 勝 (91.3% 勝年)、CAGR 39.16%、累積 1,807.9 倍！"
+                "④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：對曾浮盈 >=+5.5% 贏家賦予 40~60 天主升段續抱特權 (受 0.09/0.13/0.16 移動鎖利與季線約束)；對浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者立即撤銷保護帶換馬，22 年締造 21 勝 1 微負 (95.5% 勝年)、CAGR 41.32%、累積 1,901.4 倍！"
             ]
         }
 
