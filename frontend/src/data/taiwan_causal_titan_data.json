@@ -9969,32 +9969,88 @@
  ],
  "causal_alphas": [
   {
-   "name": "大單集中度潛伏吸籌 (OrderFlow Concentration)",
-   "code": "llm_orderflow",
-   "invariance_ratio": 2.31,
-   "source": "LLM 微觀結構假設",
-   "desc": "主力大戶建倉會使每筆成交張數顯著放大，若同時乖離率小（未引發散戶追價），後續具爆發力。"
+   "factor": "個股特質 Alpha (Idio Alpha)",
+   "name": "個股特質 Alpha (Idio Alpha)",
+   "code": "f2_idio_alpha",
+   "ic_t_stat": "IC t = 2.87 · IC均值 3.21% · 權重 12%",
+   "invariance_ratio": 0.58,
+   "source": "exp_264 正交因子 (Gram-Schmidt)",
+   "mechanism": "剝離大盤 Beta 後的殘差報酬持續為正，代表個股自身基本面/題材驅動，而非隨大盤漲跌。",
+   "scientific_basis": "Jensen (1968) α；Ang et al. (2006) 特質波動與殘差動能",
+   "desc": "剝離大盤 Beta 後的殘差報酬持續為正，代表個股自身基本面/題材驅動，而非隨大盤漲跌。"
   },
   {
-   "name": "蛙跳效應資訊連續性 (Frog-in-the-Pan FIP)",
-   "code": "llm_fip",
-   "invariance_ratio": 1.47,
-   "source": "LLM 行為金融假設",
-   "desc": "散戶對單日大跳空過度反應，但對連續微幅上漲反應不足 (Underreaction)，資訊連續性高的股票超額收益強烈。"
+   "factor": "FIP 資訊連續性 (Frog-in-the-Pan)",
+   "name": "FIP 資訊連續性 (Frog-in-the-Pan)",
+   "code": "f3_fip_continuity",
+   "ic_t_stat": "IC t = 2.81 · IC均值 2.85% · 權重 24%",
+   "invariance_ratio": 0.57,
+   "source": "exp_264 正交因子 (Gram-Schmidt)",
+   "mechanism": "報酬由許多小漲日累積而非少數暴衝日，投資人反應不足，動能延續性更強。",
+   "scientific_basis": "Da, Gurun & Warachka (2014) Frog-in-the-Pan",
+   "desc": "報酬由許多小漲日累積而非少數暴衝日，投資人反應不足，動能延續性更強。"
   },
   {
-   "name": "下影線抗跌與非對稱波動偏度 (Asymmetric Vol Skew)",
-   "code": "llm_volskew",
-   "invariance_ratio": 3.17,
-   "source": "LLM 波動率偏度假設",
-   "desc": "下影線承接強烈且上行波動大於下行波動（正偏態），代表籌碼清洗乾淨，具備高勝率反轉動能。"
+   "factor": "籌碼吸籌 (Chip Accumulation)",
+   "name": "籌碼吸籌 (Chip Accumulation)",
+   "code": "f4_chip_accum",
+   "ic_t_stat": "IC t = -1.47 · IC均值 -1.42% · 權重 20%",
+   "invariance_ratio": 0.47,
+   "source": "exp_264 正交因子 (Gram-Schmidt)",
+   "mechanism": "三大法人與大戶持續淨買超且價量配合，代表聰明錢建倉，後續股價具延續性。",
+   "scientific_basis": "Chordia & Swaminathan (2000) 資金流與價格發現",
+   "desc": "三大法人與大戶持續淨買超且價量配合，代表聰明錢建倉，後續股價具延續性。"
   },
   {
-   "name": "偏度動量衰減阻力因子 (Skewed Momentum Decay)",
-   "code": "ga_alpha_4",
-   "invariance_ratio": 1.25,
-   "source": "遺傳算法 (GA) 符號回歸",
-   "desc": "透過符號原語演化出的高點阻力穿透公式，有效過濾追高衰竭風險。"
+   "factor": "非對稱凸性 (Asymmetric Convexity)",
+   "name": "非對稱凸性 (Asymmetric Convexity)",
+   "code": "f5_asym_convexity",
+   "ic_t_stat": "IC t = 1.06 · IC均值 0.95% · 權重 20%",
+   "invariance_ratio": 0.55,
+   "source": "exp_264 正交因子 (Gram-Schmidt)",
+   "mechanism": "上漲日波動大於下跌日波動的正偏度結構，吸引風險偏好資金並帶來右尾爆發。",
+   "scientific_basis": "Barberis & Huang (2008) 彩券型偏好；Harvey & Siddique (2000) 偏度定價",
+   "desc": "上漲日波動大於下跌日波動的正偏度結構，吸引風險偏好資金並帶來右尾爆發。"
+  },
+  {
+   "factor": "碎形效率比 (Fractal Efficiency Ratio)",
+   "name": "碎形效率比 (Fractal Efficiency Ratio)",
+   "code": "f6_fractal_er",
+   "ic_t_stat": "IC t = 1.28 · IC均值 1.15% · 權重 12%",
+   "invariance_ratio": 0.56,
+   "source": "exp_264 正交因子 (Gram-Schmidt)",
+   "mechanism": "價格路徑接近直線 (噪音低) 的趨勢更純粹，趨勢型標的勝率較高。",
+   "scientific_basis": "Kaufman (1995) Efficiency Ratio；Mandelbrot 碎形市場假說",
+   "desc": "價格路徑接近直線 (噪音低) 的趨勢更純粹，趨勢型標的勝率較高。"
+  },
+  {
+   "factor": "VCP 波動收斂突破 (VCP Pivot)",
+   "name": "VCP 波動收斂突破 (VCP Pivot)",
+   "code": "f7_vcp_pivot",
+   "ic_t_stat": "IC t = -0.80 · IC均值 -0.87% · 權重 12%",
+   "invariance_ratio": 0.45,
+   "source": "exp_264 正交因子 (Gram-Schmidt)",
+   "mechanism": "波動與量能逐級收斂後的突破，代表供給枯竭，易啟動主升段。",
+   "scientific_basis": "Minervini (2013) VCP；Wyckoff 供需法則",
+   "desc": "波動與量能逐級收斂後的突破，代表供給枯竭，易啟動主升段。"
   }
- ]
+ ],
+ "ortho_diagnostics": {
+  "factor_names": [
+   "f1_total_mom",
+   "f2_idio_alpha",
+   "f3_fip_continuity",
+   "f4_chip_accum",
+   "f5_asym_convexity",
+   "f6_fractal_er",
+   "f7_vcp_pivot"
+  ],
+  "num_factors": 7,
+  "max_raw_abs_corr": 0.7467,
+  "max_ortho_abs_corr": 0.00385,
+  "max_raw_vif": 3.401,
+  "max_ortho_vif": 1.0,
+  "effective_factor_rank": 7.0,
+  "ortho_verified": true
+ }
 }

@@ -1468,7 +1468,7 @@ export default function TaiwanCausalTitanDashboard() {
           { id: 'portfolio', label: '🎯 實盤跟單與調倉指揮部' },
           { id: 'curve', label: `📈 22年 ${kpis.total_multiple?.toLocaleString()}x 淨值曲線 (Log)` },
           { id: 'yearly', label: '🏆 歷年年度勝率與報酬 (2005-2026)' },
-          { id: 'alphas', label: '🔬 4 大真因果 Alpha 不變性雷達' },
+          { id: 'alphas', label: '🔬 exp_264 6 大正交 Alpha 因子' },
           { id: 'trades', label: '📋 回測歷史全交易紀錄 (1,290筆)' },
           { id: 'rules', label: '📖 策略 SOP 與風控法典' }
         ].map(tab => (
@@ -2352,7 +2352,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== TAB 4: 4 大真因果 Alpha 不變性雷達 ===== */}
+      {/* ===== TAB 4: exp_264 正交 Alpha 因子 ===== */}
       {activeTabSub === 'alphas' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.2rem' }}>
           {causal_alphas.map(alpha => (
