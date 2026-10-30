@@ -1,4 +1,25 @@
 import os
+import sys
+import builtins
+
+# 防護機制：當啟動 uvicorn 的終端機視窗 (PTY) 被關閉時，直接 print 會觸發 OSError: [Errno 5] Input/output error 導致背景任務中斷
+_orig_print = builtins.print
+_fallback_log_fp = None
+def _safe_print(*args, **kwargs):
+    global _fallback_log_fp
+    try:
+        _orig_print(*args, **kwargs)
+    except OSError:
+        try:
+            if _fallback_log_fp is None or _fallback_log_fp.closed:
+                _fallback_log_fp = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "uvicorn.log"), "a", encoding="utf-8")
+                sys.stdout = _fallback_log_fp
+                sys.stderr = _fallback_log_fp
+            _orig_print(*args, file=_fallback_log_fp, flush=True)
+        except Exception:
+            pass
+builtins.print = _safe_print
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -1022,8 +1043,9 @@ def set_scraper_progress(task_type, target_db, target_table, target_table_name, 
         SCRAPER_STATE["progress_percent"] = max(0, min(100, int(percent)))
         SCRAPER_STATE["status"] = status
         SCRAPER_STATE["updated_at"] = now_str
-        if status == "running" and not SCRAPER_STATE.get("started_at"):
+        if status == "running" and (step_index == 1 or not SCRAPER_STATE.get("started_at")):
             SCRAPER_STATE["started_at"] = now_str
+            SCRAPER_STATE["finished_at"] = None
         if status in ["success", "error"]:
             SCRAPER_STATE["finished_at"] = now_str
         if error:
@@ -1060,7 +1082,12 @@ def add_scraper_log(message, status="running"):
 
 def run_scraper_task(task_type: str):
     global scraper
+    import importlib
     import scraper
+    try:
+        importlib.reload(scraper)
+    except Exception:
+        pass
     try:
         if task_type in ('daily', 'all'):
             set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'daily_stock', '台股每日個股行情與法人期貨 (TWSE/TPEx/TAIFEX)', '步驟 1/7：正在連線臺灣證交所、櫃買中心與期交所爬取今日全市場價量、三大法人與期貨未平倉...', 1, 7, 14)
@@ -1272,9 +1299,9 @@ def run_scraper_task(task_type: str):
             set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'shareholder_concentration', '集保股權分散表更新完成', '🎉 集保股權分散籌碼更新完成！', 1, 1, 100, status="success")
             invalidate_db_status_cache()
 
-    except Exception as e:
-        print(f"[x] [API Scraper] 任務 {task_type} 異常中斷: {e}")
+    except BaseException as e:
         set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', '', '更新異常中斷', f'❌ 執行過程發生錯誤: {str(e)}', 0, 1, 0, status="error", error=str(e))
+        print(f"[x] [API Scraper] 任務 {task_type} 異常中斷: {e}")
 
 VALID_SCRAPER_TASKS = [
     'daily', 'all', 'revenue', 
@@ -1318,7 +1345,7 @@ def start_scraper(task_type: str, background_tasks: BackgroundTasks):
         SCRAPER_STATE["logs"] = []
     set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', t_id, t_name, f'任務啟動中：準備更新「{t_name}」...', 1, 5, 5, status="running")
     
-    background_tasks.add_task(run_scraper_task, task_type)
+    threading.Thread(target=run_scraper_task, args=(task_type,), daemon=True).start()
     return {
         "status": "Task started in background",
         "task": task_type,

@@ -235,11 +235,11 @@ def download_and_save(full_history: bool = False):
 
     all_tickers = sorted(list(merged_meta.keys()))
     # 台股 (.TW) 直接由本地 daily_stock 零延遲交叉同步，僅對跨國與美股標的呼叫 Yahoo Finance，大幅加速同步並避免重複抓取
-    yf_tickers = [t for t in all_tickers if not t.endswith('.TW')]
-    mode_label = "2000-01-01 至今完整歷史" if full_history else "近 1 個月增量 (1mo)"
+    yf_tickers = [t for t in all_tickers if not t.endswith('.TW') and t not in ('BMWYY', 'EA')]
+    mode_label = "2000-01-01 至今完整歷史" if full_history else "近 5 日極速增量 (5d)"
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 開始下載 {len(yf_tickers)} 檔美股 S&P 500 PIT 與跨國泰坦個股數據 ({mode_label})...")
 
-    batch_size = 30
+    batch_size = 65
     total_saved = 0
     trailing_nan_tickers = []
     for i in range(0, len(yf_tickers), batch_size):
@@ -249,7 +249,7 @@ def download_and_save(full_history: bool = False):
             if full_history:
                 df = yf.download(batch, start="2000-01-01", auto_adjust=False, progress=False, group_by='ticker')
             else:
-                df = yf.download(batch, period="1mo", auto_adjust=False, progress=False, group_by='ticker')
+                df = yf.download(batch, period="5d", auto_adjust=False, progress=False, group_by='ticker')
         except Exception as e:
             print(f"    批次下載失敗: {e}")
             continue

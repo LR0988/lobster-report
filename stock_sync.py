@@ -419,8 +419,10 @@ def sync_titan_portfolios(sb_conn, local_conn):
         if os.path.exists(tw_open_path):
             with open(tw_open_path, "r", encoding="utf-8") as f:
                 tw_open_data = json.load(f)
-            max_tw_d = tw_open_data.get("as_of_date", "2026-10-16")
-            for op in tw_open_data.get("open_positions", []):
+            is_dict = isinstance(tw_open_data, dict)
+            max_tw_d = tw_open_data.get("as_of_date", "2026-10-16") if is_dict else "2026-10-16"
+            open_pos_list = tw_open_data.get("open_positions", []) if is_dict else (tw_open_data if isinstance(tw_open_data, list) else [])
+            for op in open_pos_list:
                 sid = str(op.get("stock_id") or "")
                 if sid:
                     local_cur.execute("SELECT date, closing_price FROM daily_stock WHERE stock_id = ? AND closing_price IS NOT NULL ORDER BY date DESC LIMIT 60", (sid,))
@@ -439,7 +441,8 @@ def sync_titan_portfolios(sb_conn, local_conn):
                         op["stop_loss_ma60"] = ma60_v
                         if d_fmt > max_tw_d:
                             max_tw_d = d_fmt
-            tw_open_data["as_of_date"] = max_tw_d
+            if is_dict:
+                tw_open_data["as_of_date"] = max_tw_d
             with open(tw_open_path, "w", encoding="utf-8") as f:
                 json.dump(tw_open_data, f, ensure_ascii=False, indent=2)
             print("  ✓ 台股泰坦前端 titan_open_positions.json 同步完成")
