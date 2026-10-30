@@ -48,7 +48,6 @@ GLOBAL_STOCK_NAME_MAP = {
     '2609': '陽明',
     '1513.TW': '中興電 (重電設備龍頭)',
     '1519.TW': '華城 (變壓器重電王者)',
-    '3324.TW': '雙鴻 (水冷散熱大廠)',
     '2356.TW': '英業達 (AI 伺服器代工)',
     '2376.TW': '技嘉 (AI 伺服器板卡)',
     '2368.TW': '金像電 (AI 伺服器高階 PCB 龍頭)',
@@ -67,23 +66,61 @@ GLOBAL_STOCK_NAME_MAP = {
     '2345': '智邦',
     '2379.TW': '瑞昱 (網通 IC 設計大廠)',
     '2379': '瑞昱',
+    '2383.TW': '台光電 (AI 伺服器 CCL 銅箔基板霸主)',
+    '2383': '台光電',
+    '3711.TW': '日月光投控 (全球先進封測龍頭)',
+    '3711': '日月光投控',
+    '2059.TW': '川湖 (AI 伺服器導軌霸主)',
+    '2059': '川湖',
+    '6805.TW': '富世達 (AI 水冷快接頭與軸承龍頭)',
+    '6805': '富世達',
+    '3036.TW': '文曄 (全球半導體通路巨擘)',
+    '3036': '文曄',
+    '6415.TW': '矽力*-KY (電源管理 IC 龍頭)',
+    '6415': '矽力*-KY',
     'MRNA': '莫德納 (Moderna mRNA生技巨擘)',
-    'TEAM': 'Atlassian (企業協同軟體龍頭)',
-    'ASX': '日月光投控 (ASE 封測龍頭ADR)',
-    'ILMN': '因美納 (Illumina 基因定序霸主)',
-    'PBR': '巴西石油 (Petrobras 能源ADR)',
     'MU': '美光科技 (Micron HBM記憶體巨頭)',
-    'MRVL': '邁威爾科技 (Marvell AI光通訊晶片)',
+    'WDC': '威騰電子 (Western Digital 儲存巨擘)',
+    'SNDK': 'SanDisk (閃迪 NAND Flash 儲存霸主)',
+    'STX': '希捷科技 (Seagate AI大容量硬碟龍頭)',
+    'GLW': '康寧 (Corning AI光纖與特種玻璃霸主)',
+    'CIEN': 'Ciena (AI資料中心高速光通訊龍頭)',
+    'LITE': 'Lumentum (高速光模組與雷射霸主)',
+    'COHR': 'Coherent (AI光收發模組巨擘)',
+    'ANET': 'Arista Networks (AI雲端高速交換器霸主)',
+    'APH': '安費諾 (Amphenol AI高速連接器霸主)',
+    'DELL': '戴爾科技 (Dell AI伺服器巨頭)',
+    'ORCL': '甲骨文 (Oracle AI雲端資料庫巨擘)',
+    'PLTR': 'Palantir (AI軍工與企業決策大數據霸主)',
+    'GEV': 'GE Vernova (AI電力電網與燃氣渦輪霸主)',
+    'VST': 'Vistra (北美核電與AI獨立發電龍頭)',
+    'CEG': 'Constellation Energy (北美最大核電巨擘)',
+    'PWR': 'Quanta Services (北美電網基建工程霸主)',
+    'ETN': '伊頓 (Eaton AI資料中心電力管理巨擘)',
+    'FIX': 'Comfort Systems (AI資料中心液冷機電龍頭)',
+    'GE': '奇異航太 (GE Aerospace 航空發動機霸主)',
+    'HWM': 'Howmet Aerospace (航太渦輪葉片霸主)',
+    'UBER': '優步 (Uber 全球移動與外送平台霸主)',
+    'HOOD': 'Robinhood (新世代金融科技券商龍頭)',
+    'KKR': 'KKR (全球私募股權與另類資產巨擘)',
+    'BX': '黑石集團 (Blackstone 全球另類資產之王)',
+    'GS': '高盛集團 (Goldman Sachs 頂級投行)',
+    'JPM': '摩根大通 (JPMorgan 美股金融巨擘)',
+    'INTC': '英特爾 (Intel 晶圓代工與x86處理器)',
+    'TXN': '德州儀器 (Texas Instruments 類比IC霸主)',
+    'ADI': '亞德諾半導體 (Analog Devices 類比晶片)',
+    'ON': '安森美 (onsemi 車用與碳化矽功率半導體)',
+    'NXPI': '恩智浦 (NXP 車用半導體巨擘)',
+    'MPWR': '芯源系統 (Monolithic Power AI電源晶片王)',
+    'TER': '泰瑞達 (Teradyne 半導體自動化測試設備)',
     'CRWD': 'CrowdStrike (終端資安龍頭)',
     'FTNT': 'Fortinet (飛塔網路資安)',
     'PANW': '派拓網路 (Palo Alto 資安龍頭)',
-    'ZS': 'Zscaler (雲端零信任資安龍頭)',
     'SMCI': '美超微 (Supermicro AI液冷伺服器)',
-    'CEG': 'Constellation Energy (核電龍頭)',
     'LLY': '禮來 (Eli Lilly 製藥巨擘)',
     'NVDA': '輝達 (NVIDIA AI算力之王)',
-    'AVGO': '博通 (Broadcom 網通霸主)',
-    'TSLA': '特斯拉 (Tesla 自動駕駛)',
+    'AVGO': '博通 (Broadcom 網通與ASIC霸主)',
+    'TSLA': '特斯拉 (Tesla 自動駕駛與機器人)',
     'AAPL': '蘋果 (Apple)',
     'MSFT': '微軟 (Microsoft)',
     'AMZN': '亞馬遜 (Amazon)',
@@ -91,19 +128,27 @@ GLOBAL_STOCK_NAME_MAP = {
     'META': 'Meta (臉書)',
     'NFLX': '網飛 (Netflix 串流霸主)',
     'AMD': '超微半導體 (AMD)',
-    'ASML': '艾司摩爾 (ASML 極紫外光機霸主)',
-    'TSM': '台積電 ADR (TSMC)',
     'KLAC': '科磊 (KLA 半導體檢測設備王)',
     'LRCX': '科林研發 (Lam Research 蝕刻設備)',
     'AMAT': '應用材料 (半導體設備巨頭)',
     'SNPS': '新思科技 (Synopsys EDA晶片設計)',
     'CDNS': '益華電腦 (Cadence EDA龍頭)',
-    'MELI': '美卡多 (MercadoLibre 拉美電商王)',
-    'SPOT': 'Spotify (全球音樂串流霸主)',
-    'TTD': 'The Trade Desk (程序化廣告龍頭)',
     'DASH': 'DoorDash (北美外送龍頭)',
     'ABNB': 'Airbnb (全球旅宿平台)',
-    'BKNG': 'Booking Holdings (全球旅遊龍頭)'
+    'BKNG': 'Booking Holdings (全球旅遊龍頭)',
+    'MPC': '馬拉松石油 (Marathon Petroleum 煉油巨擘)',
+    'VLO': '瓦萊羅能源 (Valero Energy 北美煉油龍頭)',
+    'PSX': '菲利普斯66 (Phillips 66 能源化工巨擘)',
+    'COP': '康菲石油 (ConocoPhillips 頁岩油氣巨擘)',
+    'XOM': '埃克森美孚 (ExxonMobil 全球能源霸主)',
+    'CVX': '雪佛龍 (Chevron 全球綜合能源巨頭)',
+    'MRK': '默沙東 (Merck 全球免疫腫瘤藥王)',
+    'BIIB': '百健 (Biogen 神經科學與生技巨擘)',
+    'GILD': '吉利德科學 (Gilead 抗病毒生技巨頭)',
+    'AMGN': '安進 (Amgen 全球生物製藥龍頭)',
+    'REGN': '再生元製藥 (Regeneron 單株抗體霸主)',
+    'VRTX': '福泰製藥 (Vertex 基因編輯與止痛新藥王)',
+    'ABBV': '艾伯維 (AbbVie 免疫學新藥巨擘)'
 }
 
 def _resolve_display_name(ticker: str, cursor=None) -> str:
@@ -989,7 +1034,9 @@ def get_global_sovereign_dashboard_data():
         }
         sp500_active_set = None
         try:
-            sp500_csv = "/tmp/sp500_ticker_start_end.csv"
+            sp500_csv = os.path.join(os.path.dirname(__file__), "sp500_ticker_start_end.csv")
+            if not os.path.exists(sp500_csv):
+                sp500_csv = "/tmp/sp500_ticker_start_end.csv"
             if os.path.exists(sp500_csv):
                 import csv
                 sp500_active_set = set()
@@ -1000,7 +1047,11 @@ def get_global_sovereign_dashboard_data():
                         if not end_d or end_d >= "2025-01-01":
                             sp500_active_set.add((row_sp.get("ticker") or "").strip().upper())
                 # 補充 2024~2026 新入選 S&P 500 之官方成分股
-                sp500_active_set.update({"PLTR", "CRWD", "CEG", "GEV", "VST", "KKR", "UBER", "ABNB", "BX", "PANW", "SNDK", "DELL"})
+                sp500_active_set.update({
+                    "PLTR", "CRWD", "CEG", "GEV", "VST", "KKR", "UBER", "ABNB", "BX", "PANW",
+                    "SNDK", "DELL", "SMCI", "HOOD", "LITE", "COHR", "CIEN", "FIX", "WDAY", "APO",
+                    "GDDY", "TPL", "LII", "SW", "AMTM", "SOLV", "VLTO", "KVUE", "GEHC", "BRK-B"
+                })
         except Exception:
             sp500_active_set = None
 
@@ -1315,21 +1366,21 @@ def get_global_sovereign_dashboard_data():
             "newly_admitted_count": len(newly_admitted_list),
             "total_active_universe": 1734,
             "open_pool_unbiased_backtest": {
-                "universe_size": "1,734 檔真實無生存者偏誤 PIT 選股池 (956 檔 S&P 500 歷史成分股 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 零遺漏池)",
-                "cagr_22y": 39.16,
-                "cagr_g1_2004_2014": 42.49,
+                "universe_size": "1,734 檔真實無生存者偏誤 PIT 選股池 (956 檔 S&P 500 歷史成分股 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005–2026 零遺漏池)",
+                "cagr_22y": 41.32,
+                "cagr_g1_2004_2014": 48.12,
                 "cagr_g2_2015_2026": 36.13,
                 "daily_mdd": -25.45,
                 "monthly_mdd": -18.55,
-                "sharpe": 1.22,
-                "calmar": 2.11
+                "sharpe": 1.27,
+                "calmar": 2.23
             },
             "gatekeeper_rules": [
                 "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
-                "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股，搭配單一事前統一品質規則",
+                "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 (5,338 日) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
                 "③ G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)",
                 "④ 黃金研發強度護城河 (R&D/Rev 5%~25%) + exp_262 正交突破共振：具備黃金研發護城河與平台蓄勢者提權 ×1.05 且 Top 1 重倉 56%/22%/22%；燒錢股 (R&D>28%) 降權 ×0.80；Sustain≥45% × Sortino60≥1.5 正交加權 ×1.04",
-                "⑤ exp_264 贏家 40~60 天主升段續抱護航 & 敗部滯漲/月營收定檢：曾浮盈 >=+5.5% 贏家受 0.09/0.13/0.16 移動鎖利與季線保護完整走完主升段；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減立即淘汰換馬，締造 CAGR 39.16%、1,807.9倍、月MDD -18.55%、Calmar 2.11、勝年 21/23！"
+                "⑤ exp_264 贏家 40~60 天主升段續抱護航 & 敗部滯漲/月營收定檢：曾浮盈 >=+5.5% 贏家受 0.09/0.13/0.16 移動鎖利與季線保護完整走完主升段；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減立即淘汰換馬，締造 2005–2026 CAGR 41.32%、1,901.4倍、月MDD -18.55%、Calmar 2.23、勝年 21/22！"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
         }

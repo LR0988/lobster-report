@@ -1108,12 +1108,12 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步全球主權 ETF 警告: {e}")
                 print(f"[x] [API Scraper] 同步全球主權 ETF 失敗: {e}")
 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', '全球泰坦旗艦 228 檔各國龍頭與實盤持倉 (global_stock_daily)', '步驟 6/7：正在連線抓取全球泰坦 228 檔龍頭個股 (MRNA, MU, 000660.KS, 2330, 3037, 3443 等) 並更新實盤現價...', 6, 7, 85)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', 'S&P 500 PIT 成分股與台股 0050∪0051 純上市池 (global_stock_daily)', '步驟 6/7：正在連線抓取美股 S&P 500 PIT 成分股與交叉補齊台股 0050∪0051 純上市池最新行情並更新實盤現價...', 6, 7, 85)
             try:
                 import sync_global_titan_stocks
                 sync_global_titan_stocks.download_and_save(full_history=False)
-                add_scraper_log("✓ 全球泰坦旗艦個股行情與實盤持倉最新價已寫入 global_stock_daily / global_sovereign_positions")
-                print("[✓] [API Scraper] 全球泰坦旗艦個股與持倉現價同步完成")
+                add_scraper_log("✓ S&P 500 PIT 成分股與台股 0050∪0051 純上市最新行情已寫入 global_stock_daily / global_sovereign_positions")
+                print("[✓] [API Scraper] S&P 500 PIT 與台股 0050∪0051 個股及持倉現價同步完成")
             except Exception as e:
                 add_scraper_log(f"⚠️ 同步全球泰坦個股警告: {e}")
                 print(f"[x] [API Scraper] 同步全球泰坦個股失敗: {e}")
@@ -1167,12 +1167,12 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 更新全球主權 ETF 警告: {e}")
                 print(f"[x] [API Scraper] 更新全球主權 ETF 失敗: {e}")
 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', '全球泰坦旗艦 228 檔各國龍頭與實盤持倉 (global_stock_daily)', '步驟 2/3：正在連線抓取全球 228 檔龍頭資產 (MRNA, MU, 000660.KS, 2330, 3037, 3443 等) 最新收盤行情...', 2, 3, 60)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', 'S&P 500 PIT 成分股與台股 0050∪0051 純上市池 (global_stock_daily)', '步驟 2/3：正在連線抓取美股 S&P 500 PIT 成分股與交叉補齊台股 0050∪0051 純上市前 150 大最新收盤行情...', 2, 3, 60)
             try:
                 import sync_global_titan_stocks
                 sync_global_titan_stocks.download_and_save(full_history=False)
-                add_scraper_log("✓ 全球泰坦旗艦個股最新報價已寫入 global_stock_daily 並同步更新實盤持倉現價")
-                print("[✓] [API Scraper] 全球泰坦旗艦資產行情更新完成")
+                add_scraper_log("✓ S&P 500 PIT 與台股 0050∪0051 純上市最新報價已寫入 global_stock_daily 並同步更新實盤持倉現價")
+                print("[✓] [API Scraper] S&P 500 PIT 與台股 0050∪0051 資產行情更新完成")
             except Exception as e:
                 add_scraper_log(f"⚠️ 更新全球旗艦資產警告: {e}")
                 print(f"[x] [API Scraper] 更新全球旗艦資產失敗: {e}")
@@ -1185,7 +1185,7 @@ def run_scraper_task(task_type: str):
             except Exception as e:
                 print(f"[x] [API Scraper] 同步雲端快照失敗: {e}")
                 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', '全球泰坦更新完成', '🎉 全球主權 ETF、228 檔旗艦龍頭與實盤持倉最新收盤行情已全數更新完成！', 3, 3, 100, status="success")
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', '全球泰坦更新完成', '🎉 全球主權 ETF、S&P 500 PIT 成分股與台股 0050∪0051 純上市池及實盤持倉最新收盤行情已全數更新完成！', 3, 3, 100, status="success")
             invalidate_db_status_cache()
 
         elif task_type in ['macro', 'macro_indicators']:
@@ -2910,12 +2910,20 @@ def run_scheduled_pipeline():
 
         # 執行全球泰坦 2.0、超跌狙擊手與可轉債好球帶自動化快照產出
         try:
-            print("[Scheduler Pipeline] 開始執行全球泰坦 2.0 (模組 C 2.0 DCF 雙因子) 與戰情室快照產出...")
+            print("[Scheduler Pipeline] 開始執行全球泰坦 G12-PIT (S&P 500 PIT + 台股 0050∪0051 純上市) 與戰情室快照產出...")
             import global_sovereign_service
             gs_data = global_sovereign_service.get_global_sovereign_dashboard_data()
             with open(os.path.join(FRONTEND_DIR, 'src/data/defaultGlobalSovereignData.json'), 'w', encoding='utf-8') as f:
                 json.dump(gs_data, f, ensure_ascii=False, indent=2)
-            print("[Scheduler Pipeline] 全球泰坦 2.0 前端資料同步成功！")
+            try:
+                import stock_sync
+                sb_c = stock_sync.get_supabase_conn()
+                stock_sync.sync_ml_cache(sb_c)
+                sb_c.close()
+                print("[Scheduler Pipeline] 全球泰坦雲端 stock_ml_cache 自動同步成功！")
+            except Exception as e_sb:
+                print(f"[Scheduler Pipeline] 雲端 stock_ml_cache 同步提醒: {e_sb}")
+            print("[Scheduler Pipeline] 全球泰坦 G12-PIT 前端資料同步成功！")
         except Exception as e:
             print(f"[Scheduler Pipeline] 全球泰坦 2.0 快照產出失敗: {str(e)}")
 
@@ -4173,7 +4181,9 @@ def get_low_freq_top30():
 @app.get("/api/global-sovereign/dashboard")
 def get_global_sovereign_dashboard():
     """全球主權國家泰坦看板：即時國運動能排行、歷史回測清單與歷年獲利"""
+    import importlib
     import global_sovereign_service
+    importlib.reload(global_sovereign_service)
     return global_sovereign_service.get_global_sovereign_dashboard_data()
 
 @app.get("/api/global_sovereign/dml-dsr")
@@ -4234,7 +4244,7 @@ def trigger_oversold_sniper_rescan():
 
 @app.post("/api/oversold_sniper/trades")
 def create_oversold_sniper_trade(payload: dict = Body(...)):
-    """新增實盤跟單紀錄 (一鍵跟單或自訂輸入進場價位與獨立時間)"""
+    """新增實盤跟單紀錄 (支援 S/B 分級、动态首個獲利門檻與獨立進場時間)"""
     import oversold_sniper_service
     ticker = payload.get("ticker", "")
     name = payload.get("name", ticker)
@@ -4244,8 +4254,17 @@ def create_oversold_sniper_trade(payload: dict = Body(...)):
     shares = payload.get("shares", 1000)
     entry_date = payload.get("entry_date", datetime.now().strftime("%Y-%m-%d"))
     entry_time = payload.get("entry_time", datetime.now().strftime("%H:%M:%S"))
+    tier = payload.get("tier", "B")
+    natr_pct = payload.get("natr_pct", 2.8)
+    mom60_pct = payload.get("mom60_pct", 10.0)
+    trust_buy = payload.get("trust_buy", 0)
+    context_mode = payload.get("context_mode", "🛡️ 平靜日法人自救")
     notes = payload.get("notes", "")
-    return oversold_sniper_service.add_user_trade(ticker, name, market, currency, entry_price, shares, entry_date, notes, entry_time=entry_time)
+    return oversold_sniper_service.add_user_trade(
+        ticker, name, market, currency, entry_price, shares, entry_date, notes,
+        entry_time=entry_time, tier=tier, natr_pct=natr_pct, mom60_pct=mom60_pct,
+        trust_buy=trust_buy, context_mode=context_mode
+    )
 
 @app.post("/api/oversold_sniper/trades/{trade_id}/close")
 def close_oversold_sniper_trade(trade_id: str, payload: dict = Body(...)):

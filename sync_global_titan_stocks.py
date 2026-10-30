@@ -160,7 +160,51 @@ def download_and_save(full_history: bool = False):
         if idx_t not in merged_meta:
             merged_meta[idx_t] = {'name': idx_name, 'country': '美國', 'market': '美股ETF'}
 
-    # 確保 global_stock_daily 已存在的所有歷史 ticker 皆納入更新，不遺漏任何一檔
+    # 嚴格清除任何誤入 global_stock_daily / global_stock_metadata 之上櫃 (TPEx) .TW 股票 (如 3324.TW 等)，確保 100% 純上市 0050∪0051
+    try:
+        cursor.execute("""
+            SELECT DISTINCT stock_id FROM daily_stock
+            WHERE market_type = 'TPEx' AND length(stock_id) = 4
+        """)
+        tpex_tw_tickers = [f"{r[0]}.TW" for r in cursor.fetchall() if r[0]]
+        for bad_t in set(tpex_tw_tickers + ["3324.TW", "5274.TW", "3293.TW", "8436.TW", "6488.TW", "8069.TW"]):
+            merged_meta.pop(bad_t, None)
+            cursor.execute("DELETE FROM global_stock_daily WHERE ticker = ?", (bad_t,))
+            cursor.execute("DELETE FROM global_stock_metadata WHERE ticker = ?", (bad_t,))
+        conn.commit()
+    except Exception as e_tpex:
+        print(f"清除 TPEx 上櫃標的提醒: {e_tpex}")
+
+    # 自動納入台股最新一日 0050 ∪ 0051 (TWSE 純上市成交額前 150 大) 進入 metadata 與交叉補齊池
+    try:
+        cursor.execute("SELECT MAX(date) FROM daily_stock WHERE closing_price IS NOT NULL AND market_type IN ('上市', 'TWSE')")
+        lat_tw_row = cursor.fetchone()
+        lat_tw_date = lat_tw_row[0] if lat_tw_row and lat_tw_row[0] else None
+        if lat_tw_date:
+            cursor.execute("""
+                SELECT stock_id, stock_name
+                FROM daily_stock
+                WHERE date = ?
+                  AND length(stock_id) = 4
+                  AND stock_id GLOB '[1-9][0-9][0-9][0-9]'
+                  AND stock_id NOT LIKE '91%'
+                  AND market_type IN ('上市', 'TWSE')
+                  AND closing_price IS NOT NULL
+                ORDER BY COALESCE(trade_value, closing_price * trade_volume) DESC
+                LIMIT 150
+            """, (lat_tw_date,))
+            for sid_150, sname_150 in cursor.fetchall():
+                t_150 = f"{sid_150}.TW"
+                if t_150 not in merged_meta:
+                    merged_meta[t_150] = {
+                        'name': f"{sname_150} ({t_150})" if sname_150 else t_150,
+                        'country': '台灣',
+                        'market': '台灣證交所 (0050∪0051)'
+                    }
+    except Exception as e_150:
+        print(f"載入台股 0050∪0051 純上市前 150 大提醒: {e_150}")
+
+    # 確保 global_stock_daily 已存在的所有歷史 ticker (排除上櫃股) 皆納入更新，不遺漏任何一檔
     try:
         cursor.execute("""
             SELECT DISTINCT d.ticker, m.name, m.country, m.market
@@ -190,20 +234,22 @@ def download_and_save(full_history: bool = False):
     print(f"已更新 global_stock_metadata (共 {len(meta_records)} 檔)")
 
     all_tickers = sorted(list(merged_meta.keys()))
+    # 台股 (.TW) 直接由本地 daily_stock 零延遲交叉同步，僅對跨國與美股標的呼叫 Yahoo Finance，大幅加速同步並避免重複抓取
+    yf_tickers = [t for t in all_tickers if not t.endswith('.TW')]
     mode_label = "2000-01-01 至今完整歷史" if full_history else "近 1 個月增量 (1mo)"
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 開始下載 {len(all_tickers)} 檔全球泰坦個股數據 ({mode_label})...")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 開始下載 {len(yf_tickers)} 檔美股 S&P 500 PIT 與跨國泰坦個股數據 ({mode_label})...")
 
-    batch_size = 25
+    batch_size = 30
     total_saved = 0
     trailing_nan_tickers = []
-    for i in range(0, len(all_tickers), batch_size):
-        batch = all_tickers[i:i + batch_size]
-        print(f"  正在下載第 {i+1}~{min(i+batch_size, len(all_tickers))} 檔: {batch[:5]}...")
+    for i in range(0, len(yf_tickers), batch_size):
+        batch = yf_tickers[i:i + batch_size]
+        print(f"  正在下載第 {i+1}~{min(i+batch_size, len(yf_tickers))} 檔: {batch[:5]}...")
         try:
             if full_history:
-                df = yf.download(batch, start="2000-01-01", progress=False, group_by='ticker')
+                df = yf.download(batch, start="2000-01-01", auto_adjust=False, progress=False, group_by='ticker')
             else:
-                df = yf.download(batch, period="1mo", progress=False, group_by='ticker')
+                df = yf.download(batch, period="1mo", auto_adjust=False, progress=False, group_by='ticker')
         except Exception as e:
             print(f"    批次下載失敗: {e}")
             continue

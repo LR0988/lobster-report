@@ -98,7 +98,7 @@ def sync_global_sovereign_history(full_history: bool = True):
     period = "max" if full_history else "1mo"
     print(f"[{datetime.now().strftime('%H:%M:%S')}] 開始下載全球 {len(tickers)} 個主權國家 ETF (期間: {period})...")
     
-    df_raw = yf.download(tickers, period=period, group_by='ticker', progress=False)
+    df_raw = yf.download(tickers, period=period, auto_adjust=False, group_by='ticker', progress=False)
     
     import requests
     from zoneinfo import ZoneInfo
