@@ -5408,7 +5408,7 @@ function StockDashboard() {
                       icon: '👑',
                       tag: is20ySelected
                         ? '22年+205238% (2053倍)・CAGR 42.58%・MDD -35.30%・夏普1.13・卡瑪1.21'
-                        : '10年超額Alpha・CAGR 42.6%・台股因果泰坦'
+                        : '10年超額Alpha・CAGR 32.9%・台股因果泰坦 (exp_264)'
                     },
                     {
                       id: 'etf_0020',
@@ -5927,7 +5927,7 @@ function StockDashboard() {
                     const taiwanItem = {
                       model_id: 'titan_sovereign',
                       name: '👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10 · 22年 2053倍)',
-                      short_name: '👑 台股因果泰坦 (黃金階梯 2053倍)',
+                      short_name: '👑 台股因果泰坦 (exp_264 · 上限1億 · 491倍)',
                       model_name: '👑 台股因果量化泰坦旗艦版 (DOE 黃金階梯 35/25/20/10/10 · 22年 2053倍)',
                       total_return_pct: tw?.customModeData?.total_return_pct ?? 205237.8,
                       cagr_pct: tw?.customModeData?.cagr_pct ?? 42.58,
