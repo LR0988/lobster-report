@@ -1323,23 +1323,23 @@ export default function TaiwanCausalTitanDashboard() {
         }}>
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年回測倍數</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>2,053.38x</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>{(kpis.total_multiple ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}x</div>
           </div>
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年化報酬率 CAGR</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+42.58%</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+{kpis.cagr}%</div>
           </div>
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>夏普比率 Sharpe</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>1.13</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>{kpis.sharpe}</div>
           </div>
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>最大回撤 MDD</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>-35.30%</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>{kpis.max_drawdown}%</div>
           </div>
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>卡瑪比率 Calmar</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#C084FC', fontFamily: 'monospace' }}>1.21</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#C084FC', fontFamily: 'monospace' }}>{kpis.calmar}</div>
           </div>
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年度勝率 (贏大盤)</div>
@@ -1466,7 +1466,7 @@ export default function TaiwanCausalTitanDashboard() {
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.2rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '0.5rem', flexWrap: 'wrap' }}>
         {[
           { id: 'portfolio', label: '🎯 實盤跟單與調倉指揮部' },
-          { id: 'curve', label: '📈 22年 2,053.38x 淨值曲線 (Log)' },
+          { id: 'curve', label: `📈 22年 ${kpis.total_multiple?.toLocaleString()}x 淨值曲線 (Log)` },
           { id: 'yearly', label: '🏆 歷年年度勝率與報酬 (2005-2026)' },
           { id: 'alphas', label: '🔬 4 大真因果 Alpha 不變性雷達' },
           { id: 'trades', label: '📋 回測歷史全交易紀錄 (1,290筆)' },
@@ -2162,7 +2162,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== TAB 2: 22 年 2,053.38x 累積淨值走勢曲線 (Log) ===== */}
+      {/* ===== TAB 2: 22 年累積淨值走勢曲線 (Log) ===== */}
       {activeTabSub === 'curve' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
@@ -2175,8 +2175,8 @@ export default function TaiwanCausalTitanDashboard() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem' }}>
-              <span style={{ color: '#F59E0B', fontWeight: 'bold' }}>● 👑 台股因果泰坦 (2,053.38x)</span>
-              <span style={{ color: '#64748B' }}>● 加權指數 (7.72x)</span>
+              <span style={{ color: '#F59E0B', fontWeight: 'bold' }}>● 👑 台股因果泰坦 ({kpis.total_multiple}x)</span>
+              <span style={{ color: '#64748B' }}>● 加權指數 ({kpis.taiex_multiple}x)</span>
             </div>
           </div>
 
@@ -2207,22 +2207,22 @@ export default function TaiwanCausalTitanDashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.9rem', marginTop: '1.2rem' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年累積倍數</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>2,053.38x</div>
-              <div style={{ fontSize: '0.7rem', color: '#34D399', marginTop: '0.2rem' }}>大盤 7.72x (Alpha +2,045x)</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>{(kpis.total_multiple ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}x</div>
+              <div style={{ fontSize: '0.7rem', color: '#34D399', marginTop: '0.2rem' }}>大盤 {kpis.taiex_multiple}x (Alpha +{((kpis.total_multiple ?? 0) - (kpis.taiex_multiple ?? 0)).toFixed(0)}x)</div>
             </div>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #10B981' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年化複合報酬率 (CAGR)</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+42.58%</div>
-              <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.2rem' }}>大盤同期 10.02%</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+{kpis.cagr}%</div>
+              <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.2rem' }}>大盤同期 {kpis.taiex_cagr}%</div>
             </div>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>夏普比率 (Sharpe Ratio)</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>1.13</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>{kpis.sharpe}</div>
               <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '0.2rem' }}>大盤 0.54 (提升 2.1x)</div>
             </div>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #EC4899' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>歷史最大回撤 (MDD)</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>-35.30%</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>{kpis.max_drawdown}%</div>
               <div style={{ fontSize: '0.7rem', color: '#34D399', marginTop: '0.2rem' }}>大盤 -54.07% (大幅抗震避險)</div>
             </div>
           </div>
@@ -2236,13 +2236,13 @@ export default function TaiwanCausalTitanDashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #F59E0B' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年累積總倍數</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>2,053.38x</div>
-              <div style={{ fontSize: '0.72rem', color: '#34D399', marginTop: '0.2rem' }}>大盤 7.72x (超越大盤 266 倍)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#FDE68A', fontFamily: 'monospace' }}>{(kpis.total_multiple ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}x</div>
+              <div style={{ fontSize: '0.72rem', color: '#34D399', marginTop: '0.2rem' }}>大盤 {kpis.taiex_multiple}x (超越大盤 {kpis.taiex_multiple ? Math.round(kpis.total_multiple / kpis.taiex_multiple) : 0} 倍)</div>
             </div>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #10B981' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年化複合報酬率 (CAGR)</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+42.58%</div>
-              <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.2rem' }}>大盤 10.02% (Alpha +32.56%)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>+{kpis.cagr}%</div>
+              <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.2rem' }}>大盤 {kpis.taiex_cagr}% (Alpha +{kpis.alpha_cagr}%)</div>
             </div>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #38BDF8' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>年度勝率 (贏大盤年份)</div>
@@ -2256,7 +2256,7 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #EC4899' }}>
               <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>22年回測交易總勝率</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>58.53%</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#F472B6', fontFamily: 'monospace' }}>{kpis.win_rate}%</div>
               <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '0.2rem' }}>全歷史共 1,290 筆真實撮合進出</div>
             </div>
           </div>

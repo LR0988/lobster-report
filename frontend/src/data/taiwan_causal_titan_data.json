@@ -25,7 +25,12 @@
   "taiex_sharpe": 0.6,
   "taiex_mdd": -58.31,
   "taiex_multiple": 7.49,
-  "alpha_cagr": 23.2
+  "alpha_cagr": 23.2,
+  "sortino": 2.44,
+  "profit_factor": 3.75,
+  "total_trades": 564,
+  "total_return_pct": 48992.7,
+  "alpha_total_pct": 48343.2
  },
  "current_positions": [],
  "curve": [
@@ -1857,7 +1862,7 @@
    "taiex_ret": 3.93
   },
   {
-   "date": "2026-10-31",
+   "date": "2026-10-22",
    "strategy_nav": 490.927,
    "taiex_nav": 7.495,
    "monthly_ret": -0.59,
