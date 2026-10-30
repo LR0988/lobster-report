@@ -3,7 +3,7 @@ import defaultTitanData from '../data/taiwan_causal_titan_data.json';
 import { getCurrentUser, apiGetCausalTitanDashboard } from '../api';
 
 // ==========================================
-// 👑 台股因果泰坦 (上限1億) · exp_264 旗艦邏輯 (elite_55 池 · 24 檔 · 60 日換倉 · 贏家護航 + 敗部定檢)
+// 👑 台股因果泰坦 (上限1億) · 全球泰坦 G12-PIT 邏輯 × 台股 0050∪0051 PIT 宇宙 (無倖存者偏差) × 1 億資金容量約束
 // 核心架構：嚴格以「歷史進出交易流水帳 (txHistory)」為唯一真實來源 (Single Source of Truth)
 // 1. 所有持股部位 100% 由歷史交易流水帳 (txHistory) 的買進/加碼/減持/賣出動態推導！
 // 2. 歷史進出若無買任何股票，持股部位即為 0 檔，絕無幽靈部位脫鉤！
@@ -114,9 +114,9 @@ export default function TaiwanCausalTitanDashboard() {
   const [data, setData] = useState(defaultTitanData);
   const [liveStatus, setLiveStatus] = useState({ state: 'loading', msg: '連線本機資料庫中…' });
 
-  // 開啟頁面時直連筆電本機 API (tw_stock.db)；若資料庫有更新交易日，後端會即時以 exp_264 重算
+  // 開啟頁面時直連筆電本機 API (tw_stock.db)；若資料庫有更新交易日，後端會即時以全球泰坦邏輯重算最新訊號
   const loadLiveData = async (refresh = false) => {
-    setLiveStatus({ state: 'loading', msg: refresh ? '正在以本機資料庫重算 exp_264…' : '連線本機資料庫中…' });
+    setLiveStatus({ state: 'loading', msg: refresh ? '正在以本機資料庫重算最新訊號…' : '連線本機資料庫中…' });
     const live = await apiGetCausalTitanDashboard(refresh);
     if (live) {
       setData(live);
@@ -189,16 +189,16 @@ export default function TaiwanCausalTitanDashboard() {
     }
   }, [txHistory, dismissedSuggestions, storageKeys]);
 
-  // 目標持股配置：100% 取自 exp_264 回測引擎最新一日目標權重 (data.current_positions)
-  // exp_264 於風控觸發時會全數空手 (target = [])，此時持有任何股票皆會被提示賣出。
+  // 目標持股配置：100% 取自全球泰坦台股版最新一日目標權重 (含台股 Top5 護盾後曝險) (data.current_positions)
+  // 宏觀護盾觸發全數空手時 (target = [])，此時持有任何股票皆會被提示賣出。
   const targetAllocationConfig = useMemo(() => (data?.current_positions || []).map(p => ({
     stock_id: String(p.stock_id),
     name: p.stock_name || p.name || String(p.stock_id),
-    role: p.role || 'exp_264 持股',
+    role: p.role || '全球泰坦台股持股',
     weight_pct: Number(p.target_weight_pct ?? p.weight_pct) || 0,
     price: Number(p.current_price) || 0,
     stop_loss: Number(p.stop_loss_price) || 0,
-    industry: p.industry || 'elite_55 池'
+    industry: p.industry || '0050∪0051 PIT'
   })).filter(t => t.weight_pct > 0 && t.price > 0), [data?.current_positions]);
 
   // =========================================================================
@@ -273,7 +273,7 @@ export default function TaiwanCausalTitanDashboard() {
         const curPrice = defaultPos?.current_price || config?.price || avgPrice;
         const stopLossPrice = defaultPos?.stop_loss_price || config?.stop_loss || Math.round(curPrice * 0.9 * 100) / 100;
         const role = config?.role || defaultPos?.role || '💎 實盤自選持股';
-        const industry = config?.industry || defaultPos?.industry || 'elite_55 池';
+        const industry = config?.industry || defaultPos?.industry || '0050∪0051 PIT';
         const targetWeightPct = config?.weight_pct || 20.0;
 
         activePositions.push({
@@ -292,7 +292,7 @@ export default function TaiwanCausalTitanDashboard() {
           entry_date: h.firstBuyDate,
           entry_fee: Math.round(h.totalFee),
           stop_loss_price: stopLossPrice,
-          stop_condition: defaultPos?.stop_condition || `exp_264 護航/定檢：參考 60MA (${stopLossPrice}元)，贏家移動停利 9/13/16%`
+          stop_condition: defaultPos?.stop_condition || `全球泰坦：連任保護/贏家護航，參考 60MA (${stopLossPrice}元)`
         });
       }
     });
@@ -522,7 +522,7 @@ export default function TaiwanCausalTitanDashboard() {
           actionColor: '#EF4444',
           stock_id: heldPos.stock_id || '-',
           name: heldPos.stock_name || heldPos.name || '非核心標的',
-          role: '⚠️ 非 exp_264 目標持股 (出場/空手訊號)',
+          role: '⚠️ 非全球泰坦目標持股 (出場/空手訊號)',
           targetWeightPct: 0,
           targetTwd: 0,
           currentShares: exitShares,
@@ -592,7 +592,7 @@ export default function TaiwanCausalTitanDashboard() {
       });
 
     if (activeLines.length === 0) {
-      triggerNotice('ℹ️ 目前 exp_264 目標持股均已處於平衡容差帶內，無須發送任何調倉委託！');
+      triggerNotice('ℹ️ 目前目標持股均已處於平衡容差帶內，無須發送任何調倉委託！');
       return;
     }
     const text = activeLines.join('\n');
@@ -724,7 +724,7 @@ export default function TaiwanCausalTitanDashboard() {
   const handleExecuteAllSuggestions = () => {
     const activeSuggestions = rebalanceSuggestions.filter(s => s.action !== '續抱' && !s.isBalanced && s.recShares > 0);
     if (activeSuggestions.length === 0) {
-      triggerNotice('ℹ️ 目前 exp_264 目標持股均已處於平衡狀態，無須執行任何調倉！');
+      triggerNotice('ℹ️ 目前目標持股均已處於平衡狀態，無須執行任何調倉！');
       return;
     }
     if (!window.confirm(`確定要一次性執行共 ${activeSuggestions.length} 檔調倉更動嗎？\n系統將自動在歷史進出流水帳中寫入交易紀錄，持股部位與損益將自動精確生成。`)) return;
@@ -744,7 +744,7 @@ export default function TaiwanCausalTitanDashboard() {
   // ==========================================
   // 1. 一鍵載入 10/12 法定開倉交易明細
   const handleLoadDefault1012Positions = () => {
-    if (window.confirm('確定要載入舊版因果泰坦 2026-10-12 建倉範本 (5 筆交易) 嗎？\n此為舊版 DOE 黃金階梯歷史範本，並非 exp_264 目前訊號。')) {
+    if (window.confirm('確定要載入舊版因果泰坦 2026-10-12 建倉範本 (5 筆交易) 嗎？\n此為舊版 DOE 黃金階梯歷史範本，並非目前最新訊號。')) {
       setTxHistory(TEMPLATE_1012_TRANSACTIONS);
       setDismissedSuggestions([]);
       triggerNotice('⚡ 已成功寫入 10/12 法定建倉交易明細！實戰部位與損益已即時生成。');
@@ -1282,11 +1282,11 @@ export default function TaiwanCausalTitanDashboard() {
                 borderRadius: '6px',
                 fontSize: '0.78rem'
               }}>
-                👑 exp_264 旗艦邏輯
+                👑 全球泰坦邏輯 · 台股 0050∪0051
               </span>
               <span
                 onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
-                title="點擊以本機資料庫重新計算 exp_264"
+                title="點擊以本機資料庫重新計算最新訊號"
                 style={{
                   cursor: liveStatus.state === 'loading' ? 'default' : 'pointer',
                   background: liveStatus.state === 'live' ? 'rgba(16,185,129,0.2)' : (liveStatus.state === 'loading' ? 'rgba(59,130,246,0.2)' : 'rgba(245,158,11,0.2)'),
@@ -1301,7 +1301,7 @@ export default function TaiwanCausalTitanDashboard() {
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              elite_55 精選池 · 24 檔 · 60 日週期換股 · 贏家豁免護航 + 敗部定檢 · 單檔 ≤ 20 日均量 10% 的 1 億容量約束 · <strong>以歷史交易進出流水帳為唯一真實來源</strong>
+              僅買每日 0050∪0051 (PIT 無倖存者偏差) · 前 3 名 52/24/24 · 半月雙梯隊 · 宏觀外科護盾 · 單檔 ≤ 20 日均量 10% 的 1 億容量約束 · <strong>以歷史交易進出流水帳為唯一真實來源</strong>
             </p>
           </div>
 
@@ -1314,7 +1314,7 @@ export default function TaiwanCausalTitanDashboard() {
               fontSize: '0.78rem'
             }}>
               <span style={{ color: '#94A3B8' }}>調倉週期：</span>
-              <strong style={{ color: '#FDE68A' }}>每 60 交易日 + 15 日/營收窗口定檢</strong>
+              <strong style={{ color: '#FDE68A' }}>每月 1 號 / 22 號 雙梯隊半月換倉</strong>
             </div>
             <div style={{
               background: 'rgba(0, 0, 0, 0.4)',
@@ -1495,7 +1495,7 @@ export default function TaiwanCausalTitanDashboard() {
           { id: 'portfolio', label: '🎯 實盤跟單與調倉指揮部' },
           { id: 'curve', label: `📈 22年 ${kpis.total_multiple?.toLocaleString()}x 淨值曲線 (Log)` },
           { id: 'yearly', label: '🏆 歷年年度勝率與報酬 (2005-2026)' },
-          { id: 'alphas', label: '🔬 exp_264 6 大正交 Alpha 因子' },
+          { id: 'alphas', label: '🔬 選股因子 Rank IC 檢驗' },
           { id: 'trades', label: '📋 回測歷史全交易紀錄 (1,290筆)' },
           { id: 'rules', label: '📖 策略 SOP 與風控法典' }
         ].map(tab => (
@@ -1523,7 +1523,7 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'portfolio' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          {/* 1. exp_264 持股更動建議試算器 */}
+          {/* 1. 全球泰坦台股版 持股更動建議試算器 */}
           <div className="glass-card" style={{
             padding: '1.2rem',
             borderTop: '3px solid #F59E0B',
@@ -1533,10 +1533,10 @@ export default function TaiwanCausalTitanDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🔄 exp_264 週期換股 · 持股更動建議試算器
+                  🔄 全球泰坦台股版 · 持股更動建議試算器
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與 exp_264 最新一日目標權重 ({targetAllocationConfig.length} 檔{targetAllocationConfig.length === 0 ? '，風控觸發全數空手' : ''}) 即時比對偏差。資料截止：<strong>{strategy_info.latest_data_date}</strong>；資金容量上限 1 億。
+                  依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與全球泰坦台股版最新一日目標權重 ({targetAllocationConfig.length} 檔{targetAllocationConfig.length === 0 ? '，風控觸發全數空手' : ''}) 即時比對偏差。資料截止：<strong>{strategy_info.latest_data_date}</strong>；資金容量上限 1 億。
                 </p>
               </div>
 
@@ -2198,7 +2198,7 @@ export default function TaiwanCausalTitanDashboard() {
                 📈 22 年 (2005 - 2026) 策略 vs 大盤加權指數累積淨值走勢 (Log10 對數刻度)
               </h4>
               <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.82rem', color: '#94A3B8' }}>
-                elite_55 精選池 · 60 日週期換股 + 贏家護航/敗部定檢 · 1 億資金容量約束 · 0.25% 雙邊換手摩擦嚴格計入
+                全球泰坦邏輯 × 台股 0050∪0051 PIT · 1 億資金容量約束 · 買 0.04% / 賣 0.44% (含證交稅) 交易成本嚴格計入
               </p>
             </div>
             <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem' }}>
@@ -2294,7 +2294,7 @@ export default function TaiwanCausalTitanDashboard() {
                 🏆 2005 - 2026 歷年年度績效與個股實戰勝率對比 ({yearly_stats.length} 年勝率 {yearly_stats.length ? ((yearly_stats.filter(y => y.is_positive).length / yearly_stats.length) * 100).toFixed(1) : 0}%)
               </h4>
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                exp_264：60 日週期換股 · 贏家護航 · 敗部定檢 · 回撤分級降倉 (-16%/-20%/-24%)
+                半月雙梯隊 · 前 3 名 52/24/24 · 宏觀護盾空手停泊黃金/短債 · 容量約束 1 億
               </p>
             </div>
           </div>
@@ -2379,7 +2379,7 @@ export default function TaiwanCausalTitanDashboard() {
         </div>
       )}
 
-      {/* ===== TAB 4: exp_264 正交 Alpha 因子 ===== */}
+      {/* ===== TAB 4: 選股因子 Rank IC 檢驗 ===== */}
       {activeTabSub === 'alphas' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.2rem' }}>
           {causal_alphas.map(alpha => (
@@ -2422,7 +2422,7 @@ export default function TaiwanCausalTitanDashboard() {
                 📋 2005 - 2026 回測全進出交易明細 (共 {trades.length.toLocaleString()} 筆完整紀錄)
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                進出場由 exp_264 每日目標權重重建；已套用 1 億資金容量上限
+                同梯隊連續持有同一檔合併為一筆；已套用 1 億資金容量上限 (單檔 ≤ 20 日均成交值 10%)
               </p>
             </div>
             <button
@@ -2485,32 +2485,32 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 (exp_264 · 上限1億) · 實戰紀律操作守則 (SOP)
+            📖 台股因果泰坦 (上限1億) · 實戰紀律操作守則 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
               <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 標的池、選股與調倉時序</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>標的範疇：</strong>elite_55 精選高流動性池，最多 24 檔分散持有。<br />
-                • <strong>週期換股：</strong>每 60 個交易日換倉；新標的需通過輪動門檻 (rotation_threshold = 45)。<br />
-                • <strong>訊號：</strong>動能 + 籌碼 + 月營收 + 基本面 + 正交化 Alpha (Gram-Schmidt)，並以 VCP、HRP 叢集風險、可轉債拋壓等乘數校準。
+                • <strong>標的範疇：</strong>每日 0050 ∪ 0051 (官方 0050 成分 ∪ TWSE 純上市 60 日均成交值前 150 名)，含歷史上已下市/被剔除者，無倖存者偏差；再經全球泰坦台股過濾 (成交值與單筆金額前 30、PE、ROE、法人買超、動能路徑)。<br />
+                • <strong>換倉：</strong>每月 1 號 (A梯隊) 與 22 號 (B梯隊) 半月雙梯隊，收盤選股、次日開盤進場；新買進若跳空 &gt; 1.5% 或季線乖離 &gt; 40% 改掛 C×0.998 低接。<br />
+                • <strong>評分：</strong>G5 八因子微結構動能 × G12 進場防雷 × 研發護城河 × 正交共振。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 贏家護航 × 敗部定檢</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 配權與持有紀律</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>🏆 贏家護航：</strong>浮盈 ≥ 5.5% 且 sustain ≥ 0.50、ortho_z &gt; 0.80、收盤 &gt; 60MA 者換倉時豁免續抱，並以 9% / 13% / 16% 階梯式移動停利鎖利 (峰值報酬 &lt;20% / &lt;50% / ≥50%)。<br />
-                • <strong>🔍 敗部定檢：</strong>持有 ≥ 15 日且排名跌入後 25%、10 日動能 &lt; -2%、收盤 &lt; 20MA 即淘汰；每月 10~12 日營收 YoY 與 MoM 雙衰減 (&lt; -5) 且弱勢者亦淘汰。
+                • <strong>前 3 名 52% / 24% / 24%：</strong>Rank 1 具黃金研發護城河 (研發/營收 5~25%) 則 56/22/22；再乘以宏觀曝險。<br />
+                • <strong>智慧連任：</strong>舊持股 Rank 1~4 連任 (Rank 5 需日內吸籌為正)，12% 贏家漂移容忍帶內不賣；贏家浮盈 ≥ 5.5% 且守穩季線享續抱，並以 9/13/16% 階梯移動鎖利；滯漲或月營收雙衰減者淘汰。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #EF4444' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#F87171', fontSize: '1rem' }}>3. 風控與 1 億容量上限</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#F87171', fontSize: '1rem' }}>3. 宏觀護盾與 1 億容量上限</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>回撤分級降倉：</strong>策略回撤 -16% / -20% / -24% 時倉位降至 90% / 75% / 50%；大盤廣度與乖離同時轉弱時全數空手 (現金)。<br />
-                • <strong>現貨 1.0x 無槓桿：</strong>總部位 ≤ 100%，0.25% 雙邊換手摩擦。<br />
-                • <strong>資金上限 1 億：</strong>單檔部位 ≤ 20 日均成交值的 10%，超額部分留作現金；超過 1 億的資金不再擴大部位。
+                • <strong>宏觀曝險：</strong>全球 15 國寬幅 ≥ 50% 滿倉、30~50% 七成、&lt; 30% 空手；外科護盾 C1/C2/C3/C4/C6 與深熊 V 轉依「台股 Top5」重新判斷。空手時資金停泊黃金/短債池。<br />
+                • <strong>資金容量上限 1 億：</strong>單檔部位 ≤ 前 20 日均成交值 10%，超額不買 (留現金)；回測中約 {data?.strategy_info?.capacity_hit_rate ?? '-'}% 的下單被容量限制。<br />
+                • <strong>回測期間：</strong>截至 {data?.strategy_info?.backtest_through ?? '-'}；最新持股與曝險即時取自本機資料庫 ({strategy_info.latest_data_date})。
               </p>
             </div>
           </div>

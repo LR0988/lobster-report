@@ -1247,6 +1247,14 @@ def get_global_sovereign_dashboard_data():
         # 依 G12-PIT Sovereign 主動能分數初排，啟動【Rank 2~5 二階精篩狙擊器】與【同產業/同題材單押上限 = 1】
         if valid_picks:
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
+            # 【台股因果泰坦 (台股 0050∪0051 only)】保留台股子榜與護盾前基礎曝險，供 tw_titan_pit_service 以「僅台股」重算 Top5 護盾與 52/24/24 配權
+            try:
+                if isinstance(data.get("macro_status"), dict):
+                    data["macro_status"]["pre_shield_exposure_pct"] = data["macro_status"].get("exposure_pct", 100)
+                data["tw_only_ranked"] = [dict(x) for x in valid_picks if str(x.get("ticker", "")).endswith(".TW")][:12]
+            except Exception:
+                data["tw_only_ranked"] = []
+
             for idx_pre, p_item in enumerate(valid_picks, start=1):
                 p_item["pre_sniper_rank"] = idx_pre
 
