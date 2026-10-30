@@ -573,8 +573,22 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
   }
   const allUserTrades = (localTrades.length > 0 ? localTrades : (cloudTrades || [])).filter(isNotDeleted);
 
-  const userActiveHoldings = allUserTrades.filter(t => t.status === 'ACTIVE');
+  const userActiveHoldings = allUserTrades.filter(t => t.status === 'ACTIVE' || t.status === 'OPEN');
   const userClosedTrades = allUserTrades.filter(t => t.status === 'CLOSED');
+
+  const roundTwTickJs = (p, isTw = true, mode = 'round') => {
+    const val = parseFloat(p);
+    if (!val || isNaN(val) || val <= 0) return 0;
+    if (!isTw) return parseFloat(val.toFixed(2));
+    let tick = 0.01;
+    if (val >= 1000) tick = 5.0;
+    else if (val >= 500) tick = 1.0;
+    else if (val >= 100) tick = 0.5;
+    else if (val >= 50) tick = 0.1;
+    else if (val >= 10) tick = 0.05;
+    const mult = mode === 'floor' ? Math.floor((val + 1e-7) / tick) : Math.round(val / tick);
+    return parseFloat((mult * tick).toFixed(2));
+  };
 
   let activeHoldings = [];
   let tradeHistory = [];
@@ -583,13 +597,17 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
     const sActive = (serverData.active_holdings || []).filter(isNotDeleted);
     const sClosed = (serverData.trade_history || []).filter(isNotDeleted);
 
-    // 以最新即時行情更新用戶持倉中的現價與未實現損益
+    // 以最新即時行情與 S/B 分級規則更新用戶持倉中的現價、預掛賣單價與未實現損益
     const priceMap = {};
+    const radarMap = {};
     for (const item of (serverData.radar?.all_ranked || [])) {
       if (item.ticker && item.close) {
         priceMap[item.ticker] = item.close;
+        radarMap[item.ticker] = item;
         if (item.ticker.endsWith('.TW')) {
-          priceMap[item.ticker.replace('.TW', '')] = item.close;
+          const shortId = item.ticker.replace('.TW', '');
+          priceMap[shortId] = item.close;
+          radarMap[shortId] = item;
         }
       }
     }
@@ -599,29 +617,67 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
       }
     }
 
-    const refreshedUserActive = userActiveHoldings.map(pos => {
-      const liveP = priceMap[pos.ticker] || priceMap[pos.ticker.toUpperCase()] || pos.current_price;
-      const gainPct = parseFloat((((liveP - pos.entry_price) / pos.entry_price) * 100.0).toFixed(2));
-      const gainAmt = parseFloat(((liveP - pos.entry_price) * pos.shares).toFixed(2));
-      return {
-        ...pos,
-        current_price: liveP,
-        unrealized_pnl_pct: gainPct,
-        unrealized_pnl_amount: gainAmt
-      };
-    });
+    const enrichPosition = (pos) => {
+      const isTw = pos.currency === 'TWD' || (pos.ticker && pos.ticker.endsWith('.TW'));
+      const cSign = isTw ? 'NT$' : '$';
+      const rItem = radarMap[pos.ticker] || radarMap[(pos.ticker || '').toUpperCase()] || {};
+      const liveP = priceMap[pos.ticker] || priceMap[(pos.ticker || '').toUpperCase()] || pos.current_price || pos.entry_price;
+      const ePrice = parseFloat(pos.entry_price) || liveP;
+      const gainPct = parseFloat((((liveP - ePrice) / ePrice) * 100.0).toFixed(2));
+      const gainAmt = parseFloat(((liveP - ePrice) * (pos.shares || 1000)).toFixed(2));
 
-    const refreshedSActive = sActive.map(pos => {
-      const liveP = priceMap[pos.ticker] || priceMap[pos.ticker.toUpperCase()] || pos.current_price;
-      const gainPct = parseFloat((((liveP - pos.entry_price) / pos.entry_price) * 100.0).toFixed(2));
-      const gainAmt = parseFloat(((liveP - pos.entry_price) * pos.shares).toFixed(2));
+      const tier = pos.tier || rItem.tier || 'B';
+      const natrPct = pos.natr_pct || rItem.natr_pct || (tier === 'S' ? 3.8 : 2.6);
+      const daysHeld = pos.days_held || pos.holding_days || 1;
+      const curMa10 = rItem.ma10 || pos.target_ma10 || (ePrice * (tier === 'S' ? 1.065 : 1.035));
+
+      const rawFirstTp = tier === 'S'
+        ? (daysHeld <= 4 ? Math.max(curMa10, ePrice * 1.065) : Math.max(curMa10, ePrice * 1.015))
+        : (daysHeld <= 2 ? Math.max(curMa10, ePrice * 1.035) : Math.max(curMa10, ePrice * 1.012));
+      const rawMaxTp = tier === 'S' ? ePrice * 1.12 : ePrice * 1.085;
+      const todayLimitSell = pos.today_limit_sell_price || roundTwTickJs(Math.min(rawMaxTp, rawFirstTp), isTw, 'round');
+      const maxTpPrice = pos.target_stage2 || roundTwTickJs(rawMaxTp, isTw, 'round');
+      const stopLossP = pos.stop_loss_price || roundTwTickJs(ePrice * 0.92, isTw, 'floor');
+      const todayLimitGainPct = parseFloat((((todayLimitSell - ePrice) / ePrice) * 100.0).toFixed(2));
+
+      let canSell = Boolean(pos.can_sell);
+      let sellBadge = pos.sell_badge || `📋 08:50 預掛賣單 ${cSign}${todayLimitSell} (+${todayLimitGainPct}%)`;
+      let sellBadgeColor = pos.sell_badge_color || (tier === 'S' ? '#F43F5E' : '#38BDF8');
+      let sellInstruction = pos.sell_instruction || `請於 08:50 盤前預掛【${tier}級限價賣單 ${cSign}${todayLimitSell} (+${todayLimitGainPct}%)】（上限 ${cSign}${maxTpPrice}，硬停損 ${cSign}${stopLossP}）`;
+
+      if (liveP >= todayLimitSell) {
+        canSell = true;
+        sellBadge = `🚀 已達 ${tier} 級獲利門檻 (${cSign}${todayLimitSell})！立即平倉`;
+        sellBadgeColor = '#10B981';
+      } else if (liveP <= stopLossP || gainPct <= -8.0) {
+        canSell = true;
+        sellBadge = `🛑 觸發 -8% 硬停損 (${cSign}${stopLossP})`;
+        sellBadgeColor = '#EF4444';
+      }
+
       return {
         ...pos,
+        tier,
+        tier_badge: pos.tier_badge || (tier === 'S' ? `🔥 S級暴衝大魚股 (NATR ${natrPct}%)` : `⚡ B級標準中堅股 (NATR ${natrPct}%)`),
+        natr_pct: natrPct,
         current_price: liveP,
+        days_held: daysHeld,
+        today_limit_sell_price: todayLimitSell,
+        today_limit_gain_pct: todayLimitGainPct,
+        target_stage1: todayLimitSell,
+        target_stage2: maxTpPrice,
+        stop_loss_price: stopLossP,
         unrealized_pnl_pct: gainPct,
-        unrealized_pnl_amount: gainAmt
+        unrealized_pnl_amount: gainAmt,
+        can_sell: canSell,
+        sell_badge: sellBadge,
+        sell_badge_color: sellBadgeColor,
+        sell_instruction: sellInstruction
       };
-    });
+    };
+
+    const refreshedUserActive = userActiveHoldings.map(enrichPosition);
+    const refreshedSActive = sActive.map(enrichPosition);
 
     const existingActiveIds = new Set(refreshedSActive.map(t => t.id));
     const mergedActive = [...refreshedUserActive.filter(t => !existingActiveIds.has(t.id)), ...refreshedSActive];
@@ -762,16 +818,42 @@ export async function apiAddOversoldSniperTrade(payload) {
   }
 
   const newTradeId = localResult?.trade_id || `snip_${Date.now()}`;
-  const inputPrice = parseFloat(payload.entry_price);
+  const isTw = (payload.currency === 'TWD') || (payload.ticker && payload.ticker.toUpperCase().endsWith('.TW'));
+  const roundTwTickLocal = (p, mode = 'round') => {
+    const val = parseFloat(p);
+    if (!val || isNaN(val) || val <= 0) return 0;
+    if (!isTw) return parseFloat(val.toFixed(2));
+    let tick = 0.01;
+    if (val >= 1000) tick = 5.0;
+    else if (val >= 500) tick = 1.0;
+    else if (val >= 100) tick = 0.5;
+    else if (val >= 50) tick = 0.1;
+    else if (val >= 10) tick = 0.05;
+    const mult = mode === 'floor' ? Math.floor((val + 1e-7) / tick) : Math.round(val / tick);
+    return parseFloat((mult * tick).toFixed(2));
+  };
+
+  const inputPrice = roundTwTickLocal(payload.entry_price, 'round');
   const inputShares = parseFloat(payload.shares);
+  const tier = (payload.tier || localResult?.tier || 'B').toUpperCase();
+  const natrPct = parseFloat(payload.natr_pct || (tier === 'S' ? 3.8 : 2.6));
+  const firstTp = localResult?.first_tp_price || payload.first_tp_price || roundTwTickLocal(inputPrice * (tier === 'S' ? 1.065 : 1.035), 'round');
+  const maxTp = localResult?.max_tp_price || payload.max_tp_price || roundTwTickLocal(inputPrice * (tier === 'S' ? 1.12 : 1.085), 'round');
+  const stopLossP = localResult?.stop_loss_price || roundTwTickLocal(inputPrice * 0.92, 'floor');
+  const firstTpGainPct = parseFloat((((firstTp - inputPrice) / inputPrice) * 100.0).toFixed(2));
+  const cSign = isTw ? 'NT$' : '$';
 
   const newTrade = {
     id: newTradeId,
     ticker: payload.ticker,
     name: payload.name || payload.ticker,
-    market: payload.market || '美股',
-    currency: payload.currency || 'USD',
+    market: payload.market || (isTw ? '台股' : '美股'),
+    currency: payload.currency || (isTw ? 'TWD' : 'USD'),
     status: 'ACTIVE',
+    tier,
+    tier_badge: tier === 'S' ? `🔥 S級暴衝大魚股 (NATR ${natrPct}%)` : `⚡ B級標準中堅股 (NATR ${natrPct}%)`,
+    natr_pct: natrPct,
+    context_mode: payload.context_mode || '🛡️ 法人自救/群體恐慌',
     entry_date: entryDate,
     entry_time: entryTime,
     entry_datetime: `${entryDate} ${entryTime}`,
@@ -781,13 +863,19 @@ export async function apiAddOversoldSniperTrade(payload) {
     unrealized_pnl_pct: 0.0,
     unrealized_pnl_amount: 0.0,
     holding_days: 1,
-    target_ma10: parseFloat((inputPrice * 1.075).toFixed(2)),
-    target_ma20: parseFloat((inputPrice * 1.10).toFixed(2)),
-    stop_loss_price: parseFloat((inputPrice * 0.90).toFixed(2)),
+    days_held: 1,
+    max_holding_days: 10,
+    today_limit_sell_price: firstTp,
+    today_limit_gain_pct: firstTpGainPct,
+    target_ma10: firstTp,
+    target_ma20: maxTp,
+    target_stage1: firstTp,
+    target_stage2: maxTp,
+    stop_loss_price: stopLossP,
     can_sell: false,
-    sell_badge: '🛡️ 建倉持有中',
-    sell_badge_color: '#38BDF8',
-    sell_instruction: `進場時間: ${entryDate} ${entryTime.slice(0, 5)}，目標等待反彈觸及 10MA 停利！`,
+    sell_badge: `📋 08:50 預掛賣單 ${cSign}${firstTp} (+${firstTpGainPct}%)`,
+    sell_badge_color: tier === 'S' ? '#F43F5E' : '#38BDF8',
+    sell_instruction: `【${tier}級跟單｜第 1/10 天】請於 08:50 盤前預掛【限價賣單 ${cSign}${firstTp} (+${firstTpGainPct}%)】（封頂上限 ${cSign}${maxTp}，防守硬停損 ${cSign}${stopLossP}）`,
     notes: payload.notes || ''
   };
 
@@ -798,8 +886,12 @@ export async function apiAddOversoldSniperTrade(payload) {
 
   return localResult || {
     status: 'ok',
-    message: `成功新增跟單 ${payload.ticker} (成本: ${inputPrice}，進場時間: ${entryDate} ${entryTime.slice(0, 5)})！`,
+    message: `成功新增【${tier}級】跟單 ${payload.ticker} (買價: ${inputPrice}，首檻預掛賣價: ${firstTp}，上限: ${maxTp}，停損: ${stopLossP})！`,
     trade_id: newTradeId,
+    tier,
+    first_tp_price: firstTp,
+    max_tp_price: maxTp,
+    stop_loss_price: stopLossP,
     entry_date: entryDate,
     entry_time: entryTime
   };

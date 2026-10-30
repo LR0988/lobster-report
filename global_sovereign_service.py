@@ -824,7 +824,7 @@ def get_global_sovereign_dashboard_data():
                 winrate_grade = "volatile"
 
             # 計算 G12-PIT Sovereign (配置七) 主動能分數：
-            # 融合 G11-PIT 基底 + G12 三大進場防雷 + RD 黃金研發護城河加權 + exp_262 正交突破共振
+            # 融合 G11-PIT 基底 + exp_262 正交突破共振 (G12 三道防雷與研發加權已移除)
             io_60_val = round(float(sum(io_diffs[:min(60, len(io_diffs))])), 4) if len(io_diffs) >= 20 else io_20_val
             fip60_win = min(60, len(daily_rets))
             fip_60_val = round((sum(1 for r in daily_rets[:fip60_win] if r > 0) - sum(1 for r in daily_rets[:fip60_win] if r < 0)) / float(max(1, fip60_win)), 2) if fip60_win >= 20 else fip_val
@@ -844,18 +844,20 @@ def get_global_sovereign_dashboard_data():
             )
             anti_topping_veto_active = bool((cur_px < ma20) and (io_5_val < -0.01))
 
-            # G12 三大進場防雷指標：vw_io_5、high_dist_b2、vol_veto_d、cond_b60_veto
+            # [已移除] G12 三大進場防雷 (以下乘數固定為 1.0)
             vw_io_5_num = sum(io_diffs[k] * vols[k] for k in range(min(5, len(io_diffs), len(vols))))
             vw_io_5_den = sum(vols[:min(5, len(vols))]) + 1.0
             vw_io_5_val = vw_io_5_num / vw_io_5_den
-            m_high_dist_b2 = 0.72 if (bias20_val > 0.05 and (io_5_val < -0.012 or vw_io_5_val < -0.010)) else 1.0
-            m_vol_veto_d = 0.72 if (vol20_ann > 0.68 and (io_5_val < 0.0 or dd20_val < -0.08)) else 1.0
-            m_cond_b60 = 0.70 if (bias60_val > 0.35 and (io_5_val < 0.0 or vw_io_5_val < 0.0)) else 1.0
+            # [已移除] G12 三道進場防雷乘數 (×0.72/×0.72/×0.70)：消融測試為負貢獻或無貢獻，固定為 1.0 (不再影響評分)
+            m_high_dist_b2 = 1.0
+            m_vol_veto_d = 1.0
+            m_cond_b60 = 1.0
 
             # RD 研發強度護城河指標 (RD費用 / 營收 %)
-            rd_pct_val = float(rd_intensity_map.get(t_code, {}).get("rd_pct_median", 0.0) or 0.0)
-            m_r2_tech = 0.80 if rd_pct_val > 28.0 else (0.92 if (0.0 < rd_pct_val < 3.5) else 1.00)
-            m_rd_synergy = (1.05 if (coiled_spring_active and 5.0 <= rd_pct_val <= 25.0) else 1.0) * m_r2_tech
+            # [已移除] 研發強度加權 (×1.05/×0.80/×0.92) 與 Top1 56/22/22 加碼：靜態表含全歷史後見之明且貢獻為負；rd_pct 僅保留為 0 的相容欄位
+            rd_pct_val = 0.0
+            m_r2_tech = 1.00
+            m_rd_synergy = 1.00
 
             # exp_262 正交突破共振指標：sustain_20d、comp_ratio、sortino_60、turnover_growth
             sustain_20d_val = 0.0
@@ -905,7 +907,7 @@ def get_global_sovereign_dashboard_data():
                 rd_tag = f"🧬黃金研發護城河(R&D {rd_pct_val:.1f}%)"
                 sniper_tag = f"{sniper_tag} × {rd_tag}" if sniper_tag else rd_tag
             if anti_topping_veto_active or m_high_dist_b2 < 1.0 or m_vol_veto_d < 1.0 or m_cond_b60 < 1.0:
-                veto_tag = f"🛑G12高檔派發/爆波動防雷降權"
+                veto_tag = f"🛑L2 跌破月線且日內賣壓降權 (×0.70)"
                 sniper_tag = f"{sniper_tag} × {veto_tag}" if sniper_tag else veto_tag
 
             open_pool_quality_ok = bool(len(closes) >= 200)
@@ -1346,9 +1348,8 @@ def get_global_sovereign_dashboard_data():
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
             top10_picks = valid_picks[:10]
-            # G12-PIT Sovereign (配置七)：基礎信念配比 52/24/24%，若 Rank #1 具備黃金研發護城河 (5% <= R&D/Rev <= 25%) 則提振至 56/22/22%
-            top1_rd_pct = float(top10_picks[0].get("rd_pct") or 0.0) if top10_picks else 0.0
-            weights_single_tranche = [56, 22, 22] if (5.0 <= top1_rd_pct <= 25.0) else [52, 24, 24]
+            # G12-PIT Sovereign：基礎信念配比固定 52/24/24%
+            weights_single_tranche = [52, 24, 24]   # [已移除] 研發強度 56/22/22 加碼，固定 52/24/24
             for idx_p, pick in enumerate(top10_picks, start=1):
                 pick["rank"] = idx_p
                 pick["is_active"] = (idx_p <= 3)
@@ -1364,6 +1365,18 @@ def get_global_sovereign_dashboard_data():
             key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0),
             reverse=True
         )
+        _g11p = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "g11_pit_yearly_history.json")
+        try:
+            with open(_g11p, "r", encoding="utf-8") as _f:
+                _G = json.load(_f)
+        except Exception:
+            _G = {}
+        _cagr, _mult = float(_G.get("cagr", 0)), float(_G.get("mult", 0))
+        _mm, _dm = float(_G.get("monthly_mdd", 0)), float(_G.get("daily_mdd", 0))
+        _cal, _sh = float(_G.get("calmar", 0)), float(_G.get("sharpe", 0))
+        _wy = str(_G.get("winning_years", "-"))
+        _wy_n = _wy.split(" ")[0]
+        _hist = _G.get("yearly_history", [])
         data["dynamic_universe_status"] = {
             "enabled": True,
             "mode": "true_pit_sp500_and_tw0050_0051_1734_g12_sovereign",
@@ -1375,20 +1388,20 @@ def get_global_sovereign_dashboard_data():
             "total_active_universe": 1734,
             "open_pool_unbiased_backtest": {
                 "universe_size": "1,734 檔真實無生存者偏誤 PIT 選股池 (956 檔 S&P 500 歷史成分股 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005–2026 零遺漏池)",
-                "cagr_22y": 41.32,
-                "cagr_g1_2004_2014": 48.12,
-                "cagr_g2_2015_2026": 36.13,
-                "daily_mdd": -25.45,
-                "monthly_mdd": -18.55,
-                "sharpe": 1.27,
-                "calmar": 2.23
+                "cagr_22y": _cagr,
+                "cagr_g1_2004_2014": _G.get("g1_cagr"),
+                "cagr_g2_2015_2026": _G.get("g2_cagr"),
+                "daily_mdd": _dm,
+                "monthly_mdd": _mm,
+                "sharpe": _sh,
+                "calmar": _cal
             },
             "gatekeeper_rules": [
                 "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
                 "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 (5,338 日) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
-                "③ G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)",
-                "④ 黃金研發強度護城河 (R&D/Rev 5%~25%) + exp_262 正交突破共振：具備黃金研發護城河與平台蓄勢者提權 ×1.05 且 Top 1 重倉 56%/22%/22%；燒錢股 (R&D>28%) 降權 ×0.80；Sustain≥45% × Sortino60≥1.5 正交加權 ×1.04",
-                "⑤ exp_264 贏家 40~60 天主升段續抱護航 & 敗部滯漲/月營收定檢：曾浮盈 >=+5.5% 贏家受 0.09/0.13/0.16 移動鎖利與季線保護完整走完主升段；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減立即淘汰換馬，締造 2005–2026 CAGR 41.32%、1,901.4倍、月MDD -18.55%、Calmar 2.23、勝年 21/22！"
+                "③ [已移除] G12 三大進場防雷閘門與研發強度加權：消融測試顯示它們對報酬為負貢獻或無貢獻 (且研發強度靜態表含後見之明)，已拿掉；固定 Top 3 配權 52%/24%/24%",
+                "④ exp_262 正交突破共振：Sustain≥45% × Sortino60≥1.5 正交加權 ×1.04；月營收雙衰減降權",
+                f"⑤ exp_264 贏家 40~60 天主升段續抱護航 & 敗部滯漲/月營收定檢：曾浮盈 >=+5.5% 贏家受 0.09/0.13/0.16 移動鎖利與季線保護；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減立即淘汰換馬。回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
         }
@@ -1417,43 +1430,37 @@ def get_global_sovereign_dashboard_data():
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
         # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (2005-2026 0050∪0051 純上市 PIT 零遺漏版)
-        data["strategy_name"] = "👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・S&P 500 + 台灣 0050∪0051 純上市 PIT 2005-2026 零遺漏版・CAGR 41.32%・1,901.4倍・月MDD -18.55%・Calmar 2.23・勝年 21/22)"
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・S&P 500 + 台灣 0050∪0051 純上市 PIT 2005-2026・已移除 G12 三道防雷與研發加權・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
-            "total_ret": 190040.0,
-            "mult": 1901.4,
-            "cagr": 41.32,
-            "g1_cagr": 48.12,
-            "g2_cagr": 36.13,
-            "mdd": -18.55,
-            "daily_mdd": -25.45,
-            "sharpe": 1.27,
-            "calmar": 2.23,
-            "daily_calmar": 1.62,
-            "sortino": 2.12,
-            "win_rate": 95.5,
-            "winning_years": "21/22",
-            "semi_monthly_win_rate": 63.5,
-            "big_loss_rate": 8.0
+            "total_ret": _G.get("total_ret_pct"),
+            "mult": _mult,
+            "cagr": _cagr,
+            "g1_cagr": _G.get("g1_cagr"),
+            "g2_cagr": _G.get("g2_cagr"),
+            "mdd": _mm,
+            "daily_mdd": _dm,
+            "sharpe": _sh,
+            "calmar": _cal,
+            "daily_calmar": _G.get("daily_calmar"),
+            "sortino": _G.get("sortino"),
+            "win_rate": round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else None,
+            "winning_years": _wy_n,
+            "semi_monthly_win_rate": _G.get("semi_monthly_win_rate"),
+            "big_loss_rate": _G.get("big_loss_rate")
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
                 "【G12-PIT Sovereign 2005-2026 0050∪0051 純上市零遺漏架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT (2005-2026 5,338日 100% 零遺漏) + "
-                "G12 三大進場防雷(高檔出貨/爆波動/季線背離降權) + 黃金研發護城河(R&D 5~25% Top1 重倉 56/22/22%) + "
+                "(已移除 G12 三大進場防雷與研發強度加權；固定 52/24/24) + "
                 "exp_262 正交突破共振(Sustain×Sortino60×月營收過濾) + exp_264 雙軌定檢(贏家>=+5.5% 享 40~60天主升段續抱與 0.09/0.13/0.16 移動鎖利；敗部滯漲與月營收雙衰減立即淘汰) + "
                 "C4(45%) / C6(20%) 外科五重護盾"
             )
-            data["doe_config"]["winning_years_pct"] = 95.5
+            data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
         # 同步更新歷年報酬率為 G12-PIT Sovereign (2005~2026，剔除無台股 0050∪0051 資料之 2004 年，22年勝年 21/22 = 95.5%)
-        scheme_a_yearly = {
-            2005: 68.06, 2006: 117.21, 2007: 208.63, 2008: 27.68,
-            2009: 27.27, 2010: 19.77, 2011: 10.19, 2012: 13.82, 2013: 62.15,
-            2014: 13.99, 2015: -3.54, 2016: 49.08, 2017: 25.61, 2018: 24.51,
-            2019: 11.61, 2020: 35.28, 2021: 2.98, 2022: 14.05, 2023: 38.14,
-            2024: 62.16, 2025: 30.83, 2026: 220.04
-        }
+        scheme_a_yearly = {int(r["year"]): float(r["return_pct"]) for r in _hist if r.get("year") is not None}
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
             data["yearly_performance"] = [row for row in data["yearly_performance"] if int(row.get("year", 0)) >= 2005]
             for row in data["yearly_performance"]:
@@ -1463,23 +1470,23 @@ def get_global_sovereign_dashboard_data():
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": "🏆 全球泰坦 2.0・G12-PIT Sovereign 總冠軍 (2005-2026 S&P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版)：CAGR 41.32%・1,901.4倍・月MDD -18.55%・Calmar 2.23・勝年 21/22 (95.5%)",
-            "baseline_cagr": 32.89,
-            "smart_cagr": 41.32,
-            "cagr_boost": 8.43,
-            "mult_boost": 1304.0,
-            "winning_years": "21/22 (95.5%)",
-            "semi_monthly_win_rate": "63.5%",
-            "monthly_mdd": "-18.55%",
-            "daily_mdd": "-25.45%",
-            "calmar": 2.23,
-            "sharpe": 1.27,
-            "recent_8y_cagr": 47.85,
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (2005-2026 S&P 500 + 台灣 0050∪0051 純上市 PIT・已移除 G12 防雷與研發加權)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "baseline_cagr": None,
+            "smart_cagr": _cagr,
+            "cagr_boost": None,
+            "mult_boost": None,
+            "winning_years": _wy,
+            "semi_monthly_win_rate": f"{_G.get('semi_monthly_win_rate')}%",
+            "monthly_mdd": f"{_mm:.2f}%",
+            "daily_mdd": f"{_dm:.2f}%",
+            "calmar": _cal,
+            "sharpe": _sh,
+            "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
                 "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：剔除無台股 0050∪0051 資料之 2004 年，嚴格鎖定 2005-01-03 ~ 2026-10-29 共 5,338 個交易日 (美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔，100% 零遺漏且排除上櫃股)。",
-                "② G12 三大進場防雷閘門：攔截高檔出貨 (bias20>5% & IO_5<-1.2% -> ×0.72)、高波動失血 (vol20>68% & IO_5<0 -> ×0.72) 與季線過熱背離 (bias60>35% & IO_5<0 -> ×0.70)，將月度 MDD 壓低至 -18.55% (Calmar 高達 2.23)！",
-                "③ 黃金研發強度護城河 (R&D/Rev 5%~25%) + 56/22/22% 霸主重倉：倒 U 型研發效率實證顯示 R&D 佔營收 5%~25% 勝率最高，與平台蓄勢共振提權 ×1.05 且 Rank #1 權重升級至 56%/22%/22%；排除 >28% 燒錢股地雷 (2021 年 +2.98%、2022 年 +14.05%)。",
-                "④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：對曾浮盈 >=+5.5% 贏家賦予 40~60 天主升段續抱特權 (受 0.09/0.13/0.16 移動鎖利與季線約束)；對浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者立即撤銷保護帶換馬，22 年締造 21 勝 1 微負 (95.5% 勝年)、CAGR 41.32%、累積 1,901.4 倍！"
+                "② [已移除] G12 三大進場防雷閘門 (×0.72/×0.72/×0.70)：消融測試顯示為負貢獻或無貢獻，已拿掉。",
+                "③ [已移除] 黃金研發強度護城河加權與 56/22/22 重倉：研發強度靜態表含全歷史後見之明且貢獻為負，已拿掉；固定 52/24/24 配權。",
+                f"④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：曾浮盈 >=+5.5% 贏家享 40~60 天主升段續抱 (受 0.09/0.13/0.16 移動鎖利與季線約束)；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者撤銷保護帶換馬。22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 

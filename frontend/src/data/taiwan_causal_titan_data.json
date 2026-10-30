@@ -6,116 +6,89 @@
   "rebalance_freq": "每月 1 號 (A梯隊) 與 22 號 (B梯隊) 雙梯隊半月換倉",
   "next_rebalance_date": "2026-11-11",
   "current_rebalance_date": "2026-10-30",
-  "holding_count": 3,
+  "holding_count": 2,
   "allocation_type": "前 3 名 52% / 24% / 24% (Rank1 具黃金研發護城河 56/22/22) × 宏觀曝險",
   "exit_rule": "智慧連任保護 + exp_264 贏家護航/敗部定檢 + 12% 贏家漂移容忍帶 + 宏觀外科護盾 (空手停泊黃金/短債池)",
   "transaction_friction": "買 0.03990% / 賣 0.43990% (含 0.3% 證交稅，手續費 2.8 折)",
   "latest_data_date": "2026-10-30",
   "capital_cap_twd": 100000000,
   "capacity_rule": "單檔部位 ≤ 前 20 日均成交值 10%；超出部分不買 (資金留現金/短債)",
-  "capacity_hit_rate": 11.6,
+  "capacity_hit_rate": 11.1,
   "backtest_through": "2026-10-02"
  },
  "kpis": {
-  "cagr": 18.01,
-  "sharpe": 0.9,
-  "max_drawdown": -37.28,
+  "cagr": 17.87,
+  "sharpe": 0.89,
+  "max_drawdown": -37.2,
   "calmar": 0.48,
-  "annual_vol": 20.94,
-  "win_rate": 56.19,
-  "total_multiple": 36.6,
+  "annual_vol": 21.08,
+  "win_rate": 55.77,
+  "total_multiple": 35.71,
   "taiex_cagr": 9.97,
   "taiex_sharpe": 0.6,
   "taiex_mdd": -58.31,
   "taiex_multiple": 7.89,
-  "alpha_cagr": 8.04,
-  "sortino": 1.36,
-  "profit_factor": 2.7,
-  "total_trades": 404,
-  "total_return_pct": 3559.8,
-  "alpha_total_pct": 2870.7
+  "alpha_cagr": 7.91,
+  "sortino": 1.35,
+  "profit_factor": 2.68,
+  "total_trades": 407,
+  "total_return_pct": 3471.0,
+  "alpha_total_pct": 2781.9
  },
  "current_positions": [
   {
-   "id": "pos_2451",
-   "stock_id": "2451",
-   "stock_name": "創見",
+   "id": "pos_2379",
+   "stock_id": "2379",
+   "stock_name": "瑞昱",
    "industry": "🇹🇼 台灣 0050∪0051 純上市 PIT",
    "role": "👑 Rank1 王者 (52%)",
    "weight_pct": 52.0,
    "target_weight_pct": 52.0,
    "entry_date": "",
-   "entry_price": 294.0,
-   "current_price": 294.0,
-   "latest_price": 294.0,
+   "entry_price": 803.0,
+   "current_price": 803.0,
+   "latest_price": 803.0,
    "unrealized_return_pct": 0.0,
    "pnl_pct": 0.0,
    "holding_days": 0,
-   "stop_loss_price": 286.74,
-   "ma60_stop_price": 286.74,
-   "stop_loss_ma60": 286.74,
-   "dist_to_stop_pct": 2.53,
-   "stop_loss_pct": 2.53,
+   "stop_loss_price": 726.48,
+   "ma60_stop_price": 726.48,
+   "stop_loss_ma60": 726.48,
+   "dist_to_stop_pct": 10.53,
+   "stop_loss_pct": 10.53,
    "stop_condition": "全球泰坦：連任保護 / 贏家護航 / 敗部定檢；破 60MA 或排名掉出將於下次換倉日換出",
-   "strategy_current_price": 294.0,
-   "price_date": "2026-10-29",
-   "highlight": "🛡️ 禁追跳空>1.5%・超限掛 293.41",
-   "score": 0.7793,
-   "smart_entry_desc": "短線動能偏熱 (5D +9.1%)，T+1 開盤價若未超過 298.41 (+1.5%) 可直接買入；若跳空超過 298.41 (3D拉回率 70%) 則改掛 C_T×0.998 (293.41) 等 2 天。"
-  },
-  {
-   "id": "pos_3044",
-   "stock_id": "3044",
-   "stock_name": "健鼎",
-   "industry": "🇹🇼 台灣 0050∪0051 純上市 PIT",
-   "role": "🚀 Rank2 (24%)",
-   "weight_pct": 24.0,
-   "target_weight_pct": 24.0,
-   "entry_date": "",
-   "entry_price": 536.0,
-   "current_price": 536.0,
-   "latest_price": 536.0,
-   "unrealized_return_pct": 0.0,
-   "pnl_pct": 0.0,
-   "holding_days": 0,
-   "stop_loss_price": 504.45,
-   "ma60_stop_price": 504.45,
-   "stop_loss_ma60": 504.45,
-   "dist_to_stop_pct": 6.25,
-   "stop_loss_pct": 6.25,
-   "stop_condition": "全球泰坦：連任保護 / 贏家護航 / 敗部定檢；破 60MA 或排名掉出將於下次換倉日換出",
-   "strategy_current_price": 536.0,
-   "price_date": "2026-10-29",
-   "highlight": "🟢 開盤直買・跳空>1.5%掛 534.93",
-   "score": 0.4129,
-   "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 544.04 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (534.93) 等 2 天。"
+   "strategy_current_price": 803.0,
+   "price_date": "2026-10-30",
+   "highlight": "🟢 開盤直買・跳空>1.5%掛 801.39",
+   "score": 0.3534,
+   "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 815.04 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (801.39) 等 2 天。"
   },
   {
    "id": "pos_3034",
    "stock_id": "3034",
    "stock_name": "聯詠",
    "industry": "🇹🇼 台灣 0050∪0051 純上市 PIT",
-   "role": "⚡ Rank3 (24%)",
+   "role": "🚀 Rank2 (24%)",
    "weight_pct": 24.0,
    "target_weight_pct": 24.0,
    "entry_date": "",
-   "entry_price": 596.0,
-   "current_price": 596.0,
-   "latest_price": 596.0,
+   "entry_price": 575.0,
+   "current_price": 575.0,
+   "latest_price": 575.0,
    "unrealized_return_pct": 0.0,
    "pnl_pct": 0.0,
    "holding_days": 0,
-   "stop_loss_price": 546.0,
-   "ma60_stop_price": 546.0,
-   "stop_loss_ma60": 546.0,
-   "dist_to_stop_pct": 9.16,
-   "stop_loss_pct": 9.16,
+   "stop_loss_price": 546.93,
+   "ma60_stop_price": 546.93,
+   "stop_loss_ma60": 546.93,
+   "dist_to_stop_pct": 5.13,
+   "stop_loss_pct": 5.13,
    "stop_condition": "全球泰坦：連任保護 / 贏家護航 / 敗部定檢；破 60MA 或排名掉出將於下次換倉日換出",
-   "strategy_current_price": 596.0,
-   "price_date": "2026-10-29",
-   "highlight": "🟢 開盤直買・跳空>1.5%掛 594.81",
-   "score": 0.2604,
-   "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 604.94 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (594.81) 等 2 天。"
+   "strategy_current_price": 575.0,
+   "price_date": "2026-10-30",
+   "highlight": "🟢 開盤直買・跳空>1.5%掛 573.85",
+   "score": 0.3269,
+   "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 583.62 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (573.85) 等 2 天。"
   }
  ],
  "curve": [
@@ -186,1769 +159,1769 @@
    "date": "2005-10-31",
    "strategy_nav": 1.059,
    "taiex_nav": 0.938,
-   "monthly_ret": -5.93,
+   "monthly_ret": -5.87,
    "taiex_ret": -5.79
   },
   {
    "date": "2005-11-30",
-   "strategy_nav": 1.157,
+   "strategy_nav": 1.155,
    "taiex_nav": 1.01,
-   "monthly_ret": 9.28,
+   "monthly_ret": 9.07,
    "taiex_ret": 7.62
   },
   {
    "date": "2005-12-31",
-   "strategy_nav": 1.249,
+   "strategy_nav": 1.242,
    "taiex_nav": 1.066,
-   "monthly_ret": 7.98,
+   "monthly_ret": 7.52,
    "taiex_ret": 5.56
   },
   {
    "date": "2006-01-31",
-   "strategy_nav": 1.363,
+   "strategy_nav": 1.354,
    "taiex_nav": 1.063,
-   "monthly_ret": 9.09,
+   "monthly_ret": 9.02,
    "taiex_ret": -0.25
   },
   {
    "date": "2006-02-28",
-   "strategy_nav": 1.208,
+   "strategy_nav": 1.201,
    "taiex_nav": 1.068,
    "monthly_ret": -11.31,
    "taiex_ret": 0.45
   },
   {
    "date": "2006-03-31",
-   "strategy_nav": 1.444,
+   "strategy_nav": 1.435,
    "taiex_nav": 1.077,
-   "monthly_ret": 19.49,
+   "monthly_ret": 19.52,
    "taiex_ret": 0.8
   },
   {
    "date": "2006-04-30",
-   "strategy_nav": 1.556,
+   "strategy_nav": 1.538,
    "taiex_nav": 1.167,
-   "monthly_ret": 7.75,
+   "monthly_ret": 7.15,
    "taiex_ret": 8.43
   },
   {
    "date": "2006-05-31",
-   "strategy_nav": 1.509,
+   "strategy_nav": 1.493,
    "taiex_nav": 1.115,
-   "monthly_ret": -3.0,
+   "monthly_ret": -2.91,
    "taiex_ret": -4.53
   },
   {
    "date": "2006-06-30",
-   "strategy_nav": 1.317,
+   "strategy_nav": 1.3,
    "taiex_nav": 1.091,
-   "monthly_ret": -12.74,
+   "monthly_ret": -12.92,
    "taiex_ret": -2.08
   },
   {
    "date": "2006-07-31",
-   "strategy_nav": 1.292,
+   "strategy_nav": 1.276,
    "taiex_nav": 1.051,
-   "monthly_ret": -1.85,
+   "monthly_ret": -1.84,
    "taiex_ret": -3.73
   },
   {
    "date": "2006-08-31",
-   "strategy_nav": 1.295,
+   "strategy_nav": 1.279,
    "taiex_nav": 1.076,
-   "monthly_ret": 0.2,
+   "monthly_ret": 0.21,
    "taiex_ret": 2.44
   },
   {
    "date": "2006-09-30",
-   "strategy_nav": 1.418,
+   "strategy_nav": 1.408,
    "taiex_nav": 1.12,
-   "monthly_ret": 9.55,
+   "monthly_ret": 10.11,
    "taiex_ret": 4.1
   },
   {
    "date": "2006-10-31",
-   "strategy_nav": 1.522,
+   "strategy_nav": 1.517,
    "taiex_nav": 1.143,
-   "monthly_ret": 7.32,
+   "monthly_ret": 7.69,
    "taiex_ret": 2.01
   },
   {
    "date": "2006-11-30",
-   "strategy_nav": 1.525,
+   "strategy_nav": 1.519,
    "taiex_nav": 1.232,
-   "monthly_ret": 0.16,
+   "monthly_ret": 0.17,
    "taiex_ret": 7.78
   },
   {
    "date": "2006-12-31",
-   "strategy_nav": 1.664,
+   "strategy_nav": 1.659,
    "taiex_nav": 1.274,
-   "monthly_ret": 9.15,
+   "monthly_ret": 9.16,
    "taiex_ret": 3.38
   },
   {
    "date": "2007-01-31",
-   "strategy_nav": 1.722,
+   "strategy_nav": 1.71,
    "taiex_nav": 1.253,
-   "monthly_ret": 3.49,
+   "monthly_ret": 3.08,
    "taiex_ret": -1.59
   },
   {
    "date": "2007-02-28",
-   "strategy_nav": 1.767,
+   "strategy_nav": 1.752,
    "taiex_nav": 1.286,
-   "monthly_ret": 2.62,
+   "monthly_ret": 2.5,
    "taiex_ret": 2.63
   },
   {
    "date": "2007-03-31",
-   "strategy_nav": 1.771,
+   "strategy_nav": 1.751,
    "taiex_nav": 1.283,
-   "monthly_ret": 0.17,
+   "monthly_ret": -0.1,
    "taiex_ret": -0.22
   },
   {
    "date": "2007-04-30",
-   "strategy_nav": 1.681,
+   "strategy_nav": 1.662,
    "taiex_nav": 1.282,
-   "monthly_ret": -5.07,
+   "monthly_ret": -5.04,
    "taiex_ret": -0.11
   },
   {
    "date": "2007-05-31",
-   "strategy_nav": 1.824,
+   "strategy_nav": 1.818,
    "taiex_nav": 1.326,
-   "monthly_ret": 8.54,
+   "monthly_ret": 9.37,
    "taiex_ret": 3.42
   },
   {
    "date": "2007-06-30",
-   "strategy_nav": 1.929,
+   "strategy_nav": 1.916,
    "taiex_nav": 1.446,
-   "monthly_ret": 5.74,
+   "monthly_ret": 5.37,
    "taiex_ret": 9.06
   },
   {
    "date": "2007-07-31",
-   "strategy_nav": 2.132,
+   "strategy_nav": 2.11,
    "taiex_nav": 1.512,
-   "monthly_ret": 10.54,
+   "monthly_ret": 10.16,
    "taiex_ret": 4.55
   },
   {
    "date": "2007-08-31",
-   "strategy_nav": 2.3,
+   "strategy_nav": 2.277,
    "taiex_nav": 1.462,
-   "monthly_ret": 7.88,
+   "monthly_ret": 7.91,
    "taiex_ret": -3.29
   },
   {
    "date": "2007-09-30",
-   "strategy_nav": 2.382,
+   "strategy_nav": 2.358,
    "taiex_nav": 1.532,
-   "monthly_ret": 3.53,
+   "monthly_ret": 3.54,
    "taiex_ret": 4.78
   },
   {
    "date": "2007-10-31",
-   "strategy_nav": 2.609,
+   "strategy_nav": 2.583,
    "taiex_nav": 1.581,
    "monthly_ret": 9.54,
    "taiex_ret": 3.18
   },
   {
    "date": "2007-11-30",
-   "strategy_nav": 2.157,
+   "strategy_nav": 2.135,
    "taiex_nav": 1.398,
-   "monthly_ret": -17.32,
+   "monthly_ret": -17.31,
    "taiex_ret": -11.58
   },
   {
    "date": "2007-12-31",
-   "strategy_nav": 2.209,
+   "strategy_nav": 2.187,
    "taiex_nav": 1.385,
-   "monthly_ret": 2.42,
+   "monthly_ret": 2.43,
    "taiex_ret": -0.93
   },
   {
    "date": "2008-01-31",
-   "strategy_nav": 2.332,
+   "strategy_nav": 2.308,
    "taiex_nav": 1.224,
    "monthly_ret": 5.54,
    "taiex_ret": -11.58
   },
   {
    "date": "2008-02-29",
-   "strategy_nav": 2.395,
+   "strategy_nav": 2.371,
    "taiex_nav": 1.369,
    "monthly_ret": 2.71,
    "taiex_ret": 11.86
   },
   {
    "date": "2008-03-31",
-   "strategy_nav": 2.289,
+   "strategy_nav": 2.266,
    "taiex_nav": 1.395,
    "monthly_ret": -4.42,
    "taiex_ret": 1.9
   },
   {
    "date": "2008-04-30",
-   "strategy_nav": 2.475,
+   "strategy_nav": 2.451,
    "taiex_nav": 1.452,
-   "monthly_ret": 8.13,
+   "monthly_ret": 8.15,
    "taiex_ret": 4.05
   },
   {
    "date": "2008-05-31",
-   "strategy_nav": 2.474,
+   "strategy_nav": 2.45,
    "taiex_nav": 1.403,
    "monthly_ret": -0.03,
    "taiex_ret": -3.37
   },
   {
    "date": "2008-06-30",
-   "strategy_nav": 2.144,
+   "strategy_nav": 2.122,
    "taiex_nav": 1.225,
-   "monthly_ret": -13.35,
+   "monthly_ret": -13.37,
    "taiex_ret": -12.71
   },
   {
    "date": "2008-07-31",
-   "strategy_nav": 2.113,
+   "strategy_nav": 2.092,
    "taiex_nav": 1.143,
    "monthly_ret": -1.44,
    "taiex_ret": -6.64
   },
   {
    "date": "2008-08-31",
-   "strategy_nav": 2.109,
+   "strategy_nav": 2.088,
    "taiex_nav": 1.147,
    "monthly_ret": -0.19,
    "taiex_ret": 0.31
   },
   {
    "date": "2008-09-30",
-   "strategy_nav": 2.106,
+   "strategy_nav": 2.085,
    "taiex_nav": 0.931,
    "monthly_ret": -0.14,
    "taiex_ret": -18.83
   },
   {
    "date": "2008-10-31",
-   "strategy_nav": 2.101,
+   "strategy_nav": 2.08,
    "taiex_nav": 0.793,
    "monthly_ret": -0.23,
    "taiex_ret": -14.84
   },
   {
    "date": "2008-11-30",
-   "strategy_nav": 2.1,
+   "strategy_nav": 2.079,
    "taiex_nav": 0.726,
    "monthly_ret": -0.05,
    "taiex_ret": -8.42
   },
   {
    "date": "2008-12-31",
-   "strategy_nav": 2.082,
+   "strategy_nav": 2.061,
    "taiex_nav": 0.747,
    "monthly_ret": -0.85,
    "taiex_ret": 2.93
   },
   {
    "date": "2009-01-31",
-   "strategy_nav": 2.154,
+   "strategy_nav": 2.132,
    "taiex_nav": 0.692,
    "monthly_ret": 3.44,
    "taiex_ret": -7.48
   },
   {
    "date": "2009-02-28",
-   "strategy_nav": 2.171,
+   "strategy_nav": 2.149,
    "taiex_nav": 0.742,
    "monthly_ret": 0.79,
    "taiex_ret": 7.28
   },
   {
    "date": "2009-03-31",
-   "strategy_nav": 2.144,
+   "strategy_nav": 2.123,
    "taiex_nav": 0.848,
    "monthly_ret": -1.21,
    "taiex_ret": 14.34
   },
   {
    "date": "2009-04-30",
-   "strategy_nav": 2.128,
+   "strategy_nav": 2.107,
    "taiex_nav": 0.975,
-   "monthly_ret": -0.76,
+   "monthly_ret": -0.75,
    "taiex_ret": 15.0
   },
   {
    "date": "2009-05-31",
-   "strategy_nav": 2.331,
+   "strategy_nav": 2.25,
    "taiex_nav": 1.122,
-   "monthly_ret": 9.53,
+   "monthly_ret": 6.78,
    "taiex_ret": 14.98
   },
   {
    "date": "2009-06-30",
-   "strategy_nav": 2.182,
+   "strategy_nav": 2.088,
    "taiex_nav": 1.047,
-   "monthly_ret": -6.39,
+   "monthly_ret": -7.21,
    "taiex_ret": -6.65
   },
   {
    "date": "2009-07-31",
-   "strategy_nav": 2.231,
+   "strategy_nav": 2.135,
    "taiex_nav": 1.152,
-   "monthly_ret": 2.23,
+   "monthly_ret": 2.26,
    "taiex_ret": 10.04
   },
   {
    "date": "2009-08-31",
-   "strategy_nav": 2.253,
+   "strategy_nav": 2.154,
    "taiex_nav": 1.111,
-   "monthly_ret": 1.02,
+   "monthly_ret": 0.9,
    "taiex_ret": -3.56
   },
   {
    "date": "2009-09-30",
-   "strategy_nav": 2.383,
+   "strategy_nav": 2.277,
    "taiex_nav": 1.222,
-   "monthly_ret": 5.76,
+   "monthly_ret": 5.71,
    "taiex_ret": 10.01
   },
   {
    "date": "2009-10-31",
-   "strategy_nav": 2.148,
+   "strategy_nav": 2.058,
    "taiex_nav": 1.195,
-   "monthly_ret": -9.85,
+   "monthly_ret": -9.65,
    "taiex_ret": -2.25
   },
   {
    "date": "2009-11-30",
-   "strategy_nav": 2.192,
+   "strategy_nav": 2.096,
    "taiex_nav": 1.234,
-   "monthly_ret": 2.03,
+   "monthly_ret": 1.89,
    "taiex_ret": 3.3
   },
   {
    "date": "2009-12-31",
-   "strategy_nav": 2.412,
+   "strategy_nav": 2.308,
    "taiex_nav": 1.333,
-   "monthly_ret": 10.06,
+   "monthly_ret": 10.1,
    "taiex_ret": 7.99
   },
   {
    "date": "2010-01-31",
-   "strategy_nav": 2.172,
+   "strategy_nav": 2.078,
    "taiex_nav": 1.244,
-   "monthly_ret": -9.99,
+   "monthly_ret": -9.97,
    "taiex_ret": -6.69
   },
   {
    "date": "2010-02-28",
-   "strategy_nav": 2.176,
+   "strategy_nav": 2.084,
    "taiex_nav": 1.21,
-   "monthly_ret": 0.18,
+   "monthly_ret": 0.29,
    "taiex_ret": -2.67
   },
   {
    "date": "2010-03-31",
-   "strategy_nav": 2.201,
+   "strategy_nav": 2.107,
    "taiex_nav": 1.289,
-   "monthly_ret": 1.16,
+   "monthly_ret": 1.12,
    "taiex_ret": 6.51
   },
   {
    "date": "2010-04-30",
-   "strategy_nav": 2.183,
+   "strategy_nav": 2.093,
    "taiex_nav": 1.303,
-   "monthly_ret": -0.82,
+   "monthly_ret": -0.7,
    "taiex_ret": 1.06
   },
   {
    "date": "2010-05-31",
-   "strategy_nav": 2.006,
+   "strategy_nav": 1.919,
    "taiex_nav": 1.188,
-   "monthly_ret": -8.11,
+   "monthly_ret": -8.33,
    "taiex_ret": -8.86
   },
   {
    "date": "2010-06-30",
-   "strategy_nav": 2.019,
+   "strategy_nav": 1.931,
    "taiex_nav": 1.193,
-   "monthly_ret": 0.66,
+   "monthly_ret": 0.65,
    "taiex_ret": 0.47
   },
   {
    "date": "2010-07-31",
-   "strategy_nav": 1.954,
+   "strategy_nav": 1.869,
    "taiex_nav": 1.263,
-   "monthly_ret": -3.21,
+   "monthly_ret": -3.19,
    "taiex_ret": 5.88
   },
   {
    "date": "2010-08-31",
-   "strategy_nav": 1.954,
+   "strategy_nav": 1.873,
    "taiex_nav": 1.24,
-   "monthly_ret": -0.01,
+   "monthly_ret": 0.18,
    "taiex_ret": -1.86
   },
   {
    "date": "2010-09-30",
-   "strategy_nav": 2.076,
+   "strategy_nav": 1.99,
    "taiex_nav": 1.341,
-   "monthly_ret": 6.24,
+   "monthly_ret": 6.27,
    "taiex_ret": 8.16
   },
   {
    "date": "2010-10-31",
-   "strategy_nav": 2.075,
+   "strategy_nav": 1.991,
    "taiex_nav": 1.349,
-   "monthly_ret": -0.06,
+   "monthly_ret": 0.06,
    "taiex_ret": 0.6
   },
   {
    "date": "2010-11-30",
-   "strategy_nav": 2.145,
+   "strategy_nav": 2.059,
    "taiex_nav": 1.363,
-   "monthly_ret": 3.4,
+   "monthly_ret": 3.41,
    "taiex_ret": 1.03
   },
   {
    "date": "2010-12-31",
-   "strategy_nav": 2.241,
+   "strategy_nav": 2.152,
    "taiex_nav": 1.461,
-   "monthly_ret": 4.49,
+   "monthly_ret": 4.52,
    "taiex_ret": 7.17
   },
   {
    "date": "2011-01-31",
-   "strategy_nav": 2.294,
+   "strategy_nav": 2.203,
    "taiex_nav": 1.489,
-   "monthly_ret": 2.32,
+   "monthly_ret": 2.34,
    "taiex_ret": 1.93
   },
   {
    "date": "2011-02-28",
-   "strategy_nav": 2.278,
+   "strategy_nav": 2.185,
    "taiex_nav": 1.4,
-   "monthly_ret": -0.69,
+   "monthly_ret": -0.78,
    "taiex_ret": -5.97
   },
   {
    "date": "2011-03-31",
-   "strategy_nav": 2.418,
+   "strategy_nav": 2.323,
    "taiex_nav": 1.413,
-   "monthly_ret": 6.16,
+   "monthly_ret": 6.29,
    "taiex_ret": 0.97
   },
   {
    "date": "2011-04-30",
-   "strategy_nav": 2.769,
+   "strategy_nav": 2.661,
    "taiex_nav": 1.466,
-   "monthly_ret": 14.5,
+   "monthly_ret": 14.57,
    "taiex_ret": 3.74
   },
   {
    "date": "2011-05-31",
-   "strategy_nav": 2.729,
+   "strategy_nav": 2.618,
    "taiex_nav": 1.463,
-   "monthly_ret": -1.44,
+   "monthly_ret": -1.61,
    "taiex_ret": -0.21
   },
   {
    "date": "2011-06-30",
-   "strategy_nav": 2.496,
+   "strategy_nav": 2.393,
    "taiex_nav": 1.409,
-   "monthly_ret": -8.52,
+   "monthly_ret": -8.6,
    "taiex_ret": -3.74
   },
   {
    "date": "2011-07-31",
-   "strategy_nav": 2.927,
+   "strategy_nav": 2.795,
    "taiex_nav": 1.407,
-   "monthly_ret": 17.23,
+   "monthly_ret": 16.8,
    "taiex_ret": -0.1
   },
   {
    "date": "2011-08-31",
-   "strategy_nav": 2.638,
+   "strategy_nav": 2.523,
    "taiex_nav": 1.26,
-   "monthly_ret": -9.86,
+   "monthly_ret": -9.73,
    "taiex_ret": -10.44
   },
   {
    "date": "2011-09-30",
-   "strategy_nav": 2.498,
+   "strategy_nav": 2.389,
    "taiex_nav": 1.176,
-   "monthly_ret": -5.31,
+   "monthly_ret": -5.3,
    "taiex_ret": -6.67
   },
   {
    "date": "2011-10-31",
-   "strategy_nav": 2.482,
+   "strategy_nav": 2.374,
    "taiex_nav": 1.235,
    "monthly_ret": -0.63,
    "taiex_ret": 5.01
   },
   {
    "date": "2011-11-30",
-   "strategy_nav": 2.481,
+   "strategy_nav": 2.373,
    "taiex_nav": 1.124,
-   "monthly_ret": -0.04,
+   "monthly_ret": -0.05,
    "taiex_ret": -9.01
   },
   {
    "date": "2011-12-31",
-   "strategy_nav": 2.485,
+   "strategy_nav": 2.377,
    "taiex_nav": 1.151,
-   "monthly_ret": 0.18,
+   "monthly_ret": 0.17,
    "taiex_ret": 2.43
   },
   {
    "date": "2012-01-31",
-   "strategy_nav": 2.491,
+   "strategy_nav": 2.383,
    "taiex_nav": 1.224,
    "monthly_ret": 0.23,
    "taiex_ret": 6.29
   },
   {
    "date": "2012-02-29",
-   "strategy_nav": 2.621,
+   "strategy_nav": 2.511,
    "taiex_nav": 1.322,
-   "monthly_ret": 5.22,
+   "monthly_ret": 5.37,
    "taiex_ret": 8.04
   },
   {
    "date": "2012-03-31",
-   "strategy_nav": 2.614,
+   "strategy_nav": 2.496,
    "taiex_nav": 1.291,
-   "monthly_ret": -0.29,
+   "monthly_ret": -0.61,
    "taiex_ret": -2.32
   },
   {
    "date": "2012-04-30",
-   "strategy_nav": 2.317,
+   "strategy_nav": 2.212,
    "taiex_nav": 1.221,
-   "monthly_ret": -11.34,
+   "monthly_ret": -11.35,
    "taiex_ret": -5.44
   },
   {
    "date": "2012-05-31",
-   "strategy_nav": 2.248,
+   "strategy_nav": 2.145,
    "taiex_nav": 1.189,
-   "monthly_ret": -2.98,
+   "monthly_ret": -3.03,
    "taiex_ret": -2.67
   },
   {
    "date": "2012-06-30",
-   "strategy_nav": 2.199,
+   "strategy_nav": 2.099,
    "taiex_nav": 1.188,
-   "monthly_ret": -2.18,
+   "monthly_ret": -2.15,
    "taiex_ret": -0.07
   },
   {
    "date": "2012-07-31",
-   "strategy_nav": 2.065,
+   "strategy_nav": 1.977,
    "taiex_nav": 1.184,
-   "monthly_ret": -6.1,
+   "monthly_ret": -5.83,
    "taiex_ret": -0.35
   },
   {
    "date": "2012-08-31",
-   "strategy_nav": 2.203,
+   "strategy_nav": 2.114,
    "taiex_nav": 1.204,
-   "monthly_ret": 6.68,
+   "monthly_ret": 6.92,
    "taiex_ret": 1.74
   },
   {
    "date": "2012-09-30",
-   "strategy_nav": 2.166,
+   "strategy_nav": 2.082,
    "taiex_nav": 1.256,
-   "monthly_ret": -1.7,
+   "monthly_ret": -1.47,
    "taiex_ret": 4.3
   },
   {
    "date": "2012-10-31",
-   "strategy_nav": 2.166,
+   "strategy_nav": 2.076,
    "taiex_nav": 1.167,
-   "monthly_ret": 0.03,
+   "monthly_ret": -0.3,
    "taiex_ret": -7.12
   },
   {
    "date": "2012-11-30",
-   "strategy_nav": 2.22,
+   "strategy_nav": 2.139,
    "taiex_nav": 1.234,
-   "monthly_ret": 2.47,
+   "monthly_ret": 3.05,
    "taiex_ret": 5.78
   },
   {
    "date": "2012-12-31",
-   "strategy_nav": 2.158,
+   "strategy_nav": 2.059,
    "taiex_nav": 1.253,
-   "monthly_ret": -2.79,
+   "monthly_ret": -3.75,
    "taiex_ret": 1.57
   },
   {
    "date": "2013-01-31",
-   "strategy_nav": 2.228,
+   "strategy_nav": 2.134,
    "taiex_nav": 1.278,
-   "monthly_ret": 3.24,
+   "monthly_ret": 3.62,
    "taiex_ret": 1.95
   },
   {
    "date": "2013-02-28",
-   "strategy_nav": 2.264,
+   "strategy_nav": 2.168,
    "taiex_nav": 1.286,
-   "monthly_ret": 1.61,
+   "monthly_ret": 1.6,
    "taiex_ret": 0.61
   },
   {
    "date": "2013-03-31",
-   "strategy_nav": 2.168,
+   "strategy_nav": 2.076,
    "taiex_nav": 1.281,
-   "monthly_ret": -4.24,
+   "monthly_ret": -4.22,
    "taiex_ret": -0.39
   },
   {
    "date": "2013-04-30",
-   "strategy_nav": 2.156,
+   "strategy_nav": 2.064,
    "taiex_nav": 1.318,
-   "monthly_ret": -0.57,
+   "monthly_ret": -0.59,
    "taiex_ret": 2.88
   },
   {
    "date": "2013-05-31",
-   "strategy_nav": 2.088,
+   "strategy_nav": 1.998,
    "taiex_nav": 1.344,
-   "monthly_ret": -3.12,
+   "monthly_ret": -3.18,
    "taiex_ret": 1.99
   },
   {
    "date": "2013-06-30",
-   "strategy_nav": 2.101,
+   "strategy_nav": 2.01,
    "taiex_nav": 1.312,
    "monthly_ret": 0.59,
    "taiex_ret": -2.33
   },
   {
    "date": "2013-07-31",
-   "strategy_nav": 2.061,
+   "strategy_nav": 1.973,
    "taiex_nav": 1.32,
-   "monthly_ret": -1.88,
+   "monthly_ret": -1.87,
    "taiex_ret": 0.57
   },
   {
    "date": "2013-08-31",
-   "strategy_nav": 1.953,
+   "strategy_nav": 1.869,
    "taiex_nav": 1.306,
-   "monthly_ret": -5.24,
+   "monthly_ret": -5.28,
    "taiex_ret": -1.06
   },
   {
    "date": "2013-09-30",
-   "strategy_nav": 1.964,
+   "strategy_nav": 1.877,
    "taiex_nav": 1.331,
-   "monthly_ret": 0.57,
+   "monthly_ret": 0.46,
    "taiex_ret": 1.89
   },
   {
    "date": "2013-10-31",
-   "strategy_nav": 2.119,
+   "strategy_nav": 2.031,
    "taiex_nav": 1.376,
-   "monthly_ret": 7.86,
+   "monthly_ret": 8.21,
    "taiex_ret": 3.38
   },
   {
    "date": "2013-11-30",
-   "strategy_nav": 2.19,
+   "strategy_nav": 2.098,
    "taiex_nav": 1.368,
-   "monthly_ret": 3.38,
+   "monthly_ret": 3.26,
    "taiex_ret": -0.51
   },
   {
    "date": "2013-12-31",
-   "strategy_nav": 2.19,
+   "strategy_nav": 2.098,
    "taiex_nav": 1.402,
-   "monthly_ret": -0.01,
+   "monthly_ret": 0.02,
    "taiex_ret": 2.43
   },
   {
    "date": "2014-01-31",
-   "strategy_nav": 2.176,
+   "strategy_nav": 2.085,
    "taiex_nav": 1.378,
-   "monthly_ret": -0.65,
+   "monthly_ret": -0.61,
    "taiex_ret": -1.73
   },
   {
    "date": "2014-02-28",
-   "strategy_nav": 2.317,
+   "strategy_nav": 2.222,
    "taiex_nav": 1.406,
-   "monthly_ret": 6.51,
+   "monthly_ret": 6.58,
    "taiex_ret": 2.09
   },
   {
    "date": "2014-03-31",
-   "strategy_nav": 2.353,
+   "strategy_nav": 2.26,
    "taiex_nav": 1.441,
-   "monthly_ret": 1.53,
+   "monthly_ret": 1.69,
    "taiex_ret": 2.43
   },
   {
    "date": "2014-04-30",
-   "strategy_nav": 2.47,
+   "strategy_nav": 2.366,
    "taiex_nav": 1.431,
-   "monthly_ret": 4.97,
+   "monthly_ret": 4.7,
    "taiex_ret": -0.65
   },
   {
    "date": "2014-05-31",
-   "strategy_nav": 2.553,
+   "strategy_nav": 2.446,
    "taiex_nav": 1.477,
-   "monthly_ret": 3.4,
+   "monthly_ret": 3.37,
    "taiex_ret": 3.24
   },
   {
    "date": "2014-06-30",
-   "strategy_nav": 2.613,
+   "strategy_nav": 2.5,
    "taiex_nav": 1.529,
-   "monthly_ret": 2.32,
+   "monthly_ret": 2.22,
    "taiex_ret": 3.49
   },
   {
    "date": "2014-07-31",
-   "strategy_nav": 2.502,
+   "strategy_nav": 2.395,
    "taiex_nav": 1.516,
-   "monthly_ret": -4.24,
+   "monthly_ret": -4.22,
    "taiex_ret": -0.82
   },
   {
    "date": "2014-08-31",
-   "strategy_nav": 2.629,
+   "strategy_nav": 2.517,
    "taiex_nav": 1.536,
-   "monthly_ret": 5.06,
+   "monthly_ret": 5.08,
    "taiex_ret": 1.29
   },
   {
    "date": "2014-09-30",
-   "strategy_nav": 2.421,
+   "strategy_nav": 2.32,
    "taiex_nav": 1.46,
-   "monthly_ret": -7.9,
+   "monthly_ret": -7.82,
    "taiex_ret": -4.97
   },
   {
    "date": "2014-10-31",
-   "strategy_nav": 2.418,
+   "strategy_nav": 2.316,
    "taiex_nav": 1.461,
-   "monthly_ret": -0.13,
+   "monthly_ret": -0.14,
    "taiex_ret": 0.09
   },
   {
    "date": "2014-11-30",
-   "strategy_nav": 2.516,
+   "strategy_nav": 2.409,
    "taiex_nav": 1.496,
-   "monthly_ret": 4.05,
+   "monthly_ret": 4.02,
    "taiex_ret": 2.37
   },
   {
    "date": "2014-12-31",
-   "strategy_nav": 2.539,
+   "strategy_nav": 2.433,
    "taiex_nav": 1.515,
-   "monthly_ret": 0.94,
+   "monthly_ret": 0.98,
    "taiex_ret": 1.31
   },
   {
    "date": "2015-01-31",
-   "strategy_nav": 2.536,
+   "strategy_nav": 2.43,
    "taiex_nav": 1.524,
-   "monthly_ret": -0.14,
+   "monthly_ret": -0.12,
    "taiex_ret": 0.59
   },
   {
    "date": "2015-02-28",
-   "strategy_nav": 2.637,
+   "strategy_nav": 2.527,
    "taiex_nav": 1.566,
-   "monthly_ret": 4.0,
+   "monthly_ret": 3.97,
    "taiex_ret": 2.78
   },
   {
    "date": "2015-03-31",
-   "strategy_nav": 2.68,
+   "strategy_nav": 2.577,
    "taiex_nav": 1.561,
-   "monthly_ret": 1.62,
+   "monthly_ret": 2.01,
    "taiex_ret": -0.37
   },
   {
    "date": "2015-04-30",
-   "strategy_nav": 2.766,
+   "strategy_nav": 2.657,
    "taiex_nav": 1.599,
-   "monthly_ret": 3.21,
+   "monthly_ret": 3.11,
    "taiex_ret": 2.44
   },
   {
    "date": "2015-05-31",
-   "strategy_nav": 2.938,
+   "strategy_nav": 2.823,
    "taiex_nav": 1.579,
-   "monthly_ret": 6.24,
+   "monthly_ret": 6.22,
    "taiex_ret": -1.21
   },
   {
    "date": "2015-06-30",
-   "strategy_nav": 2.991,
+   "strategy_nav": 2.873,
    "taiex_nav": 1.518,
-   "monthly_ret": 1.8,
+   "monthly_ret": 1.79,
    "taiex_ret": -3.9
   },
   {
    "date": "2015-07-31",
-   "strategy_nav": 2.773,
+   "strategy_nav": 2.663,
    "taiex_nav": 1.411,
-   "monthly_ret": -7.29,
+   "monthly_ret": -7.3,
    "taiex_ret": -7.05
   },
   {
    "date": "2015-08-31",
-   "strategy_nav": 2.538,
+   "strategy_nav": 2.435,
    "taiex_nav": 1.331,
-   "monthly_ret": -8.46,
+   "monthly_ret": -8.57,
    "taiex_ret": -5.66
   },
   {
    "date": "2015-09-30",
-   "strategy_nav": 2.537,
+   "strategy_nav": 2.434,
    "taiex_nav": 1.332,
    "monthly_ret": -0.04,
    "taiex_ret": 0.08
   },
   {
    "date": "2015-10-31",
-   "strategy_nav": 2.495,
+   "strategy_nav": 2.393,
    "taiex_nav": 1.393,
-   "monthly_ret": -1.66,
+   "monthly_ret": -1.69,
    "taiex_ret": 4.56
   },
   {
    "date": "2015-11-30",
-   "strategy_nav": 2.425,
+   "strategy_nav": 2.325,
    "taiex_nav": 1.354,
-   "monthly_ret": -2.8,
+   "monthly_ret": -2.86,
    "taiex_ret": -2.73
   },
   {
    "date": "2015-12-31",
-   "strategy_nav": 2.425,
+   "strategy_nav": 2.324,
    "taiex_nav": 1.357,
    "monthly_ret": -0.02,
    "taiex_ret": 0.21
   },
   {
    "date": "2016-01-31",
-   "strategy_nav": 2.425,
+   "strategy_nav": 2.325,
    "taiex_nav": 1.315,
    "monthly_ret": 0.02,
    "taiex_ret": -3.09
   },
   {
    "date": "2016-02-29",
-   "strategy_nav": 2.496,
+   "strategy_nav": 2.392,
    "taiex_nav": 1.369,
-   "monthly_ret": 2.92,
+   "monthly_ret": 2.9,
    "taiex_ret": 4.09
   },
   {
    "date": "2016-03-31",
-   "strategy_nav": 2.641,
+   "strategy_nav": 2.532,
    "taiex_nav": 1.424,
-   "monthly_ret": 5.82,
+   "monthly_ret": 5.85,
    "taiex_ret": 3.97
   },
   {
    "date": "2016-04-30",
-   "strategy_nav": 2.445,
+   "strategy_nav": 2.344,
    "taiex_nav": 1.364,
    "monthly_ret": -7.41,
    "taiex_ret": -4.2
   },
   {
    "date": "2016-05-31",
-   "strategy_nav": 2.426,
+   "strategy_nav": 2.327,
    "taiex_nav": 1.389,
-   "monthly_ret": -0.8,
+   "monthly_ret": -0.74,
    "taiex_ret": 1.88
   },
   {
    "date": "2016-06-30",
-   "strategy_nav": 2.499,
+   "strategy_nav": 2.395,
    "taiex_nav": 1.411,
-   "monthly_ret": 3.0,
+   "monthly_ret": 2.93,
    "taiex_ret": 1.53
   },
   {
    "date": "2016-07-31",
-   "strategy_nav": 2.653,
+   "strategy_nav": 2.543,
    "taiex_nav": 1.463,
    "monthly_ret": 6.15,
    "taiex_ret": 3.67
   },
   {
    "date": "2016-08-31",
-   "strategy_nav": 2.702,
+   "strategy_nav": 2.588,
    "taiex_nav": 1.476,
-   "monthly_ret": 1.85,
+   "monthly_ret": 1.8,
    "taiex_ret": 0.94
   },
   {
    "date": "2016-09-30",
-   "strategy_nav": 2.742,
+   "strategy_nav": 2.62,
    "taiex_nav": 1.492,
-   "monthly_ret": 1.49,
+   "monthly_ret": 1.24,
    "taiex_ret": 1.08
   },
   {
    "date": "2016-10-31",
-   "strategy_nav": 2.743,
+   "strategy_nav": 2.62,
    "taiex_nav": 1.512,
-   "monthly_ret": 0.05,
+   "monthly_ret": -0.01,
    "taiex_ret": 1.34
   },
   {
    "date": "2016-11-30",
-   "strategy_nav": 2.697,
+   "strategy_nav": 2.575,
    "taiex_nav": 1.504,
-   "monthly_ret": -1.7,
+   "monthly_ret": -1.71,
    "taiex_ret": -0.53
   },
   {
    "date": "2016-12-31",
-   "strategy_nav": 2.697,
+   "strategy_nav": 2.576,
    "taiex_nav": 1.506,
    "monthly_ret": 0.02,
    "taiex_ret": 0.14
   },
   {
    "date": "2017-01-31",
-   "strategy_nav": 2.701,
+   "strategy_nav": 2.58,
    "taiex_nav": 1.538,
    "monthly_ret": 0.15,
    "taiex_ret": 2.1
   },
   {
    "date": "2017-02-28",
-   "strategy_nav": 2.734,
+   "strategy_nav": 2.611,
    "taiex_nav": 1.587,
-   "monthly_ret": 1.2,
+   "monthly_ret": 1.22,
    "taiex_ret": 3.2
   },
   {
    "date": "2017-03-31",
-   "strategy_nav": 2.734,
+   "strategy_nav": 2.611,
    "taiex_nav": 1.597,
    "monthly_ret": 0.0,
    "taiex_ret": 0.63
   },
   {
    "date": "2017-04-30",
-   "strategy_nav": 2.782,
+   "strategy_nav": 2.657,
    "taiex_nav": 1.607,
-   "monthly_ret": 1.78,
+   "monthly_ret": 1.75,
    "taiex_ret": 0.62
   },
   {
    "date": "2017-05-31",
-   "strategy_nav": 2.813,
+   "strategy_nav": 2.684,
    "taiex_nav": 1.634,
-   "monthly_ret": 1.11,
+   "monthly_ret": 1.03,
    "taiex_ret": 1.71
   },
   {
    "date": "2017-06-30",
-   "strategy_nav": 2.948,
+   "strategy_nav": 2.812,
    "taiex_nav": 1.692,
-   "monthly_ret": 4.8,
+   "monthly_ret": 4.77,
    "taiex_ret": 3.53
   },
   {
    "date": "2017-07-31",
-   "strategy_nav": 3.069,
+   "strategy_nav": 2.928,
    "taiex_nav": 1.697,
-   "monthly_ret": 4.08,
+   "monthly_ret": 4.1,
    "taiex_ret": 0.31
   },
   {
    "date": "2017-08-31",
-   "strategy_nav": 3.154,
+   "strategy_nav": 3.01,
    "taiex_nav": 1.723,
-   "monthly_ret": 2.78,
+   "monthly_ret": 2.81,
    "taiex_ret": 1.52
   },
   {
    "date": "2017-09-30",
-   "strategy_nav": 3.222,
+   "strategy_nav": 3.072,
    "taiex_nav": 1.682,
-   "monthly_ret": 2.15,
+   "monthly_ret": 2.08,
    "taiex_ret": -2.42
   },
   {
    "date": "2017-10-31",
-   "strategy_nav": 3.393,
+   "strategy_nav": 3.239,
    "taiex_nav": 1.757,
-   "monthly_ret": 5.31,
+   "monthly_ret": 5.41,
    "taiex_ret": 4.49
   },
   {
    "date": "2017-11-30",
-   "strategy_nav": 3.244,
+   "strategy_nav": 3.093,
    "taiex_nav": 1.719,
-   "monthly_ret": -4.4,
+   "monthly_ret": -4.49,
    "taiex_ret": -2.16
   },
   {
    "date": "2017-12-31",
-   "strategy_nav": 3.378,
+   "strategy_nav": 3.226,
    "taiex_nav": 1.732,
-   "monthly_ret": 4.13,
+   "monthly_ret": 4.3,
    "taiex_ret": 0.78
   },
   {
    "date": "2018-01-31",
-   "strategy_nav": 3.378,
+   "strategy_nav": 3.227,
    "taiex_nav": 1.808,
-   "monthly_ret": 0.0,
+   "monthly_ret": 0.02,
    "taiex_ret": 4.33
   },
   {
    "date": "2018-02-28",
-   "strategy_nav": 3.141,
+   "strategy_nav": 3.0,
    "taiex_nav": 1.761,
-   "monthly_ret": -7.02,
+   "monthly_ret": -7.05,
    "taiex_ret": -2.6
   },
   {
    "date": "2018-03-31",
-   "strategy_nav": 3.219,
+   "strategy_nav": 3.077,
    "taiex_nav": 1.766,
-   "monthly_ret": 2.5,
+   "monthly_ret": 2.58,
    "taiex_ret": 0.28
   },
   {
    "date": "2018-04-30",
-   "strategy_nav": 3.917,
+   "strategy_nav": 3.746,
    "taiex_nav": 1.735,
-   "monthly_ret": 21.69,
+   "monthly_ret": 21.75,
    "taiex_ret": -1.73
   },
   {
    "date": "2018-05-31",
-   "strategy_nav": 4.857,
+   "strategy_nav": 4.644,
    "taiex_nav": 1.77,
-   "monthly_ret": 23.98,
+   "monthly_ret": 23.97,
    "taiex_ret": 2.04
   },
   {
    "date": "2018-06-30",
-   "strategy_nav": 4.946,
+   "strategy_nav": 4.728,
    "taiex_nav": 1.764,
-   "monthly_ret": 1.83,
+   "monthly_ret": 1.8,
    "taiex_ret": -0.35
   },
   {
    "date": "2018-07-31",
-   "strategy_nav": 4.953,
+   "strategy_nav": 4.734,
    "taiex_nav": 1.8,
    "monthly_ret": 0.14,
    "taiex_ret": 2.04
   },
   {
    "date": "2018-08-31",
-   "strategy_nav": 4.96,
+   "strategy_nav": 4.742,
    "taiex_nav": 1.801,
    "monthly_ret": 0.16,
    "taiex_ret": 0.06
   },
   {
    "date": "2018-09-30",
-   "strategy_nav": 4.988,
+   "strategy_nav": 4.767,
    "taiex_nav": 1.792,
-   "monthly_ret": 0.55,
+   "monthly_ret": 0.54,
    "taiex_ret": -0.52
   },
   {
    "date": "2018-10-31",
-   "strategy_nav": 4.982,
+   "strategy_nav": 4.762,
    "taiex_nav": 1.596,
-   "monthly_ret": -0.12,
+   "monthly_ret": -0.11,
    "taiex_ret": -10.94
   },
   {
    "date": "2018-11-30",
-   "strategy_nav": 4.991,
+   "strategy_nav": 4.771,
    "taiex_nav": 1.61,
    "monthly_ret": 0.19,
    "taiex_ret": 0.88
   },
   {
    "date": "2018-12-31",
-   "strategy_nav": 5.013,
+   "strategy_nav": 4.792,
    "taiex_nav": 1.583,
    "monthly_ret": 0.44,
    "taiex_ret": -1.62
   },
   {
    "date": "2019-01-31",
-   "strategy_nav": 5.09,
+   "strategy_nav": 4.865,
    "taiex_nav": 1.617,
    "monthly_ret": 1.53,
    "taiex_ret": 2.11
   },
   {
    "date": "2019-02-28",
-   "strategy_nav": 5.119,
+   "strategy_nav": 4.894,
    "taiex_nav": 1.691,
-   "monthly_ret": 0.57,
+   "monthly_ret": 0.6,
    "taiex_ret": 4.6
   },
   {
    "date": "2019-03-31",
-   "strategy_nav": 5.277,
+   "strategy_nav": 5.049,
    "taiex_nav": 1.732,
-   "monthly_ret": 3.1,
+   "monthly_ret": 3.16,
    "taiex_ret": 2.42
   },
   {
    "date": "2019-04-30",
-   "strategy_nav": 5.568,
+   "strategy_nav": 5.329,
    "taiex_nav": 1.785,
-   "monthly_ret": 5.52,
+   "monthly_ret": 5.53,
    "taiex_ret": 3.07
   },
   {
    "date": "2019-05-31",
-   "strategy_nav": 5.823,
+   "strategy_nav": 5.579,
    "taiex_nav": 1.709,
-   "monthly_ret": 4.57,
+   "monthly_ret": 4.71,
    "taiex_ret": -4.28
   },
   {
    "date": "2019-06-30",
-   "strategy_nav": 5.966,
+   "strategy_nav": 5.716,
    "taiex_nav": 1.747,
-   "monthly_ret": 2.46,
+   "monthly_ret": 2.44,
    "taiex_ret": 2.21
   },
   {
    "date": "2019-07-31",
-   "strategy_nav": 5.921,
+   "strategy_nav": 5.67,
    "taiex_nav": 1.762,
-   "monthly_ret": -0.75,
+   "monthly_ret": -0.8,
    "taiex_ret": 0.87
   },
   {
    "date": "2019-08-31",
-   "strategy_nav": 6.156,
+   "strategy_nav": 5.89,
    "taiex_nav": 1.728,
-   "monthly_ret": 3.96,
+   "monthly_ret": 3.88,
    "taiex_ret": -1.9
   },
   {
    "date": "2019-09-30",
-   "strategy_nav": 6.32,
+   "strategy_nav": 6.045,
    "taiex_nav": 1.763,
-   "monthly_ret": 2.66,
+   "monthly_ret": 2.64,
    "taiex_ret": 1.99
   },
   {
    "date": "2019-10-31",
-   "strategy_nav": 6.458,
+   "strategy_nav": 6.18,
    "taiex_nav": 1.849,
-   "monthly_ret": 2.19,
+   "monthly_ret": 2.24,
    "taiex_ret": 4.89
   },
   {
    "date": "2019-11-30",
-   "strategy_nav": 6.324,
+   "strategy_nav": 6.052,
    "taiex_nav": 1.87,
    "monthly_ret": -2.08,
    "taiex_ret": 1.15
   },
   {
    "date": "2019-12-31",
-   "strategy_nav": 6.884,
+   "strategy_nav": 6.596,
    "taiex_nav": 1.953,
-   "monthly_ret": 8.85,
+   "monthly_ret": 8.99,
    "taiex_ret": 4.42
   },
   {
    "date": "2020-01-31",
-   "strategy_nav": 7.057,
+   "strategy_nav": 6.773,
    "taiex_nav": 1.871,
-   "monthly_ret": 2.51,
+   "monthly_ret": 2.69,
    "taiex_ret": -4.18
   },
   {
    "date": "2020-02-29",
-   "strategy_nav": 6.934,
+   "strategy_nav": 6.652,
    "taiex_nav": 1.838,
-   "monthly_ret": -1.73,
+   "monthly_ret": -1.79,
    "taiex_ret": -1.77
   },
   {
    "date": "2020-03-31",
-   "strategy_nav": 6.718,
+   "strategy_nav": 6.441,
    "taiex_nav": 1.58,
-   "monthly_ret": -3.12,
+   "monthly_ret": -3.17,
    "taiex_ret": -14.03
   },
   {
    "date": "2020-04-30",
-   "strategy_nav": 6.927,
+   "strategy_nav": 6.641,
    "taiex_nav": 1.789,
    "monthly_ret": 3.11,
    "taiex_ret": 13.23
   },
   {
    "date": "2020-05-31",
-   "strategy_nav": 7.027,
+   "strategy_nav": 6.738,
    "taiex_nav": 1.781,
    "monthly_ret": 1.45,
    "taiex_ret": -0.45
   },
   {
    "date": "2020-06-30",
-   "strategy_nav": 8.162,
+   "strategy_nav": 7.871,
    "taiex_nav": 1.892,
-   "monthly_ret": 16.14,
+   "monthly_ret": 16.82,
    "taiex_ret": 6.21
   },
   {
    "date": "2020-07-31",
-   "strategy_nav": 10.291,
+   "strategy_nav": 9.93,
    "taiex_nav": 2.062,
-   "monthly_ret": 26.09,
+   "monthly_ret": 26.16,
    "taiex_ret": 8.98
   },
   {
    "date": "2020-08-31",
-   "strategy_nav": 10.373,
+   "strategy_nav": 10.013,
    "taiex_nav": 2.05,
-   "monthly_ret": 0.79,
+   "monthly_ret": 0.84,
    "taiex_ret": -0.58
   },
   {
    "date": "2020-09-30",
-   "strategy_nav": 10.198,
+   "strategy_nav": 9.844,
    "taiex_nav": 2.037,
    "monthly_ret": -1.69,
    "taiex_ret": -0.6
   },
   {
    "date": "2020-10-31",
-   "strategy_nav": 9.925,
+   "strategy_nav": 9.574,
    "taiex_nav": 2.042,
-   "monthly_ret": -2.68,
+   "monthly_ret": -2.75,
    "taiex_ret": 0.25
   },
   {
    "date": "2020-11-30",
-   "strategy_nav": 10.826,
+   "strategy_nav": 10.457,
    "taiex_nav": 2.234,
-   "monthly_ret": 9.07,
+   "monthly_ret": 9.22,
    "taiex_ret": 9.38
   },
   {
    "date": "2020-12-31",
-   "strategy_nav": 11.555,
+   "strategy_nav": 11.154,
    "taiex_nav": 2.398,
-   "monthly_ret": 6.74,
+   "monthly_ret": 6.67,
    "taiex_ret": 7.36
   },
   {
    "date": "2021-01-31",
-   "strategy_nav": 11.965,
+   "strategy_nav": 11.51,
    "taiex_nav": 2.464,
-   "monthly_ret": 3.54,
+   "monthly_ret": 3.19,
    "taiex_ret": 2.75
   },
   {
    "date": "2021-02-28",
-   "strategy_nav": 12.561,
+   "strategy_nav": 12.09,
    "taiex_nav": 2.597,
-   "monthly_ret": 4.98,
+   "monthly_ret": 5.03,
    "taiex_ret": 5.39
   },
   {
    "date": "2021-03-31",
-   "strategy_nav": 12.695,
+   "strategy_nav": 12.216,
    "taiex_nav": 2.675,
-   "monthly_ret": 1.07,
+   "monthly_ret": 1.04,
    "taiex_ret": 2.99
   },
   {
    "date": "2021-04-30",
-   "strategy_nav": 12.695,
+   "strategy_nav": 12.216,
    "taiex_nav": 2.86,
    "monthly_ret": -0.0,
    "taiex_ret": 6.91
   },
   {
    "date": "2021-05-31",
-   "strategy_nav": 12.826,
+   "strategy_nav": 12.342,
    "taiex_nav": 2.746,
    "monthly_ret": 1.04,
    "taiex_ret": -3.96
   },
   {
    "date": "2021-06-30",
-   "strategy_nav": 12.562,
+   "strategy_nav": 12.088,
    "taiex_nav": 2.89,
    "monthly_ret": -2.06,
    "taiex_ret": 5.24
   },
   {
    "date": "2021-07-31",
-   "strategy_nav": 12.561,
+   "strategy_nav": 12.087,
    "taiex_nav": 2.808,
    "monthly_ret": -0.01,
    "taiex_ret": -2.86
   },
   {
    "date": "2021-08-31",
-   "strategy_nav": 12.559,
+   "strategy_nav": 12.085,
    "taiex_nav": 2.847,
    "monthly_ret": -0.01,
    "taiex_ret": 1.41
   },
   {
    "date": "2021-09-30",
-   "strategy_nav": 12.597,
+   "strategy_nav": 12.123,
    "taiex_nav": 2.757,
-   "monthly_ret": 0.3,
+   "monthly_ret": 0.31,
    "taiex_ret": -3.18
   },
   {
    "date": "2021-10-31",
-   "strategy_nav": 13.719,
+   "strategy_nav": 13.245,
    "taiex_nav": 2.765,
-   "monthly_ret": 8.91,
+   "monthly_ret": 9.25,
    "taiex_ret": 0.31
   },
   {
    "date": "2021-11-30",
-   "strategy_nav": 13.409,
+   "strategy_nav": 12.936,
    "taiex_nav": 2.837,
-   "monthly_ret": -2.26,
+   "monthly_ret": -2.33,
    "taiex_ret": 2.59
   },
   {
    "date": "2021-12-31",
-   "strategy_nav": 13.97,
+   "strategy_nav": 13.495,
    "taiex_nav": 2.966,
-   "monthly_ret": 4.19,
+   "monthly_ret": 4.32,
    "taiex_ret": 4.54
   },
   {
    "date": "2022-01-31",
-   "strategy_nav": 13.28,
+   "strategy_nav": 12.812,
    "taiex_nav": 2.877,
-   "monthly_ret": -4.93,
+   "monthly_ret": -5.06,
    "taiex_ret": -2.99
   },
   {
    "date": "2022-02-28",
-   "strategy_nav": 13.312,
+   "strategy_nav": 12.842,
    "taiex_nav": 2.873,
    "monthly_ret": 0.24,
    "taiex_ret": -0.13
   },
   {
    "date": "2022-03-31",
-   "strategy_nav": 13.406,
+   "strategy_nav": 12.933,
    "taiex_nav": 2.88,
    "monthly_ret": 0.71,
    "taiex_ret": 0.23
   },
   {
    "date": "2022-04-30",
-   "strategy_nav": 13.272,
+   "strategy_nav": 12.804,
    "taiex_nav": 2.701,
    "monthly_ret": -1.0,
    "taiex_ret": -6.22
   },
   {
    "date": "2022-05-31",
-   "strategy_nav": 13.276,
+   "strategy_nav": 12.808,
    "taiex_nav": 2.736,
    "monthly_ret": 0.03,
    "taiex_ret": 1.3
   },
   {
    "date": "2022-06-30",
-   "strategy_nav": 13.287,
+   "strategy_nav": 12.818,
    "taiex_nav": 2.413,
    "monthly_ret": 0.08,
    "taiex_ret": -11.79
   },
   {
    "date": "2022-07-31",
-   "strategy_nav": 13.292,
+   "strategy_nav": 12.822,
    "taiex_nav": 2.442,
    "monthly_ret": 0.04,
    "taiex_ret": 1.18
   },
   {
    "date": "2022-08-31",
-   "strategy_nav": 13.317,
+   "strategy_nav": 12.847,
    "taiex_nav": 2.457,
    "monthly_ret": 0.19,
    "taiex_ret": 0.64
   },
   {
    "date": "2022-09-30",
-   "strategy_nav": 13.345,
+   "strategy_nav": 12.874,
    "taiex_nav": 2.185,
    "monthly_ret": 0.21,
    "taiex_ret": -11.07
   },
   {
    "date": "2022-10-31",
-   "strategy_nav": 13.366,
+   "strategy_nav": 12.894,
    "taiex_nav": 2.108,
    "monthly_ret": 0.16,
    "taiex_ret": -3.54
   },
   {
    "date": "2022-11-30",
-   "strategy_nav": 13.403,
+   "strategy_nav": 12.93,
    "taiex_nav": 2.422,
    "monthly_ret": 0.28,
    "taiex_ret": 14.9
   },
   {
    "date": "2022-12-31",
-   "strategy_nav": 13.214,
+   "strategy_nav": 12.744,
    "taiex_nav": 2.301,
-   "monthly_ret": -1.41,
+   "monthly_ret": -1.44,
    "taiex_ret": -4.99
   },
   {
    "date": "2023-01-31",
-   "strategy_nav": 13.789,
+   "strategy_nav": 13.295,
    "taiex_nav": 2.485,
-   "monthly_ret": 4.35,
+   "monthly_ret": 4.32,
    "taiex_ret": 7.98
   },
   {
    "date": "2023-02-28",
-   "strategy_nav": 15.761,
+   "strategy_nav": 15.275,
    "taiex_nav": 2.524,
-   "monthly_ret": 14.3,
+   "monthly_ret": 14.89,
    "taiex_ret": 1.56
   },
   {
    "date": "2023-03-31",
-   "strategy_nav": 15.233,
+   "strategy_nav": 14.737,
    "taiex_nav": 2.583,
-   "monthly_ret": -3.35,
+   "monthly_ret": -3.52,
    "taiex_ret": 2.35
   },
   {
    "date": "2023-04-30",
-   "strategy_nav": 14.477,
+   "strategy_nav": 14.003,
    "taiex_nav": 2.536,
-   "monthly_ret": -4.96,
+   "monthly_ret": -4.98,
    "taiex_ret": -1.82
   },
   {
    "date": "2023-05-31",
-   "strategy_nav": 14.219,
+   "strategy_nav": 13.756,
    "taiex_nav": 2.699,
-   "monthly_ret": -1.78,
+   "monthly_ret": -1.77,
    "taiex_ret": 6.42
   },
   {
    "date": "2023-06-30",
-   "strategy_nav": 14.285,
+   "strategy_nav": 13.819,
    "taiex_nav": 2.754,
    "monthly_ret": 0.46,
    "taiex_ret": 2.03
   },
   {
    "date": "2023-07-31",
-   "strategy_nav": 13.779,
+   "strategy_nav": 13.324,
    "taiex_nav": 2.791,
-   "monthly_ret": -3.54,
+   "monthly_ret": -3.58,
    "taiex_ret": 1.36
   },
   {
    "date": "2023-08-31",
-   "strategy_nav": 13.531,
+   "strategy_nav": 13.077,
    "taiex_nav": 2.708,
-   "monthly_ret": -1.8,
+   "monthly_ret": -1.86,
    "taiex_ret": -2.98
   },
   {
    "date": "2023-09-30",
-   "strategy_nav": 13.585,
+   "strategy_nav": 13.129,
    "taiex_nav": 2.662,
    "monthly_ret": 0.4,
    "taiex_ret": -1.69
   },
   {
    "date": "2023-10-31",
-   "strategy_nav": 13.567,
+   "strategy_nav": 13.112,
    "taiex_nav": 2.605,
    "monthly_ret": -0.13,
    "taiex_ret": -2.16
   },
   {
    "date": "2023-11-30",
-   "strategy_nav": 13.872,
+   "strategy_nav": 13.405,
    "taiex_nav": 2.838,
-   "monthly_ret": 2.25,
+   "monthly_ret": 2.23,
    "taiex_ret": 8.95
   },
   {
    "date": "2023-12-31",
-   "strategy_nav": 14.082,
+   "strategy_nav": 13.61,
    "taiex_nav": 2.919,
-   "monthly_ret": 1.52,
+   "monthly_ret": 1.53,
    "taiex_ret": 2.85
   },
   {
    "date": "2024-01-31",
-   "strategy_nav": 13.771,
+   "strategy_nav": 13.308,
    "taiex_nav": 2.912,
-   "monthly_ret": -2.21,
+   "monthly_ret": -2.22,
    "taiex_ret": -0.23
   },
   {
    "date": "2024-02-29",
-   "strategy_nav": 15.227,
+   "strategy_nav": 14.731,
    "taiex_nav": 3.087,
-   "monthly_ret": 10.58,
+   "monthly_ret": 10.69,
    "taiex_ret": 6.02
   },
   {
    "date": "2024-03-31",
-   "strategy_nav": 15.694,
+   "strategy_nav": 15.166,
    "taiex_nav": 3.28,
-   "monthly_ret": 3.07,
+   "monthly_ret": 2.96,
    "taiex_ret": 6.22
   },
   {
    "date": "2024-04-30",
-   "strategy_nav": 15.92,
+   "strategy_nav": 15.384,
    "taiex_nav": 3.32,
-   "monthly_ret": 1.43,
+   "monthly_ret": 1.44,
    "taiex_ret": 1.24
   },
   {
    "date": "2024-05-31",
-   "strategy_nav": 15.99,
+   "strategy_nav": 15.449,
    "taiex_nav": 3.447,
-   "monthly_ret": 0.44,
+   "monthly_ret": 0.42,
    "taiex_ret": 3.81
   },
   {
    "date": "2024-06-30",
-   "strategy_nav": 16.612,
+   "strategy_nav": 16.042,
    "taiex_nav": 3.749,
-   "monthly_ret": 3.89,
+   "monthly_ret": 3.84,
    "taiex_ret": 8.77
   },
   {
    "date": "2024-07-31",
-   "strategy_nav": 16.389,
+   "strategy_nav": 15.828,
    "taiex_nav": 3.614,
-   "monthly_ret": -1.34,
+   "monthly_ret": -1.33,
    "taiex_ret": -3.62
   },
   {
    "date": "2024-08-31",
-   "strategy_nav": 16.504,
+   "strategy_nav": 15.94,
    "taiex_nav": 3.625,
-   "monthly_ret": 0.7,
+   "monthly_ret": 0.71,
    "taiex_ret": 0.31
   },
   {
    "date": "2024-09-30",
-   "strategy_nav": 16.863,
+   "strategy_nav": 16.285,
    "taiex_nav": 3.618,
-   "monthly_ret": 2.17,
+   "monthly_ret": 2.16,
    "taiex_ret": -0.2
   },
   {
    "date": "2024-10-31",
-   "strategy_nav": 17.729,
+   "strategy_nav": 17.131,
    "taiex_nav": 3.715,
-   "monthly_ret": 5.14,
+   "monthly_ret": 5.2,
    "taiex_ret": 2.68
   },
   {
    "date": "2024-11-30",
-   "strategy_nav": 17.209,
+   "strategy_nav": 16.628,
    "taiex_nav": 3.624,
-   "monthly_ret": -2.93,
+   "monthly_ret": -2.94,
    "taiex_ret": -2.44
   },
   {
    "date": "2024-12-31",
-   "strategy_nav": 18.495,
+   "strategy_nav": 17.883,
    "taiex_nav": 3.75,
-   "monthly_ret": 7.47,
+   "monthly_ret": 7.55,
    "taiex_ret": 3.47
   },
   {
    "date": "2025-01-31",
-   "strategy_nav": 18.838,
+   "strategy_nav": 18.207,
    "taiex_nav": 3.83,
-   "monthly_ret": 1.86,
+   "monthly_ret": 1.81,
    "taiex_ret": 2.13
   },
   {
    "date": "2025-02-28",
-   "strategy_nav": 17.726,
+   "strategy_nav": 17.105,
    "taiex_nav": 3.753,
-   "monthly_ret": -5.9,
+   "monthly_ret": -6.05,
    "taiex_ret": -2.01
   },
   {
    "date": "2025-03-31",
-   "strategy_nav": 17.84,
+   "strategy_nav": 17.201,
    "taiex_nav": 3.369,
-   "monthly_ret": 0.65,
+   "monthly_ret": 0.56,
    "taiex_ret": -10.23
   },
   {
    "date": "2025-04-30",
-   "strategy_nav": 18.309,
+   "strategy_nav": 17.649,
    "taiex_nav": 3.294,
-   "monthly_ret": 2.63,
+   "monthly_ret": 2.6,
    "taiex_ret": -2.23
   },
   {
    "date": "2025-05-31",
-   "strategy_nav": 18.351,
+   "strategy_nav": 17.689,
    "taiex_nav": 3.475,
    "monthly_ret": 0.23,
    "taiex_ret": 5.5
   },
   {
    "date": "2025-06-30",
-   "strategy_nav": 18.315,
+   "strategy_nav": 17.655,
    "taiex_nav": 3.623,
    "monthly_ret": -0.19,
    "taiex_ret": 4.26
   },
   {
    "date": "2025-07-31",
-   "strategy_nav": 20.383,
+   "strategy_nav": 19.665,
    "taiex_nav": 3.832,
-   "monthly_ret": 11.29,
+   "monthly_ret": 11.39,
    "taiex_ret": 5.78
   },
   {
    "date": "2025-08-31",
-   "strategy_nav": 22.223,
+   "strategy_nav": 21.511,
    "taiex_nav": 3.945,
-   "monthly_ret": 9.03,
+   "monthly_ret": 9.39,
    "taiex_ret": 2.93
   },
   {
    "date": "2025-09-30",
-   "strategy_nav": 22.128,
+   "strategy_nav": 21.378,
    "taiex_nav": 4.203,
-   "monthly_ret": -0.43,
+   "monthly_ret": -0.62,
    "taiex_ret": 6.55
   },
   {
    "date": "2025-10-31",
-   "strategy_nav": 24.572,
+   "strategy_nav": 23.798,
    "taiex_nav": 4.596,
-   "monthly_ret": 11.04,
+   "monthly_ret": 11.32,
    "taiex_ret": 9.34
   },
   {
    "date": "2025-11-30",
-   "strategy_nav": 25.531,
+   "strategy_nav": 24.751,
    "taiex_nav": 4.497,
-   "monthly_ret": 3.9,
+   "monthly_ret": 4.0,
    "taiex_ret": -2.15
   },
   {
    "date": "2025-12-31",
-   "strategy_nav": 24.146,
+   "strategy_nav": 23.367,
    "taiex_nav": 4.715,
-   "monthly_ret": -5.42,
+   "monthly_ret": -5.59,
    "taiex_ret": 4.84
   },
   {
    "date": "2026-01-31",
-   "strategy_nav": 25.768,
+   "strategy_nav": 24.95,
    "taiex_nav": 5.219,
-   "monthly_ret": 6.72,
+   "monthly_ret": 6.78,
    "taiex_ret": 10.7
   },
   {
    "date": "2026-02-28",
-   "strategy_nav": 28.702,
+   "strategy_nav": 27.776,
    "taiex_nav": 5.765,
-   "monthly_ret": 11.39,
+   "monthly_ret": 11.32,
    "taiex_ret": 10.45
   },
   {
    "date": "2026-03-31",
-   "strategy_nav": 28.958,
+   "strategy_nav": 28.068,
    "taiex_nav": 5.164,
-   "monthly_ret": 0.89,
+   "monthly_ret": 1.05,
    "taiex_ret": -10.42
   },
   {
    "date": "2026-04-30",
-   "strategy_nav": 36.348,
+   "strategy_nav": 35.455,
    "taiex_nav": 6.337,
-   "monthly_ret": 25.52,
+   "monthly_ret": 26.32,
    "taiex_ret": 22.71
   },
   {
    "date": "2026-05-31",
-   "strategy_nav": 36.932,
+   "strategy_nav": 36.036,
    "taiex_nav": 7.282,
-   "monthly_ret": 1.61,
+   "monthly_ret": 1.64,
    "taiex_ret": 14.92
   },
   {
    "date": "2026-06-30",
-   "strategy_nav": 37.032,
+   "strategy_nav": 36.134,
    "taiex_nav": 7.509,
    "monthly_ret": 0.27,
    "taiex_ret": 3.11
   },
   {
    "date": "2026-07-31",
-   "strategy_nav": 37.157,
+   "strategy_nav": 36.256,
    "taiex_nav": 7.019,
    "monthly_ret": 0.34,
    "taiex_ret": -6.52
   },
   {
    "date": "2026-08-31",
-   "strategy_nav": 36.473,
+   "strategy_nav": 35.588,
    "taiex_nav": 7.509,
    "monthly_ret": -1.84,
    "taiex_ret": 6.98
   },
   {
    "date": "2026-09-30",
-   "strategy_nav": 36.577,
+   "strategy_nav": 35.69,
    "taiex_nav": 7.804,
    "monthly_ret": 0.28,
    "taiex_ret": 3.93
   },
   {
    "date": "2026-10-02",
-   "strategy_nav": 36.598,
+   "strategy_nav": 35.71,
    "taiex_nav": 7.891,
    "monthly_ret": 0.06,
    "taiex_ret": 1.12
@@ -1957,83 +1930,83 @@
  "yearly_stats": [
   {
    "year": 2005,
-   "strategy_ret": 24.9,
+   "strategy_ret": 24.22,
    "taiex_ret": 6.6,
-   "alpha": 18.31,
+   "alpha": 17.62,
    "is_positive": true,
-   "return_pct": 24.9,
+   "return_pct": 24.22,
    "taiex_pct": 6.6
   },
   {
    "year": 2006,
-   "strategy_ret": 33.24,
+   "strategy_ret": 33.51,
    "taiex_ret": 19.48,
-   "alpha": 13.76,
+   "alpha": 14.04,
    "is_positive": true,
-   "return_pct": 33.24,
+   "return_pct": 33.51,
    "taiex_pct": 19.48
   },
   {
    "year": 2007,
-   "strategy_ret": 32.76,
+   "strategy_ret": 31.88,
    "taiex_ret": 8.72,
-   "alpha": 24.03,
+   "alpha": 23.16,
    "is_positive": true,
-   "return_pct": 32.76,
+   "return_pct": 31.88,
    "taiex_pct": 8.72
   },
   {
    "year": 2008,
-   "strategy_ret": -5.76,
+   "strategy_ret": -5.75,
    "taiex_ret": -46.03,
    "alpha": 40.27,
    "is_positive": false,
-   "return_pct": -5.76,
+   "return_pct": -5.75,
    "taiex_pct": -46.03
   },
   {
    "year": 2009,
-   "strategy_ret": 15.86,
+   "strategy_ret": 11.97,
    "taiex_ret": 78.34,
-   "alpha": -62.48,
+   "alpha": -66.38,
    "is_positive": true,
-   "return_pct": 15.86,
+   "return_pct": 11.97,
    "taiex_pct": 78.34
   },
   {
    "year": 2010,
-   "strategy_ret": -7.09,
+   "strategy_ret": -6.75,
    "taiex_ret": 9.58,
-   "alpha": -16.67,
+   "alpha": -16.33,
    "is_positive": false,
-   "return_pct": -7.09,
+   "return_pct": -6.75,
    "taiex_pct": 9.58
   },
   {
    "year": 2011,
-   "strategy_ret": 10.88,
+   "strategy_ret": 10.45,
    "taiex_ret": -21.18,
-   "alpha": 32.07,
+   "alpha": 31.63,
    "is_positive": true,
-   "return_pct": 10.88,
+   "return_pct": 10.45,
    "taiex_pct": -21.18
   },
   {
    "year": 2012,
-   "strategy_ret": -13.17,
+   "strategy_ret": -13.38,
    "taiex_ret": 8.87,
-   "alpha": -22.04,
+   "alpha": -22.25,
    "is_positive": false,
-   "return_pct": -13.17,
+   "return_pct": -13.38,
    "taiex_pct": 8.87
   },
   {
    "year": 2013,
-   "strategy_ret": 1.47,
+   "strategy_ret": 1.89,
    "taiex_ret": 11.85,
-   "alpha": -10.37,
+   "alpha": -9.96,
    "is_positive": true,
-   "return_pct": 1.47,
+   "return_pct": 1.89,
    "taiex_pct": 11.85
   },
   {
@@ -2047,110 +2020,110 @@
   },
   {
    "year": 2015,
-   "strategy_ret": -4.51,
+   "strategy_ret": -4.47,
    "taiex_ret": -10.41,
-   "alpha": 5.9,
+   "alpha": 5.94,
    "is_positive": false,
-   "return_pct": -4.51,
+   "return_pct": -4.47,
    "taiex_pct": -10.41
   },
   {
    "year": 2016,
-   "strategy_ret": 11.24,
+   "strategy_ret": 10.83,
    "taiex_ret": 10.98,
-   "alpha": 0.26,
+   "alpha": -0.15,
    "is_positive": true,
-   "return_pct": 11.24,
+   "return_pct": 10.83,
    "taiex_pct": 10.98
   },
   {
    "year": 2017,
-   "strategy_ret": 25.22,
+   "strategy_ret": 25.26,
    "taiex_ret": 15.01,
-   "alpha": 10.2,
+   "alpha": 10.25,
    "is_positive": true,
-   "return_pct": 25.22,
+   "return_pct": 25.26,
    "taiex_pct": 15.01
   },
   {
    "year": 2018,
-   "strategy_ret": 48.42,
+   "strategy_ret": 48.52,
    "taiex_ret": -8.6,
-   "alpha": 57.03,
+   "alpha": 57.13,
    "is_positive": true,
-   "return_pct": 48.42,
+   "return_pct": 48.52,
    "taiex_pct": -8.6
   },
   {
    "year": 2019,
-   "strategy_ret": 37.31,
+   "strategy_ret": 37.65,
    "taiex_ret": 23.33,
-   "alpha": 13.98,
+   "alpha": 14.31,
    "is_positive": true,
-   "return_pct": 37.31,
+   "return_pct": 37.65,
    "taiex_pct": 23.33
   },
   {
    "year": 2020,
-   "strategy_ret": 67.86,
+   "strategy_ret": 69.1,
    "taiex_ret": 22.8,
-   "alpha": 45.06,
+   "alpha": 46.3,
    "is_positive": true,
-   "return_pct": 67.86,
+   "return_pct": 69.1,
    "taiex_pct": 22.8
   },
   {
    "year": 2021,
-   "strategy_ret": 20.89,
+   "strategy_ret": 20.98,
    "taiex_ret": 23.66,
-   "alpha": -2.77,
+   "alpha": -2.68,
    "is_positive": true,
-   "return_pct": 20.89,
+   "return_pct": 20.98,
    "taiex_pct": 23.66
   },
   {
    "year": 2022,
-   "strategy_ret": -5.41,
+   "strategy_ret": -5.56,
    "taiex_ret": -22.4,
-   "alpha": 16.99,
+   "alpha": 16.84,
    "is_positive": false,
-   "return_pct": -5.41,
+   "return_pct": -5.56,
    "taiex_pct": -22.4
   },
   {
    "year": 2023,
-   "strategy_ret": 6.57,
+   "strategy_ret": 6.79,
    "taiex_ret": 26.83,
-   "alpha": -20.26,
+   "alpha": -20.04,
    "is_positive": true,
-   "return_pct": 6.57,
+   "return_pct": 6.79,
    "taiex_pct": 26.83
   },
   {
    "year": 2024,
-   "strategy_ret": 31.33,
+   "strategy_ret": 31.4,
    "taiex_ret": 28.47,
-   "alpha": 2.87,
+   "alpha": 2.93,
    "is_positive": true,
-   "return_pct": 31.33,
+   "return_pct": 31.4,
    "taiex_pct": 28.47
   },
   {
    "year": 2025,
-   "strategy_ret": 30.56,
+   "strategy_ret": 30.66,
    "taiex_ret": 25.74,
-   "alpha": 4.82,
+   "alpha": 4.93,
    "is_positive": true,
-   "return_pct": 30.56,
+   "return_pct": 30.66,
    "taiex_pct": 25.74
   },
   {
    "year": 2026,
-   "strategy_ret": 51.57,
+   "strategy_ret": 52.82,
    "taiex_ret": 67.37,
-   "alpha": -15.8,
+   "alpha": -14.55,
    "is_positive": true,
-   "return_pct": 51.57,
+   "return_pct": 52.82,
    "taiex_pct": 67.37
   }
  ],
@@ -2340,8 +2313,8 @@
   {
    "stock_id": "3017",
    "stock_name": "奇鋐",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 78%",
-   "weight_pct": 39.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 76%",
+   "weight_pct": 38.0,
    "entry_date": "20250723",
    "exit_date": "20250923",
    "entry_price": 858.0,
@@ -2354,8 +2327,8 @@
   {
    "stock_id": "2345",
    "stock_name": "智邦",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20250825",
    "exit_date": "20250923",
    "entry_price": 961.0,
@@ -2368,8 +2341,8 @@
   {
    "stock_id": "6669",
    "stock_name": "緯穎",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20250825",
    "exit_date": "20250923",
    "entry_price": 3090.0,
@@ -2481,7 +2454,7 @@
    "stock_id": "2345",
    "stock_name": "智邦",
    "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 48%",
-   "weight_pct": 23.8,
+   "weight_pct": 23.9,
    "entry_date": "20241125",
    "exit_date": "20250225",
    "entry_price": 646.0,
@@ -2509,7 +2482,7 @@
    "stock_id": "2330",
    "stock_name": "台積電",
    "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 60%",
-   "weight_pct": 30.2,
+   "weight_pct": 29.9,
    "entry_date": "20240924",
    "exit_date": "20250123",
    "entry_price": 976.0,
@@ -2522,8 +2495,8 @@
   {
    "stock_id": "3665",
    "stock_name": "貿聯-KY",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 11%",
-   "weight_pct": 5.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 12%",
+   "weight_pct": 6.0,
    "entry_date": "20241224",
    "exit_date": "20250123",
    "entry_price": 616.0,
@@ -2578,8 +2551,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 47%",
-   "weight_pct": 23.4,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 46%",
+   "weight_pct": 22.9,
    "entry_date": "20231226",
    "exit_date": "20240423",
    "entry_price": 583.0,
@@ -2592,8 +2565,8 @@
   {
    "stock_id": "3017",
    "stock_name": "奇鋐",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 11%",
-   "weight_pct": 5.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 12%",
+   "weight_pct": 6.0,
    "entry_date": "20240223",
    "exit_date": "20240423",
    "entry_price": 520.0,
@@ -2606,8 +2579,8 @@
   {
    "stock_id": "2379",
    "stock_name": "瑞昱",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 11%",
-   "weight_pct": 5.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 12%",
+   "weight_pct": 6.0,
    "entry_date": "20240325",
    "exit_date": "20240423",
    "entry_price": 592.0,
@@ -2648,8 +2621,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 11%",
-   "weight_pct": 5.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 12%",
+   "weight_pct": 6.0,
    "entry_date": "20240223",
    "exit_date": "20240325",
    "entry_price": 1035.0,
@@ -2914,8 +2887,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20210125",
    "exit_date": "20210223",
    "entry_price": 917.0,
@@ -2928,8 +2901,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20210125",
    "exit_date": "20210223",
    "entry_price": 642.0,
@@ -2942,8 +2915,8 @@
   {
    "stock_id": "2379",
    "stock_name": "瑞昱",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20210125",
    "exit_date": "20210223",
    "entry_price": 496.0,
@@ -2984,8 +2957,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 62%",
-   "weight_pct": 31.1,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 60%",
+   "weight_pct": 30.1,
    "entry_date": "20201023",
    "exit_date": "20201223",
    "entry_price": 458.0,
@@ -2998,8 +2971,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20201124",
    "exit_date": "20201223",
    "entry_price": 752.0,
@@ -3012,8 +2985,8 @@
   {
    "stock_id": "2327",
    "stock_name": "國巨*",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20201124",
    "exit_date": "20201223",
    "entry_price": 427.0,
@@ -3124,8 +3097,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 44%",
-   "weight_pct": 21.9,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 42%",
+   "weight_pct": 20.9,
    "entry_date": "20191125",
    "exit_date": "20200123",
    "entry_price": 420.0,
@@ -3138,8 +3111,8 @@
   {
    "stock_id": "6669",
    "stock_name": "緯穎",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20191224",
    "exit_date": "20200123",
    "entry_price": 628.0,
@@ -3152,8 +3125,8 @@
   {
    "stock_id": "2327",
    "stock_name": "國巨*",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20191224",
    "exit_date": "20200123",
    "entry_price": 390.0,
@@ -3670,8 +3643,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 91%",
-   "weight_pct": 45.6,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 90%",
+   "weight_pct": 45.2,
    "entry_date": "20160602",
    "exit_date": "20161102",
    "entry_price": 159.0,
@@ -3684,8 +3657,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20160902",
    "exit_date": "20161004",
    "entry_price": 170.01,
@@ -3698,8 +3671,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20160902",
    "exit_date": "20161004",
    "entry_price": 250.51,
@@ -3712,8 +3685,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 85%",
-   "weight_pct": 42.7,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 84%",
+   "weight_pct": 42.0,
    "entry_date": "20160623",
    "exit_date": "20160923",
    "entry_price": 165.5,
@@ -3726,8 +3699,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20160823",
    "exit_date": "20160923",
    "entry_price": 171.0,
@@ -3740,8 +3713,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20160823",
    "exit_date": "20160923",
    "entry_price": 241.01,
@@ -3895,7 +3868,7 @@
    "stock_id": "1476",
    "stock_name": "儒鴻",
    "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 41%",
-   "weight_pct": 20.3,
+   "weight_pct": 20.7,
    "entry_date": "20150224",
    "exit_date": "20150526",
    "entry_price": 338.0,
@@ -3922,8 +3895,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 62%",
-   "weight_pct": 30.8,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 61%",
+   "weight_pct": 30.3,
    "entry_date": "20141223",
    "exit_date": "20150423",
    "entry_price": 139.0,
@@ -3950,8 +3923,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20150224",
    "exit_date": "20150324",
    "entry_price": 297.0,
@@ -4104,8 +4077,8 @@
   {
    "stock_id": "2317",
    "stock_name": "鴻海",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 61%",
-   "weight_pct": 30.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 62%",
+   "weight_pct": 31.0,
    "entry_date": "20140825",
    "exit_date": "20141023",
    "entry_price": 110.0,
@@ -4132,8 +4105,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 40%",
-   "weight_pct": 20.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20140723",
    "exit_date": "20140923",
    "entry_price": 2495.0,
@@ -4146,8 +4119,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140825",
    "exit_date": "20140923",
    "entry_price": 153.0,
@@ -4160,8 +4133,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 45%",
-   "weight_pct": 22.6,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 46%",
+   "weight_pct": 23.1,
    "entry_date": "20140702",
    "exit_date": "20140903",
    "entry_price": 2345.0,
@@ -4216,8 +4189,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 58%",
-   "weight_pct": 29.2,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 57%",
+   "weight_pct": 28.5,
    "entry_date": "20140402",
    "exit_date": "20140804",
    "entry_price": 120.5,
@@ -4230,8 +4203,8 @@
   {
    "stock_id": "2357",
    "stock_name": "華碩",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140603",
    "exit_date": "20140804",
    "entry_price": 328.5,
@@ -4258,8 +4231,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140603",
    "exit_date": "20140702",
    "entry_price": 152.5,
@@ -4272,8 +4245,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 40%",
-   "weight_pct": 19.8,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20140123",
    "exit_date": "20140523",
    "entry_price": 211.0,
@@ -4286,8 +4259,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140325",
    "exit_date": "20140523",
    "entry_price": 177.0,
@@ -4300,8 +4273,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140325",
    "exit_date": "20140523",
    "entry_price": 111.5,
@@ -4314,8 +4287,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 39%",
-   "weight_pct": 19.5,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20140304",
    "exit_date": "20140502",
    "entry_price": 166.5,
@@ -4328,8 +4301,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140402",
    "exit_date": "20140502",
    "entry_price": 466.0,
@@ -4342,8 +4315,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 33%",
-   "weight_pct": 16.3,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 31%",
+   "weight_pct": 15.7,
    "entry_date": "20140103",
    "exit_date": "20140402",
    "entry_price": 196.0,
@@ -4356,8 +4329,8 @@
   {
    "stock_id": "1476",
    "stock_name": "儒鴻",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140304",
    "exit_date": "20140402",
    "entry_price": 388.0,
@@ -4370,8 +4343,8 @@
   {
    "stock_id": "2357",
    "stock_name": "華碩",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 32%",
-   "weight_pct": 16.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 33%",
+   "weight_pct": 16.7,
    "entry_date": "20131224",
    "exit_date": "20140325",
    "entry_price": 267.0,
@@ -4399,7 +4372,7 @@
    "stock_id": "6176",
    "stock_name": "瑞儀",
    "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 8%",
-   "weight_pct": 3.9,
+   "weight_pct": 4.2,
    "entry_date": "20140204",
    "exit_date": "20140304",
    "entry_price": 132.5,
@@ -4413,7 +4386,7 @@
    "stock_id": "2049",
    "stock_name": "上銀",
    "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 8%",
-   "weight_pct": 3.9,
+   "weight_pct": 4.2,
    "entry_date": "20140204",
    "exit_date": "20140304",
    "entry_price": 271.5,
@@ -4426,8 +4399,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20131224",
    "exit_date": "20140225",
    "entry_price": 1215.0,
@@ -4440,8 +4413,8 @@
   {
    "stock_id": "2439",
    "stock_name": "美律",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20140103",
    "exit_date": "20140204",
    "entry_price": 172.0,
@@ -4454,8 +4427,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20140103",
    "exit_date": "20140204",
    "entry_price": 1205.0,
@@ -4468,8 +4441,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20131224",
    "exit_date": "20140123",
    "entry_price": 166.5,
@@ -4538,8 +4511,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 49%",
-   "weight_pct": 24.5,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 47%",
+   "weight_pct": 23.7,
    "entry_date": "20130702",
    "exit_date": "20131104",
    "entry_price": 144.5,
@@ -4580,8 +4553,8 @@
   {
    "stock_id": "1476",
    "stock_name": "儒鴻",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130904",
    "exit_date": "20131002",
    "entry_price": 247.0,
@@ -4594,8 +4567,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130904",
    "exit_date": "20131002",
    "entry_price": 124.5,
@@ -4608,8 +4581,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 16%",
-   "weight_pct": 7.9,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 17%",
+   "weight_pct": 8.7,
    "entry_date": "20130802",
    "exit_date": "20130904",
    "entry_price": 366.0,
@@ -4622,8 +4595,8 @@
   {
    "stock_id": "2105",
    "stock_name": "正新",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 16%",
-   "weight_pct": 7.9,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 17%",
+   "weight_pct": 8.7,
    "entry_date": "20130802",
    "exit_date": "20130904",
    "entry_price": 85.9,
@@ -4734,8 +4707,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20130502",
    "exit_date": "20130604",
    "entry_price": 145.5,
@@ -4748,8 +4721,8 @@
   {
    "stock_id": "3673",
    "stock_name": "TPK-KY",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130502",
    "exit_date": "20130604",
    "entry_price": 599.0,
@@ -4762,8 +4735,8 @@
   {
    "stock_id": "2105",
    "stock_name": "正新",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130502",
    "exit_date": "20130604",
    "entry_price": 99.2,
@@ -4790,8 +4763,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 60%",
-   "weight_pct": 30.1,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 57%",
+   "weight_pct": 28.7,
    "entry_date": "20130103",
    "exit_date": "20130402",
    "entry_price": 100.5,
@@ -4804,8 +4777,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130204",
    "exit_date": "20130402",
    "entry_price": 801.0,
@@ -4818,8 +4791,8 @@
   {
    "stock_id": "2357",
    "stock_name": "華碩",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130304",
    "exit_date": "20130402",
    "entry_price": 369.0,
@@ -4832,8 +4805,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 62%",
-   "weight_pct": 30.8,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 61%",
+   "weight_pct": 30.6,
    "entry_date": "20121126",
    "exit_date": "20130325",
    "entry_price": 95.5,
@@ -4846,8 +4819,8 @@
   {
    "stock_id": "2357",
    "stock_name": "華碩",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130225",
    "exit_date": "20130325",
    "entry_price": 351.5,
@@ -4860,8 +4833,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130225",
    "exit_date": "20130325",
    "entry_price": 813.0,
@@ -4874,8 +4847,8 @@
   {
    "stock_id": "2412",
    "stock_name": "中華電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20130204",
    "exit_date": "20130304",
    "entry_price": 93.9,
@@ -4916,8 +4889,8 @@
   {
    "stock_id": "3697",
    "stock_name": "F-晨星",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 51%",
-   "weight_pct": 25.6,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 49%",
+   "weight_pct": 24.6,
    "entry_date": "20120905",
    "exit_date": "20130103",
    "entry_price": 244.0,
@@ -4930,8 +4903,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 27%",
-   "weight_pct": 13.4,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 28%",
+   "weight_pct": 13.9,
    "entry_date": "20121102",
    "exit_date": "20130103",
    "entry_price": 115.0,
@@ -4942,15 +4915,15 @@
    "leader": false
   },
   {
-   "stock_id": "3673",
-   "stock_name": "TPK-KY",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "stock_id": "3008",
+   "stock_name": "大立光",
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20121204",
    "exit_date": "20130103",
-   "entry_price": 470.0,
-   "exit_price": 529.0,
-   "return_pct": 8.89,
+   "entry_price": 781.0,
+   "exit_price": 836.0,
+   "return_pct": 7.04,
    "holding_days": 21,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": false
@@ -4958,8 +4931,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20121126",
    "exit_date": "20121226",
    "entry_price": 115.5,
@@ -4970,15 +4943,15 @@
    "leader": false
   },
   {
-   "stock_id": "3673",
-   "stock_name": "TPK-KY",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "stock_id": "3008",
+   "stock_name": "大立光",
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20121126",
    "exit_date": "20121226",
-   "entry_price": 429.0,
-   "exit_price": 519.0,
-   "return_pct": 17.04,
+   "entry_price": 721.0,
+   "exit_price": 786.0,
+   "return_pct": 9.02,
    "holding_days": 21,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": false
@@ -4986,8 +4959,8 @@
   {
    "stock_id": "3697",
    "stock_name": "F-晨星",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 32%",
-   "weight_pct": 16.2,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 31%",
+   "weight_pct": 15.5,
    "entry_date": "20120823",
    "exit_date": "20121126",
    "entry_price": 225.0,
@@ -5000,8 +4973,8 @@
   {
    "stock_id": "2357",
    "stock_name": "華碩",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20121023",
    "exit_date": "20121126",
    "entry_price": 305.0,
@@ -5014,8 +4987,8 @@
   {
    "stock_id": "6176",
    "stock_name": "瑞儀",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20121023",
    "exit_date": "20121126",
    "entry_price": 130.5,
@@ -5026,29 +4999,29 @@
    "leader": false
   },
   {
-   "stock_id": "2454",
-   "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 23%",
-   "weight_pct": 11.5,
-   "entry_date": "20120905",
-   "exit_date": "20121102",
-   "entry_price": 323.5,
-   "exit_price": 328.0,
-   "return_pct": 1.38,
-   "holding_days": 41,
-   "exit_reason": "🔄 半月輪動調倉換出",
-   "leader": false
-  },
-  {
    "stock_id": "2357",
    "stock_name": "華碩",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20121002",
    "exit_date": "20121102",
    "entry_price": 316.0,
    "exit_price": 314.0,
    "return_pct": -0.63,
+   "holding_days": 22,
+   "exit_reason": "🔄 半月輪動調倉換出",
+   "leader": false
+  },
+  {
+   "stock_id": "2454",
+   "stock_name": "聯發科",
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
+   "entry_date": "20121002",
+   "exit_date": "20121102",
+   "entry_price": 313.0,
+   "exit_price": 328.0,
+   "return_pct": 4.79,
    "holding_days": 22,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": false
@@ -5092,6 +5065,20 @@
    "exit_price": 107.5,
    "return_pct": 12.44,
    "holding_days": 65,
+   "exit_reason": "🔄 半月輪動調倉換出",
+   "leader": false
+  },
+  {
+   "stock_id": "2354",
+   "stock_name": "鴻準",
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
+   "entry_date": "20120905",
+   "exit_date": "20121002",
+   "entry_price": 116.5,
+   "exit_price": 113.0,
+   "return_pct": -3.0,
+   "holding_days": 19,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": false
   },
@@ -5210,8 +5197,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 40%",
-   "weight_pct": 20.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20120202",
    "exit_date": "20120403",
    "entry_price": 77.5,
@@ -5224,8 +5211,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20120302",
    "exit_date": "20120403",
    "entry_price": 228.0,
@@ -5238,8 +5225,8 @@
   {
    "stock_id": "2354",
    "stock_name": "鴻準",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20120302",
    "exit_date": "20120403",
    "entry_price": 142.0,
@@ -5378,8 +5365,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20110623",
    "exit_date": "20110823",
    "entry_price": 189.0,
@@ -5392,8 +5379,8 @@
   {
    "stock_id": "2412",
    "stock_name": "中華電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110623",
    "exit_date": "20110823",
    "entry_price": 98.0,
@@ -5406,8 +5393,8 @@
   {
    "stock_id": "2049",
    "stock_name": "上銀",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110725",
    "exit_date": "20110823",
    "entry_price": 361.0,
@@ -5420,8 +5407,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110623",
    "exit_date": "20110725",
    "entry_price": 904.0,
@@ -5434,8 +5421,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 48%",
-   "weight_pct": 24.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 45%",
+   "weight_pct": 22.5,
    "entry_date": "20110302",
    "exit_date": "20110705",
    "entry_price": 822.0,
@@ -5448,8 +5435,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110404",
    "exit_date": "20110705",
    "entry_price": 147.0,
@@ -5462,8 +5449,8 @@
   {
    "stock_id": "1301",
    "stock_name": "台塑",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110404",
    "exit_date": "20110705",
    "entry_price": 103.5,
@@ -5560,8 +5547,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 30%",
-   "weight_pct": 15.1,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 29%",
+   "weight_pct": 14.5,
    "entry_date": "20101223",
    "exit_date": "20110323",
    "entry_price": 71.8,
@@ -5574,8 +5561,8 @@
   {
    "stock_id": "1326",
    "stock_name": "台化",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110223",
    "exit_date": "20110323",
    "entry_price": 104.0,
@@ -5588,8 +5575,8 @@
   {
    "stock_id": "1303",
    "stock_name": "南亞",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20110223",
    "exit_date": "20110323",
    "entry_price": 86.9,
@@ -5672,8 +5659,8 @@
   {
    "stock_id": "2412",
    "stock_name": "中華電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 26%",
-   "weight_pct": 13.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 27%",
+   "weight_pct": 13.6,
    "entry_date": "20100803",
    "exit_date": "20101202",
    "entry_price": 68.5,
@@ -5686,8 +5673,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 23%",
-   "weight_pct": 11.5,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20101004",
    "exit_date": "20101202",
    "entry_price": 62.0,
@@ -5700,8 +5687,8 @@
   {
    "stock_id": "2412",
    "stock_name": "中華電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 40%",
-   "weight_pct": 20.1,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 41%",
+   "weight_pct": 20.3,
    "entry_date": "20100723",
    "exit_date": "20101123",
    "entry_price": 66.8,
@@ -5714,8 +5701,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 33%",
-   "weight_pct": 16.3,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 31%",
+   "weight_pct": 15.7,
    "entry_date": "20100803",
    "exit_date": "20101102",
    "entry_price": 113.5,
@@ -5728,8 +5715,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 29%",
-   "weight_pct": 14.7,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 28%",
+   "weight_pct": 14.1,
    "entry_date": "20100723",
    "exit_date": "20101025",
    "entry_price": 110.0,
@@ -5757,7 +5744,7 @@
    "stock_id": "2498",
    "stock_name": "宏達電",
    "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 8%",
-   "weight_pct": 3.9,
+   "weight_pct": 4.2,
    "entry_date": "20100902",
    "exit_date": "20101004",
    "entry_price": 603.0,
@@ -5770,8 +5757,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20100803",
    "exit_date": "20100902",
    "entry_price": 648.0,
@@ -5784,8 +5771,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20100723",
    "exit_date": "20100824",
    "entry_price": 62.6,
@@ -5798,8 +5785,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 40%",
-   "weight_pct": 20.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20100405",
    "exit_date": "20100602",
    "entry_price": 555.0,
@@ -5812,8 +5799,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 23%",
-   "weight_pct": 11.5,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20100405",
    "exit_date": "20100602",
    "entry_price": 61.5,
@@ -5826,8 +5813,8 @@
   {
    "stock_id": "2317",
    "stock_name": "鴻海",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20100504",
    "exit_date": "20100602",
    "entry_price": 148.5,
@@ -5952,8 +5939,8 @@
   {
    "stock_id": "2317",
    "stock_name": "鴻海",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 37%",
-   "weight_pct": 18.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20091124",
    "exit_date": "20100125",
    "entry_price": 138.0,
@@ -5980,8 +5967,8 @@
   {
    "stock_id": "6286",
    "stock_name": "立錡",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20091124",
    "exit_date": "20091223",
    "entry_price": 315.5,
@@ -5994,8 +5981,8 @@
   {
    "stock_id": "2105",
    "stock_name": "正新",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20091124",
    "exit_date": "20091223",
    "entry_price": 74.5,
@@ -6092,8 +6079,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20090923",
    "exit_date": "20091023",
    "entry_price": 506.0,
@@ -6106,8 +6093,8 @@
   {
    "stock_id": "6286",
    "stock_name": "立錡",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20090923",
    "exit_date": "20091023",
    "entry_price": 263.0,
@@ -6120,8 +6107,8 @@
   {
    "stock_id": "2353",
    "stock_name": "宏碁",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20090923",
    "exit_date": "20091023",
    "entry_price": 80.1,
@@ -6218,8 +6205,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20090504",
    "exit_date": "20090702",
    "entry_price": 320.5,
@@ -6232,8 +6219,8 @@
   {
    "stock_id": "2882",
    "stock_name": "國泰金",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20090602",
    "exit_date": "20090702",
    "entry_price": 54.0,
@@ -6246,8 +6233,8 @@
   {
    "stock_id": "2498",
    "stock_name": "宏達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20090602",
    "exit_date": "20090702",
    "entry_price": 540.0,
@@ -6274,8 +6261,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20090504",
    "exit_date": "20090602",
    "entry_price": 71.5,
@@ -6288,8 +6275,8 @@
   {
    "stock_id": "2353",
    "stock_name": "宏碁",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20090504",
    "exit_date": "20090602",
    "entry_price": 66.9,
@@ -6302,8 +6289,8 @@
   {
    "stock_id": "3034",
    "stock_name": "聯詠",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 28%",
-   "weight_pct": 14.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 26%",
+   "weight_pct": 13.0,
    "entry_date": "20090423",
    "exit_date": "20090526",
    "entry_price": 71.0,
@@ -6316,8 +6303,8 @@
   {
    "stock_id": "2353",
    "stock_name": "宏碁",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 11%",
-   "weight_pct": 5.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 12%",
+   "weight_pct": 6.0,
    "entry_date": "20090423",
    "exit_date": "20090526",
    "entry_price": 61.6,
@@ -6330,8 +6317,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 11%",
-   "weight_pct": 5.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 12%",
+   "weight_pct": 6.0,
    "entry_date": "20090423",
    "exit_date": "20090526",
    "entry_price": 84.3,
@@ -6610,8 +6597,8 @@
   {
    "stock_id": "2317",
    "stock_name": "鴻海",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20070703",
    "exit_date": "20070802",
    "entry_price": 290.5,
@@ -6624,8 +6611,8 @@
   {
    "stock_id": "2379",
    "stock_name": "瑞昱",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20070703",
    "exit_date": "20070802",
    "entry_price": 163.0,
@@ -6638,8 +6625,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 35%",
-   "weight_pct": 17.7,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 37%",
+   "weight_pct": 18.3,
    "entry_date": "20070424",
    "exit_date": "20070724",
    "entry_price": 400.0,
@@ -6652,8 +6639,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 48%",
-   "weight_pct": 23.9,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 45%",
+   "weight_pct": 22.6,
    "entry_date": "20070403",
    "exit_date": "20070703",
    "entry_price": 68.1,
@@ -6666,8 +6653,8 @@
   {
    "stock_id": "2325",
    "stock_name": "矽品",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20070502",
    "exit_date": "20070703",
    "entry_price": 64.0,
@@ -6680,8 +6667,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 39%",
-   "weight_pct": 19.7,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 38%",
+   "weight_pct": 18.9,
    "entry_date": "20070323",
    "exit_date": "20070625",
    "entry_price": 70.1,
@@ -6694,8 +6681,8 @@
   {
    "stock_id": "2325",
    "stock_name": "矽品",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 16%",
-   "weight_pct": 7.9,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 17%",
+   "weight_pct": 8.7,
    "entry_date": "20070523",
    "exit_date": "20070625",
    "entry_price": 66.5,
@@ -6708,8 +6695,8 @@
   {
    "stock_id": "3035",
    "stock_name": "智原",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 39%",
-   "weight_pct": 19.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 38%",
+   "weight_pct": 19.0,
    "entry_date": "20070323",
    "exit_date": "20070523",
    "entry_price": 118.0,
@@ -6736,8 +6723,8 @@
   {
    "stock_id": "2393",
    "stock_name": "億光",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20070323",
    "exit_date": "20070424",
    "entry_price": 133.5,
@@ -6750,8 +6737,8 @@
   {
    "stock_id": "2448",
    "stock_name": "晶電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20070302",
    "exit_date": "20070403",
    "entry_price": 115.0,
@@ -6764,8 +6751,8 @@
   {
    "stock_id": "2393",
    "stock_name": "億光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20070302",
    "exit_date": "20070403",
    "entry_price": 118.0,
@@ -6778,8 +6765,8 @@
   {
    "stock_id": "6239",
    "stock_name": "力成",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20070302",
    "exit_date": "20070403",
    "entry_price": 143.5,
@@ -6832,29 +6819,29 @@
    "leader": false
   },
   {
-   "stock_id": "2330",
-   "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 39%",
-   "weight_pct": 19.4,
-   "entry_date": "20061204",
-   "exit_date": "20070302",
-   "entry_price": 66.2,
-   "exit_price": 66.6,
-   "return_pct": 0.11,
-   "holding_days": 62,
-   "exit_reason": "🔄 半月輪動調倉換出",
-   "leader": false
-  },
-  {
    "stock_id": "6286",
    "stock_name": "立錡",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 32%",
-   "weight_pct": 15.8,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 68%",
+   "weight_pct": 34.2,
    "entry_date": "20070202",
    "exit_date": "20070302",
    "entry_price": 312.0,
    "exit_price": 302.0,
    "return_pct": -3.21,
+   "holding_days": 20,
+   "exit_reason": "🔄 半月輪動調倉換出",
+   "leader": false
+  },
+  {
+   "stock_id": "2330",
+   "stock_name": "台積電",
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 32%",
+   "weight_pct": 15.8,
+   "entry_date": "20070202",
+   "exit_date": "20070302",
+   "entry_price": 67.8,
+   "exit_price": 66.6,
+   "return_pct": -2.26,
    "holding_days": 20,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": false
@@ -6883,6 +6870,20 @@
    "entry_price": 340.0,
    "exit_price": 335.0,
    "return_pct": -1.47,
+   "holding_days": 20,
+   "exit_reason": "🔄 半月輪動調倉換出",
+   "leader": false
+  },
+  {
+   "stock_id": "6239",
+   "stock_name": "力成",
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
+   "entry_date": "20070104",
+   "exit_date": "20070202",
+   "entry_price": 135.0,
+   "exit_price": 133.0,
+   "return_pct": -1.48,
    "holding_days": 20,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": false
@@ -6918,8 +6919,8 @@
   {
    "stock_id": "2354",
    "stock_name": "鴻準",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 57%",
-   "weight_pct": 28.5,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 64%",
+   "weight_pct": 32.0,
    "entry_date": "20060905",
    "exit_date": "20070104",
    "entry_price": 267.0,
@@ -6928,6 +6929,20 @@
    "holding_days": 86,
    "exit_reason": "🔄 半月輪動調倉換出",
    "leader": true
+  },
+  {
+   "stock_id": "2330",
+   "stock_name": "台積電",
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
+   "entry_date": "20061204",
+   "exit_date": "20070104",
+   "entry_price": 66.2,
+   "exit_price": 67.7,
+   "return_pct": 2.27,
+   "holding_days": 22,
+   "exit_reason": "🔄 半月輪動調倉換出",
+   "leader": false
   },
   {
    "stock_id": "2354",
@@ -7002,8 +7017,8 @@
   {
    "stock_id": "2498",
    "stock_name": "宏達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 52%",
-   "weight_pct": 26.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060905",
    "exit_date": "20061003",
    "entry_price": 864.0,
@@ -7072,8 +7087,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 48%",
-   "weight_pct": 24.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 45%",
+   "weight_pct": 22.5,
    "entry_date": "20060404",
    "exit_date": "20060802",
    "entry_price": 303.0,
@@ -7086,8 +7101,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060705",
    "exit_date": "20060802",
    "entry_price": 707.0,
@@ -7100,8 +7115,8 @@
   {
    "stock_id": "2354",
    "stock_name": "鴻準",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060705",
    "exit_date": "20060802",
    "entry_price": 251.5,
@@ -7114,8 +7129,8 @@
   {
    "stock_id": "2498",
    "stock_name": "宏達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060602",
    "exit_date": "20060705",
    "entry_price": 1050.0,
@@ -7128,8 +7143,8 @@
   {
    "stock_id": "3189",
    "stock_name": "景碩",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060602",
    "exit_date": "20060705",
    "entry_price": 128.0,
@@ -7142,8 +7157,8 @@
   {
    "stock_id": "2498",
    "stock_name": "宏達電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 33%",
-   "weight_pct": 16.3,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 43%",
+   "weight_pct": 21.3,
    "entry_date": "20060323",
    "exit_date": "20060623",
    "entry_price": 872.0,
@@ -7184,8 +7199,8 @@
   {
    "stock_id": "2308",
    "stock_name": "台達電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060502",
    "exit_date": "20060602",
    "entry_price": 102.0,
@@ -7198,8 +7213,8 @@
   {
    "stock_id": "2882",
    "stock_name": "國泰金",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060502",
    "exit_date": "20060602",
    "entry_price": 71.2,
@@ -7212,8 +7227,8 @@
   {
    "stock_id": "2474",
    "stock_name": "可成",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 40%",
-   "weight_pct": 20.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060323",
    "exit_date": "20060523",
    "entry_price": 297.0,
@@ -7226,8 +7241,8 @@
   {
    "stock_id": "8078",
    "stock_name": "華寶",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20060425",
    "exit_date": "20060523",
    "entry_price": 236.0,
@@ -7394,8 +7409,8 @@
   {
    "stock_id": "2317",
    "stock_name": "鴻海",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 61%",
-   "weight_pct": 30.5,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 62%",
+   "weight_pct": 31.0,
    "entry_date": "20051123",
    "exit_date": "20060124",
    "entry_price": 164.5,
@@ -7422,8 +7437,8 @@
   {
    "stock_id": "3008",
    "stock_name": "大立光",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 56%",
-   "weight_pct": 28.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 52%",
+   "weight_pct": 26.0,
    "entry_date": "20051123",
    "exit_date": "20051223",
    "entry_price": 373.0,
@@ -7436,8 +7451,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 22%",
-   "weight_pct": 11.0,
+   "role": "🅱️ B梯隊(22號) · 梯隊內平均權重 24%",
+   "weight_pct": 12.0,
    "entry_date": "20051123",
    "exit_date": "20051223",
    "entry_price": 59.0,
@@ -7450,8 +7465,8 @@
   {
    "stock_id": "2317",
    "stock_name": "鴻海",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 39%",
-   "weight_pct": 19.6,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 40%",
+   "weight_pct": 19.8,
    "entry_date": "20051004",
    "exit_date": "20051202",
    "entry_price": 153.5,
@@ -7478,8 +7493,8 @@
   {
    "stock_id": "2454",
    "stock_name": "聯發科",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 25%",
-   "weight_pct": 12.6,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 23%",
+   "weight_pct": 11.7,
    "entry_date": "20051004",
    "exit_date": "20051102",
    "entry_price": 324.0,
@@ -7492,8 +7507,8 @@
   {
    "stock_id": "2330",
    "stock_name": "台積電",
-   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 10%",
-   "weight_pct": 5.0,
+   "role": "🅰️ A梯隊(1號) · 梯隊內平均權重 11%",
+   "weight_pct": 5.4,
    "entry_date": "20051004",
    "exit_date": "20051102",
    "entry_price": 53.0,
@@ -7817,7 +7832,7 @@
    "factor": "G12 最終評分 (所有因子合成)",
    "name": "G12 最終評分 (所有因子合成)",
    "code": "G12 最終評分 (所有因子合成)",
-   "ic_t_stat": "IC t = -0.11 · IC均值 -0.13% · 261 期",
+   "ic_t_stat": "IC t = -0.22 · IC均值 -0.27% · 261 期",
    "invariance_ratio": 0.52,
    "source": "G12-PIT 台股 0050∪0051",
    "mechanism": "八因子微結構動能 × 進場防雷 × 研發護城河 × 正交共振，為選股排序依據。",
@@ -7870,7 +7885,7 @@
   }
  ],
  "live_signal": {
-  "generated_at": "2026-10-30 17:26:29",
+  "generated_at": "2026-10-30 20:25:34",
   "exposure_pct": 100.0,
   "base_exposure_pct": 100.0,
   "shield": "全球共振多頭，無護盾觸發",
@@ -7881,35 +7896,21 @@
   "ranked": [
    {
     "rank": 1,
-    "stock_id": "2451",
-    "name": "創見",
-    "score": 0.7793,
-    "price": 294.0
+    "stock_id": "2379",
+    "name": "瑞昱",
+    "score": 0.3534,
+    "price": 803.0
    },
    {
     "rank": 2,
-    "stock_id": "3044",
-    "name": "健鼎",
-    "score": 0.4129,
-    "price": 536.0
-   },
-   {
-    "rank": 3,
     "stock_id": "3034",
     "name": "聯詠",
-    "score": 0.2604,
-    "price": 596.0
-   },
-   {
-    "rank": 4,
-    "stock_id": "2379",
-    "name": "瑞昱",
-    "score": 0.2374,
-    "price": 794.0
+    "score": 0.3269,
+    "price": 575.0
    }
   ],
-  "top5_neg_io20": 1,
-  "top5_neg_io5": 3,
-  "top5_avg_io20": 0.046
+  "top5_neg_io20": 0,
+  "top5_neg_io5": 1,
+  "top5_avg_io20": 0.0935
  }
 }

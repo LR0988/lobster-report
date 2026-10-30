@@ -3,7 +3,7 @@ tw_titan_pit_service.py
 台股因果泰坦 (上限1億) 即時層：以本機 tw_stock.db 即時運算「全球泰坦邏輯 × 僅台股 0050∪0051」的最新持股與宏觀曝險，
 並寫回前端 taiwan_causal_titan_data.json (回測區塊由 tw_titan_pit_backtest.py 產生，本檔不改動)。
 
-與回測一致之處：選股排序 = 全球泰坦 G12 評分；僅台股候選；前 3 名 52/24/24 (Rank1 研發 5~25% 則 56/22/22)；
+與回測一致之處：選股排序 = 全球泰坦 G12 評分；僅台股候選；前 3 名固定 52/24/24 (已移除研發強度 56/22/22 加碼)；
 宏觀曝險 = 護盾前基礎曝險 × 以「台股 Top5」重算的外科五重護盾 (C1/C2/C3/C4/C6) 與深熊 V 轉。
 """
 import json
@@ -87,8 +87,7 @@ def refresh_live() -> dict:
 
     base_exp = float(ms.get("pre_shield_exposure_pct", ms.get("exposure_pct", 100)))
     exp_pct, shield_tag, top5_stats = _shield_exposure(ms, ranked[:5], base_exp)
-    top1_rd = float(ranked[0].get("rd_pct") or 0.0) if ranked else 0.0
-    weights = [56, 22, 22] if 5.0 <= top1_rd <= 25.0 else [52, 24, 24]
+    weights = [52, 24, 24]
 
     positions = []
     if exp_pct > 0:

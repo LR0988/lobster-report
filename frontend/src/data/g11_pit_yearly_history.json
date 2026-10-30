@@ -1,24 +1,30 @@
 {
-  "strategy_version": "G12-PIT Sovereign (配置七：S&P 500 PIT + 台灣 0050∪0051 純上市 PIT 2005-2026 零遺漏版)",
+  "strategy_version": "G12-PIT Sovereign (配置七-R：已移除 G12 三道防雷與研發加權 · S&P 500 PIT + 台灣 0050∪0051 純上市 PIT 2005-2026)",
   "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
-  "cagr": 41.32,
-  "mult": 1901.4,
-  "monthly_mdd": -18.55,
-  "daily_mdd": -25.45,
-  "calmar": 2.23,
-  "sharpe": 1.27,
-  "g1_cagr": 48.12,
-  "g2_cagr": 36.13,
-  "winning_years": "21/22 (95.5%)",
+  "cagr": 42.32,
+  "mult": 2150.8,
+  "monthly_mdd": -20.01,
+  "daily_mdd": -24.96,
+  "calmar": 2.11,
+  "sharpe": 1.28,
+  "total_ret_pct": 214979.4,
+  "sortino": 2.1,
+  "daily_calmar": 1.7,
+  "recent_8y_cagr": 41.03,
+  "semi_monthly_win_rate": 61.1,
+  "big_loss_rate": 10.2,
+  "g1_cagr": 47.57,
+  "g2_cagr": 29.03,
+  "winning_years": "22/22 (100.0%)",
   "yearly_history": [
     {
       "year": 2005,
-      "return_pct": 68.06,
+      "return_pct": 83.8,
       "spy_ret_pct": 5.32,
-      "alpha_pct": 62.73,
-      "cum_mult": 1.68,
-      "capital_twd": 1680552.0,
-      "yearly_mdd_pct": -21.66,
+      "alpha_pct": 78.47,
+      "cum_mult": 1.84,
+      "capital_twd": 1837955.0,
+      "yearly_mdd_pct": -21.52,
       "avg_exposure_pct": 96.0,
       "total_rebal_slots": 72,
       "us_slots": 70,
@@ -26,8 +32,8 @@
       "us_share_pct": 97.2,
       "tw_share_pct": 2.8,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 17,
-      "unique_us_count": 15,
+      "unique_stocks_count": 16,
+      "unique_us_count": 14,
       "unique_tw_count": 2,
       "top_stocks": [
         {
@@ -41,15 +47,15 @@
           "ticker": "VLO",
           "name": "Valero",
           "market": "US",
-          "count": 12,
-          "cum_period_ret": 46.6
+          "count": 14,
+          "cum_period_ret": 113.9
         },
         {
           "ticker": "EOG",
           "name": "EOG能源",
           "market": "US",
-          "count": 9,
-          "cum_period_ret": 51.2
+          "count": 11,
+          "cum_period_ret": 56.6
         },
         {
           "ticker": "KBH",
@@ -69,22 +75,22 @@
           "ticker": "NUE",
           "name": "紐柯鋼鐵",
           "market": "US",
-          "count": 4,
-          "cum_period_ret": 11.3
-        },
-        {
-          "ticker": "HAL",
-          "name": "哈里伯頓",
-          "market": "US",
           "count": 3,
-          "cum_period_ret": -12.4
+          "cum_period_ret": -1.8
         },
         {
-          "ticker": "BBY",
-          "name": "BBY",
+          "ticker": "RIG",
+          "name": "RIG",
           "market": "US",
           "count": 2,
-          "cum_period_ret": 3.8
+          "cum_period_ret": 1.2
+        },
+        {
+          "ticker": "ANTM",
+          "name": "ANTM",
+          "market": "US",
+          "count": 2,
+          "cum_period_ret": -0.5
         }
       ],
       "us_stocks": [
@@ -97,14 +103,14 @@
         {
           "ticker": "VLO",
           "name": "Valero",
-          "count": 12,
-          "cum_period_ret": 46.6
+          "count": 14,
+          "cum_period_ret": 113.9
         },
         {
           "ticker": "EOG",
           "name": "EOG能源",
-          "count": 9,
-          "cum_period_ret": 51.2
+          "count": 11,
+          "cum_period_ret": 56.6
         },
         {
           "ticker": "KBH",
@@ -121,8 +127,8 @@
         {
           "ticker": "NUE",
           "name": "紐柯鋼鐵",
-          "count": 4,
-          "cum_period_ret": 11.3
+          "count": 3,
+          "cum_period_ret": -1.8
         }
       ],
       "tw_stocks": [
@@ -142,18 +148,18 @@
     },
     {
       "year": 2006,
-      "return_pct": 117.21,
+      "return_pct": 109.3,
       "spy_ret_pct": 15.85,
-      "alpha_pct": 101.37,
-      "cum_mult": 3.65,
-      "capital_twd": 3650394.0,
-      "yearly_mdd_pct": -21.88,
+      "alpha_pct": 93.46,
+      "cum_mult": 3.85,
+      "capital_twd": 3846931.0,
+      "yearly_mdd_pct": -23.48,
       "avg_exposure_pct": 91.7,
       "total_rebal_slots": 69,
-      "us_slots": 35,
-      "tw_slots": 34,
-      "us_share_pct": 50.7,
-      "tw_share_pct": 49.3,
+      "us_slots": 36,
+      "tw_slots": 33,
+      "us_share_pct": 52.2,
+      "tw_share_pct": 47.8,
       "cash_defense_periods": 1,
       "unique_stocks_count": 19,
       "unique_us_count": 12,
@@ -188,18 +194,18 @@
           "cum_period_ret": 10.7
         },
         {
-          "ticker": "2393.TW",
-          "name": "億光",
-          "market": "TW",
-          "count": 5,
-          "cum_period_ret": 35.3
-        },
-        {
           "ticker": "NVDA",
           "name": "輝達",
           "market": "US",
           "count": 5,
           "cum_period_ret": 15.0
+        },
+        {
+          "ticker": "2393.TW",
+          "name": "億光",
+          "market": "TW",
+          "count": 4,
+          "cum_period_ret": 25.0
         },
         {
           "ticker": "ATI",
@@ -242,16 +248,16 @@
           "cum_period_ret": 19.8
         },
         {
+          "ticker": "AMD",
+          "name": "超微半導體",
+          "count": 3,
+          "cum_period_ret": -2.8
+        },
+        {
           "ticker": "MRO",
           "name": "Marathon Oil",
           "count": 2,
           "cum_period_ret": -3.5
-        },
-        {
-          "ticker": "AMD",
-          "name": "超微半導體",
-          "count": 2,
-          "cum_period_ret": -16.5
         }
       ],
       "tw_stocks": [
@@ -276,8 +282,8 @@
         {
           "ticker": "2393.TW",
           "name": "億光",
-          "count": 5,
-          "cum_period_ret": 35.3
+          "count": 4,
+          "cum_period_ret": 25.0
         },
         {
           "ticker": "6286.TW",
@@ -295,21 +301,21 @@
     },
     {
       "year": 2007,
-      "return_pct": 208.63,
+      "return_pct": 198.05,
       "spy_ret_pct": 5.15,
-      "alpha_pct": 203.49,
-      "cum_mult": 11.27,
-      "capital_twd": 11266286.0,
-      "yearly_mdd_pct": -12.65,
+      "alpha_pct": 192.9,
+      "cum_mult": 11.47,
+      "capital_twd": 11465606.0,
+      "yearly_mdd_pct": -11.98,
       "avg_exposure_pct": 92.4,
       "total_rebal_slots": 72,
-      "us_slots": 57,
-      "tw_slots": 15,
-      "us_share_pct": 79.2,
-      "tw_share_pct": 20.8,
+      "us_slots": 56,
+      "tw_slots": 16,
+      "us_share_pct": 77.8,
+      "tw_share_pct": 22.2,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 23,
-      "unique_us_count": 15,
+      "unique_stocks_count": 22,
+      "unique_us_count": 14,
       "unique_tw_count": 8,
       "top_stocks": [
         {
@@ -334,6 +340,13 @@
           "cum_period_ret": -2.5
         },
         {
+          "ticker": "NVDA",
+          "name": "輝達",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": 43.8
+        },
+        {
           "ticker": "ATI",
           "name": "ATI特種金屬",
           "market": "US",
@@ -348,25 +361,18 @@
           "cum_period_ret": -5.3
         },
         {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "market": "US",
-          "count": 3,
-          "cum_period_ret": 22.6
-        },
-        {
-          "ticker": "JNPR",
-          "name": "瞻博網路",
-          "market": "US",
-          "count": 3,
-          "cum_period_ret": 11.3
-        },
-        {
           "ticker": "1303.TW",
           "name": "南亞",
           "market": "TW",
           "count": 3,
           "cum_period_ret": 3.4
+        },
+        {
+          "ticker": "2454.TW",
+          "name": "聯發科",
+          "market": "TW",
+          "count": 2,
+          "cum_period_ret": 25.9
         }
       ],
       "us_stocks": [
@@ -389,22 +395,22 @@
           "cum_period_ret": -2.5
         },
         {
+          "ticker": "NVDA",
+          "name": "輝達",
+          "count": 5,
+          "cum_period_ret": 43.8
+        },
+        {
           "ticker": "ATI",
           "name": "ATI特種金屬",
           "count": 5,
           "cum_period_ret": 39.8
         },
         {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "count": 3,
-          "cum_period_ret": 22.6
-        },
-        {
-          "ticker": "JNPR",
-          "name": "瞻博網路",
-          "count": 3,
-          "cum_period_ret": 11.3
+          "ticker": "X",
+          "name": "美國鋼鐵",
+          "count": 2,
+          "cum_period_ret": 4.3
         }
       ],
       "tw_stocks": [
@@ -424,7 +430,7 @@
           "ticker": "2454.TW",
           "name": "聯發科",
           "count": 2,
-          "cum_period_ret": 55.5
+          "cum_period_ret": 25.9
         },
         {
           "ticker": "2448.TW",
@@ -433,27 +439,27 @@
           "cum_period_ret": 23.2
         },
         {
+          "ticker": "6239.TW",
+          "name": "力成",
+          "count": 2,
+          "cum_period_ret": -12.6
+        },
+        {
           "ticker": "2393.TW",
           "name": "億光",
           "count": 1,
           "cum_period_ret": 14.4
-        },
-        {
-          "ticker": "2325.TW",
-          "name": "矽品",
-          "count": 1,
-          "cum_period_ret": 9.7
         }
       ]
     },
     {
       "year": 2008,
-      "return_pct": 27.68,
+      "return_pct": 27.86,
       "spy_ret_pct": -36.79,
-      "alpha_pct": 64.48,
-      "cum_mult": 14.39,
-      "capital_twd": 14385007.0,
-      "yearly_mdd_pct": -9.27,
+      "alpha_pct": 64.65,
+      "cum_mult": 14.66,
+      "capital_twd": 14659804.0,
+      "yearly_mdd_pct": -9.64,
       "avg_exposure_pct": 22.3,
       "total_rebal_slots": 18,
       "us_slots": 13,
@@ -461,8 +467,8 @@
       "us_share_pct": 72.2,
       "tw_share_pct": 27.8,
       "cash_defense_periods": 18,
-      "unique_stocks_count": 9,
-      "unique_us_count": 7,
+      "unique_stocks_count": 8,
+      "unique_us_count": 6,
       "unique_tw_count": 2,
       "top_stocks": [
         {
@@ -473,25 +479,32 @@
           "cum_period_ret": 110.0
         },
         {
-          "ticker": "2498.TW",
-          "name": "宏達電",
-          "market": "TW",
-          "count": 3,
-          "cum_period_ret": -23.0
-        },
-        {
           "ticker": "1722.TW",
           "name": "台肥",
           "market": "TW",
-          "count": 2,
+          "count": 3,
           "cum_period_ret": 14.4
+        },
+        {
+          "ticker": "EOG",
+          "name": "EOG能源",
+          "market": "US",
+          "count": 2,
+          "cum_period_ret": 4.0
         },
         {
           "ticker": "HES",
           "name": "赫斯能源",
           "market": "US",
           "count": 2,
-          "cum_period_ret": 11.9
+          "cum_period_ret": -7.2
+        },
+        {
+          "ticker": "2498.TW",
+          "name": "宏達電",
+          "market": "TW",
+          "count": 2,
+          "cum_period_ret": -9.2
         },
         {
           "ticker": "CNX",
@@ -501,25 +514,18 @@
           "cum_period_ret": 5.7
         },
         {
-          "ticker": "EOG",
-          "name": "EOG能源",
+          "ticker": "FLR",
+          "name": "FLR",
           "market": "US",
           "count": 1,
-          "cum_period_ret": 3.3
+          "cum_period_ret": 4.6
         },
         {
-          "ticker": "APA",
-          "name": "APA Corp",
+          "ticker": "AAPL",
+          "name": "蘋果",
           "market": "US",
           "count": 1,
-          "cum_period_ret": 2.8
-        },
-        {
-          "ticker": "AMZN",
-          "name": "亞馬遜",
-          "market": "US",
-          "count": 1,
-          "cum_period_ret": -22.4
+          "cum_period_ret": -31.3
         }
       ],
       "us_stocks": [
@@ -530,10 +536,16 @@
           "cum_period_ret": 110.0
         },
         {
+          "ticker": "EOG",
+          "name": "EOG能源",
+          "count": 2,
+          "cum_period_ret": 4.0
+        },
+        {
           "ticker": "HES",
           "name": "赫斯能源",
           "count": 2,
-          "cum_period_ret": 11.9
+          "cum_period_ret": -7.2
         },
         {
           "ticker": "CNX",
@@ -542,92 +554,72 @@
           "cum_period_ret": 5.7
         },
         {
-          "ticker": "EOG",
-          "name": "EOG能源",
+          "ticker": "FLR",
+          "name": "FLR",
           "count": 1,
-          "cum_period_ret": 3.3
+          "cum_period_ret": 4.6
         },
         {
-          "ticker": "APA",
-          "name": "APA Corp",
+          "ticker": "AAPL",
+          "name": "蘋果",
           "count": 1,
-          "cum_period_ret": 2.8
-        },
-        {
-          "ticker": "AMZN",
-          "name": "亞馬遜",
-          "count": 1,
-          "cum_period_ret": -22.4
+          "cum_period_ret": -31.3
         }
       ],
       "tw_stocks": [
         {
-          "ticker": "2498.TW",
-          "name": "宏達電",
-          "count": 3,
-          "cum_period_ret": -23.0
-        },
-        {
           "ticker": "1722.TW",
           "name": "台肥",
-          "count": 2,
+          "count": 3,
           "cum_period_ret": 14.4
+        },
+        {
+          "ticker": "2498.TW",
+          "name": "宏達電",
+          "count": 2,
+          "cum_period_ret": -9.2
         }
       ]
     },
     {
       "year": 2009,
-      "return_pct": 27.27,
+      "return_pct": 30.2,
       "spy_ret_pct": 26.35,
-      "alpha_pct": 0.92,
-      "cum_mult": 18.31,
-      "capital_twd": 18307835.0,
-      "yearly_mdd_pct": -18.59,
+      "alpha_pct": 3.84,
+      "cum_mult": 19.09,
+      "capital_twd": 19086373.0,
+      "yearly_mdd_pct": -18.95,
       "avg_exposure_pct": 78.5,
       "total_rebal_slots": 60,
-      "us_slots": 48,
-      "tw_slots": 12,
-      "us_share_pct": 80.0,
-      "tw_share_pct": 20.0,
+      "us_slots": 47,
+      "tw_slots": 13,
+      "us_share_pct": 78.3,
+      "tw_share_pct": 21.7,
       "cash_defense_periods": 4,
-      "unique_stocks_count": 31,
-      "unique_us_count": 23,
+      "unique_stocks_count": 29,
+      "unique_us_count": 21,
       "unique_tw_count": 8,
       "top_stocks": [
         {
           "ticker": "F",
           "name": "福特汽車",
           "market": "US",
-          "count": 12,
-          "cum_period_ret": 132.4
+          "count": 13,
+          "cum_period_ret": 137.6
         },
         {
           "ticker": "AMZN",
           "name": "亞馬遜",
           "market": "US",
-          "count": 5,
-          "cum_period_ret": 6.7
+          "count": 6,
+          "cum_period_ret": 25.0
         },
         {
           "ticker": "FCX",
           "name": "自由港麥克莫蘭",
           "market": "US",
-          "count": 5,
-          "cum_period_ret": 4.6
-        },
-        {
-          "ticker": "JNPR",
-          "name": "瞻博網路",
-          "market": "US",
           "count": 4,
-          "cum_period_ret": 11.4
-        },
-        {
-          "ticker": "2454.TW",
-          "name": "聯發科",
-          "market": "TW",
-          "count": 4,
-          "cum_period_ret": 11.0
+          "cum_period_ret": -11.0
         },
         {
           "ticker": "AZO",
@@ -635,6 +627,20 @@
           "market": "US",
           "count": 3,
           "cum_period_ret": -2.0
+        },
+        {
+          "ticker": "WFC",
+          "name": "富國銀行",
+          "market": "US",
+          "count": 3,
+          "cum_period_ret": -2.7
+        },
+        {
+          "ticker": "2454.TW",
+          "name": "聯發科",
+          "market": "TW",
+          "count": 3,
+          "cum_period_ret": -16.0
         },
         {
           "ticker": "FITB",
@@ -644,43 +650,43 @@
           "cum_period_ret": 41.7
         },
         {
-          "ticker": "6286.TW",
-          "name": "立錡",
+          "ticker": "3034.TW",
+          "name": "聯詠",
           "market": "TW",
           "count": 2,
-          "cum_period_ret": -5.9
+          "cum_period_ret": 29.0
         }
       ],
       "us_stocks": [
         {
           "ticker": "F",
           "name": "福特汽車",
-          "count": 12,
-          "cum_period_ret": 132.4
+          "count": 13,
+          "cum_period_ret": 137.6
         },
         {
           "ticker": "AMZN",
           "name": "亞馬遜",
-          "count": 5,
-          "cum_period_ret": 6.7
+          "count": 6,
+          "cum_period_ret": 25.0
         },
         {
           "ticker": "FCX",
           "name": "自由港麥克莫蘭",
-          "count": 5,
-          "cum_period_ret": 4.6
-        },
-        {
-          "ticker": "JNPR",
-          "name": "瞻博網路",
           "count": 4,
-          "cum_period_ret": 11.4
+          "cum_period_ret": -11.0
         },
         {
           "ticker": "AZO",
           "name": "AutoZone",
           "count": 3,
           "cum_period_ret": -2.0
+        },
+        {
+          "ticker": "WFC",
+          "name": "富國銀行",
+          "count": 3,
+          "cum_period_ret": -2.7
         },
         {
           "ticker": "FITB",
@@ -693,8 +699,20 @@
         {
           "ticker": "2454.TW",
           "name": "聯發科",
-          "count": 4,
-          "cum_period_ret": 11.0
+          "count": 3,
+          "cum_period_ret": -16.0
+        },
+        {
+          "ticker": "3034.TW",
+          "name": "聯詠",
+          "count": 2,
+          "cum_period_ret": 29.0
+        },
+        {
+          "ticker": "2353.TW",
+          "name": "宏碁",
+          "count": 2,
+          "cum_period_ret": -2.1
         },
         {
           "ticker": "6286.TW",
@@ -703,22 +721,10 @@
           "cum_period_ret": -5.9
         },
         {
-          "ticker": "3034.TW",
-          "name": "聯詠",
-          "count": 1,
-          "cum_period_ret": 19.3
-        },
-        {
           "ticker": "2105.TW",
           "name": "正新",
           "count": 1,
           "cum_period_ret": 6.0
-        },
-        {
-          "ticker": "2353.TW",
-          "name": "宏碁",
-          "count": 1,
-          "cum_period_ret": 5.7
         },
         {
           "ticker": "3231.TW",
@@ -730,43 +736,36 @@
     },
     {
       "year": 2010,
-      "return_pct": 19.77,
+      "return_pct": 16.8,
       "spy_ret_pct": 15.06,
-      "alpha_pct": 4.71,
-      "cum_mult": 21.93,
-      "capital_twd": 21926494.0,
-      "yearly_mdd_pct": -22.59,
-      "avg_exposure_pct": 72.2,
+      "alpha_pct": 1.75,
+      "cum_mult": 22.29,
+      "capital_twd": 22293421.0,
+      "yearly_mdd_pct": -22.9,
+      "avg_exposure_pct": 70.5,
       "total_rebal_slots": 60,
       "us_slots": 55,
       "tw_slots": 5,
       "us_share_pct": 91.7,
       "tw_share_pct": 8.3,
       "cash_defense_periods": 4,
-      "unique_stocks_count": 24,
-      "unique_us_count": 21,
-      "unique_tw_count": 3,
+      "unique_stocks_count": 22,
+      "unique_us_count": 20,
+      "unique_tw_count": 2,
       "top_stocks": [
         {
           "ticker": "AKAM",
           "name": "Akamai",
           "market": "US",
-          "count": 8,
-          "cum_period_ret": 9.1
-        },
-        {
-          "ticker": "F",
-          "name": "福特汽車",
-          "market": "US",
           "count": 7,
-          "cum_period_ret": 18.8
+          "cum_period_ret": 4.7
         },
         {
-          "ticker": "CRM",
-          "name": "Salesforce",
+          "ticker": "CMI",
+          "name": "CMI",
           "market": "US",
           "count": 6,
-          "cum_period_ret": 34.2
+          "cum_period_ret": 39.6
         },
         {
           "ticker": "FITB",
@@ -783,45 +782,46 @@
           "cum_period_ret": 13.3
         },
         {
+          "ticker": "F",
+          "name": "福特汽車",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": -2.0
+        },
+        {
           "ticker": "DD",
           "name": "DD",
           "market": "US",
           "count": 5,
-          "cum_period_ret": -5.3
-        },
-        {
-          "ticker": "CMI",
-          "name": "CMI",
-          "market": "US",
-          "count": 3,
-          "cum_period_ret": 17.1
+          "cum_period_ret": -7.8
         },
         {
           "ticker": "2498.TW",
           "name": "宏達電",
           "market": "TW",
-          "count": 3,
-          "cum_period_ret": 10.8
+          "count": 4,
+          "cum_period_ret": 16.0
+        },
+        {
+          "ticker": "CRM",
+          "name": "Salesforce",
+          "market": "US",
+          "count": 4,
+          "cum_period_ret": 12.0
         }
       ],
       "us_stocks": [
         {
           "ticker": "AKAM",
           "name": "Akamai",
-          "count": 8,
-          "cum_period_ret": 9.1
-        },
-        {
-          "ticker": "F",
-          "name": "福特汽車",
           "count": 7,
-          "cum_period_ret": 18.8
+          "cum_period_ret": 4.7
         },
         {
-          "ticker": "CRM",
-          "name": "Salesforce",
+          "ticker": "CMI",
+          "name": "CMI",
           "count": 6,
-          "cum_period_ret": 34.2
+          "cum_period_ret": 39.6
         },
         {
           "ticker": "FITB",
@@ -836,24 +836,24 @@
           "cum_period_ret": 13.3
         },
         {
+          "ticker": "F",
+          "name": "福特汽車",
+          "count": 5,
+          "cum_period_ret": -2.0
+        },
+        {
           "ticker": "DD",
           "name": "DD",
           "count": 5,
-          "cum_period_ret": -5.3
+          "cum_period_ret": -7.8
         }
       ],
       "tw_stocks": [
         {
           "ticker": "2498.TW",
           "name": "宏達電",
-          "count": 3,
-          "cum_period_ret": 10.8
-        },
-        {
-          "ticker": "3008.TW",
-          "name": "大立光",
-          "count": 1,
-          "cum_period_ret": -3.7
+          "count": 4,
+          "cum_period_ret": 16.0
         },
         {
           "ticker": "3034.TW",
@@ -865,36 +865,29 @@
     },
     {
       "year": 2011,
-      "return_pct": 10.19,
+      "return_pct": 4.74,
       "spy_ret_pct": 1.9,
-      "alpha_pct": 8.29,
-      "cum_mult": 24.16,
-      "capital_twd": 24160454.0,
-      "yearly_mdd_pct": -22.15,
+      "alpha_pct": 2.85,
+      "cum_mult": 23.35,
+      "capital_twd": 23350541.0,
+      "yearly_mdd_pct": -19.49,
       "avg_exposure_pct": 67.8,
       "total_rebal_slots": 54,
-      "us_slots": 29,
-      "tw_slots": 25,
-      "us_share_pct": 53.7,
-      "tw_share_pct": 46.3,
+      "us_slots": 34,
+      "tw_slots": 20,
+      "us_share_pct": 63.0,
+      "tw_share_pct": 37.0,
       "cash_defense_periods": 6,
       "unique_stocks_count": 17,
-      "unique_us_count": 13,
-      "unique_tw_count": 4,
+      "unique_us_count": 14,
+      "unique_tw_count": 3,
       "top_stocks": [
-        {
-          "ticker": "2498.TW",
-          "name": "宏達電",
-          "market": "TW",
-          "count": 9,
-          "cum_period_ret": 36.5
-        },
         {
           "ticker": "NFLX",
           "name": "網飛",
           "market": "US",
-          "count": 8,
-          "cum_period_ret": 51.4
+          "count": 9,
+          "cum_period_ret": 48.6
         },
         {
           "ticker": "2474.TW",
@@ -902,6 +895,13 @@
           "market": "TW",
           "count": 7,
           "cum_period_ret": 49.8
+        },
+        {
+          "ticker": "2498.TW",
+          "name": "宏達電",
+          "market": "TW",
+          "count": 7,
+          "cum_period_ret": 40.4
         },
         {
           "ticker": "2049.TW",
@@ -918,6 +918,13 @@
           "cum_period_ret": -15.2
         },
         {
+          "ticker": "MRO",
+          "name": "Marathon Oil",
+          "market": "US",
+          "count": 3,
+          "cum_period_ret": 6.9
+        },
+        {
           "ticker": "WMB",
           "name": "WMB",
           "market": "US",
@@ -925,26 +932,19 @@
           "cum_period_ret": 2.8
         },
         {
-          "ticker": "3008.TW",
-          "name": "大立光",
-          "market": "TW",
-          "count": 3,
-          "cum_period_ret": -0.6
-        },
-        {
-          "ticker": "MRO",
-          "name": "Marathon Oil",
+          "ticker": "WYNN",
+          "name": "永利渡假村",
           "market": "US",
           "count": 2,
-          "cum_period_ret": 8.9
+          "cum_period_ret": 3.9
         }
       ],
       "us_stocks": [
         {
           "ticker": "NFLX",
           "name": "網飛",
-          "count": 8,
-          "cum_period_ret": 51.4
+          "count": 9,
+          "cum_period_ret": 48.6
         },
         {
           "ticker": "CMG",
@@ -953,37 +953,31 @@
           "cum_period_ret": -15.2
         },
         {
+          "ticker": "MRO",
+          "name": "Marathon Oil",
+          "count": 3,
+          "cum_period_ret": 6.9
+        },
+        {
           "ticker": "WMB",
           "name": "WMB",
           "count": 3,
           "cum_period_ret": 2.8
         },
         {
-          "ticker": "MRO",
-          "name": "Marathon Oil",
+          "ticker": "WYNN",
+          "name": "永利渡假村",
           "count": 2,
-          "cum_period_ret": 8.9
+          "cum_period_ret": 3.9
         },
         {
           "ticker": "BIIB",
           "name": "百健",
           "count": 2,
           "cum_period_ret": 0.7
-        },
-        {
-          "ticker": "CF",
-          "name": "CF Industries",
-          "count": 1,
-          "cum_period_ret": 14.6
         }
       ],
       "tw_stocks": [
-        {
-          "ticker": "2498.TW",
-          "name": "宏達電",
-          "count": 9,
-          "cum_period_ret": 36.5
-        },
         {
           "ticker": "2474.TW",
           "name": "可成",
@@ -991,37 +985,37 @@
           "cum_period_ret": 49.8
         },
         {
+          "ticker": "2498.TW",
+          "name": "宏達電",
+          "count": 7,
+          "cum_period_ret": 40.4
+        },
+        {
           "ticker": "2049.TW",
           "name": "上銀",
           "count": 6,
           "cum_period_ret": -9.7
-        },
-        {
-          "ticker": "3008.TW",
-          "name": "大立光",
-          "count": 3,
-          "cum_period_ret": -0.6
         }
       ]
     },
     {
       "year": 2012,
-      "return_pct": 13.82,
+      "return_pct": 7.18,
       "spy_ret_pct": 15.99,
-      "alpha_pct": -2.17,
-      "cum_mult": 27.5,
-      "capital_twd": 27500136.0,
-      "yearly_mdd_pct": -16.89,
+      "alpha_pct": -8.81,
+      "cum_mult": 25.03,
+      "capital_twd": 25028075.0,
+      "yearly_mdd_pct": -18.8,
       "avg_exposure_pct": 86.3,
       "total_rebal_slots": 63,
-      "us_slots": 58,
-      "tw_slots": 5,
-      "us_share_pct": 92.1,
-      "tw_share_pct": 7.9,
+      "us_slots": 55,
+      "tw_slots": 8,
+      "us_share_pct": 87.3,
+      "tw_share_pct": 12.7,
       "cash_defense_periods": 3,
-      "unique_stocks_count": 22,
-      "unique_us_count": 20,
-      "unique_tw_count": 2,
+      "unique_stocks_count": 23,
+      "unique_us_count": 19,
+      "unique_tw_count": 4,
       "top_stocks": [
         {
           "ticker": "STX",
@@ -1057,13 +1051,6 @@
           "market": "US",
           "count": 5,
           "cum_period_ret": -3.2
-        },
-        {
-          "ticker": "V",
-          "name": "Visa",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 9.1
         },
         {
           "ticker": "LYB",
@@ -1078,6 +1065,13 @@
           "market": "TW",
           "count": 3,
           "cum_period_ret": 7.9
+        },
+        {
+          "ticker": "6176.TW",
+          "name": "瑞儀",
+          "market": "TW",
+          "count": 3,
+          "cum_period_ret": -5.9
         }
       ],
       "us_stocks": [
@@ -1112,10 +1106,10 @@
           "cum_period_ret": -3.2
         },
         {
-          "ticker": "V",
-          "name": "Visa",
+          "ticker": "LYB",
+          "name": "利安德巴塞爾",
           "count": 4,
-          "cum_period_ret": 9.1
+          "cum_period_ret": 4.1
         }
       ],
       "tw_stocks": [
@@ -1128,57 +1122,69 @@
         {
           "ticker": "6176.TW",
           "name": "瑞儀",
-          "count": 2,
-          "cum_period_ret": 14.6
+          "count": 3,
+          "cum_period_ret": -5.9
+        },
+        {
+          "ticker": "2474.TW",
+          "name": "可成",
+          "count": 1,
+          "cum_period_ret": -12.0
+        },
+        {
+          "ticker": "2049.TW",
+          "name": "上銀",
+          "count": 1,
+          "cum_period_ret": -13.4
         }
       ]
     },
     {
       "year": 2013,
-      "return_pct": 62.15,
+      "return_pct": 77.84,
       "spy_ret_pct": 32.31,
-      "alpha_pct": 29.85,
-      "cum_mult": 44.59,
-      "capital_twd": 44592572.0,
-      "yearly_mdd_pct": -9.42,
+      "alpha_pct": 45.53,
+      "cum_mult": 44.51,
+      "capital_twd": 44509574.0,
+      "yearly_mdd_pct": -11.11,
       "avg_exposure_pct": 91.5,
       "total_rebal_slots": 72,
-      "us_slots": 67,
-      "tw_slots": 5,
-      "us_share_pct": 93.1,
-      "tw_share_pct": 6.9,
+      "us_slots": 68,
+      "tw_slots": 4,
+      "us_share_pct": 94.4,
+      "tw_share_pct": 5.6,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 19,
-      "unique_us_count": 16,
+      "unique_stocks_count": 18,
+      "unique_us_count": 15,
       "unique_tw_count": 3,
       "top_stocks": [
         {
           "ticker": "NFLX",
           "name": "網飛",
           "market": "US",
-          "count": 15,
-          "cum_period_ret": 110.8
+          "count": 18,
+          "cum_period_ret": 145.2
         },
         {
           "ticker": "MU",
           "name": "美光科技",
           "market": "US",
-          "count": 11,
-          "cum_period_ret": 77.7
+          "count": 12,
+          "cum_period_ret": 99.4
         },
         {
           "ticker": "GILD",
           "name": "吉利德科學",
           "market": "US",
           "count": 10,
-          "cum_period_ret": 96.4
+          "cum_period_ret": 77.9
         },
         {
-          "ticker": "MPC",
-          "name": "馬拉松石油",
+          "ticker": "DAL",
+          "name": "達美航空",
           "market": "US",
-          "count": 5,
-          "cum_period_ret": 0.1
+          "count": 6,
+          "cum_period_ret": 34.0
         },
         {
           "ticker": "FSLR",
@@ -1188,51 +1194,51 @@
           "cum_period_ret": -28.8
         },
         {
-          "ticker": "DAL",
-          "name": "達美航空",
+          "ticker": "VLO",
+          "name": "Valero",
           "market": "US",
           "count": 4,
-          "cum_period_ret": 10.3
+          "cum_period_ret": -11.7
         },
         {
-          "ticker": "1476.TW",
-          "name": "儒鴻",
-          "market": "TW",
-          "count": 3,
-          "cum_period_ret": 18.5
-        },
-        {
-          "ticker": "BBY",
-          "name": "BBY",
+          "ticker": "LYB",
+          "name": "利安德巴塞爾",
           "market": "US",
           "count": 3,
-          "cum_period_ret": -12.0
+          "cum_period_ret": 7.4
+        },
+        {
+          "ticker": "BIIB",
+          "name": "百健",
+          "market": "US",
+          "count": 2,
+          "cum_period_ret": 16.3
         }
       ],
       "us_stocks": [
         {
           "ticker": "NFLX",
           "name": "網飛",
-          "count": 15,
-          "cum_period_ret": 110.8
+          "count": 18,
+          "cum_period_ret": 145.2
         },
         {
           "ticker": "MU",
           "name": "美光科技",
-          "count": 11,
-          "cum_period_ret": 77.7
+          "count": 12,
+          "cum_period_ret": 99.4
         },
         {
           "ticker": "GILD",
           "name": "吉利德科學",
           "count": 10,
-          "cum_period_ret": 96.4
+          "cum_period_ret": 77.9
         },
         {
-          "ticker": "MPC",
-          "name": "馬拉松石油",
-          "count": 5,
-          "cum_period_ret": 0.1
+          "ticker": "DAL",
+          "name": "達美航空",
+          "count": 6,
+          "cum_period_ret": 34.0
         },
         {
           "ticker": "FSLR",
@@ -1241,18 +1247,18 @@
           "cum_period_ret": -28.8
         },
         {
-          "ticker": "DAL",
-          "name": "達美航空",
+          "ticker": "VLO",
+          "name": "Valero",
           "count": 4,
-          "cum_period_ret": 10.3
+          "cum_period_ret": -11.7
         }
       ],
       "tw_stocks": [
         {
           "ticker": "1476.TW",
           "name": "儒鴻",
-          "count": 3,
-          "cum_period_ret": 18.5
+          "count": 2,
+          "cum_period_ret": 13.0
         },
         {
           "ticker": "2308.TW",
@@ -1270,43 +1276,43 @@
     },
     {
       "year": 2014,
-      "return_pct": 13.99,
+      "return_pct": 7.24,
       "spy_ret_pct": 13.46,
-      "alpha_pct": 0.53,
-      "cum_mult": 50.83,
-      "capital_twd": 50831823.0,
-      "yearly_mdd_pct": -14.98,
+      "alpha_pct": -6.22,
+      "cum_mult": 47.73,
+      "capital_twd": 47733186.0,
+      "yearly_mdd_pct": -20.33,
       "avg_exposure_pct": 90.6,
       "total_rebal_slots": 72,
-      "us_slots": 64,
-      "tw_slots": 8,
-      "us_share_pct": 88.9,
-      "tw_share_pct": 11.1,
+      "us_slots": 65,
+      "tw_slots": 7,
+      "us_share_pct": 90.3,
+      "tw_share_pct": 9.7,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 20,
+      "unique_stocks_count": 18,
       "unique_us_count": 16,
-      "unique_tw_count": 4,
+      "unique_tw_count": 2,
       "top_stocks": [
         {
           "ticker": "MU",
           "name": "美光科技",
           "market": "US",
-          "count": 17,
-          "cum_period_ret": 67.2
+          "count": 16,
+          "cum_period_ret": 74.5
         },
         {
           "ticker": "DAL",
           "name": "達美航空",
           "market": "US",
-          "count": 7,
-          "cum_period_ret": 17.7
+          "count": 8,
+          "cum_period_ret": 18.1
         },
         {
-          "ticker": "GILD",
-          "name": "吉利德科學",
+          "ticker": "WMB",
+          "name": "WMB",
           "market": "US",
-          "count": 7,
-          "cum_period_ret": -8.9
+          "count": 6,
+          "cum_period_ret": -9.4
         },
         {
           "ticker": "LUV",
@@ -1323,45 +1329,45 @@
           "cum_period_ret": 14.9
         },
         {
-          "ticker": "META",
-          "name": "Meta",
+          "ticker": "GILD",
+          "name": "吉利德科學",
           "market": "US",
-          "count": 4,
-          "cum_period_ret": 20.9
-        },
-        {
-          "ticker": "WMB",
-          "name": "WMB",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": -11.6
+          "count": 5,
+          "cum_period_ret": -11.4
         },
         {
           "ticker": "CMG",
           "name": "Chipotle",
           "market": "US",
-          "count": 3,
-          "cum_period_ret": -23.0
+          "count": 5,
+          "cum_period_ret": -25.4
+        },
+        {
+          "ticker": "META",
+          "name": "Meta",
+          "market": "US",
+          "count": 4,
+          "cum_period_ret": -8.0
         }
       ],
       "us_stocks": [
         {
           "ticker": "MU",
           "name": "美光科技",
-          "count": 17,
-          "cum_period_ret": 67.2
+          "count": 16,
+          "cum_period_ret": 74.5
         },
         {
           "ticker": "DAL",
           "name": "達美航空",
-          "count": 7,
-          "cum_period_ret": 17.7
+          "count": 8,
+          "cum_period_ret": 18.1
         },
         {
-          "ticker": "GILD",
-          "name": "吉利德科學",
-          "count": 7,
-          "cum_period_ret": -8.9
+          "ticker": "WMB",
+          "name": "WMB",
+          "count": 6,
+          "cum_period_ret": -9.4
         },
         {
           "ticker": "LUV",
@@ -1370,16 +1376,16 @@
           "cum_period_ret": 47.4
         },
         {
-          "ticker": "META",
-          "name": "Meta",
-          "count": 4,
-          "cum_period_ret": 20.9
+          "ticker": "GILD",
+          "name": "吉利德科學",
+          "count": 5,
+          "cum_period_ret": -11.4
         },
         {
-          "ticker": "WMB",
-          "name": "WMB",
-          "count": 4,
-          "cum_period_ret": -11.6
+          "ticker": "CMG",
+          "name": "Chipotle",
+          "count": 5,
+          "cum_period_ret": -25.4
         }
       ],
       "tw_stocks": [
@@ -1390,33 +1396,21 @@
           "cum_period_ret": 14.9
         },
         {
-          "ticker": "2474.TW",
-          "name": "可成",
-          "count": 1,
-          "cum_period_ret": 12.8
-        },
-        {
-          "ticker": "2439.TW",
-          "name": "美律",
-          "count": 1,
-          "cum_period_ret": 5.5
-        },
-        {
-          "ticker": "2317.TW",
-          "name": "鴻海",
-          "count": 1,
-          "cum_period_ret": -5.5
+          "ticker": "1476.TW",
+          "name": "儒鴻",
+          "count": 2,
+          "cum_period_ret": 2.1
         }
       ]
     },
     {
       "year": 2015,
-      "return_pct": -3.54,
+      "return_pct": 0.97,
       "spy_ret_pct": 1.23,
-      "alpha_pct": -4.77,
-      "cum_mult": 49.03,
-      "capital_twd": 49034408.0,
-      "yearly_mdd_pct": -20.33,
+      "alpha_pct": -0.26,
+      "cum_mult": 48.2,
+      "capital_twd": 48197230.0,
+      "yearly_mdd_pct": -19.7,
       "avg_exposure_pct": 77.8,
       "total_rebal_slots": 57,
       "us_slots": 54,
@@ -1424,16 +1418,16 @@
       "us_share_pct": 94.7,
       "tw_share_pct": 5.3,
       "cash_defense_periods": 5,
-      "unique_stocks_count": 21,
-      "unique_us_count": 19,
+      "unique_stocks_count": 20,
+      "unique_us_count": 18,
       "unique_tw_count": 2,
       "top_stocks": [
         {
           "ticker": "NFLX",
           "name": "網飛",
           "market": "US",
-          "count": 10,
-          "cum_period_ret": 54.6
+          "count": 11,
+          "cum_period_ret": 66.1
         },
         {
           "ticker": "SWKS",
@@ -1460,15 +1454,15 @@
           "ticker": "AAPL",
           "name": "蘋果",
           "market": "US",
-          "count": 3,
-          "cum_period_ret": 0.3
+          "count": 4,
+          "cum_period_ret": 5.5
         },
         {
           "ticker": "LUV",
           "name": "西南航空",
           "market": "US",
-          "count": 3,
-          "cum_period_ret": -0.4
+          "count": 4,
+          "cum_period_ret": -4.3
         },
         {
           "ticker": "3008.TW",
@@ -1489,8 +1483,8 @@
         {
           "ticker": "NFLX",
           "name": "網飛",
-          "count": 10,
-          "cum_period_ret": 54.6
+          "count": 11,
+          "cum_period_ret": 66.1
         },
         {
           "ticker": "SWKS",
@@ -1513,14 +1507,14 @@
         {
           "ticker": "AAPL",
           "name": "蘋果",
-          "count": 3,
-          "cum_period_ret": 0.3
+          "count": 4,
+          "cum_period_ret": 5.5
         },
         {
           "ticker": "LUV",
           "name": "西南航空",
-          "count": 3,
-          "cum_period_ret": -0.4
+          "count": 4,
+          "cum_period_ret": -4.3
         }
       ],
       "tw_stocks": [
@@ -1540,22 +1534,22 @@
     },
     {
       "year": 2016,
-      "return_pct": 49.08,
+      "return_pct": 38.73,
       "spy_ret_pct": 12.0,
-      "alpha_pct": 37.08,
-      "cum_mult": 73.1,
-      "capital_twd": 73098996.0,
-      "yearly_mdd_pct": -10.89,
+      "alpha_pct": 26.74,
+      "cum_mult": 66.87,
+      "capital_twd": 66865414.0,
+      "yearly_mdd_pct": -11.62,
       "avg_exposure_pct": 83.3,
       "total_rebal_slots": 63,
-      "us_slots": 62,
-      "tw_slots": 1,
-      "us_share_pct": 98.4,
-      "tw_share_pct": 1.6,
+      "us_slots": 63,
+      "tw_slots": 0,
+      "us_share_pct": 100.0,
+      "tw_share_pct": 0.0,
       "cash_defense_periods": 3,
-      "unique_stocks_count": 20,
+      "unique_stocks_count": 19,
       "unique_us_count": 19,
-      "unique_tw_count": 1,
+      "unique_tw_count": 0,
       "top_stocks": [
         {
           "ticker": "NVDA",
@@ -1575,8 +1569,8 @@
           "ticker": "META",
           "name": "Meta",
           "market": "US",
-          "count": 6,
-          "cum_period_ret": 14.1
+          "count": 8,
+          "cum_period_ret": 11.1
         },
         {
           "ticker": "NEM",
@@ -1630,8 +1624,8 @@
         {
           "ticker": "META",
           "name": "Meta",
-          "count": 6,
-          "cum_period_ret": 14.1
+          "count": 8,
+          "cum_period_ret": 11.1
         },
         {
           "ticker": "NEM",
@@ -1652,23 +1646,16 @@
           "cum_period_ret": -35.1
         }
       ],
-      "tw_stocks": [
-        {
-          "ticker": "2330.TW",
-          "name": "台積電",
-          "count": 1,
-          "cum_period_ret": -3.9
-        }
-      ]
+      "tw_stocks": []
     },
     {
       "year": 2017,
-      "return_pct": 25.61,
+      "return_pct": 23.98,
       "spy_ret_pct": 21.71,
-      "alpha_pct": 3.9,
-      "cum_mult": 91.82,
-      "capital_twd": 91817226.0,
-      "yearly_mdd_pct": -18.38,
+      "alpha_pct": 2.27,
+      "cum_mult": 82.9,
+      "capital_twd": 82896974.0,
+      "yearly_mdd_pct": -13.09,
       "avg_exposure_pct": 98.3,
       "total_rebal_slots": 72,
       "us_slots": 71,
@@ -1676,16 +1663,16 @@
       "us_share_pct": 98.6,
       "tw_share_pct": 1.4,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 20,
-      "unique_us_count": 19,
+      "unique_stocks_count": 18,
+      "unique_us_count": 17,
       "unique_tw_count": 1,
       "top_stocks": [
         {
           "ticker": "MU",
           "name": "美光科技",
           "market": "US",
-          "count": 15,
-          "cum_period_ret": 99.1
+          "count": 17,
+          "cum_period_ret": 82.5
         },
         {
           "ticker": "NVDA",
@@ -1702,18 +1689,25 @@
           "cum_period_ret": 41.6
         },
         {
-          "ticker": "CSX",
-          "name": "CSX鐵路運輸",
-          "market": "US",
-          "count": 7,
-          "cum_period_ret": -10.6
-        },
-        {
           "ticker": "AMD",
           "name": "超微半導體",
           "market": "US",
           "count": 5,
           "cum_period_ret": -45.1
+        },
+        {
+          "ticker": "AMAT",
+          "name": "應用材料",
+          "market": "US",
+          "count": 4,
+          "cum_period_ret": 7.9
+        },
+        {
+          "ticker": "CSX",
+          "name": "CSX鐵路運輸",
+          "market": "US",
+          "count": 4,
+          "cum_period_ret": -9.6
         },
         {
           "ticker": "HAL",
@@ -1723,26 +1717,19 @@
           "cum_period_ret": -4.5
         },
         {
-          "ticker": "FCX",
-          "name": "自由港麥克莫蘭",
+          "ticker": "BAC",
+          "name": "美國銀行",
           "market": "US",
           "count": 3,
-          "cum_period_ret": -13.2
-        },
-        {
-          "ticker": "DE",
-          "name": "強鹿",
-          "market": "US",
-          "count": 2,
-          "cum_period_ret": -6.6
+          "cum_period_ret": -17.9
         }
       ],
       "us_stocks": [
         {
           "ticker": "MU",
           "name": "美光科技",
-          "count": 15,
-          "cum_period_ret": 99.1
+          "count": 17,
+          "cum_period_ret": 82.5
         },
         {
           "ticker": "NVDA",
@@ -1757,22 +1744,22 @@
           "cum_period_ret": 41.6
         },
         {
-          "ticker": "CSX",
-          "name": "CSX鐵路運輸",
-          "count": 7,
-          "cum_period_ret": -10.6
-        },
-        {
           "ticker": "AMD",
           "name": "超微半導體",
           "count": 5,
           "cum_period_ret": -45.1
         },
         {
-          "ticker": "HAL",
-          "name": "哈里伯頓",
-          "count": 3,
-          "cum_period_ret": -4.5
+          "ticker": "AMAT",
+          "name": "應用材料",
+          "count": 4,
+          "cum_period_ret": 7.9
+        },
+        {
+          "ticker": "CSX",
+          "name": "CSX鐵路運輸",
+          "count": 4,
+          "cum_period_ret": -9.6
         }
       ],
       "tw_stocks": [
@@ -1786,12 +1773,12 @@
     },
     {
       "year": 2018,
-      "return_pct": 24.51,
+      "return_pct": 47.69,
       "spy_ret_pct": -4.57,
-      "alpha_pct": 29.08,
-      "cum_mult": 114.32,
-      "capital_twd": 114319006.0,
-      "yearly_mdd_pct": -17.62,
+      "alpha_pct": 52.26,
+      "cum_mult": 122.43,
+      "capital_twd": 122431914.0,
+      "yearly_mdd_pct": -19.54,
       "avg_exposure_pct": 65.3,
       "total_rebal_slots": 60,
       "us_slots": 55,
@@ -1799,8 +1786,8 @@
       "us_share_pct": 91.7,
       "tw_share_pct": 8.3,
       "cash_defense_periods": 4,
-      "unique_stocks_count": 20,
-      "unique_us_count": 19,
+      "unique_stocks_count": 19,
+      "unique_us_count": 18,
       "unique_tw_count": 1,
       "top_stocks": [
         {
@@ -1808,14 +1795,14 @@
           "name": "網飛",
           "market": "US",
           "count": 10,
-          "cum_period_ret": 21.8
+          "cum_period_ret": 40.5
         },
         {
           "ticker": "AMZN",
           "name": "亞馬遜",
           "market": "US",
-          "count": 6,
-          "cum_period_ret": 11.9
+          "count": 7,
+          "cum_period_ret": 16.2
         },
         {
           "ticker": "2327.TW",
@@ -1825,6 +1812,13 @@
           "cum_period_ret": 173.3
         },
         {
+          "ticker": "AMD",
+          "name": "超微半導體",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": 62.8
+        },
+        {
           "ticker": "ADBE",
           "name": "Adobe",
           "market": "US",
@@ -1842,22 +1836,15 @@
           "ticker": "VLO",
           "name": "Valero",
           "market": "US",
-          "count": 5,
-          "cum_period_ret": -18.1
+          "count": 4,
+          "cum_period_ret": -18.2
         },
         {
-          "ticker": "AMD",
-          "name": "超微半導體",
+          "ticker": "MU",
+          "name": "美光科技",
           "market": "US",
           "count": 3,
-          "cum_period_ret": -3.5
-        },
-        {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "market": "US",
-          "count": 3,
-          "cum_period_ret": -4.3
+          "cum_period_ret": -9.3
         }
       ],
       "us_stocks": [
@@ -1865,13 +1852,19 @@
           "ticker": "NFLX",
           "name": "網飛",
           "count": 10,
-          "cum_period_ret": 21.8
+          "cum_period_ret": 40.5
         },
         {
           "ticker": "AMZN",
           "name": "亞馬遜",
-          "count": 6,
-          "cum_period_ret": 11.9
+          "count": 7,
+          "cum_period_ret": 16.2
+        },
+        {
+          "ticker": "AMD",
+          "name": "超微半導體",
+          "count": 5,
+          "cum_period_ret": 62.8
         },
         {
           "ticker": "ADBE",
@@ -1888,14 +1881,8 @@
         {
           "ticker": "VLO",
           "name": "Valero",
-          "count": 5,
-          "cum_period_ret": -18.1
-        },
-        {
-          "ticker": "AMD",
-          "name": "超微半導體",
-          "count": 3,
-          "cum_period_ret": -3.5
+          "count": 4,
+          "cum_period_ret": -18.2
         }
       ],
       "tw_stocks": [
@@ -1909,21 +1896,21 @@
     },
     {
       "year": 2019,
-      "return_pct": 11.61,
+      "return_pct": 10.79,
       "spy_ret_pct": 31.22,
-      "alpha_pct": -19.62,
-      "cum_mult": 127.59,
-      "capital_twd": 127588911.0,
-      "yearly_mdd_pct": -14.45,
+      "alpha_pct": -20.43,
+      "cum_mult": 135.64,
+      "capital_twd": 135644876.0,
+      "yearly_mdd_pct": -14.24,
       "avg_exposure_pct": 90.7,
       "total_rebal_slots": 66,
-      "us_slots": 63,
-      "tw_slots": 3,
-      "us_share_pct": 95.5,
-      "tw_share_pct": 4.5,
+      "us_slots": 64,
+      "tw_slots": 2,
+      "us_share_pct": 97.0,
+      "tw_share_pct": 3.0,
       "cash_defense_periods": 2,
-      "unique_stocks_count": 18,
-      "unique_us_count": 16,
+      "unique_stocks_count": 17,
+      "unique_us_count": 15,
       "unique_tw_count": 2,
       "top_stocks": [
         {
@@ -1937,8 +1924,8 @@
           "ticker": "CMG",
           "name": "Chipotle",
           "market": "US",
-          "count": 12,
-          "cum_period_ret": -3.9
+          "count": 11,
+          "cum_period_ret": 1.7
         },
         {
           "ticker": "LLY",
@@ -1948,18 +1935,25 @@
           "cum_period_ret": -0.7
         },
         {
+          "ticker": "LRCX",
+          "name": "科林研發",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": 31.7
+        },
+        {
+          "ticker": "TGT",
+          "name": "目標百貨",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": 24.0
+        },
+        {
           "ticker": "SBUX",
           "name": "星巴克",
           "market": "US",
           "count": 5,
           "cum_period_ret": 4.0
-        },
-        {
-          "ticker": "LRCX",
-          "name": "科林研發",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 26.2
         },
         {
           "ticker": "PG",
@@ -1974,13 +1968,6 @@
           "market": "US",
           "count": 4,
           "cum_period_ret": 10.4
-        },
-        {
-          "ticker": "TGT",
-          "name": "目標百貨",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 4.2
         }
       ],
       "us_stocks": [
@@ -1993,8 +1980,8 @@
         {
           "ticker": "CMG",
           "name": "Chipotle",
-          "count": 12,
-          "cum_period_ret": -3.9
+          "count": 11,
+          "cum_period_ret": 1.7
         },
         {
           "ticker": "LLY",
@@ -2003,30 +1990,30 @@
           "cum_period_ret": -0.7
         },
         {
+          "ticker": "LRCX",
+          "name": "科林研發",
+          "count": 5,
+          "cum_period_ret": 31.7
+        },
+        {
+          "ticker": "TGT",
+          "name": "目標百貨",
+          "count": 5,
+          "cum_period_ret": 24.0
+        },
+        {
           "ticker": "SBUX",
           "name": "星巴克",
           "count": 5,
           "cum_period_ret": 4.0
-        },
-        {
-          "ticker": "LRCX",
-          "name": "科林研發",
-          "count": 4,
-          "cum_period_ret": 26.2
-        },
-        {
-          "ticker": "PG",
-          "name": "PG",
-          "count": 4,
-          "cum_period_ret": 13.2
         }
       ],
       "tw_stocks": [
         {
           "ticker": "2454.TW",
           "name": "聯發科",
-          "count": 2,
-          "cum_period_ret": 18.3
+          "count": 1,
+          "cum_period_ret": 6.7
         },
         {
           "ticker": "6669.TW",
@@ -2038,12 +2025,12 @@
     },
     {
       "year": 2020,
-      "return_pct": 35.28,
+      "return_pct": 36.52,
       "spy_ret_pct": 18.33,
-      "alpha_pct": 16.95,
-      "cum_mult": 172.61,
-      "capital_twd": 172606980.0,
-      "yearly_mdd_pct": -23.03,
+      "alpha_pct": 18.19,
+      "cum_mult": 185.18,
+      "capital_twd": 185178082.0,
+      "yearly_mdd_pct": -22.44,
       "avg_exposure_pct": 82.8,
       "total_rebal_slots": 63,
       "us_slots": 58,
@@ -2051,23 +2038,23 @@
       "us_share_pct": 92.1,
       "tw_share_pct": 7.9,
       "cash_defense_periods": 3,
-      "unique_stocks_count": 23,
-      "unique_us_count": 20,
+      "unique_stocks_count": 20,
+      "unique_us_count": 17,
       "unique_tw_count": 3,
       "top_stocks": [
-        {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "market": "US",
-          "count": 10,
-          "cum_period_ret": 62.2
-        },
         {
           "ticker": "AMD",
           "name": "超微半導體",
           "market": "US",
+          "count": 12,
+          "cum_period_ret": -19.4
+        },
+        {
+          "ticker": "NVDA",
+          "name": "輝達",
+          "market": "US",
           "count": 9,
-          "cum_period_ret": -37.0
+          "cum_period_ret": 67.1
         },
         {
           "ticker": "DXCM",
@@ -2077,11 +2064,11 @@
           "cum_period_ret": 13.7
         },
         {
-          "ticker": "AAPL",
-          "name": "蘋果",
+          "ticker": "FDX",
+          "name": "聯邦快遞",
           "market": "US",
-          "count": 6,
-          "cum_period_ret": 11.1
+          "count": 5,
+          "cum_period_ret": 26.5
         },
         {
           "ticker": "ETSY",
@@ -2091,11 +2078,11 @@
           "cum_period_ret": 63.7
         },
         {
-          "ticker": "FDX",
-          "name": "聯邦快遞",
+          "ticker": "AAPL",
+          "name": "蘋果",
           "market": "US",
           "count": 4,
-          "cum_period_ret": 18.0
+          "cum_period_ret": -3.1
         },
         {
           "ticker": "2454.TW",
@@ -2109,21 +2096,21 @@
           "name": "科林研發",
           "market": "US",
           "count": 3,
-          "cum_period_ret": -6.2
+          "cum_period_ret": 9.5
         }
       ],
       "us_stocks": [
         {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "count": 10,
-          "cum_period_ret": 62.2
-        },
-        {
           "ticker": "AMD",
           "name": "超微半導體",
+          "count": 12,
+          "cum_period_ret": -19.4
+        },
+        {
+          "ticker": "NVDA",
+          "name": "輝達",
           "count": 9,
-          "cum_period_ret": -37.0
+          "cum_period_ret": 67.1
         },
         {
           "ticker": "DXCM",
@@ -2132,10 +2119,10 @@
           "cum_period_ret": 13.7
         },
         {
-          "ticker": "AAPL",
-          "name": "蘋果",
-          "count": 6,
-          "cum_period_ret": 11.1
+          "ticker": "FDX",
+          "name": "聯邦快遞",
+          "count": 5,
+          "cum_period_ret": 26.5
         },
         {
           "ticker": "ETSY",
@@ -2144,10 +2131,10 @@
           "cum_period_ret": 63.7
         },
         {
-          "ticker": "FDX",
-          "name": "聯邦快遞",
+          "ticker": "AAPL",
+          "name": "蘋果",
           "count": 4,
-          "cum_period_ret": 18.0
+          "cum_period_ret": -3.1
         }
       ],
       "tw_stocks": [
@@ -2173,21 +2160,21 @@
     },
     {
       "year": 2021,
-      "return_pct": 2.98,
+      "return_pct": 1.48,
       "spy_ret_pct": 28.73,
-      "alpha_pct": -25.75,
-      "cum_mult": 177.75,
-      "capital_twd": 177751111.0,
-      "yearly_mdd_pct": -23.4,
+      "alpha_pct": -27.25,
+      "cum_mult": 187.91,
+      "capital_twd": 187912634.0,
+      "yearly_mdd_pct": -23.62,
       "avg_exposure_pct": 89.8,
       "total_rebal_slots": 72,
-      "us_slots": 69,
-      "tw_slots": 3,
-      "us_share_pct": 95.8,
-      "tw_share_pct": 4.2,
+      "us_slots": 68,
+      "tw_slots": 4,
+      "us_share_pct": 94.4,
+      "tw_share_pct": 5.6,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 26,
-      "unique_us_count": 23,
+      "unique_stocks_count": 25,
+      "unique_us_count": 22,
       "unique_tw_count": 3,
       "top_stocks": [
         {
@@ -2212,25 +2199,32 @@
           "cum_period_ret": 29.5
         },
         {
+          "ticker": "MRNA",
+          "name": "莫德納",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": -3.2
+        },
+        {
+          "ticker": "NVDA",
+          "name": "輝達",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": -32.9
+        },
+        {
+          "ticker": "F",
+          "name": "福特汽車",
+          "market": "US",
+          "count": 4,
+          "cum_period_ret": 13.8
+        },
+        {
           "ticker": "TGT",
           "name": "目標百貨",
           "market": "US",
-          "count": 5,
-          "cum_period_ret": 16.8
-        },
-        {
-          "ticker": "COF",
-          "name": "第一資本",
-          "market": "US",
           "count": 4,
-          "cum_period_ret": -2.2
-        },
-        {
-          "ticker": "FDX",
-          "name": "聯邦快遞",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": -5.2
+          "cum_period_ret": 8.8
         },
         {
           "ticker": "AMAT",
@@ -2238,13 +2232,6 @@
           "market": "US",
           "count": 4,
           "cum_period_ret": -12.1
-        },
-        {
-          "ticker": "MRNA",
-          "name": "莫德納",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": -16.0
         }
       ],
       "us_stocks": [
@@ -2267,30 +2254,30 @@
           "cum_period_ret": 29.5
         },
         {
-          "ticker": "TGT",
-          "name": "目標百貨",
+          "ticker": "MRNA",
+          "name": "莫德納",
           "count": 5,
-          "cum_period_ret": 16.8
+          "cum_period_ret": -3.2
         },
         {
-          "ticker": "COF",
-          "name": "第一資本",
-          "count": 4,
-          "cum_period_ret": -2.2
+          "ticker": "NVDA",
+          "name": "輝達",
+          "count": 5,
+          "cum_period_ret": -32.9
         },
         {
-          "ticker": "FDX",
-          "name": "聯邦快遞",
+          "ticker": "F",
+          "name": "福特汽車",
           "count": 4,
-          "cum_period_ret": -5.2
+          "cum_period_ret": 13.8
         }
       ],
       "tw_stocks": [
         {
           "ticker": "6531.TW",
           "name": "愛普*",
-          "count": 1,
-          "cum_period_ret": 29.0
+          "count": 2,
+          "cum_period_ret": 14.6
         },
         {
           "ticker": "8046.TW",
@@ -2308,12 +2295,12 @@
     },
     {
       "year": 2022,
-      "return_pct": 14.05,
+      "return_pct": 13.17,
       "spy_ret_pct": -18.18,
-      "alpha_pct": 32.23,
-      "cum_mult": 202.73,
-      "capital_twd": 202729819.0,
-      "yearly_mdd_pct": -9.96,
+      "alpha_pct": 31.35,
+      "cum_mult": 212.66,
+      "capital_twd": 212661503.0,
+      "yearly_mdd_pct": -10.13,
       "avg_exposure_pct": 26.0,
       "total_rebal_slots": 30,
       "us_slots": 30,
@@ -2321,8 +2308,8 @@
       "us_share_pct": 100.0,
       "tw_share_pct": 0.0,
       "cash_defense_periods": 14,
-      "unique_stocks_count": 15,
-      "unique_us_count": 15,
+      "unique_stocks_count": 14,
+      "unique_us_count": 14,
       "unique_tw_count": 0,
       "top_stocks": [
         {
@@ -2347,6 +2334,13 @@
           "cum_period_ret": 1.4
         },
         {
+          "ticker": "OXY",
+          "name": "西方石油",
+          "market": "US",
+          "count": 4,
+          "cum_period_ret": -17.3
+        },
+        {
           "ticker": "SLB",
           "name": "斯倫貝謝",
           "market": "US",
@@ -2354,15 +2348,8 @@
           "cum_period_ret": 1.8
         },
         {
-          "ticker": "OXY",
-          "name": "西方石油",
-          "market": "US",
-          "count": 3,
-          "cum_period_ret": -5.5
-        },
-        {
           "ticker": "MRK",
-          "name": "MRK",
+          "name": "默沙東",
           "market": "US",
           "count": 2,
           "cum_period_ret": 2.6
@@ -2402,20 +2389,20 @@
           "cum_period_ret": 1.4
         },
         {
+          "ticker": "OXY",
+          "name": "西方石油",
+          "count": 4,
+          "cum_period_ret": -17.3
+        },
+        {
           "ticker": "SLB",
           "name": "斯倫貝謝",
           "count": 3,
           "cum_period_ret": 1.8
         },
         {
-          "ticker": "OXY",
-          "name": "西方石油",
-          "count": 3,
-          "cum_period_ret": -5.5
-        },
-        {
           "ticker": "MRK",
-          "name": "MRK",
+          "name": "默沙東",
           "count": 2,
           "cum_period_ret": 2.6
         }
@@ -2424,12 +2411,12 @@
     },
     {
       "year": 2023,
-      "return_pct": 38.14,
+      "return_pct": 48.63,
       "spy_ret_pct": 26.18,
-      "alpha_pct": 11.96,
-      "cum_mult": 280.05,
-      "capital_twd": 280052502.0,
-      "yearly_mdd_pct": -14.41,
+      "alpha_pct": 22.45,
+      "cum_mult": 316.07,
+      "capital_twd": 316073725.0,
+      "yearly_mdd_pct": -13.44,
       "avg_exposure_pct": 82.1,
       "total_rebal_slots": 69,
       "us_slots": 61,
@@ -2437,44 +2424,30 @@
       "us_share_pct": 88.4,
       "tw_share_pct": 11.6,
       "cash_defense_periods": 1,
-      "unique_stocks_count": 26,
-      "unique_us_count": 22,
+      "unique_stocks_count": 24,
+      "unique_us_count": 20,
       "unique_tw_count": 4,
       "top_stocks": [
         {
           "ticker": "NVDA",
           "name": "輝達",
           "market": "US",
-          "count": 12,
-          "cum_period_ret": 119.8
+          "count": 11,
+          "cum_period_ret": 131.2
         },
         {
           "ticker": "META",
           "name": "Meta",
           "market": "US",
-          "count": 6,
-          "cum_period_ret": 42.8
+          "count": 11,
+          "cum_period_ret": 88.9
         },
         {
           "ticker": "GE",
           "name": "奇異航太",
           "market": "US",
-          "count": 6,
-          "cum_period_ret": 25.0
-        },
-        {
-          "ticker": "NFLX",
-          "name": "網飛",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 11.0
-        },
-        {
-          "ticker": "XOM",
-          "name": "埃克森美孚",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 2.4
+          "count": 10,
+          "cum_period_ret": 35.1
         },
         {
           "ticker": "3443.TW",
@@ -2482,6 +2455,13 @@
           "market": "TW",
           "count": 3,
           "cum_period_ret": 47.3
+        },
+        {
+          "ticker": "SLB",
+          "name": "斯倫貝謝",
+          "market": "US",
+          "count": 3,
+          "cum_period_ret": 4.9
         },
         {
           "ticker": "LLY",
@@ -2496,44 +2476,51 @@
           "market": "US",
           "count": 3,
           "cum_period_ret": -10.7
+        },
+        {
+          "ticker": "NFLX",
+          "name": "網飛",
+          "market": "US",
+          "count": 2,
+          "cum_period_ret": 2.8
         }
       ],
       "us_stocks": [
         {
           "ticker": "NVDA",
           "name": "輝達",
-          "count": 12,
-          "cum_period_ret": 119.8
+          "count": 11,
+          "cum_period_ret": 131.2
         },
         {
           "ticker": "META",
           "name": "Meta",
-          "count": 6,
-          "cum_period_ret": 42.8
+          "count": 11,
+          "cum_period_ret": 88.9
         },
         {
           "ticker": "GE",
           "name": "奇異航太",
-          "count": 6,
-          "cum_period_ret": 25.0
+          "count": 10,
+          "cum_period_ret": 35.1
         },
         {
-          "ticker": "NFLX",
-          "name": "網飛",
-          "count": 4,
-          "cum_period_ret": 11.0
-        },
-        {
-          "ticker": "XOM",
-          "name": "埃克森美孚",
-          "count": 4,
-          "cum_period_ret": 2.4
+          "ticker": "SLB",
+          "name": "斯倫貝謝",
+          "count": 3,
+          "cum_period_ret": 4.9
         },
         {
           "ticker": "LLY",
           "name": "禮來製藥",
           "count": 3,
           "cum_period_ret": 0.1
+        },
+        {
+          "ticker": "VLO",
+          "name": "Valero",
+          "count": 3,
+          "cum_period_ret": -10.7
         }
       ],
       "tw_stocks": [
@@ -2565,29 +2552,29 @@
     },
     {
       "year": 2024,
-      "return_pct": 62.16,
+      "return_pct": 68.67,
       "spy_ret_pct": 24.89,
-      "alpha_pct": 37.27,
-      "cum_mult": 454.13,
-      "capital_twd": 454134396.0,
-      "yearly_mdd_pct": -23.63,
-      "avg_exposure_pct": 64.4,
+      "alpha_pct": 43.79,
+      "cum_mult": 533.13,
+      "capital_twd": 533131760.0,
+      "yearly_mdd_pct": -20.23,
+      "avg_exposure_pct": 64.2,
       "total_rebal_slots": 72,
-      "us_slots": 68,
-      "tw_slots": 4,
-      "us_share_pct": 94.4,
-      "tw_share_pct": 5.6,
+      "us_slots": 70,
+      "tw_slots": 2,
+      "us_share_pct": 97.2,
+      "tw_share_pct": 2.8,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 24,
-      "unique_us_count": 22,
+      "unique_stocks_count": 21,
+      "unique_us_count": 19,
       "unique_tw_count": 2,
       "top_stocks": [
         {
           "ticker": "NVDA",
           "name": "輝達",
           "market": "US",
-          "count": 14,
-          "cum_period_ret": 120.1
+          "count": 15,
+          "cum_period_ret": 130.0
         },
         {
           "ticker": "VST",
@@ -2604,18 +2591,18 @@
           "cum_period_ret": 172.3
         },
         {
+          "ticker": "GE",
+          "name": "奇異航太",
+          "market": "US",
+          "count": 6,
+          "cum_period_ret": 6.3
+        },
+        {
           "ticker": "UBER",
           "name": "優步",
           "market": "US",
           "count": 5,
           "cum_period_ret": 54.8
-        },
-        {
-          "ticker": "GE",
-          "name": "奇異航太",
-          "market": "US",
-          "count": 5,
-          "cum_period_ret": -4.8
         },
         {
           "ticker": "KKR",
@@ -2632,19 +2619,19 @@
           "cum_period_ret": 4.5
         },
         {
-          "ticker": "3017.TW",
-          "name": "奇鋐",
-          "market": "TW",
+          "ticker": "META",
+          "name": "Meta",
+          "market": "US",
           "count": 3,
-          "cum_period_ret": 15.9
+          "cum_period_ret": 63.9
         }
       ],
       "us_stocks": [
         {
           "ticker": "NVDA",
           "name": "輝達",
-          "count": 14,
-          "cum_period_ret": 120.1
+          "count": 15,
+          "cum_period_ret": 130.0
         },
         {
           "ticker": "VST",
@@ -2659,16 +2646,16 @@
           "cum_period_ret": 172.3
         },
         {
+          "ticker": "GE",
+          "name": "奇異航太",
+          "count": 6,
+          "cum_period_ret": 6.3
+        },
+        {
           "ticker": "UBER",
           "name": "優步",
           "count": 5,
           "cum_period_ret": 54.8
-        },
-        {
-          "ticker": "GE",
-          "name": "奇異航太",
-          "count": 5,
-          "cum_period_ret": -4.8
         },
         {
           "ticker": "KKR",
@@ -2681,8 +2668,8 @@
         {
           "ticker": "3017.TW",
           "name": "奇鋐",
-          "count": 3,
-          "cum_period_ret": 15.9
+          "count": 1,
+          "cum_period_ret": 1.0
         },
         {
           "ticker": "3034.TW",
@@ -2694,12 +2681,12 @@
     },
     {
       "year": 2025,
-      "return_pct": 30.83,
+      "return_pct": 24.3,
       "spy_ret_pct": 17.72,
-      "alpha_pct": 13.11,
-      "cum_mult": 594.13,
-      "capital_twd": 594126408.0,
-      "yearly_mdd_pct": -22.11,
+      "alpha_pct": 6.58,
+      "cum_mult": 662.67,
+      "capital_twd": 662673430.0,
+      "yearly_mdd_pct": -24.96,
       "avg_exposure_pct": 80.6,
       "total_rebal_slots": 66,
       "us_slots": 61,
@@ -2707,16 +2694,16 @@
       "us_share_pct": 92.4,
       "tw_share_pct": 7.6,
       "cash_defense_periods": 2,
-      "unique_stocks_count": 19,
-      "unique_us_count": 18,
+      "unique_stocks_count": 20,
+      "unique_us_count": 19,
       "unique_tw_count": 1,
       "top_stocks": [
         {
           "ticker": "PLTR",
           "name": "Palantir",
           "market": "US",
-          "count": 15,
-          "cum_period_ret": 89.7
+          "count": 14,
+          "cum_period_ret": 102.9
         },
         {
           "ticker": "GEV",
@@ -2730,21 +2717,21 @@
           "name": "貿聯-KY",
           "market": "TW",
           "count": 5,
-          "cum_period_ret": 40.8
+          "cum_period_ret": 31.4
         },
         {
-          "ticker": "VST",
-          "name": "Vistra",
+          "ticker": "WDC",
+          "name": "威騰電子",
           "market": "US",
-          "count": 5,
-          "cum_period_ret": -9.0
+          "count": 4,
+          "cum_period_ret": 80.4
         },
         {
           "ticker": "AVGO",
           "name": "博通",
           "market": "US",
           "count": 4,
-          "cum_period_ret": -9.2
+          "cum_period_ret": -15.4
         },
         {
           "ticker": "HOOD",
@@ -2754,26 +2741,26 @@
           "cum_period_ret": -22.5
         },
         {
-          "ticker": "WDC",
-          "name": "威騰電子",
+          "ticker": "VST",
+          "name": "Vistra",
           "market": "US",
-          "count": 3,
-          "cum_period_ret": 70.0
+          "count": 4,
+          "cum_period_ret": -23.0
         },
         {
-          "ticker": "NFLX",
-          "name": "網飛",
+          "ticker": "MU",
+          "name": "美光科技",
           "market": "US",
           "count": 3,
-          "cum_period_ret": 20.1
+          "cum_period_ret": 100.4
         }
       ],
       "us_stocks": [
         {
           "ticker": "PLTR",
           "name": "Palantir",
-          "count": 15,
-          "cum_period_ret": 89.7
+          "count": 14,
+          "cum_period_ret": 102.9
         },
         {
           "ticker": "GEV",
@@ -2782,16 +2769,16 @@
           "cum_period_ret": 84.1
         },
         {
-          "ticker": "VST",
-          "name": "Vistra",
-          "count": 5,
-          "cum_period_ret": -9.0
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "count": 4,
+          "cum_period_ret": 80.4
         },
         {
           "ticker": "AVGO",
           "name": "博通",
           "count": 4,
-          "cum_period_ret": -9.2
+          "cum_period_ret": -15.4
         },
         {
           "ticker": "HOOD",
@@ -2800,10 +2787,10 @@
           "cum_period_ret": -22.5
         },
         {
-          "ticker": "WDC",
-          "name": "威騰電子",
-          "count": 3,
-          "cum_period_ret": 70.0
+          "ticker": "VST",
+          "name": "Vistra",
+          "count": 4,
+          "cum_period_ret": -23.0
         }
       ],
       "tw_stocks": [
@@ -2811,18 +2798,18 @@
           "ticker": "3665.TW",
           "name": "貿聯-KY",
           "count": 5,
-          "cum_period_ret": 40.8
+          "cum_period_ret": 31.4
         }
       ]
     },
     {
       "year": 2026,
-      "return_pct": 220.04,
+      "return_pct": 224.56,
       "spy_ret_pct": 13.75,
-      "alpha_pct": 206.29,
-      "cum_mult": 1901.42,
-      "capital_twd": 1901417672.0,
-      "yearly_mdd_pct": -25.45,
+      "alpha_pct": 210.82,
+      "cum_mult": 2150.79,
+      "capital_twd": 2150794386.0,
+      "yearly_mdd_pct": -23.31,
       "avg_exposure_pct": 83.6,
       "total_rebal_slots": 54,
       "us_slots": 54,
@@ -2838,50 +2825,43 @@
           "ticker": "WDC",
           "name": "威騰電子",
           "market": "US",
-          "count": 10,
-          "cum_period_ret": 86.1
+          "count": 12,
+          "cum_period_ret": 168.0
         },
         {
           "ticker": "SNDK",
           "name": "SanDisk",
           "market": "US",
           "count": 9,
-          "cum_period_ret": 258.8
+          "cum_period_ret": 235.2
+        },
+        {
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "count": 9,
+          "cum_period_ret": -18.7
         },
         {
           "ticker": "LITE",
           "name": "Lumentum",
           "market": "US",
-          "count": 9,
-          "cum_period_ret": 63.4
+          "count": 8,
+          "cum_period_ret": 62.4
         },
         {
           "ticker": "STX",
           "name": "希捷科技",
           "market": "US",
           "count": 6,
-          "cum_period_ret": 32.4
-        },
-        {
-          "ticker": "MU",
-          "name": "美光科技",
-          "market": "US",
-          "count": 6,
-          "cum_period_ret": -31.3
-        },
-        {
-          "ticker": "CIEN",
-          "name": "CIEN",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 45.2
+          "cum_period_ret": 83.2
         },
         {
           "ticker": "DELL",
           "name": "戴爾科技",
           "market": "US",
           "count": 3,
-          "cum_period_ret": 37.2
+          "cum_period_ret": 10.0
         },
         {
           "ticker": "HPE",
@@ -2889,44 +2869,51 @@
           "market": "US",
           "count": 2,
           "cum_period_ret": 15.2
+        },
+        {
+          "ticker": "CRWD",
+          "name": "CrowdStrike",
+          "market": "US",
+          "count": 1,
+          "cum_period_ret": 25.8
         }
       ],
       "us_stocks": [
         {
           "ticker": "WDC",
           "name": "威騰電子",
-          "count": 10,
-          "cum_period_ret": 86.1
+          "count": 12,
+          "cum_period_ret": 168.0
         },
         {
           "ticker": "SNDK",
           "name": "SanDisk",
           "count": 9,
-          "cum_period_ret": 258.8
+          "cum_period_ret": 235.2
+        },
+        {
+          "ticker": "MU",
+          "name": "美光科技",
+          "count": 9,
+          "cum_period_ret": -18.7
         },
         {
           "ticker": "LITE",
           "name": "Lumentum",
-          "count": 9,
-          "cum_period_ret": 63.4
+          "count": 8,
+          "cum_period_ret": 62.4
         },
         {
           "ticker": "STX",
           "name": "希捷科技",
           "count": 6,
-          "cum_period_ret": 32.4
+          "cum_period_ret": 83.2
         },
         {
-          "ticker": "MU",
-          "name": "美光科技",
-          "count": 6,
-          "cum_period_ret": -31.3
-        },
-        {
-          "ticker": "CIEN",
-          "name": "CIEN",
-          "count": 4,
-          "cum_period_ret": 45.2
+          "ticker": "DELL",
+          "name": "戴爾科技",
+          "count": 3,
+          "cum_period_ret": 10.0
         }
       ],
       "tw_stocks": []

@@ -30,8 +30,7 @@ def _roc_to_ann_str(ym) -> str:
 
 
 def run_and_extract_g11_pit_history():
-    with open("/tmp/pit_rd_intensity_map.json", "r") as f:
-        rd_map = json.load(f)
+    # [已移除] 研發強度靜態表 (含後見之明、貢獻為負)
 
     import pickle
     from build_and_test_zero_omission_0050_0051 import build_zero_omission_tw_0050_0051_pit
@@ -154,23 +153,14 @@ def run_and_extract_g11_pit_history():
     exp262_mult = (sustain_sortino_mult * rev_decay_pen).astype(np.float32)
 
     intraday_ret = ((stk_adj - stk_open) / (stk_open + 1e-9)).fillna(0.0).astype(np.float32)
-    vw_io_5 = ((intraday_ret * stk_vol).rolling(5, min_periods=2).sum() / (stk_vol.rolling(5, min_periods=2).sum() + 1.0)).fillna(0.0).astype(np.float32)
-    vol_20d = (daily_ret.rolling(20, min_periods=5).std() * np.sqrt(252)).fillna(0.0).astype(np.float32)
 
     dist_veto_g10 = np.where((stk_adj < ma20) & (io_5 < -0.01), 0.70, 1.0)
     coiled_mask = (mom12m > 0.65) & (fip_252 > 0.08) & (dd20 >= -0.12) & (dd20 <= -0.03) & (bias20 >= -0.03) & (bias20 <= 0.04) & (io_20 > -0.02)
     coiled_spring_g11 = np.where(coiled_mask, 1.12, 1.0)
     score_g11 = (env["s_g5_open"][cols] * dist_veto_g10 * coiled_spring_g11).astype(np.float32)
 
-    # G12 三大進場防雷 + RD 黃金研發強度護城河加權
-    high_dist_b2 = np.where((bias20 > 0.05) & ((io_5 < -0.012) | (vw_io_5 < -0.010)), 0.72, 1.0)
-    vol_veto_d = np.where((vol_20d > 0.68) & ((io_5 < 0.0) | (dd20 < -0.08)), 0.72, 1.0)
-    cond_b60_veto = np.where((bias60 > 0.35) & ((io_5 < 0.0) | (vw_io_5 < 0.0)), 0.70, 1.0)
-    rd_pct_arr = np.array([float(rd_map.get(c, {}).get("rd_pct_median", 0.0)) for c in cols], dtype=np.float32)
-    r2_intra_tech = np.where(rd_pct_arr > 28.0, 0.80, np.where((rd_pct_arr > 0.0) & (rd_pct_arr < 3.5), 0.92, 1.00))
-    rd_synergy_mat = np.where(coiled_mask & ((rd_pct_arr >= 5.0) & (rd_pct_arr <= 25.0))[np.newaxis, :], 1.05, 1.0) * r2_intra_tech[np.newaxis, :]
-
-    score_g12_rd = (score_g11 * high_dist_b2 * vol_veto_d * cond_b60_veto * rd_synergy_mat).astype(np.float32)
+    # [已移除] G12 三大進場防雷與研發強度加權
+    score_g12_rd = score_g11.astype(np.float32)
     score_mat = (score_g12_rd * exp262_mult).astype(np.float32)
 
     base_weights = [0.52, 0.24, 0.24]
@@ -398,11 +388,7 @@ def run_and_extract_g11_pit_history():
                     selected_stks = selected_stks[:n]
                     holding_tenure = {c_i: holding_tenure.get(c_i, 0) + 1 for c_i in selected_stks}
                     bw_slice = base_weights[:n]
-                    # Top 1 黃金研發強度 (5% ~ 25%) 確信度加碼 (56% / 22% / 22%)
-                    if n == 3:
-                        rd0 = float(rd_pct_arr[selected_stks[0]])
-                        if 5.0 <= rd0 <= 25.0:
-                            bw_slice = [0.56, 0.22, 0.22]
+                    # [已移除] 研發強度 56/22/22 加碼；固定 52/24/24
 
                     tot_bw = sum(bw_slice)
                     norm_weights = [w / tot_bw for w in bw_slice]
