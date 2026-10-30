@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import defaultTitanData from '../data/taiwan_causal_titan_data.json';
-import { getCurrentUser } from '../api';
+import { getCurrentUser, apiGetCausalTitanDashboard } from '../api';
 
 // ==========================================
 // 👑 台股因果泰坦 (上限1億) · exp_264 旗艦邏輯 (elite_55 池 · 24 檔 · 60 日換倉 · 贏家護航 + 敗部定檢)
@@ -111,7 +111,22 @@ const TEMPLATE_1012_TRANSACTIONS = [
 ];
 
 export default function TaiwanCausalTitanDashboard() {
-  const [data] = useState(defaultTitanData);
+  const [data, setData] = useState(defaultTitanData);
+  const [liveStatus, setLiveStatus] = useState({ state: 'loading', msg: '連線本機資料庫中…' });
+
+  // 開啟頁面時直連筆電本機 API (tw_stock.db)；若資料庫有更新交易日，後端會即時以 exp_264 重算
+  const loadLiveData = async (refresh = false) => {
+    setLiveStatus({ state: 'loading', msg: refresh ? '正在以本機資料庫重算 exp_264…' : '連線本機資料庫中…' });
+    const live = await apiGetCausalTitanDashboard(refresh);
+    if (live) {
+      setData(live);
+      const src = live.live_source || {};
+      setLiveStatus({ state: 'live', msg: `✅ 已連線本機資料庫 (${src.db_latest_date || live.strategy_info?.latest_data_date || '-'})${src.recomputed ? ' · 已即時重算' : ''}` });
+    } else {
+      setLiveStatus({ state: 'offline', msg: '⚠️ 未連上本機資料庫，顯示內建快照 (' + (defaultTitanData.strategy_info?.latest_data_date || '-') + ')' });
+    }
+  };
+  useEffect(() => { loadLiveData(false); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const { strategy_info = {}, kpis = {}, curve = [], yearly_stats = [], causal_alphas = [], trades = [] } = data;
 
   // 使用者身分與本地存儲
@@ -1268,6 +1283,18 @@ export default function TaiwanCausalTitanDashboard() {
                 fontSize: '0.78rem'
               }}>
                 👑 exp_264 旗艦邏輯
+              </span>
+              <span
+                onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
+                title="點擊以本機資料庫重新計算 exp_264"
+                style={{
+                  cursor: liveStatus.state === 'loading' ? 'default' : 'pointer',
+                  background: liveStatus.state === 'live' ? 'rgba(16,185,129,0.2)' : (liveStatus.state === 'loading' ? 'rgba(59,130,246,0.2)' : 'rgba(245,158,11,0.2)'),
+                  color: liveStatus.state === 'live' ? '#34D399' : (liveStatus.state === 'loading' ? '#60A5FA' : '#FBBF24'),
+                  padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.74rem', fontWeight: 'bold'
+                }}
+              >
+                {liveStatus.msg} · 🔄 重算
               </span>
               <h2 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 'bold', color: '#F8FAFC' }}>
                 👑 台股因果泰坦 【上限：1億】

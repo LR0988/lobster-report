@@ -4241,6 +4241,47 @@ def get_global_sovereign_rank_ic(start_date: str = None, end_date: str = None, f
     import global_sovereign_service
     return global_sovereign_service.get_global_titan_rank_ic_analysis(start_date, end_date, factor)
 
+_causal_titan_lock = threading.Lock()
+
+@app.get("/api/causal_titan/dashboard")
+def get_causal_titan_dashboard(refresh: bool = False):
+    """台股因果泰坦 (上限1億, exp_264)：直連本機 tw_stock.db。
+    若資料庫最新交易日比目前快照新 (或 refresh=true)，立即以本機資料庫重算 exp_264 後回傳。"""
+    import json as _json
+    import sqlite3 as _sqlite3
+    import exp264_titan_sync
+    json_path = os.path.join(BASE_DIR, "frontend", "src", "data", "taiwan_causal_titan_data.json")
+    db_path = os.path.join(BASE_DIR, "tw_stock.db")
+    def _snap_date():
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return str(_json.load(f).get("strategy_info", {}).get("latest_data_date", "")).replace("-", "")
+        except Exception:
+            return ""
+    db_latest = ""
+    try:
+        conn = _sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=10)
+        db_latest = conn.execute("SELECT MAX(date) FROM daily_index").fetchone()[0] or ""
+        conn.close()
+    except Exception as e:
+        print(f"[x] 讀取 tw_stock.db 最新日期失敗: {e}")
+    recomputed, err = False, None
+    if refresh or (db_latest and db_latest > _snap_date()):
+        with _causal_titan_lock:
+            if refresh or db_latest > _snap_date():     # 鎖內再確認，避免重複重算
+                try:
+                    exp264_titan_sync.run()
+                    recomputed = True
+                except Exception as e:
+                    err = str(e)
+                    print(f"[x] 台股因果泰坦重算失敗: {e}")
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = _json.load(f)
+    data["status"] = "ok"
+    data["live_source"] = {"db": "tw_stock.db (本機)", "db_latest_date": db_latest, "snapshot_date": _snap_date(),
+                           "recomputed": recomputed, "error": err}
+    return data
+
 @app.get("/api/tw_event_radar/dashboard")
 def get_tw_event_radar_dashboard():
     """台股事件與ETF吃豆腐看板：高股息ETF換股提前卡位預測 + 個股期貨逆價差與軋空事件掃描"""

@@ -505,6 +505,22 @@ export async function loadSniperTradesFromSupabase() {
   return null;
 }
 
+export async function apiGetCausalTitanDashboard(refresh = false) {
+  // 台股因果泰坦 (exp_264)：直連筆電本機 API -> tw_stock.db；連不上回傳 null (前端沿用內建快照)
+  const base = await resolveApiBase();
+  if (!base) return null;
+  try {
+    const res = await fetch(`${base}/api/causal_titan/dashboard${refresh ? '?refresh=true' : ''}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.status === 'ok') return json;
+    }
+  } catch (err) {
+    console.warn(`筆電本機 ${base}/api/causal_titan/dashboard 連線異常:`, err.message);
+  }
+  return null;
+}
+
 export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
   let serverData = cachedServerData;
 
