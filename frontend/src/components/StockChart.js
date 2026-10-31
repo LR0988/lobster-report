@@ -47,6 +47,7 @@ const TYPES = [{ k: 'candle', l: 'K線' }, { k: 'bar', l: '美國線' }, { k: 'l
 const DEFAULT_PREFS = {
   type: 'candle', ma: [5, 20, 60], vma: [5, 20], boll: false, hilo: true, signals: false, log: false,
   subs: ['vol', 'kd'], upColor: null, range: 126, days: 750,
+  profile: true, profMode: 'visible', profBins: 50,
 };
 const loadPrefs = () => {
   try { return { ...DEFAULT_PREFS, ...(JSON.parse(localStorage.getItem('stockChartPrefs')) || {}) }; }
@@ -72,6 +73,7 @@ const StockChartModal = ({ req, onClose }) => {
   const [err, setErr] = useState('');
   const [hover, setHover] = useState(null);
   const boxRef = useRef(null);
+  const profRef = useRef(null);
   const chartRef = useRef(null);
   const rangeRef = useRef(null);
   const setP = (patch) => setPrefs((p) => { const n = { ...p, ...patch }; try { localStorage.setItem('stockChartPrefs', JSON.stringify(n)); } catch {} return n; });
@@ -232,11 +234,85 @@ const StockChartModal = ({ req, onClose }) => {
     if (want) chart.timeScale().setVisibleLogicalRange(want); else chart.timeScale().fitContent();
     chart.timeScale().subscribeVisibleLogicalRangeChange((r) => { if (r) rangeRef.current = r; });
 
+    // ---- 價量分布 (Volume Profile)：主圖右側水平直方圖，與股價軸對齊 ----
+    const cv = profRef.current;
+    const drawProfile = () => {
+      if (!cv || !boxRef.current) return;
+      const dpr = window.devicePixelRatio || 1;
+      const W = boxRef.current.clientWidth, H = boxRef.current.clientHeight;
+      cv.width = W * dpr; cv.height = H * dpr; cv.style.width = `${W}px`; cv.style.height = `${H}px`;
+      const g = cv.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, W, H);
+      if (!prefs.profile) return;
+      const lr = chart.timeScale().getVisibleLogicalRange();
+      let a = 0, b = n - 1;
+      if (prefs.profMode === 'visible' && lr) { a = Math.max(0, Math.floor(lr.from)); b = Math.min(n - 1, Math.ceil(lr.to)); }
+      if (b - a < 1) return;
+      let lo = Infinity, hi = -Infinity;
+      for (let k = a; k <= b; k++) { lo = Math.min(lo, data.l[k]); hi = Math.max(hi, data.h[k]); }
+      const B = prefs.profBins, step = (hi - lo) / B;
+      if (!(step > 0)) return;
+      const up = new Array(B).fill(0), dn = new Array(B).fill(0);
+      for (let k = a; k <= b; k++) { // 單日成交量依 K 棒高低區間均分到各價格帶
+        const i0 = Math.min(B - 1, Math.floor((data.l[k] - lo) / step));
+        const i1 = Math.min(B - 1, Math.floor((data.h[k] - lo) / step));
+        const share = (data.v[k] || 0) / (i1 - i0 + 1);
+        const arr = data.c[k] >= (data.o[k] ?? data.c[k]) ? up : dn;
+        for (let j = i0; j <= i1; j++) arr[j] += share;
+      }
+      const tot = up.map((x, j) => x + dn[j]);
+      const mx = Math.max(...tot);
+      if (!(mx > 0)) return;
+      // POC 與 70% 價值區 (Value Area)
+      const poc = tot.indexOf(mx);
+      const sum = tot.reduce((x, y) => x + y, 0);
+      let vaLo = poc, vaHi = poc, acc = tot[poc];
+      while (acc < sum * 0.7 && (vaLo > 0 || vaHi < B - 1)) {
+        const dnV = vaLo > 0 ? tot[vaLo - 1] : -1, upV = vaHi < B - 1 ? tot[vaHi + 1] : -1;
+        if (upV >= dnV) { vaHi++; acc += tot[vaHi]; } else { vaLo--; acc += tot[vaLo]; }
+      }
+      const paneH = panes[0] ? panes[0].getHeight() : H;
+      let axisW = 0; try { axisW = chart.priceScale('right').width(); } catch (e) { axisW = 56; }
+      const xR = W - axisW - 2, maxW = Math.max(60, (W - axisW) * 0.22);
+      g.save(); g.beginPath(); g.rect(0, 0, W, paneH); g.clip();
+      for (let j = 0; j < B; j++) {
+        const y1 = main.priceToCoordinate(lo + j * step), y2 = main.priceToCoordinate(lo + (j + 1) * step);
+        if (y1 == null || y2 == null) continue;
+        const top = Math.min(y1, y2), h = Math.max(1, Math.abs(y1 - y2) - 1);
+        const inVA = j >= vaLo && j <= vaHi;
+        const wDn = (dn[j] / mx) * maxW, wUp = (up[j] / mx) * maxW;
+        g.globalAlpha = inVA ? 0.62 : 0.32;
+        g.fillStyle = DN; g.fillRect(xR - wDn - wUp, top, wDn, h);
+        g.fillStyle = UP; g.fillRect(xR - wUp, top, wUp, h);
+      }
+      g.globalAlpha = 1;
+      const yp = main.priceToCoordinate(lo + (poc + 0.5) * step);
+      if (yp != null) {
+        g.strokeStyle = '#FDE047'; g.setLineDash([4, 3]); g.lineWidth = 1;
+        g.beginPath(); g.moveTo(xR - maxW, yp); g.lineTo(xR, yp); g.stroke(); g.setLineDash([]);
+        g.fillStyle = '#FDE047'; g.font = '10px monospace'; g.textAlign = 'right';
+        g.fillText(`POC ${(lo + (poc + 0.5) * step).toFixed(2)}`, xR - maxW - 4, yp + 3);
+      }
+      g.restore();
+    };
+    const redraw = () => requestAnimationFrame(drawProfile);
+    chart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
+    const ro = new ResizeObserver(redraw);
+    ro.observe(boxRef.current);
+    const box = boxRef.current;
+    ['mouseup', 'wheel', 'touchend'].forEach((ev) => box.addEventListener(ev, redraw, { passive: true }));
+    redraw();
+
     const idxOf = new Map(dates.map((d, i) => [d, i]));
     chart.subscribeCrosshairMove((p) => setHover(p.time ? (idxOf.get(p.time) ?? null) : null));
-    return () => { chart.remove(); chartRef.current = null; };
+    return () => {
+      ro.disconnect();
+      ['mouseup', 'wheel', 'touchend'].forEach((ev) => box.removeEventListener(ev, redraw));
+      chart.remove(); chartRef.current = null;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, data, calc, prefs.type, prefs.ma, prefs.vma, prefs.boll, prefs.hilo, prefs.signals, prefs.log, subs, UP, DN]);
+  }, [state, data, calc, prefs.type, prefs.ma, prefs.vma, prefs.boll, prefs.hilo, prefs.signals, prefs.log, prefs.profile, prefs.profMode, prefs.profBins, subs, UP, DN]);
 
   const applyRange = (r) => {
     setP({ range: r.n });
@@ -313,6 +389,13 @@ const StockChartModal = ({ req, onClose }) => {
             <Chip on={prefs.hilo} onClick={() => setP({ hilo: !prefs.hilo })}>52週高低</Chip>
             <Chip on={prefs.signals} onClick={() => setP({ signals: !prefs.signals })}>交叉訊號</Chip>
             <Chip on={prefs.log} onClick={() => setP({ log: !prefs.log })}>對數座標</Chip>
+            <Chip on={prefs.profile} color="#FDE047" onClick={() => setP({ profile: !prefs.profile })}>價量分布</Chip>
+            {prefs.profile && (
+              <>
+                <Chip on={prefs.profMode === 'visible'} onClick={() => setP({ profMode: prefs.profMode === 'visible' ? 'all' : 'visible' })}>{prefs.profMode === 'visible' ? '依顯示區間' : '全部資料'}</Chip>
+                {[30, 50, 80].map((b) => <Chip key={b} on={prefs.profBins === b} onClick={() => setP({ profBins: b })}>{b}檔</Chip>)}
+              </>
+            )}
             <Chip on={upIsRed} onClick={() => setP({ upColor: upIsRed ? 'green' : 'red' })}>{upIsRed ? '紅漲綠跌' : '綠漲紅跌'}</Chip>
           </span>
           <span style={{ display: 'flex', gap: '3px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -350,6 +433,7 @@ const StockChartModal = ({ req, onClose }) => {
         {/* 圖表 */}
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
           <div ref={boxRef} style={{ position: 'absolute', inset: 0 }} />
+          <canvas ref={profRef} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} />
           {state !== 'ok' && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: state === 'error' ? '#FCA5A5' : '#94A3B8', padding: '2rem', textAlign: 'center', background: '#0B1220' }}>
               {state === 'loading' ? '從本機資料庫讀取中…' : `⚠️ ${err}`}
