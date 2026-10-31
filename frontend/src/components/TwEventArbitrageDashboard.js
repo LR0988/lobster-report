@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiGetTwEventRadarDashboard } from '../api';
+import { StockChartButton } from './StockChart';
 import defaultTwEventRadarData from '../data/defaultTwEventRadarData.json';
 
 export default function TwEventArbitrageDashboard() {
@@ -259,7 +260,7 @@ export default function TwEventArbitrageDashboard() {
                     <tr key={item.stock_id}>
                       <td>
                         <strong style={{ color: '#F8FAFC', fontSize: '0.9rem' }}>{item.stock_name}</strong>
-                        <div style={{ fontSize: '0.73rem', color: '#38BDF8', fontFamily: 'monospace' }}>{item.stock_id}.TW</div>
+                        <div style={{ fontSize: '0.73rem', color: '#38BDF8', fontFamily: 'monospace' }}>{item.stock_id}.TW <StockChartButton ticker={`${item.stock_id}.TW`} name={item.stock_name} style={{ marginLeft: '0.4rem' }} /></div>
                       </td>
                       <td>
                         <span style={{
@@ -401,7 +402,7 @@ export default function TwEventArbitrageDashboard() {
                   <tr key={item.stock_id}>
                     <td>
                       <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{item.stock_name}</strong>
-                      <div style={{ fontSize: '0.72rem', color: '#FBBF24', fontFamily: 'monospace' }}>{item.stock_id} 期貨</div>
+                      <div style={{ fontSize: '0.72rem', color: '#FBBF24', fontFamily: 'monospace' }}>{item.stock_id} 期貨 <StockChartButton ticker={`${item.stock_id}.TW`} name={item.stock_name} style={{ marginLeft: '0.4rem' }} /></div>
                     </td>
                     <td>
                       <span style={{

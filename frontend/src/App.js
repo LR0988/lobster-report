@@ -6,6 +6,7 @@ import StockDashboard from './components/StockDashboard';
 import Login from './components/Login';
 import UserManagement from './components/UserManagement';
 import ErrorBoundary from './components/ErrorBoundary';
+import StockChartHost from './components/StockChart';
 import { getCurrentUser } from './api';
 import './index.css';
 
@@ -50,6 +51,7 @@ function App() {
           </ErrorBoundary>
         </main>
         <Footer />
+        <StockChartHost />
       </div>
     </Router>
   );

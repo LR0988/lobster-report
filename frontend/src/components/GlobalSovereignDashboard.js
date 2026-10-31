@@ -4,6 +4,7 @@ import defaultRankIcData from '../data/global_titan_rank_ic.json';
 import g11PitHistoryData from '../data/g11_pit_yearly_history.json';
 import twStockNamesMap from '../data/tw_stock_names_map.json';
 import { getCurrentUser, apiGetGlobalTitanPortfolio, apiSaveGlobalTitanPortfolio, apiGetGlobalSovereignDashboard, apiGetGlobalTitanRankIc, supabaseDirectFetch } from '../api';
+import { StockChartButton } from './StockChart';
 
 // 全球泰坦旗艦核心標的中文對照表 (確保所有台股與美股代號如 8996.TW 均能清楚顯示中文名稱)
 export const GLOBAL_TITAN_NAME_MAP = {
@@ -2303,6 +2304,7 @@ export default function GlobalSovereignDashboard() {
                           <td>
                             <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(pos.ticker, pos.name)}</strong>
                             <div style={{ fontSize: '0.73rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.ticker} ({pos.market})</div>
+                            <StockChartButton ticker={pos.ticker} name={pos.name} style={{ marginTop: '3px' }} />
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: '0.68rem', color: '#A5B4FC', marginBottom: '2px', fontWeight: 'bold' }}>
@@ -2970,6 +2972,7 @@ export default function GlobalSovereignDashboard() {
                             <span style={{ fontSize: '0.73rem', color: '#94A3B8', marginLeft: '0.35rem', fontFamily: 'monospace' }}>
                               ({pick.ticker} · {pick.market})
                             </span>
+                            <StockChartButton ticker={pick.ticker} name={pick.name} style={{ marginLeft: '0.4rem' }} />
                             {pick.is_dynamic_new && (
                               <span
                                 title="通過四大主權安檢門（20D均量>=15億、ROE>=15%、0<PE<45、20D投信買超>0.2%）由全市場動態吸納入池之新世代主流股"

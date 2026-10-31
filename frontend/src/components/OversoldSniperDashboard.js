@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { StockChartButton } from './StockChart';
 import defaultOversoldSniperData from '../data/defaultOversoldSniperData.json';
 import defaultSniperBacktestData from '../data/sniper_backtest_data.json';
 import { 
@@ -1099,6 +1100,7 @@ export default function OversoldSniperDashboard() {
                       <div>
                         <span style={{ fontWeight: 'bold', fontSize: '1.02rem', color: '#F8FAFC' }}>{item.name}</span>
                         <span style={{ fontSize: '0.78rem', color: '#94A3B8', marginLeft: '6px', fontFamily: 'monospace' }}>({item.ticker})</span>
+                        <StockChartButton ticker={item.ticker} name={item.name} style={{ marginLeft: '0.4rem' }} />
                       </div>
                       <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                         <span style={{
@@ -1485,6 +1487,7 @@ export default function OversoldSniperDashboard() {
                             <span style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                               {item.ticker}
                             </span>
+                            <StockChartButton ticker={item.ticker} name={item.name} style={{ marginLeft: '0.4rem' }} />
                             <span style={{ fontSize: '0.68rem', color: '#F472B6', fontFamily: 'monospace' }}>
                               NATR {natrPct}%
                             </span>
@@ -1858,6 +1861,7 @@ export default function OversoldSniperDashboard() {
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace', marginTop: '2px' }}>
                             {pos.ticker} ({pos.shares} 股)
+                            <StockChartButton ticker={pos.ticker} name={pos.name} style={{ marginLeft: '0.4rem' }} levels={[{ price: pos.entry_price, label: '成本', color: '#38BDF8' }, { price: pos.stop_loss_price, label: '停損', color: '#F87171' }].filter((l) => l.price > 0)} />
                           </div>
                         </td>
                         <td>
@@ -2749,6 +2753,7 @@ export default function OversoldSniperDashboard() {
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                             {t.ticker} {t.natr_pct ? `｜NATR ${t.natr_pct}%` : ''}
+                            <StockChartButton ticker={t.ticker} name={t.name} style={{ marginLeft: '0.4rem' }} />
                           </div>
                         </td>
                         <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>

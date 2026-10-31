@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import titanOpenPositionsData from '../data/titan_open_positions.json';
 import { getCurrentUser, apiGetTaiwanTitanPortfolio, apiSaveTaiwanTitanPortfolio } from '../api';
+import { StockChartButton } from './StockChart';
 
 const STORAGE_KEY_POSITIONS = 'taiwan_titan_user_positions_v1';
 const STORAGE_KEY_IDLE_CASH = 'taiwan_titan_idle_cash_v1';
@@ -1609,7 +1610,7 @@ export default function TitanLiveDashboard() {
                       <tr key={pos.id} style={{ background: isBroken ? 'rgba(239, 68, 68, 0.08)' : 'rgba(255,255,255,0.015)' }}>
                         <td>
                           <strong style={{ color: '#F8FAFC' }}>{pos.stock_name}</strong>
-                          <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.stock_id}</div>
+                          <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>{pos.stock_id} <StockChartButton ticker={`${pos.stock_id}.TW`} name={pos.stock_name} style={{ marginLeft: '0.4rem' }} /></div>
                         </td>
                         <td style={{ textAlign: 'center' }}>
                           <span style={{

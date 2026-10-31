@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import defaultTitanData from '../data/taiwan_causal_titan_data.json';
 import { getCurrentUser, apiGetCausalTitanDashboard } from '../api';
+import { StockChartButton } from './StockChart';
 
 // ==========================================
 // 👑 台股因果泰坦 (上限1億) · 全球泰坦 G12-PIT 邏輯 × 台股 0050∪0051 PIT 宇宙 (無倖存者偏差) × 1 億資金容量約束
@@ -1647,6 +1648,7 @@ export default function TaiwanCausalTitanDashboard() {
                         {/* 標的名稱 */}
                         <td>
                           <strong style={{ color: '#F8FAFC' }}>{sugg.name}</strong>
+                          <StockChartButton ticker={`${sugg.stock_id}.TW`} name={sugg.name} style={{ marginLeft: '0.4rem' }} />
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                             {sugg.stock_id} | <span style={{ color: '#FBBF24' }}>{sugg.role}</span>
                           </div>
@@ -1954,6 +1956,7 @@ export default function TaiwanCausalTitanDashboard() {
                         <tr key={pos.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: isDanger ? 'rgba(239, 68, 68, 0.1)' : 'transparent' }}>
                           <td style={{ padding: '0.65rem 0.5rem' }}>
                             <strong style={{ color: '#F8FAFC' }}>{pos.stock_name || pos.name}</strong>
+                            <StockChartButton ticker={`${String(pos.stock_id || pos.ticker).split('.')[0]}.TW`} name={pos.stock_name || pos.name} style={{ marginLeft: '0.4rem' }} />
                             <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                               {pos.stock_id || pos.ticker} · {pos.industry || '台股前100大'}
                             </div>

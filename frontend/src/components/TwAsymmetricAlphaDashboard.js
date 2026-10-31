@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import defaultAsymData from '../data/defaultTwAsymmetricAlphaData.json';
 import defaultCbBacktestData from '../data/cb_backtest_data.json';
 import { apiGetTwAsymmetricAlphaDashboard, getCurrentUser } from '../api';
+import { StockChartButton } from './StockChart';
 
 const STORAGE_KEY_CB_ACTIVE = 'tw_cb_titan_active_holdings_v2';
 const STORAGE_KEY_CB_HISTORY = 'tw_cb_titan_trade_history_v2';
@@ -1219,6 +1220,7 @@ export default function TwAsymmetricAlphaDashboard() {
                         </div>
                         <div style={{ fontSize: '0.71rem', color: '#94A3B8', marginTop: '1px', fontFamily: 'monospace' }}>
                           現股: {item.stock_name} ({item.stock_id}.TW) ｜ 發行 {item.issue_amount_b || 20} 億
+                          <StockChartButton ticker={`${item.stock_id}.TW`} name={item.stock_name} style={{ marginLeft: '0.4rem' }} />
                         </div>
                       </td>
 
@@ -1500,6 +1502,7 @@ export default function TwAsymmetricAlphaDashboard() {
                           </div>
                           <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '2px' }}>
                             現股: {pos.stock_name} ({pos.ticker}) · {pos.notes}
+                            <StockChartButton ticker={pos.ticker} name={pos.stock_name} style={{ marginLeft: '0.4rem' }} />
                           </div>
                         </td>
                         <td>
@@ -2100,7 +2103,7 @@ export default function TwAsymmetricAlphaDashboard() {
                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{t.year}</td>
                         <td>
                           <strong style={{ color: '#F8FAFC' }}>{t.cb_name} ({t.cb_code})</strong>
-                          <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{t.stock_name} ({t.ticker}) · {t.industry}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{t.stock_name} ({t.ticker}) · {t.industry} <StockChartButton ticker={t.ticker} name={t.stock_name} style={{ marginLeft: '0.4rem' }} /></div>
                         </td>
                         <td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
                           {t.entry_date} ➔ {t.exit_date}

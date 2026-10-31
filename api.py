@@ -716,6 +716,66 @@ def get_futures_kbars(
 
 
 # ================================
+# 1.5 個股技術線圖資料 (即時讀取本機 tw_stock.db，不經任何上傳)
+# ================================
+@app.get("/api/chart/{ticker}")
+def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
+    """回傳單一標的日K (OHLCV)；台股另附三大法人買賣超(張)與融資/融券餘額。
+    台股: daily_stock (+ institutional_trades)；美股/其他: global_stock_daily (adjust=True 時以 adj_close 還原)。
+    """
+    from fastapi.responses import JSONResponse
+    days = max(30, min(int(days), 6000))
+    tk = ticker.strip().upper()
+    is_tw = tk.endswith(".TW") or tk.endswith(".TWO") or tk.isdigit()
+    conn = get_db_connection()
+    try:
+        out = None
+        if is_tw:
+            sid = tk.split(".")[0]
+            rows = conn.execute(
+                "SELECT date, opening_price, highest_price, lowest_price, closing_price, trade_volume, "
+                "margin_balance, short_balance, stock_name FROM daily_stock "
+                "WHERE stock_id=? AND closing_price>0 ORDER BY date DESC LIMIT ?", (sid, days)).fetchall()[::-1]
+            if len(rows) >= 5:
+                inst = {r[0]: (r[1], r[2], r[3]) for r in conn.execute(
+                    "SELECT date, foreign_net, trust_net, dealer_net FROM institutional_trades "
+                    "WHERE stock_id=? AND date>=?", (sid, rows[0][0]))}
+                rd = lambda x: None if x is None else round(float(x), 2)
+                kz = lambda x: None if x is None else int(x // 1000)  # 股 -> 張
+                out = {"market": "TW", "name": rows[0][8] or "", "d": [], "o": [], "h": [], "l": [], "c": [],
+                       "v": [], "fi": [], "tr": [], "de": [], "mb": [], "sb": []}
+                for d, o, h, l, c, v, mb, sb, _n in rows:
+                    f, t, dl = inst.get(d, (None, None, None))
+                    out["d"].append(f"{d[:4]}-{d[4:6]}-{d[6:]}")
+                    out["o"].append(rd(o or c)); out["h"].append(rd(h or c))
+                    out["l"].append(rd(l or c)); out["c"].append(rd(c))
+                    out["v"].append(int((v or 0) // 1000))
+                    out["fi"].append(kz(f)); out["tr"].append(kz(t)); out["de"].append(kz(dl))
+                    out["mb"].append(mb); out["sb"].append(sb)
+        if out is None:
+            gt = tk if "." in tk else (tk + ".TW" if is_tw else tk)
+            rows = conn.execute(
+                "SELECT date, open, high, low, close, adj_close, volume FROM global_stock_daily "
+                "WHERE ticker=? AND close>0 ORDER BY date DESC LIMIT ?", (gt, days)).fetchall()[::-1]
+            if len(rows) >= 5:
+                out = {"market": "TW" if is_tw else ("US" if "." not in gt else gt.rsplit(".", 1)[1]),
+                       "name": "", "d": [], "o": [], "h": [], "l": [], "c": [], "v": []}
+                for d, o, h, l, c, adj, v in rows:
+                    k = (adj / c) if (adjust and adj and c) else 1.0
+                    out["d"].append(d)
+                    out["o"].append(round((o or c) * k, 2)); out["h"].append(round((h or c) * k, 2))
+                    out["l"].append(round((l or c) * k, 2)); out["c"].append(round(c * k, 2))
+                    out["v"].append(int(v or 0))
+        if out is None:
+            raise HTTPException(status_code=404, detail=f"tw_stock.db 查無 {tk} 的日K資料")
+        out["ticker"] = tk
+        out["last_date"] = out["d"][-1]
+        return JSONResponse(out, headers={"Cache-Control": "no-store"})
+    finally:
+        conn.close()
+
+
+# ================================
 # 2. 智慧選股篩選器 (Screener)
 # ================================
 class ScreenerConfig(BaseModel):
