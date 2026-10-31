@@ -47,7 +47,7 @@ const TYPES = [{ k: 'candle', l: 'K線' }, { k: 'bar', l: '美國線' }, { k: 'l
 const DEFAULT_PREFS = {
   type: 'candle', ma: [5, 20, 60], vma: [5, 20], boll: false, hilo: true, signals: false, log: false,
   subs: ['vol', 'kd'], upColor: null, range: 126, days: 750,
-  profile: true, profMode: 'visible', profBins: 50,
+  profile: true, profWin: 60, profBins: 50,
 };
 const loadPrefs = () => {
   try { return { ...DEFAULT_PREFS, ...(JSON.parse(localStorage.getItem('stockChartPrefs')) || {}) }; }
@@ -247,7 +247,8 @@ const StockChartModal = ({ req, onClose }) => {
       if (!prefs.profile) return;
       const lr = chart.timeScale().getVisibleLogicalRange();
       let a = 0, b = n - 1;
-      if (prefs.profMode === 'visible' && lr) { a = Math.max(0, Math.floor(lr.from)); b = Math.min(n - 1, Math.ceil(lr.to)); }
+      if (prefs.profWin === 'visible') { if (lr) { a = Math.max(0, Math.floor(lr.from)); b = Math.min(n - 1, Math.ceil(lr.to)); } }
+      else if (prefs.profWin > 0) a = Math.max(0, n - prefs.profWin);
       if (b - a < 1) return;
       let lo = Infinity, hi = -Infinity;
       for (let k = a; k <= b; k++) { lo = Math.min(lo, data.l[k]); hi = Math.max(hi, data.h[k]); }
@@ -274,15 +275,26 @@ const StockChartModal = ({ req, onClose }) => {
       }
       const paneH = panes[0] ? panes[0].getHeight() : H;
       let axisW = 0; try { axisW = chart.priceScale('right').width(); } catch (e) { axisW = 56; }
-      const xR = W - axisW - 2, maxW = Math.max(60, (W - axisW) * 0.22);
+      const xR = W - axisW - 2, maxW = Math.max(80, (W - axisW) * 0.3);
       g.save(); g.beginPath(); g.rect(0, 0, W, paneH); g.clip();
+      const vaLoP = lo + vaLo * step, vaHiP = lo + (vaHi + 1) * step;
+      const yA = main.priceToCoordinate(vaHiP), yB = main.priceToCoordinate(vaLoP);
+      if (yA != null && yB != null) { // 成交密集區 (70% 量) 淡色橫帶貫穿主圖
+        g.fillStyle = 'rgba(250,204,21,0.07)'; g.fillRect(0, Math.min(yA, yB), xR, Math.abs(yB - yA));
+        g.strokeStyle = 'rgba(250,204,21,0.35)'; g.setLineDash([2, 4]); g.lineWidth = 1;
+        [yA, yB].forEach((y) => { g.beginPath(); g.moveTo(0, y); g.lineTo(xR, y); g.stroke(); });
+        g.setLineDash([]);
+      }
+      const winLabel = prefs.profWin === 'visible' ? '顯示區間' : prefs.profWin === 0 ? '全部' : `近${prefs.profWin}日`;
+      g.fillStyle = '#FDE047'; g.font = 'bold 11px sans-serif'; g.textAlign = 'right';
+      g.fillText(`${winLabel}累積成交密集區 ${vaLoP.toFixed(1)} ~ ${vaHiP.toFixed(1)}（70%量）`, xR, 14);
       for (let j = 0; j < B; j++) {
         const y1 = main.priceToCoordinate(lo + j * step), y2 = main.priceToCoordinate(lo + (j + 1) * step);
         if (y1 == null || y2 == null) continue;
         const top = Math.min(y1, y2), h = Math.max(1, Math.abs(y1 - y2) - 1);
         const inVA = j >= vaLo && j <= vaHi;
         const wDn = (dn[j] / mx) * maxW, wUp = (up[j] / mx) * maxW;
-        g.globalAlpha = inVA ? 0.62 : 0.32;
+        g.globalAlpha = inVA ? 0.85 : 0.45;
         g.fillStyle = DN; g.fillRect(xR - wDn - wUp, top, wDn, h);
         g.fillStyle = UP; g.fillRect(xR - wUp, top, wUp, h);
       }
@@ -298,21 +310,22 @@ const StockChartModal = ({ req, onClose }) => {
     };
     const redraw = () => requestAnimationFrame(drawProfile);
     chart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
-    const ro = new ResizeObserver(redraw);
-    ro.observe(boxRef.current);
-    const box = boxRef.current;
-    ['mouseup', 'wheel', 'touchend'].forEach((ev) => box.addEventListener(ev, redraw, { passive: true }));
+    let sig = '';
+    const timer = setInterval(() => { // 偵測座標/尺寸變化才重畫
+      const lr = chart.timeScale().getVisibleLogicalRange();
+      const sg = `${lr ? lr.from.toFixed(2) + lr.to.toFixed(2) : ''}|${boxRef.current?.clientWidth}|${boxRef.current?.clientHeight}|${main.priceToCoordinate(data.c[n - 1])}|${main.priceToCoordinate(data.c[0])}`;
+      if (sg !== sig) { sig = sg; drawProfile(); }
+    }, 120);
     redraw();
 
     const idxOf = new Map(dates.map((d, i) => [d, i]));
     chart.subscribeCrosshairMove((p) => setHover(p.time ? (idxOf.get(p.time) ?? null) : null));
     return () => {
-      ro.disconnect();
-      ['mouseup', 'wheel', 'touchend'].forEach((ev) => box.removeEventListener(ev, redraw));
+      clearInterval(timer);
       chart.remove(); chartRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, data, calc, prefs.type, prefs.ma, prefs.vma, prefs.boll, prefs.hilo, prefs.signals, prefs.log, prefs.profile, prefs.profMode, prefs.profBins, subs, UP, DN]);
+  }, [state, data, calc, prefs.type, prefs.ma, prefs.vma, prefs.boll, prefs.hilo, prefs.signals, prefs.log, prefs.profile, prefs.profWin, prefs.profBins, subs, UP, DN]);
 
   const applyRange = (r) => {
     setP({ range: r.n });
@@ -392,7 +405,9 @@ const StockChartModal = ({ req, onClose }) => {
             <Chip on={prefs.profile} color="#FDE047" onClick={() => setP({ profile: !prefs.profile })}>價量分布</Chip>
             {prefs.profile && (
               <>
-                <Chip on={prefs.profMode === 'visible'} onClick={() => setP({ profMode: prefs.profMode === 'visible' ? 'all' : 'visible' })}>{prefs.profMode === 'visible' ? '依顯示區間' : '全部資料'}</Chip>
+                {[[20, '近1月'], [60, '近3月'], [120, '近半年'], [250, '近1年'], ['visible', '顯示區間']].map(([w, l]) => (
+                  <Chip key={l} on={prefs.profWin === w} color="#FDE047" onClick={() => setP({ profWin: w })}>{l}</Chip>
+                ))}
                 {[30, 50, 80].map((b) => <Chip key={b} on={prefs.profBins === b} onClick={() => setP({ profBins: b })}>{b}檔</Chip>)}
               </>
             )}
