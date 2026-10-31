@@ -131,7 +131,7 @@ const StockChartModal = ({ req, onClose }) => {
       layout: { background: { color: '#0B1220' }, textColor: '#94A3B8', panes: { separatorColor: '#1E293B' } },
       grid: { vertLines: { color: 'rgba(148,163,184,0.07)' }, horzLines: { color: 'rgba(148,163,184,0.07)' } },
       crosshair: { mode: CrosshairMode.Normal },
-      rightPriceScale: { borderColor: '#1E293B', mode: prefs.log ? 1 : 0 },
+      rightPriceScale: { borderColor: '#1E293B' },
       timeScale: { borderColor: '#1E293B', rightOffset: 4, barSpacing: 8 },
     });
     chartRef.current = chart;
@@ -171,6 +171,9 @@ const StockChartModal = ({ req, onClose }) => {
         color: dir > 0 ? UP : DN, text: dir > 0 ? '金' : '死',
       })));
     }
+
+    // 對數座標只套用在主圖 (副圖的量/買賣超含 0 或負值，不可用對數)
+    chart.priceScale('right', 0).applyOptions({ mode: prefs.log ? 1 : 0 });
 
     // ---- 副圖 ----
     const mk = (opts, pane, extra = {}) => chart.addSeries(LineSeries, { lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, ...opts }, pane);
@@ -448,7 +451,7 @@ const StockChartModal = ({ req, onClose }) => {
         {/* 圖表 */}
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
           <div ref={boxRef} style={{ position: 'absolute', inset: 0 }} />
-          <canvas ref={profRef} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }} />
+          <canvas ref={profRef} style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none', zIndex: 5 }} />
           {state !== 'ok' && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: state === 'error' ? '#FCA5A5' : '#94A3B8', padding: '2rem', textAlign: 'center', background: '#0B1220' }}>
               {state === 'loading' ? '從本機資料庫讀取中…' : `⚠️ ${err}`}
