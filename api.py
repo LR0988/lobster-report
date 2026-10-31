@@ -757,6 +757,16 @@ def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
             rows = conn.execute(
                 "SELECT date, open, high, low, close, adj_close, volume FROM global_stock_daily "
                 "WHERE ticker=? AND close>0 ORDER BY date DESC LIMIT ?", (gt, days)).fetchall()[::-1]
+            # 歷史不足時，接上 chart_extra_daily (僅供線圖的補充歷史，由 backfill_chart_history.py 寫入)
+            if rows and len(rows) < days:
+                try:
+                    extra = conn.execute(
+                        "SELECT date, open, high, low, close, adj_close, volume FROM chart_extra_daily "
+                        "WHERE ticker=? AND date<? AND close>0 ORDER BY date DESC LIMIT ?",
+                        (gt, rows[0][0], days - len(rows))).fetchall()[::-1]
+                    rows = extra + rows
+                except Exception:
+                    pass
             if len(rows) >= 5:
                 out = {"market": "TW" if is_tw else ("US" if "." not in gt else gt.rsplit(".", 1)[1]),
                        "name": "", "d": [], "o": [], "h": [], "l": [], "c": [], "v": []}

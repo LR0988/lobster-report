@@ -46,11 +46,15 @@ const TYPES = [{ k: 'candle', l: 'K線' }, { k: 'bar', l: '美國線' }, { k: 'l
 
 const DEFAULT_PREFS = {
   type: 'candle', ma: [5, 20, 60], vma: [5, 20], boll: false, hilo: true, signals: false, log: false,
-  subs: ['vol', 'kd'], upColor: null, range: 126, days: 750,
+  subs: ['vol', 'kd'], upColor: null, range: 126, days: 1500,
   profile: true, profWin: 60, profBins: 50,
 };
 const loadPrefs = () => {
-  try { return { ...DEFAULT_PREFS, ...(JSON.parse(localStorage.getItem('stockChartPrefs')) || {}) }; }
+  try {
+    const p = { ...DEFAULT_PREFS, ...(JSON.parse(localStorage.getItem('stockChartPrefs')) || {}) };
+    p.days = Math.max(p.days || 0, DEFAULT_PREFS.days); // 舊設定存的 750 日不夠看「全部」
+    return p;
+  }
   catch { return DEFAULT_PREFS; }
 };
 
@@ -331,6 +335,11 @@ const StockChartModal = ({ req, onClose }) => {
   }, [state, data, calc, prefs.type, prefs.ma, prefs.vma, prefs.boll, prefs.hilo, prefs.signals, prefs.log, prefs.profile, prefs.profWin, prefs.profBins, subs, UP, DN]);
 
   const applyRange = (r) => {
+    if (r.n === 0 && prefs.days < 6000) { // 「全部」：重新向本機 API 取完整歷史
+      rangeRef.current = null;
+      setP({ range: 0, days: 6000 });
+      return;
+    }
     setP({ range: r.n });
     const c = chartRef.current;
     if (!c || !data) return;
