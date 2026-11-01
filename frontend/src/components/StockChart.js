@@ -86,14 +86,22 @@ const StockChartModal = ({ req, onClose }) => {
   const load = useCallback(async () => {
     setState('loading'); setErr('');
     try {
-      const base = await resolveApiBase();
+      let base = await resolveApiBase();
       const sym = encodeURIComponent(req.ticker);
-      const res = await fetch(`${base}/api/chart/${sym}?days=${prefs.days}`, { cache: 'no-store' });
+      let res;
+      try {
+        res = await fetch(`${base}/api/chart/${sym}?days=${prefs.days}`, { cache: 'no-store' });
+        if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
+      } catch (firstErr) {
+        // 若首次連線失敗或非 404 錯誤，強制從 Supabase 刷新最新通道網址重試一次
+        base = await resolveApiBase(true);
+        res = await fetch(`${base}/api/chart/${sym}?days=${prefs.days}`, { cache: 'no-store' });
+      }
       if (!res.ok) throw new Error(res.status === 404 ? `本機資料庫查無 ${req.ticker} 日K資料` : `本機 API 回應 ${res.status}`);
       setData(await res.json()); setState('ok');
     } catch (e) {
       setErr(e.message?.includes('Failed to fetch')
-        ? '連不到本機 API (port 8000)。請確認筆電上的 uvicorn api:app 正在執行，且已重啟載入 /api/chart 端點。' : e.message);
+        ? '連不到本機 API 通道。請確認筆電上的 uvicorn 與 manage_tunnel.py 正在執行。' : e.message);
       setState('error');
     }
   }, [req.ticker, prefs.days]);
