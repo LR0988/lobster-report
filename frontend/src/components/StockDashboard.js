@@ -3155,8 +3155,9 @@ function StockDashboard() {
     let interval = null;
     let isMounted = true;
 
-    if (activeTab === 'database' || activeTab === 'scraper') {
-      // 1. 切換至資料庫分頁時，立即向後端拉取一次最新爬蟲與同步狀態
+    const shouldPoll = activeTab === 'database' || activeTab === 'scraper' || scraperLiveStatus?.is_running || showScraperBanner;
+    if (shouldPoll) {
+      // 1. 立即向後端拉取一次最新爬蟲與同步狀態
       const checkInitialStatus = async () => {
         try {
           const res = await stockFetch('/api/scraper/status');
@@ -8386,7 +8387,12 @@ function StockDashboard() {
 
         {/* ===== 🌍 全球主權泰坦動能看板 ===== */}
         {activeTab === 'global_sovereign' && (
-          <GlobalSovereignDashboard key={scraperLiveStatus?.finished_at || 'init'} />
+          <GlobalSovereignDashboard 
+            key={scraperLiveStatus?.finished_at || 'init'} 
+            onTriggerScraper={() => handleTriggerDbScraper('global_sovereign', '全球泰坦 18 國主權 ETF 與 228 檔旗艦個股', 'global_stock_daily')}
+            isScraperRunning={Boolean(scraperLiveStatus?.is_running && scraperLiveStatus?.task_type === 'global_sovereign')}
+            scraperStatus={scraperLiveStatus}
+          />
         )}
 
         {/* ===== 🎯 極端超賣快打專屬戰情室 ===== */}

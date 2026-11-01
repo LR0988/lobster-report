@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "strategy_name": "👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・S&P 500 + 台灣 0050∪0051 純上市 PIT 2005-2026・已移除 G12 三道防雷與研發加權・CAGR 40.48%・1,621.2倍・月MDD -21.99%・Calmar 1.84・勝年 19/22)",
-  "generated_at": "2026-10-31 07:49:45",
+  "generated_at": "2026-11-01 23:51:18",
   "latest_data_date": "2026-10-30",
   "doe_config": {
     "execution_mode": "dual_tranche_1_and_22 (每月1號 A梯隊50% + 每月22號 B梯隊50%，台美共同開盤日執行)",
@@ -19,7 +19,7 @@
     "rank_buffer": 5,
     "weight_tolerance_pct": 5,
     "pbo_overfitting_prob": "0.00%",
-    "winning_years_pct": 100.0,
+    "winning_years_pct": 86.4,
     "worst_year_ret_pct": -4.75
   },
   "macro_status": {
@@ -52,10 +52,10 @@
     "qqq_below_ma20": true,
     "spy_below_ma20": true,
     "rs_qqq_spy_20_pct": -6.07,
-    "us10y_chg20": -0.35,
+    "us10y_chg20": -0.3,
     "top5_neg_io20": 3,
     "top5_neg_io5": 3,
-    "top5_avg_io20": 0.0052,
+    "top5_avg_io20": 0.0088,
     "g9_c1_rate_opt_shield_active": false,
     "g9_c2_tech_lag_shield_active": false,
     "g9_c3_top5_exhaustion_shield_active": false,
@@ -66,21 +66,21 @@
   },
   "kpi": {
     "scheme_a": {
-      "total_ret": 214979.4,
+      "total_ret": 162024.2,
       "mult": 1621.2,
       "cagr": 40.48,
-      "g1_cagr": 47.57,
-      "g2_cagr": 29.03,
+      "g1_cagr": 43.29,
+      "g2_cagr": 37.08,
       "mdd": -21.99,
-      "daily_mdd": -24.96,
-      "sharpe": 1.28,
-      "calmar": 2.11,
-      "daily_calmar": 1.7,
-      "sortino": 2.1,
-      "win_rate": 100.0,
-      "winning_years": "22/22",
-      "semi_monthly_win_rate": 61.1,
-      "big_loss_rate": 10.2
+      "daily_mdd": -29.6,
+      "sharpe": 1.26,
+      "calmar": 1.84,
+      "daily_calmar": 1.37,
+      "sortino": 2.05,
+      "win_rate": 86.4,
+      "winning_years": "19/22",
+      "semi_monthly_win_rate": 64.6,
+      "big_loss_rate": 11.1
     },
     "spy": {
       "total_ret": 917.9,
@@ -245,6 +245,78 @@
       "total_nav_weight_pct": 12.0
     },
     {
+      "ticker": "TXN",
+      "name": "德州儀器 (Texas Instruments 類比IC霸主)",
+      "market": "美股 (S&P 500 PIT 成分股)",
+      "currency": "USD",
+      "pool_source": "🇺🇸 S&P 500 PIT 官方成分股",
+      "is_dynamic_new": false,
+      "industry_group": "US_TXN",
+      "price": 300.84,
+      "price_date": "2026-10-30",
+      "ma60": 275.35,
+      "ma200": 260.64,
+      "mom_2w": 8.8,
+      "mom_3m": 6.1,
+      "mom_12m": 91.5,
+      "bias_ma60": 9.3,
+      "prox_52w": 91.0,
+      "winrate_tag": "⚡ 高波動衝刺",
+      "winrate_desc": "動能噴發中，留意短線震盪幅度加劇",
+      "winrate_grade": "volatile",
+      "mom_1d": -3.87,
+      "mom_5d": 5.7,
+      "pullback_prob_3d": 54.0,
+      "pullback_prob_5d": 63.0,
+      "gap_limit_cap_price": 305.35,
+      "micro_dip_price": 300.24,
+      "smart_entry_mode": "open_with_gap_cap",
+      "smart_entry_tag": "🟢 開盤直買・跳空>1.5%掛 300.24",
+      "smart_entry_price": 300.84,
+      "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 305.35 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (300.24) 等 2 天。",
+      "fip": 0.04,
+      "fip_126": 0.05,
+      "fip_60": 0.08,
+      "io_20": 0.219,
+      "io_60": 0.082,
+      "io_5": 0.068,
+      "io_accel": 0.013,
+      "vol_60d": 0.3,
+      "ma20_reclaim": true,
+      "pocket_pivot_40": -0.25,
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe_pct": null,
+      "trust_20d_pct": 0.0,
+      "whale_1000_pct": null,
+      "whale_400_pct": null,
+      "whale_scissors_pct": null,
+      "sniper_mult": 1.04,
+      "sniper_tag": "🔄月線洗盤回勾(+4%) × 🌀L6-H2平台壓縮蓄勢(回檔-3.9%/月乖離+3.9%/×1.12)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🔄月線洗盤回勾(+4%)（二階總乘數 ×1.04）",
+      "pb_depth_60": 13.1,
+      "rebound_20d": 10.6,
+      "pead_jump_63d": 0.0,
+      "convexity": 1.18,
+      "vcp": 0.58,
+      "chip": 0.14,
+      "rd_pct": 0.0,
+      "sustain_20d": 0.2,
+      "sortino_60": 1.31,
+      "score": 0.543,
+      "sniper_score": 0.5647,
+      "churn_safe": true,
+      "tenure_months": 1,
+      "max_tenure_months": 4,
+      "pre_sniper_rank": 4,
+      "rank": 3,
+      "is_active": true,
+      "in_buffer_zone": true,
+      "weight_pct": 24,
+      "tranche_weight_pct": 24,
+      "total_nav_weight_pct": 12.0
+    },
+    {
       "ticker": "COP",
       "name": "康菲石油 (ConocoPhillips 頁岩油氣巨擘)",
       "market": "美股 (S&P 500 PIT 成分股)",
@@ -309,78 +381,6 @@
       "tenure_months": 1,
       "max_tenure_months": 4,
       "pre_sniper_rank": 3,
-      "rank": 3,
-      "is_active": true,
-      "in_buffer_zone": true,
-      "weight_pct": 24,
-      "tranche_weight_pct": 24,
-      "total_nav_weight_pct": 12.0
-    },
-    {
-      "ticker": "ADI",
-      "name": "亞德諾半導體 (Analog Devices 類比晶片)",
-      "market": "美股 (S&P 500 PIT 成分股)",
-      "currency": "USD",
-      "pool_source": "🇺🇸 S&P 500 PIT 官方成分股",
-      "is_dynamic_new": false,
-      "industry_group": "US_ADI",
-      "price": 417.11,
-      "price_date": "2026-10-30",
-      "ma60": 386.76,
-      "ma200": 372.73,
-      "mom_2w": 5.5,
-      "mom_3m": 10.0,
-      "mom_12m": 80.9,
-      "bias_ma60": 7.8,
-      "prox_52w": 93.9,
-      "winrate_tag": "🚀 穩健主升推進",
-      "winrate_desc": "多頭主升趨勢穩步推進中，量價結構良好",
-      "winrate_grade": "steady",
-      "mom_1d": -3.73,
-      "mom_5d": 6.7,
-      "pullback_prob_3d": 61.3,
-      "pullback_prob_5d": 71.1,
-      "gap_limit_cap_price": 423.37,
-      "micro_dip_price": 416.28,
-      "smart_entry_mode": "no_chase_gap",
-      "smart_entry_tag": "🛡️ 禁追跳空>1.5%・超限掛 416.28",
-      "smart_entry_price": 417.11,
-      "smart_entry_desc": "短線動能偏熱 (5D +6.7%)，T+1 開盤價若未超過 423.37 (+1.5%) 可直接買入；若跳空超過 423.37 (3D拉回率 70%) 則改掛 C_T×0.998 (416.28) 等 2 天。",
-      "fip": 0.14,
-      "fip_126": 0.13,
-      "fip_60": 0.25,
-      "io_20": 0.201,
-      "io_60": 0.087,
-      "io_5": 0.076,
-      "io_accel": 0.025,
-      "vol_60d": 0.32,
-      "ma20_reclaim": true,
-      "pocket_pivot_40": -0.25,
-      "pe_ratio": null,
-      "pb_ratio": null,
-      "roe_pct": null,
-      "trust_20d_pct": 0.0,
-      "whale_1000_pct": null,
-      "whale_400_pct": null,
-      "whale_scissors_pct": null,
-      "sniper_mult": 1.04,
-      "sniper_tag": "🔄月線洗盤回勾(+4%) × 🌀L6-H2平台壓縮蓄勢(回檔-3.7%/月乖離+2.1%/×1.12)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🔄月線洗盤回勾(+4%)（二階總乘數 ×1.04）",
-      "pb_depth_60": 11.9,
-      "rebound_20d": 9.2,
-      "pead_jump_63d": 0.0,
-      "convexity": 1.0,
-      "vcp": 0.59,
-      "chip": 0.09,
-      "rd_pct": 0.0,
-      "sustain_20d": 0.35,
-      "sortino_60": 1.58,
-      "score": 0.5078,
-      "sniper_score": 0.5281,
-      "churn_safe": true,
-      "tenure_months": 1,
-      "max_tenure_months": 4,
-      "pre_sniper_rank": 5,
       "rank": 4,
       "is_active": false,
       "in_buffer_zone": true,
@@ -452,10 +452,82 @@
       "churn_safe": true,
       "tenure_months": 1,
       "max_tenure_months": 4,
-      "pre_sniper_rank": 4,
+      "pre_sniper_rank": 5,
       "rank": 5,
       "is_active": false,
       "in_buffer_zone": true,
+      "weight_pct": 0,
+      "tranche_weight_pct": 0,
+      "total_nav_weight_pct": 0
+    },
+    {
+      "ticker": "ADI",
+      "name": "亞德諾半導體 (Analog Devices 類比晶片)",
+      "market": "美股 (S&P 500 PIT 成分股)",
+      "currency": "USD",
+      "pool_source": "🇺🇸 S&P 500 PIT 官方成分股",
+      "is_dynamic_new": false,
+      "industry_group": "US_ADI",
+      "price": 417.11,
+      "price_date": "2026-10-30",
+      "ma60": 386.76,
+      "ma200": 372.73,
+      "mom_2w": 5.5,
+      "mom_3m": 10.0,
+      "mom_12m": 80.9,
+      "bias_ma60": 7.8,
+      "prox_52w": 93.9,
+      "winrate_tag": "🚀 穩健主升推進",
+      "winrate_desc": "多頭主升趨勢穩步推進中，量價結構良好",
+      "winrate_grade": "steady",
+      "mom_1d": -3.73,
+      "mom_5d": 6.7,
+      "pullback_prob_3d": 61.3,
+      "pullback_prob_5d": 71.1,
+      "gap_limit_cap_price": 423.37,
+      "micro_dip_price": 416.28,
+      "smart_entry_mode": "no_chase_gap",
+      "smart_entry_tag": "🛡️ 禁追跳空>1.5%・超限掛 416.28",
+      "smart_entry_price": 417.11,
+      "smart_entry_desc": "短線動能偏熱 (5D +6.7%)，T+1 開盤價若未超過 423.37 (+1.5%) 可直接買入；若跳空超過 423.37 (3D拉回率 70%) 則改掛 C_T×0.998 (416.28) 等 2 天。",
+      "fip": 0.14,
+      "fip_126": 0.13,
+      "fip_60": 0.25,
+      "io_20": 0.201,
+      "io_60": 0.087,
+      "io_5": 0.075,
+      "io_accel": 0.025,
+      "vol_60d": 0.32,
+      "ma20_reclaim": true,
+      "pocket_pivot_40": -0.25,
+      "pe_ratio": null,
+      "pb_ratio": null,
+      "roe_pct": null,
+      "trust_20d_pct": 0.0,
+      "whale_1000_pct": null,
+      "whale_400_pct": null,
+      "whale_scissors_pct": null,
+      "sniper_mult": 1.04,
+      "sniper_tag": "🔄月線洗盤回勾(+4%) × 🌀L6-H2平台壓縮蓄勢(回檔-3.7%/月乖離+2.1%/×1.12)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🔄月線洗盤回勾(+4%)（二階總乘數 ×1.04）",
+      "pb_depth_60": 11.9,
+      "rebound_20d": 9.2,
+      "pead_jump_63d": 0.0,
+      "convexity": 1.0,
+      "vcp": 0.59,
+      "chip": 0.09,
+      "rd_pct": 0.0,
+      "sustain_20d": 0.35,
+      "sortino_60": 1.58,
+      "score": 0.5078,
+      "sniper_score": 0.5281,
+      "churn_safe": true,
+      "tenure_months": 1,
+      "max_tenure_months": 4,
+      "pre_sniper_rank": 6,
+      "rank": 6,
+      "is_active": false,
+      "in_buffer_zone": false,
       "weight_pct": 0,
       "tranche_weight_pct": 0,
       "total_nav_weight_pct": 0
@@ -524,8 +596,8 @@
       "churn_safe": true,
       "tenure_months": 1,
       "max_tenure_months": 4,
-      "pre_sniper_rank": 6,
-      "rank": 6,
+      "pre_sniper_rank": 7,
+      "rank": 7,
       "is_active": false,
       "in_buffer_zone": false,
       "weight_pct": 0,
@@ -593,78 +665,6 @@
       "sortino_60": 2.37,
       "score": 0.4889,
       "sniper_score": 0.4889,
-      "churn_safe": true,
-      "tenure_months": 1,
-      "max_tenure_months": 4,
-      "pre_sniper_rank": 7,
-      "rank": 7,
-      "is_active": false,
-      "in_buffer_zone": false,
-      "weight_pct": 0,
-      "tranche_weight_pct": 0,
-      "total_nav_weight_pct": 0
-    },
-    {
-      "ticker": "TXN",
-      "name": "德州儀器 (Texas Instruments 類比IC霸主)",
-      "market": "美股 (S&P 500 PIT 成分股)",
-      "currency": "USD",
-      "pool_source": "🇺🇸 S&P 500 PIT 官方成分股",
-      "is_dynamic_new": false,
-      "industry_group": "US_TXN",
-      "price": 300.84,
-      "price_date": "2026-10-30",
-      "ma60": 275.35,
-      "ma200": 260.64,
-      "mom_2w": 8.8,
-      "mom_3m": 6.1,
-      "mom_12m": 91.5,
-      "bias_ma60": 9.3,
-      "prox_52w": 91.0,
-      "winrate_tag": "⚡ 高波動衝刺",
-      "winrate_desc": "動能噴發中，留意短線震盪幅度加劇",
-      "winrate_grade": "volatile",
-      "mom_1d": -3.87,
-      "mom_5d": 5.7,
-      "pullback_prob_3d": 54.0,
-      "pullback_prob_5d": 63.0,
-      "gap_limit_cap_price": 305.35,
-      "micro_dip_price": 300.24,
-      "smart_entry_mode": "open_with_gap_cap",
-      "smart_entry_tag": "🟢 開盤直買・跳空>1.5%掛 300.24",
-      "smart_entry_price": 300.84,
-      "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 305.35 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (300.24) 等 2 天。",
-      "fip": 0.04,
-      "fip_126": 0.05,
-      "fip_60": 0.08,
-      "io_20": 0.219,
-      "io_60": 0.082,
-      "io_5": 0.068,
-      "io_accel": 0.013,
-      "vol_60d": 0.3,
-      "ma20_reclaim": true,
-      "pocket_pivot_40": -0.25,
-      "pe_ratio": null,
-      "pb_ratio": null,
-      "roe_pct": null,
-      "trust_20d_pct": 0.0,
-      "whale_1000_pct": null,
-      "whale_400_pct": null,
-      "whale_scissors_pct": null,
-      "sniper_mult": 1.04,
-      "sniper_tag": "🔄月線洗盤回勾(+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🔄月線洗盤回勾(+4%)（二階總乘數 ×1.04）",
-      "pb_depth_60": 13.1,
-      "rebound_20d": 10.6,
-      "pead_jump_63d": 0.0,
-      "convexity": 1.18,
-      "vcp": 0.58,
-      "chip": 0.14,
-      "rd_pct": 0.0,
-      "sustain_20d": 0.2,
-      "sortino_60": 1.31,
-      "score": 0.4848,
-      "sniper_score": 0.5042,
       "churn_safe": true,
       "tenure_months": 1,
       "max_tenure_months": 4,
@@ -827,176 +827,176 @@
       "scheme_a_ret": 124.6,
       "spy_ret": 5.3,
       "capital": 2527588.0,
-      "scheme_a": 83.8,
-      "titan_return": 83.8
+      "scheme_a": 46.65,
+      "titan_return": 46.65
     },
     {
       "year": 2006,
       "scheme_a_ret": 19.6,
       "spy_ret": 13.8,
       "capital": 3021753.0,
-      "scheme_a": 109.3,
-      "titan_return": 109.3
+      "scheme_a": 104.43,
+      "titan_return": 104.43
     },
     {
       "year": 2007,
       "scheme_a_ret": 68.7,
       "spy_ret": 5.3,
       "capital": 5097241.0,
-      "scheme_a": 198.05,
-      "titan_return": 198.05
+      "scheme_a": 186.87,
+      "titan_return": 186.87
     },
     {
       "year": 2008,
       "scheme_a_ret": -2.2,
       "spy_ret": -36.2,
       "capital": 4982559.0,
-      "scheme_a": 27.86,
-      "titan_return": 27.86
+      "scheme_a": 29.05,
+      "titan_return": 29.05
     },
     {
       "year": 2009,
       "scheme_a_ret": 56.4,
       "spy_ret": 22.7,
       "capital": 7795035.0,
-      "scheme_a": 30.2,
-      "titan_return": 30.2
+      "scheme_a": 18.82,
+      "titan_return": 18.82
     },
     {
       "year": 2010,
       "scheme_a_ret": 4.4,
       "spy_ret": 13.1,
       "capital": 8135508.0,
-      "scheme_a": 16.8,
-      "titan_return": 16.8
+      "scheme_a": -2.36,
+      "titan_return": -2.36
     },
     {
       "year": 2011,
       "scheme_a_ret": 7.8,
       "spy_ret": 0.9,
       "capital": 8772652.0,
-      "scheme_a": 4.74,
-      "titan_return": 4.74
+      "scheme_a": -0.93,
+      "titan_return": -0.93
     },
     {
       "year": 2012,
       "scheme_a_ret": 46.0,
       "spy_ret": 14.2,
       "capital": 12805156.0,
-      "scheme_a": 7.18,
-      "titan_return": 7.18
+      "scheme_a": 3.91,
+      "titan_return": 3.91
     },
     {
       "year": 2013,
       "scheme_a_ret": 92.7,
       "spy_ret": 29.0,
       "capital": 24672480.0,
-      "scheme_a": 77.84,
-      "titan_return": 77.84
+      "scheme_a": 83.69,
+      "titan_return": 83.69
     },
     {
       "year": 2014,
       "scheme_a_ret": 41.5,
       "spy_ret": 14.6,
       "capital": 34907404.0,
-      "scheme_a": 7.24,
-      "titan_return": 7.24
+      "scheme_a": 34.45,
+      "titan_return": 34.45
     },
     {
       "year": 2015,
       "scheme_a_ret": 16.9,
       "spy_ret": 1.3,
       "capital": 40790141.0,
-      "scheme_a": 0.97,
-      "titan_return": 0.97
+      "scheme_a": 12.63,
+      "titan_return": 12.63
     },
     {
       "year": 2016,
       "scheme_a_ret": 127.6,
       "spy_ret": 13.6,
       "capital": 92823275.0,
-      "scheme_a": 38.73,
-      "titan_return": 38.73
+      "scheme_a": 63.31,
+      "titan_return": 63.31
     },
     {
       "year": 2017,
       "scheme_a_ret": 24.4,
       "spy_ret": 20.8,
       "capital": 115457819.0,
-      "scheme_a": 23.98,
-      "titan_return": 23.98
+      "scheme_a": 19.94,
+      "titan_return": 19.94
     },
     {
       "year": 2018,
       "scheme_a_ret": 13.0,
       "spy_ret": -5.2,
       "capital": 130497180.0,
-      "scheme_a": 47.69,
-      "titan_return": 47.69
+      "scheme_a": 40.16,
+      "titan_return": 40.16
     },
     {
       "year": 2019,
       "scheme_a_ret": 28.8,
       "spy_ret": 31.1,
       "capital": 168120192.0,
-      "scheme_a": 10.79,
-      "titan_return": 10.79
+      "scheme_a": 10.0,
+      "titan_return": 10.0
     },
     {
       "year": 2020,
       "scheme_a_ret": 96.8,
       "spy_ret": 17.2,
       "capital": 330918589.0,
-      "scheme_a": 36.52,
-      "titan_return": 36.52
+      "scheme_a": 31.19,
+      "titan_return": 31.19
     },
     {
       "year": 2021,
       "scheme_a_ret": 216.0,
       "spy_ret": 30.5,
       "capital": 1045723969.0,
-      "scheme_a": 1.48,
-      "titan_return": 1.48
+      "scheme_a": -4.02,
+      "titan_return": -4.02
     },
     {
       "year": 2022,
       "scheme_a_ret": -4.7,
       "spy_ret": -18.6,
       "capital": 996086451.0,
-      "scheme_a": 13.17,
-      "titan_return": 13.17
+      "scheme_a": 13.46,
+      "titan_return": 13.46
     },
     {
       "year": 2023,
       "scheme_a_ret": 191.6,
       "spy_ret": 26.7,
       "capital": 2904674296.0,
-      "scheme_a": 48.63,
-      "titan_return": 48.63
+      "scheme_a": 42.68,
+      "titan_return": 42.68
     },
     {
       "year": 2024,
       "scheme_a_ret": 84.0,
       "spy_ret": 25.6,
       "capital": 5343838623.0,
-      "scheme_a": 68.67,
-      "titan_return": 68.67
+      "scheme_a": 74.54,
+      "titan_return": 74.54
     },
     {
       "year": 2025,
       "scheme_a_ret": 42.3,
       "spy_ret": 18.0,
       "capital": 7603124343.0,
-      "scheme_a": 24.3,
-      "titan_return": 24.3
+      "scheme_a": 37.8,
+      "titan_return": 37.8
     },
     {
       "year": 2026,
       "scheme_a_ret": 180.0,
       "spy_ret": 13.5,
       "capital": 21285830597.0,
-      "scheme_a": 224.56,
-      "titan_return": 224.56
+      "scheme_a": 196.95,
+      "titan_return": 196.95
     }
   ],
   "recent_trades": [
@@ -1563,18 +1563,18 @@
     "smart_cagr": 40.48,
     "cagr_boost": null,
     "mult_boost": null,
-    "winning_years": "22/22 (100.0%)",
-    "semi_monthly_win_rate": "61.1%",
-    "monthly_mdd": "-20.01%",
-    "daily_mdd": "-24.96%",
-    "calmar": 2.11,
-    "sharpe": 1.28,
-    "recent_8y_cagr": 41.03,
+    "winning_years": "19/22 (86.4%)",
+    "semi_monthly_win_rate": "64.6%",
+    "monthly_mdd": "-21.99%",
+    "daily_mdd": "-29.60%",
+    "calmar": 1.84,
+    "sharpe": 1.26,
+    "recent_8y_cagr": 39.87,
     "rules": [
       "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：剔除無台股 0050∪0051 資料之 2004 年，嚴格鎖定 2005-01-03 ~ 2026-10-29 共 5,338 個交易日 (美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔，100% 零遺漏且排除上櫃股)。",
       "② [已移除] G12 三大進場防雷閘門 (×0.72/×0.72/×0.70)：消融測試顯示為負貢獻或無貢獻，已拿掉。",
       "③ [已移除] 黃金研發強度護城河加權與 56/22/22 重倉：研發強度靜態表含全歷史後見之明且貢獻為負，已拿掉；固定 52/24/24 配權。",
-      "④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：曾浮盈 >=+5.5% 贏家享 40~60 天主升段續抱 (受 0.09/0.13/0.16 移動鎖利與季線約束)；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者撤銷保護帶換馬。22 年勝年 19/22 (86.4%)、CAGR 40.48%、累積 1,621.2 倍。"
+      "④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：曾浮盈 >=+5.5% 贏家享 40~60 天主升段續抱 (受 0.09/0.13/0.16 移動鎖利與季線約束)；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者撤銷保護帶換馬。22 年 19/22 (86.4%) 勝年、CAGR 40.48%、累積 1,621.2 倍。"
     ]
   },
   "dynamic_universe_status": {
@@ -1589,12 +1589,12 @@
     "open_pool_unbiased_backtest": {
       "universe_size": "1,734 檔真實無生存者偏誤 PIT 選股池 (956 檔 S&P 500 歷史成分股 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005–2026 零遺漏池)",
       "cagr_22y": 40.48,
-      "cagr_g1_2004_2014": 47.57,
-      "cagr_g2_2015_2026": 29.03,
-      "daily_mdd": -24.96,
+      "cagr_g1_2004_2014": 43.29,
+      "cagr_g2_2015_2026": 37.08,
+      "daily_mdd": -29.6,
       "monthly_mdd": -21.99,
-      "sharpe": 1.28,
-      "calmar": 2.11
+      "sharpe": 1.26,
+      "calmar": 1.84
     },
     "gatekeeper_rules": [
       "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
@@ -27591,7 +27591,7 @@
       "io_20": 0.006,
       "io_60": -0.033,
       "io_5": 0.007,
-      "io_accel": 0.006,
+      "io_accel": 0.005,
       "vol_60d": 0.18,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -27619,7 +27619,7 @@
       "sniper_score": 0.1833,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 12797893454.967817
+      "avg_dv60": 12797633236.338799
     },
     "ABBV": {
       "ticker": "ABBV",
@@ -27681,7 +27681,7 @@
       "sniper_score": 0.3107,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1209449436.0331604
+      "avg_dv60": 1209453633.3010356
     },
     "ABEV": {
       "ticker": "ABEV",
@@ -27743,7 +27743,7 @@
       "sniper_score": 0.0344,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 80723413.98134486
+      "avg_dv60": 80724085.0993665
     },
     "ABEV3.SA": {
       "ticker": "ABEV3.SA",
@@ -27805,7 +27805,7 @@
       "sniper_score": 0.0866,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 526266856.2807401
+      "avg_dv60": 526267488.9474233
     },
     "ABEV3": {
       "ticker": "ABEV3.SA",
@@ -27867,7 +27867,7 @@
       "sniper_score": 0.0866,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 526266856.2807401
+      "avg_dv60": 526267488.9474233
     },
     "ABNB": {
       "ticker": "ABNB",
@@ -27898,10 +27898,10 @@
       "fip": 0.06,
       "fip_126": -0.02,
       "fip_60": 0.05,
-      "io_20": 0.014,
-      "io_60": -0.065,
-      "io_5": -0.052,
-      "io_accel": -0.056,
+      "io_20": 0.017,
+      "io_60": -0.063,
+      "io_5": -0.05,
+      "io_accel": -0.054,
       "vol_60d": 0.32,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -27920,16 +27920,16 @@
       "rebound_20d": 3.6,
       "pead_jump_63d": 17.4,
       "convexity": 0.79,
-      "vcp": 0.79,
+      "vcp": 0.78,
       "chip": 0.17,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -1.12,
-      "score": 0.1297,
-      "sniper_score": 0.1297,
+      "score": 0.1298,
+      "sniper_score": 0.1298,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 759122799.8015844
+      "avg_dv60": 759781329.7001394
     },
     "ABT": {
       "ticker": "ABT",
@@ -27991,7 +27991,7 @@
       "sniper_score": -0.0431,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 903040552.5854752
+      "avg_dv60": 903040775.6054688
     },
     "ACN": {
       "ticker": "ACN",
@@ -28053,7 +28053,7 @@
       "sniper_score": 0.3272,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1244057726.624644
+      "avg_dv60": 1244069842.3841858
     },
     "ADBE": {
       "ticker": "ADBE",
@@ -28115,7 +28115,7 @@
       "sniper_score": -0.1164,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1185507817.024442
+      "avg_dv60": 1185891461.3128917
     },
     "ADI": {
       "ticker": "ADI",
@@ -28148,7 +28148,7 @@
       "fip_60": 0.25,
       "io_20": 0.201,
       "io_60": 0.087,
-      "io_5": 0.076,
+      "io_5": 0.075,
       "io_accel": 0.025,
       "vol_60d": 0.32,
       "open_pool_quality_ok": true,
@@ -28177,7 +28177,7 @@
       "sniper_score": 0.5281,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1328503933.617808
+      "avg_dv60": 1328509773.157603
     },
     "ADP": {
       "ticker": "ADP",
@@ -28208,10 +28208,10 @@
       "fip": -0.01,
       "fip_126": -0.01,
       "fip_60": 0.03,
-      "io_20": -0.019,
-      "io_60": 0.053,
-      "io_5": -0.079,
-      "io_accel": -0.074,
+      "io_20": -0.016,
+      "io_60": 0.057,
+      "io_5": -0.075,
+      "io_accel": -0.072,
       "vol_60d": 0.25,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -28235,11 +28235,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.45,
       "sortino_60": 2.46,
-      "score": 0.143,
-      "sniper_score": 0.143,
+      "score": 0.1431,
+      "sniper_score": 0.1431,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 577315834.6263973
+      "avg_dv60": 577478019.6123759
     },
     "ADSK": {
       "ticker": "ADSK",
@@ -28270,10 +28270,10 @@
       "fip": 0.04,
       "fip_126": 0.0,
       "fip_60": -0.07,
-      "io_20": 0.098,
-      "io_60": 0.237,
-      "io_5": 0.04,
-      "io_accel": 0.016,
+      "io_20": 0.096,
+      "io_60": 0.235,
+      "io_5": 0.039,
+      "io_accel": 0.015,
       "vol_60d": 0.44,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -28301,7 +28301,7 @@
       "sniper_score": -0.0201,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 468300213.0338145
+      "avg_dv60": 468300279.5964813
     },
     "AEP": {
       "ticker": "AEP",
@@ -28363,7 +28363,7 @@
       "sniper_score": 0.0673,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 446361899.01553804
+      "avg_dv60": 446363274.90127563
     },
     "AIR.DE": {
       "ticker": "AIR.DE",
@@ -28394,10 +28394,10 @@
       "fip": -0.08,
       "fip_126": -0.02,
       "fip_60": -0.18,
-      "io_20": 0.025,
-      "io_60": -0.069,
-      "io_5": -0.028,
-      "io_accel": -0.034,
+      "io_20": 0.005,
+      "io_60": -0.089,
+      "io_5": -0.048,
+      "io_accel": -0.049,
       "vol_60d": 0.2,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -28421,11 +28421,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -2.69,
-      "score": -0.0674,
-      "sniper_score": -0.0674,
+      "score": -0.0673,
+      "sniper_score": -0.0673,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 42775028.57544544
+      "avg_dv60": 42775057.44960556
     },
     "AIR": {
       "ticker": "AIR.DE",
@@ -28456,10 +28456,10 @@
       "fip": -0.08,
       "fip_126": -0.02,
       "fip_60": -0.18,
-      "io_20": 0.025,
-      "io_60": -0.069,
-      "io_5": -0.028,
-      "io_accel": -0.034,
+      "io_20": 0.005,
+      "io_60": -0.089,
+      "io_5": -0.048,
+      "io_accel": -0.049,
       "vol_60d": 0.2,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -28483,11 +28483,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -2.69,
-      "score": -0.0674,
-      "sniper_score": -0.0674,
+      "score": -0.0673,
+      "sniper_score": -0.0673,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 42775028.57544544
+      "avg_dv60": 42775057.44960556
     },
     "ALV.DE": {
       "ticker": "ALV.DE",
@@ -28518,10 +28518,10 @@
       "fip": 0.22,
       "fip_126": 0.32,
       "fip_60": 0.23,
-      "io_20": 0.049,
-      "io_60": -0.016,
-      "io_5": 0.07,
-      "io_accel": 0.058,
+      "io_20": -0.017,
+      "io_60": -0.081,
+      "io_5": 0.005,
+      "io_accel": 0.009,
       "vol_60d": 0.18,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -28533,9 +28533,9 @@
       "whale_1000_pct": null,
       "whale_400_pct": null,
       "whale_scissors_pct": null,
-      "sniper_mult": 1.092,
-      "sniper_tag": "🎯高純度FIP(0.32)×近週吸籌(+5%) × 🔄月線洗盤回勾(+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🎯高純度FIP(0.32)×近週吸籌(+5%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.09）",
+      "sniper_mult": 1.0,
+      "sniper_tag": "",
+      "sniper_desc": "",
       "pb_depth_60": 9.5,
       "rebound_20d": 6.7,
       "pead_jump_63d": 0.0,
@@ -28545,11 +28545,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": 0.46,
-      "score": 0.1706,
-      "sniper_score": 0.1863,
+      "score": 0.1698,
+      "sniper_score": 0.1698,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 202010089.0813509
+      "avg_dv60": 202010374.3221527
     },
     "ALV": {
       "ticker": "ALV.DE",
@@ -28580,10 +28580,10 @@
       "fip": 0.22,
       "fip_126": 0.32,
       "fip_60": 0.23,
-      "io_20": 0.049,
-      "io_60": -0.016,
-      "io_5": 0.07,
-      "io_accel": 0.058,
+      "io_20": -0.017,
+      "io_60": -0.081,
+      "io_5": 0.005,
+      "io_accel": 0.009,
       "vol_60d": 0.18,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -28595,9 +28595,9 @@
       "whale_1000_pct": null,
       "whale_400_pct": null,
       "whale_scissors_pct": null,
-      "sniper_mult": 1.092,
-      "sniper_tag": "🎯高純度FIP(0.32)×近週吸籌(+5%) × 🔄月線洗盤回勾(+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🎯高純度FIP(0.32)×近週吸籌(+5%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.09）",
+      "sniper_mult": 1.0,
+      "sniper_tag": "",
+      "sniper_desc": "",
       "pb_depth_60": 9.5,
       "rebound_20d": 6.7,
       "pead_jump_63d": 0.0,
@@ -28607,11 +28607,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": 0.46,
-      "score": 0.1706,
-      "sniper_score": 0.1863,
+      "score": 0.1698,
+      "sniper_score": 0.1698,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 202010089.0813509
+      "avg_dv60": 202010374.3221527
     },
     "AMAT": {
       "ticker": "AMAT",
@@ -28642,10 +28642,10 @@
       "fip": 0.13,
       "fip_126": 0.03,
       "fip_60": -0.12,
-      "io_20": 0.069,
-      "io_60": -0.007,
-      "io_5": 0.098,
-      "io_accel": 0.081,
+      "io_20": 0.076,
+      "io_60": -0.0,
+      "io_5": 0.105,
+      "io_accel": 0.086,
       "vol_60d": 0.52,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -28658,8 +28658,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+8.1%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+8.1%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+8.6%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+8.6%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 33.8,
       "rebound_20d": 4.6,
       "pead_jump_63d": 6.5,
@@ -28669,11 +28669,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -2.93,
-      "score": 0.147,
-      "sniper_score": 0.1529,
+      "score": 0.1471,
+      "sniper_score": 0.153,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 3203434461.10862
+      "avg_dv60": 3203605814.6410117
     },
     "AMD": {
       "ticker": "AMD",
@@ -28705,7 +28705,7 @@
       "fip_126": 0.04,
       "fip_60": 0.1,
       "io_20": 0.264,
-      "io_60": 0.389,
+      "io_60": 0.388,
       "io_5": 0.144,
       "io_accel": 0.079,
       "vol_60d": 0.57,
@@ -28735,7 +28735,7 @@
       "sniper_score": 0.4657,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 10512286390.55245
+      "avg_dv60": 10512814663.739676
     },
     "AMGN": {
       "ticker": "AMGN",
@@ -28767,7 +28767,7 @@
       "fip_126": 0.09,
       "fip_60": 0.08,
       "io_20": 0.001,
-      "io_60": 0.099,
+      "io_60": 0.098,
       "io_5": -0.023,
       "io_accel": -0.023,
       "vol_60d": 0.33,
@@ -28797,7 +28797,7 @@
       "sniper_score": 0.2978,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1126232876.7598877
+      "avg_dv60": 1126233226.267395
     },
     "AMX": {
       "ticker": "AMX",
@@ -28859,7 +28859,7 @@
       "sniper_score": 0.0656,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 68500754.44383495
+      "avg_dv60": 68501440.69982211
     },
     "AMZN": {
       "ticker": "AMZN",
@@ -28921,7 +28921,7 @@
       "sniper_score": -0.0728,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 9188388931.467165
+      "avg_dv60": 9188884112.56724
     },
     "ANET": {
       "ticker": "ANET",
@@ -28983,7 +28983,7 @@
       "sniper_score": 0.0321,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1057667103.6172676
+      "avg_dv60": 1057679275.6089783
     },
     "APH": {
       "ticker": "APH",
@@ -29016,7 +29016,7 @@
       "fip_60": -0.02,
       "io_20": -0.059,
       "io_60": -0.355,
-      "io_5": -0.023,
+      "io_5": -0.024,
       "io_accel": -0.009,
       "vol_60d": 0.39,
       "open_pool_quality_ok": true,
@@ -29045,7 +29045,7 @@
       "sniper_score": 0.0035,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 952683426.4128317
+      "avg_dv60": 952797412.2372183
     },
     "ASML": {
       "ticker": "ASML",
@@ -29107,7 +29107,7 @@
       "sniper_score": 0.1499,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2313181544.455959
+      "avg_dv60": 2313492610.495809
     },
     "ASX": {
       "ticker": "ASX",
@@ -29169,7 +29169,7 @@
       "sniper_score": 0.7321,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 288159554.4624298
+      "avg_dv60": 288160111.4124298
     },
     "AVGO": {
       "ticker": "AVGO",
@@ -29231,7 +29231,7 @@
       "sniper_score": -0.1054,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 8055186446.620756
+      "avg_dv60": 8055459630.99884
     },
     "AXP": {
       "ticker": "AXP",
@@ -29293,7 +29293,7 @@
       "sniper_score": -0.0739,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 908033829.0821024
+      "avg_dv60": 908132806.362559
     },
     "AZN": {
       "ticker": "AZN",
@@ -29355,7 +29355,7 @@
       "sniper_score": 0.1888,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 514435977.47438914
+      "avg_dv60": 514711438.6462148
     },
     "AZO": {
       "ticker": "AZO",
@@ -29417,7 +29417,7 @@
       "sniper_score": -0.0354,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 820644445.766801
+      "avg_dv60": 820776363.1119791
     },
     "BA": {
       "ticker": "BA",
@@ -29479,7 +29479,7 @@
       "sniper_score": -0.0979,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 1482987748.855673
+      "avg_dv60": 1483009984.595235
     },
     "BABA": {
       "ticker": "BABA",
@@ -29541,7 +29541,7 @@
       "sniper_score": -0.2303,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1122787445.3060858
+      "avg_dv60": 1122811394.8443096
     },
     "BAC": {
       "ticker": "BAC",
@@ -29603,7 +29603,7 @@
       "sniper_score": -0.0731,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2038051365.1919641
+      "avg_dv60": 2038572924.465459
     },
     "BBD": {
       "ticker": "BBD",
@@ -29665,7 +29665,7 @@
       "sniper_score": -0.2198,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 151080957.15227872
+      "avg_dv60": 151081164.50977483
     },
     "BBDC4.SA": {
       "ticker": "BBDC4.SA",
@@ -29727,7 +29727,7 @@
       "sniper_score": -0.1941,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 1072453533.2264122
+      "avg_dv60": 1072487467.1255716
     },
     "BBDC4": {
       "ticker": "BBDC4.SA",
@@ -29789,7 +29789,7 @@
       "sniper_score": -0.1941,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 1072453533.2264122
+      "avg_dv60": 1072487467.1255716
     },
     "BIIB": {
       "ticker": "BIIB",
@@ -29851,7 +29851,7 @@
       "sniper_score": 0.5245,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 237973680.85980734
+      "avg_dv60": 237973955.61480203
     },
     "BKNG": {
       "ticker": "BKNG",
@@ -29913,7 +29913,7 @@
       "sniper_score": -0.1266,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1171743595.4312022
+      "avg_dv60": 1171767241.9176483
     },
     "BKR": {
       "ticker": "BKR",
@@ -29975,7 +29975,7 @@
       "sniper_score": 0.0222,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 419045929.1368155
+      "avg_dv60": 419671395.99463147
     },
     "BLK": {
       "ticker": "BLK",
@@ -30037,7 +30037,7 @@
       "sniper_score": 0.0568,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 647312968.5646647
+      "avg_dv60": 647314919.3827311
     },
     "BMY": {
       "ticker": "BMY",
@@ -30099,7 +30099,7 @@
       "sniper_score": 0.146,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 672592295.6110975
+      "avg_dv60": 672593466.0697556
     },
     "BRK-B": {
       "ticker": "BRK-B",
@@ -30161,7 +30161,7 @@
       "sniper_score": 0.1007,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2263665069.2259173
+      "avg_dv60": 2263720755.8234153
     },
     "BSX": {
       "ticker": "BSX",
@@ -30223,7 +30223,7 @@
       "sniper_score": -0.2423,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 883092679.5788424
+      "avg_dv60": 883093775.9564972
     },
     "BX": {
       "ticker": "BX",
@@ -30254,7 +30254,7 @@
       "fip": -0.05,
       "fip_126": -0.05,
       "fip_60": -0.08,
-      "io_20": 0.094,
+      "io_20": 0.093,
       "io_60": -0.049,
       "io_5": -0.007,
       "io_accel": -0.03,
@@ -30285,7 +30285,7 @@
       "sniper_score": -0.1056,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 562394402.7751191
+      "avg_dv60": 562408094.6306992
     },
     "C": {
       "ticker": "C",
@@ -30347,7 +30347,7 @@
       "sniper_score": 0.0393,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1179112986.9290493
+      "avg_dv60": 1179127830.4569752
     },
     "CAT": {
       "ticker": "CAT",
@@ -30409,7 +30409,7 @@
       "sniper_score": -0.0889,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2035468351.1060913
+      "avg_dv60": 2037151467.910258
     },
     "CB": {
       "ticker": "CB",
@@ -30471,7 +30471,7 @@
       "sniper_score": 0.1711,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 548478730.9958272
+      "avg_dv60": 548479101.1844889
     },
     "CDNS": {
       "ticker": "CDNS",
@@ -30502,10 +30502,10 @@
       "fip": -0.0,
       "fip_126": -0.03,
       "fip_60": 0.02,
-      "io_20": 0.021,
-      "io_60": -0.045,
-      "io_5": 0.076,
-      "io_accel": 0.071,
+      "io_20": 0.022,
+      "io_60": -0.044,
+      "io_5": 0.077,
+      "io_accel": 0.072,
       "vol_60d": 0.41,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -30533,7 +30533,7 @@
       "sniper_score": -0.0179,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 765805883.168335
+      "avg_dv60": 765806528.0186971
     },
     "CEG": {
       "ticker": "CEG",
@@ -30595,7 +30595,7 @@
       "sniper_score": -0.1135,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 871331267.3410045
+      "avg_dv60": 871343887.8192393
     },
     "CHTR": {
       "ticker": "CHTR",
@@ -30657,7 +30657,7 @@
       "sniper_score": -0.2588,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 362217720.19048727
+      "avg_dv60": 362218075.10031384
     },
     "CIEN": {
       "ticker": "CIEN",
@@ -30719,7 +30719,7 @@
       "sniper_score": 0.1237,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 991773029.0713155
+      "avg_dv60": 991782415.4766846
     },
     "CMCSA": {
       "ticker": "CMCSA",
@@ -30751,7 +30751,7 @@
       "fip_126": 0.0,
       "fip_60": -0.1,
       "io_20": 0.035,
-      "io_60": -0.115,
+      "io_60": -0.116,
       "io_5": -0.017,
       "io_accel": -0.026,
       "vol_60d": 0.31,
@@ -30781,7 +30781,7 @@
       "sniper_score": -0.031,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 652717384.9236608
+      "avg_dv60": 652719773.4875902
     },
     "CMG": {
       "ticker": "CMG",
@@ -30843,7 +30843,7 @@
       "sniper_score": 0.0036,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 577930249.2459143
+      "avg_dv60": 577930999.1924
     },
     "CMI": {
       "ticker": "CMI",
@@ -30905,7 +30905,7 @@
       "sniper_score": -0.0497,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 563364964.306752
+      "avg_dv60": 563365539.4102478
     },
     "COF": {
       "ticker": "COF",
@@ -30967,7 +30967,7 @@
       "sniper_score": -0.0466,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 718071635.9765753
+      "avg_dv60": 718076767.4692281
     },
     "COHR": {
       "ticker": "COHR",
@@ -31029,7 +31029,7 @@
       "sniper_score": -0.04,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2022156151.8803344
+      "avg_dv60": 2022305415.9895325
     },
     "COP": {
       "ticker": "COP",
@@ -31091,7 +31091,7 @@
       "sniper_score": 0.5639,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 850349526.8005472
+      "avg_dv60": 851742461.1541748
     },
     "COST": {
       "ticker": "COST",
@@ -31122,10 +31122,10 @@
       "fip": -0.01,
       "fip_126": -0.01,
       "fip_60": 0.07,
-      "io_20": -0.059,
-      "io_60": -0.052,
-      "io_5": -0.019,
-      "io_accel": -0.004,
+      "io_20": -0.057,
+      "io_60": -0.05,
+      "io_5": -0.017,
+      "io_accel": -0.003,
       "vol_60d": 0.18,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -31153,7 +31153,7 @@
       "sniper_score": 0.0877,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1936017333.0127563
+      "avg_dv60": 1937321318.4038289
     },
     "CPRT": {
       "ticker": "CPRT",
@@ -31184,10 +31184,10 @@
       "fip": -0.07,
       "fip_126": -0.1,
       "fip_60": -0.15,
-      "io_20": 0.05,
-      "io_60": 0.01,
+      "io_20": 0.049,
+      "io_60": 0.009,
       "io_5": 0.015,
-      "io_accel": 0.003,
+      "io_accel": 0.002,
       "vol_60d": 0.39,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -31215,7 +31215,7 @@
       "sniper_score": -0.11,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 321471532.0865552
+      "avg_dv60": 321471858.4948794
     },
     "CRM": {
       "ticker": "CRM",
@@ -31277,7 +31277,7 @@
       "sniper_score": 0.0429,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2744950809.3376474
+      "avg_dv60": 2744976533.6699424
     },
     "CRWD": {
       "ticker": "CRWD",
@@ -31339,7 +31339,7 @@
       "sniper_score": 0.4889,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2316083967.2000527
+      "avg_dv60": 2316166997.2641244
     },
     "CSCO": {
       "ticker": "CSCO",
@@ -31401,7 +31401,7 @@
       "sniper_score": 0.1068,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1959359677.0031521
+      "avg_dv60": 1959363198.9902241
     },
     "CSGP": {
       "ticker": "CSGP",
@@ -31432,10 +31432,10 @@
       "fip": -0.11,
       "fip_126": -0.17,
       "fip_60": -0.18,
-      "io_20": 0.025,
-      "io_60": -0.025,
-      "io_5": -0.046,
-      "io_accel": -0.053,
+      "io_20": 0.026,
+      "io_60": -0.023,
+      "io_5": -0.045,
+      "io_accel": -0.052,
       "vol_60d": 0.58,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -31463,7 +31463,7 @@
       "sniper_score": -0.1342,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 197868488.73802683
+      "avg_dv60": 197868512.37119356
     },
     "CSX": {
       "ticker": "CSX",
@@ -31494,10 +31494,10 @@
       "fip": 0.12,
       "fip_126": 0.02,
       "fip_60": 0.0,
-      "io_20": -0.033,
-      "io_60": -0.073,
-      "io_5": -0.021,
-      "io_accel": -0.013,
+      "io_20": -0.036,
+      "io_60": -0.075,
+      "io_5": -0.024,
+      "io_accel": -0.015,
       "vol_60d": 0.21,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -31525,7 +31525,7 @@
       "sniper_score": 0.3074,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 503273312.4108168
+      "avg_dv60": 503412206.2998009
     },
     "CTAS": {
       "ticker": "CTAS",
@@ -31587,7 +31587,7 @@
       "sniper_score": 0.1527,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 391566925.3372182
+      "avg_dv60": 391656487.3355357
     },
     "CTSH": {
       "ticker": "CTSH",
@@ -31649,7 +31649,7 @@
       "sniper_score": 0.0453,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 419810438.7079577
+      "avg_dv60": 419811858.10597104
     },
     "CVS": {
       "ticker": "CVS",
@@ -31711,7 +31711,7 @@
       "sniper_score": 0.0252,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 688318629.8390539
+      "avg_dv60": 688319057.0223871
     },
     "CVX": {
       "ticker": "CVX",
@@ -31773,7 +31773,7 @@
       "sniper_score": 0.4659,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1745312553.5351806
+      "avg_dv60": 1745326826.0474396
     },
     "CX": {
       "ticker": "CX",
@@ -31835,7 +31835,7 @@
       "sniper_score": 0.0123,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 73425268.80372277
+      "avg_dv60": 73425270.94372272
     },
     "DASH": {
       "ticker": "DASH",
@@ -31897,7 +31897,7 @@
       "sniper_score": -0.0612,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 811525097.1756688
+      "avg_dv60": 811529864.2761484
     },
     "DE": {
       "ticker": "DE",
@@ -31959,7 +31959,7 @@
       "sniper_score": 0.2672,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 796923017.1685954
+      "avg_dv60": 796923084.7165934
     },
     "DELL": {
       "ticker": "DELL",
@@ -32021,7 +32021,7 @@
       "sniper_score": 0.9233,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 3870416161.9617696
+      "avg_dv60": 3870486468.469747
     },
     "DHR": {
       "ticker": "DHR",
@@ -32083,7 +32083,7 @@
       "sniper_score": 0.143,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 862259648.2471657
+      "avg_dv60": 862279097.5093079
     },
     "DIS": {
       "ticker": "DIS",
@@ -32145,7 +32145,7 @@
       "sniper_score": 0.0511,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 843672882.6373113
+      "avg_dv60": 844038993.8903681
     },
     "DLTR": {
       "ticker": "DLTR",
@@ -32207,7 +32207,7 @@
       "sniper_score": 0.1902,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 289366354.9009506
+      "avg_dv60": 289429066.30016327
     },
     "DTG.DE": {
       "ticker": "DTG.DE",
@@ -32238,10 +32238,10 @@
       "fip": -0.06,
       "fip_126": -0.06,
       "fip_60": -0.08,
-      "io_20": 0.062,
-      "io_60": -0.152,
-      "io_5": 0.047,
-      "io_accel": 0.032,
+      "io_20": 0.034,
+      "io_60": -0.18,
+      "io_5": 0.019,
+      "io_accel": 0.011,
       "vol_60d": 0.19,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -32265,11 +32265,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -3.64,
-      "score": 0.0264,
-      "sniper_score": 0.0264,
+      "score": 0.0263,
+      "sniper_score": 0.0263,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 45312391.75659069
+      "avg_dv60": 45314943.763721846
     },
     "DTG": {
       "ticker": "DTG.DE",
@@ -32300,10 +32300,10 @@
       "fip": -0.06,
       "fip_126": -0.06,
       "fip_60": -0.08,
-      "io_20": 0.062,
-      "io_60": -0.152,
-      "io_5": 0.047,
-      "io_accel": 0.032,
+      "io_20": 0.034,
+      "io_60": -0.18,
+      "io_5": 0.019,
+      "io_accel": 0.011,
       "vol_60d": 0.19,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -32327,11 +32327,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -3.64,
-      "score": 0.0264,
-      "sniper_score": 0.0264,
+      "score": 0.0263,
+      "sniper_score": 0.0263,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 45312391.75659069
+      "avg_dv60": 45314943.763721846
     },
     "DXCM": {
       "ticker": "DXCM",
@@ -32393,69 +32393,7 @@
       "sniper_score": 0.1647,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 361742097.53896904
-    },
-    "EA": {
-      "ticker": "EA",
-      "price": 209.7,
-      "price_date": "2026-08-04",
-      "ma20": 209.7,
-      "ma60": 209.7,
-      "ma200": 209.7,
-      "mom_2w": 0.0,
-      "mom_1m": 0.0,
-      "mom_3m": null,
-      "mom_12m": null,
-      "bias_ma60": 0.0,
-      "prox_52w": 100.0,
-      "winrate_tag": "🎯 黃金蓄勢突破",
-      "winrate_desc": "長線大牛 + 2W橫盤蓄勢未透支 + 季線甜蜜區，實證兩週勝率 57.4%，中位數報酬 +1.58%",
-      "winrate_grade": "golden",
-      "mom_1d": 0.0,
-      "mom_5d": 0.0,
-      "pullback_prob_3d": 47.4,
-      "pullback_prob_5d": 57.9,
-      "gap_limit_cap_price": 212.85,
-      "micro_dip_price": 209.28,
-      "smart_entry_mode": "open_with_gap_cap",
-      "smart_entry_tag": "🟢 開盤直買・跳空>1.5%掛 209.28",
-      "smart_entry_price": 209.7,
-      "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 212.85 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (209.28) 等 2 天。",
-      "fip": 0.1,
-      "fip_126": 0.1,
-      "fip_60": 0.1,
-      "io_20": 0.0,
-      "io_60": 0.0,
-      "io_5": 0.0,
-      "io_accel": 0.0,
-      "vol_60d": 0.35,
-      "open_pool_quality_ok": false,
-      "ma20_reclaim": false,
-      "pocket_pivot_40": 0.0,
-      "pe_ratio": null,
-      "pb_ratio": null,
-      "roe_pct": null,
-      "trust_20d_pct": 0.0,
-      "whale_1000_pct": null,
-      "whale_400_pct": null,
-      "whale_scissors_pct": null,
-      "sniper_mult": 1.0,
-      "sniper_tag": "",
-      "sniper_desc": "",
-      "pb_depth_60": 0.1,
-      "rebound_20d": 0.0,
-      "pead_jump_63d": 0.0,
-      "convexity": 1.0,
-      "vcp": 0.86,
-      "chip": 0.17,
-      "rd_pct": 0.0,
-      "sustain_20d": 0.0,
-      "sortino_60": 0.0,
-      "score": null,
-      "sniper_score": null,
-      "churn_safe": true,
-      "liq_ok": true,
-      "avg_dv60": 10155902901.3
+      "avg_dv60": 361742109.8824692
     },
     "EQIX": {
       "ticker": "EQIX",
@@ -32486,10 +32424,10 @@
       "fip": 0.01,
       "fip_126": 0.0,
       "fip_60": 0.08,
-      "io_20": -0.146,
-      "io_60": -0.258,
-      "io_5": -0.052,
-      "io_accel": -0.016,
+      "io_20": -0.143,
+      "io_60": -0.254,
+      "io_5": -0.049,
+      "io_accel": -0.014,
       "vol_60d": 0.26,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -32509,7 +32447,7 @@
       "pead_jump_63d": 0.0,
       "convexity": 0.95,
       "vcp": 0.54,
-      "chip": 0.17,
+      "chip": 0.16,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -0.33,
@@ -32517,7 +32455,7 @@
       "sniper_score": 0.1014,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 544501923.3373007
+      "avg_dv60": 544603293.3385214
     },
     "ERIC": {
       "ticker": "ERIC",
@@ -32579,7 +32517,7 @@
       "sniper_score": 0.1735,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 96698275.63186328
+      "avg_dv60": 96698285.88019688
     },
     "ETN": {
       "ticker": "ETN",
@@ -32641,7 +32579,7 @@
       "sniper_score": -0.0848,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 860749099.893603
+      "avg_dv60": 860756530.1244608
     },
     "EXC": {
       "ticker": "EXC",
@@ -32703,7 +32641,7 @@
       "sniper_score": 0.0395,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 320542052.310594
+      "avg_dv60": 320594670.09442014
     },
     "F": {
       "ticker": "F",
@@ -32765,7 +32703,7 @@
       "sniper_score": -0.0647,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 559154424.0121028
+      "avg_dv60": 559265138.8996029
     },
     "FANG": {
       "ticker": "FANG",
@@ -32827,7 +32765,7 @@
       "sniper_score": 0.3046,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 461811524.99275845
+      "avg_dv60": 461811726.4687602
     },
     "FAST": {
       "ticker": "FAST",
@@ -32858,10 +32796,10 @@
       "fip": 0.1,
       "fip_126": 0.1,
       "fip_60": 0.08,
-      "io_20": 0.104,
-      "io_60": 0.085,
-      "io_5": -0.032,
-      "io_accel": -0.058,
+      "io_20": 0.1,
+      "io_60": 0.081,
+      "io_5": -0.035,
+      "io_accel": -0.06,
       "vol_60d": 0.2,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -32889,7 +32827,7 @@
       "sniper_score": 0.1795,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 369129645.64657974
+      "avg_dv60": 369129822.1405792
     },
     "FCX": {
       "ticker": "FCX",
@@ -32951,7 +32889,7 @@
       "sniper_score": 0.1957,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 861286298.1800145
+      "avg_dv60": 861315696.562589
     },
     "FICO": {
       "ticker": "FICO",
@@ -33013,7 +32951,7 @@
       "sniper_score": -0.2809,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 579430476.6261556
+      "avg_dv60": 579476671.0133871
     },
     "FIX": {
       "ticker": "FIX",
@@ -33075,7 +33013,7 @@
       "sniper_score": -0.0304,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 629803222.7218689
+      "avg_dv60": 629881229.5576986
     },
     "FMX": {
       "ticker": "FMX",
@@ -33137,7 +33075,7 @@
       "sniper_score": 0.2146,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 60572528.692957684
+      "avg_dv60": 60572488.761291504
     },
     "FTNT": {
       "ticker": "FTNT",
@@ -33168,9 +33106,9 @@
       "fip": 0.07,
       "fip_126": 0.07,
       "fip_60": -0.08,
-      "io_20": 0.394,
-      "io_60": 0.593,
-      "io_5": 0.333,
+      "io_20": 0.393,
+      "io_60": 0.592,
+      "io_5": 0.332,
       "io_accel": 0.234,
       "vol_60d": 0.62,
       "open_pool_quality_ok": true,
@@ -33199,7 +33137,7 @@
       "sniper_score": 0.1581,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 732780889.6595601
+      "avg_dv60": 732788773.2276663
     },
     "GE": {
       "ticker": "GE",
@@ -33261,7 +33199,7 @@
       "sniper_score": -0.0884,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1394236307.32582
+      "avg_dv60": 1394248308.9053345
     },
     "GEHC": {
       "ticker": "GEHC",
@@ -33309,8 +33247,8 @@
       "whale_scissors_pct": null,
       "sniper_mult": 1.0,
       "sniper_tag": "🕳️ 深V黃金坑轉折 (彈+20.9%)",
-      "sniper_desc": "60D曾洗盤回檔 -19.0% 挖出黃金坑，近20D強彈 +20.9% 且日內主力吸籌 IO_20=+0.00",
-      "pb_depth_60": 19.0,
+      "sniper_desc": "60D曾洗盤回檔 -19.1% 挖出黃金坑，近20D強彈 +20.9% 且日內主力吸籌 IO_20=+0.00",
+      "pb_depth_60": 19.1,
       "rebound_20d": 20.9,
       "pead_jump_63d": 6.6,
       "convexity": 1.72,
@@ -33323,7 +33261,7 @@
       "sniper_score": 0.0733,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 233199641.89124516
+      "avg_dv60": 233199732.49907812
     },
     "GEV": {
       "ticker": "GEV",
@@ -33385,7 +33323,7 @@
       "sniper_score": 0.1328,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2258389590.863792
+      "avg_dv60": 2258463210.407206
     },
     "GFS": {
       "ticker": "GFS",
@@ -33447,7 +33385,7 @@
       "sniper_score": 0.0101,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 216592535.38781267
+      "avg_dv60": 216596202.33627954
     },
     "GILD": {
       "ticker": "GILD",
@@ -33478,10 +33416,10 @@
       "fip": 0.03,
       "fip_126": 0.02,
       "fip_60": 0.15,
-      "io_20": 0.049,
-      "io_60": 0.299,
-      "io_5": 0.027,
-      "io_accel": 0.015,
+      "io_20": 0.046,
+      "io_60": 0.296,
+      "io_5": 0.024,
+      "io_accel": 0.013,
       "vol_60d": 0.26,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -33505,11 +33443,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.65,
       "sortino_60": 8.13,
-      "score": 0.3917,
-      "sniper_score": 0.4074,
+      "score": 0.3916,
+      "sniper_score": 0.4073,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 860109840.9724029
+      "avg_dv60": 860284315.7502493
     },
     "GLW": {
       "ticker": "GLW",
@@ -33571,7 +33509,7 @@
       "sniper_score": 0.0484,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1284932506.6482189
+      "avg_dv60": 1285122219.0794628
     },
     "GM": {
       "ticker": "GM",
@@ -33633,7 +33571,7 @@
       "sniper_score": 0.1295,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 582191400.6325175
+      "avg_dv60": 582195566.6992569
     },
     "GOOG": {
       "ticker": "GOOG",
@@ -33664,9 +33602,9 @@
       "fip": -0.04,
       "fip_126": -0.08,
       "fip_60": -0.02,
-      "io_20": 0.034,
-      "io_60": -0.054,
-      "io_5": 0.107,
+      "io_20": 0.033,
+      "io_60": -0.055,
+      "io_5": 0.106,
       "io_accel": 0.098,
       "vol_60d": 0.33,
       "open_pool_quality_ok": true,
@@ -33695,7 +33633,7 @@
       "sniper_score": -0.1043,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 5883158109.497878
+      "avg_dv60": 5883816568.137767
     },
     "GOOGL": {
       "ticker": "GOOGL",
@@ -33729,7 +33667,7 @@
       "io_20": 0.033,
       "io_60": -0.071,
       "io_5": 0.101,
-      "io_accel": 0.093,
+      "io_accel": 0.092,
       "vol_60d": 0.33,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -33757,7 +33695,7 @@
       "sniper_score": -0.0965,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 8799335883.912123
+      "avg_dv60": 8800240308.124289
     },
     "GS": {
       "ticker": "GS",
@@ -33819,7 +33757,7 @@
       "sniper_score": -0.0001,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1956315745.1432974
+      "avg_dv60": 1956550102.3309326
     },
     "HCA": {
       "ticker": "HCA",
@@ -33881,7 +33819,7 @@
       "sniper_score": 0.1144,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 567016229.6210785
+      "avg_dv60": 567044076.8527222
     },
     "HD": {
       "ticker": "HD",
@@ -33943,7 +33881,7 @@
       "sniper_score": -0.0326,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1380616972.6055257
+      "avg_dv60": 1380620418.23232
     },
     "HLT": {
       "ticker": "HLT",
@@ -34005,7 +33943,7 @@
       "sniper_score": 0.2432,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 577287486.7934341
+      "avg_dv60": 577287385.666097
     },
     "HON": {
       "ticker": "HON",
@@ -34067,7 +34005,7 @@
       "sniper_score": -0.0158,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 597506515.6809934
+      "avg_dv60": 597893043.4774017
     },
     "HOOD": {
       "ticker": "HOOD",
@@ -34129,7 +34067,7 @@
       "sniper_score": -0.2539,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2222207565.927882
+      "avg_dv60": 2222288863.1103387
     },
     "HPE": {
       "ticker": "HPE",
@@ -34191,7 +34129,7 @@
       "sniper_score": 0.6549,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1205373130.78376
+      "avg_dv60": 1205477071.841548
     },
     "HWM": {
       "ticker": "HWM",
@@ -34253,7 +34191,7 @@
       "sniper_score": -0.1332,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 763136587.3321533
+      "avg_dv60": 765110027.4609121
     },
     "IBM": {
       "ticker": "IBM",
@@ -34307,7 +34245,7 @@
       "pead_jump_63d": 0.0,
       "convexity": 1.21,
       "vcp": 0.71,
-      "chip": 0.25,
+      "chip": 0.24,
       "rd_pct": 0.0,
       "sustain_20d": 0.4,
       "sortino_60": 2.33,
@@ -34315,7 +34253,7 @@
       "sniper_score": -0.0138,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1262508157.5880787
+      "avg_dv60": 1263239843.8453166
     },
     "IDXX": {
       "ticker": "IDXX",
@@ -34377,7 +34315,7 @@
       "sniper_score": -0.0543,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 278684048.2180786
+      "avg_dv60": 279161745.19678754
     },
     "ILMN": {
       "ticker": "ILMN",
@@ -34408,10 +34346,10 @@
       "fip": 0.06,
       "fip_126": 0.13,
       "fip_60": 0.17,
-      "io_20": 0.183,
-      "io_60": 0.639,
-      "io_5": 0.169,
-      "io_accel": 0.123,
+      "io_20": 0.169,
+      "io_60": 0.625,
+      "io_5": 0.155,
+      "io_accel": 0.113,
       "vol_60d": 0.65,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -34424,8 +34362,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+12.3%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+12.3%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+11.3%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+11.3%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 25.3,
       "rebound_20d": 2.1,
       "pead_jump_63d": 7.6,
@@ -34435,11 +34373,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.05,
       "sortino_60": 2.22,
-      "score": 0.715,
-      "sniper_score": 0.7436,
+      "score": 0.7142,
+      "sniper_score": 0.7428,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 680954111.3913485
+      "avg_dv60": 680963138.0090586
     },
     "ING": {
       "ticker": "ING",
@@ -34501,7 +34439,7 @@
       "sniper_score": 0.1033,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 73672258.59545708
+      "avg_dv60": 73672319.94245529
     },
     "INTC": {
       "ticker": "INTC",
@@ -34534,7 +34472,7 @@
       "fip_60": -0.05,
       "io_20": 0.271,
       "io_60": 0.397,
-      "io_5": 0.229,
+      "io_5": 0.228,
       "io_accel": 0.161,
       "vol_60d": 0.84,
       "open_pool_quality_ok": true,
@@ -34563,7 +34501,7 @@
       "sniper_score": 0.0924,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 10655545845.15616
+      "avg_dv60": 10659203059.178965
     },
     "INTU": {
       "ticker": "INTU",
@@ -34625,7 +34563,7 @@
       "sniper_score": -0.1379,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1162557463.0618231
+      "avg_dv60": 1162558617.0829773
     },
     "ISRG": {
       "ticker": "ISRG",
@@ -34663,7 +34601,7 @@
       "vol_60d": 0.3,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
-      "pocket_pivot_40": 0.3,
+      "pocket_pivot_40": 0.25,
       "pe_ratio": null,
       "pb_ratio": null,
       "roe_pct": null,
@@ -34687,7 +34625,7 @@
       "sniper_score": -0.0398,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 933270292.4564372
+      "avg_dv60": 934951257.8047689
     },
     "ITUB": {
       "ticker": "ITUB",
@@ -34749,7 +34687,7 @@
       "sniper_score": -0.0516,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 269302824.2032726
+      "avg_dv60": 269302917.13094074
     },
     "ITUB4.SA": {
       "ticker": "ITUB4.SA",
@@ -34811,7 +34749,7 @@
       "sniper_score": -0.0045,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 1461545103.4264183
+      "avg_dv60": 1461569800.5422084
     },
     "ITUB4": {
       "ticker": "ITUB4.SA",
@@ -34873,7 +34811,7 @@
       "sniper_score": -0.0045,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 1461545103.4264183
+      "avg_dv60": 1461569800.5422084
     },
     "JNJ": {
       "ticker": "JNJ",
@@ -34935,7 +34873,7 @@
       "sniper_score": 0.2594,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1786836534.1837137
+      "avg_dv60": 1786840236.0438793
     },
     "JPM": {
       "ticker": "JPM",
@@ -34989,7 +34927,7 @@
       "pead_jump_63d": 0.0,
       "convexity": 0.64,
       "vcp": 0.74,
-      "chip": 0.15,
+      "chip": 0.14,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -1.64,
@@ -34997,7 +34935,7 @@
       "sniper_score": 0.0183,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2351533956.4444203
+      "avg_dv60": 2351954705.956421
     },
     "KDP": {
       "ticker": "KDP",
@@ -35059,7 +34997,7 @@
       "sniper_score": 0.2959,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 378858164.0295784
+      "avg_dv60": 378858183.14424515
     },
     "KHC": {
       "ticker": "KHC",
@@ -35121,7 +35059,7 @@
       "sniper_score": 0.0217,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 407381488.78919286
+      "avg_dv60": 407381955.3058624
     },
     "KKR": {
       "ticker": "KKR",
@@ -35183,7 +35121,7 @@
       "sniper_score": -0.1288,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 458902270.71850765
+      "avg_dv60": 459003725.8093516
     },
     "KLAC": {
       "ticker": "KLAC",
@@ -35214,10 +35152,10 @@
       "fip": 0.09,
       "fip_126": -0.03,
       "fip_60": -0.12,
-      "io_20": 0.013,
-      "io_60": -0.139,
-      "io_5": 0.048,
-      "io_accel": 0.045,
+      "io_20": 0.01,
+      "io_60": -0.142,
+      "io_5": 0.045,
+      "io_accel": 0.043,
       "vol_60d": 0.5,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -35245,7 +35183,7 @@
       "sniper_score": 0.0304,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1776007855.3009212
+      "avg_dv60": 1776033981.511027
     },
     "KO": {
       "ticker": "KO",
@@ -35307,7 +35245,7 @@
       "sniper_score": 0.2382,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1368014422.780022
+      "avg_dv60": 1368023543.8361995
     },
     "LIN": {
       "ticker": "LIN",
@@ -35369,7 +35307,7 @@
       "sniper_score": 0.1544,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 963160965.8491007
+      "avg_dv60": 963164179.8490397
     },
     "LITE": {
       "ticker": "LITE",
@@ -35401,7 +35339,7 @@
       "fip_126": 0.05,
       "fip_60": 0.05,
       "io_20": -0.13,
-      "io_60": -0.269,
+      "io_60": -0.268,
       "io_5": 0.044,
       "io_accel": 0.077,
       "vol_60d": 0.88,
@@ -35431,7 +35369,7 @@
       "sniper_score": 1.0244,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 4443549853.697662
+      "avg_dv60": 4443724298.950195
     },
     "LLY": {
       "ticker": "LLY",
@@ -35493,7 +35431,7 @@
       "sniper_score": 0.3487,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2827974177.351245
+      "avg_dv60": 2833055042.4875894
     },
     "LMT": {
       "ticker": "LMT",
@@ -35555,7 +35493,7 @@
       "sniper_score": 0.3305,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 688645651.3413544
+      "avg_dv60": 688657912.6290894
     },
     "LOW": {
       "ticker": "LOW",
@@ -35617,7 +35555,7 @@
       "sniper_score": -0.0295,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 623787803.6342235
+      "avg_dv60": 623788312.3712412
     },
     "LRCX": {
       "ticker": "LRCX",
@@ -35679,7 +35617,7 @@
       "sniper_score": 0.0684,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2657350921.3010836
+      "avg_dv60": 2657860970.8285522
     },
     "LULU": {
       "ticker": "LULU",
@@ -35710,10 +35648,10 @@
       "fip": -0.05,
       "fip_126": -0.08,
       "fip_60": -0.15,
-      "io_20": 0.168,
-      "io_60": 0.43,
-      "io_5": 0.071,
-      "io_accel": 0.029,
+      "io_20": 0.175,
+      "io_60": 0.438,
+      "io_5": 0.078,
+      "io_accel": 0.034,
       "vol_60d": 0.54,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -35737,11 +35675,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -1.38,
-      "score": -0.1521,
-      "sniper_score": -0.1521,
+      "score": -0.1522,
+      "sniper_score": -0.1522,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 541141719.1367427
+      "avg_dv60": 541149962.3179117
     },
     "MA": {
       "ticker": "MA",
@@ -35803,7 +35741,7 @@
       "sniper_score": 0.167,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1680435823.5756104
+      "avg_dv60": 1680441108.4251912
     },
     "MAR": {
       "ticker": "MAR",
@@ -35865,7 +35803,7 @@
       "sniper_score": 0.3517,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 535749127.0837087
+      "avg_dv60": 535946121.73268634
     },
     "MBG.DE": {
       "ticker": "MBG.DE",
@@ -35896,10 +35834,10 @@
       "fip": -0.06,
       "fip_126": -0.09,
       "fip_60": -0.22,
-      "io_20": 0.026,
-      "io_60": -0.151,
-      "io_5": -0.0,
-      "io_accel": -0.007,
+      "io_20": 0.031,
+      "io_60": -0.147,
+      "io_5": 0.004,
+      "io_accel": -0.003,
       "vol_60d": 0.24,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -35923,11 +35861,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -2.93,
-      "score": -0.1337,
-      "sniper_score": -0.1337,
+      "score": -0.1338,
+      "sniper_score": -0.1338,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 97721493.06578393
+      "avg_dv60": 97723068.7492068
     },
     "MBG": {
       "ticker": "MBG.DE",
@@ -35958,10 +35896,10 @@
       "fip": -0.06,
       "fip_126": -0.09,
       "fip_60": -0.22,
-      "io_20": 0.026,
-      "io_60": -0.151,
-      "io_5": -0.0,
-      "io_accel": -0.007,
+      "io_20": 0.031,
+      "io_60": -0.147,
+      "io_5": 0.004,
+      "io_accel": -0.003,
       "vol_60d": 0.24,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -35985,11 +35923,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -2.93,
-      "score": -0.1337,
-      "sniper_score": -0.1337,
+      "score": -0.1338,
+      "sniper_score": -0.1338,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 97721493.06578393
+      "avg_dv60": 97723068.7492068
     },
     "MBGYY": {
       "ticker": "MBGYY",
@@ -36020,10 +35958,10 @@
       "fip": -0.07,
       "fip_126": -0.09,
       "fip_60": -0.2,
-      "io_20": -0.018,
-      "io_60": -0.047,
-      "io_5": -0.013,
-      "io_accel": -0.008,
+      "io_20": -0.02,
+      "io_60": -0.049,
+      "io_5": -0.014,
+      "io_accel": -0.009,
       "vol_60d": 0.25,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -36042,8 +35980,8 @@
       "rebound_20d": 4.3,
       "pead_jump_63d": 0.0,
       "convexity": 0.7,
-      "vcp": 0.8,
-      "chip": 0.23,
+      "vcp": 0.78,
+      "chip": 0.2,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -3.27,
@@ -36051,7 +35989,7 @@
       "sniper_score": -0.1537,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 6952164.606310797
+      "avg_dv60": 7063900.326530139
     },
     "MCD": {
       "ticker": "MCD",
@@ -36113,7 +36051,7 @@
       "sniper_score": -0.0487,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1289372875.897764
+      "avg_dv60": 1289392983.4453838
     },
     "MCHP": {
       "ticker": "MCHP",
@@ -36146,7 +36084,7 @@
       "fip_60": -0.02,
       "io_20": 0.248,
       "io_60": 0.028,
-      "io_5": 0.103,
+      "io_5": 0.102,
       "io_accel": 0.041,
       "vol_60d": 0.37,
       "open_pool_quality_ok": true,
@@ -36160,8 +36098,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.0816,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+4.1%/+4%) × 🔄月線洗盤回勾(+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+4.1%/+4%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.08）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+4.0%/+4%) × 🔄月線洗盤回勾(+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+4.0%/+4%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.08）",
       "pb_depth_60": 18.1,
       "rebound_20d": 10.9,
       "pead_jump_63d": 13.9,
@@ -36175,7 +36113,7 @@
       "sniper_score": 0.1903,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 670970689.1836039
+      "avg_dv60": 671005943.3319346
     },
     "MCK": {
       "ticker": "MCK",
@@ -36237,7 +36175,7 @@
       "sniper_score": 0.1853,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 736883457.4044678
+      "avg_dv60": 736883258.4884644
     },
     "MDLZ": {
       "ticker": "MDLZ",
@@ -36268,10 +36206,10 @@
       "fip": -0.04,
       "fip_126": -0.06,
       "fip_60": -0.07,
-      "io_20": -0.024,
-      "io_60": 0.02,
-      "io_5": -0.02,
-      "io_accel": -0.014,
+      "io_20": -0.031,
+      "io_60": 0.013,
+      "io_5": -0.027,
+      "io_accel": -0.019,
       "vol_60d": 0.22,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -36299,7 +36237,7 @@
       "sniper_score": 0.1245,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 466064340.9639124
+      "avg_dv60": 466111881.3750331
     },
     "MDT": {
       "ticker": "MDT",
@@ -36361,7 +36299,7 @@
       "sniper_score": 0.0893,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1539774172.5694747
+      "avg_dv60": 1539786557.0425923
     },
     "MELI": {
       "ticker": "MELI",
@@ -36423,7 +36361,7 @@
       "sniper_score": -0.1902,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1007525451.7017618
+      "avg_dv60": 1007530623.1223551
     },
     "META": {
       "ticker": "META",
@@ -36485,7 +36423,7 @@
       "sniper_score": -0.0137,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 13404886365.987085
+      "avg_dv60": 13407736444.848328
     },
     "MNST": {
       "ticker": "MNST",
@@ -36516,10 +36454,10 @@
       "fip": 0.13,
       "fip_126": 0.11,
       "fip_60": 0.07,
-      "io_20": 0.017,
-      "io_60": -0.026,
-      "io_5": -0.013,
-      "io_accel": -0.017,
+      "io_20": 0.026,
+      "io_60": -0.018,
+      "io_5": -0.004,
+      "io_accel": -0.011,
       "vol_60d": 0.25,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -36543,11 +36481,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": 0.3,
-      "score": 0.2377,
-      "sniper_score": 0.2377,
+      "score": 0.2379,
+      "sniper_score": 0.2379,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 439250788.2547628
+      "avg_dv60": 439251917.3137665
     },
     "MO": {
       "ticker": "MO",
@@ -36609,7 +36547,7 @@
       "sniper_score": 0.3366,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 574818786.5643735
+      "avg_dv60": 574904056.4465395
     },
     "MPC": {
       "ticker": "MPC",
@@ -36671,7 +36609,7 @@
       "sniper_score": 0.6054,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1008981026.0109049
+      "avg_dv60": 1008994071.4245605
     },
     "MPWR": {
       "ticker": "MPWR",
@@ -36702,10 +36640,10 @@
       "fip": 0.1,
       "fip_126": -0.02,
       "fip_60": -0.02,
-      "io_20": 0.105,
-      "io_60": -0.11,
-      "io_5": 0.064,
-      "io_accel": 0.038,
+      "io_20": 0.114,
+      "io_60": -0.101,
+      "io_5": 0.073,
+      "io_accel": 0.044,
       "vol_60d": 0.49,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -36717,9 +36655,9 @@
       "whale_1000_pct": null,
       "whale_400_pct": null,
       "whale_scissors_pct": null,
-      "sniper_mult": 1.0,
-      "sniper_tag": "⚡ 財報/營收跳空驚喜 (+8.1%)",
-      "sniper_desc": "近一季曾出現帶量單日長紅 +8.1% (PEAD 超預期印記) 且主力持續鎖碼",
+      "sniper_mult": 1.04,
+      "sniper_tag": "⚡日內吸籌點火(IO加速+4.4%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+4.4%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 24.5,
       "rebound_20d": 7.6,
       "pead_jump_63d": 8.1,
@@ -36730,10 +36668,10 @@
       "sustain_20d": 0.0,
       "sortino_60": -1.27,
       "score": 0.0636,
-      "sniper_score": 0.0636,
+      "sniper_score": 0.0661,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 900338811.4813721
+      "avg_dv60": 900343092.574056
     },
     "MRK": {
       "ticker": "MRK",
@@ -36795,7 +36733,7 @@
       "sniper_score": 0.4817,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1495470785.132739
+      "avg_dv60": 1495566834.2914836
     },
     "MRVL": {
       "ticker": "MRVL",
@@ -36826,10 +36764,10 @@
       "fip": 0.08,
       "fip_126": 0.14,
       "fip_60": 0.17,
-      "io_20": 0.309,
-      "io_60": 0.107,
-      "io_5": 0.142,
-      "io_accel": 0.065,
+      "io_20": 0.305,
+      "io_60": 0.104,
+      "io_5": 0.138,
+      "io_accel": 0.062,
       "vol_60d": 0.74,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -36842,8 +36780,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+6.5%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+6.5%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+6.2%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+6.2%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 36.9,
       "rebound_20d": 3.3,
       "pead_jump_63d": 12.8,
@@ -36853,11 +36791,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -0.02,
-      "score": 0.4425,
-      "sniper_score": 0.4602,
+      "score": 0.4424,
+      "sniper_score": 0.4601,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 5171846390.027895
+      "avg_dv60": 5173249808.737615
     },
     "MS": {
       "ticker": "MS",
@@ -36919,7 +36857,7 @@
       "sniper_score": -0.004,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1024157827.6861229
+      "avg_dv60": 1024181636.1748505
     },
     "MSFT": {
       "ticker": "MSFT",
@@ -36981,7 +36919,7 @@
       "sniper_score": 0.0222,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 10667145084.040262
+      "avg_dv60": 10667431551.726023
     },
     "MU": {
       "ticker": "MU",
@@ -37012,14 +36950,14 @@
       "fip": 0.05,
       "fip_126": 0.03,
       "fip_60": 0.05,
-      "io_20": 0.189,
-      "io_60": 0.293,
-      "io_5": 0.015,
-      "io_accel": -0.032,
+      "io_20": 0.187,
+      "io_60": 0.291,
+      "io_5": 0.013,
+      "io_accel": -0.034,
       "vol_60d": 0.54,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
-      "pocket_pivot_40": 0.35,
+      "pocket_pivot_40": 0.3,
       "pe_ratio": null,
       "pb_ratio": null,
       "roe_pct": null,
@@ -37039,11 +36977,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.05,
       "sortino_60": 0.46,
-      "score": 1.1395,
-      "sniper_score": 1.1395,
+      "score": 1.1374,
+      "sniper_score": 1.1374,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 25408200128.047955
+      "avg_dv60": 25411726967.071026
     },
     "MUFG": {
       "ticker": "MUFG",
@@ -37105,7 +37043,7 @@
       "sniper_score": 0.1213,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 61139779.460813016
+      "avg_dv60": 61139867.13814417
     },
     "NEE": {
       "ticker": "NEE",
@@ -37167,7 +37105,7 @@
       "sniper_score": 0.0044,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 920998065.4108495
+      "avg_dv60": 921036577.591095
     },
     "NEM": {
       "ticker": "NEM",
@@ -37229,7 +37167,7 @@
       "sniper_score": 0.1058,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 820601435.9395126
+      "avg_dv60": 820646126.8517685
     },
     "NFLX": {
       "ticker": "NFLX",
@@ -37260,10 +37198,10 @@
       "fip": -0.12,
       "fip_126": -0.16,
       "fip_60": -0.2,
-      "io_20": 0.087,
+      "io_20": 0.086,
       "io_60": -0.052,
       "io_5": -0.039,
-      "io_accel": -0.06,
+      "io_accel": -0.061,
       "vol_60d": 0.34,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -37291,7 +37229,7 @@
       "sniper_score": -0.1583,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2492674654.4884596
+      "avg_dv60": 2493603194.3878474
     },
     "NKE": {
       "ticker": "NKE",
@@ -37353,7 +37291,7 @@
       "sniper_score": -0.1394,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1236688844.8690217
+      "avg_dv60": 1236696523.441658
     },
     "NOW": {
       "ticker": "NOW",
@@ -37415,7 +37353,7 @@
       "sniper_score": -0.2208,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 2053551822.3398733
+      "avg_dv60": 2054002757.3676555
     },
     "NVDA": {
       "ticker": "NVDA",
@@ -37447,8 +37385,8 @@
       "fip_126": -0.07,
       "fip_60": -0.1,
       "io_20": -0.058,
-      "io_60": -0.383,
-      "io_5": -0.035,
+      "io_60": -0.384,
+      "io_5": -0.036,
       "io_accel": -0.021,
       "vol_60d": 0.34,
       "open_pool_quality_ok": true,
@@ -37477,7 +37415,7 @@
       "sniper_score": -0.0087,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 23807042847.165245
+      "avg_dv60": 23814258456.95439
     },
     "NVO": {
       "ticker": "NVO",
@@ -37539,7 +37477,7 @@
       "sniper_score": -0.1231,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 499179578.0665283
+      "avg_dv60": 499210773.39986163
     },
     "NXPI": {
       "ticker": "NXPI",
@@ -37570,10 +37508,10 @@
       "fip": 0.0,
       "fip_126": 0.0,
       "fip_60": -0.02,
-      "io_20": 0.435,
+      "io_20": 0.434,
       "io_60": 0.268,
-      "io_5": 0.245,
-      "io_accel": 0.136,
+      "io_5": 0.244,
+      "io_accel": 0.135,
       "vol_60d": 0.35,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -37586,8 +37524,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.0816,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+13.6%/+4%) × 🔄月線洗盤回勾(+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+13.6%/+4%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.08）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+13.5%/+4%) × 🔄月線洗盤回勾(+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+13.5%/+4%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.08）",
       "pb_depth_60": 18.1,
       "rebound_20d": 18.7,
       "pead_jump_63d": 5.7,
@@ -37601,7 +37539,7 @@
       "sniper_score": 0.209,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 831649128.1646475
+      "avg_dv60": 833006996.5588633
     },
     "ODFL": {
       "ticker": "ODFL",
@@ -37663,7 +37601,7 @@
       "sniper_score": 0.0293,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 336462465.81934613
+      "avg_dv60": 336462393.9193471
     },
     "ON": {
       "ticker": "ON",
@@ -37694,10 +37632,10 @@
       "fip": 0.07,
       "fip_126": 0.0,
       "fip_60": 0.05,
-      "io_20": 0.197,
-      "io_60": -0.16,
-      "io_5": 0.097,
-      "io_accel": 0.048,
+      "io_20": 0.198,
+      "io_60": -0.159,
+      "io_5": 0.098,
+      "io_accel": 0.049,
       "vol_60d": 0.51,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -37710,8 +37648,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+4.8%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+4.8%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+4.9%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+4.9%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 19.9,
       "rebound_20d": 2.9,
       "pead_jump_63d": 6.0,
@@ -37725,7 +37663,7 @@
       "sniper_score": 0.1404,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 729733799.9672012
+      "avg_dv60": 730421734.0006256
     },
     "ORCL": {
       "ticker": "ORCL",
@@ -37779,7 +37717,7 @@
       "pead_jump_63d": 10.7,
       "convexity": 1.01,
       "vcp": 0.62,
-      "chip": 0.15,
+      "chip": 0.14,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -0.82,
@@ -37787,7 +37725,7 @@
       "sniper_score": -0.2082,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 4240398467.6285553
+      "avg_dv60": 4242410260.742531
     },
     "ORLY": {
       "ticker": "ORLY",
@@ -37849,7 +37787,7 @@
       "sniper_score": -0.0357,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 491786467.11778
+      "avg_dv60": 491786555.2377828
     },
     "PANW": {
       "ticker": "PANW",
@@ -37880,10 +37818,10 @@
       "fip": 0.04,
       "fip_126": 0.07,
       "fip_60": -0.05,
-      "io_20": -0.017,
-      "io_60": 0.266,
-      "io_5": 0.056,
-      "io_accel": 0.06,
+      "io_20": -0.014,
+      "io_60": 0.269,
+      "io_5": 0.059,
+      "io_accel": 0.063,
       "vol_60d": 0.62,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -37907,11 +37845,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.1,
       "sortino_60": 0.55,
-      "score": 0.3103,
-      "sniper_score": 0.3103,
+      "score": 0.3104,
+      "sniper_score": 0.3104,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2176881497.654409
+      "avg_dv60": 2177367281.540426
     },
     "PAYX": {
       "ticker": "PAYX",
@@ -37973,7 +37911,7 @@
       "sniper_score": -0.0007,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 325111293.57586884
+      "avg_dv60": 325111500.99787396
     },
     "PBR": {
       "ticker": "PBR",
@@ -38035,7 +37973,7 @@
       "sniper_score": 0.5412,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 517476243.9973974
+      "avg_dv60": 517495746.11922264
     },
     "PCAR": {
       "ticker": "PCAR",
@@ -38097,7 +38035,7 @@
       "sniper_score": -0.0411,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 373572022.8990163
+      "avg_dv60": 373572270.8800252
     },
     "PCG": {
       "ticker": "PCG",
@@ -38129,9 +38067,9 @@
       "fip_126": 0.11,
       "fip_60": 0.05,
       "io_20": 0.053,
-      "io_60": 0.184,
-      "io_5": -0.002,
-      "io_accel": -0.015,
+      "io_60": 0.183,
+      "io_5": -0.003,
+      "io_accel": -0.016,
       "vol_60d": 0.55,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -38159,7 +38097,7 @@
       "sniper_score": -0.1402,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 561395591.4237598
+      "avg_dv60": 561399770.5821899
     },
     "PDD": {
       "ticker": "PDD",
@@ -38190,10 +38128,10 @@
       "fip": -0.11,
       "fip_126": -0.14,
       "fip_60": -0.1,
-      "io_20": 0.07,
-      "io_60": -0.149,
-      "io_5": -0.016,
-      "io_accel": -0.034,
+      "io_20": 0.062,
+      "io_60": -0.157,
+      "io_5": -0.024,
+      "io_accel": -0.039,
       "vol_60d": 0.27,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -38217,11 +38155,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -2.71,
-      "score": -0.1343,
-      "sniper_score": -0.1343,
+      "score": -0.1342,
+      "sniper_score": -0.1342,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 497199098.3252347
+      "avg_dv60": 497401502.0446396
     },
     "PEP": {
       "ticker": "PEP",
@@ -38283,7 +38221,7 @@
       "sniper_score": 0.0057,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1153780772.4395778
+      "avg_dv60": 1153927806.3506572
     },
     "PETR4.SA": {
       "ticker": "PETR4.SA",
@@ -38345,7 +38283,7 @@
       "sniper_score": 0.6705,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2484531979.0685782
+      "avg_dv60": 2484558421.918119
     },
     "PETR4": {
       "ticker": "PETR4.SA",
@@ -38407,7 +38345,7 @@
       "sniper_score": 0.6705,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2484531979.0685782
+      "avg_dv60": 2484558421.918119
     },
     "PFE": {
       "ticker": "PFE",
@@ -38460,8 +38398,8 @@
       "rebound_20d": 12.5,
       "pead_jump_63d": 0.0,
       "convexity": 1.53,
-      "vcp": 0.77,
-      "chip": 0.17,
+      "vcp": 0.76,
+      "chip": 0.18,
       "rd_pct": 0.0,
       "sustain_20d": 0.7,
       "sortino_60": 5.33,
@@ -38469,7 +38407,7 @@
       "sniper_score": 0.2406,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 899470573.1842433
+      "avg_dv60": 903737864.8969141
     },
     "PG": {
       "ticker": "PG",
@@ -38531,7 +38469,7 @@
       "sniper_score": 0.1233,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1335503041.8790894
+      "avg_dv60": 1335525419.3251038
     },
     "PGR": {
       "ticker": "PGR",
@@ -38593,7 +38531,7 @@
       "sniper_score": 0.1139,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 547099687.1314769
+      "avg_dv60": 547100504.3208059
     },
     "PH": {
       "ticker": "PH",
@@ -38655,7 +38593,7 @@
       "sniper_score": -0.0175,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 566104165.616574
+      "avg_dv60": 566107659.9176025
     },
     "PLTR": {
       "ticker": "PLTR",
@@ -38686,10 +38624,10 @@
       "fip": 0.0,
       "fip_126": -0.03,
       "fip_60": -0.02,
-      "io_20": -0.008,
-      "io_60": 0.073,
-      "io_5": -0.041,
-      "io_accel": -0.039,
+      "io_20": -0.007,
+      "io_60": 0.074,
+      "io_5": -0.039,
+      "io_accel": -0.038,
       "vol_60d": 0.44,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -38704,8 +38642,8 @@
       "sniper_mult": 1.0,
       "sniper_tag": "🛑L2 跌破月線且日內賣壓降權 (×0.70)",
       "sniper_desc": "",
-      "pb_depth_60": 13.7,
-      "rebound_20d": 0.2,
+      "pb_depth_60": 15.1,
+      "rebound_20d": 1.8,
       "pead_jump_63d": 10.3,
       "convexity": 1.05,
       "vcp": 0.73,
@@ -38717,7 +38655,7 @@
       "sniper_score": 0.0132,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 4771912125.197405
+      "avg_dv60": 4772070717.55193
     },
     "PM": {
       "ticker": "PM",
@@ -38779,7 +38717,7 @@
       "sniper_score": 0.2739,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 837516675.5108187
+      "avg_dv60": 837620162.270991
     },
     "PSX": {
       "ticker": "PSX",
@@ -38841,7 +38779,7 @@
       "sniper_score": 0.7079,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 731171130.4020015
+      "avg_dv60": 731178064.4505056
     },
     "PWR": {
       "ticker": "PWR",
@@ -38903,7 +38841,7 @@
       "sniper_score": 0.119,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 664757941.9417521
+      "avg_dv60": 664760600.7351685
     },
     "PYPL": {
       "ticker": "PYPL",
@@ -38965,7 +38903,7 @@
       "sniper_score": -0.0605,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 656722538.2952886
+      "avg_dv60": 656724418.6750666
     },
     "QCOM": {
       "ticker": "QCOM",
@@ -39027,7 +38965,7 @@
       "sniper_score": -0.0301,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2017122405.0666852
+      "avg_dv60": 2017179199.9378712
     },
     "QQQ": {
       "ticker": "QQQ",
@@ -39058,7 +38996,7 @@
       "fip": 0.05,
       "fip_126": -0.02,
       "fip_60": -0.03,
-      "io_20": 0.052,
+      "io_20": 0.051,
       "io_60": 0.024,
       "io_5": 0.033,
       "io_accel": 0.02,
@@ -39089,7 +39027,7 @@
       "sniper_score": 0.0146,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 25012838989.210632
+      "avg_dv60": 25016918173.909607
     },
     "RCL": {
       "ticker": "RCL",
@@ -39151,7 +39089,7 @@
       "sniper_score": 0.0937,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 629928218.7686361
+      "avg_dv60": 629929575.4802704
     },
     "REGN": {
       "ticker": "REGN",
@@ -39213,7 +39151,7 @@
       "sniper_score": 0.3826,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 576381130.2344259
+      "avg_dv60": 576673028.9682007
     },
     "RHM.DE": {
       "ticker": "RHM.DE",
@@ -39244,10 +39182,10 @@
       "fip": -0.09,
       "fip_126": -0.1,
       "fip_60": -0.22,
-      "io_20": 0.174,
-      "io_60": -0.038,
-      "io_5": 0.082,
-      "io_accel": 0.038,
+      "io_20": 0.119,
+      "io_60": -0.094,
+      "io_5": 0.026,
+      "io_accel": -0.004,
       "vol_60d": 0.35,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -39271,11 +39209,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -1.46,
-      "score": -0.1772,
-      "sniper_score": -0.1772,
+      "score": -0.1764,
+      "sniper_score": -0.1764,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 178363409.64782125
+      "avg_dv60": 178364360.73980814
     },
     "RHM": {
       "ticker": "RHM.DE",
@@ -39306,10 +39244,10 @@
       "fip": -0.09,
       "fip_126": -0.1,
       "fip_60": -0.22,
-      "io_20": 0.174,
-      "io_60": -0.038,
-      "io_5": 0.082,
-      "io_accel": 0.038,
+      "io_20": 0.119,
+      "io_60": -0.094,
+      "io_5": 0.026,
+      "io_accel": -0.004,
       "vol_60d": 0.35,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -39333,11 +39271,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -1.46,
-      "score": -0.1772,
-      "sniper_score": -0.1772,
+      "score": -0.1764,
+      "sniper_score": -0.1764,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 178363409.64782125
+      "avg_dv60": 178364360.73980814
     },
     "ROP": {
       "ticker": "ROP",
@@ -39399,7 +39337,7 @@
       "sniper_score": 0.1912,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 330700523.6698176
+      "avg_dv60": 330700562.5531514
     },
     "ROST": {
       "ticker": "ROST",
@@ -39461,7 +39399,7 @@
       "sniper_score": 0.1178,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 527041431.43378603
+      "avg_dv60": 527041918.43111676
     },
     "RTX": {
       "ticker": "RTX",
@@ -39523,7 +39461,7 @@
       "sniper_score": 0.0436,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 889094956.6504135
+      "avg_dv60": 889122828.7508392
     },
     "SAP": {
       "ticker": "SAP.DE",
@@ -39554,10 +39492,10 @@
       "fip": 0.02,
       "fip_126": 0.05,
       "fip_60": 0.03,
-      "io_20": 0.077,
-      "io_60": 0.237,
-      "io_5": -0.011,
-      "io_accel": -0.031,
+      "io_20": 0.112,
+      "io_60": 0.272,
+      "io_5": 0.024,
+      "io_accel": -0.004,
       "vol_60d": 0.28,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -39571,7 +39509,7 @@
       "whale_scissors_pct": null,
       "sniper_mult": 1.0,
       "sniper_tag": "🕳️ 深V黃金坑轉折 (彈+15.0%)",
-      "sniper_desc": "60D曾洗盤回檔 -15.2% 挖出黃金坑，近20D強彈 +15.0% 且日內主力吸籌 IO_20=+0.08",
+      "sniper_desc": "60D曾洗盤回檔 -15.2% 挖出黃金坑，近20D強彈 +15.0% 且日內主力吸籌 IO_20=+0.11",
       "pb_depth_60": 15.2,
       "rebound_20d": 15.0,
       "pead_jump_63d": 5.5,
@@ -39581,11 +39519,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.85,
       "sortino_60": 4.77,
-      "score": 0.1089,
-      "sniper_score": 0.1089,
+      "score": 0.1092,
+      "sniper_score": 0.1092,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 410361614.52200824
+      "avg_dv60": 410365406.45950824
     },
     "SAP.DE": {
       "ticker": "SAP.DE",
@@ -39616,10 +39554,10 @@
       "fip": 0.02,
       "fip_126": 0.05,
       "fip_60": 0.03,
-      "io_20": 0.077,
-      "io_60": 0.237,
-      "io_5": -0.011,
-      "io_accel": -0.031,
+      "io_20": 0.112,
+      "io_60": 0.272,
+      "io_5": 0.024,
+      "io_accel": -0.004,
       "vol_60d": 0.28,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -39633,7 +39571,7 @@
       "whale_scissors_pct": null,
       "sniper_mult": 1.0,
       "sniper_tag": "🕳️ 深V黃金坑轉折 (彈+15.0%)",
-      "sniper_desc": "60D曾洗盤回檔 -15.2% 挖出黃金坑，近20D強彈 +15.0% 且日內主力吸籌 IO_20=+0.08",
+      "sniper_desc": "60D曾洗盤回檔 -15.2% 挖出黃金坑，近20D強彈 +15.0% 且日內主力吸籌 IO_20=+0.11",
       "pb_depth_60": 15.2,
       "rebound_20d": 15.0,
       "pead_jump_63d": 5.5,
@@ -39643,11 +39581,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.85,
       "sortino_60": 4.77,
-      "score": 0.1089,
-      "sniper_score": 0.1089,
+      "score": 0.1092,
+      "sniper_score": 0.1092,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 410361614.52200824
+      "avg_dv60": 410365406.45950824
     },
     "SBUX": {
       "ticker": "SBUX",
@@ -39709,7 +39647,7 @@
       "sniper_score": 0.1277,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 739297371.8102944
+      "avg_dv60": 739307737.0822779
     },
     "SCHW": {
       "ticker": "SCHW",
@@ -39771,7 +39709,7 @@
       "sniper_score": -0.0735,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 816331140.829352
+      "avg_dv60": 816334558.6369705
     },
     "SHEL": {
       "ticker": "SHEL",
@@ -39820,7 +39758,7 @@
       "sniper_mult": 1.0,
       "sniper_tag": "",
       "sniper_desc": "",
-      "pb_depth_60": 13.3,
+      "pb_depth_60": 13.4,
       "rebound_20d": 14.7,
       "pead_jump_63d": 0.0,
       "convexity": 1.36,
@@ -39833,7 +39771,7 @@
       "sniper_score": 0.3854,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 579295980.3445795
+      "avg_dv60": 579298407.1415106
     },
     "SHW": {
       "ticker": "SHW",
@@ -39895,7 +39833,7 @@
       "sniper_score": -0.0384,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 545759102.0372416
+      "avg_dv60": 545760099.8671976
     },
     "SIE.DE": {
       "ticker": "SIE.DE",
@@ -39926,10 +39864,10 @@
       "fip": 0.07,
       "fip_126": 0.07,
       "fip_60": 0.08,
-      "io_20": 0.205,
-      "io_60": 0.125,
-      "io_5": 0.18,
-      "io_accel": 0.129,
+      "io_20": 0.111,
+      "io_60": 0.031,
+      "io_5": 0.086,
+      "io_accel": 0.058,
       "vol_60d": 0.27,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -39942,8 +39880,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+12.9%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+12.9%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+5.8%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+5.8%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 12.8,
       "rebound_20d": 4.4,
       "pead_jump_63d": 0.0,
@@ -39957,7 +39895,7 @@
       "sniper_score": 0.0115,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 252425243.28881675
+      "avg_dv60": 252427434.80078736
     },
     "SIE": {
       "ticker": "SIE.DE",
@@ -39988,10 +39926,10 @@
       "fip": 0.07,
       "fip_126": 0.07,
       "fip_60": 0.08,
-      "io_20": 0.205,
-      "io_60": 0.125,
-      "io_5": 0.18,
-      "io_accel": 0.129,
+      "io_20": 0.111,
+      "io_60": 0.031,
+      "io_5": 0.086,
+      "io_accel": 0.058,
       "vol_60d": 0.27,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -40004,8 +39942,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+12.9%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+12.9%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+5.8%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+5.8%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 12.8,
       "rebound_20d": 4.4,
       "pead_jump_63d": 0.0,
@@ -40019,41 +39957,41 @@
       "sniper_score": 0.0115,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 252425243.28881675
+      "avg_dv60": 252427434.80078736
     },
     "SIEGY": {
       "ticker": "SIEGY",
-      "price": 147.63,
+      "price": 147.95,
       "price_date": "2026-10-30",
-      "ma20": 148.9,
-      "ma60": 155.36,
+      "ma20": 148.92,
+      "ma60": 155.37,
       "ma200": 149.62,
-      "mom_2w": 0.8,
-      "mom_1m": -4.6,
-      "mom_3m": -10.8,
-      "mom_12m": 4.2,
-      "bias_ma60": -5.0,
-      "prox_52w": 88.1,
+      "mom_2w": 1.0,
+      "mom_1m": -4.4,
+      "mom_3m": -10.6,
+      "mom_12m": 4.4,
+      "bias_ma60": -4.8,
+      "prox_52w": 88.3,
       "winrate_tag": "🚀 穩健主升推進",
       "winrate_desc": "多頭主升趨勢穩步推進中，量價結構良好",
       "winrate_grade": "steady",
-      "mom_1d": -3.79,
-      "mom_5d": 2.9,
-      "pullback_prob_3d": 47.4,
-      "pullback_prob_5d": 57.9,
-      "gap_limit_cap_price": 149.84,
-      "micro_dip_price": 147.33,
+      "mom_1d": -3.58,
+      "mom_5d": 3.1,
+      "pullback_prob_3d": 54.0,
+      "pullback_prob_5d": 63.0,
+      "gap_limit_cap_price": 150.17,
+      "micro_dip_price": 147.65,
       "smart_entry_mode": "open_with_gap_cap",
-      "smart_entry_tag": "🟢 開盤直買・跳空>1.5%掛 147.33",
-      "smart_entry_price": 147.63,
-      "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 149.84 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (147.33) 等 2 天。",
+      "smart_entry_tag": "🟢 開盤直買・跳空>1.5%掛 147.65",
+      "smart_entry_price": 147.95,
+      "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 150.17 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (147.65) 等 2 天。",
       "fip": 0.05,
       "fip_126": -0.02,
       "fip_60": -0.07,
-      "io_20": 0.036,
-      "io_60": -0.135,
-      "io_5": -0.002,
-      "io_accel": -0.011,
+      "io_20": 0.038,
+      "io_60": -0.133,
+      "io_5": -0.0,
+      "io_accel": -0.01,
       "vol_60d": 0.26,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -40069,19 +40007,19 @@
       "sniper_tag": "",
       "sniper_desc": "",
       "pb_depth_60": 15.8,
-      "rebound_20d": 3.5,
+      "rebound_20d": 3.7,
       "pead_jump_63d": 0.0,
-      "convexity": 0.83,
-      "vcp": 0.68,
+      "convexity": 0.84,
+      "vcp": 0.66,
       "chip": 0.1,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
-      "sortino_60": -1.45,
-      "score": -0.0332,
-      "sniper_score": -0.0332,
+      "sortino_60": -1.41,
+      "score": -0.0313,
+      "sniper_score": -0.0313,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 27410686.358347576
+      "avg_dv60": 27713481.912053425
     },
     "SLB": {
       "ticker": "SLB",
@@ -40143,7 +40081,7 @@
       "sniper_score": 0.2718,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 649462580.0460528
+      "avg_dv60": 649465293.020471
     },
     "SMCI": {
       "ticker": "SMCI",
@@ -40174,10 +40112,10 @@
       "fip": -0.08,
       "fip_126": -0.06,
       "fip_60": 0.02,
-      "io_20": -0.122,
-      "io_60": -0.071,
-      "io_5": 0.072,
-      "io_accel": 0.102,
+      "io_20": -0.119,
+      "io_60": -0.069,
+      "io_5": 0.074,
+      "io_accel": 0.104,
       "vol_60d": 0.77,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -40205,7 +40143,7 @@
       "sniper_score": -0.0978,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1583990975.240292
+      "avg_dv60": 1584094301.5001845
     },
     "SNDK": {
       "ticker": "SNDK",
@@ -40267,7 +40205,7 @@
       "sniper_score": 1.8252,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 16128766555.65119
+      "avg_dv60": 16129503067.716064
     },
     "SNPS": {
       "ticker": "SNPS",
@@ -40329,7 +40267,7 @@
       "sniper_score": 0.1363,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 925473565.7997558
+      "avg_dv60": 926293940.7580566
     },
     "SONY": {
       "ticker": "SONY",
@@ -40391,7 +40329,7 @@
       "sniper_score": 0.0056,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 95214129.82110399
+      "avg_dv60": 95214271.92276637
     },
     "SPGI": {
       "ticker": "SPGI",
@@ -40453,7 +40391,7 @@
       "sniper_score": 0.0941,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 781195252.7609202
+      "avg_dv60": 781195571.5700785
     },
     "SPOT": {
       "ticker": "SPOT",
@@ -40515,7 +40453,7 @@
       "sniper_score": 0.0732,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 872839940.9338074
+      "avg_dv60": 872844193.9204916
     },
     "SPY": {
       "ticker": "SPY",
@@ -40577,7 +40515,7 @@
       "sniper_score": 0.0377,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 31212645042.884964
+      "avg_dv60": 31218736196.230164
     },
     "STX": {
       "ticker": "STX",
@@ -40608,10 +40546,10 @@
       "fip": 0.13,
       "fip_126": 0.11,
       "fip_60": 0.05,
-      "io_20": 0.336,
-      "io_60": 0.654,
-      "io_5": 0.239,
-      "io_accel": 0.155,
+      "io_20": 0.333,
+      "io_60": 0.651,
+      "io_5": 0.236,
+      "io_accel": 0.153,
       "vol_60d": 0.68,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -40624,8 +40562,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+15.5%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+15.5%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+15.3%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+15.3%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 38.7,
       "rebound_20d": 3.8,
       "pead_jump_63d": 4.5,
@@ -40635,11 +40573,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -1.37,
-      "score": 0.387,
-      "sniper_score": 0.4025,
+      "score": 0.3869,
+      "sniper_score": 0.4024,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 3578128319.1802135
+      "avg_dv60": 3578196182.7130127
     },
     "SYK": {
       "ticker": "SYK",
@@ -40701,7 +40639,7 @@
       "sniper_score": -0.1104,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 791655439.868866
+      "avg_dv60": 791655877.658844
     },
     "T": {
       "ticker": "T",
@@ -40763,7 +40701,7 @@
       "sniper_score": -0.0654,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 989105039.1728843
+      "avg_dv60": 989316647.761043
     },
     "TEAM": {
       "ticker": "TEAM",
@@ -40825,7 +40763,7 @@
       "sniper_score": 0.5254,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 664316786.4256338
+      "avg_dv60": 664320109.5723215
     },
     "TER": {
       "ticker": "TER",
@@ -40856,10 +40794,10 @@
       "fip": 0.16,
       "fip_126": 0.03,
       "fip_60": 0.05,
-      "io_20": 0.157,
-      "io_60": 0.262,
-      "io_5": 0.117,
-      "io_accel": 0.078,
+      "io_20": 0.154,
+      "io_60": 0.258,
+      "io_5": 0.114,
+      "io_accel": 0.076,
       "vol_60d": 0.68,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -40872,9 +40810,9 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+7.8%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+7.8%/+4%)（二階總乘數 ×1.04）",
-      "pb_depth_60": 41.0,
+      "sniper_tag": "⚡日內吸籌點火(IO加速+7.6%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+7.6%/+4%)（二階總乘數 ×1.04）",
+      "pb_depth_60": 41.1,
       "rebound_20d": 3.0,
       "pead_jump_63d": 0.0,
       "convexity": 0.69,
@@ -40887,7 +40825,7 @@
       "sniper_score": 0.0591,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 992620696.0555644
+      "avg_dv60": 992641369.8346964
     },
     "TGT": {
       "ticker": "TGT",
@@ -40949,7 +40887,7 @@
       "sniper_score": 0.3823,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 634422502.3351634
+      "avg_dv60": 634682807.6073965
     },
     "TJX": {
       "ticker": "TJX",
@@ -41011,7 +40949,7 @@
       "sniper_score": -0.0307,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1029623537.1150995
+      "avg_dv60": 1029935761.9371668
     },
     "TM": {
       "ticker": "TM",
@@ -41073,7 +41011,7 @@
       "sniper_score": 0.0011,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 59873512.53564987
+      "avg_dv60": 59873411.41881307
     },
     "TMO": {
       "ticker": "TMO",
@@ -41135,7 +41073,7 @@
       "sniper_score": 0.22,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1355143761.4968343
+      "avg_dv60": 1355173372.3801677
     },
     "TMUS": {
       "ticker": "TMUS",
@@ -41197,7 +41135,7 @@
       "sniper_score": -0.1458,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 878318036.1617696
+      "avg_dv60": 878349631.8275961
     },
     "TSLA": {
       "ticker": "TSLA",
@@ -41228,9 +41166,9 @@
       "fip": -0.01,
       "fip_126": -0.07,
       "fip_60": -0.1,
-      "io_20": 0.035,
-      "io_60": 0.067,
-      "io_5": 0.01,
+      "io_20": 0.034,
+      "io_60": 0.066,
+      "io_5": 0.009,
       "io_accel": 0.001,
       "vol_60d": 0.4,
       "open_pool_quality_ok": true,
@@ -41259,7 +41197,7 @@
       "sniper_score": 0.101,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 13048904466.343912
+      "avg_dv60": 13049343704.270731
     },
     "TSM": {
       "ticker": "TSM",
@@ -41321,7 +41259,7 @@
       "sniper_score": 0.1288,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 4483755234.793337
+      "avg_dv60": 4484676046.584575
     },
     "TTD": {
       "ticker": "TTD",
@@ -41383,7 +41321,7 @@
       "sniper_score": -0.2842,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 303680279.408006
+      "avg_dv60": 303681090.7528369
     },
     "TXN": {
       "ticker": "TXN",
@@ -41430,7 +41368,7 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "🔄月線洗盤回勾(+4%)",
+      "sniper_tag": "🔄月線洗盤回勾(+4%) × 🌀L6-H2平台壓縮蓄勢(回檔-3.9%/月乖離+3.9%/×1.12)",
       "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：🔄月線洗盤回勾(+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 13.1,
       "rebound_20d": 10.6,
@@ -41441,11 +41379,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.2,
       "sortino_60": 1.31,
-      "score": 0.4848,
-      "sniper_score": 0.5042,
+      "score": 0.543,
+      "sniper_score": 0.5647,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1676770835.3517406
+      "avg_dv60": 1678353063.2004802
     },
     "UBER": {
       "ticker": "UBER",
@@ -41507,7 +41445,7 @@
       "sniper_score": -0.1128,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1200348255.6138926
+      "avg_dv60": 1201244245.7763927
     },
     "UMC": {
       "ticker": "UMC",
@@ -41569,7 +41507,7 @@
       "sniper_score": 0.4477,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 240677161.15827027
+      "avg_dv60": 240678553.10429573
     },
     "UNH": {
       "ticker": "UNH",
@@ -41631,7 +41569,7 @@
       "sniper_score": 0.1517,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1944306171.5859735
+      "avg_dv60": 1944320368.0561829
     },
     "UNP": {
       "ticker": "UNP",
@@ -41693,7 +41631,7 @@
       "sniper_score": 0.2296,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 688686226.5101705
+      "avg_dv60": 688687224.6435038
     },
     "V": {
       "ticker": "V",
@@ -41755,7 +41693,7 @@
       "sniper_score": 0.2012,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2374158603.1930513
+      "avg_dv60": 2374173892.2365823
     },
     "VALE": {
       "ticker": "VALE",
@@ -41809,7 +41747,7 @@
       "pead_jump_63d": 0.0,
       "convexity": 0.82,
       "vcp": 0.6,
-      "chip": 0.17,
+      "chip": 0.18,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -3.72,
@@ -41817,7 +41755,7 @@
       "sniper_score": -0.0749,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 448510553.3509752
+      "avg_dv60": 448558396.66775066
     },
     "VALE3.SA": {
       "ticker": "VALE3.SA",
@@ -41879,7 +41817,7 @@
       "sniper_score": -0.0302,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1814907729.2407482
+      "avg_dv60": 1814926541.9742203
     },
     "VALE3": {
       "ticker": "VALE3.SA",
@@ -41941,7 +41879,7 @@
       "sniper_score": -0.0302,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1814907729.2407482
+      "avg_dv60": 1814926541.9742203
     },
     "VLO": {
       "ticker": "VLO",
@@ -42003,7 +41941,7 @@
       "sniper_score": 0.4923,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1148389703.4920552
+      "avg_dv60": 1148399428.5521443
     },
     "VRSK": {
       "ticker": "VRSK",
@@ -42065,7 +42003,7 @@
       "sniper_score": 0.0134,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 224689712.26165086
+      "avg_dv60": 224693739.68338013
     },
     "VRTX": {
       "ticker": "VRTX",
@@ -42127,7 +42065,7 @@
       "sniper_score": 0.2375,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 606316990.7392883
+      "avg_dv60": 607695095.6846619
     },
     "VST": {
       "ticker": "VST",
@@ -42189,7 +42127,7 @@
       "sniper_score": -0.1156,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 794240989.713148
+      "avg_dv60": 794253968.81869
     },
     "VZ": {
       "ticker": "VZ",
@@ -42251,69 +42189,7 @@
       "sniper_score": 0.0544,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1046237536.8156456
-    },
-    "WBD": {
-      "ticker": "WBD",
-      "price": 30.95,
-      "price_date": "2026-10-05",
-      "ma20": 30.95,
-      "ma60": 30.95,
-      "ma200": 30.95,
-      "mom_2w": 0.0,
-      "mom_1m": 0.0,
-      "mom_3m": null,
-      "mom_12m": null,
-      "bias_ma60": 0.0,
-      "prox_52w": 100.0,
-      "winrate_tag": "🎯 黃金蓄勢突破",
-      "winrate_desc": "長線大牛 + 2W橫盤蓄勢未透支 + 季線甜蜜區，實證兩週勝率 57.4%，中位數報酬 +1.58%",
-      "winrate_grade": "golden",
-      "mom_1d": 0.0,
-      "mom_5d": 0.0,
-      "pullback_prob_3d": 47.4,
-      "pullback_prob_5d": 57.9,
-      "gap_limit_cap_price": 31.41,
-      "micro_dip_price": 30.89,
-      "smart_entry_mode": "open_with_gap_cap",
-      "smart_entry_tag": "🟢 開盤直買・跳空>1.5%掛 30.89",
-      "smart_entry_price": 30.95,
-      "smart_entry_desc": "黃金溫和起漲區，T+1 開盤於上限價 31.41 (+1.5%) 內 100% 開盤直買零踏空；僅當開盤跳空 > +1.5% 時改掛微結構低接價 C_T×0.998 (30.89) 等 2 天。",
-      "fip": 0.1,
-      "fip_126": 0.1,
-      "fip_60": 0.1,
-      "io_20": 0.0,
-      "io_60": 0.0,
-      "io_5": 0.0,
-      "io_accel": 0.0,
-      "vol_60d": 0.35,
-      "open_pool_quality_ok": false,
-      "ma20_reclaim": false,
-      "pocket_pivot_40": 0.0,
-      "pe_ratio": null,
-      "pb_ratio": null,
-      "roe_pct": null,
-      "trust_20d_pct": 0.0,
-      "whale_1000_pct": null,
-      "whale_400_pct": null,
-      "whale_scissors_pct": null,
-      "sniper_mult": 1.0,
-      "sniper_tag": "",
-      "sniper_desc": "",
-      "pb_depth_60": 0.2,
-      "rebound_20d": 0.0,
-      "pead_jump_63d": 0.0,
-      "convexity": 1.0,
-      "vcp": 0.86,
-      "chip": 0.17,
-      "rd_pct": 0.0,
-      "sustain_20d": 0.0,
-      "sortino_60": 0.0,
-      "score": null,
-      "sniper_score": null,
-      "churn_safe": true,
-      "liq_ok": false,
-      "avg_dv60": 1238.0
+      "avg_dv60": 1046511183.0248451
     },
     "WDAY": {
       "ticker": "WDAY",
@@ -42375,7 +42251,7 @@
       "sniper_score": 0.0037,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 621751834.3823364
+      "avg_dv60": 621835449.6024323
     },
     "WDC": {
       "ticker": "WDC",
@@ -42406,10 +42282,10 @@
       "fip": 0.12,
       "fip_126": 0.03,
       "fip_60": -0.02,
-      "io_20": 0.45,
-      "io_60": 0.578,
-      "io_5": 0.188,
-      "io_accel": 0.075,
+      "io_20": 0.448,
+      "io_60": 0.575,
+      "io_5": 0.186,
+      "io_accel": 0.074,
       "vol_60d": 0.65,
       "open_pool_quality_ok": true,
       "ma20_reclaim": false,
@@ -42422,8 +42298,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.04,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+7.5%/+4%)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+7.5%/+4%)（二階總乘數 ×1.04）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+7.4%/+4%)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+7.4%/+4%)（二階總乘數 ×1.04）",
       "pb_depth_60": 39.5,
       "rebound_20d": 10.3,
       "pead_jump_63d": 4.1,
@@ -42437,7 +42313,7 @@
       "sniper_score": 0.3358,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 3289406188.135427
+      "avg_dv60": 3289886860.037028
     },
     "WEGE3.SA": {
       "ticker": "WEGE3.SA",
@@ -42499,7 +42375,7 @@
       "sniper_score": 0.0644,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 510172751.10298795
+      "avg_dv60": 510178796.10306424
     },
     "WEGE3": {
       "ticker": "WEGE3.SA",
@@ -42561,7 +42437,7 @@
       "sniper_score": 0.0644,
       "churn_safe": false,
       "liq_ok": true,
-      "avg_dv60": 510172751.10298795
+      "avg_dv60": 510178796.10306424
     },
     "WELL": {
       "ticker": "WELL",
@@ -42623,7 +42499,7 @@
       "sniper_score": 0.1154,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 626591679.8053645
+      "avg_dv60": 626593451.0354105
     },
     "WFC": {
       "ticker": "WFC",
@@ -42677,7 +42553,7 @@
       "pead_jump_63d": 0.0,
       "convexity": 0.72,
       "vcp": 0.81,
-      "chip": 0.18,
+      "chip": 0.17,
       "rd_pct": 0.0,
       "sustain_20d": 0.0,
       "sortino_60": -0.91,
@@ -42685,7 +42561,7 @@
       "sniper_score": -0.0234,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 1165782729.4469044
+      "avg_dv60": 1166960704.4284565
     },
     "WMT": {
       "ticker": "WMT",
@@ -42716,7 +42592,7 @@
       "fip": 0.05,
       "fip_126": 0.0,
       "fip_60": 0.1,
-      "io_20": -0.008,
+      "io_20": -0.007,
       "io_60": 0.044,
       "io_5": -0.005,
       "io_accel": -0.003,
@@ -42747,7 +42623,7 @@
       "sniper_score": 0.1615,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2533061789.366896
+      "avg_dv60": 2533408216.3963876
     },
     "XEL": {
       "ticker": "XEL",
@@ -42809,7 +42685,7 @@
       "sniper_score": 0.0537,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 404723798.27051353
+      "avg_dv60": 404813602.42183685
     },
     "XOM": {
       "ticker": "XOM",
@@ -42871,7 +42747,7 @@
       "sniper_score": 0.4576,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 2183880177.9535074
+      "avg_dv60": 2185949043.9076743
     },
     "ZS": {
       "ticker": "ZS",
@@ -42902,10 +42778,10 @@
       "fip": 0.02,
       "fip_126": 0.13,
       "fip_60": 0.13,
-      "io_20": 0.224,
-      "io_60": 0.515,
-      "io_5": 0.116,
-      "io_accel": 0.06,
+      "io_20": 0.243,
+      "io_60": 0.535,
+      "io_5": 0.136,
+      "io_accel": 0.075,
       "vol_60d": 0.67,
       "open_pool_quality_ok": true,
       "ma20_reclaim": true,
@@ -42918,8 +42794,8 @@
       "whale_400_pct": null,
       "whale_scissors_pct": null,
       "sniper_mult": 1.0816,
-      "sniper_tag": "⚡日內吸籌點火(IO加速+6.0%/+4%) × 🔄月線洗盤回勾(+4%) × 📐exp_262正交壓縮突破(Sustain 45%/Sortino 4.8/×1.04)",
-      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+6.0%/+4%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.08）",
+      "sniper_tag": "⚡日內吸籌點火(IO加速+7.5%/+4%) × 🔄月線洗盤回勾(+4%) × 📐exp_262正交壓縮突破(Sustain 45%/Sortino 4.8/×1.04)",
+      "sniper_desc": "觸發 G9 跨市場正交精篩催化劑：⚡日內吸籌點火(IO加速+7.5%/+4%) × 🔄月線洗盤回勾(+4%)（二階總乘數 ×1.08）",
       "pb_depth_60": 26.5,
       "rebound_20d": 20.8,
       "pead_jump_63d": 16.5,
@@ -42929,11 +42805,11 @@
       "rd_pct": 0.0,
       "sustain_20d": 0.45,
       "sortino_60": 4.83,
-      "score": 0.1197,
-      "sniper_score": 0.1295,
+      "score": 0.1199,
+      "sniper_score": 0.1297,
       "churn_safe": true,
       "liq_ok": true,
-      "avg_dv60": 598341494.253449
+      "avg_dv60": 598356770.8672333
     }
   },
   "tw_only_ranked": [

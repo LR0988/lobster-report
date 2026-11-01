@@ -306,7 +306,7 @@ export const ALL_RANK_IC_FACTORS = [
   { key: 'zscore_20d', label: '🎚️ 20日價格 Z-Score (Mean Reversion)', cat: 'technicals', catName: '🛡️ 技術與乖離', desc: '(Price - 20MA) / Std20 超買超賣與急跌反彈' }
 ];
 
-export default function GlobalSovereignDashboard() {
+export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRunning, scraperStatus }) {
   const [data, setData] = useState(defaultData);
   const [loading, setLoading] = useState(false);
 
@@ -1935,10 +1935,41 @@ export default function GlobalSovereignDashboard() {
               />
             </div>
 
+            {onTriggerScraper && (
+              <button
+                className="btn"
+                onClick={onTriggerScraper}
+                disabled={isScraperRunning || loading}
+                title="立即從證交所與美股資料庫抓取最新價量，重新計算全球泰坦最新持股推薦與動能權重"
+                style={{
+                  padding: '0.22rem 0.65rem',
+                  fontSize: '0.76rem',
+                  fontWeight: 'bold',
+                  background: isScraperRunning ? 'rgba(37, 99, 235, 0.4)' : 'linear-gradient(135deg, #2563EB, #3B82F6)',
+                  border: '1px solid rgba(59, 130, 246, 0.6)',
+                  color: '#fff',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  cursor: isScraperRunning ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isScraperRunning ? (
+                  <>
+                    <span className="loader" style={{ width: '11px', height: '11px', borderWidth: '2px' }}></span>
+                    <span>{scraperStatus?.current_step || '正在更新全球泰坦...'}</span>
+                  </>
+                ) : (
+                  <span>⚡ 立即更新全球泰坦</span>
+                )}
+              </button>
+            )}
+
             <button
               className="btn btn-secondary"
               onClick={fetchData}
-              disabled={loading}
+              disabled={loading || isScraperRunning}
               style={{ padding: '0.22rem 0.6rem', fontSize: '0.76rem' }}
             >
               {loading ? '🔄 更新中' : '🔄 重新整理'}
