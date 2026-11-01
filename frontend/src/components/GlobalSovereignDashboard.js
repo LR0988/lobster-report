@@ -1867,7 +1867,7 @@ export default function GlobalSovereignDashboard() {
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              1,734檔無偏誤 PIT (S&amp;P 500 + 台灣0050∪0051純上市) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>2,150.8倍 (CAGR 42.32%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-20.01%</strong> (日MDD -24.96%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.11</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.28</strong> ｜ G1(05-14) <strong style={{ color: '#34D399' }}>47.57%</strong> / G2(15-26) <strong style={{ color: '#34D399' }}>29.03%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>22/22 (100.0%)</strong>
+              1,734檔無偏誤 PIT (S&amp;P 500 + 台灣0050∪0051純上市) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>1,621.2倍 (CAGR 40.48%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-21.99%</strong> (日MDD -29.60%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>1.84</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.26</strong> ｜ G1(05-14) <strong style={{ color: '#34D399' }}>43.29%</strong> / G2(15-26) <strong style={{ color: '#34D399' }}>37.08%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>19/22 (86.4%)</strong>
             </span>
             <button
               type="button"
@@ -2876,12 +2876,12 @@ export default function GlobalSovereignDashboard() {
                 fontSize: '0.74rem',
                 color: '#CBD5E1'
               }}>
-                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>🏆 G12-PIT Sovereign 實證 (2005–2026・CAGR 42.32%・2,150.8倍・月MDD -20.01%・Calmar 2.11・勝年 22/22 全勝)：</span>
+                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>🏆 G12-PIT Sovereign 實證 (2005–2026・CAGR 40.48%・1,621.2倍・月MDD -21.99%・Calmar 1.84・勝年 19/22)：</span>
                 <span>🧬 <strong style={{ color: '#A78BFA' }}>S&amp;P 500 PIT + 台灣 0050∪0051 純上市 PIT × 純粹動能 × exp_262(×1.04)</strong></span>
                 <span style={{ color: '#475569' }}>|</span>
                 <span>👑 <strong style={{ color: '#34D399' }}>52/24/24% 穩健信念配比</strong></span>
                 <span style={{ color: '#475569' }}>|</span>
-                <span>🛡️ <strong style={{ color: '#FCD34D' }}>exp_264 主升段 40~60 天護航 + 敗部定檢</strong> (月MDD壓入 -20.01%)</span>
+                <span>🛡️ <strong style={{ color: '#FCD34D' }}>exp_264 主升段 40~60 天護航 + 敗部定檢</strong> (月MDD壓入 -21.99%)</span>
               </div>
 
               <div style={{ overflowX: 'auto' }}>
@@ -3295,32 +3295,32 @@ export default function GlobalSovereignDashboard() {
                   </div>
                 </div>
 
-                {/* 頂部 5 大統計摘要卡 */}
+                {/* 頂部 5 大統計摘要卡 (動態對齊 g11_pit_yearly_history.json) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))', gap: '0.65rem', marginBottom: '0.95rem' }}>
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #FBBF24' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🏆 22年真實 PIT 年化報酬 (CAGR)</div>
                     <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>
-                      +42.32% <span style={{ fontSize: '0.75rem', color: '#34D399' }}>(累積 2,150.8 倍)</span>
+                      +{pitHistoryObj.cagr || 40.48}% <span style={{ fontSize: '0.75rem', color: '#34D399' }}>(累積 {Number(pitHistoryObj.mult || 1621.2).toLocaleString()} 倍)</span>
                     </div>
                     <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      100萬本金 ➔ 期末 NT$ 21.50 億
+                      100萬本金 ➔ 期末 NT$ {((pitHistoryObj.mult || 1621.2) / 10).toFixed(2)} 億
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (Monthly MDD)</div>
                     <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
-                      -20.01% <span style={{ fontSize: '0.74rem', color: '#67E8F9' }}>(Calmar 2.11)</span>
+                      {pitHistoryObj.monthly_mdd || -21.99}% <span style={{ fontSize: '0.74rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 1.84})</span>
                     </div>
                     <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      日度 MDD -24.96% ｜ Sharpe 1.28
+                      日度 MDD {pitHistoryObj.daily_mdd || -29.60}% ｜ Sharpe {pitHistoryObj.sharpe || 1.26}
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>⚖️ 雙世代無偏誤穩健度檢驗</div>
                     <div style={{ fontSize: '1.08rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
-                      G1: +47.57% ｜ G2: +29.03%
+                      G1: +{pitHistoryObj.g1_cagr || 43.29}% ｜ G2: +{pitHistoryObj.g2_cagr || 37.08}%
                     </div>
                     <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
                       2005–2014 與 2015–2026 雙世代皆穩定超額成長
@@ -3338,12 +3338,12 @@ export default function GlobalSovereignDashboard() {
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #A855F7' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🔥 歷次股災與逆風年全數正報酬</div>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🔥 歷次股災與逆風年強韌防禦</div>
                     <div style={{ fontSize: '1.02rem', fontWeight: 'bold', color: '#E9D5FF', fontFamily: 'monospace' }}>
-                      08年+28%・11年+5%・18年+48%・22年+13%
+                      08海嘯+29%・18年+40%・22升息+13%
                     </div>
                     <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      年度勝率 22/22 年 (100.0%)
+                      年度勝率 {pitHistoryObj.winning_years || '19/22 (86.4%)'} (弱勢年虧損大幅收窄)
                     </div>
                   </div>
                 </div>
@@ -3738,10 +3738,10 @@ export default function GlobalSovereignDashboard() {
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.73rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.16)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +42.32% ｜ 2,150.8倍 ｜ 月MDD -20.01% (日 -24.96%) ｜ Calmar 2.11 ｜ Sharpe 1.28
+                  CAGR +40.48% ｜ 1,621.2倍 ｜ 月MDD -21.99% (日 -29.60%) ｜ Calmar 1.84 ｜ Sharpe 1.26
                 </span>
                 <span style={{ fontSize: '0.73rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.18)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  G1(05-14) 47.57% / G2(15-26) 29.03% ｜ 勝年 22/22 (100.0%)
+                  G1(05-14) 43.29% / G2(15-26) 37.08% ｜ 勝年 19/22 (86.4%)
                 </span>
               </div>
             </div>
@@ -3987,15 +3987,15 @@ export default function GlobalSovereignDashboard() {
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>20/23 (87.0%)</td>
                     </tr>
                     <tr style={{ background: 'rgba(245, 158, 11, 0.22)', borderLeft: '3px solid #F59E0B' }}>
-                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版) - 移除防雷與研發加權 + exp_262正交突破 + exp_264主升段護航</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>42.32%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>2,150.8x</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-20.01%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-24.96%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>2.11</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.28</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>61.1%</td>
-                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>22/22 (100.0%)</td>
+                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版) - 移除防雷與研發加權 + FIP大型股鬆綁 + exp_262/264</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>40.48%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>1,621.2x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-21.99%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-29.60%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>1.84</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.26</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.6%</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>19/22 (86.4%)</td>
                     </tr>
                   </tbody>
                 </table>
@@ -4135,52 +4135,36 @@ export default function GlobalSovereignDashboard() {
               padding: '0.85rem 1rem'
             }}>
               <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#34D399', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span>📅 2005–2026（22年零遺漏）G12-PIT Sovereign (S&amp;P 500 + 台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（22勝 0負 100%全勝！2008 海嘯 +27.86%、2011 歐債 +4.74%、2015 +0.97%、2018 貿易戰 +47.69%、2021 +1.48%、2022 升息熊市 +13.17% 全數正報酬！）</span>
+                <span>📅 2005–2026（22年零遺漏）G12-PIT Sovereign (S&amp;P 500 + 台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（2008海嘯 +29.1%、2018貿易戰 +40.2%、2022升息熊市 +13.5% 強韌防禦；2010/2011/2021 弱勢年大減損）</span>
                 <span style={{ fontSize: '0.72rem', color: '#FDE047', fontFamily: 'monospace' }}>
-                  CAGR +42.32% ｜ 2,150.8倍 ｜ 月MDD -20.01% ｜ Calmar 2.11
+                  CAGR +40.48% ｜ 1,621.2倍 ｜ 月MDD -21.99% ｜ Calmar 1.84
                 </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(128px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>
-                {[
-                  { y: 2005, r: '+83.80%', note: 'AAPL/VLO/EOG', rocket: true },
-                  { y: 2006, r: '+109.30%', note: 'CHK/鴻準/宏達電', rocket: true },
-                  { y: 2007, r: '+198.05%', note: 'CHK/AMZN/AAPL', rocket: true },
-                  { y: 2008, r: '+27.86%', note: '🛡️CHK/台肥/EOG', shield: true },
-                  { y: 2009, r: '+30.20%', note: '🚀F/AMZN/FCX' },
-                  { y: 2010, r: '+16.80%', note: 'AKAM/CMI/FITB' },
-                  { y: 2011, r: '+4.74%', note: '🛡️NFLX/可成/宏達電', shield: true },
-                  { y: 2012, r: '+7.18%', note: 'STX/AAPL/M' },
-                  { y: 2013, r: '+77.84%', note: 'NFLX/MU/GILD', rocket: true },
-                  { y: 2014, r: '+7.24%', note: 'MU/DAL/WMB' },
-                  { y: 2015, r: '+0.97%', note: '🛡️NFLX/SWKS/LOW', shield: true },
-                  { y: 2016, r: '+38.73%', note: 'NVDA/AMZN/META', rocket: true },
-                  { y: 2017, r: '+23.98%', note: 'MU/NVDA/BA' },
-                  { y: 2018, r: '+47.69%', note: '🛡️NFLX/AMZN/國巨', shield: true },
-                  { y: 2019, r: '+10.79%', note: 'AMD/CMG/LLY' },
-                  { y: 2020, r: '+36.52%', note: 'AMD/NVDA/DXCM' },
-                  { y: 2021, r: '+1.48%', note: '🛡️TSLA/FCX/ETSY', shield: true },
-                  { y: 2022, r: '+13.17%', note: '🛡️XOM/DVN/COP', shield: true },
-                  { y: 2023, r: '+48.63%', note: 'NVDA/META/GE', rocket: true },
-                  { y: 2024, r: '+68.67%', note: 'NVDA/VST/PLTR', rocket: true },
-                  { y: 2025, r: '+24.30%', note: 'PLTR/GEV/貿聯-KY' },
-                  { y: '2026*', r: '+224.56%', note: '🚀WDC/SNDK/MU', rocket: true }
-                ].map((item) => (
-                  <div
-                    key={item.y}
-                    style={{
-                      background: item.rocket ? 'rgba(245, 158, 11, 0.18)' : (item.neg ? 'rgba(239, 68, 68, 0.12)' : (item.shield ? 'rgba(56, 189, 248, 0.12)' : 'rgba(255,255,255,0.03)')),
-                      border: `1px solid ${item.rocket ? 'rgba(245, 158, 11, 0.5)' : (item.neg ? 'rgba(239, 68, 68, 0.35)' : (item.shield ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255,255,255,0.06)'))}`,
-                      borderRadius: '5px',
-                      padding: '0.35rem 0.5rem',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <div style={{ color: '#94A3B8', fontSize: '0.66rem' }}>{item.y} {item.note && <span style={{ color: item.rocket ? '#FDE047' : '#7DD3FC' }}>({item.note})</span>}</div>
-                    <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: item.neg ? '#FCA5A5' : (item.rocket ? '#FDE047' : '#34D399'), marginTop: '1px' }}>
-                      {item.r}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>
+                {(Array.isArray(g11PitHistoryData?.yearly_history) ? g11PitHistoryData.yearly_history : []).map((item) => {
+                  const rNum = Number(item.return_pct || 0);
+                  const isNeg = rNum < 0;
+                  const isRocket = rNum >= 50.0;
+                  const isShield = [2008, 2011, 2018, 2022].includes(item.year);
+                  const topStr = (item.top_stocks || []).slice(0, 3).map(s => s.name ? s.name.split('(')[0] : s.ticker).join('/');
+                  return (
+                    <div
+                      key={item.year}
+                      style={{
+                        background: isRocket ? 'rgba(245, 158, 11, 0.18)' : (isNeg ? 'rgba(239, 68, 68, 0.12)' : (isShield ? 'rgba(56, 189, 248, 0.12)' : 'rgba(255,255,255,0.03)')),
+                        border: `1px solid ${isRocket ? 'rgba(245, 158, 11, 0.5)' : (isNeg ? 'rgba(239, 68, 68, 0.35)' : (isShield ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255,255,255,0.06)'))}`,
+                        borderRadius: '5px',
+                        padding: '0.35rem 0.5rem',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <div style={{ color: '#94A3B8', fontSize: '0.66rem' }}>{item.year} {topStr && <span style={{ color: isRocket ? '#FDE047' : '#7DD3FC' }}>({topStr})</span>}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: isNeg ? '#FCA5A5' : (isRocket ? '#FDE047' : '#34D399'), marginTop: '1px' }}>
+                        {rNum >= 0 ? '+' : ''}{rNum.toFixed(2)}%
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

@@ -152,7 +152,14 @@ def run_and_extract_g11_pit_history():
     intraday_ret = ((stk_adj - stk_open) / (stk_open + 1e-9)).fillna(0.0).astype(np.float32)
 
     dist_veto_g10 = np.where((stk_adj < ma20) & (io_5 < -0.01), 0.70, 1.0)
-    coiled_mask = (mom12m > 0.65) & (fip_252 > 0.08) & (dd20 >= -0.12) & (dd20 <= -0.03) & (bias20 >= -0.03) & (bias20 <= 0.04) & (io_20 > -0.02)
+
+    # 實證修正：大型美股 (S&P 500 流動性 Top 100) 解除 FIP 平滑度約束 (fip_252 > 0.08)
+    # 消除對跳空質變巨頭 (Big Jumpers) 的人為壓抑，台股與非大型美股維持 FIP 防假突破
+    is_mega_us = pd.DataFrame(False, index=idx, columns=cols)
+    is_mega_us[us_tickers] = (env["us_rk_pit"] <= 100).fillna(False)
+
+    fip_cond = (fip_252 > 0.08) | is_mega_us
+    coiled_mask = (mom12m > 0.65) & fip_cond & (dd20 >= -0.12) & (dd20 <= -0.03) & (bias20 >= -0.03) & (bias20 <= 0.04) & (io_20 > -0.02)
     coiled_spring_g11 = np.where(coiled_mask, 1.12, 1.0)
     score_g11 = (env["s_g5_open"][cols] * dist_veto_g10 * coiled_spring_g11).astype(np.float32)
 

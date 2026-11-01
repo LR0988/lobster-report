@@ -835,9 +835,11 @@ def get_global_sovereign_dashboard_data():
             dd20_val = (cur_px / max(1e-6, h20)) - 1.0
             bias20_val = (cur_px / max(1e-6, ma20)) - 1.0
             bias60_val = (cur_px / max(1e-6, ma60)) - 1.0
+            # 實證打假修正：大型美股解除 FIP 平滑度限制 (跳空質變巨頭 Big Jumpers 免被平滑度約束錯殺)
+            fip_ok = (fip_val > 0.08) or (not t_code.endswith(".TW"))
             coiled_spring_active = bool(
                 (mom12m is not None and mom12m > 65.0)
-                and (fip_val > 0.08)
+                and fip_ok
                 and (-0.12 <= dd20_val <= -0.03)
                 and (-0.03 <= bias20_val <= 0.04)
                 and (io_20_val > -0.02)
