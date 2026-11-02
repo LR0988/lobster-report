@@ -87541,5 +87541,1027 @@
       "tenure_months": 1,
       "max_tenure_months": 4
     }
+  ],
+  "recent_2026_rebalances": [
+    {
+      "year": 2026,
+      "rebal_date": "2026-10-22",
+      "entry_date": "2026-10-23",
+      "exit_date": "2026-10-30",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.57,
+      "is_active": true,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "VLO",
+          "name": "瓦萊羅能源",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 428.98,
+          "exit_price": 399.66,
+          "period_ret": -6.83,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 2,
+          "ticker": "MPC",
+          "name": "馬拉松石油",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 463.4,
+          "exit_price": 444.73,
+          "period_ret": -4.03,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "MRK",
+          "name": "默沙東",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 145.02,
+          "exit_price": 149.52,
+          "period_ret": 3.1,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-10-01",
+      "entry_date": "2026-10-02",
+      "exit_date": "2026-10-30",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 45.0,
+      "breadth": 0.75,
+      "is_active": true,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 23.4,
+          "entry_price": 1053.26,
+          "exit_price": 840.7,
+          "period_ret": -20.18,
+          "is_active": true,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 2,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 10.8,
+          "entry_price": 1773.12,
+          "exit_price": 1150.89,
+          "period_ret": -35.09,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 10.8,
+          "entry_price": 1107.18,
+          "exit_price": 884.74,
+          "period_ret": -20.09,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-09-22",
+      "entry_date": "2026-09-23",
+      "exit_date": "2026-10-23",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 72.0,
+      "breadth": 0.93,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 37.4,
+          "entry_price": 946.56,
+          "exit_price": 760.0,
+          "period_ret": -19.71,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 2,
+          "ticker": "DELL",
+          "name": "戴爾科技",
+          "market": "US",
+          "weight": 17.3,
+          "entry_price": 558.23,
+          "exit_price": 451.62,
+          "period_ret": -19.1,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 17.3,
+          "entry_price": 1895.41,
+          "exit_price": 1271.62,
+          "period_ret": -32.91,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-09-01",
+      "entry_date": "2026-09-02",
+      "exit_date": "2026-10-02",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.89,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 867.71,
+          "exit_price": 1053.26,
+          "period_ret": 21.38,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 2,
+          "ticker": "2368.TW",
+          "name": "金像電",
+          "market": "TW",
+          "weight": 24.0,
+          "entry_price": 9896.37,
+          "exit_price": 8996.7,
+          "period_ret": -9.09,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "MRK",
+          "name": "默沙東",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 150.61,
+          "exit_price": 143.77,
+          "period_ret": -4.54,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-08-24",
+      "entry_date": "2026-08-25",
+      "exit_date": "2026-09-23",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 60.0,
+      "breadth": 0.89,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 31.2,
+          "entry_price": 858.1,
+          "exit_price": 946.56,
+          "period_ret": 10.31,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 2,
+          "ticker": "DELL",
+          "name": "戴爾科技",
+          "market": "US",
+          "weight": 14.4,
+          "entry_price": 442.28,
+          "exit_price": 558.23,
+          "period_ret": 26.22,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "HPE",
+          "name": "HPE",
+          "market": "US",
+          "weight": 14.4,
+          "entry_price": 53.46,
+          "exit_price": 62.23,
+          "period_ret": 16.39,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-08-03",
+      "entry_date": "2026-08-04",
+      "exit_date": "2026-09-02",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 72.0,
+      "breadth": 0.84,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "DELL",
+          "name": "戴爾科技",
+          "market": "US",
+          "weight": 37.4,
+          "entry_price": 448.66,
+          "exit_price": 461.41,
+          "period_ret": 2.84,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 2,
+          "ticker": "HPE",
+          "name": "HPE",
+          "market": "US",
+          "weight": 17.3,
+          "entry_price": 52.48,
+          "exit_price": 51.86,
+          "period_ret": -1.18,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "DDOG",
+          "name": "DDOG",
+          "market": "US",
+          "weight": 17.3,
+          "entry_price": 272.03,
+          "exit_price": 219.46,
+          "period_ret": -19.33,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-07-22",
+      "entry_date": "2026-07-23",
+      "exit_date": "2026-08-25",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.91,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 555.54,
+          "exit_price": 446.58,
+          "period_ret": -19.61,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 975.13,
+          "exit_price": 928.98,
+          "period_ret": -4.73,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "STX",
+          "name": "希捷科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 904.28,
+          "exit_price": 813.85,
+          "period_ret": -10.0,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-07-01",
+      "entry_date": "2026-07-02",
+      "exit_date": "2026-08-04",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 50.0,
+      "breadth": 0.88,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 26.0,
+          "entry_price": 595.31,
+          "exit_price": 554.83,
+          "period_ret": -6.8,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 1041.34,
+          "exit_price": 866.82,
+          "period_ret": -16.76,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "INTC",
+          "name": "英特爾",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 128.92,
+          "exit_price": 95.24,
+          "period_ret": -26.12,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-06-22",
+      "entry_date": "2026-06-23",
+      "exit_date": "2026-07-23",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 50.0,
+      "breadth": 0.93,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 26.0,
+          "entry_price": 2007.7,
+          "exit_price": 1567.6,
+          "period_ret": -21.92,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 665.0,
+          "exit_price": 555.54,
+          "period_ret": -16.46,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 1079.83,
+          "exit_price": 975.13,
+          "period_ret": -9.7,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-06-01",
+      "entry_date": "2026-06-02",
+      "exit_date": "2026-07-02",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 50.0,
+      "breadth": 0.98,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 26.0,
+          "entry_price": 1750.06,
+          "exit_price": 2043.8,
+          "period_ret": 16.78,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 558.67,
+          "exit_price": 595.31,
+          "period_ret": 6.56,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 1049.84,
+          "exit_price": 1041.34,
+          "period_ret": -0.81,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-05-22",
+      "entry_date": "2026-05-26",
+      "exit_date": "2026-06-23",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 50.0,
+      "breadth": 0.98,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 26.0,
+          "entry_price": 1535.21,
+          "exit_price": 2007.7,
+          "period_ret": 30.78,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 2,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 963.01,
+          "exit_price": 832.15,
+          "period_ret": -13.59,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 3,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 12.0,
+          "entry_price": 504.54,
+          "exit_price": 665.0,
+          "period_ret": 31.8,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-05-01",
+      "entry_date": "2026-05-04",
+      "exit_date": "2026-06-02",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.98,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 1222.18,
+          "exit_price": 1750.06,
+          "period_ret": 43.19,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 2,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 986.88,
+          "exit_price": 935.13,
+          "period_ret": -5.24,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 430.48,
+          "exit_price": 558.67,
+          "period_ret": 29.78,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-04-22",
+      "entry_date": "2026-04-23",
+      "exit_date": "2026-05-26",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.99,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 948.54,
+          "exit_price": 1535.21,
+          "period_ret": 61.85,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 2,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 854.0,
+          "exit_price": 963.01,
+          "period_ret": 12.76,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 386.77,
+          "exit_price": 504.54,
+          "period_ret": 30.45,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-04-01",
+      "entry_date": "2026-04-02",
+      "exit_date": "2026-05-04",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.52,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 642.09,
+          "exit_price": 1222.18,
+          "period_ret": 90.34,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 2,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 708.59,
+          "exit_price": 986.88,
+          "period_ret": 39.27,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 278.01,
+          "exit_price": 430.48,
+          "period_ret": 54.84,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-03-23",
+      "entry_date": "2026-03-24",
+      "exit_date": "2026-04-23",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.5,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "STX",
+          "name": "希捷科技",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 401.55,
+          "exit_price": 573.37,
+          "period_ret": 42.79,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 693.69,
+          "exit_price": 948.54,
+          "period_ret": 36.74,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "LITE",
+          "name": "Lumentum",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 728.85,
+          "exit_price": 854.0,
+          "period_ret": 17.17,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-03-02",
+      "entry_date": "2026-03-03",
+      "exit_date": "2026-04-02",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.84,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 386.33,
+          "exit_price": 341.29,
+          "period_ret": -11.66,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "SNDK",
+          "name": "SanDisk",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 581.64,
+          "exit_price": 642.09,
+          "period_ret": 10.39,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "GLW",
+          "name": "康寧",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 151.23,
+          "exit_price": 135.93,
+          "period_ret": -10.12,
+          "is_active": false,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-02-23",
+      "entry_date": "2026-02-24",
+      "exit_date": "2026-03-24",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.85,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 281.64,
+          "exit_price": 294.35,
+          "period_ret": 4.51,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "STX",
+          "name": "希捷科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 408.78,
+          "exit_price": 401.55,
+          "period_ret": -1.77,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 428.97,
+          "exit_price": 401.05,
+          "period_ret": -6.51,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-02-02",
+      "entry_date": "2026-02-03",
+      "exit_date": "2026-03-03",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 1.0,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 279.21,
+          "exit_price": 254.3,
+          "period_ret": -8.92,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 4
+        },
+        {
+          "rank": 2,
+          "ticker": "STX",
+          "name": "希捷科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 450.04,
+          "exit_price": 360.09,
+          "period_ret": -19.99,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 441.91,
+          "exit_price": 386.33,
+          "period_ret": -12.58,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-01-22",
+      "entry_date": "2026-01-23",
+      "exit_date": "2026-02-24",
+      "tranche": "B梯隊 (月下旬調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 1.0,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 240.49,
+          "exit_price": 281.64,
+          "period_ret": 17.11,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 2,
+          "ticker": "STX",
+          "name": "希捷科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 343.35,
+          "exit_price": 408.78,
+          "period_ret": 19.06,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 396.93,
+          "exit_price": 428.97,
+          "period_ret": 8.07,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        }
+      ]
+    },
+    {
+      "year": 2026,
+      "rebal_date": "2026-01-02",
+      "entry_date": "2026-01-05",
+      "exit_date": "2026-02-03",
+      "tranche": "A梯隊 (月初調倉)",
+      "exposure_pct": 100.0,
+      "breadth": 0.93,
+      "is_active": false,
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "WDC",
+          "name": "威騰電子",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 192.97,
+          "exit_price": 279.21,
+          "period_ret": 44.7,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 3
+        },
+        {
+          "rank": 2,
+          "ticker": "STX",
+          "name": "希捷科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 294.01,
+          "exit_price": 450.04,
+          "period_ret": 53.07,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        },
+        {
+          "rank": 3,
+          "ticker": "MU",
+          "name": "美光科技",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 324.94,
+          "exit_price": 441.91,
+          "period_ret": 35.99,
+          "is_active": false,
+          "action": "🔄 贏家續抱",
+          "tenure_months": 2
+        }
+      ]
+    }
   ]
 }

@@ -1,13 +1,35 @@
-tw_stock.db
-*.db
-*.sqlite
-*.sqlite3
-*.parquet
+# Root directories and files that should not be uploaded
+pit_cache/
 venv/
 .venv/
 quant_weekly_system/
 research_notebooks/
-*.pkl
-frontend/build/
-frontend/node_modules/
+web-frontend/
+backend/
+memory/
 .git/
+
+# Node and build artifacts
+node_modules/
+frontend/node_modules/
+frontend/build/
+build/
+
+# Python, data, database, ML models
+*.py
+*.pyc
+__pycache__/
+*.joblib
+*.pkl
+*.parquet
+*.csv
+*.db
+*.db*
+*.sqlite
+*.sqlite3
+*.log
+*.log*
+*.jsonl
+*.zip
+*.tar.gz
+*.bin

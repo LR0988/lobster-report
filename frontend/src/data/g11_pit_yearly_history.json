@@ -7,15 +7,15 @@
   "daily_mdd": -29.6,
   "calmar": 1.84,
   "sharpe": 1.26,
-  "total_ret_pct": 137753.9,
+  "total_ret_pct": 162024.2,
   "sortino": 1.98,
-  "daily_calmar": 1.28,
-  "recent_8y_cagr": 39.79,
-  "semi_monthly_win_rate": 63.9,
-  "big_loss_rate": 11.3,
-  "g1_cagr": 41.81,
-  "g2_cagr": 35.89,
-  "winning_years": "19/22 (86.4%)",
+  "daily_calmar": 1.37,
+  "recent_8y_cagr": 39.57,
+  "semi_monthly_win_rate": 64.6,
+  "big_loss_rate": 11.1,
+  "g1_cagr": 43.29,
+  "g2_cagr": 37.08,
+  "winning_years": "19/21 (86.4%)",
   "yearly_history": [
     {
       "year": 2006,
@@ -24445,21 +24445,21 @@
     },
     {
       "year": 2026,
-      "return_pct": 162.13,
+      "return_pct": 158.92,
       "spy_ret_pct": 11.69,
-      "alpha_pct": 150.44,
-      "cum_mult": 1378.54,
-      "capital_twd": 1378538540.0,
-      "yearly_mdd_pct": -26.04,
-      "avg_exposure_pct": 77.5,
-      "total_rebal_slots": 57,
-      "us_slots": 56,
+      "alpha_pct": 147.24,
+      "cum_mult": 1361.69,
+      "capital_twd": 1361690074.0,
+      "yearly_mdd_pct": -26.21,
+      "avg_exposure_pct": 82.5,
+      "total_rebal_slots": 60,
+      "us_slots": 59,
       "tw_slots": 1,
-      "us_share_pct": 98.2,
-      "tw_share_pct": 1.8,
-      "cash_defense_periods": 1,
-      "unique_stocks_count": 12,
-      "unique_us_count": 11,
+      "us_share_pct": 98.3,
+      "tw_share_pct": 1.7,
+      "cash_defense_periods": 0,
+      "unique_stocks_count": 14,
+      "unique_us_count": 13,
       "unique_tw_count": 1,
       "top_stocks": [
         {
@@ -24515,8 +24515,8 @@
           "ticker": "MRK",
           "name": "默沙東",
           "market": "US",
-          "count": 1,
-          "cum_period_ret": -4.5
+          "count": 2,
+          "cum_period_ret": -1.4
         }
       ],
       "us_stocks": [
@@ -24572,10 +24572,50 @@
           "entry_date": "2026-10-23",
           "exit_date": "2026-10-30",
           "tranche": "B梯隊 (月下旬調倉)",
-          "exposure_pct": 0.0,
+          "exposure_pct": 100.0,
           "breadth": 0.57,
           "is_active": true,
-          "picks": []
+          "picks": [
+            {
+              "rank": 1,
+              "ticker": "VLO",
+              "name": "瓦萊羅能源",
+              "market": "US",
+              "weight": 52.0,
+              "entry_price": 428.98,
+              "exit_price": 399.66,
+              "period_ret": -6.83,
+              "is_active": true,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 2,
+              "ticker": "MPC",
+              "name": "馬拉松石油",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 463.4,
+              "exit_price": 444.73,
+              "period_ret": -4.03,
+              "is_active": true,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "MRK",
+              "name": "默沙東",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 145.02,
+              "exit_price": 149.52,
+              "period_ret": 3.1,
+              "is_active": true,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            }
+          ]
         },
         {
           "year": 2026,
@@ -25556,10 +25596,50 @@
       "entry_date": "2026-10-23",
       "exit_date": "2026-10-30",
       "tranche": "B梯隊 (月下旬調倉)",
-      "exposure_pct": 0.0,
+      "exposure_pct": 100.0,
       "breadth": 0.57,
       "is_active": true,
-      "picks": []
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "VLO",
+          "name": "瓦萊羅能源",
+          "market": "US",
+          "weight": 52.0,
+          "entry_price": 428.98,
+          "exit_price": 399.66,
+          "period_ret": -6.83,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 2,
+          "ticker": "MPC",
+          "name": "馬拉松石油",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 463.4,
+          "exit_price": 444.73,
+          "period_ret": -4.03,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        },
+        {
+          "rank": 3,
+          "ticker": "MRK",
+          "name": "默沙東",
+          "market": "US",
+          "weight": 24.0,
+          "entry_price": 145.02,
+          "exit_price": 149.52,
+          "period_ret": 3.1,
+          "is_active": true,
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
+        }
+      ]
     },
     {
       "year": 2026,
@@ -30122,6 +30202,21 @@
         "period_ret_pct": -4.54,
         "is_active": false,
         "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2026-10-22",
+        "entry_date": "2026-10-23",
+        "exit_date": "2026-10-30",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "MRK",
+        "name": "默沙東",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 145.02,
+        "exit_price": 149.52,
+        "period_ret_pct": 3.1,
+        "is_active": true,
+        "action": "🟢 買入建倉"
       }
     ],
     "2354": [
@@ -30564,6 +30659,21 @@
         "exit_price": 87.36,
         "period_ret_pct": 3.8,
         "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2026-10-22",
+        "entry_date": "2026-10-23",
+        "exit_date": "2026-10-30",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "VLO",
+        "name": "瓦萊羅能源",
+        "market": "US",
+        "weight_pct": 52.0,
+        "entry_price": 428.98,
+        "exit_price": 399.66,
+        "period_ret_pct": -6.83,
+        "is_active": true,
         "action": "🟢 買入建倉"
       }
     ],
@@ -37687,6 +37797,21 @@
         "exit_price": 25.04,
         "period_ret_pct": -18.56,
         "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2026-10-22",
+        "entry_date": "2026-10-23",
+        "exit_date": "2026-10-30",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "MPC",
+        "name": "馬拉松石油",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 463.4,
+        "exit_price": 444.73,
+        "period_ret_pct": -4.03,
+        "is_active": true,
         "action": "🟢 買入建倉"
       }
     ],
