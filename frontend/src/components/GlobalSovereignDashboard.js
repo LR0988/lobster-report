@@ -2565,239 +2565,251 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
 
           {/* =====================================================================
-              🏛️ 第一步：全球泰坦【現在 A 梯隊 vs B 梯隊 官方持有股票】(AB 梯隊完全分開並列)
+              🏛️ 1. 全球泰坦當前持股（A隊 / B隊 同一列並列・含曝險原因）
              ===================================================================== */}
           <div className="glass-card" style={{
-            padding: '1.2rem',
+            padding: '1.1rem',
             borderTop: '4px solid #F59E0B',
             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92))',
             border: '1px solid rgba(245, 158, 11, 0.35)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.85rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#FDE047', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                  🏛️ 第一步：全球泰坦【現在 A 隊 與 B 隊 官方持有股票】（A、B 梯隊分開獨立顯示）
+                <h4 style={{ margin: 0, color: '#FDE047', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  🏛️ 1. 全球泰坦當前持股（🅰️ A隊 vs 🅱️ B隊）
                 </h4>
-                <p style={{ margin: '0.25rem 0 0 0', color: '#CBD5E1', fontSize: '0.8rem' }}>
-                  全球泰坦將總資金對半分為 <strong style={{ color: '#38BDF8' }}>🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)</strong> 與 <strong style={{ color: '#C084FC' }}>🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)</strong>，兩隊各自獨立選股、獨立持有滿一個月才換倉。
+                <p style={{ margin: '0.2rem 0 0 0', color: '#CBD5E1', fontSize: '0.78rem' }}>
+                  總資金對半分為 <strong style={{ color: '#38BDF8' }}>🅰️ A隊 (每月1號調倉・50%資金)</strong> 與 <strong style={{ color: '#C084FC' }}>🅱️ B隊 (每月22號調倉・50%資金)</strong>，兩隊獨立選股、滿一個月換倉。
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <span style={{
-                  fontSize: '0.76rem',
-                  background: 'rgba(16, 185, 129, 0.18)',
-                  border: '1px solid rgba(16, 185, 129, 0.5)',
-                  color: '#6EE7B7',
-                  padding: '0.28rem 0.7rem',
-                  borderRadius: '6px',
-                  fontWeight: 'bold'
-                }}>
-                  🛡️ 當前綜合市場寬幅 63.3% (&ge;50%)：A、B 雙隊皆為 100% 正常持倉（自動轉向能源與防禦板塊）
-                </span>
-              </div>
+              <span style={{
+                fontSize: '0.75rem',
+                background: 'rgba(16, 185, 129, 0.18)',
+                border: '1px solid rgba(16, 185, 129, 0.5)',
+                color: '#6EE7B7',
+                padding: '0.25rem 0.65rem',
+                borderRadius: '6px',
+                fontWeight: 'bold'
+              }}>
+                📌 當前總曝險 100% 原因：全球市場寬幅 63.3% (&ge;50% 多頭區) 且 QQQ 乖離 19.7% (&lt;30% 未過熱) ➔ 雙隊 100% 滿倉進攻
+              </span>
             </div>
 
-            {/* A 梯隊 與 B 梯隊 雙欄並列卡片 */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '1.1rem' }}>
-              {/* 左欄：🅰️ A 梯隊官方當前持倉 */}
+            {/* A 隊 與 B 隊 同一列並列卡片（無雙卷軸） */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(410px, 1fr))', gap: '1rem' }}>
+              {/* 左欄：🅰️ A 隊當前持股 */}
               {(dashboardStationView === 'all' || dashboardStationView === 'titan_a') && (
                 <div style={{
                   background: 'rgba(14, 165, 233, 0.07)',
                   border: '1px solid rgba(56, 189, 248, 0.45)',
                   borderTop: '3px solid #38BDF8',
                   borderRadius: '8px',
-                  padding: '1rem'
+                  padding: '0.9rem'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                    <div>
-                      <div style={{ fontSize: '1.02rem', fontWeight: 'bold', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span>{officialTrancheA.tranche_name}</span>
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-                        最新調倉日：<strong style={{ color: '#F8FAFC' }}>{officialTrancheA.rebal_date}</strong> (進場日 {officialTrancheA.entry_date}) ｜ 下次換倉：<strong style={{ color: '#FCD34D' }}>{officialTrancheA.next_rebal_date}</strong>
-                      </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.45rem' }}>
+                    <div style={{ fontSize: '0.98rem', fontWeight: 'bold', color: '#38BDF8' }}>
+                      🅰️ A隊 當前持股（1號調倉・50%資金）
                     </div>
                     <span style={{
-                      fontSize: '0.73rem',
+                      fontSize: '0.72rem',
                       background: 'rgba(56, 189, 248, 0.2)',
                       color: '#7DD3FC',
                       border: '1px solid rgba(56, 189, 248, 0.5)',
-                      padding: '2px 8px',
+                      padding: '2px 7px',
                       borderRadius: '4px',
                       fontWeight: 'bold'
                     }}>
-                      🟢 A隊現在持有 3 檔 (曝險 {officialTrancheA.exposure_pct}%)
+                      調倉日 {officialTrancheA.rebal_date} ｜ 下次 {officialTrancheA.next_rebal_date}
                     </span>
                   </div>
 
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="custom-table" style={{ width: '100%', fontSize: '0.8rem' }}>
-                      <thead>
-                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                          <th style={{ textAlign: 'center', width: '48px' }}>順位</th>
-                          <th>A 隊官方持有股票</th>
-                          <th style={{ textAlign: 'right' }}>A隊權重 (總資金)</th>
-                          <th style={{ textAlign: 'right' }}>官方進場價</th>
-                          <th style={{ textAlign: 'right' }}>最新現價 (損益)</th>
-                          <th style={{ textAlign: 'center' }}>狀態</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(officialTrancheA.picks || []).map((p) => {
-                          const isPos = (p.period_ret_pct || 0) >= 0;
-                          const curr = p.market === 'US' ? 'US$ ' : 'NT$ ';
-                          return (
-                            <tr key={`off_a_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#7DD3FC' }}>
-                                {p.rank === 1 ? '🥇 #1' : p.rank === 2 ? '🥈 #2' : '🥉 #3'}
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                                  <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{p.ticker}</strong>
-                                  <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{formatStockDisplayName(p.ticker, p.name)}</span>
-                                  <StockChartButton ticker={p.ticker} name={p.name} />
-                                </div>
-                                <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
-                                  {p.sector || '核心動能正選'} ｜ 硬停損價 (-15%): <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>{curr}{p.stop_loss_price}</span>
-                                </div>
-                              </td>
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                <div style={{ color: '#38BDF8', fontWeight: 'bold', fontSize: '0.88rem' }}>A隊 {p.tranche_weight_pct}%</div>
-                                <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>佔總資金 {p.total_portfolio_weight_pct}%</div>
-                              </td>
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
-                                <div>{curr}{Number(p.entry_price).toLocaleString()}</div>
-                                <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{p.entry_date}</div>
-                              </td>
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                <div style={{ color: '#F8FAFC' }}>{curr}{Number(p.current_price).toLocaleString()}</div>
-                                <div style={{ fontSize: '0.72rem', color: isPos ? '#34D399' : '#F87171' }}>
-                                  ({isPos ? '+' : ''}{Number(p.period_ret_pct).toFixed(2)}%)
-                                </div>
-                              </td>
-                              <td style={{ textAlign: 'center' }}>
-                                <span style={{
-                                  fontSize: '0.72rem',
-                                  background: 'rgba(16, 185, 129, 0.2)',
-                                  color: '#34D399',
-                                  border: '1px solid rgba(16, 185, 129, 0.4)',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  whiteSpace: 'nowrap'
-                                }}>
-                                  🟢 {p.action || '持有中'}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  {/* A隊曝險原因條 */}
+                  <div style={{
+                    fontSize: '0.73rem',
+                    color: '#A7F3D0',
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    borderRadius: '5px',
+                    padding: '0.32rem 0.6rem',
+                    marginBottom: '0.6rem',
+                    fontWeight: 'bold'
+                  }}>
+                    📌 曝險 {officialTrancheA.exposure_pct}% 原因：{officialTrancheA.defense_reason || '全球寬幅 63.3% (≥50% 多頭標準) 且無過熱警訊 ➔ 100% 滿倉進攻'}
                   </div>
-                  <div style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: '#94A3B8', background: 'rgba(0,0,0,0.28)', padding: '0.4rem 0.65rem', borderRadius: '5px' }}>
+
+                  <table className="custom-table" style={{ width: '100%', fontSize: '0.79rem' }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                        <th style={{ textAlign: 'center', width: '36px' }}>#</th>
+                        <th>股票</th>
+                        <th style={{ textAlign: 'right' }}>權重</th>
+                        <th style={{ textAlign: 'right' }}>買價</th>
+                        <th style={{ textAlign: 'right' }}>現價 (損益)</th>
+                        <th style={{ textAlign: 'center' }}>狀態</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(officialTrancheA.picks || []).map((p) => {
+                        const isPos = (p.period_ret_pct || 0) >= 0;
+                        const curr = p.market === 'US' ? '$' : 'NT$';
+                        return (
+                          <tr key={`off_a_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#7DD3FC' }}>
+                              #{p.rank}
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                <strong style={{ color: '#F8FAFC', fontSize: '0.86rem' }}>{p.ticker}</strong>
+                                <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{formatStockDisplayName(p.ticker, p.name).split(' (')[0]}</span>
+                                <StockChartButton ticker={p.ticker} name={p.name} />
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '1px' }}>
+                                {p.sector || '動能正選'} ｜ 停損: <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>{curr}{p.stop_loss_price}</span>
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                              <div style={{ color: '#38BDF8', fontWeight: 'bold' }}>{p.tranche_weight_pct}%</div>
+                              <div style={{ fontSize: '0.67rem', color: '#94A3B8' }}>總資金{p.total_portfolio_weight_pct}%</div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                              <div>{curr}{Number(p.entry_price).toLocaleString()}</div>
+                              <div style={{ fontSize: '0.66rem', color: '#94A3B8' }}>{p.entry_date?.slice(5)}</div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                              <div style={{ color: '#F8FAFC' }}>{curr}{Number(p.current_price).toLocaleString()}</div>
+                              <div style={{ fontSize: '0.71rem', color: isPos ? '#34D399' : '#F87171' }}>
+                                {isPos ? '+' : ''}{Number(p.period_ret_pct).toFixed(2)}%
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <span style={{
+                                fontSize: '0.7rem',
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                color: '#34D399',
+                                border: '1px solid rgba(16, 185, 129, 0.4)',
+                                padding: '2px 5px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                持有中
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.71rem', color: '#94A3B8', background: 'rgba(0,0,0,0.28)', padding: '0.35rem 0.6rem', borderRadius: '5px' }}>
                     💡 {officialTrancheA.previous_rebal_note}
                   </div>
                 </div>
               )}
 
-              {/* 右欄：🅱️ B 梯隊官方當前持倉 */}
+              {/* 右欄：🅱️ B 隊當前持股 */}
               {(dashboardStationView === 'all' || dashboardStationView === 'titan_b') && (
                 <div style={{
                   background: 'rgba(168, 85, 247, 0.07)',
                   border: '1px solid rgba(192, 132, 252, 0.45)',
                   borderTop: '3px solid #C084FC',
                   borderRadius: '8px',
-                  padding: '1rem'
+                  padding: '0.9rem'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                    <div>
-                      <div style={{ fontSize: '1.02rem', fontWeight: 'bold', color: '#C084FC', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span>{officialTrancheB.tranche_name}</span>
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginTop: '0.2rem' }}>
-                        最新調倉日：<strong style={{ color: '#F8FAFC' }}>{officialTrancheB.rebal_date}</strong> (進場日 {officialTrancheB.entry_date}) ｜ 下次換倉：<strong style={{ color: '#FCD34D' }}>{officialTrancheB.next_rebal_date}</strong>
-                      </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.45rem' }}>
+                    <div style={{ fontSize: '0.98rem', fontWeight: 'bold', color: '#C084FC' }}>
+                      🅱️ B隊 當前持股（22號調倉・50%資金）
                     </div>
                     <span style={{
-                      fontSize: '0.73rem',
+                      fontSize: '0.72rem',
                       background: 'rgba(168, 85, 247, 0.2)',
                       color: '#E9D5FF',
                       border: '1px solid rgba(192, 132, 252, 0.5)',
-                      padding: '2px 8px',
+                      padding: '2px 7px',
                       borderRadius: '4px',
                       fontWeight: 'bold'
                     }}>
-                      🟢 B隊現在持有 3 檔 (曝險 {officialTrancheB.exposure_pct}%)
+                      調倉日 {officialTrancheB.rebal_date} ｜ 下次 {officialTrancheB.next_rebal_date}
                     </span>
                   </div>
 
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="custom-table" style={{ width: '100%', fontSize: '0.8rem' }}>
-                      <thead>
-                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                          <th style={{ textAlign: 'center', width: '48px' }}>順位</th>
-                          <th>B 隊官方持有股票</th>
-                          <th style={{ textAlign: 'right' }}>B隊權重 (總資金)</th>
-                          <th style={{ textAlign: 'right' }}>官方進場價</th>
-                          <th style={{ textAlign: 'right' }}>最新現價 (損益)</th>
-                          <th style={{ textAlign: 'center' }}>狀態</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(officialTrancheB.picks || []).map((p) => {
-                          const isPos = (p.period_ret_pct || 0) >= 0;
-                          const curr = p.market === 'US' ? 'US$ ' : 'NT$ ';
-                          return (
-                            <tr key={`off_b_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#E9D5FF' }}>
-                                {p.rank === 1 ? '🥇 #1' : p.rank === 2 ? '🥈 #2' : '🥉 #3'}
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                                  <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{p.ticker}</strong>
-                                  <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{formatStockDisplayName(p.ticker, p.name)}</span>
-                                  <StockChartButton ticker={p.ticker} name={p.name} />
-                                </div>
-                                <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
-                                  {p.sector || '核心動能正選'} ｜ 硬停損價 (-15%): <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>{curr}{p.stop_loss_price}</span>
-                                </div>
-                              </td>
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                <div style={{ color: '#C084FC', fontWeight: 'bold', fontSize: '0.88rem' }}>B隊 {p.tranche_weight_pct}%</div>
-                                <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>佔總資金 {p.total_portfolio_weight_pct}%</div>
-                              </td>
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
-                                <div>{curr}{Number(p.entry_price).toLocaleString()}</div>
-                                <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{p.entry_date}</div>
-                              </td>
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                <div style={{ color: '#F8FAFC' }}>{curr}{Number(p.current_price).toLocaleString()}</div>
-                                <div style={{ fontSize: '0.72rem', color: isPos ? '#34D399' : '#F87171' }}>
-                                  ({isPos ? '+' : ''}{Number(p.period_ret_pct).toFixed(2)}%)
-                                </div>
-                              </td>
-                              <td style={{ textAlign: 'center' }}>
-                                <span style={{
-                                  fontSize: '0.72rem',
-                                  background: 'rgba(16, 185, 129, 0.2)',
-                                  color: '#34D399',
-                                  border: '1px solid rgba(16, 185, 129, 0.4)',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  whiteSpace: 'nowrap'
-                                }}>
-                                  🟢 {p.action || '持有中'}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  {/* B隊曝險原因條 */}
+                  <div style={{
+                    fontSize: '0.73rem',
+                    color: '#A7F3D0',
+                    background: 'rgba(16, 185, 129, 0.12)',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    borderRadius: '5px',
+                    padding: '0.32rem 0.6rem',
+                    marginBottom: '0.6rem',
+                    fontWeight: 'bold'
+                  }}>
+                    📌 曝險 {officialTrancheB.exposure_pct}% 原因：{officialTrancheB.defense_reason || '全球寬幅 57.0% (≥50% 多頭標準) 且無過熱警訊 ➔ 100% 滿倉進攻'}
                   </div>
-                  <div style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: '#94A3B8', background: 'rgba(0,0,0,0.28)', padding: '0.4rem 0.65rem', borderRadius: '5px' }}>
+
+                  <table className="custom-table" style={{ width: '100%', fontSize: '0.79rem' }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                        <th style={{ textAlign: 'center', width: '36px' }}>#</th>
+                        <th>股票</th>
+                        <th style={{ textAlign: 'right' }}>權重</th>
+                        <th style={{ textAlign: 'right' }}>買價</th>
+                        <th style={{ textAlign: 'right' }}>現價 (損益)</th>
+                        <th style={{ textAlign: 'center' }}>狀態</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(officialTrancheB.picks || []).map((p) => {
+                        const isPos = (p.period_ret_pct || 0) >= 0;
+                        const curr = p.market === 'US' ? '$' : 'NT$';
+                        return (
+                          <tr key={`off_b_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
+                            <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#E9D5FF' }}>
+                              #{p.rank}
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                                <strong style={{ color: '#F8FAFC', fontSize: '0.86rem' }}>{p.ticker}</strong>
+                                <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{formatStockDisplayName(p.ticker, p.name).split(' (')[0]}</span>
+                                <StockChartButton ticker={p.ticker} name={p.name} />
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '1px' }}>
+                                {p.sector || '動能正選'} ｜ 停損: <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>{curr}{p.stop_loss_price}</span>
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                              <div style={{ color: '#C084FC', fontWeight: 'bold' }}>{p.tranche_weight_pct}%</div>
+                              <div style={{ fontSize: '0.67rem', color: '#94A3B8' }}>總資金{p.total_portfolio_weight_pct}%</div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                              <div>{curr}{Number(p.entry_price).toLocaleString()}</div>
+                              <div style={{ fontSize: '0.66rem', color: '#94A3B8' }}>{p.entry_date?.slice(5)}</div>
+                            </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                              <div style={{ color: '#F8FAFC' }}>{curr}{Number(p.current_price).toLocaleString()}</div>
+                              <div style={{ fontSize: '0.71rem', color: isPos ? '#34D399' : '#F87171' }}>
+                                {isPos ? '+' : ''}{Number(p.period_ret_pct).toFixed(2)}%
+                              </div>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <span style={{
+                                fontSize: '0.7rem',
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                color: '#34D399',
+                                border: '1px solid rgba(16, 185, 129, 0.4)',
+                                padding: '2px 5px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                持有中
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.71rem', color: '#94A3B8', background: 'rgba(0,0,0,0.28)', padding: '0.35rem 0.6rem', borderRadius: '5px' }}>
                     💡 {officialTrancheB.previous_rebal_note}
                   </div>
                 </div>
@@ -2806,28 +2818,28 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
           </div>
 
           {/* =====================================================================
-              🎯 第二步：給您的專屬跟單行動建議（🅰️ A 梯隊 與 🅱️ B 梯隊 完全獨立分開試算！）
+              🎯 2. 您的跟單買賣建議（A隊 / B隊 同一列並列・簡化表頭無卷軸）
              ===================================================================== */}
           <div className="glass-card" style={{
-            padding: '1.2rem',
+            padding: '1.1rem',
             borderTop: '4px solid #10B981',
             background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(6, 78, 59, 0.18))',
             border: '1px solid rgba(16, 185, 129, 0.4)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.85rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                  🎯 第二步：建議您持有的股票 &amp; 建議買進多少（🅰️ A 隊 與 🅱️ B 隊 完全分開試算）
+                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  🎯 2. 您的跟單買賣建議（🅰️ A隊 vs 🅱️ B隊）
                 </h4>
-                <p style={{ margin: '0.25rem 0 0 0', color: '#CBD5E1', fontSize: '0.8rem' }}>
-                  系統已將您的總資產淨值 <strong style={{ color: '#FDE047' }}>NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}</strong> 自動切分為：
-                  <strong style={{ color: '#38BDF8', marginLeft: '0.35rem' }}>🅰️ A隊 50% 預算 = NT$ {Math.round(separatedTrancheSuggestions.budgetTwdA).toLocaleString()} (約 US$ {Math.round(separatedTrancheSuggestions.budgetTwdA / usdFx).toLocaleString()})</strong>
-                  <span style={{ margin: '0 0.35rem' }}>｜</span>
-                  <strong style={{ color: '#C084FC' }}>🅱️ B隊 50% 預算 = NT$ {Math.round(separatedTrancheSuggestions.budgetTwdB).toLocaleString()} (約 US$ {Math.round(separatedTrancheSuggestions.budgetTwdB / usdFx).toLocaleString()})</strong>
+                <p style={{ margin: '0.2rem 0 0 0', color: '#CBD5E1', fontSize: '0.78rem' }}>
+                  總資產 <strong style={{ color: '#FDE047' }}>NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}</strong> 拆為：
+                  <strong style={{ color: '#38BDF8', marginLeft: '0.3rem' }}>🅰️ A隊預算 NT$ {Math.round(separatedTrancheSuggestions.budgetTwdA).toLocaleString()}</strong>
+                  <span style={{ margin: '0 0.3rem' }}>｜</span>
+                  <strong style={{ color: '#C084FC' }}>🅱️ B隊預算 NT$ {Math.round(separatedTrancheSuggestions.budgetTwdB).toLocaleString()}</strong>
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={handleSyncToOfficialABTranches}
@@ -2835,15 +2847,14 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                     background: 'linear-gradient(135deg, #10B981, #059669)',
                     border: '1px solid #34D399',
                     color: '#FFF',
-                    padding: '0.36rem 0.8rem',
+                    padding: '0.32rem 0.75rem',
                     borderRadius: '6px',
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)'
+                    cursor: 'pointer'
                   }}
                 >
-                  ⚡ 一鍵將我的帳本同步為【A+B 官方標準持倉】
+                  ⚡ 一鍵同步為 A+B 官方持倉
                 </button>
                 <button
                   type="button"
@@ -2852,14 +2863,14 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                     background: 'rgba(56, 189, 248, 0.18)',
                     border: '1px solid #38BDF8',
                     color: '#7DD3FC',
-                    padding: '0.34rem 0.68rem',
+                    padding: '0.3rem 0.6rem',
                     borderRadius: '6px',
-                    fontSize: '0.75rem',
+                    fontSize: '0.74rem',
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
                 >
-                  📋 複製 A 隊買賣單
+                  📋 複製 A隊單
                 </button>
                 <button
                   type="button"
@@ -2868,47 +2879,47 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                     background: 'rgba(168, 85, 247, 0.18)',
                     border: '1px solid #C084FC',
                     color: '#E9D5FF',
-                    padding: '0.34rem 0.68rem',
+                    padding: '0.3rem 0.6rem',
                     borderRadius: '6px',
-                    fontSize: '0.75rem',
+                    fontSize: '0.74rem',
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
                 >
-                  📋 複製 B 隊買賣單
+                  📋 複製 B隊單
                 </button>
                 {dismissedSuggestions.length > 0 && (
                   <button
                     type="button"
                     onClick={() => {
                       setDismissedSuggestions([]);
-                      triggerNotice('✓ 已重設所有調倉標記，重新為您生成即時最新建議！');
+                      triggerNotice('✓ 已重設調倉標記！');
                     }}
                     style={{
                       background: 'rgba(239, 68, 68, 0.18)',
                       border: '1px solid #EF4444',
                       color: '#FCA5A5',
-                      padding: '0.34rem 0.68rem',
+                      padding: '0.3rem 0.6rem',
                       borderRadius: '6px',
-                      fontSize: '0.75rem',
+                      fontSize: '0.74rem',
                       fontWeight: 'bold',
                       cursor: 'pointer'
                     }}
                   >
-                    ↺ 重設已標記 ({dismissedSuggestions.length})
+                    ↺ 重設 ({dismissedSuggestions.length})
                   </button>
                 )}
               </div>
             </div>
 
-            {/* 分別渲染 🅰️ A 梯隊跟單建議表 與 🅱️ B 梯隊跟單建議表 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+            {/* 🅰️ A隊 與 🅱️ B隊 跟單建議表：同一列左右並列（無雙卷軸） */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(410px, 1fr))', gap: '1rem' }}>
               {[
                 {
                   teamId: 'A',
                   visible: dashboardStationView === 'all' || dashboardStationView === 'titan_a',
-                  title: '🅰️ A 梯隊 (每月 1 號調倉・50% 總資金) — 建議您持有的股票 & 建議買進數量',
-                  subtitle: `對應 2026-11-02 官方 A 隊最新持倉 (MPC 52% / COP 24% / TXN 24%) ｜ A 隊專屬預算：NT$ ${Math.round(separatedTrancheSuggestions.budgetTwdA).toLocaleString()}`,
+                  title: '🅰️ A隊 跟單建議（1號調倉・預算 50%）',
+                  subtitle: `目標：MPC 52% / COP 24% / TXN 24%`,
                   accentColor: '#38BDF8',
                   bgTint: 'rgba(14, 165, 233, 0.06)',
                   rows: separatedTrancheSuggestions.trancheASuggestions
@@ -2916,8 +2927,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                 {
                   teamId: 'B',
                   visible: dashboardStationView === 'all' || dashboardStationView === 'titan_b',
-                  title: '🅱️ B 梯隊 (每月 22 號調倉・50% 總資金) — 建議您持有的股票 & 建議買進數量',
-                  subtitle: `對應 2026-10-22 官方 B 隊最新持倉 (VLO 52% / MPC 24% / MRK 24%) ｜ B 隊專屬預算：NT$ ${Math.round(separatedTrancheSuggestions.budgetTwdB).toLocaleString()}`,
+                  title: '🅱️ B隊 跟單建議（22號調倉・預算 50%）',
+                  subtitle: `目標：VLO 52% / MPC 24% / MRK 24%`,
                   accentColor: '#C084FC',
                   bgTint: 'rgba(168, 85, 247, 0.06)',
                   rows: separatedTrancheSuggestions.trancheBSuggestions
@@ -2928,232 +2939,194 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   style={{
                     background: sec.bgTint,
                     border: `1px solid ${sec.accentColor}66`,
-                    borderLeft: `4px solid ${sec.accentColor}`,
+                    borderTop: `3px solid ${sec.accentColor}`,
                     borderRadius: '8px',
-                    padding: '0.95rem 1.05rem'
+                    padding: '0.85rem'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.7rem' }}>
-                    <div>
-                      <div style={{ fontSize: '1rem', fontWeight: 'bold', color: sec.accentColor }}>
-                        {sec.title}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '0.15rem' }}>
-                        {sec.subtitle}
-                      </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.55rem' }}>
+                    <div style={{ fontSize: '0.96rem', fontWeight: 'bold', color: sec.accentColor }}>
+                      {sec.title}
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: '#94A3B8' }}>
+                      {sec.subtitle}
                     </div>
                   </div>
 
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="custom-table" style={{ width: '100%', fontSize: '0.83rem' }}>
-                      <thead>
-                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                          <th style={{ width: '92px', textAlign: 'center' }}>跟單動作</th>
-                          <th>建議您持有的股票 (代碼 / 名稱)</th>
-                          <th style={{ textAlign: 'right' }}>{sec.teamId}隊目標權重 (配置金額)</th>
-                          <th style={{ textAlign: 'right' }}>建議應持有股數</th>
-                          <th style={{ textAlign: 'right' }}>您目前在{sec.teamId}隊已持有</th>
-                          <th style={{ textAlign: 'right', color: '#FDE047' }}>🔥 建議買進 / 賣出多少</th>
-                          <th style={{ textAlign: 'center', width: '95px' }}>成交股數(可改)</th>
-                          <th style={{ textAlign: 'center', width: '105px' }}>成交價格(可改)</th>
-                          <th style={{ textAlign: 'right' }}>預估現金變動</th>
-                          <th style={{ textAlign: 'center', width: '110px' }}>一鍵記帳</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sec.rows.map((sugg) => {
-                          const rowVal = getRowValues(sugg);
-                          const isUsd = sugg.currency === 'USD';
-                          const curr = isUsd ? 'US$ ' : 'NT$ ';
-                          const fx = isUsd ? usdFx : 1.0;
+                  <table className="custom-table" style={{ width: '100%', fontSize: '0.78rem' }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                        <th style={{ width: '58px', textAlign: 'center' }}>動作</th>
+                        <th>股票</th>
+                        <th style={{ textAlign: 'right' }}>權重 (目標額)</th>
+                        <th style={{ textAlign: 'right' }}>應有/現有</th>
+                        <th style={{ textAlign: 'right', color: '#FDE047' }}>建議買賣</th>
+                        <th style={{ textAlign: 'center', width: '150px' }}>記帳 (股數/價)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sec.rows.map((sugg) => {
+                        const rowVal = getRowValues(sugg);
+                        const isUsd = sugg.currency === 'USD';
+                        return (
+                          <tr key={sugg.key} style={{ background: sugg.action === '買入' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.015)' }}>
+                            <td style={{ textAlign: 'center' }}>
+                              <span style={{
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                fontSize: '0.72rem',
+                                background: sugg.actionColor + '25',
+                                color: sugg.actionColor,
+                                border: `1px solid ${sugg.actionColor}60`,
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {sugg.action === '續抱' ? '續抱' : (sugg.action === '買入' ? '買進' : (sugg.action === '減持' ? '減持' : '賣出'))}
+                              </span>
+                            </td>
 
-                          const sharesNum = parseInt(rowVal.shares, 10) || 0;
-                          const priceNum = parseFloat(rowVal.price) || 0;
-                          const feeNum = parseFloat(rowVal.taxFee) || 0;
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
+                                <strong style={{ color: '#F8FAFC', fontSize: '0.85rem' }}>{sugg.ticker}</strong>
+                                <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{sugg.name.split(' (')[0]}</span>
+                              </div>
+                            </td>
 
-                          let cashDiffTwd = 0;
-                          if (sugg.action === '買入' || sugg.action === '加碼') {
-                            cashDiffTwd = -(sharesNum * priceNum * fx + (isUsd ? feeNum * fx : feeNum));
-                          } else {
-                            cashDiffTwd = (sharesNum * priceNum * fx - (isUsd ? feeNum * fx : feeNum));
-                          }
-
-                          return (
-                            <tr key={sugg.key} style={{ background: sugg.action === '買入' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.015)' }}>
-                              <td style={{ textAlign: 'center' }}>
-                                <span style={{
-                                  padding: '0.22rem 0.55rem',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  fontSize: '0.78rem',
-                                  background: sugg.actionColor + '25',
-                                  color: sugg.actionColor,
-                                  border: `1px solid ${sugg.actionColor}60`,
-                                  whiteSpace: 'nowrap'
-                                }}>
-                                  {sugg.action === '續抱' ? '✅ 已達標續抱' : (sugg.action === '買入' ? '🟢 建議買進' : (sugg.action === '減持' ? '🟠 建議減持' : '🔴 建議賣出'))}
-                                </span>
-                              </td>
-
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                                  <strong style={{ color: '#F8FAFC', fontSize: '0.9rem' }}>{sugg.ticker}</strong>
-                                  <strong style={{ color: '#E2E8F0' }}>{sugg.name}</strong>
-                                  <StockChartButton ticker={sugg.ticker} name={sugg.name} />
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                              <div style={{ color: sec.accentColor, fontWeight: 'bold' }}>
+                                {sugg.trancheWeightPct > 0 ? `${sugg.trancheWeightPct}%` : '0%'}
+                              </div>
+                              {sugg.targetTwd > 0 && (
+                                <div style={{ fontSize: '0.67rem', color: '#94A3B8' }}>
+                                  {isUsd ? `$${Math.round(sugg.targetOrig).toLocaleString()}` : `NT$${Math.round(sugg.targetTwd / 10000)}萬`}
                                 </div>
-                                <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '2px' }}>
-                                  <span style={{ color: sec.accentColor, fontWeight: 'bold' }}>{sugg.role}</span>
-                                  {sugg.sector && <span> ｜ {sugg.sector}</span>}
-                                </div>
-                              </td>
+                              )}
+                            </td>
 
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                <div style={{ color: '#F8FAFC', fontWeight: 'bold' }}>{sugg.targetWeightDisplay}</div>
-                                {sugg.targetTwd > 0 && (
-                                  <div style={{ fontSize: '0.72rem', color: '#67E8F9' }}>
-                                    NT$ {Math.round(sugg.targetTwd).toLocaleString()} {isUsd ? `(約 US$ ${Math.round(sugg.targetOrig).toLocaleString()})` : ''}
-                                  </div>
-                                )}
-                              </td>
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                              <div style={{ color: '#F8FAFC', fontWeight: 'bold' }}>應 {sugg.targetShares}股</div>
+                              <div style={{ fontSize: '0.68rem', color: sugg.currentShares > 0 ? '#34D399' : '#94A3B8' }}>
+                                現 {sugg.currentShares}股
+                              </div>
+                            </td>
 
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#CBD5E1' }}>
-                                {sugg.targetShares.toLocaleString()} 股
-                              </td>
-
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: sugg.currentShares > 0 ? '#34D399' : '#94A3B8' }}>
-                                <strong>{sugg.currentShares.toLocaleString()} 股</strong>
-                              </td>
-
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                {sugg.action === '續抱' ? (
-                                  <span style={{ color: '#34D399', fontWeight: 'bold' }}>0 股 (已買齊續抱)</span>
-                                ) : (
-                                  <div>
-                                    <div style={{
-                                      fontSize: '0.92rem',
-                                      fontWeight: 'bold',
-                                      color: sugg.action === '買入' ? '#FDE047' : '#FCA5A5'
-                                    }}>
-                                      {sugg.action === '買入' ? `買進 +${sugg.recShares} 股` : `賣出 -${sugg.recShares} 股`}
-                                    </div>
-                                    <div style={{ fontSize: '0.72rem', color: '#CBD5E1' }}>
-                                      約 {isUsd ? `US$ ${Math.round(sugg.recAmountOrig).toLocaleString()} (NT$ ${Math.round(sugg.recAmountTwd).toLocaleString()})` : `NT$ ${Math.round(sugg.recAmountTwd).toLocaleString()}`}
-                                    </div>
-                                  </div>
-                                )}
-                              </td>
-
-                              <td style={{ textAlign: 'center' }}>
-                                <input
-                                  type="number"
-                                  value={rowVal.shares}
-                                  onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
-                                  disabled={sugg.action === '續抱' || sugg.isExecuted}
-                                  style={{
-                                    width: '76px',
-                                    padding: '0.28rem 0.35rem',
-                                    borderRadius: '4px',
-                                    background: (sugg.action === '續抱' || sugg.isExecuted) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.65)',
-                                    border: (sugg.action === '續抱' || sugg.isExecuted) ? '1px solid rgba(255,255,255,0.1)' : `1px solid ${sec.accentColor}`,
-                                    color: (sugg.action === '續抱' || sugg.isExecuted) ? '#94A3B8' : '#FDE047',
+                            <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                              {sugg.action === '續抱' ? (
+                                <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.74rem' }}>0 股 (已齊)</span>
+                              ) : (
+                                <div>
+                                  <div style={{
+                                    fontSize: '0.84rem',
                                     fontWeight: 'bold',
-                                    textAlign: 'right',
-                                    fontFamily: 'monospace',
-                                    fontSize: '0.84rem'
-                                  }}
-                                />
-                              </td>
+                                    color: sugg.action === '買入' ? '#FDE047' : '#FCA5A5'
+                                  }}>
+                                    {sugg.action === '買入' ? `+${sugg.recShares} 股` : `-${sugg.recShares} 股`}
+                                  </div>
+                                  <div style={{ fontSize: '0.67rem', color: '#CBD5E1' }}>
+                                    {isUsd ? `≈$${Math.round(sugg.recAmountOrig).toLocaleString()}` : `≈NT$${Math.round(sugg.recAmountTwd).toLocaleString()}`}
+                                  </div>
+                                </div>
+                              )}
+                            </td>
 
-                              <td style={{ textAlign: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.18rem' }}>
-                                  <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{curr}</span>
+                            <td style={{ textAlign: 'center' }}>
+                              {sugg.isExecuted ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setDismissedSuggestions(prev => prev.filter(k => k !== sugg.key))}
+                                  style={{
+                                    padding: '2px 6px',
+                                    fontSize: '0.7rem',
+                                    background: 'rgba(59, 130, 246, 0.2)',
+                                    color: '#93C5FD',
+                                    border: '1px solid rgba(59, 130, 246, 0.4)',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  ✅已記帳(重算)
+                                </button>
+                              ) : sugg.action === '續抱' ? (
+                                <span style={{ fontSize: '0.72rem', color: '#34D399' }}>✅ 達標</span>
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                                  <input
+                                    type="number"
+                                    value={rowVal.shares}
+                                    onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
+                                    title="成交股數"
+                                    style={{
+                                      width: '46px',
+                                      padding: '2px 3px',
+                                      borderRadius: '3px',
+                                      background: 'rgba(0,0,0,0.65)',
+                                      border: `1px solid ${sec.accentColor}`,
+                                      color: '#FDE047',
+                                      fontWeight: 'bold',
+                                      textAlign: 'right',
+                                      fontFamily: 'monospace',
+                                      fontSize: '0.75rem'
+                                    }}
+                                  />
                                   <input
                                     type="number"
                                     step="0.1"
                                     value={rowVal.price}
                                     onChange={(e) => handleUpdateRowInput(sugg.key, 'price', e.target.value)}
+                                    title="成交價格"
                                     style={{
-                                      width: '76px',
-                                      padding: '0.28rem 0.35rem',
-                                      borderRadius: '4px',
+                                      width: '54px',
+                                      padding: '2px 3px',
+                                      borderRadius: '3px',
                                       background: 'rgba(0,0,0,0.65)',
                                       border: '1px solid rgba(255,255,255,0.25)',
                                       color: '#F8FAFC',
-                                      fontWeight: 'bold',
                                       textAlign: 'right',
                                       fontFamily: 'monospace',
-                                      fontSize: '0.84rem'
+                                      fontSize: '0.75rem'
                                     }}
                                   />
-                                </div>
-                              </td>
-
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: cashDiffTwd >= 0 ? '#34D399' : '#F87171' }}>
-                                {sugg.action === '續抱' ? 'NT$ 0' : `${cashDiffTwd >= 0 ? '+' : ''}NT$ ${Math.round(cashDiffTwd).toLocaleString()}`}
-                              </td>
-
-                              <td style={{ textAlign: 'center' }}>
-                                {sugg.isExecuted ? (
                                   <button
                                     type="button"
-                                    onClick={() => setDismissedSuggestions(prev => prev.filter(k => k !== sugg.key))}
+                                    onClick={() => handleExecuteSuggestion(sugg)}
                                     style={{
-                                      padding: '0.32rem 0.6rem',
-                                      fontSize: '0.73rem',
-                                      background: 'rgba(59, 130, 246, 0.2)',
-                                      color: '#93C5FD',
-                                      border: '1px solid rgba(59, 130, 246, 0.4)',
+                                      padding: '2px 6px',
+                                      fontSize: '0.72rem',
+                                      background: `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
+                                      color: '#FFF',
+                                      border: 'none',
                                       borderRadius: '4px',
                                       fontWeight: 'bold',
                                       cursor: 'pointer',
                                       whiteSpace: 'nowrap'
                                     }}
                                   >
-                                    ✅ 已執行 (↺重算)
+                                    送出
                                   </button>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleExecuteSuggestion(sugg)}
-                                    disabled={sugg.action === '續抱'}
-                                    style={{
-                                      padding: '0.34rem 0.75rem',
-                                      fontSize: '0.76rem',
-                                      background: sugg.action === '續抱' ? 'rgba(16, 185, 129, 0.2)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
-                                      color: sugg.action === '續抱' ? '#34D399' : '#FFF',
-                                      border: sugg.action === '續抱' ? '1px solid rgba(16, 185, 129, 0.45)' : 'none',
-                                      borderRadius: '4px',
-                                      fontWeight: 'bold',
-                                      cursor: sugg.action === '續抱' ? 'default' : 'pointer',
-                                      whiteSpace: 'nowrap'
-                                    }}
-                                  >
-                                    {sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出'}
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               ))}
             </div>
           </div>
 
           {/* =====================================================================
-              💼 第三步：您的實戰持有中部位與帳本管理 (Current Live Holdings)
+              💼 3. 我的目前持股 (Current Live Holdings)
              ===================================================================== */}
-          <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #38BDF8' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+          <div className="glass-card" style={{ padding: '1.1rem', borderTop: '3px solid #38BDF8' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  💼 第三步：您的實戰帳本持有中部位 ({userPositions.length} 檔)
+                  💼 3. 我的目前持股 ({userPositions.length} 檔)
                 </h4>
-                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.76rem' }}>
-                  100% 由下方歷史交易流水帳自動推導。您可於上方「第二步」點擊「🚀 確認送出」或「⚡ 一鍵將我的帳本同步為 A+B 官方標準持倉」更新帳本。
+                <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.75rem' }}>
+                  由歷史流水帳自動計算。可於上方「2. 跟單買賣建議」點擊「送出」或「⚡ 一鍵同步為 A+B 官方持倉」更新。
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -3928,18 +3901,44 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
             const overallUsShare = ((totalUsSlots / totalAllSlots) * 100).toFixed(1);
             const overallTwShare = ((totalTwSlots / totalAllSlots) * 100).toFixed(1);
 
+            const getRebalanceExposureReason = (rb) => {
+              if (rb.defense_reason && rb.defense_reason !== '正常進攻 (100% 滿倉)') {
+                return rb.defense_reason;
+              }
+              const exp = Number(rb.exposure_pct !== undefined ? rb.exposure_pct : 100);
+              const rawBr = rb.breadth !== undefined && rb.breadth !== null ? Number(rb.breadth) : (rb.us_breadth_pct || 0.633);
+              const brPct = rawBr <= 1.5 ? (rawBr * 100).toFixed(1) : Number(rawBr).toFixed(1);
+              if (exp >= 99.5) return `全球寬幅 ${brPct}% (≥50% 多頭標準) 且無過熱/破線警訊 ➔ 100% 滿倉進攻`;
+              if (Math.abs(exp - 95) < 1) return `全球寬幅 ${brPct}% (30~50% 警戒區)，因 QQQ 守穩季線且選擇權莊家地板支撐 ➔ 回補至 95%`;
+              if (Math.abs(exp - 82) < 1) return `全球寬幅 ${brPct}% (<30% 深熊區)，因 QQQ 站上月線且寬幅急彈 ≥8% 機構吸籌 ➔ V轉先遣 82%`;
+              if (Math.abs(exp - 72) < 1) return `全球寬幅 ${brPct}%，觸發 C1 護盾 (10Y美債殖利率急升 × 選擇權避險減弱) ➔ 預防降倉至 72%`;
+              if (Math.abs(exp - 70) < 1) return `全球寬幅 ${brPct}% 落入 30%~50% 警戒區 (QQQ 仍守穩季線) ➔ 防禦降倉至 70%`;
+              if (Math.abs(exp - 65) < 1) return `全球寬幅 ${brPct}%，觸發 C2 護盾 (QQQ跌破季線 × 科技相對轉弱 × 機構流出) ➔ 降倉至 65%`;
+              if (Math.abs(exp - 60) < 1) return `全球寬幅 ${brPct}%，觸發 C3 護盾 (Top5 領頭羊集體機構出貨 × 大盤破月線) ➔ 降倉至 60%`;
+              if (Math.abs(exp - 50) < 1) {
+                return Number(brPct) >= 50
+                  ? `全球寬幅 ${brPct}%，觸發模組 C 2.0 過熱閥門 (QQQ年線乖離 ≥30% × 10Y美債 ≥3.5%) ➔ 半倉防禦 50%`
+                  : `全球寬幅 ${brPct}% (30~50% 警戒區) × 選擇權異常放量避險 ➔ 半倉防禦 50%`;
+              }
+              if (Math.abs(exp - 45) < 1) return `全球寬幅 ${brPct}%，觸發 C4 護盾 (10Y美債20日急升 ≥0.22% × 高乖離科技轉弱) ➔ 降倉至 45%`;
+              if (Math.abs(exp - 35) < 1) return `全球寬幅 ${brPct}% (30~50% 警戒區) 且 QQQ 跌破 60MA 季線 (M1減震器) ➔ 降倉至 35%`;
+              if (Math.abs(exp - 20) < 1) return `全球寬幅 ${brPct}% (30~50% 警戒區) 且 QQQ 破季線 + SPY 破月線雙殺 (C6護盾) ➔ 極度防禦 20%`;
+              if (exp <= 0.5) return `全球寬幅 ${brPct}% (<30% 全面空頭警戒區) ➔ 100% 空倉抱現金避險`;
+              return `全球寬幅 ${brPct}%，依宏觀動能護盾動態調節 ➔ 曝險 ${exp}%`;
+            };
+
             return (
               <div id="g11-pit-history-section" className="glass-card" style={{
-                padding: '1.25rem 1.35rem',
+                padding: '1.15rem 1.25rem',
                 borderTop: '3px solid #F59E0B',
                 background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92))',
                 border: '1px solid rgba(245, 158, 11, 0.35)'
               }}>
-                {/* 標題與篩選按鈕列 */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.9rem' }}>
+                {/* 簡化標題與篩選按鈕列 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
                   <div>
-                    <h4 style={{ margin: 0, color: '#FDE047', fontSize: '1.12rem', display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                      <span>📅 G12-PIT Sovereign (配置七) 歷年績效與歷年購買股票種類全景明細 (2005–2026・22年真實無生存者偏誤回測)</span>
+                    <h4 style={{ margin: 0, color: '#FDE047', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                      <span>📅 4. 歷年績效與 A/B 隊買賣明細（2005–2026）</span>
                       <span style={{
                         fontSize: '0.72rem',
                         background: 'rgba(16, 185, 129, 0.2)',
@@ -3949,28 +3948,28 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         borderRadius: '4px',
                         fontWeight: 'bold'
                       }}>
-                        ✅ S&P 500 PIT + 台灣 0050∪0051 純上市 PIT (2005–2026 零遺漏) × 移除防雷/研發加權 × exp_262/264
+                        CAGR +40.48% ｜ 1,621.2倍 ｜ 無生存者偏誤回測
                       </span>
                     </h4>
-                    <p style={{ margin: '0.28rem 0 0 0', color: '#CBD5E1', fontSize: '0.77rem', lineHeight: 1.5 }}>
-                      嚴格對齊台股資料庫起點（<strong>2005-01-03 ~ 2026-10-29 共 22 年 5,338 個交易日，剔除無台股 0050∪0051 資料之 2004 年</strong>），鎖定<strong>美股 S&P 500 官方當期成分股 (956檔)</strong> 與 <strong>台股 0050 ∪ 0051 歷史純上市成分股 (778檔・100% 零遺漏・剔除所有上櫃股與轉上市前區間)</strong>，22 年創造 <strong>22 勝 0 負 (100.0% 全勝年)</strong>！
+                    <p style={{ margin: '0.22rem 0 0 0', color: '#CBD5E1', fontSize: '0.76rem' }}>
+                      點擊任一年份即可展開該年每個月的 <strong style={{ color: '#38BDF8' }}>🅰️ A隊 (1號)</strong> 與 <strong style={{ color: '#C084FC' }}>🅱️ B隊 (22號)</strong> 買賣細節、每筆損益與當期曝險原因。
                     </p>
                   </div>
 
                   {/* 世代與情境篩選器 */}
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                     {[
-                      { key: 'ALL', label: '🌐 全部 22 年 (2005–2026)' },
-                      { key: 'G1', label: '🏛️ G1 早年世代 (2005–2014・CAGR 47.57%)' },
-                      { key: 'G2', label: '🚀 G2 近年世代 (2015–2026・CAGR 29.03%)' },
-                      { key: 'BEAR', label: '🛡️ 股災/逆風檢驗年 (2008/2011/2018/2022)' }
+                      { key: 'ALL', label: '🌐 全部 (2005–2026)' },
+                      { key: 'G1', label: '🏛️ 早年 (2005–2014)' },
+                      { key: 'G2', label: '🚀 近年 (2015–2026)' },
+                      { key: 'BEAR', label: '🛡️ 股災年 (08/11/18/22)' }
                     ].map((btn) => (
                       <button
                         key={btn.key}
                         type="button"
                         onClick={() => setPitYearFilter(btn.key)}
                         style={{
-                          padding: '0.3rem 0.7rem',
+                          padding: '0.28rem 0.65rem',
                           borderRadius: '5px',
                           fontSize: '0.74rem',
                           fontWeight: 'bold',
@@ -3986,89 +3985,74 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   </div>
                 </div>
 
-                {/* 頂部 5 大統計摘要卡 (動態對齊 g11_pit_yearly_history.json) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))', gap: '0.65rem', marginBottom: '0.95rem' }}>
-                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #FBBF24' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🏆 22年真實 PIT 年化報酬 (CAGR)</div>
-                    <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>
-                      +{pitHistoryObj.cagr || 40.48}% <span style={{ fontSize: '0.75rem', color: '#34D399' }}>(累積 {Number(pitHistoryObj.mult || 1621.2).toLocaleString()} 倍)</span>
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      100萬本金 ➔ 期末 NT$ {((pitHistoryObj.mult || 1621.2) / 10).toFixed(2)} 億
+                {/* 頂部 5 大統計摘要卡 */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))', gap: '0.65rem', marginBottom: '0.9rem' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #FBBF24' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🏆 年化報酬 (CAGR)</div>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>
+                      +{pitHistoryObj.cagr || 40.48}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 1621.2).toLocaleString()}倍)</span>
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (Monthly MDD)</div>
-                    <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
-                      {pitHistoryObj.monthly_mdd || -21.99}% <span style={{ fontSize: '0.74rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 1.84})</span>
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      日度 MDD {pitHistoryObj.daily_mdd || -29.60}% ｜ Sharpe {pitHistoryObj.sharpe || 1.26}
+                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (MDD)</div>
+                    <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
+                      {pitHistoryObj.monthly_mdd || -21.99}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 1.84})</span>
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>⚖️ 雙世代無偏誤穩健度檢驗</div>
-                    <div style={{ fontSize: '1.08rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
-                      G1: +{pitHistoryObj.g1_cagr || 43.29}% ｜ G2: +{pitHistoryObj.g2_cagr || 37.08}%
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      2005–2014 與 2015–2026 雙世代皆穩定超額成長
+                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>⚖️ 雙世代年化報酬</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
+                      05-14: +{pitHistoryObj.g1_cagr || 43.29}% ｜ 15-26: +{pitHistoryObj.g2_cagr || 37.08}%
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #60A5FA' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🌎 22年累計購買股票種類佔比</div>
-                    <div style={{ fontSize: '1.08rem', fontWeight: 'bold', color: '#93C5FD', fontFamily: 'monospace' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #60A5FA' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🌎 累計選股市場佔比</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#93C5FD', fontFamily: 'monospace' }}>
                       🇺🇸 美股 {overallUsShare}% ｜ 🇹🇼 台股 {overallTwShare}%
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      美股 {totalUsSlots} 倉次 vs 台股 {totalTwSlots} 倉次
-                    </div>
                   </div>
 
-                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: '3px solid #A855F7' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🔥 歷次股災與逆風年強韌防禦</div>
-                    <div style={{ fontSize: '1.02rem', fontWeight: 'bold', color: '#E9D5FF', fontFamily: 'monospace' }}>
-                      08海嘯+29%・18年+40%・22升息+13%
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#CBD5E1', marginTop: '2px' }}>
-                      年度勝率 {pitHistoryObj.winning_years || '19/22 (86.4%)'} (弱勢年虧損大幅收窄)
+                  <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #A855F7' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🔥 股災年表現</div>
+                    <div style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#E9D5FF', fontFamily: 'monospace' }}>
+                      08年+29%・18年+40%・22年+13%
                     </div>
                   </div>
                 </div>
 
-                {/* 🔍 持股即時核對工具列 (我有沒有買對？) */}
+                {/* 🔍 持股即時核對工具列 */}
                 <div style={{
-                  marginBottom: '1rem',
-                  padding: '0.75rem 1rem',
+                  marginBottom: '0.9rem',
+                  padding: '0.65rem 0.9rem',
                   background: 'rgba(30, 41, 59, 0.75)',
                   border: '1px solid rgba(251, 191, 36, 0.3)',
                   borderRadius: '8px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '1rem' }}>🔍</span>
-                      <strong style={{ color: '#FDE047', fontSize: '0.85rem' }}>泰坦官方持股即時核對器</strong>
-                      <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-                        (輸入股票代號快速查詢該檔在 2005–2026 年是否為官方選股、何時買進/賣出與進出場價)
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <span style={{ fontSize: '0.95rem' }}>🔍</span>
+                      <strong style={{ color: '#FDE047', fontSize: '0.84rem' }}>官方選股查詢</strong>
+                      <span style={{ fontSize: '0.73rem', color: '#94A3B8' }}>
+                        (輸入代號查詢歷史買賣紀錄與進出場價)
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                       <input
                         type="text"
-                        placeholder="輸入代號 (例: 2408, 3037, LITE, WDC, SNDK, MU, PSX)..."
+                        placeholder="輸入代號 (例: 2408, 3037, MPC, VLO, LITE)..."
                         value={pitSearchQuery}
                         onChange={(e) => setPitSearchQuery(e.target.value.trim().toUpperCase())}
                         style={{
                           background: 'rgba(15, 23, 42, 0.9)',
                           border: '1px solid #64748B',
                           color: '#F8FAFC',
-                          padding: '0.35rem 0.75rem',
+                          padding: '0.32rem 0.7rem',
                           borderRadius: '5px',
-                          fontSize: '0.8rem',
-                          width: '260px'
+                          fontSize: '0.78rem',
+                          width: '240px'
                         }}
                       />
                       {pitSearchQuery && (
@@ -4079,10 +4063,10 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                             background: 'rgba(239, 68, 68, 0.2)',
                             border: '1px solid #EF4444',
                             color: '#FCA5A5',
-                            padding: '0.35rem 0.6rem',
+                            padding: '0.32rem 0.55rem',
                             borderRadius: '4px',
                             cursor: 'pointer',
-                            fontSize: '0.75rem'
+                            fontSize: '0.74rem'
                           }}
                         >
                           ✕ 清除
@@ -4100,24 +4084,22 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
                     if (matchedTrades.length === 0) {
                       return (
-                        <div style={{ marginTop: '0.65rem', padding: '0.55rem 0.8rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', fontSize: '0.78rem', color: '#FCA5A5' }}>
-                          ⚠️ <strong>未命中官方選股</strong>：代號 <strong>{pitSearchQuery}</strong> 在泰坦 G12-PIT 官方歷史調倉中未曾入選。
-                          <span style={{ color: '#94A3B8', marginLeft: '6px' }}>請核對是否為個人主觀選股或代號輸入有誤。</span>
+                        <div style={{ marginTop: '0.55rem', padding: '0.5rem 0.75rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', fontSize: '0.76rem', color: '#FCA5A5' }}>
+                          ⚠️ 代號 <strong>{pitSearchQuery}</strong> 未曾入選官方歷史調倉。
                         </div>
                       );
                     }
 
                     return (
-                      <div style={{ marginTop: '0.65rem', padding: '0.65rem 0.8rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                          <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.82rem' }}>
-                            ✅ 命中泰坦官方選股！代號 {matchedTrades[0]?.ticker} ({matchedTrades[0]?.name}) 共入選 {matchedTrades.length} 次調倉
+                      <div style={{ marginTop: '0.55rem', padding: '0.6rem 0.75rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                          <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                            ✅ {matchedTrades[0]?.ticker} ({matchedTrades[0]?.name}) 共入選 {matchedTrades.length} 次調倉
                           </span>
-                          <span style={{ color: '#94A3B8', fontSize: '0.72rem' }}>按調倉日期倒序排列</span>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.45rem' }}>
                           {matchedTrades.slice(0, 6).map((tr, idx) => (
-                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '0.45rem 0.6rem', borderRadius: '4px', borderLeft: tr.is_active ? '3px solid #10B981' : '3px solid #38BDF8', fontSize: '0.74rem' }}>
+                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.55rem', borderRadius: '4px', borderLeft: tr.is_active ? '3px solid #10B981' : '3px solid #38BDF8', fontSize: '0.73rem' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#FDE047', fontWeight: 'bold' }}>
                                 <span>📅 {tr.date} ({tr.tranche})</span>
                                 <span style={{ color: tr.period_ret_pct >= 0 ? '#34D399' : '#FCA5A5' }}>
@@ -4125,11 +4107,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                 </span>
                               </div>
                               <div style={{ color: '#CBD5E1', marginTop: '2px', display: 'flex', justifyContent: 'space-between' }}>
-                                <span>買入: {tr.entry_price} ➔ 出場: {tr.exit_price}</span>
+                                <span>買價: {tr.entry_price} ➔ 賣價: {tr.exit_price}</span>
                                 <span>權重: {tr.weight_pct}%</span>
-                              </div>
-                              <div style={{ fontSize: '0.68rem', color: tr.is_active ? '#34D399' : '#94A3B8', marginTop: '1px' }}>
-                                {tr.is_active ? '🟢 當前最新持倉中' : `⚪ 調倉出場 (${tr.exit_date})`} ｜ {tr.action}
                               </div>
                             </div>
                           ))}
@@ -4139,19 +4118,19 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   })()}
                 </div>
 
-                {/* 2005–2026 歷年績效全景大表 (大表不列股票清單，點擊展開後依 🅰️ A 隊 / 🅱️ B 隊 分開並列顯示每期買賣細節與每筆損益) */}
-                <div style={{ overflowX: 'auto' }}>
+                {/* 2005–2026 歷年績效簡化大表 */}
+                <div>
                   <table className="custom-table" style={{ width: '100%', fontSize: '0.82rem' }}>
                     <thead>
                       <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                        <th style={{ textAlign: 'center', width: '95px' }}>年份</th>
-                        <th style={{ textAlign: 'right', width: '115px', color: '#FDE047' }}>G12-PIT 年度報酬</th>
-                        <th style={{ textAlign: 'right', width: '105px', color: '#94A3B8' }}>SPY 基準報酬</th>
-                        <th style={{ textAlign: 'right', width: '110px', color: '#34D399' }}>超額 Alpha</th>
-                        <th style={{ textAlign: 'right', width: '125px', color: '#38BDF8' }}>累積淨值倍數</th>
-                        <th style={{ textAlign: 'right', width: '100px', color: '#FCA5A5' }}>年內 MDD</th>
-                        <th style={{ textAlign: 'center', width: '210px', color: '#93C5FD' }}>📊 美股 vs 台股配置比例</th>
-                        <th style={{ textAlign: 'center', width: '210px', color: '#FBBF24' }}>🅰️ A隊 / 🅱️ B隊 買賣明細與損益</th>
+                        <th style={{ textAlign: 'center', width: '90px' }}>年份</th>
+                        <th style={{ textAlign: 'right', width: '110px', color: '#FDE047' }}>年度報酬</th>
+                        <th style={{ textAlign: 'right', width: '105px', color: '#94A3B8' }}>大盤 (SPY)</th>
+                        <th style={{ textAlign: 'right', width: '105px', color: '#34D399' }}>超額報酬</th>
+                        <th style={{ textAlign: 'right', width: '115px', color: '#38BDF8' }}>累積倍數</th>
+                        <th style={{ textAlign: 'right', width: '95px', color: '#FCA5A5' }}>最大回撤</th>
+                        <th style={{ textAlign: 'center', width: '190px', color: '#93C5FD' }}>美股 / 台股比例</th>
+                        <th style={{ textAlign: 'center', width: '175px', color: '#FBBF24' }}>買賣明細</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -4161,8 +4140,206 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         const isBearYear = [2008, 2018, 2022].includes(yrRow.year);
                         const isExpanded = !!expandedPitYears[yrRow.year];
                         const rebalList = yrRow.rebalances || [];
-                        const trancheAList = rebalList.filter(rb => String(rb.tranche || '').includes('A梯隊'));
-                        const trancheBList = rebalList.filter(rb => String(rb.tranche || '').includes('B梯隊'));
+
+                        // 將該年度調倉按「月份 (YYYY-MM)」分組，讓每個月的 🅰️ A隊 與 🅱️ B隊 對齊在同一列，完全不設內部雙卷軸！
+                        const monthMap = {};
+                        rebalList.forEach((rb) => {
+                          const ym = String(rb.rebal_date || '').slice(0, 7) || `${yrRow.year}-01`;
+                          if (!monthMap[ym]) {
+                            monthMap[ym] = { ym, rbA: null, rbB: null };
+                          }
+                          if (String(rb.tranche || '').includes('A梯隊')) {
+                            monthMap[ym].rbA = rb;
+                          } else {
+                            monthMap[ym].rbB = rb;
+                          }
+                        });
+                        const monthlyRows = Object.values(monthMap).sort((a, b) => b.ym.localeCompare(a.ym));
+
+                        const renderRebalanceCard = (rb, teamKey, ymStr) => {
+                          const isTeamA = teamKey === 'A';
+                          const accentColor = isTeamA ? '#38BDF8' : '#C084FC';
+                          const teamBadge = isTeamA ? '🅰️ A隊 (1號調倉・50%資金)' : '🅱️ B隊 (22號調倉・50%資金)';
+
+                          if (!rb) {
+                            return (
+                              <div
+                                key={`empty_${teamKey}_${ymStr}`}
+                                style={{
+                                  background: 'rgba(15, 23, 42, 0.5)',
+                                  border: '1px dashed rgba(148, 163, 184, 0.25)',
+                                  borderRadius: '8px',
+                                  padding: '0.85rem',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                  color: '#94A3B8',
+                                  fontSize: '0.76rem'
+                                }}
+                              >
+                                <div style={{ fontWeight: 'bold', color: accentColor, marginBottom: '0.25rem' }}>
+                                  {teamBadge} — {ymStr}
+                                </div>
+                                <div>⏳ 尚未到達當月 22 號調倉日（目前續抱上期 10/22 B隊持倉：VLO / MPC / MRK）</div>
+                              </div>
+                            );
+                          }
+
+                          const periodWeightedRet = (rb.picks || []).reduce((acc, p) => acc + ((Number(p.weight) || 0) * (Number(p.period_ret) || 0) / 100.0), 0);
+                          const isPeriodPos = periodWeightedRet >= 0;
+                          const expPct = Number(rb.exposure_pct !== undefined ? rb.exposure_pct : 100);
+                          const expReason = getRebalanceExposureReason(rb);
+                          const isDefended = expPct < 100;
+
+                          return (
+                            <div
+                              key={`rb_card_${teamKey}_${rb.rebal_date}`}
+                              style={{
+                                background: rb.is_active
+                                  ? 'rgba(16, 185, 129, 0.08)'
+                                  : (isTeamA ? 'rgba(14, 165, 233, 0.05)' : 'rgba(168, 85, 247, 0.05)'),
+                                border: rb.is_active
+                                  ? '1px solid rgba(52, 211, 153, 0.6)'
+                                  : `1px solid ${accentColor}55`,
+                                borderTop: `3px solid ${rb.is_active ? '#10B981' : accentColor}`,
+                                borderRadius: '8px',
+                                padding: '0.75rem 0.85rem'
+                              }}
+                            >
+                              {/* 單期卡片頂部：梯隊 + 調倉日期 + 當期總損益 */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.45rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    color: accentColor,
+                                    background: isTeamA ? 'rgba(56, 189, 248, 0.16)' : 'rgba(168, 85, 247, 0.16)',
+                                    padding: '2px 7px',
+                                    borderRadius: '4px'
+                                  }}>
+                                    {isTeamA ? '🅰️ A隊 (1號)' : '🅱️ B隊 (22號)'}
+                                  </span>
+                                  <strong style={{ color: '#F8FAFC', fontSize: '0.82rem', fontFamily: 'monospace' }}>
+                                    {rb.rebal_date}
+                                  </strong>
+                                  <span style={{ color: '#94A3B8', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+                                    ({rb.entry_date?.slice(5)} ➔ {rb.is_active ? '持有中' : rb.exit_date?.slice(5)})
+                                  </span>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                                  {rb.is_active && (
+                                    <span style={{ background: 'rgba(16, 185, 129, 0.25)', color: '#34D399', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                      🟢 當前持有
+                                    </span>
+                                  )}
+                                  {rb.picks && rb.picks.length > 0 && (
+                                    <span style={{
+                                      background: isPeriodPos ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)',
+                                      color: isPeriodPos ? '#34D399' : '#FCA5A5',
+                                      fontSize: '0.73rem',
+                                      padding: '1px 7px',
+                                      borderRadius: '4px',
+                                      fontWeight: 'bold',
+                                      fontFamily: 'monospace'
+                                    }}>
+                                      當期損益 {isPeriodPos ? '+' : ''}{periodWeightedRet.toFixed(2)}%
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* 📌 曝險比例與曝險原因條（清楚寫出為何是 100% / 72% / 50% / 45% / 0% 等） */}
+                              <div style={{
+                                fontSize: '0.72rem',
+                                padding: '0.3rem 0.55rem',
+                                borderRadius: '5px',
+                                marginBottom: '0.5rem',
+                                background: expPct === 0
+                                  ? 'rgba(239, 68, 68, 0.14)'
+                                  : (isDefended ? 'rgba(245, 158, 11, 0.14)' : 'rgba(16, 185, 129, 0.1)'),
+                                border: expPct === 0
+                                  ? '1px solid rgba(239, 68, 68, 0.4)'
+                                  : (isDefended ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(16, 185, 129, 0.3)'),
+                                color: expPct === 0 ? '#FCA5A5' : (isDefended ? '#FDE68A' : '#A7F3D0'),
+                                lineHeight: 1.4
+                              }}>
+                                <strong>{expPct === 0 ? '🛑' : (isDefended ? '🛡️' : '📌')} 曝險 {expPct}% 原因：</strong>
+                                <span>{expReason}</span>
+                              </div>
+
+                              {/* 簡化表頭之 3 檔持股損益表 */}
+                              {(!rb.picks || rb.picks.length === 0) ? (
+                                <div style={{ color: '#FCD34D', fontSize: '0.74rem', padding: '0.35rem 0.2rem', fontWeight: 'bold' }}>
+                                  💵 本期 100% 持有現金避險（未買入股票，成功避開空頭下跌）
+                                </div>
+                              ) : (
+                                <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+                                  <thead>
+                                    <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                                      <th style={{ textAlign: 'center', width: '32px' }}>#</th>
+                                      <th>股票</th>
+                                      <th style={{ textAlign: 'right' }}>權重</th>
+                                      <th style={{ textAlign: 'right' }}>買價</th>
+                                      <th style={{ textAlign: 'right' }}>{rb.is_active ? '現價' : '賣價'}</th>
+                                      <th style={{ textAlign: 'right' }}>損益</th>
+                                      <th style={{ textAlign: 'center' }}>狀態</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {rb.picks.map((p, pIdx) => {
+                                      const isPPos = (Number(p.period_ret) || 0) >= 0;
+                                      const curr = p.market === 'US' ? '$' : 'NT$';
+                                      return (
+                                        <tr key={`p_${rb.rebal_date}_${pIdx}`} style={{ background: 'rgba(255,255,255,0.015)' }}>
+                                          <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#CBD5E1' }}>
+                                            #{p.rank}
+                                          </td>
+                                          <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                                              <span style={{ fontSize: '0.66rem' }}>{p.market === 'US' ? '🇺🇸' : '🇹🇼'}</span>
+                                              <strong style={{ color: p.market === 'TW' ? '#6EE7B7' : '#93C5FD', fontFamily: 'monospace' }}>
+                                                {p.ticker.replace('.TW', '')}
+                                              </strong>
+                                              <span style={{ color: '#F8FAFC', fontWeight: 'bold' }}>
+                                                {formatStockDisplayName(p.ticker, p.name).split(' (')[0]}
+                                              </span>
+                                              <StockChartButton ticker={p.ticker} name={p.name} />
+                                            </div>
+                                          </td>
+                                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: accentColor, fontWeight: 'bold' }}>
+                                            {p.weight}%
+                                          </td>
+                                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                                            {curr}{Number(p.entry_price).toLocaleString()}
+                                          </td>
+                                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F8FAFC', fontWeight: 'bold' }}>
+                                            {curr}{Number(p.exit_price).toLocaleString()}
+                                          </td>
+                                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: isPPos ? '#34D399' : '#F87171' }}>
+                                            {isPPos ? '+' : ''}{Number(p.period_ret).toFixed(2)}%
+                                          </td>
+                                          <td style={{ textAlign: 'center' }}>
+                                            <span style={{
+                                              fontSize: '0.66rem',
+                                              padding: '1px 5px',
+                                              borderRadius: '3px',
+                                              background: p.is_active ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.08)',
+                                              color: p.is_active ? '#34D399' : '#CBD5E1',
+                                              whiteSpace: 'nowrap'
+                                            }}>
+                                              {p.is_active ? '持有中' : (p.action || '已結算').replace('🟢 ', '').replace('🔄 ', '')}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              )}
+                            </div>
+                          );
+                        };
 
                         return (
                           <React.Fragment key={yrRow.year}>
@@ -4184,7 +4361,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                 <div>{yrRow.year}{yrRow.year === 2026 ? '*' : ''}</div>
                                 {isBearYear && (
                                   <span style={{ fontSize: '0.63rem', background: 'rgba(56, 189, 248, 0.22)', color: '#7DD3FC', padding: '1px 5px', borderRadius: '3px' }}>
-                                    🛡️股災防禦年
+                                    🛡️防禦年
                                   </span>
                                 )}
                               </td>
@@ -4204,7 +4381,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                               <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                                 <div style={{ fontWeight: 'bold', color: '#38BDF8' }}>{yrRow.cum_mult.toLocaleString()}x</div>
                                 <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>
-                                  平均曝險 {yrRow.avg_exposure_pct}%
+                                  均曝險 {yrRow.avg_exposure_pct}%
                                 </div>
                               </td>
 
@@ -4212,30 +4389,23 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                 {yrRow.yearly_mdd_pct.toFixed(2)}%
                               </td>
 
-                              {/* 美股 vs 台股種類比例條 */}
                               <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '4px' }}>
-                                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>🇺🇸 美股 {yrRow.us_share_pct}% ({yrRow.unique_us_count}檔)</span>
-                                  <span style={{ color: '#34D399', fontWeight: 'bold' }}>🇹🇼 台股 {yrRow.tw_share_pct}% ({yrRow.unique_tw_count}檔)</span>
+                                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>🇺🇸 {yrRow.us_share_pct}%</span>
+                                  <span style={{ color: '#34D399', fontWeight: 'bold' }}>🇹🇼 {yrRow.tw_share_pct}%</span>
                                 </div>
-                                <div style={{ width: '100%', height: '7px', background: 'rgba(52, 211, 153, 0.35)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
+                                <div style={{ width: '100%', height: '6px', background: 'rgba(52, 211, 153, 0.35)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
                                   <div style={{ width: `${yrRow.us_share_pct}%`, height: '100%', background: 'linear-gradient(90deg, #3B82F6, #60A5FA)' }} />
                                   <div style={{ width: `${yrRow.tw_share_pct}%`, height: '100%', background: 'linear-gradient(90deg, #10B981, #34D399)' }} />
                                 </div>
-                                {yrRow.cash_defense_periods > 0 && (
-                                  <div style={{ fontSize: '0.65rem', color: '#FCD34D', marginTop: '2px' }}>
-                                    🛡️ 空倉防禦期: {yrRow.cash_defense_periods} 期
-                                  </div>
-                                )}
                               </td>
 
-                              {/* 展開 A/B 梯隊明細按鈕 */}
                               <td style={{ textAlign: 'center' }} onClick={(e) => { e.stopPropagation(); togglePitYearExpand(yrRow.year); }}>
                                 <button
                                   type="button"
                                   style={{
-                                    fontSize: '0.76rem',
-                                    padding: '0.32rem 0.75rem',
+                                    fontSize: '0.75rem',
+                                    padding: '0.3rem 0.7rem',
                                     borderRadius: '5px',
                                     border: isExpanded ? '1px solid #F59E0B' : '1px solid rgba(56, 189, 248, 0.45)',
                                     background: isExpanded ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.25))' : 'rgba(56, 189, 248, 0.14)',
@@ -4245,211 +4415,47 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                     whiteSpace: 'nowrap'
                                   }}
                                 >
-                                  {isExpanded
-                                    ? `▴ 收合 ${yrRow.year} 年 A/B 隊明細`
-                                    : `▾ 展開 A隊(${trancheAList.length}期) / B隊(${trancheBList.length}期) 買賣損益`}
+                                  {isExpanded ? `▴ 收合明細` : `▾ 展開 A/B 隊損益`}
                                 </button>
                               </td>
                             </tr>
 
-                            {/* 🌟 展開後：比照當前持股，將 🅰️ A 梯隊 與 🅱️ B 梯隊 左右分開並列，列出每一期買賣細節與每筆損益 */}
+                            {/* 🌟 展開後：每個月的 🅰️ A隊 與 🅱️ B隊 排在同一列，無雙卷軸，並清楚寫出曝險原因 */}
                             {isExpanded && (
                               <tr style={{ background: 'rgba(15, 23, 42, 0.98)' }}>
-                                <td colSpan={8} style={{ padding: '1rem 1.15rem', borderBottom: '2px solid rgba(245, 158, 11, 0.5)' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
+                                <td colSpan={8} style={{ padding: '1rem 1.1rem', borderBottom: '2px solid rgba(245, 158, 11, 0.5)' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.8rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                      <span style={{ color: '#FDE047', fontWeight: 'bold', fontSize: '0.95rem' }}>
-                                        🏛️ {yrRow.year} 年度【🅰️ A 梯隊 vs 🅱️ B 梯隊】分隊買賣歷史明細與每筆損益（共 {rebalList.length} 期調倉）
+                                      <span style={{ color: '#FDE047', fontWeight: 'bold', fontSize: '0.94rem' }}>
+                                        📂 {yrRow.year} 年 A隊 / B隊 買賣損益明細
                                       </span>
                                       <span style={{ fontSize: '0.73rem', background: 'rgba(16, 185, 129, 0.16)', color: '#6EE7B7', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                        年度總報酬 {isPos ? '+' : ''}{yrRow.return_pct.toFixed(2)}% ｜ 超額 Alpha {isAlphaPos ? '+' : ''}{yrRow.alpha_pct.toFixed(2)}%
+                                        年度報酬 {isPos ? '+' : ''}{yrRow.return_pct.toFixed(2)}% ｜ 平均曝險 {yrRow.avg_exposure_pct}%
                                       </span>
                                     </div>
                                     <span style={{ fontSize: '0.73rem', color: '#94A3B8' }}>
-                                      左欄為 <strong style={{ color: '#38BDF8' }}>🅰️ A 梯隊 (每月 1 號調倉・50%資金)</strong> ｜ 右欄為 <strong style={{ color: '#C084FC' }}>🅱️ B 梯隊 (每月 22 號調倉・50%資金)</strong>
+                                      同月同一列對齊：左 <strong style={{ color: '#38BDF8' }}>🅰️ A隊 (1號調倉)</strong> ｜ 右 <strong style={{ color: '#C084FC' }}>🅱️ B隊 (22號調倉)</strong>
                                     </span>
                                   </div>
 
-                                  {rebalList.length === 0 ? (
+                                  {monthlyRows.length === 0 ? (
                                     <div style={{ color: '#94A3B8', fontSize: '0.78rem', padding: '0.5rem' }}>
                                       暫無逐期明細紀錄。
                                     </div>
                                   ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '1.1rem', alignItems: 'start' }}>
-                                      {[
-                                        {
-                                          teamKey: 'A',
-                                          teamTitle: `🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%) — ${yrRow.year} 年共 ${trancheAList.length} 期`,
-                                          accentColor: '#38BDF8',
-                                          bgTint: 'rgba(14, 165, 233, 0.06)',
-                                          list: trancheAList
-                                        },
-                                        {
-                                          teamKey: 'B',
-                                          teamTitle: `🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%) — ${yrRow.year} 年共 ${trancheBList.length} 期`,
-                                          accentColor: '#C084FC',
-                                          bgTint: 'rgba(168, 85, 247, 0.06)',
-                                          list: trancheBList
-                                        }
-                                      ].map((teamCol) => (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                      {monthlyRows.map((mRow) => (
                                         <div
-                                          key={`hist_col_${yrRow.year}_${teamCol.teamKey}`}
+                                          key={`month_row_${mRow.ym}`}
                                           style={{
-                                            background: teamCol.bgTint,
-                                            border: `1px solid ${teamCol.accentColor}55`,
-                                            borderTop: `3px solid ${teamCol.accentColor}`,
-                                            borderRadius: '8px',
-                                            padding: '0.85rem'
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(auto-fit, minmax(410px, 1fr))',
+                                            gap: '0.9rem',
+                                            alignItems: 'stretch'
                                           }}
                                         >
-                                          <div style={{
-                                            fontSize: '0.92rem',
-                                            fontWeight: 'bold',
-                                            color: teamCol.accentColor,
-                                            marginBottom: '0.7rem',
-                                            paddingBottom: '0.45rem',
-                                            borderBottom: '1px solid rgba(255,255,255,0.1)',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center'
-                                          }}>
-                                            <span>{teamCol.teamTitle}</span>
-                                            <span style={{ fontSize: '0.72rem', color: '#CBD5E1', fontWeight: 'normal' }}>
-                                              由新到舊排列
-                                            </span>
-                                          </div>
-
-                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '560px', overflowY: 'auto', paddingRight: '4px' }}>
-                                            {teamCol.list.map((rb, rIdx) => {
-                                              const periodWeightedRet = (rb.picks || []).reduce((acc, p) => acc + ((Number(p.weight) || 0) * (Number(p.period_ret) || 0) / 100.0), 0);
-                                              const isPeriodPos = periodWeightedRet >= 0;
-
-                                              return (
-                                                <div
-                                                  key={`rb_${teamCol.teamKey}_${rIdx}`}
-                                                  style={{
-                                                    background: rb.is_active ? 'rgba(16, 185, 129, 0.09)' : (rb.exposure_pct === 0 ? 'rgba(239, 68, 68, 0.06)' : 'rgba(15, 23, 42, 0.85)'),
-                                                    border: rb.is_active ? '1px solid rgba(52, 211, 153, 0.55)' : (rb.exposure_pct === 0 ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(255, 255, 255, 0.12)'),
-                                                    borderRadius: '7px',
-                                                    padding: '0.65rem 0.75rem'
-                                                  }}
-                                                >
-                                                  {/* 單期調倉標頭 */}
-                                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem', paddingBottom: '0.38rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                                                    <div>
-                                                      <strong style={{ color: rb.is_active ? '#34D399' : '#FDE047', fontSize: '0.82rem', fontFamily: 'monospace' }}>
-                                                        📅 調倉日 {rb.rebal_date}
-                                                      </strong>
-                                                      <span style={{ color: '#94A3B8', fontSize: '0.71rem', marginLeft: '0.45rem', fontFamily: 'monospace' }}>
-                                                        (進場 {rb.entry_date} ➔ {rb.exit_date})
-                                                      </span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                                                      {rb.is_active && (
-                                                        <span style={{ background: 'rgba(16, 185, 129, 0.25)', color: '#34D399', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                                          🟢 當前持有中
-                                                        </span>
-                                                      )}
-                                                      <span style={{ background: rb.exposure_pct > 0 ? 'rgba(56, 189, 248, 0.18)' : 'rgba(239, 68, 68, 0.2)', color: rb.exposure_pct > 0 ? '#7DD3FC' : '#FCA5A5', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
-                                                        曝險 {rb.exposure_pct}%
-                                                      </span>
-                                                      {rb.picks && rb.picks.length > 0 && (
-                                                        <span style={{
-                                                          background: isPeriodPos ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)',
-                                                          color: isPeriodPos ? '#34D399' : '#FCA5A5',
-                                                          fontSize: '0.72rem',
-                                                          padding: '1px 6px',
-                                                          borderRadius: '4px',
-                                                          fontWeight: 'bold',
-                                                          fontFamily: 'monospace'
-                                                        }}>
-                                                          當期該隊損益: {isPeriodPos ? '+' : ''}{periodWeightedRet.toFixed(2)}%
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                  </div>
-
-                                                  {/* 單期 3 檔持股表格 (比照頂部當前持股格式) */}
-                                                  {(!rb.picks || rb.picks.length === 0) ? (
-                                                    <div style={{ color: '#FCD34D', fontSize: '0.74rem', padding: '0.35rem 0' }}>
-                                                      🛡️ {rb.defense_reason || '宏觀護盾全面空倉避險'} (美寬幅 {rb.us_breadth_pct}% / 台寬幅 {rb.tw_breadth_pct}%) ➔ 100% 抱現金避開下跌
-                                                    </div>
-                                                  ) : (
-                                                    <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
-                                                      <thead>
-                                                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                                                          <th style={{ textAlign: 'center', width: '42px' }}>順位</th>
-                                                          <th>持有股票 (代號 / 名稱)</th>
-                                                          <th style={{ textAlign: 'right' }}>{teamCol.teamKey}隊權重</th>
-                                                          <th style={{ textAlign: 'right' }}>買進價</th>
-                                                          <th style={{ textAlign: 'right' }}>{rb.is_active ? '最新現價' : '出場價'}</th>
-                                                          <th style={{ textAlign: 'right' }}>每筆損益 (貢獻)</th>
-                                                          <th style={{ textAlign: 'center' }}>狀態</th>
-                                                        </tr>
-                                                      </thead>
-                                                      <tbody>
-                                                        {rb.picks.map((p, pIdx) => {
-                                                          const isPPos = (Number(p.period_ret) || 0) >= 0;
-                                                          const curr = p.market === 'US' ? 'US$ ' : 'NT$ ';
-                                                          const contrib = ((Number(p.weight) || 0) * (Number(p.period_ret) || 0)) / 100.0;
-                                                          const totalWeight = ((Number(p.weight) || 0) * 0.5).toFixed(0);
-                                                          return (
-                                                            <tr key={`p_${rIdx}_${pIdx}`} style={{ background: 'rgba(255,255,255,0.015)' }}>
-                                                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#CBD5E1' }}>
-                                                                {p.rank === 1 ? '🥇#1' : p.rank === 2 ? '🥈#2' : `🥉#${p.rank}`}
-                                                              </td>
-                                                              <td>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                                                                  <span style={{ fontSize: '0.68rem' }}>{p.market === 'US' ? '🇺🇸' : '🇹🇼'}</span>
-                                                                  <strong style={{ color: p.market === 'TW' ? '#6EE7B7' : '#93C5FD', fontFamily: 'monospace' }}>
-                                                                    {p.ticker.replace('.TW', '')}
-                                                                  </strong>
-                                                                  <span style={{ color: '#F8FAFC', fontWeight: 'bold' }}>
-                                                                    {formatStockDisplayName(p.ticker, p.name).split(' (')[0]}
-                                                                  </span>
-                                                                  <StockChartButton ticker={p.ticker} name={p.name} />
-                                                                </div>
-                                                              </td>
-                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                                                <div style={{ color: teamCol.accentColor, fontWeight: 'bold' }}>{p.weight}%</div>
-                                                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>總資金{totalWeight}%</div>
-                                                              </td>
-                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
-                                                                {curr}{Number(p.entry_price).toLocaleString()}
-                                                              </td>
-                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F8FAFC', fontWeight: 'bold' }}>
-                                                                {curr}{Number(p.exit_price).toLocaleString()}
-                                                              </td>
-                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                                                                <div style={{ color: isPPos ? '#34D399' : '#F87171', fontSize: '0.82rem' }}>
-                                                                  {isPPos ? '+' : ''}{Number(p.period_ret).toFixed(2)}%
-                                                                </div>
-                                                                <div style={{ fontSize: '0.65rem', color: isPPos ? '#6EE7B7' : '#FCA5A5' }}>
-                                                                  ({contrib >= 0 ? '+' : ''}{contrib.toFixed(2)}%)
-                                                                </div>
-                                                              </td>
-                                                              <td style={{ textAlign: 'center' }}>
-                                                                <span style={{
-                                                                  fontSize: '0.66rem',
-                                                                  padding: '1px 5px',
-                                                                  borderRadius: '3px',
-                                                                  background: p.is_active ? 'rgba(16, 185, 129, 0.2)' : (p.action && p.action.includes('停損') ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.08)'),
-                                                                  color: p.is_active ? '#34D399' : (p.action && p.action.includes('停損') ? '#FCA5A5' : '#CBD5E1'),
-                                                                  whiteSpace: 'nowrap'
-                                                                }}>
-                                                                  {p.action}
-                                                                </span>
-                                                              </td>
-                                                            </tr>
-                                                          );
-                                                        })}
-                                                      </tbody>
-                                                    </table>
-                                                  )}
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
+                                          {renderRebalanceCard(mRow.rbA, 'A', mRow.ym)}
+                                          {renderRebalanceCard(mRow.rbB, 'B', mRow.ym)}
                                         </div>
                                       ))}
                                     </div>

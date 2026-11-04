@@ -33,6 +33,39 @@ from build_and_test_zero_omission_0050_0051 import build_zero_omission_tw_0050_0
 def asym_stepped_winner_tr_dd(peak_pnl: float) -> float:
     return 0.09 if peak_pnl < 0.20 else (0.13 if peak_pnl < 0.50 else 0.16)
 
+def build_exposure_reason(exp_pct: float, br_val: float) -> str:
+    exp = float(exp_pct if exp_pct is not None else 100.0)
+    br_pct = round(float(br_val) * 100.0, 1) if (br_val is not None and float(br_val) <= 1.5) else round(float(br_val or 63.3), 1)
+    if exp >= 99.5:
+        return f"全球寬幅 {br_pct}% (≥50% 多頭標準) 且無過熱/破線警訊 ➔ 100% 滿倉進攻"
+    elif abs(exp - 95.0) < 1.0:
+        return f"全球寬幅 {br_pct}% (30~50% 警戒區)，因 QQQ 守穩季線且選擇權莊家地板支撐 ➔ 回補至 95%"
+    elif abs(exp - 82.0) < 1.0:
+        return f"全球寬幅 {br_pct}% (<30% 深熊區)，因 QQQ 站上月線且寬幅急彈 ≥8% 機構吸籌 ➔ V轉先遣 82%"
+    elif abs(exp - 72.0) < 1.0:
+        return f"全球寬幅 {br_pct}%，觸發 C1 護盾 (10Y美債殖利率急升 × 選擇權避險減弱) ➔ 預防降倉至 72%"
+    elif abs(exp - 70.0) < 1.0:
+        return f"全球寬幅 {br_pct}% 落入 30%~50% 警戒區 (QQQ 仍守穩季線) ➔ 防禦降倉至 70%"
+    elif abs(exp - 65.0) < 1.0:
+        return f"全球寬幅 {br_pct}%，觸發 C2 護盾 (QQQ跌破季線 × 科技相對轉弱 × 機構流出) ➔ 降倉至 65%"
+    elif abs(exp - 60.0) < 1.0:
+        return f"全球寬幅 {br_pct}%，觸發 C3 護盾 (Top5 領頭羊集體機構出貨 × 大盤破月線) ➔ 降倉至 60%"
+    elif abs(exp - 50.0) < 1.0:
+        if br_pct >= 50.0:
+            return f"全球寬幅 {br_pct}%，觸發模組 C 2.0 過熱閥門 (QQQ年線乖離 ≥30% × 10Y美債 ≥3.5%) ➔ 半倉防禦 50%"
+        else:
+            return f"全球寬幅 {br_pct}% (30~50% 警戒區) × 選擇權異常放量避險 ➔ 半倉防禦 50%"
+    elif abs(exp - 45.0) < 1.0:
+        return f"全球寬幅 {br_pct}%，觸發 C4 護盾 (10Y美債20日急升 ≥0.22% × 高乖離科技轉弱) ➔ 降倉至 45%"
+    elif abs(exp - 35.0) < 1.0:
+        return f"全球寬幅 {br_pct}% (30~50% 警戒區) 且 QQQ 跌破 60MA 季線 (M1減震器) ➔ 降倉至 35%"
+    elif abs(exp - 20.0) < 1.0:
+        return f"全球寬幅 {br_pct}% (30~50% 警戒區) 且 QQQ 破季線 + SPY 破月線雙殺 (C6護盾) ➔ 極度防禦 20%"
+    elif exp <= 0.5:
+        return f"全球寬幅 {br_pct}% (<30% 全面空頭警戒區) ➔ 100% 空倉抱現金避險"
+    else:
+        return f"全球寬幅 {br_pct}%，依宏觀動能護盾動態調節 ➔ 曝險 {exp:.0f}%"
+
 def _roc_to_ann_str(ym) -> str:
     ym_s = str(ym).strip()
     if len(ym_s) < 5 or not ym_s.isdigit():
@@ -340,6 +373,7 @@ def main():
                         "tranche": tranche_name,
                         "exposure_pct": 0.0,
                         "breadth": round(br, 2),
+                        "defense_reason": build_exposure_reason(0.0, round(br, 2)),
                         "is_active": is_active_tranche,
                         "picks": []
                     })
@@ -447,6 +481,7 @@ def main():
                         "tranche": tranche_name,
                         "exposure_pct": round(exposure * 100.0, 1),
                         "breadth": round(br, 2),
+                        "defense_reason": build_exposure_reason(round(exposure * 100.0, 1), round(br, 2)),
                         "is_active": is_active_tranche,
                         "picks": period_picks_info
                     })
