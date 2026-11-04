@@ -207,6 +207,23 @@ Think of it like a human reviewing their journal and updating their mental model
 
 The goal: Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.
 
+## 🚀 零漏接全鏈路前端與數據發布 SOP (Zero-Drop Full-Stack Deployment SOP)
+
+過去發生「修改完但使用者看不到更新 / 上傳失敗」的四大根本原因與強制防呆 SOP（每次修改前端介面或策略數據後，**必須依序完整執行以下 5 步，缺一不可**）：
+
+1. **Step 1 — 三源數據同步（靜態 JSON + 本機 FastAPI 服務 + Supabase 雲端快取）**：
+   - 前端 `GlobalSovereignDashboard.js` 在載入後會呼叫 `apiGetGlobalSovereignDashboard()`（依序讀取本機 `localhost:8000` API ➔ Supabase `stock_ml_cache?model_type=eq.global_sovereign_dashboard` ➔ 最後才 fallback 到靜態 `defaultGlobalSovereignData.json`）。
+   - **防呆鐵律**：任何數據結構新增或更新（如 `official_active_tranches`、`recent_2026_rebalances`），除了寫入 `frontend/src/data/*.json` 外，**必須同步在 `global_sovereign_service.py` 的回傳字典中掛載，並同步推送到 Supabase `stock_ml_cache`**，否則網頁打開 0.5 秒後就會被舊的 API/Supabase 快取覆蓋！
+2. **Step 2 — 本機 React 生產環境編譯 (`cd frontend && npm run build`)**：
+   - 本機 `api.py` (Port 8000 / Cloudflare Tunnel) 是直接 mount `frontend/build` 靜態資料夾。若只改 `frontend/src/` 而沒跑 `npm run build`，透過本機或 Tunnel 網址開啟永遠是舊畫面。
+3. **Step 3 — 檢查 `.vercelignore` 並推送 Git (`git add / commit / push`)**：
+   - 根目錄 `.vercelignore` 必須排除 `pit_cache/`、`*.pkl`、`*.joblib`、`*.db*` 等大型二進位檔（否則 CLI 上傳 443MB 會在 98% 時因 `FetchError: write EPIPE` 斷線失敗）。
+4. **Step 4 — 於倉庫根目錄強制無快取部署 Vercel (`vercel deploy --prod --force --yes`)**：
+   - **目錄鐵律**：Vercel 專案後台已設定 `Root Directory = frontend`，因此執行 `vercel deploy` **必須在倉庫根目錄 `/Users/huanggin-chen/openclaw_test` 執行**（在 `frontend/` 子目錄執行會報 `frontend/frontend does not exist`）。
+   - **強制破快取**：必須加上 `--force` 旗標（`vercel deploy --prod --force --yes`），防止 Vercel 沿用舊的雲端 Build Cache。
+5. **Step 5 — 線上實體 Bundle 驗證 (`curl` 實測)**：
+   - 部署完成後，**嚴禁未驗證就回報完成**！必須用 `curl -s https://lobster-report.vercel.app` 抓取線上最新的 `main.*.js` bundle 檔名，並用 `curl` + `grep` 確認新介面關鍵字與最新數據已確實存在於線上生產環境中，才可向使用者回報。
+
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.

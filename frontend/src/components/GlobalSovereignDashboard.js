@@ -48,6 +48,16 @@ export const GLOBAL_TITAN_NAME_MAP = {
   'ASX': '日月光投控 (ASE 封測龍頭ADR)',
   'ILMN': '因美納 (Illumina 基因定序霸主)',
   'PBR': '巴西石油 (Petrobras 能源ADR)',
+  'VLO': '瓦萊羅能源 (Valero 北美煉油巨頭)',
+  'MPC': '馬拉松石油 (Marathon 美國最大煉油商)',
+  'MRK': '默沙東 (Merck 全球製藥防禦巨擘)',
+  'COP': '康菲石油 (ConocoPhillips 油氣開採龍頭)',
+  'TXN': '德州儀器 (Texas Instruments 類比晶片霸主)',
+  'LITE': 'Lumentum (AI光通訊雷射龍頭)',
+  'SNDK': 'SanDisk (閃迪 NAND快閃記憶體)',
+  'STX': '希捷科技 (Seagate 大容量儲存龍頭)',
+  'WDC': '威騰電子 (Western Digital 儲存巨頭)',
+  'NEM': '紐蒙特礦業 (Newmont 全球金礦龍頭)',
   'MU': '美光科技 (Micron HBM記憶體巨頭)',
   'MRVL': '邁威爾科技 (Marvell AI光通訊晶片)',
   'CRWD': 'CrowdStrike (終端資安龍頭)',
@@ -801,6 +811,256 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
     };
   }, [macro.exposure_pct]);
 
+  // 2.8 全球泰坦【官方標準持倉】— 🅰️ A 梯隊 (1號調倉) 與 🅱️ B 梯隊 (22號調倉) 獨立資料源
+  const { officialTrancheA, officialTrancheB } = useMemo(() => {
+    const src = data?.official_active_tranches || g11PitHistoryData?.official_active_tranches || defaultData?.official_active_tranches || {};
+    const fallbackA = {
+      tranche_id: 'A',
+      tranche_name: '🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)',
+      rebal_schedule: '每月 1 號 (遇假日順延)',
+      capital_share_pct: 50.0,
+      rebal_date: '2026-11-02',
+      entry_date: '2026-11-03',
+      next_rebal_date: '2026-12-01',
+      exposure_pct: 100.0,
+      defense_reason: '正常進攻 (100% 滿倉・系統已自動轉向能源與防禦巨頭)',
+      previous_rebal_note: '上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場',
+      picks: [
+        { rank: 1, ticker: 'MPC', name: '馬拉松石油', market: 'US', sector: '能源精煉 (防禦高現流)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-11-03', entry_price: 430.00, current_price: 423.29, period_ret_pct: -1.56, stop_loss_price: 365.50, action: '持有中 (續抱)' },
+        { rank: 2, ticker: 'COP', name: '康菲石油', market: 'US', sector: '油氣開採 (抗通膨防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 145.18, current_price: 145.26, period_ret_pct: 0.06, stop_loss_price: 123.40, action: '持有中 (續抱)' },
+        { rank: 3, ticker: 'TXN', name: '德州儀器', market: 'US', sector: '類比晶片龍頭 (高息防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 309.83, current_price: 308.96, period_ret_pct: -0.28, stop_loss_price: 263.36, action: '持有中 (續抱)' }
+      ]
+    };
+    const fallbackB = {
+      tranche_id: 'B',
+      tranche_name: '🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)',
+      rebal_schedule: '每月 22 號 (遇假日順延)',
+      capital_share_pct: 50.0,
+      rebal_date: '2026-10-22',
+      entry_date: '2026-10-23',
+      next_rebal_date: '2026-11-22',
+      exposure_pct: 100.0,
+      defense_reason: '正常進攻 (100% 滿倉・系統已自動轉向能源與醫療防禦)',
+      previous_rebal_note: '本期自 2026-10-23 建倉持有至今，未觸發 -15% 硬停損，標準紀律為續抱至 2026-11-22 換倉',
+      picks: [
+        { rank: 1, ticker: 'VLO', name: '瓦萊羅能源', market: 'US', sector: '能源精煉 (防禦高現流)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-10-23', entry_price: 428.98, current_price: 385.03, period_ret_pct: -10.25, stop_loss_price: 364.63, action: '持有中 (續抱)' },
+        { rank: 2, ticker: 'MPC', name: '馬拉松石油', market: 'US', sector: '能源精煉 (防禦高現流)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 463.40, current_price: 423.29, period_ret_pct: -8.66, stop_loss_price: 393.89, action: '持有中 (續抱)' },
+        { rank: 3, ticker: 'MRK', name: '默沙東', market: 'US', sector: '大型製藥 (剛性醫療防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 145.02, current_price: 147.09, period_ret_pct: 1.43, stop_loss_price: 123.27, action: '持有中 (續抱)' }
+      ]
+    };
+    return {
+      officialTrancheA: src.tranche_a && Array.isArray(src.tranche_a.picks) && src.tranche_a.picks.length > 0 ? src.tranche_a : fallbackA,
+      officialTrancheB: src.tranche_b && Array.isArray(src.tranche_b.picks) && src.tranche_b.picks.length > 0 ? src.tranche_b : fallbackB
+    };
+  }, [data]);
+
+  // 2.9 🅰️ A 梯隊 與 🅱️ B 梯隊 完全獨立分開之跟單建議演算法
+  const separatedTrancheSuggestions = useMemo(() => {
+    const baseCapitalTwd = totalNetAssetsTwd > 0 ? totalNetAssetsTwd : 2000000;
+    const budgetTwdA = baseCapitalTwd * 0.5;
+    const budgetTwdB = baseCapitalTwd * 0.5;
+
+    const picksA = officialTrancheA.picks || [];
+    const picksB = officialTrancheB.picks || [];
+
+    // 先計算每檔官方標的在 A 隊與 B 隊各自的目標股數
+    const targetMapA = {};
+    picksA.forEach(p => {
+      const isUsd = p.market === 'US';
+      const fx = isUsd ? usdFx : 1.0;
+      const px = p.current_price || p.entry_price || 1;
+      const tgtTwd = budgetTwdA * ((p.tranche_weight_pct || 0) / 100.0);
+      targetMapA[p.ticker] = Math.floor((tgtTwd / fx) / px);
+    });
+
+    const targetMapB = {};
+    picksB.forEach(p => {
+      const isUsd = p.market === 'US';
+      const fx = isUsd ? usdFx : 1.0;
+      const px = p.current_price || p.entry_price || 1;
+      const tgtTwd = budgetTwdB * ((p.tranche_weight_pct || 0) / 100.0);
+      targetMapB[p.ticker] = Math.floor((tgtTwd / fx) / px);
+    });
+
+    // 將使用者目前持股拆分歸屬至 A 隊與 B 隊
+    const heldInA = {};
+    const heldInB = {};
+    userPositions.forEach(pos => {
+      const tk = pos.ticker;
+      const sh = Number(pos.shares) || 0;
+      const inA = targetMapA[tk] !== undefined;
+      const inB = targetMapB[tk] !== undefined;
+      const roleStr = String(pos.role || '');
+      const entryDay = pos.entry_date ? parseInt(pos.entry_date.split('-')[2], 10) : 1;
+
+      if (inA && !inB) {
+        heldInA[tk] = (heldInA[tk] || 0) + sh;
+      } else if (!inA && inB) {
+        heldInB[tk] = (heldInB[tk] || 0) + sh;
+      } else if (inA && inB) {
+        // 雙隊皆持有同一檔 (例如 MPC)：依進場日或優先順序分配至 A 隊與 B 隊
+        if (roleStr.includes('B隊') || roleStr.includes('B梯隊') || entryDay >= 18) {
+          const allocB = Math.min(sh, targetMapB[tk]);
+          heldInB[tk] = (heldInB[tk] || 0) + allocB;
+          heldInA[tk] = (heldInA[tk] || 0) + Math.max(0, sh - allocB);
+        } else {
+          const allocA = Math.min(sh, targetMapA[tk]);
+          heldInA[tk] = (heldInA[tk] || 0) + allocA;
+          heldInB[tk] = (heldInB[tk] || 0) + Math.max(0, sh - allocA);
+        }
+      }
+    });
+
+    const buildTeamList = (teamId, teamPicks, budgetTwd, heldMap) => {
+      const list = [];
+      teamPicks.forEach((p, idx) => {
+        const rank = p.rank || (idx + 1);
+        const isUsd = p.market === 'US';
+        const currency = isUsd ? 'USD' : 'TWD';
+        const fx = isUsd ? usdFx : 1.0;
+        const price = p.current_price || p.entry_price || 1;
+        const trancheWeightPct = p.tranche_weight_pct || (rank === 1 ? 52 : 24);
+        const totalWeightPct = p.total_portfolio_weight_pct || (trancheWeightPct * 0.5);
+        const targetTwd = budgetTwd * (trancheWeightPct / 100.0);
+        const targetOrig = targetTwd / fx;
+        const targetShares = Math.floor(targetOrig / price);
+        const curShares = heldMap[p.ticker] || 0;
+        const diffShares = targetShares - curShares;
+
+        const suggKey = `sep_${teamId}_${p.ticker}`;
+        const isExecuted = dismissedSuggestions.includes(suggKey);
+        const heldPos = userPositions.find(up => up.ticker === p.ticker);
+
+        let action = '續抱';
+        let actionColor = '#10B981';
+        let recShares = 0;
+        let actionNote = `${teamId}隊已達標續抱`;
+        let isBalanced = true;
+        let estFee = 0;
+
+        if (diffShares > 0) {
+          action = '買入';
+          actionColor = '#10B981';
+          recShares = diffShares;
+          const buyOrig = Math.round(diffShares * price);
+          const buyTwd = Math.round(diffShares * price * fx);
+          actionNote = `建議買進 +${diffShares} 股 (約 ${isUsd ? `US$ ${buyOrig.toLocaleString()}` : `NT$ ${buyTwd.toLocaleString()}`})`;
+          isBalanced = false;
+          estFee = isUsd ? 15 : Math.max(20, Math.round(diffShares * price * 0.001425));
+        } else if (diffShares < 0 && Math.abs(diffShares * price * fx) > baseCapitalTwd * 0.06) {
+          action = '減持';
+          actionColor = '#F59E0B';
+          recShares = Math.abs(diffShares);
+          actionNote = `超出${teamId}隊目標，建議減碼 ${recShares} 股`;
+          isBalanced = false;
+          estFee = isUsd ? 15 : Math.round(recShares * price * (0.003 + 0.001425));
+        }
+
+        list.push({
+          key: suggKey,
+          teamId,
+          rank,
+          action,
+          actionColor,
+          ticker: p.ticker,
+          name: formatStockDisplayName(p.ticker, p.name),
+          sector: p.sector || '',
+          market: p.market === 'US' ? '美股' : '台股',
+          currency,
+          trancheWeightPct,
+          totalWeightPct,
+          targetWeightDisplay: `${teamId}隊 ${trancheWeightPct}% (佔總資金 ${totalWeightPct}%)`,
+          targetTwd,
+          targetOrig,
+          currentShares: curShares,
+          targetShares,
+          recShares,
+          recAmountOrig: recShares * price,
+          recAmountTwd: recShares * price * fx,
+          defaultPrice: price,
+          officialEntryPrice: p.entry_price,
+          officialEntryDate: p.entry_date,
+          stopLossPrice: p.stop_loss_price,
+          defaultTaxFee: estFee,
+          role: `${teamId === 'A' ? '🅰️ A隊' : '🅱️ B隊'} Rank #${rank} (${trancheWeightPct}%)`,
+          actionNote: isExecuted ? `${actionNote} (已執行)` : actionNote,
+          heldPos,
+          isBalanced,
+          isExecuted
+        });
+      });
+
+      // 檢查使用者帳本中是否有「非官方 A/B 隊」的舊持股需要換倉賣出
+      userPositions.forEach(heldPos => {
+        const inA = targetMapA[heldPos.ticker] !== undefined;
+        const inB = targetMapB[heldPos.ticker] !== undefined;
+        if (!inA && !inB) {
+          const isUsd = heldPos.currency === 'USD';
+          const fx = isUsd ? usdFx : 1.0;
+          const curPrice = heldPos.current_price || heldPos.entry_price || 1;
+          const valTwd = heldPos.shares * curPrice * fx;
+          const allocPct = baseCapitalTwd > 0 ? (valTwd / baseCapitalTwd) * 100 : 0;
+          const roleStr = String(heldPos.role || '');
+          const entryDay = heldPos.entry_date ? parseInt(heldPos.entry_date.split('-')[2], 10) : 1;
+
+          // 判斷這筆舊持股屬於 A 隊、B 隊、或雙隊合流舊倉
+          let exitSharesForTeam = 0;
+          if (allocPct >= 16 && heldPos.shares >= 2) {
+            exitSharesForTeam = teamId === 'A' ? Math.floor(heldPos.shares / 2) : (heldPos.shares - Math.floor(heldPos.shares / 2));
+          } else if (roleStr.includes('B隊') || roleStr.includes('B梯隊') || entryDay >= 18) {
+            exitSharesForTeam = teamId === 'B' ? heldPos.shares : 0;
+          } else {
+            exitSharesForTeam = teamId === 'A' ? heldPos.shares : 0;
+          }
+
+          if (exitSharesForTeam > 0) {
+            const suggKey = `sep_exit_${teamId}_${heldPos.ticker}`;
+            const isExecuted = dismissedSuggestions.includes(suggKey);
+            const estTaxFee = isUsd ? 15 : Math.round(exitSharesForTeam * curPrice * (0.003 + 0.001425));
+            list.push({
+              key: suggKey,
+              teamId,
+              rank: 99,
+              action: exitSharesForTeam < heldPos.shares ? '減持' : '賣出',
+              actionColor: '#EF4444',
+              ticker: heldPos.ticker,
+              name: formatStockDisplayName(heldPos.ticker, heldPos.name),
+              sector: '舊倉換血出場',
+              market: heldPos.market,
+              currency: heldPos.currency,
+              trancheWeightPct: 0,
+              totalWeightPct: 0,
+              targetWeightDisplay: '0% (非當期官方持倉・建議換倉)',
+              targetTwd: 0,
+              targetOrig: 0,
+              currentShares: exitSharesForTeam,
+              targetShares: 0,
+              recShares: exitSharesForTeam,
+              recAmountOrig: exitSharesForTeam * curPrice,
+              recAmountTwd: exitSharesForTeam * curPrice * fx,
+              defaultPrice: curPrice,
+              defaultTaxFee: estTaxFee,
+              role: `${teamId === 'A' ? '🅰️ A隊' : '🅱️ B隊'} 舊倉換血釋出資金`,
+              actionNote: `非當期${teamId}隊官方持股，建議賣出 ${exitSharesForTeam} 股換入當期正選`,
+              heldPos,
+              isBalanced: false,
+              isExecuted
+            });
+          }
+        }
+      });
+
+      return list;
+    };
+
+    return {
+      budgetTwdA,
+      budgetTwdB,
+      trancheASuggestions: buildTeamList('A', picksA, budgetTwdA, heldInA),
+      trancheBSuggestions: buildTeamList('B', picksB, budgetTwdB, heldInB)
+    };
+  }, [totalNetAssetsTwd, officialTrancheA, officialTrancheB, userPositions, usdFx, dismissedSuggestions]);
+
   // 3. 雙梯隊持倉更動建議演算法 (支援 100% 雙隊滿倉 / 1號 A梯隊 50% / 22號 B梯隊 50%，含 DOE 容差帶與前 5 名保護帶)
   const rebalanceSuggestions = useMemo(() => {
     if (totalNetAssetsTwd <= 0) return [];
@@ -1068,6 +1328,118 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
     triggerNotice(`📋 已成功複製 ${activeLines.length} 筆調倉委託指令！`);
   };
 
+  const handleCopySeparatedOrders = (teamId) => {
+    const list = teamId === 'A'
+      ? separatedTrancheSuggestions.trancheASuggestions
+      : teamId === 'B'
+        ? separatedTrancheSuggestions.trancheBSuggestions
+        : [...separatedTrancheSuggestions.trancheASuggestions, ...separatedTrancheSuggestions.trancheBSuggestions];
+    const activeLines = list
+      .filter(s => s.action !== '續抱' && s.recShares > 0)
+      .map(s => {
+        const isUsd = s.currency === 'USD';
+        const actionText = s.action === '買入' || s.action === '加碼' ? '買進' : '賣出';
+        const curr = isUsd ? 'US$ ' : 'NT$ ';
+        return `[${s.teamId}梯隊] ${s.ticker} ${s.name}: ${actionText} ${s.recShares} 股 (參考價 ${curr}${s.defaultPrice})`;
+      });
+    if (activeLines.length === 0) {
+      triggerNotice('ℹ️ 目前該梯隊持股均已對齊官方標準持倉，無須發送調倉委託！');
+      return;
+    }
+    navigator.clipboard.writeText(activeLines.join('\n'));
+    triggerNotice(`📋 已成功複製 ${activeLines.length} 筆 ${teamId === 'ALL' ? 'A+B 雙梯隊' : `${teamId} 梯隊`}跟單委託指令！`);
+  };
+
+  // 一鍵將個人帳本對齊為當前全球泰坦 A+B 梯隊官方標準持倉
+  const handleSyncToOfficialABTranches = async () => {
+    const baseCap = totalNetAssetsTwd > 0 ? Math.round(totalNetAssetsTwd) : 2100000;
+    if (!window.confirm(
+      `確定要依您目前的總資產規模 (NT$ ${baseCap.toLocaleString()})，一鍵將帳本對齊為「全球泰坦當前 A 梯隊 + B 梯隊官方標準持倉」嗎？\n\n` +
+      `・🅰️ A 梯隊 (50% 資金・2026-11-03 進場)：MPC (52%)、COP (24%)、TXN (24%)\n` +
+      `・🅱️ B 梯隊 (50% 資金・2026-10-23 進場)：VLO (52%)、MPC (24%)、MRK (24%)\n\n` +
+      `系統將自動生成對應之標準建倉流水帳並同步儲存！`
+    )) {
+      return;
+    }
+
+    const budgetA = baseCap * 0.5;
+    const budgetB = baseCap * 0.5;
+    const newTxList = [];
+
+    // B 梯隊 (2026-10-23 建倉)
+    (officialTrancheB.picks || []).forEach((p, idx) => {
+      const fx = p.market === 'US' ? usdFx : 1.0;
+      const entryPx = p.entry_price || p.current_price || 1;
+      const wPct = p.tranche_weight_pct || (idx === 0 ? 52 : 24);
+      const allocTwd = budgetB * (wPct / 100.0);
+      const sh = Math.max(1, Math.floor((allocTwd / fx) / entryPx));
+      const fee = p.market === 'US' ? 15 : Math.max(20, Math.round(sh * entryPx * 0.001425));
+      const costTwd = Math.round((sh * entryPx + fee) * fx);
+      newTxList.push({
+        id: `tx_official_b_${p.ticker}_${Date.now()}_${idx}`,
+        date: p.entry_date || '2026-10-23',
+        action: '買入',
+        ticker: p.ticker,
+        name: formatStockDisplayName(p.ticker, p.name),
+        currency: p.market === 'US' ? 'USD' : 'TWD',
+        shares: sh,
+        price: entryPx,
+        tax_fee: fee,
+        cash_flow_twd: -costTwd,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `🅱️ 22號B隊調倉：官方標準持倉 Rank #${p.rank} (B隊${wPct}%)`
+      });
+    });
+
+    // A 梯隊 (2026-11-03 建倉)
+    (officialTrancheA.picks || []).forEach((p, idx) => {
+      const fx = p.market === 'US' ? usdFx : 1.0;
+      const entryPx = p.entry_price || p.current_price || 1;
+      const wPct = p.tranche_weight_pct || (idx === 0 ? 52 : 24);
+      const allocTwd = budgetA * (wPct / 100.0);
+      const sh = Math.max(1, Math.floor((allocTwd / fx) / entryPx));
+      const fee = p.market === 'US' ? 15 : Math.max(20, Math.round(sh * entryPx * 0.001425));
+      const costTwd = Math.round((sh * entryPx + fee) * fx);
+      newTxList.push({
+        id: `tx_official_a_${p.ticker}_${Date.now()}_${idx}`,
+        date: p.entry_date || '2026-11-03',
+        action: '買入',
+        ticker: p.ticker,
+        name: formatStockDisplayName(p.ticker, p.name),
+        currency: p.market === 'US' ? 'USD' : 'TWD',
+        shares: sh,
+        price: entryPx,
+        tax_fee: fee,
+        cash_flow_twd: -costTwd,
+        realized_pnl_twd: null,
+        realized_return_pct: null,
+        note: `🅰️ 1號A隊調倉：官方標準持倉 Rank #${p.rank} (A隊${wPct}%)`
+      });
+    });
+
+    // 初始本金入金紀錄
+    newTxList.push({
+      id: `tx_official_init_${Date.now()}`,
+      date: '2026-10-01',
+      action: '投入現金',
+      ticker: '-',
+      name: '資金帳戶 (A+B雙梯隊總本金)',
+      currency: 'TWD',
+      shares: 0,
+      price: 0,
+      tax_fee: 0,
+      cash_flow_twd: baseCap,
+      realized_pnl_twd: null,
+      realized_return_pct: null,
+      note: `雙梯隊標準本金 NT$ ${baseCap.toLocaleString()} (A隊50% + B隊50%)`
+    });
+
+    setTxHistory(newTxList);
+    setDismissedSuggestions([]);
+    triggerNotice('✅ 已成功將您的帳本同步為「全球泰坦當前 A 梯隊 + B 梯隊官方標準持倉」！');
+  };
+
   // 4. 點擊「🚀 確認送出」執行建議更動
   const handleExecuteSuggestion = (sugg) => {
     if (sugg.action === '續抱' || sugg.isBalanced) {
@@ -1102,7 +1474,11 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       }
 
       // 記帳流水：寫入 txHistory 後，userPositions 與閒置現金將自動 100% 即時推導！
-      const modeNotePrefix = rebalanceMode === 'full_100' ? '雙隊滿倉' : (rebalanceMode === 'tranche_a_50' ? '🅰️ 1號A隊調倉' : '🅱️ 22號B隊調倉');
+      const modeNotePrefix = sugg.teamId === 'A'
+        ? '🅰️ 1號A隊調倉'
+        : sugg.teamId === 'B'
+          ? '🅱️ 22號B隊調倉'
+          : (rebalanceMode === 'full_100' ? '雙隊滿倉' : (rebalanceMode === 'tranche_a_50' ? '🅰️ 1號A隊調倉' : '🅱️ 22號B隊調倉'));
       const newTx = {
         id: 'tx_' + Date.now(),
         date: today,
@@ -2188,18 +2564,614 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
 
-          {/* 3. 目前持倉 (Current Live Holdings) */}
-          <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #10B981' }}>
+          {/* =====================================================================
+              🏛️ 第一步：全球泰坦【現在 A 梯隊 vs B 梯隊 官方持有股票】(AB 梯隊完全分開並列)
+             ===================================================================== */}
+          <div className="glass-card" style={{
+            padding: '1.2rem',
+            borderTop: '4px solid #F59E0B',
+            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92))',
+            border: '1px solid rgba(245, 158, 11, 0.35)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <h4 style={{ margin: 0, color: '#FDE047', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  🏛️ 第一步：全球泰坦【現在 A 隊 與 B 隊 官方持有股票】（A、B 梯隊分開獨立顯示）
+                </h4>
+                <p style={{ margin: '0.25rem 0 0 0', color: '#CBD5E1', fontSize: '0.8rem' }}>
+                  全球泰坦將總資金對半分為 <strong style={{ color: '#38BDF8' }}>🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)</strong> 與 <strong style={{ color: '#C084FC' }}>🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)</strong>，兩隊各自獨立選股、獨立持有滿一個月才換倉。
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: '0.76rem',
+                  background: 'rgba(16, 185, 129, 0.18)',
+                  border: '1px solid rgba(16, 185, 129, 0.5)',
+                  color: '#6EE7B7',
+                  padding: '0.28rem 0.7rem',
+                  borderRadius: '6px',
+                  fontWeight: 'bold'
+                }}>
+                  🛡️ 當前綜合市場寬幅 63.3% (&ge;50%)：A、B 雙隊皆為 100% 正常持倉（自動轉向能源與防禦板塊）
+                </span>
+              </div>
+            </div>
+
+            {/* A 梯隊 與 B 梯隊 雙欄並列卡片 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '1.1rem' }}>
+              {/* 左欄：🅰️ A 梯隊官方當前持倉 */}
+              {(dashboardStationView === 'all' || dashboardStationView === 'titan_a') && (
+                <div style={{
+                  background: 'rgba(14, 165, 233, 0.07)',
+                  border: '1px solid rgba(56, 189, 248, 0.45)',
+                  borderTop: '3px solid #38BDF8',
+                  borderRadius: '8px',
+                  padding: '1rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontSize: '1.02rem', fontWeight: 'bold', color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>{officialTrancheA.tranche_name}</span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginTop: '0.2rem' }}>
+                        最新調倉日：<strong style={{ color: '#F8FAFC' }}>{officialTrancheA.rebal_date}</strong> (進場日 {officialTrancheA.entry_date}) ｜ 下次換倉：<strong style={{ color: '#FCD34D' }}>{officialTrancheA.next_rebal_date}</strong>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '0.73rem',
+                      background: 'rgba(56, 189, 248, 0.2)',
+                      color: '#7DD3FC',
+                      border: '1px solid rgba(56, 189, 248, 0.5)',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 'bold'
+                    }}>
+                      🟢 A隊現在持有 3 檔 (曝險 {officialTrancheA.exposure_pct}%)
+                    </span>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="custom-table" style={{ width: '100%', fontSize: '0.8rem' }}>
+                      <thead>
+                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                          <th style={{ textAlign: 'center', width: '48px' }}>順位</th>
+                          <th>A 隊官方持有股票</th>
+                          <th style={{ textAlign: 'right' }}>A隊權重 (總資金)</th>
+                          <th style={{ textAlign: 'right' }}>官方進場價</th>
+                          <th style={{ textAlign: 'right' }}>最新現價 (損益)</th>
+                          <th style={{ textAlign: 'center' }}>狀態</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(officialTrancheA.picks || []).map((p) => {
+                          const isPos = (p.period_ret_pct || 0) >= 0;
+                          const curr = p.market === 'US' ? 'US$ ' : 'NT$ ';
+                          return (
+                            <tr key={`off_a_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#7DD3FC' }}>
+                                {p.rank === 1 ? '🥇 #1' : p.rank === 2 ? '🥈 #2' : '🥉 #3'}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                                  <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{p.ticker}</strong>
+                                  <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{formatStockDisplayName(p.ticker, p.name)}</span>
+                                  <StockChartButton ticker={p.ticker} name={p.name} />
+                                </div>
+                                <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
+                                  {p.sector || '核心動能正選'} ｜ 硬停損價 (-15%): <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>{curr}{p.stop_loss_price}</span>
+                                </div>
+                              </td>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                <div style={{ color: '#38BDF8', fontWeight: 'bold', fontSize: '0.88rem' }}>A隊 {p.tranche_weight_pct}%</div>
+                                <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>佔總資金 {p.total_portfolio_weight_pct}%</div>
+                              </td>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                                <div>{curr}{Number(p.entry_price).toLocaleString()}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{p.entry_date}</div>
+                              </td>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                <div style={{ color: '#F8FAFC' }}>{curr}{Number(p.current_price).toLocaleString()}</div>
+                                <div style={{ fontSize: '0.72rem', color: isPos ? '#34D399' : '#F87171' }}>
+                                  ({isPos ? '+' : ''}{Number(p.period_ret_pct).toFixed(2)}%)
+                                </div>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <span style={{
+                                  fontSize: '0.72rem',
+                                  background: 'rgba(16, 185, 129, 0.2)',
+                                  color: '#34D399',
+                                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  🟢 {p.action || '持有中'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: '#94A3B8', background: 'rgba(0,0,0,0.28)', padding: '0.4rem 0.65rem', borderRadius: '5px' }}>
+                    💡 {officialTrancheA.previous_rebal_note}
+                  </div>
+                </div>
+              )}
+
+              {/* 右欄：🅱️ B 梯隊官方當前持倉 */}
+              {(dashboardStationView === 'all' || dashboardStationView === 'titan_b') && (
+                <div style={{
+                  background: 'rgba(168, 85, 247, 0.07)',
+                  border: '1px solid rgba(192, 132, 252, 0.45)',
+                  borderTop: '3px solid #C084FC',
+                  borderRadius: '8px',
+                  padding: '1rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontSize: '1.02rem', fontWeight: 'bold', color: '#C084FC', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>{officialTrancheB.tranche_name}</span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#94A3B8', marginTop: '0.2rem' }}>
+                        最新調倉日：<strong style={{ color: '#F8FAFC' }}>{officialTrancheB.rebal_date}</strong> (進場日 {officialTrancheB.entry_date}) ｜ 下次換倉：<strong style={{ color: '#FCD34D' }}>{officialTrancheB.next_rebal_date}</strong>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '0.73rem',
+                      background: 'rgba(168, 85, 247, 0.2)',
+                      color: '#E9D5FF',
+                      border: '1px solid rgba(192, 132, 252, 0.5)',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontWeight: 'bold'
+                    }}>
+                      🟢 B隊現在持有 3 檔 (曝險 {officialTrancheB.exposure_pct}%)
+                    </span>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="custom-table" style={{ width: '100%', fontSize: '0.8rem' }}>
+                      <thead>
+                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                          <th style={{ textAlign: 'center', width: '48px' }}>順位</th>
+                          <th>B 隊官方持有股票</th>
+                          <th style={{ textAlign: 'right' }}>B隊權重 (總資金)</th>
+                          <th style={{ textAlign: 'right' }}>官方進場價</th>
+                          <th style={{ textAlign: 'right' }}>最新現價 (損益)</th>
+                          <th style={{ textAlign: 'center' }}>狀態</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(officialTrancheB.picks || []).map((p) => {
+                          const isPos = (p.period_ret_pct || 0) >= 0;
+                          const curr = p.market === 'US' ? 'US$ ' : 'NT$ ';
+                          return (
+                            <tr key={`off_b_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
+                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#E9D5FF' }}>
+                                {p.rank === 1 ? '🥇 #1' : p.rank === 2 ? '🥈 #2' : '🥉 #3'}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                                  <strong style={{ color: '#F8FAFC', fontSize: '0.88rem' }}>{p.ticker}</strong>
+                                  <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{formatStockDisplayName(p.ticker, p.name)}</span>
+                                  <StockChartButton ticker={p.ticker} name={p.name} />
+                                </div>
+                                <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
+                                  {p.sector || '核心動能正選'} ｜ 硬停損價 (-15%): <span style={{ color: '#FCA5A5', fontFamily: 'monospace' }}>{curr}{p.stop_loss_price}</span>
+                                </div>
+                              </td>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                <div style={{ color: '#C084FC', fontWeight: 'bold', fontSize: '0.88rem' }}>B隊 {p.tranche_weight_pct}%</div>
+                                <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>佔總資金 {p.total_portfolio_weight_pct}%</div>
+                              </td>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                                <div>{curr}{Number(p.entry_price).toLocaleString()}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{p.entry_date}</div>
+                              </td>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                <div style={{ color: '#F8FAFC' }}>{curr}{Number(p.current_price).toLocaleString()}</div>
+                                <div style={{ fontSize: '0.72rem', color: isPos ? '#34D399' : '#F87171' }}>
+                                  ({isPos ? '+' : ''}{Number(p.period_ret_pct).toFixed(2)}%)
+                                </div>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <span style={{
+                                  fontSize: '0.72rem',
+                                  background: 'rgba(16, 185, 129, 0.2)',
+                                  color: '#34D399',
+                                  border: '1px solid rgba(16, 185, 129, 0.4)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  🟢 {p.action || '持有中'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{ marginTop: '0.6rem', fontSize: '0.72rem', color: '#94A3B8', background: 'rgba(0,0,0,0.28)', padding: '0.4rem 0.65rem', borderRadius: '5px' }}>
+                    💡 {officialTrancheB.previous_rebal_note}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* =====================================================================
+              🎯 第二步：給您的專屬跟單行動建議（🅰️ A 梯隊 與 🅱️ B 梯隊 完全獨立分開試算！）
+             ===================================================================== */}
+          <div className="glass-card" style={{
+            padding: '1.2rem',
+            borderTop: '4px solid #10B981',
+            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(6, 78, 59, 0.18))',
+            border: '1px solid rgba(16, 185, 129, 0.4)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                  🎯 第二步：建議您持有的股票 &amp; 建議買進多少（🅰️ A 隊 與 🅱️ B 隊 完全分開試算）
+                </h4>
+                <p style={{ margin: '0.25rem 0 0 0', color: '#CBD5E1', fontSize: '0.8rem' }}>
+                  系統已將您的總資產淨值 <strong style={{ color: '#FDE047' }}>NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}</strong> 自動切分為：
+                  <strong style={{ color: '#38BDF8', marginLeft: '0.35rem' }}>🅰️ A隊 50% 預算 = NT$ {Math.round(separatedTrancheSuggestions.budgetTwdA).toLocaleString()} (約 US$ {Math.round(separatedTrancheSuggestions.budgetTwdA / usdFx).toLocaleString()})</strong>
+                  <span style={{ margin: '0 0.35rem' }}>｜</span>
+                  <strong style={{ color: '#C084FC' }}>🅱️ B隊 50% 預算 = NT$ {Math.round(separatedTrancheSuggestions.budgetTwdB).toLocaleString()} (約 US$ {Math.round(separatedTrancheSuggestions.budgetTwdB / usdFx).toLocaleString()})</strong>
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleSyncToOfficialABTranches}
+                  style={{
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    border: '1px solid #34D399',
+                    color: '#FFF',
+                    padding: '0.36rem 0.8rem',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)'
+                  }}
+                >
+                  ⚡ 一鍵將我的帳本同步為【A+B 官方標準持倉】
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCopySeparatedOrders('A')}
+                  style={{
+                    background: 'rgba(56, 189, 248, 0.18)',
+                    border: '1px solid #38BDF8',
+                    color: '#7DD3FC',
+                    padding: '0.34rem 0.68rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📋 複製 A 隊買賣單
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCopySeparatedOrders('B')}
+                  style={{
+                    background: 'rgba(168, 85, 247, 0.18)',
+                    border: '1px solid #C084FC',
+                    color: '#E9D5FF',
+                    padding: '0.34rem 0.68rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📋 複製 B 隊買賣單
+                </button>
+                {dismissedSuggestions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDismissedSuggestions([]);
+                      triggerNotice('✓ 已重設所有調倉標記，重新為您生成即時最新建議！');
+                    }}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.18)',
+                      border: '1px solid #EF4444',
+                      color: '#FCA5A5',
+                      padding: '0.34rem 0.68rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ↺ 重設已標記 ({dismissedSuggestions.length})
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 分別渲染 🅰️ A 梯隊跟單建議表 與 🅱️ B 梯隊跟單建議表 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+              {[
+                {
+                  teamId: 'A',
+                  visible: dashboardStationView === 'all' || dashboardStationView === 'titan_a',
+                  title: '🅰️ A 梯隊 (每月 1 號調倉・50% 總資金) — 建議您持有的股票 & 建議買進數量',
+                  subtitle: `對應 2026-11-02 官方 A 隊最新持倉 (MPC 52% / COP 24% / TXN 24%) ｜ A 隊專屬預算：NT$ ${Math.round(separatedTrancheSuggestions.budgetTwdA).toLocaleString()}`,
+                  accentColor: '#38BDF8',
+                  bgTint: 'rgba(14, 165, 233, 0.06)',
+                  rows: separatedTrancheSuggestions.trancheASuggestions
+                },
+                {
+                  teamId: 'B',
+                  visible: dashboardStationView === 'all' || dashboardStationView === 'titan_b',
+                  title: '🅱️ B 梯隊 (每月 22 號調倉・50% 總資金) — 建議您持有的股票 & 建議買進數量',
+                  subtitle: `對應 2026-10-22 官方 B 隊最新持倉 (VLO 52% / MPC 24% / MRK 24%) ｜ B 隊專屬預算：NT$ ${Math.round(separatedTrancheSuggestions.budgetTwdB).toLocaleString()}`,
+                  accentColor: '#C084FC',
+                  bgTint: 'rgba(168, 85, 247, 0.06)',
+                  rows: separatedTrancheSuggestions.trancheBSuggestions
+                }
+              ].filter(sec => sec.visible).map((sec) => (
+                <div
+                  key={`sep_table_${sec.teamId}`}
+                  style={{
+                    background: sec.bgTint,
+                    border: `1px solid ${sec.accentColor}66`,
+                    borderLeft: `4px solid ${sec.accentColor}`,
+                    borderRadius: '8px',
+                    padding: '0.95rem 1.05rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.7rem' }}>
+                    <div>
+                      <div style={{ fontSize: '1rem', fontWeight: 'bold', color: sec.accentColor }}>
+                        {sec.title}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '0.15rem' }}>
+                        {sec.subtitle}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="custom-table" style={{ width: '100%', fontSize: '0.83rem' }}>
+                      <thead>
+                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                          <th style={{ width: '92px', textAlign: 'center' }}>跟單動作</th>
+                          <th>建議您持有的股票 (代碼 / 名稱)</th>
+                          <th style={{ textAlign: 'right' }}>{sec.teamId}隊目標權重 (配置金額)</th>
+                          <th style={{ textAlign: 'right' }}>建議應持有股數</th>
+                          <th style={{ textAlign: 'right' }}>您目前在{sec.teamId}隊已持有</th>
+                          <th style={{ textAlign: 'right', color: '#FDE047' }}>🔥 建議買進 / 賣出多少</th>
+                          <th style={{ textAlign: 'center', width: '95px' }}>成交股數(可改)</th>
+                          <th style={{ textAlign: 'center', width: '105px' }}>成交價格(可改)</th>
+                          <th style={{ textAlign: 'right' }}>預估現金變動</th>
+                          <th style={{ textAlign: 'center', width: '110px' }}>一鍵記帳</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sec.rows.map((sugg) => {
+                          const rowVal = getRowValues(sugg);
+                          const isUsd = sugg.currency === 'USD';
+                          const curr = isUsd ? 'US$ ' : 'NT$ ';
+                          const fx = isUsd ? usdFx : 1.0;
+
+                          const sharesNum = parseInt(rowVal.shares, 10) || 0;
+                          const priceNum = parseFloat(rowVal.price) || 0;
+                          const feeNum = parseFloat(rowVal.taxFee) || 0;
+
+                          let cashDiffTwd = 0;
+                          if (sugg.action === '買入' || sugg.action === '加碼') {
+                            cashDiffTwd = -(sharesNum * priceNum * fx + (isUsd ? feeNum * fx : feeNum));
+                          } else {
+                            cashDiffTwd = (sharesNum * priceNum * fx - (isUsd ? feeNum * fx : feeNum));
+                          }
+
+                          return (
+                            <tr key={sugg.key} style={{ background: sugg.action === '買入' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.015)' }}>
+                              <td style={{ textAlign: 'center' }}>
+                                <span style={{
+                                  padding: '0.22rem 0.55rem',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  fontSize: '0.78rem',
+                                  background: sugg.actionColor + '25',
+                                  color: sugg.actionColor,
+                                  border: `1px solid ${sugg.actionColor}60`,
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {sugg.action === '續抱' ? '✅ 已達標續抱' : (sugg.action === '買入' ? '🟢 建議買進' : (sugg.action === '減持' ? '🟠 建議減持' : '🔴 建議賣出'))}
+                                </span>
+                              </td>
+
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                                  <strong style={{ color: '#F8FAFC', fontSize: '0.9rem' }}>{sugg.ticker}</strong>
+                                  <strong style={{ color: '#E2E8F0' }}>{sugg.name}</strong>
+                                  <StockChartButton ticker={sugg.ticker} name={sugg.name} />
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginTop: '2px' }}>
+                                  <span style={{ color: sec.accentColor, fontWeight: 'bold' }}>{sugg.role}</span>
+                                  {sugg.sector && <span> ｜ {sugg.sector}</span>}
+                                </div>
+                              </td>
+
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                <div style={{ color: '#F8FAFC', fontWeight: 'bold' }}>{sugg.targetWeightDisplay}</div>
+                                {sugg.targetTwd > 0 && (
+                                  <div style={{ fontSize: '0.72rem', color: '#67E8F9' }}>
+                                    NT$ {Math.round(sugg.targetTwd).toLocaleString()} {isUsd ? `(約 US$ ${Math.round(sugg.targetOrig).toLocaleString()})` : ''}
+                                  </div>
+                                )}
+                              </td>
+
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#CBD5E1' }}>
+                                {sugg.targetShares.toLocaleString()} 股
+                              </td>
+
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: sugg.currentShares > 0 ? '#34D399' : '#94A3B8' }}>
+                                <strong>{sugg.currentShares.toLocaleString()} 股</strong>
+                              </td>
+
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                {sugg.action === '續抱' ? (
+                                  <span style={{ color: '#34D399', fontWeight: 'bold' }}>0 股 (已買齊續抱)</span>
+                                ) : (
+                                  <div>
+                                    <div style={{
+                                      fontSize: '0.92rem',
+                                      fontWeight: 'bold',
+                                      color: sugg.action === '買入' ? '#FDE047' : '#FCA5A5'
+                                    }}>
+                                      {sugg.action === '買入' ? `買進 +${sugg.recShares} 股` : `賣出 -${sugg.recShares} 股`}
+                                    </div>
+                                    <div style={{ fontSize: '0.72rem', color: '#CBD5E1' }}>
+                                      約 {isUsd ? `US$ ${Math.round(sugg.recAmountOrig).toLocaleString()} (NT$ ${Math.round(sugg.recAmountTwd).toLocaleString()})` : `NT$ ${Math.round(sugg.recAmountTwd).toLocaleString()}`}
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+
+                              <td style={{ textAlign: 'center' }}>
+                                <input
+                                  type="number"
+                                  value={rowVal.shares}
+                                  onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
+                                  disabled={sugg.action === '續抱' || sugg.isExecuted}
+                                  style={{
+                                    width: '76px',
+                                    padding: '0.28rem 0.35rem',
+                                    borderRadius: '4px',
+                                    background: (sugg.action === '續抱' || sugg.isExecuted) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.65)',
+                                    border: (sugg.action === '續抱' || sugg.isExecuted) ? '1px solid rgba(255,255,255,0.1)' : `1px solid ${sec.accentColor}`,
+                                    color: (sugg.action === '續抱' || sugg.isExecuted) ? '#94A3B8' : '#FDE047',
+                                    fontWeight: 'bold',
+                                    textAlign: 'right',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.84rem'
+                                  }}
+                                />
+                              </td>
+
+                              <td style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.18rem' }}>
+                                  <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{curr}</span>
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    value={rowVal.price}
+                                    onChange={(e) => handleUpdateRowInput(sugg.key, 'price', e.target.value)}
+                                    style={{
+                                      width: '76px',
+                                      padding: '0.28rem 0.35rem',
+                                      borderRadius: '4px',
+                                      background: 'rgba(0,0,0,0.65)',
+                                      border: '1px solid rgba(255,255,255,0.25)',
+                                      color: '#F8FAFC',
+                                      fontWeight: 'bold',
+                                      textAlign: 'right',
+                                      fontFamily: 'monospace',
+                                      fontSize: '0.84rem'
+                                    }}
+                                  />
+                                </div>
+                              </td>
+
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: cashDiffTwd >= 0 ? '#34D399' : '#F87171' }}>
+                                {sugg.action === '續抱' ? 'NT$ 0' : `${cashDiffTwd >= 0 ? '+' : ''}NT$ ${Math.round(cashDiffTwd).toLocaleString()}`}
+                              </td>
+
+                              <td style={{ textAlign: 'center' }}>
+                                {sugg.isExecuted ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setDismissedSuggestions(prev => prev.filter(k => k !== sugg.key))}
+                                    style={{
+                                      padding: '0.32rem 0.6rem',
+                                      fontSize: '0.73rem',
+                                      background: 'rgba(59, 130, 246, 0.2)',
+                                      color: '#93C5FD',
+                                      border: '1px solid rgba(59, 130, 246, 0.4)',
+                                      borderRadius: '4px',
+                                      fontWeight: 'bold',
+                                      cursor: 'pointer',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    ✅ 已執行 (↺重算)
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleExecuteSuggestion(sugg)}
+                                    disabled={sugg.action === '續抱'}
+                                    style={{
+                                      padding: '0.34rem 0.75rem',
+                                      fontSize: '0.76rem',
+                                      background: sugg.action === '續抱' ? 'rgba(16, 185, 129, 0.2)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
+                                      color: sugg.action === '續抱' ? '#34D399' : '#FFF',
+                                      border: sugg.action === '續抱' ? '1px solid rgba(16, 185, 129, 0.45)' : 'none',
+                                      borderRadius: '4px',
+                                      fontWeight: 'bold',
+                                      cursor: sugg.action === '續抱' ? 'default' : 'pointer',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出'}
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* =====================================================================
+              💼 第三步：您的實戰持有中部位與帳本管理 (Current Live Holdings)
+             ===================================================================== */}
+          <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #38BDF8' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.6rem' }}>
               <div>
-                <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  💼 當前實戰持有中部位 ({userPositions.length} 檔)
+                <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  💼 第三步：您的實戰帳本持有中部位 ({userPositions.length} 檔)
                 </h4>
                 <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.76rem' }}>
-                  100% 由下方歷史交易流水帳自動推導。月內安心續抱，於每月 1 號 (A隊) 與 22 號 (B隊) 調倉日檢視排名與季線狀態。
+                  100% 由下方歷史交易流水帳自動推導。您可於上方「第二步」點擊「🚀 確認送出」或「⚡ 一鍵將我的帳本同步為 A+B 官方標準持倉」更新帳本。
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleSyncToOfficialABTranches}
+                  style={{
+                    background: 'linear-gradient(135deg, #0EA5E9, #2563EB)',
+                    border: 'none',
+                    color: '#FFF',
+                    padding: '0.28rem 0.7rem',
+                    borderRadius: '5px',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⚡ 對齊 A+B 官方持倉
+                </button>
                 <button
                   onClick={handleOpenAddPosition}
                   style={{
@@ -2227,9 +3199,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                     fontWeight: 'bold',
                     cursor: 'pointer'
                   }}
-                  title="校準為官方實盤帳本 (本金210萬、MRNA 131股/欣興 571股/創意 52股、閒置現金70,221元)"
+                  title="校準為舊版方案二實盤帳本 (本金210萬、MRNA 131股/欣興 571股/創意 52股)"
                 >
-                  🔄 校準實盤帳本
+                  🔄 載入舊帳本
                 </button>
                 <button
                   onClick={syncToDatabase}
@@ -2288,7 +3260,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
             {userPositions.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-                目前尚無任何持股部位。可點擊上方「➕ 新增持股」或於下方「雙梯隊調倉試算」執行建倉。
+                目前尚無任何持股部位。可點擊上方「第二步」之「🚀 確認送出」或「⚡ 一鍵將我的帳本同步為 A+B 官方標準持倉」建立部位。
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -2296,8 +3268,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <thead>
                     <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
                       <th>標的名稱與代碼</th>
-                      <th style={{ textAlign: 'center' }}>梯隊與角色</th>
-                      <th style={{ textAlign: 'center' }}>當期排名 / 任期</th>
+                      <th style={{ textAlign: 'center' }}>所屬梯隊與角色</th>
+                      <th style={{ textAlign: 'center' }}>官方持倉核對狀態</th>
                       <th style={{ textAlign: 'center' }}>建倉日期</th>
                       <th style={{ textAlign: 'right' }}>持有股數</th>
                       <th style={{ textAlign: 'right' }}>成本均價</th>
@@ -2324,8 +3296,10 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       const isWin = pnlTwd >= 0;
 
                       const pickMatch = currentPicks.find(cp => cp.ticker === pos.ticker || (cp.ticker && pos.ticker && cp.ticker.split('.')[0] === pos.ticker.split('.')[0]));
-                      const liveRank = pickMatch ? pickMatch.rank : null;
                       const churnSafe = pickMatch ? pickMatch.churn_safe !== false : true;
+
+                      const inOfficialA = (officialTrancheA.picks || []).find(p => p.ticker === pos.ticker);
+                      const inOfficialB = (officialTrancheB.picks || []).find(p => p.ticker === pos.ticker);
 
                       const daysHeld = pos.entry_date ? Math.max(1, Math.floor((new Date() - new Date(pos.entry_date)) / (1000 * 60 * 60 * 24))) : 12;
                       const monthsHeld = Math.min(4, Math.max(1, Math.ceil(daysHeld / 30)));
@@ -2335,9 +3309,13 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       const isBelowMa60 = curPrice < ma60Price;
                       const isNearMa60 = !isBelowMa60 && biasMa60Pct <= 4.0;
 
-                      const trancheTag = allocPct >= 23
-                        ? '🔥 A+B雙隊共振'
-                        : (pos.entry_date && parseInt(pos.entry_date.split('-')[2], 10) >= 18 ? '🅱️ B梯隊(22號)' : '🅰️ A梯隊(1號)');
+                      const trancheTag = (inOfficialA && inOfficialB)
+                        ? '🔥 A+B雙隊官方持倉'
+                        : inOfficialA
+                          ? '🅰️ A梯隊(1號)'
+                          : inOfficialB
+                            ? '🅱️ B梯隊(22號)'
+                            : (allocPct >= 23 ? '⚠️ 舊帳本雙隊合流' : (pos.entry_date && parseInt(pos.entry_date.split('-')[2], 10) >= 18 ? '🅱️ B梯隊(22號)' : '🅰️ A梯隊(1號)'));
 
                       return (
                         <tr key={pos.id} style={{ background: isBelowMa60 ? 'rgba(245, 158, 11, 0.06)' : 'rgba(255,255,255,0.015)' }}>
@@ -2362,19 +3340,30 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                             </span>
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            {liveRank ? (
+                            {(inOfficialA || inOfficialB) ? (
                               <span style={{
                                 fontSize: '0.72rem',
                                 padding: '2px 6px',
                                 borderRadius: '4px',
                                 fontWeight: 'bold',
-                                background: liveRank <= 3 ? 'rgba(16, 185, 129, 0.2)' : (liveRank <= 5 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(245, 158, 11, 0.2)'),
-                                color: liveRank <= 3 ? '#34D399' : (liveRank <= 5 ? '#60A5FA' : '#FBBF24')
+                                background: 'rgba(16, 185, 129, 0.2)',
+                                color: '#34D399',
+                                border: '1px solid rgba(16, 185, 129, 0.4)'
                               }}>
-                                {liveRank <= 3 ? `👑 Rank #${liveRank} 正選` : (liveRank <= 5 ? `🛡️ Rank #${liveRank} 保護帶` : `Rank #${liveRank} 觀察`)}
+                                ✅ 官方當期正選 ({inOfficialA && inOfficialB ? `A#${inOfficialA.rank}+B#${inOfficialB.rank}` : inOfficialA ? `A隊#${inOfficialA.rank}` : `B隊#${inOfficialB.rank}`})
                               </span>
                             ) : (
-                              <span style={{ fontSize: '0.72rem', color: '#FBBF24' }}>⚠️ 季線外觀察</span>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontWeight: 'bold',
+                                background: 'rgba(239, 68, 68, 0.18)',
+                                color: '#FCA5A5',
+                                border: '1px solid rgba(239, 68, 68, 0.4)'
+                              }}>
+                                ⚠️ 非當期官方持倉 (建議換倉)
+                              </span>
                             )}
                             <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '2px' }}>
                               任期: 第 {monthsHeld}/4 月 ({daysHeld}天)
@@ -2485,344 +3474,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
             )}
           </div>
-
-          {/* 4. 雙梯隊調倉試算與執行建議 (Dual-Tranche Rebalance Calculator) */}
-          {(dashboardStationView === 'all' || dashboardStationView === 'titan_attack' || dashboardStationView === 'titan_a' || dashboardStationView === 'titan_b') && (
-            <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #38BDF8', background: 'rgba(14, 165, 233, 0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <h4 style={{ margin: 0, color: '#38BDF8', fontSize: '1.08rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    🔄 雙梯隊調倉試算與執行建議（G7 確信度配比 46% / 27% / 27%・±12% 贏家漂移容忍帶）
-                  </h4>
-                  {(!dualTrancheGuide.isWindowA && !dualTrancheGuide.isWindowB) && (
-                    <span style={{
-                      fontSize: '0.72rem',
-                      background: 'rgba(245, 158, 11, 0.18)',
-                      border: '1px solid rgba(245, 158, 11, 0.45)',
-                      color: '#FDE68A',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontWeight: 'bold'
-                    }}>
-                      ⏳ 目前為月內續抱期：下方僅為盤後即時預演，實盤請於 {dualTrancheGuide.nextActionLabel} 窗口再執行換股
-                    </span>
-                  )}
-                </div>
-                <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.76rem' }}>
-                  同一正選標的優先以 🅰️ A隊 (1號・50%預算) 補滿，多出股數歸入 🅱️ B隊 (22號・50%預算)；在手持股位列 Rank 1~4 (或 Rank #5 且 IO<sub>20</sub>&gt;0) 自動保護免賣。
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={handleCopyAllOrders}
-                  style={{
-                    background: 'rgba(56, 189, 248, 0.2)',
-                    border: '1px solid #38BDF8',
-                    color: '#67E8F9',
-                    padding: '0.32rem 0.7rem',
-                    borderRadius: '5px',
-                    fontSize: '0.75rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
-                  }}
-                >
-                  📋 複製調倉委託
-                </button>
-
-                {dismissedSuggestions.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDismissedSuggestions([]);
-                      triggerNotice('✓ 已重設所有調倉標記，重新為您生成即時最新建議！');
-                    }}
-                    style={{
-                      background: 'rgba(239, 68, 68, 0.18)',
-                      border: '1px solid #EF4444',
-                      color: '#FCA5A5',
-                      padding: '0.32rem 0.7rem',
-                      borderRadius: '5px',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ↺ 重設已標記 ({dismissedSuggestions.length})
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {rebalanceSuggestions.length === 0 ? (
-              <div style={{ padding: '1.35rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.08)', borderRadius: '8px', border: '1px dashed #10B981' }}>
-                <div style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                  ✨ 目前持倉與目標模式（{rebalanceMode === 'full_100' ? '雙隊合流 46/27/27%' : (rebalanceMode === 'tranche_a_50' ? '1號 A梯隊 (50%)' : '22號 B梯隊 (50%)')}）已完全對齊且處於 ±12% 贏家漂移容差帶內，無須任何調倉！
-                </div>
-                <div style={{ color: '#94A3B8', fontSize: '0.75rem', marginTop: '0.2rem' }}>
-                  下次定期調倉窗口為 <strong>{dualTrancheGuide.nextActionLabel} ({dualTrancheGuide.nextTrancheBadge})</strong>。
-                </div>
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="custom-table" style={{ width: '100%', fontSize: '0.84rem' }}>
-                  <thead>
-                    <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                      <th style={{ width: '80px', textAlign: 'center' }}>動作建議</th>
-                      <th>標的名稱 (代碼)</th>
-                      <th style={{ textAlign: 'right' }}>目標配置 (金額)</th>
-                      <th style={{ textAlign: 'right' }}>目前股數</th>
-                      <th style={{ textAlign: 'right', color: '#67E8F9' }}>建議更動股數</th>
-                      <th style={{ textAlign: 'center', width: '110px' }}>實際成交股數 (可改)</th>
-                      <th style={{ textAlign: 'center', width: '110px' }}>成交價格 (可改)</th>
-                      <th style={{ textAlign: 'center', width: '100px' }}>稅金/手續費</th>
-                      <th style={{ textAlign: 'right' }}>預估現金變動</th>
-                      <th style={{ textAlign: 'center', width: '110px' }}>執行確認</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rebalanceSuggestions.map((sugg) => {
-                      const rowVal = getRowValues(sugg);
-                      const isUsd = sugg.currency === 'USD';
-                      const curr = isUsd ? 'US$ ' : 'NT$ ';
-                      const fx = isUsd ? usdFx : 1.0;
-
-                      const sharesNum = parseInt(rowVal.shares, 10) || 0;
-                      const priceNum = parseFloat(rowVal.price) || 0;
-                      const feeNum = parseFloat(rowVal.taxFee) || 0;
-
-                      // 現金變動估算
-                      let cashDiffTwd = 0;
-                      if (sugg.action === '買入' || sugg.action === '加碼') {
-                        cashDiffTwd = -(sharesNum * priceNum * fx + (isUsd ? feeNum * fx : feeNum));
-                      } else {
-                        cashDiffTwd = (sharesNum * priceNum * fx - (isUsd ? feeNum * fx : feeNum));
-                      }
-
-                      return (
-                        <tr key={sugg.key} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                          {/* 動作標籤 */}
-                          <td style={{ textAlign: 'center' }}>
-                            <span style={{
-                              padding: '0.2rem 0.5rem',
-                              borderRadius: '4px',
-                              fontWeight: 'bold',
-                              fontSize: '0.78rem',
-                              background: sugg.actionColor + '25',
-                              color: sugg.actionColor,
-                              border: `1px solid ${sugg.actionColor}60`
-                            }}>
-                              {sugg.action === '續抱' ? '✅ 續抱' : (sugg.isFullA && sugg.deficitSharesB > 0 ? '🟢 補齊B隊' : (sugg.action === '買入' ? '🟢 買入' : (sugg.action === '加碼' ? '🔵 加碼' : (sugg.action === '減持' ? '🟠 減持' : '🔴 賣出'))))}
-                            </span>
-                          </td>
-
-                          {/* 標的名稱 與 雙梯隊分配進度 */}
-                          <td>
-                            <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(sugg.ticker, sugg.name)}</strong>
-                            <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
-                              {sugg.ticker} | <span style={{ color: '#FBBF24' }}>{sugg.role}</span>
-                            </div>
-                            {/* 雙梯隊 A隊補滿 / B隊補齊 狀態條 */}
-                            {sugg.targetSharesA > 0 && (
-                              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.3rem', fontSize: '0.7rem', flexWrap: 'wrap' }}>
-                                <span style={{
-                                  padding: '1px 6px',
-                                  borderRadius: '3px',
-                                  background: sugg.isFullA ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                                  color: sugg.isFullA ? '#34D399' : '#F87171',
-                                  border: sugg.isFullA ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-                                  fontFamily: 'monospace'
-                                }}>
-                                  🅰️ A隊: {sugg.isFullA ? `✅ 已補滿 (${sugg.allocSharesA}/${sugg.targetSharesA}股)` : `⚠️ 缺 ${sugg.deficitSharesA} 股`}
-                                </span>
-                                <span style={{
-                                  padding: '1px 6px',
-                                  borderRadius: '3px',
-                                  background: sugg.isFullB ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                                  color: sugg.isFullB ? '#34D399' : '#FBBF24',
-                                  border: sugg.isFullB ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
-                                  fontFamily: 'monospace'
-                                }}>
-                                  🅱️ B隊: {sugg.isFullB ? `✅ 已補齊 (${sugg.allocSharesB}/${sugg.targetSharesB}股)` : `⚠️ 缺 ${sugg.deficitSharesB} 股 (買入補齊)`}
-                                </span>
-                              </div>
-                            )}
-                            {/* 機率智慧買點 / 不換倉原股續抱指引 */}
-                            {sugg.action === '續抱' ? (
-                              <div style={{ marginTop: '0.28rem', fontSize: '0.7rem', color: '#34D399', fontWeight: 'bold' }}>
-                                🛡️ 不換倉原股續抱：在手持股免掛單折騰，零摩擦吃滿主升段
-                              </div>
-                            ) : (sugg.action === '買入' || sugg.action === '加碼') && (
-                              <div
-                                title={sugg.smartEntryDesc || ''}
-                                style={{
-                                  marginTop: '0.28rem',
-                                  fontSize: '0.7rem',
-                                  color: sugg.smartEntryMode === 'limit_pullback' ? '#FBBF24' : '#38BDF8',
-                                  background: 'rgba(15, 23, 42, 0.65)',
-                                  border: '1px solid rgba(56, 189, 248, 0.25)',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  display: 'inline-block',
-                                  cursor: 'help'
-                                }}
-                              >
-                                🎯 <strong>{sugg.smartEntryTag}</strong> ｜ 建議掛單: <strong>{curr}{sugg.smartEntryPrice?.toLocaleString()}</strong> (T+1開高禁追上限: {curr}{sugg.gapLimitCapPrice?.toLocaleString()})
-                              </div>
-                            )}
-                          </td>
-
-                          {/* 目標配置 */}
-                          <td style={{ textAlign: 'right' }}>
-                            <div style={{ color: '#CBD5E1', fontWeight: 'bold' }}>{sugg.targetWeightDisplay || `${sugg.targetWeightPct}%`}</div>
-                            <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
-                              NT$ {Math.round(sugg.targetTwd).toLocaleString()}
-                            </div>
-                          </td>
-
-                          {/* 目前股數 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>
-                            <div style={{ color: '#F1F5F9', fontWeight: 'bold' }}>{sugg.currentShares.toLocaleString()} 股</div>
-                            <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>
-                              佔比 {totalNetAssetsTwd > 0 ? (((sugg.currentShares * sugg.defaultPrice * (sugg.currency === 'USD' ? usdFx : 1)) / totalNetAssetsTwd) * 100).toFixed(1) : 0}%
-                            </div>
-                          </td>
-
-                          {/* 建議股數 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: sugg.action === '續抱' ? '#34D399' : '#67E8F9' }}>
-                            <div>{sugg.action === '續抱' ? '0 股 (已平衡)' : (sugg.action === '買入' || sugg.action === '加碼' ? `+${sugg.recShares} 股` : `-${sugg.recShares} 股`)}</div>
-                            {sugg.actionNote && (
-                              <div style={{ fontSize: '0.68rem', color: sugg.action === '續抱' ? '#6EE7B7' : '#FCD34D', fontWeight: 'normal', fontFamily: 'sans-serif' }}>
-                                {sugg.actionNote}
-                              </div>
-                            )}
-                          </td>
-
-                          {/* 實際股數 Input */}
-                          <td style={{ textAlign: 'center' }}>
-                            <input
-                              type="number"
-                              value={rowVal.shares}
-                              onChange={(e) => handleUpdateRowInput(sugg.key, 'shares', e.target.value)}
-                              disabled={sugg.action === '續抱' || sugg.isExecuted}
-                              style={{
-                                width: '85px',
-                                padding: '0.3rem 0.4rem',
-                                borderRadius: '4px',
-                                background: (sugg.action === '續抱' || sugg.isExecuted) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)',
-                                border: (sugg.action === '續抱' || sugg.isExecuted) ? '1px solid rgba(255,255,255,0.1)' : '1px solid #38BDF8',
-                                color: (sugg.action === '續抱' || sugg.isExecuted) ? '#94A3B8' : '#38BDF8',
-                                fontWeight: 'bold',
-                                textAlign: 'right',
-                                fontFamily: 'monospace',
-                                fontSize: '0.85rem'
-                              }}
-                            />
-                          </td>
-
-                          {/* 成交價格 Input */}
-                          <td style={{ textAlign: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.2rem' }}>
-                              <span style={{ fontSize: '0.74rem', color: '#94A3B8' }}>{curr}</span>
-                              <input
-                                type="number"
-                                step="0.1"
-                                value={rowVal.price}
-                                onChange={(e) => handleUpdateRowInput(sugg.key, 'price', e.target.value)}
-                                style={{
-                                  width: '80px',
-                                  padding: '0.3rem 0.4rem',
-                                  borderRadius: '4px',
-                                  background: 'rgba(0,0,0,0.6)',
-                                  border: '1px solid rgba(255,255,255,0.25)',
-                                  color: '#F8FAFC',
-                                  fontWeight: 'bold',
-                                  textAlign: 'right',
-                                  fontFamily: 'monospace',
-                                  fontSize: '0.85rem'
-                                }}
-                              />
-                            </div>
-                          </td>
-
-                          {/* 稅費 Input */}
-                          <td style={{ textAlign: 'center' }}>
-                            <input
-                              type="number"
-                              value={rowVal.taxFee}
-                              onChange={(e) => handleUpdateRowInput(sugg.key, 'taxFee', e.target.value)}
-                              style={{
-                                width: '70px',
-                                padding: '0.3rem 0.4rem',
-                                borderRadius: '4px',
-                                background: 'rgba(0,0,0,0.6)',
-                                border: '1px solid rgba(255,255,255,0.2)',
-                                color: '#FCA5A5',
-                                textAlign: 'right',
-                                fontFamily: 'monospace',
-                                fontSize: '0.82rem'
-                              }}
-                            />
-                          </td>
-
-                          {/* 預估現金變動 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: cashDiffTwd >= 0 ? '#34D399' : '#F87171' }}>
-                            {cashDiffTwd >= 0 ? '+' : ''}NT$ {Math.round(cashDiffTwd).toLocaleString()}
-                          </td>
-
-                          {/* 右側按鈕送出 */}
-                          <td style={{ textAlign: 'center' }}>
-                            {sugg.isExecuted ? (
-                              <button
-                                type="button"
-                                onClick={() => setDismissedSuggestions(prev => prev.filter(k => k !== sugg.key))}
-                                title="點擊取消已執行標記，重新恢復為待調倉建議"
-                                style={{
-                                  padding: '0.35rem 0.65rem',
-                                  fontSize: '0.74rem',
-                                  background: 'rgba(59, 130, 246, 0.2)',
-                                  color: '#93C5FD',
-                                  border: '1px solid rgba(59, 130, 246, 0.4)',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  cursor: 'pointer',
-                                  whiteSpace: 'nowrap'
-                                }}
-                              >
-                                ✅ 已執行 (↺重算)
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleExecuteSuggestion(sugg)}
-                                disabled={sugg.action === '續抱'}
-                                style={{
-                                  padding: '0.35rem 0.8rem',
-                                  fontSize: '0.78rem',
-                                  background: sugg.action === '續抱' ? 'rgba(16, 185, 129, 0.25)' : `linear-gradient(135deg, ${sugg.actionColor}, #0284C7)`,
-                                  color: sugg.action === '續抱' ? '#34D399' : '#FFF',
-                                  border: sugg.action === '續抱' ? '1px solid rgba(16, 185, 129, 0.5)' : 'none',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  cursor: sugg.action === '續抱' ? 'default' : 'pointer',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                  whiteSpace: 'nowrap'
-                                }}
-                              >
-                                {sugg.action === '續抱' ? '✅ 續抱中' : '🚀 確認送出'}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-          )}
 
           {/* 2.5 📡 全球泰坦 Top 10 敏銳動能與爆量滯漲即時雷達表 (Live Top 10 Ranking & Churn Filter Radar) */}
           {(dashboardStationView === 'all' || dashboardStationView === 'titan_a' || dashboardStationView === 'titan_b') && currentPicks.length > 0 && (

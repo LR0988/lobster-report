@@ -1567,7 +1567,7 @@ def get_global_sovereign_dashboard_data():
     except Exception as e:
         print("直連資料庫計算全球主權數據失敗:", e)
 
-    # 附加 Rank IC 總覽快照 (供前端即時渲染)
+    # 附加 Rank IC 總覽快照與 G12-PIT 官方 A/B 梯隊標準持倉 (供前端即時渲染，避免 API 覆蓋靜態 JSON)
     try:
         rank_ic_file = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "global_titan_rank_ic.json")
         if os.path.exists(rank_ic_file):
@@ -1575,6 +1575,14 @@ def get_global_sovereign_dashboard_data():
                 ic_json = json.load(f_ic)
                 data["rank_ic_summary"] = ic_json.get("overall_summary", {})
                 data["rank_ic_total_periods"] = ic_json.get("total_periods", 0)
+        pit_hist_file = os.path.join(os.path.dirname(__file__), "frontend", "src", "data", "g11_pit_yearly_history.json")
+        if os.path.exists(pit_hist_file):
+            with open(pit_hist_file, "r", encoding="utf-8") as f_pit:
+                pit_json = json.load(f_pit)
+                if "official_active_tranches" in pit_json:
+                    data["official_active_tranches"] = pit_json["official_active_tranches"]
+                if "recent_2026_rebalances" in pit_json:
+                    data["recent_2026_rebalances"] = pit_json["recent_2026_rebalances"]
     except Exception as e:
         pass
 

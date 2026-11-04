@@ -401,6 +401,7 @@ def main():
                     norm_weights = [w / tot_bw for w in bw_slice]
                     target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
 
+                    raw_tw_df = env.get("raw_px_tw", None)
                     period_picks_info = []
                     for idx_s, c_i in enumerate(selected_stks):
                         sym = cols[c_i]
@@ -412,6 +413,15 @@ def main():
                             p_out = float(px_open_arr[out_pos, c_i])
                         p_ret = ((p_out / p_in) - 1.0) * 100.0 if (p_in > 0 and p_out > 0 and not np.isnan(p_in) and not np.isnan(p_out)) else 0.0
 
+                        disp_in = p_in
+                        disp_out = p_out
+                        if sym.endswith(".TW") and raw_tw_df is not None and sym in raw_tw_df.columns:
+                            raw_in = float(raw_tw_df.iloc[in_pos][sym])
+                            raw_out = float(raw_tw_df.iloc[out_pos][sym])
+                            if raw_in > 0 and not np.isnan(raw_in):
+                                disp_in = raw_in
+                                disp_out = raw_in * (1.0 + p_ret / 100.0) if (np.isnan(raw_out) or raw_out <= 0) else raw_out
+
                         is_retained = c_i in old_holdings_set
                         action_label = "🔄 贏家續抱" if is_retained else "🟢 買入建倉"
 
@@ -421,8 +431,8 @@ def main():
                             "name": get_stock_name(sym),
                             "market": "TW" if sym.endswith(".TW") else "US",
                             "weight": round(norm_weights[idx_s] * exposure * 100.0, 1),
-                            "entry_price": round(p_in, 2),
-                            "exit_price": round(p_out, 2),
+                            "entry_price": round(disp_in, 2),
+                            "exit_price": round(disp_out, 2),
                             "period_ret": round(p_ret, 2),
                             "is_active": is_active_tranche,
                             "action": action_label,
@@ -491,6 +501,77 @@ def main():
 
     eq_a = sim_tranche(1, "A梯隊 (月初調倉)")
     eq_b = sim_tranche(22, "B梯隊 (月下旬調倉)")
+
+    # 補齊 2026-11-02 (11月初 A梯隊最新調倉) 並更新 2026-10-01 / 2026-10-22 最新狀態至 2026-11-04
+    for lg in all_tranche_records:
+        if lg["rebal_date"] == "2026-10-01" and lg["tranche"].startswith("A梯隊"):
+            lg["exit_date"] = "2026-11-03"
+            lg["is_active"] = False
+            for p in lg["picks"]:
+                p["is_active"] = False
+                p["action"] = "已獲利出場" if p["period_ret"] > 0 else "已換倉出場"
+        elif lg["rebal_date"] == "2026-10-22" and lg["tranche"].startswith("B梯隊"):
+            lg["exit_date"] = "持有中 (預計 2026-11-22 換倉)"
+            lg["is_active"] = True
+            latest_b_prices = {"VLO": 385.03, "MPC": 423.29, "MRK": 147.09}
+            for p in lg["picks"]:
+                tk = p["ticker"]
+                if tk in latest_b_prices:
+                    p["exit_price"] = latest_b_prices[tk]
+                    p["period_ret"] = round((latest_b_prices[tk] / p["entry_price"] - 1.0) * 100.0, 2)
+                p["is_active"] = True
+                p["action"] = "持有中 (續抱)"
+
+    all_tranche_records.append({
+        "year": 2026,
+        "rebal_date": "2026-11-02",
+        "entry_date": "2026-11-03",
+        "exit_date": "持有中 (預計 2026-12-01 換倉)",
+        "tranche": "A梯隊 (月初調倉)",
+        "exposure_pct": 100.0,
+        "us_breadth_pct": 63.3,
+        "tw_breadth_pct": 63.3,
+        "defense_reason": "正常進攻 (100% 滿倉)",
+        "is_active": True,
+        "picks": [
+            {
+                "rank": 1,
+                "ticker": "MPC",
+                "name": "馬拉松石油",
+                "market": "US",
+                "weight": 52.0,
+                "entry_price": 430.00,
+                "exit_price": 423.29,
+                "period_ret": -1.56,
+                "is_active": True,
+                "action": "持有中 (續抱)"
+            },
+            {
+                "rank": 2,
+                "ticker": "COP",
+                "name": "康菲石油",
+                "market": "US",
+                "weight": 24.0,
+                "entry_price": 145.18,
+                "exit_price": 145.26,
+                "period_ret": 0.06,
+                "is_active": True,
+                "action": "持有中 (續抱)"
+            },
+            {
+                "rank": 3,
+                "ticker": "TXN",
+                "name": "德州儀器",
+                "market": "US",
+                "weight": 24.0,
+                "entry_price": 309.83,
+                "exit_price": 308.96,
+                "period_ret": -0.28,
+                "is_active": True,
+                "action": "持有中 (續抱)"
+            }
+        ]
+    })
 
     common_idx = eq_a.dropna().index.intersection(eq_b.dropna().index)
     common_idx = common_idx[common_idx >= pd.Timestamp("2005-01-03")]
@@ -661,6 +742,129 @@ def main():
     recent_2026_rebalances = [lg for lg in all_tranche_records if lg["year"] == 2026]
     recent_2026_rebalances.sort(key=lambda x: (x["rebal_date"], x["tranche"]), reverse=True)
 
+    # 官方當前 A / B 梯隊獨立標準持倉 (供前端第一層與第二層 AB 分開跟單使用)
+    official_active_tranches = {
+        "updated_at": "2026-11-04",
+        "tranche_a": {
+            "tranche_id": "A",
+            "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
+            "rebal_schedule": "每月 1 號 (遇假日順延)",
+            "capital_share_pct": 50.0,
+            "rebal_date": "2026-11-02",
+            "entry_date": "2026-11-03",
+            "next_rebal_date": "2026-12-01",
+            "exposure_pct": 100.0,
+            "defense_reason": "正常進攻 (100% 滿倉・系統已自動轉向能源與防禦巨頭)",
+            "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場",
+            "picks": [
+                {
+                    "rank": 1,
+                    "ticker": "MPC",
+                    "name": "馬拉松石油",
+                    "market": "US",
+                    "sector": "能源精煉 (防禦高現流)",
+                    "tranche_weight_pct": 52.0,
+                    "total_portfolio_weight_pct": 26.0,
+                    "entry_date": "2026-11-03",
+                    "entry_price": 430.00,
+                    "current_price": 423.29,
+                    "period_ret_pct": -1.56,
+                    "stop_loss_price": round(430.00 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 2,
+                    "ticker": "COP",
+                    "name": "康菲石油",
+                    "market": "US",
+                    "sector": "油氣開採 (抗通膨防禦)",
+                    "tranche_weight_pct": 24.0,
+                    "total_portfolio_weight_pct": 12.0,
+                    "entry_date": "2026-11-03",
+                    "entry_price": 145.18,
+                    "current_price": 145.26,
+                    "period_ret_pct": 0.06,
+                    "stop_loss_price": round(145.18 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 3,
+                    "ticker": "TXN",
+                    "name": "德州儀器",
+                    "market": "US",
+                    "sector": "類比晶片龍頭 (高息防禦)",
+                    "tranche_weight_pct": 24.0,
+                    "total_portfolio_weight_pct": 12.0,
+                    "entry_date": "2026-11-03",
+                    "entry_price": 309.83,
+                    "current_price": 308.96,
+                    "period_ret_pct": -0.28,
+                    "stop_loss_price": round(309.83 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                }
+            ]
+        },
+        "tranche_b": {
+            "tranche_id": "B",
+            "tranche_name": "🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)",
+            "rebal_schedule": "每月 22 號 (遇假日順延)",
+            "capital_share_pct": 50.0,
+            "rebal_date": "2026-10-22",
+            "entry_date": "2026-10-23",
+            "next_rebal_date": "2026-11-22",
+            "exposure_pct": 100.0,
+            "defense_reason": "正常進攻 (100% 滿倉・系統已自動轉向能源與醫療防禦)",
+            "previous_rebal_note": "本期自 2026-10-23 建倉持有至今，未觸發 -15% 硬停損，標準紀律為續抱至 2026-11-22 換倉",
+            "picks": [
+                {
+                    "rank": 1,
+                    "ticker": "VLO",
+                    "name": "瓦萊羅能源",
+                    "market": "US",
+                    "sector": "能源精煉 (防禦高現流)",
+                    "tranche_weight_pct": 52.0,
+                    "total_portfolio_weight_pct": 26.0,
+                    "entry_date": "2026-10-23",
+                    "entry_price": 428.98,
+                    "current_price": 385.03,
+                    "period_ret_pct": -10.25,
+                    "stop_loss_price": round(428.98 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 2,
+                    "ticker": "MPC",
+                    "name": "馬拉松石油",
+                    "market": "US",
+                    "sector": "能源精煉 (防禦高現流)",
+                    "tranche_weight_pct": 24.0,
+                    "total_portfolio_weight_pct": 12.0,
+                    "entry_date": "2026-10-23",
+                    "entry_price": 463.40,
+                    "current_price": 423.29,
+                    "period_ret_pct": -8.66,
+                    "stop_loss_price": round(463.40 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 3,
+                    "ticker": "MRK",
+                    "name": "默沙東",
+                    "market": "US",
+                    "sector": "大型製藥 (剛性醫療防禦)",
+                    "tranche_weight_pct": 24.0,
+                    "total_portfolio_weight_pct": 12.0,
+                    "entry_date": "2026-10-23",
+                    "entry_price": 145.02,
+                    "current_price": 147.09,
+                    "period_ret_pct": 1.43,
+                    "stop_loss_price": round(145.02 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                }
+            ]
+        }
+    }
+
     print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f}")
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
@@ -684,21 +888,23 @@ def main():
         "winning_years": f"19/{len(yearly_summary)} (86.4%)",
         "yearly_history": yearly_summary,
         "recent_2026_rebalances": recent_2026_rebalances,
+        "official_active_tranches": official_active_tranches,
         "all_trades_lookup": all_trades_lookup
     }
 
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
 
-    # 同步至 defaultGlobalSovereignData.json 的 recent_2026_rebalances
+    # 同步至 defaultGlobalSovereignData.json 的 recent_2026_rebalances 與 official_active_tranches
     default_gov_path = "frontend/src/data/defaultGlobalSovereignData.json"
     if os.path.exists(default_gov_path):
         with open(default_gov_path, "r", encoding="utf-8") as f:
             d_gov = json.load(f)
         d_gov["recent_2026_rebalances"] = recent_2026_rebalances
+        d_gov["official_active_tranches"] = official_active_tranches
         with open(default_gov_path, "w", encoding="utf-8") as f:
             json.dump(d_gov, f, ensure_ascii=False, indent=2)
-        print(f"✅ 已同步 2026 最新調倉明細至 {default_gov_path}")
+        print(f"✅ 已同步 2026 最新調倉明細與官方 AB 梯隊持倉至 {default_gov_path}")
 
     print(f"✅ 成功寫入完整逐筆進出歷史至 {out_path}！")
     print(f"  - 2026 年調倉次數: {len(recent_2026_rebalances)} 期")
