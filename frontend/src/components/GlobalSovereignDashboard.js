@@ -4139,20 +4139,19 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   })()}
                 </div>
 
-                {/* 2004–2026 歷年績效與購買股票種類全景表 */}
+                {/* 2005–2026 歷年績效全景大表 (大表不列股票清單，點擊展開後依 🅰️ A 隊 / 🅱️ B 隊 分開並列顯示每期買賣細節與每筆損益) */}
                 <div style={{ overflowX: 'auto' }}>
-                  <table className="custom-table" style={{ width: '100%', fontSize: '0.79rem' }}>
+                  <table className="custom-table" style={{ width: '100%', fontSize: '0.82rem' }}>
                     <thead>
                       <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
-                        <th style={{ textAlign: 'center', width: '85px' }}>年份 / 明細</th>
-                        <th style={{ textAlign: 'right', width: '92px', color: '#FDE047' }}>G12-PIT 報酬</th>
-                        <th style={{ textAlign: 'right', width: '85px', color: '#94A3B8' }}>SPY 基準</th>
-                        <th style={{ textAlign: 'right', width: '88px', color: '#34D399' }}>超額 Alpha</th>
-                        <th style={{ textAlign: 'right', width: '95px', color: '#38BDF8' }}>累積淨值倍數</th>
-                        <th style={{ textAlign: 'right', width: '80px', color: '#FCA5A5' }}>年內 MDD</th>
-                        <th style={{ textAlign: 'center', width: '175px', color: '#93C5FD' }}>📊 當年購買股票種類佔比 (美股 vs 台股)</th>
-                        <th style={{ color: '#60A5FA' }}>🇺🇸 當年實際購買 S&P 500 PIT 美股主力 (換倉次數 / 期間累積貢獻)</th>
-                        <th style={{ color: '#34D399' }}>🇹🇼 當年實際購買台股 PIT 主力 (換倉次數 / 期間累積貢獻)</th>
+                        <th style={{ textAlign: 'center', width: '95px' }}>年份</th>
+                        <th style={{ textAlign: 'right', width: '115px', color: '#FDE047' }}>G12-PIT 年度報酬</th>
+                        <th style={{ textAlign: 'right', width: '105px', color: '#94A3B8' }}>SPY 基準報酬</th>
+                        <th style={{ textAlign: 'right', width: '110px', color: '#34D399' }}>超額 Alpha</th>
+                        <th style={{ textAlign: 'right', width: '125px', color: '#38BDF8' }}>累積淨值倍數</th>
+                        <th style={{ textAlign: 'right', width: '100px', color: '#FCA5A5' }}>年內 MDD</th>
+                        <th style={{ textAlign: 'center', width: '210px', color: '#93C5FD' }}>📊 美股 vs 台股配置比例</th>
+                        <th style={{ textAlign: 'center', width: '210px', color: '#FBBF24' }}>🅰️ A隊 / 🅱️ B隊 買賣明細與損益</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -4162,48 +4161,35 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         const isBearYear = [2008, 2018, 2022].includes(yrRow.year);
                         const isExpanded = !!expandedPitYears[yrRow.year];
                         const rebalList = yrRow.rebalances || [];
+                        const trancheAList = rebalList.filter(rb => String(rb.tranche || '').includes('A梯隊'));
+                        const trancheBList = rebalList.filter(rb => String(rb.tranche || '').includes('B梯隊'));
 
                         return (
                           <React.Fragment key={yrRow.year}>
                             <tr
+                              onClick={() => togglePitYearExpand(yrRow.year)}
                               style={{
-                                background: isBearYear
-                                  ? 'rgba(56, 189, 248, 0.08)'
-                                  : (yrRow.return_pct >= 65 ? 'rgba(16, 185, 129, 0.06)' : 'rgba(255,255,255,0.015)'),
+                                cursor: 'pointer',
+                                background: isExpanded
+                                  ? 'rgba(245, 158, 11, 0.12)'
+                                  : isBearYear
+                                    ? 'rgba(56, 189, 248, 0.08)'
+                                    : (yrRow.return_pct >= 65 ? 'rgba(16, 185, 129, 0.06)' : 'rgba(255,255,255,0.015)'),
                                 borderLeft: isBearYear
                                   ? '3px solid #38BDF8'
                                   : (yrRow.return_pct >= 65 ? '3px solid #10B981' : (isPos ? '3px solid rgba(52, 211, 153, 0.35)' : '3px solid #EF4444'))
                               }}
                             >
-                              <td style={{ textAlign: 'center', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
+                              <td style={{ textAlign: 'center', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC', fontSize: '0.9rem' }}>
                                 <div>{yrRow.year}{yrRow.year === 2026 ? '*' : ''}</div>
                                 {isBearYear && (
-                                  <span style={{ fontSize: '0.63rem', background: 'rgba(56, 189, 248, 0.22)', color: '#7DD3FC', padding: '1px 4px', borderRadius: '3px' }}>
-                                    🛡️股災年
+                                  <span style={{ fontSize: '0.63rem', background: 'rgba(56, 189, 248, 0.22)', color: '#7DD3FC', padding: '1px 5px', borderRadius: '3px' }}>
+                                    🛡️股災防禦年
                                   </span>
                                 )}
-                                <button
-                                  type="button"
-                                  onClick={() => togglePitYearExpand(yrRow.year)}
-                                  style={{
-                                    marginTop: '5px',
-                                    fontSize: '0.68rem',
-                                    padding: '2px 5px',
-                                    borderRadius: '3px',
-                                    border: isExpanded ? '1px solid #F59E0B' : '1px solid rgba(251, 191, 36, 0.4)',
-                                    background: isExpanded ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255, 255, 255, 0.05)',
-                                    color: isExpanded ? '#FDE047' : '#CBD5E1',
-                                    cursor: 'pointer',
-                                    display: 'block',
-                                    width: '100%',
-                                    fontWeight: isExpanded ? 'bold' : 'normal'
-                                  }}
-                                >
-                                  {isExpanded ? '▴ 收合明細' : `▾ 展開${rebalList.length > 0 ? rebalList.length + '期' : '明細'}`}
-                                </button>
                               </td>
 
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.85rem', color: isPos ? (yrRow.return_pct >= 65 ? '#FDE047' : '#34D399') : '#F87171' }}>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.92rem', color: isPos ? (yrRow.return_pct >= 65 ? '#FDE047' : '#34D399') : '#F87171' }}>
                                 {isPos ? '+' : ''}{yrRow.return_pct.toFixed(2)}%
                               </td>
 
@@ -4217,175 +4203,253 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
                               <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                                 <div style={{ fontWeight: 'bold', color: '#38BDF8' }}>{yrRow.cum_mult.toLocaleString()}x</div>
-                                <div style={{ fontSize: '0.66rem', color: '#94A3B8' }}>
+                                <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>
                                   平均曝險 {yrRow.avg_exposure_pct}%
                                 </div>
                               </td>
 
-                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yrRow.yearly_mdd_pct >= -15 ? '#34D399' : '#FBBF24' }}>
+                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yrRow.yearly_mdd_pct >= -15 ? '#34D399' : '#FBBF24', fontWeight: 'bold' }}>
                                 {yrRow.yearly_mdd_pct.toFixed(2)}%
                               </td>
 
                               {/* 美股 vs 台股種類比例條 */}
                               <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.69rem', marginBottom: '3px' }}>
-                                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>🇺🇸 {yrRow.us_share_pct}% ({yrRow.unique_us_count}檔)</span>
-                                  <span style={{ color: '#34D399', fontWeight: 'bold' }}>🇹🇼 {yrRow.tw_share_pct}% ({yrRow.unique_tw_count}檔)</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '4px' }}>
+                                  <span style={{ color: '#60A5FA', fontWeight: 'bold' }}>🇺🇸 美股 {yrRow.us_share_pct}% ({yrRow.unique_us_count}檔)</span>
+                                  <span style={{ color: '#34D399', fontWeight: 'bold' }}>🇹🇼 台股 {yrRow.tw_share_pct}% ({yrRow.unique_tw_count}檔)</span>
                                 </div>
                                 <div style={{ width: '100%', height: '7px', background: 'rgba(52, 211, 153, 0.35)', borderRadius: '4px', overflow: 'hidden', display: 'flex' }}>
                                   <div style={{ width: `${yrRow.us_share_pct}%`, height: '100%', background: 'linear-gradient(90deg, #3B82F6, #60A5FA)' }} />
                                   <div style={{ width: `${yrRow.tw_share_pct}%`, height: '100%', background: 'linear-gradient(90deg, #10B981, #34D399)' }} />
                                 </div>
                                 {yrRow.cash_defense_periods > 0 && (
-                                  <div style={{ fontSize: '0.64rem', color: '#FCD34D', marginTop: '2px' }}>
-                                    🛡️ 空頭避險期: {yrRow.cash_defense_periods} 期
+                                  <div style={{ fontSize: '0.65rem', color: '#FCD34D', marginTop: '2px' }}>
+                                    🛡️ 空倉防禦期: {yrRow.cash_defense_periods} 期
                                   </div>
                                 )}
                               </td>
 
-                              {/* 當年實際購買 S&P 500 PIT 美股主力 */}
-                              <td>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                  {(yrRow.us_stocks || []).map((st) => (
-                                    <span
-                                      key={st.ticker}
-                                      style={{
-                                        fontSize: '0.7rem',
-                                        padding: '2px 6px',
-                                        borderRadius: '4px',
-                                        background: 'rgba(59, 130, 246, 0.14)',
-                                        border: '1px solid rgba(96, 165, 250, 0.35)',
-                                        color: '#E2E8F0',
-                                        fontFamily: 'monospace'
-                                      }}
-                                    >
-                                      <strong style={{ color: '#93C5FD' }}>{st.ticker}</strong>
-                                      {st.name && st.name !== st.ticker ? ` ${st.name}` : ''}
-                                      <span style={{ color: '#FDE047', marginLeft: '3px' }}>×{st.count}次</span>
-                                      <span style={{ color: st.cum_period_ret >= 0 ? '#34D399' : '#FCA5A5', marginLeft: '3px' }}>
-                                        ({st.cum_period_ret >= 0 ? '+' : ''}{st.cum_period_ret}%)
-                                      </span>
-                                    </span>
-                                  ))}
-                                </div>
-                              </td>
-
-                              {/* 當年實際購買台股 PIT 主力 */}
-                              <td>
-                                {(yrRow.tw_stocks && yrRow.tw_stocks.length > 0) ? (
-                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                    {yrRow.tw_stocks.map((st) => (
-                                      <span
-                                        key={st.ticker}
-                                        style={{
-                                          fontSize: '0.7rem',
-                                          padding: '2px 6px',
-                                          borderRadius: '4px',
-                                          background: 'rgba(16, 185, 129, 0.14)',
-                                          border: '1px solid rgba(52, 211, 153, 0.35)',
-                                          color: '#E2E8F0',
-                                          fontFamily: 'monospace'
-                                        }}
-                                      >
-                                        <strong style={{ color: '#6EE7B7' }}>{st.ticker.replace('.TW', '')}</strong>
-                                        {st.name ? ` ${st.name}` : ''}
-                                        <span style={{ color: '#FDE047', marginLeft: '3px' }}>×{st.count}次</span>
-                                        <span style={{ color: st.cum_period_ret >= 0 ? '#34D399' : '#FCA5A5', marginLeft: '3px' }}>
-                                          ({st.cum_period_ret >= 0 ? '+' : ''}{st.cum_period_ret}%)
-                                        </span>
-                                      </span>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span style={{ fontSize: '0.7rem', color: '#64748B', fontFamily: 'monospace' }}>
-                                    當年度由美股 S&P 500 強勢領頭羊包辦
-                                  </span>
-                                )}
+                              {/* 展開 A/B 梯隊明細按鈕 */}
+                              <td style={{ textAlign: 'center' }} onClick={(e) => { e.stopPropagation(); togglePitYearExpand(yrRow.year); }}>
+                                <button
+                                  type="button"
+                                  style={{
+                                    fontSize: '0.76rem',
+                                    padding: '0.32rem 0.75rem',
+                                    borderRadius: '5px',
+                                    border: isExpanded ? '1px solid #F59E0B' : '1px solid rgba(56, 189, 248, 0.45)',
+                                    background: isExpanded ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.25))' : 'rgba(56, 189, 248, 0.14)',
+                                    color: isExpanded ? '#FDE047' : '#7DD3FC',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {isExpanded
+                                    ? `▴ 收合 ${yrRow.year} 年 A/B 隊明細`
+                                    : `▾ 展開 A隊(${trancheAList.length}期) / B隊(${trancheBList.length}期) 買賣損益`}
+                                </button>
                               </td>
                             </tr>
 
-                            {/* 🌟 展開的該年度每一次調倉詳細進出表 */}
+                            {/* 🌟 展開後：比照當前持股，將 🅰️ A 梯隊 與 🅱️ B 梯隊 左右分開並列，列出每一期買賣細節與每筆損益 */}
                             {isExpanded && (
-                              <tr style={{ background: 'rgba(15, 23, 42, 0.96)' }}>
-                                <td colSpan={9} style={{ padding: '0.75rem 1rem', borderBottom: '2px solid rgba(245, 158, 11, 0.4)' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                                    <span style={{ color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>
-                                      📋 {yrRow.year} 年度調倉詳細進出全景明細 (共 {rebalList.length} 次調倉・逐期進出場價格與盈虧)
-                                    </span>
-                                    <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                                      點擊上方「收合明細」可關閉 ｜ 標註 🟢 為最新進行中持倉
+                              <tr style={{ background: 'rgba(15, 23, 42, 0.98)' }}>
+                                <td colSpan={8} style={{ padding: '1rem 1.15rem', borderBottom: '2px solid rgba(245, 158, 11, 0.5)' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                      <span style={{ color: '#FDE047', fontWeight: 'bold', fontSize: '0.95rem' }}>
+                                        🏛️ {yrRow.year} 年度【🅰️ A 梯隊 vs 🅱️ B 梯隊】分隊買賣歷史明細與每筆損益（共 {rebalList.length} 期調倉）
+                                      </span>
+                                      <span style={{ fontSize: '0.73rem', background: 'rgba(16, 185, 129, 0.16)', color: '#6EE7B7', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '2px 8px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                        年度總報酬 {isPos ? '+' : ''}{yrRow.return_pct.toFixed(2)}% ｜ 超額 Alpha {isAlphaPos ? '+' : ''}{yrRow.alpha_pct.toFixed(2)}%
+                                      </span>
+                                    </div>
+                                    <span style={{ fontSize: '0.73rem', color: '#94A3B8' }}>
+                                      左欄為 <strong style={{ color: '#38BDF8' }}>🅰️ A 梯隊 (每月 1 號調倉・50%資金)</strong> ｜ 右欄為 <strong style={{ color: '#C084FC' }}>🅱️ B 梯隊 (每月 22 號調倉・50%資金)</strong>
                                     </span>
                                   </div>
 
                                   {rebalList.length === 0 ? (
-                                    <div style={{ color: '#94A3B8', fontSize: '0.75rem', padding: '0.5rem' }}>
+                                    <div style={{ color: '#94A3B8', fontSize: '0.78rem', padding: '0.5rem' }}>
                                       暫無逐期明細紀錄。
                                     </div>
                                   ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.6rem', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
-                                      {rebalList.map((rb, rIdx) => (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '1.1rem', alignItems: 'start' }}>
+                                      {[
+                                        {
+                                          teamKey: 'A',
+                                          teamTitle: `🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%) — ${yrRow.year} 年共 ${trancheAList.length} 期`,
+                                          accentColor: '#38BDF8',
+                                          bgTint: 'rgba(14, 165, 233, 0.06)',
+                                          list: trancheAList
+                                        },
+                                        {
+                                          teamKey: 'B',
+                                          teamTitle: `🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%) — ${yrRow.year} 年共 ${trancheBList.length} 期`,
+                                          accentColor: '#C084FC',
+                                          bgTint: 'rgba(168, 85, 247, 0.06)',
+                                          list: trancheBList
+                                        }
+                                      ].map((teamCol) => (
                                         <div
-                                          key={rIdx}
+                                          key={`hist_col_${yrRow.year}_${teamCol.teamKey}`}
                                           style={{
-                                            background: rb.is_active ? 'rgba(16, 185, 129, 0.08)' : (rb.exposure_pct === 0 ? 'rgba(239, 68, 68, 0.06)' : 'rgba(30, 41, 59, 0.7)'),
-                                            border: rb.is_active ? '1px solid rgba(52, 211, 153, 0.5)' : (rb.exposure_pct === 0 ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)'),
-                                            borderRadius: '6px',
-                                            padding: '0.6rem 0.75rem',
-                                            fontSize: '0.75rem'
+                                            background: teamCol.bgTint,
+                                            border: `1px solid ${teamCol.accentColor}55`,
+                                            borderTop: `3px solid ${teamCol.accentColor}`,
+                                            borderRadius: '8px',
+                                            padding: '0.85rem'
                                           }}
                                         >
-                                          {/* 調倉標題列 */}
-                                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '4px', marginBottom: '6px' }}>
-                                            <div>
-                                              <strong style={{ color: rb.is_active ? '#34D399' : '#FDE047' }}>📅 {rb.rebal_date}</strong>
-                                              <span style={{ color: '#94A3B8', fontSize: '0.7rem', marginLeft: '6px' }}>({rb.tranche})</span>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                              {rb.is_active && (
-                                                <span style={{ background: 'rgba(16, 185, 129, 0.25)', color: '#34D399', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>
-                                                  🟢 進行中持倉
-                                                </span>
-                                              )}
-                                              <span style={{ background: rb.exposure_pct > 0 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(239, 68, 68, 0.2)', color: rb.exposure_pct > 0 ? '#7DD3FC' : '#FCA5A5', fontSize: '0.65rem', padding: '1px 5px', borderRadius: '3px' }}>
-                                                曝險 {rb.exposure_pct}%
-                                              </span>
-                                            </div>
+                                          <div style={{
+                                            fontSize: '0.92rem',
+                                            fontWeight: 'bold',
+                                            color: teamCol.accentColor,
+                                            marginBottom: '0.7rem',
+                                            paddingBottom: '0.45rem',
+                                            borderBottom: '1px solid rgba(255,255,255,0.1)',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                          }}>
+                                            <span>{teamCol.teamTitle}</span>
+                                            <span style={{ fontSize: '0.72rem', color: '#CBD5E1', fontWeight: 'normal' }}>
+                                              由新到舊排列
+                                            </span>
                                           </div>
 
-                                          {/* 選股明細清單 */}
-                                          {rb.picks.length === 0 ? (
-                                            <div style={{ color: '#FCD34D', fontSize: '0.72rem', padding: '4px 0' }}>
-                                              🛡️ 宏觀護盾全面空倉避險 (市場寬幅 {rb.breadth}) ➔ 100% 抱現金領息
-                                            </div>
-                                          ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                              {rb.picks.map((p, pIdx) => {
-                                                const isPPos = p.period_ret >= 0;
-                                                return (
-                                                  <div key={pIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.25)', padding: '4px 6px', borderRadius: '4px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                      <span style={{ color: '#94A3B8', fontSize: '0.68rem' }}>#{p.rank}</span>
-                                                      <span style={{ color: p.market === 'TW' ? '#6EE7B7' : '#93C5FD', fontWeight: 'bold' }}>
-                                                        {p.ticker.replace('.TW', '')}
-                                                      </span>
-                                                      <span style={{ color: '#E2E8F0', fontSize: '0.7rem' }}>{p.name}</span>
-                                                      <span style={{ fontSize: '0.62rem', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', padding: '0 4px', borderRadius: '2px' }}>
-                                                        {p.action}
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '560px', overflowY: 'auto', paddingRight: '4px' }}>
+                                            {teamCol.list.map((rb, rIdx) => {
+                                              const periodWeightedRet = (rb.picks || []).reduce((acc, p) => acc + ((Number(p.weight) || 0) * (Number(p.period_ret) || 0) / 100.0), 0);
+                                              const isPeriodPos = periodWeightedRet >= 0;
+
+                                              return (
+                                                <div
+                                                  key={`rb_${teamCol.teamKey}_${rIdx}`}
+                                                  style={{
+                                                    background: rb.is_active ? 'rgba(16, 185, 129, 0.09)' : (rb.exposure_pct === 0 ? 'rgba(239, 68, 68, 0.06)' : 'rgba(15, 23, 42, 0.85)'),
+                                                    border: rb.is_active ? '1px solid rgba(52, 211, 153, 0.55)' : (rb.exposure_pct === 0 ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(255, 255, 255, 0.12)'),
+                                                    borderRadius: '7px',
+                                                    padding: '0.65rem 0.75rem'
+                                                  }}
+                                                >
+                                                  {/* 單期調倉標頭 */}
+                                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem', paddingBottom: '0.38rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                                    <div>
+                                                      <strong style={{ color: rb.is_active ? '#34D399' : '#FDE047', fontSize: '0.82rem', fontFamily: 'monospace' }}>
+                                                        📅 調倉日 {rb.rebal_date}
+                                                      </strong>
+                                                      <span style={{ color: '#94A3B8', fontSize: '0.71rem', marginLeft: '0.45rem', fontFamily: 'monospace' }}>
+                                                        (進場 {rb.entry_date} ➔ {rb.exit_date})
                                                       </span>
                                                     </div>
-                                                    <div style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                                                      <div style={{ color: isPPos ? '#34D399' : '#FCA5A5', fontWeight: 'bold' }}>
-                                                        {isPPos ? '+' : ''}{p.period_ret}%
-                                                      </div>
-                                                      <div style={{ fontSize: '0.64rem', color: '#94A3B8' }}>
-                                                        買 {p.entry_price} ➔ 出 {p.exit_price} ({p.weight}%)
-                                                      </div>
+                                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                                      {rb.is_active && (
+                                                        <span style={{ background: 'rgba(16, 185, 129, 0.25)', color: '#34D399', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                                          🟢 當前持有中
+                                                        </span>
+                                                      )}
+                                                      <span style={{ background: rb.exposure_pct > 0 ? 'rgba(56, 189, 248, 0.18)' : 'rgba(239, 68, 68, 0.2)', color: rb.exposure_pct > 0 ? '#7DD3FC' : '#FCA5A5', fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+                                                        曝險 {rb.exposure_pct}%
+                                                      </span>
+                                                      {rb.picks && rb.picks.length > 0 && (
+                                                        <span style={{
+                                                          background: isPeriodPos ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)',
+                                                          color: isPeriodPos ? '#34D399' : '#FCA5A5',
+                                                          fontSize: '0.72rem',
+                                                          padding: '1px 6px',
+                                                          borderRadius: '4px',
+                                                          fontWeight: 'bold',
+                                                          fontFamily: 'monospace'
+                                                        }}>
+                                                          當期該隊損益: {isPeriodPos ? '+' : ''}{periodWeightedRet.toFixed(2)}%
+                                                        </span>
+                                                      )}
                                                     </div>
                                                   </div>
-                                                );
-                                              })}
-                                            </div>
-                                          )}
+
+                                                  {/* 單期 3 檔持股表格 (比照頂部當前持股格式) */}
+                                                  {(!rb.picks || rb.picks.length === 0) ? (
+                                                    <div style={{ color: '#FCD34D', fontSize: '0.74rem', padding: '0.35rem 0' }}>
+                                                      🛡️ {rb.defense_reason || '宏觀護盾全面空倉避險'} (美寬幅 {rb.us_breadth_pct}% / 台寬幅 {rb.tw_breadth_pct}%) ➔ 100% 抱現金避開下跌
+                                                    </div>
+                                                  ) : (
+                                                    <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+                                                      <thead>
+                                                        <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
+                                                          <th style={{ textAlign: 'center', width: '42px' }}>順位</th>
+                                                          <th>持有股票 (代號 / 名稱)</th>
+                                                          <th style={{ textAlign: 'right' }}>{teamCol.teamKey}隊權重</th>
+                                                          <th style={{ textAlign: 'right' }}>買進價</th>
+                                                          <th style={{ textAlign: 'right' }}>{rb.is_active ? '最新現價' : '出場價'}</th>
+                                                          <th style={{ textAlign: 'right' }}>每筆損益 (貢獻)</th>
+                                                          <th style={{ textAlign: 'center' }}>狀態</th>
+                                                        </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                        {rb.picks.map((p, pIdx) => {
+                                                          const isPPos = (Number(p.period_ret) || 0) >= 0;
+                                                          const curr = p.market === 'US' ? 'US$ ' : 'NT$ ';
+                                                          const contrib = ((Number(p.weight) || 0) * (Number(p.period_ret) || 0)) / 100.0;
+                                                          const totalWeight = ((Number(p.weight) || 0) * 0.5).toFixed(0);
+                                                          return (
+                                                            <tr key={`p_${rIdx}_${pIdx}`} style={{ background: 'rgba(255,255,255,0.015)' }}>
+                                                              <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#CBD5E1' }}>
+                                                                {p.rank === 1 ? '🥇#1' : p.rank === 2 ? '🥈#2' : `🥉#${p.rank}`}
+                                                              </td>
+                                                              <td>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                                                                  <span style={{ fontSize: '0.68rem' }}>{p.market === 'US' ? '🇺🇸' : '🇹🇼'}</span>
+                                                                  <strong style={{ color: p.market === 'TW' ? '#6EE7B7' : '#93C5FD', fontFamily: 'monospace' }}>
+                                                                    {p.ticker.replace('.TW', '')}
+                                                                  </strong>
+                                                                  <span style={{ color: '#F8FAFC', fontWeight: 'bold' }}>
+                                                                    {formatStockDisplayName(p.ticker, p.name).split(' (')[0]}
+                                                                  </span>
+                                                                  <StockChartButton ticker={p.ticker} name={p.name} />
+                                                                </div>
+                                                              </td>
+                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                                                                <div style={{ color: teamCol.accentColor, fontWeight: 'bold' }}>{p.weight}%</div>
+                                                                <div style={{ fontSize: '0.65rem', color: '#94A3B8' }}>總資金{totalWeight}%</div>
+                                                              </td>
+                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#CBD5E1' }}>
+                                                                {curr}{Number(p.entry_price).toLocaleString()}
+                                                              </td>
+                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#F8FAFC', fontWeight: 'bold' }}>
+                                                                {curr}{Number(p.exit_price).toLocaleString()}
+                                                              </td>
+                                                              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                                                                <div style={{ color: isPPos ? '#34D399' : '#F87171', fontSize: '0.82rem' }}>
+                                                                  {isPPos ? '+' : ''}{Number(p.period_ret).toFixed(2)}%
+                                                                </div>
+                                                                <div style={{ fontSize: '0.65rem', color: isPPos ? '#6EE7B7' : '#FCA5A5' }}>
+                                                                  ({contrib >= 0 ? '+' : ''}{contrib.toFixed(2)}%)
+                                                                </div>
+                                                              </td>
+                                                              <td style={{ textAlign: 'center' }}>
+                                                                <span style={{
+                                                                  fontSize: '0.66rem',
+                                                                  padding: '1px 5px',
+                                                                  borderRadius: '3px',
+                                                                  background: p.is_active ? 'rgba(16, 185, 129, 0.2)' : (p.action && p.action.includes('停損') ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.08)'),
+                                                                  color: p.is_active ? '#34D399' : (p.action && p.action.includes('停損') ? '#FCA5A5' : '#CBD5E1'),
+                                                                  whiteSpace: 'nowrap'
+                                                                }}>
+                                                                  {p.action}
+                                                                </span>
+                                                              </td>
+                                                            </tr>
+                                                          );
+                                                        })}
+                                                      </tbody>
+                                                    </table>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
@@ -5049,11 +5113,17 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   const isNeg = rNum < 0;
                   const isRocket = rNum >= 50.0;
                   const isShield = [2008, 2011, 2018, 2022].includes(item.year);
-                  const topStr = (item.top_stocks || []).slice(0, 3).map(s => s.name ? s.name.split('(')[0] : s.ticker).join('/');
                   return (
                     <div
                       key={item.year}
+                      onClick={() => {
+                        setExpandedPitYears(prev => ({ ...prev, [item.year]: true }));
+                        const el = document.getElementById('g11-pit-history-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      title={`點擊展開 ${item.year} 年 A隊 / B隊 買賣明細與損益`}
                       style={{
+                        cursor: 'pointer',
                         background: isRocket ? 'rgba(245, 158, 11, 0.18)' : (isNeg ? 'rgba(239, 68, 68, 0.12)' : (isShield ? 'rgba(56, 189, 248, 0.12)' : 'rgba(255,255,255,0.03)')),
                         border: `1px solid ${isRocket ? 'rgba(245, 158, 11, 0.5)' : (isNeg ? 'rgba(239, 68, 68, 0.35)' : (isShield ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255,255,255,0.06)'))}`,
                         borderRadius: '5px',
@@ -5061,8 +5131,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         textAlign: 'center'
                       }}
                     >
-                      <div style={{ color: '#94A3B8', fontSize: '0.66rem' }}>{item.year} {topStr && <span style={{ color: isRocket ? '#FDE047' : '#7DD3FC' }}>({topStr})</span>}</div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.82rem', color: isNeg ? '#FCA5A5' : (isRocket ? '#FDE047' : '#34D399'), marginTop: '1px' }}>
+                      <div style={{ color: '#94A3B8', fontSize: '0.68rem', fontWeight: 'bold' }}>{item.year}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.84rem', color: isNeg ? '#FCA5A5' : (isRocket ? '#FDE047' : '#34D399'), marginTop: '1px' }}>
                         {rNum >= 0 ? '+' : ''}{rNum.toFixed(2)}%
                       </div>
                     </div>
