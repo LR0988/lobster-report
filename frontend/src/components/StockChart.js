@@ -16,15 +16,15 @@ import * as ind from './chartIndicators';
 const EVT = 'open-stock-chart';
 export const openStockChart = (detail) => window.dispatchEvent(new CustomEvent(EVT, { detail }));
 
-export const StockChartButton = ({ ticker, name, levels, label = '📈 K線', style }) => (
+export const StockChartButton = ({ ticker, name, levels, label = '📈', style }) => (
   <button
     type="button"
     title={`開啟 ${name || ticker} 技術線圖`}
     onClick={(e) => { e.stopPropagation(); openStockChart({ ticker, name, levels }); }}
     style={{
-      cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold', padding: '2px 7px', borderRadius: '4px',
+      cursor: 'pointer', fontSize: '0.78rem', fontWeight: 'bold', padding: '2px 5px', borderRadius: '4px',
       border: '1px solid rgba(96,165,250,0.55)', background: 'rgba(59,130,246,0.15)', color: '#93C5FD',
-      whiteSpace: 'nowrap', ...style,
+      lineHeight: 1.1, whiteSpace: 'nowrap', ...style,
     }}
   >{label}</button>
 );

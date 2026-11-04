@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import defaultData from '../data/defaultGlobalSovereignData.json';
 import defaultRankIcData from '../data/global_titan_rank_ic.json';
 import g11PitHistoryData from '../data/g11_pit_yearly_history.json';
@@ -2208,7 +2209,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
 
   return (
-    <div className="global-sovereign-dashboard" style={{ animation: 'fadeIn 0.25s ease', paddingBottom: '3rem' }}>
+    <div className="global-sovereign-dashboard" style={{ paddingBottom: '3rem' }}>
       {/* 提示通知氣泡 */}
       {feedbackMsg && (
         <div style={{
@@ -2403,7 +2404,16 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
           </div>
 
           <div style={{ background: 'rgba(0,0,0,0.32)', padding: '0.6rem 0.8rem', borderRadius: '6px', borderLeft: unrealizedPnlTwd >= 0 ? '3px solid #10B981' : '3px solid #EF4444' }}>
-            <div style={{ fontSize: '0.72rem', color: '#94A3B8', marginBottom: '0.15rem' }}>📈 當前未實現損益</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.15rem' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>📈 當前未實現損益</span>
+              <button
+                type="button"
+                onClick={handleOpenAddPosition}
+                style={{ background: 'rgba(16, 185, 129, 0.22)', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#34D399', fontSize: '0.68rem', fontWeight: 'bold', padding: '0.1rem 0.45rem', borderRadius: '3px', cursor: 'pointer' }}
+              >
+                ➕ 新增持股
+              </button>
+            </div>
             <div style={{ fontSize: '1.18rem', fontWeight: 'bold', color: unrealizedPnlTwd >= 0 ? '#34D399' : '#F87171', fontFamily: 'monospace' }}>
               {unrealizedPnlTwd >= 0 ? '+' : ''}NT$ {Math.round(unrealizedPnlTwd).toLocaleString()}
               <span style={{ fontSize: '0.76rem', marginLeft: '0.3rem' }}>
@@ -2640,7 +2650,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <table className="custom-table" style={{ width: '100%', fontSize: '0.79rem' }}>
                     <thead>
                       <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                        <th style={{ textAlign: 'center', width: '36px' }}>#</th>
                         <th>股票</th>
                         <th style={{ textAlign: 'right' }}>權重</th>
                         <th style={{ textAlign: 'right' }}>買價</th>
@@ -2654,9 +2663,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         const curr = p.market === 'US' ? '$' : 'NT$';
                         return (
                           <tr key={`off_a_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                            <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#7DD3FC' }}>
-                              #{p.rank}
-                            </td>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
                                 <strong style={{ color: '#F8FAFC', fontSize: '0.86rem' }}>{p.ticker}</strong>
@@ -2749,7 +2755,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <table className="custom-table" style={{ width: '100%', fontSize: '0.79rem' }}>
                     <thead>
                       <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                        <th style={{ textAlign: 'center', width: '36px' }}>#</th>
                         <th>股票</th>
                         <th style={{ textAlign: 'right' }}>權重</th>
                         <th style={{ textAlign: 'right' }}>買價</th>
@@ -2763,9 +2768,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         const curr = p.market === 'US' ? '$' : 'NT$';
                         return (
                           <tr key={`off_b_${p.ticker}`} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                            <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#E9D5FF' }}>
-                              #{p.rank}
-                            </td>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
                                 <strong style={{ color: '#F8FAFC', fontSize: '0.86rem' }}>{p.ticker}</strong>
@@ -2840,6 +2842,22 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleOpenAddPosition}
+                  style={{
+                    background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
+                    border: '1px solid #60A5FA',
+                    color: '#FFF',
+                    padding: '0.32rem 0.75rem',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ➕ 新增持股
+                </button>
                 <button
                   type="button"
                   onClick={handleSyncToOfficialABTranches}
@@ -2989,6 +3007,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
                                 <strong style={{ color: '#F8FAFC', fontSize: '0.85rem' }}>{sugg.ticker}</strong>
                                 <span style={{ color: '#E2E8F0', fontWeight: 'bold' }}>{sugg.name.split(' (')[0]}</span>
+                                <StockChartButton ticker={sugg.ticker} name={sugg.name} />
                               </div>
                             </td>
 
@@ -3323,7 +3342,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                 color: '#34D399',
                                 border: '1px solid rgba(16, 185, 129, 0.4)'
                               }}>
-                                ✅ 官方當期正選 ({inOfficialA && inOfficialB ? `A#${inOfficialA.rank}+B#${inOfficialB.rank}` : inOfficialA ? `A隊#${inOfficialA.rank}` : `B隊#${inOfficialB.rank}`})
+                                ✅ 官方當期正選 ({inOfficialA && inOfficialB ? `A隊第${inOfficialA.rank}名+B隊第${inOfficialB.rank}名` : inOfficialA ? `A隊第${inOfficialA.rank}名` : `B隊第${inOfficialB.rank}名`})
                               </span>
                             ) : (
                               <span style={{
@@ -3448,16 +3467,16 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
             )}
           </div>
 
-          {/* 2.5 📡 全球泰坦 Top 10 敏銳動能與爆量滯漲即時雷達表 (Live Top 10 Ranking & Churn Filter Radar) */}
+          {/* 2.5 📡 全球泰坦選股雷達 Top 10 (精簡版：不擠壓欄位) */}
           {(dashboardStationView === 'all' || dashboardStationView === 'titan_a' || dashboardStationView === 'titan_b') && currentPicks.length > 0 && (
-            <div className="glass-card" style={{ padding: '1.2rem', borderTop: '3px solid #F59E0B', background: 'rgba(245, 158, 11, 0.03)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div className="glass-card" style={{ padding: '1.1rem', borderTop: '3px solid #F59E0B', background: 'rgba(245, 158, 11, 0.03)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    📡 全球泰坦 2.0・G12-PIT Sovereign 即時選股雷達 Top 10（無偏誤精簡版：移除防雷/研發加權 × exp_262/264）
+                    📡 全球泰坦選股雷達 Top 10
                   </h4>
-                  <p style={{ margin: '0.2rem 0 0 0', color: '#94A3B8', fontSize: '0.77rem' }}>
-                    主排序採用 <strong>G12-PIT Sovereign 強化公式</strong>：G11 基底 × <strong>exp_262 正交突破共振 (×1.04)</strong>（已精簡移除過擬合防雷與靜態研發加權）；<strong>Rank 1~3 為正選 (52/24/24%)，贏家享 exp_264 40~60 天主升段續抱保護</strong>。
+                  <p style={{ margin: '0.18rem 0 0 0', color: '#94A3B8', fontSize: '0.76rem' }}>
+                    前 3 名為當期正選（配比 <strong style={{ color: '#34D399' }}>52% / 24% / 24%</strong>），第 4~5 名為在手續抱保護帶。
                   </p>
                 </div>
 
@@ -3491,7 +3510,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       fontWeight: 'bold'
                     }}
                   >
-                    👑 僅看 Rank 1~3 正選
+                    👑 前 3 名正選
                   </button>
                   <button
                     onClick={() => setRadarWinrateFilter('golden_safe')}
@@ -3506,7 +3525,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       fontWeight: 'bold'
                     }}
                   >
-                    🎯 黃金蓄勢 / 甜點支撐
+                    🎯 甜點買點
                   </button>
                   <button
                     onClick={() => setRadarWinrateFilter('caution')}
@@ -3521,49 +3540,23 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       fontWeight: 'bold'
                     }}
                   >
-                    ⚠️ 標記短線過熱組
+                    ⚠️ 短線過熱
                   </button>
                 </div>
               </div>
 
-              {/* 精簡版 G12-PIT Sovereign 終極引擎速覽條 */}
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.75rem',
-                alignItems: 'center',
-                background: 'rgba(15, 23, 42, 0.65)',
-                border: '1px solid rgba(245, 158, 11, 0.25)',
-                borderRadius: '6px',
-                padding: '0.5rem 0.85rem',
-                marginBottom: '0.85rem',
-                fontSize: '0.74rem',
-                color: '#CBD5E1'
-              }}>
-                <span style={{ color: '#FDE68A', fontWeight: 'bold' }}>🏆 G12-PIT Sovereign 實證 (2005–2026・CAGR 40.48%・1,621.2倍・月MDD -21.99%・Calmar 1.84・勝年 19/22)：</span>
-                <span>🧬 <strong style={{ color: '#A78BFA' }}>S&amp;P 500 PIT + 台灣 0050∪0051 純上市 PIT × 純粹動能 × exp_262(×1.04)</strong></span>
-                <span style={{ color: '#475569' }}>|</span>
-                <span>👑 <strong style={{ color: '#34D399' }}>52/24/24% 穩健信念配比</strong></span>
-                <span style={{ color: '#475569' }}>|</span>
-                <span>🛡️ <strong style={{ color: '#FCD34D' }}>exp_264 主升段 40~60 天護航 + 敗部定檢</strong> (月MDD壓入 -21.99%)</span>
-              </div>
-
               <div style={{ overflowX: 'auto' }}>
-                <table className="custom-table" style={{ width: '100%', fontSize: '0.81rem' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.8rem' }}>
                   <thead>
                     <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                      <th style={{ textAlign: 'center', width: '115px' }}>順位與保護帶</th>
-                      <th>標的名稱 (代碼 / 市場)</th>
-                      <th style={{ textAlign: 'center' }}>配比規則 (單隊 / 雙隊)</th>
-                      <th style={{ textAlign: 'right' }}>最新現價</th>
-                      <th style={{ textAlign: 'right', color: '#60A5FA' }}>60MA 季線 (乖離%)</th>
-                      <th style={{ textAlign: 'right', color: '#34D399' }}>2W / 3M / 12M 動能</th>
-                      <th style={{ textAlign: 'right', color: '#A5B4FC' }}>FIP / 凸性 / 52W</th>
-                      <th style={{ textAlign: 'center', color: '#67E8F9' }}>🔬 G5 微結構 (IO<sub>20</sub> / 口袋支點)</th>
-                      <th style={{ textAlign: 'center', color: '#C084FC' }}>💎 Rank 2~10 營運籌碼與飆股特質</th>
-                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>G12-PIT 總分</th>
-                      <th style={{ textAlign: 'center', color: '#38BDF8' }}>🎯 換倉機率買點 (掛單指引)</th>
-                      <th style={{ textAlign: 'center', color: '#FBBF24' }}>型態與量價檢驗</th>
+                      <th style={{ textAlign: 'center', width: '92px' }}>排名</th>
+                      <th>股票</th>
+                      <th style={{ textAlign: 'center' }}>目標配比</th>
+                      <th style={{ textAlign: 'right' }}>現價 (季線乖離)</th>
+                      <th style={{ textAlign: 'right', color: '#34D399' }}>動能 (3M / 12M)</th>
+                      <th style={{ textAlign: 'left', color: '#C084FC', maxWidth: '210px' }}>飆股特質</th>
+                      <th style={{ textAlign: 'right', color: '#FBBF24' }}>總分</th>
+                      <th style={{ textAlign: 'center', color: '#38BDF8' }}>買點與型態</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -3583,7 +3576,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       const pickRank = pick.rank || (idx + 1);
                       const isTop3 = pickRank <= 3;
                       const isBuf = pickRank > 3 && pickRank <= 5;
-                      const curr = pick.currency === 'USD' ? 'US$ ' : 'NT$ ';
+                      const curr = pick.currency === 'USD' ? '$' : 'NT$';
                       const isHeld = userPositions.some(p => p.ticker === pick.ticker || (p.ticker && pick.ticker && p.ticker.split('.')[0] === pick.ticker.split('.')[0]));
                       const singleW = isTop3 ? (pickRank === 1 ? 52 : 24) : 0;
                       const navHalfW = singleW / 2;
@@ -3612,199 +3605,123 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       }
 
                       const io20Val = pick.io_20 !== undefined ? Number(pick.io_20) : 0.0;
-                      const pp40Val = pick.pocket_pivot_40 !== undefined ? Number(pick.pocket_pivot_40) : 0.0;
+                      const shortSniperTag = (pick.sniper_tag || '📈 強勢主升延續')
+                        .replace(/（.*?）/g, '')
+                        .replace(/\(.*?\)/g, '')
+                        .trim();
 
                       return (
                         <tr key={pick.ticker} style={{
                           background: isTop3 ? 'rgba(16, 185, 129, 0.07)' : (isBuf ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255,255,255,0.01)'),
                           borderLeft: isTop3 ? '3px solid #10B981' : (isBuf ? '3px solid #3B82F6' : 'none')
                         }}>
-                          <td style={{ textAlign: 'center' }}>
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                             <span style={{
-                              fontSize: '0.73rem',
-                              padding: '2px 7px',
+                              fontSize: '0.72rem',
+                              padding: '2px 6px',
                               borderRadius: '4px',
                               fontWeight: 'bold',
                               background: isTop3 ? 'rgba(16, 185, 129, 0.22)' : (isBuf ? 'rgba(59, 130, 246, 0.22)' : 'rgba(255,255,255,0.07)'),
                               color: isTop3 ? '#34D399' : (isBuf ? '#60A5FA' : '#94A3B8')
                             }}>
-                              {isTop3 ? `👑 Top ${pickRank} 正選` : (isBuf ? `🛡️ Rank ${pickRank} 保護帶` : `Rank ${pickRank} 候補`)}
+                              {isTop3 ? `👑 第${pickRank}名` : (isBuf ? `🛡️ 第${pickRank}名` : `第${pickRank}名`)}
                             </span>
                           </td>
                           <td>
-                            <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(pick.ticker, pick.name)}</strong>
-                            <span style={{ fontSize: '0.73rem', color: '#94A3B8', marginLeft: '0.35rem', fontFamily: 'monospace' }}>
-                              ({pick.ticker} · {pick.market})
-                            </span>
-                            <StockChartButton ticker={pick.ticker} name={pick.name} style={{ marginLeft: '0.4rem' }} />
-                            {pick.is_dynamic_new && (
-                              <span
-                                title="通過四大主權安檢門（20D均量>=15億、ROE>=15%、0<PE<45、20D投信買超>0.2%）由全市場動態吸納入池之新世代主流股"
-                                style={{ marginLeft: '0.4rem', fontSize: '0.68rem', background: 'rgba(6, 182, 212, 0.22)', border: '1px solid rgba(34, 211, 238, 0.5)', color: '#67E8F9', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold', cursor: 'help' }}
-                              >
-                                🌊 動態活水新星
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              <strong style={{ color: '#F8FAFC' }}>{formatStockDisplayName(pick.ticker, pick.name).split(' (')[0]}</strong>
+                              <span style={{ fontSize: '0.73rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                                ({pick.ticker})
                               </span>
-                            )}
-                            {isHeld && (
-                              <span style={{ marginLeft: '0.4rem', fontSize: '0.68rem', background: 'rgba(245, 158, 11, 0.25)', color: '#FCD34D', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>
-                                ★ 已持有
-                              </span>
-                            )}
+                              <StockChartButton ticker={pick.ticker} name={pick.name} />
+                              {isHeld && (
+                                <span style={{ fontSize: '0.67rem', background: 'rgba(245, 158, 11, 0.25)', color: '#FCD34D', padding: '1px 5px', borderRadius: '3px', fontWeight: 'bold' }}>
+                                  ★ 已持有
+                                </span>
+                              )}
+                            </div>
                           </td>
-                          <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>
+                          <td style={{ textAlign: 'center', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
                             {isTop3 ? (
                               <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>
-                                單隊 {navHalfW}% <span style={{ color: '#94A3B8', fontSize: '0.73rem' }}>/ 雙隊 {singleW}%</span>
+                                單隊 {singleW}% <span style={{ color: '#94A3B8', fontSize: '0.71rem' }}>(總資金{navHalfW}%)</span>
                               </span>
                             ) : isBuf ? (
-                              <span style={{ color: pickRank === 5 && io20Val <= 0 ? '#FBBF24' : '#93C5FD', fontSize: '0.74rem' }}>
-                                {pickRank <= 4 ? '在手無條件續抱' : (io20Val > 0 ? 'Rank#5 (IO>0 續抱)' : 'Rank#5 (IO≤0 換血)')}
+                              <span style={{ color: pickRank === 5 && io20Val <= 0 ? '#FBBF24' : '#93C5FD', fontSize: '0.73rem' }}>
+                                {pickRank <= 4 ? '在手續抱保護' : (io20Val > 0 ? '在手續抱' : '觀察換血')}
                               </span>
                             ) : (
-                              <span style={{ color: '#64748B', fontSize: '0.75rem' }}>0% (觀察名單)</span>
+                              <span style={{ color: '#64748B', fontSize: '0.73rem' }}>候補觀察</span>
                             )}
                           </td>
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#F8FAFC' }}>
-                            {curr}{pick.price?.toLocaleString()}
-                          </td>
-                          {/* 60MA 季線與乖離率合併 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                            <span style={{ color: '#CBD5E1' }}>{curr}{pick.ma60?.toLocaleString()}</span>
+                          {/* 現價與 60MA 季線乖離率合併 */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+                            <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>
+                              {curr}{pick.price?.toLocaleString()}
+                            </div>
                             {pick.bias_ma60 !== undefined && (
-                              <span style={{
-                                marginLeft: '5px',
-                                fontSize: '0.73rem',
+                              <div style={{
+                                fontSize: '0.7rem',
                                 fontWeight: 'bold',
                                 color: pick.bias_ma60 <= 4.5 ? '#34D399' : (pick.bias_ma60 > 25.0 ? '#F87171' : '#93C5FD')
                               }}>
-                                ({pick.bias_ma60 >= 0 ? '+' : ''}{pick.bias_ma60}%)
-                              </span>
+                                季線 {pick.bias_ma60 >= 0 ? '+' : ''}{pick.bias_ma60}%
+                              </div>
                             )}
                           </td>
-                          {/* 2W / 3M / 12M 動能 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.76rem' }}>
-                            <div>
-                              <span style={{ color: '#94A3B8' }}>2W: </span>
-                              <strong style={{ color: (pick.mom_2w !== undefined && pick.mom_2w <= 5.0) ? '#34D399' : (pick.mom_2w > 11.0 ? '#F87171' : '#FCD34D') }}>
-                                {pick.mom_2w !== undefined ? `${pick.mom_2w > 0 ? '+' : ''}${pick.mom_2w}%` : '-'}
-                              </strong>
+                          {/* 動能 (3M / 12M) */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                            <div style={{ color: '#CBD5E1' }}>
+                              3M <strong style={{ color: '#34D399' }}>+{pick.mom_3m}%</strong>
                             </div>
-                            <div style={{ color: '#CBD5E1', marginTop: '1px' }}>
-                              3M: <strong style={{ color: '#34D399' }}>+{pick.mom_3m}%</strong> ｜ 12M: <strong style={{ color: '#34D399' }}>+{pick.mom_12m}%</strong>
+                            <div style={{ color: '#94A3B8', fontSize: '0.7rem' }}>
+                              12M <strong style={{ color: '#6EE7B7' }}>+{pick.mom_12m}%</strong>
                             </div>
                           </td>
-                          {/* FIP / 凸性 / 52W */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                          {/* 飆股特質：精簡且限制寬度、允許換行，絕不擠壓其他欄位 */}
+                          <td style={{ maxWidth: '210px', whiteSpace: 'normal', lineHeight: 1.35 }} title={pick.sniper_desc || pick.sniper_tag || ''}>
                             <div>
-                              FIP: <strong style={{ color: '#A5B4FC' }}>{pick.fip}</strong> (半年 <strong style={{ color: '#C4B5FD' }}>{pick.fip_126 ?? pick.fip}</strong>)
-                            </div>
-                            <div style={{ marginTop: '1px' }}>
-                              凸性: <strong style={{ color: '#38BDF8' }}>{pick.convexity !== undefined ? `${Number(pick.convexity).toFixed(2)}x` : '1.00x'}</strong> ｜ 52W: <strong style={{ color: '#F472B6' }}>{pick.prox_52w ?? 95}%</strong>
-                            </div>
-                          </td>
-                          {/* G5 微結構 (IO_20 / 口袋支點) */}
-                          <td style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                            <div>
-                              IO<sub>20</sub>: <strong style={{ color: io20Val > 0 ? '#34D399' : '#F87171' }}>{io20Val >= 0 ? '+' : ''}{io20Val.toFixed(2)}</strong>
-                            </div>
-                            <div style={{ marginTop: '1px' }}>
-                              口袋支點: <strong style={{ color: pp40Val >= 0 ? '#67E8F9' : '#FCA5A5' }}>{pp40Val >= 0 ? '+' : ''}{pp40Val.toFixed(2)}</strong>
-                            </div>
-                          </td>
-                          {/* Rank 2~10 營運籌碼與飆股特質 */}
-                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }} title={pick.sniper_desc || ''}>
-                            {pick.sniper_tag ? (
                               <span style={{
-                                fontSize: '0.71rem',
-                                padding: '2px 6px',
+                                display: 'inline-block',
+                                fontSize: '0.7rem',
+                                padding: '1px 6px',
                                 borderRadius: '4px',
                                 fontWeight: 'bold',
-                                background: pick.sniper_mult > 1.0 ? 'rgba(16, 185, 129, 0.22)' : (pick.sniper_mult < 1.0 ? 'rgba(239, 68, 68, 0.22)' : 'rgba(168, 85, 247, 0.18)'),
+                                background: pick.sniper_mult > 1.0 ? 'rgba(16, 185, 129, 0.2)' : (pick.sniper_mult < 1.0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(168, 85, 247, 0.16)'),
                                 color: pick.sniper_mult > 1.0 ? '#34D399' : (pick.sniper_mult < 1.0 ? '#F87171' : '#E9D5FF'),
-                                border: `1px solid ${pick.sniper_mult > 1.0 ? 'rgba(16, 185, 129, 0.5)' : (pick.sniper_mult < 1.0 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(168, 85, 247, 0.4)')}`,
-                                cursor: 'help'
+                                border: `1px solid ${pick.sniper_mult > 1.0 ? 'rgba(16, 185, 129, 0.45)' : (pick.sniper_mult < 1.0 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(168, 85, 247, 0.35)')}`
                               }}>
-                                {pick.sniper_tag}
+                                {shortSniperTag}
                               </span>
-                            ) : (
-                              <span style={{ fontSize: '0.71rem', color: '#94A3B8' }}>📈 強勢主升延續</span>
-                            )}
-                            {(pick.pe_ratio || pick.roe_pct || pick.whale_1000_pct != null) && (
-                              <div style={{ fontSize: '0.68rem', color: '#CBD5E1', fontFamily: 'monospace', marginTop: '2px' }}>
-                                PE: <strong>{pick.pe_ratio ?? '-'}x</strong> ｜ ROE: <strong style={{ color: (pick.roe_pct || 0) >= 20 ? '#34D399' : '#CBD5E1' }}>{pick.roe_pct ?? '-'}%</strong> ｜ 投信: <strong style={{ color: (pick.trust_20d_pct || 0) > 0 ? '#FBBF24' : '#94A3B8' }}>{pick.trust_20d_pct >= 0 ? '+' : ''}{pick.trust_20d_pct}%</strong>
-                                {pick.whale_scissors_pct != null && (
-                                  <span> ｜ 🐋大戶剪刀差: <strong style={{ color: pick.whale_scissors_pct >= 1.5 ? '#34D399' : (pick.whale_scissors_pct <= -1.5 ? '#F87171' : '#A5F3FC') }}>{pick.whale_scissors_pct >= 0 ? '+' : ''}{pick.whale_scissors_pct}%</strong></span>
-                                )}
+                            </div>
+                            {(pick.roe_pct != null || pick.pe_ratio != null) && (
+                              <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontFamily: 'monospace', marginTop: '2px' }}>
+                                ROE <strong style={{ color: (pick.roe_pct || 0) >= 20 ? '#34D399' : '#CBD5E1' }}>{pick.roe_pct ?? '-'}%</strong> · PE <strong>{pick.pe_ratio ?? '-'}x</strong>
                               </div>
                             )}
                           </td>
-                          {/* G7 總分 */}
-                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24', fontSize: '0.88rem' }}>
-                            <div>{(pick.sniper_score ?? pick.score)?.toFixed(3)}</div>
-                            {pick.sniper_mult && pick.sniper_mult !== 1.0 && (
-                              <div style={{ fontSize: '0.66rem', color: pick.sniper_mult > 1 ? '#34D399' : '#F87171' }}>
-                                (初分 {pick.score?.toFixed(2)} × {pick.sniper_mult})
-                              </div>
-                            )}
+                          {/* 總分 */}
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#FBBF24', fontSize: '0.86rem', whiteSpace: 'nowrap' }}>
+                            {(pick.sniper_score ?? pick.score)?.toFixed(2)}
                           </td>
-                          {/* 換倉機率智慧買點與不換倉續抱指引 */}
-                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }} title={pick.smart_entry_desc || ''}>
-                            {isHeld ? (
+                          {/* 買點與型態合併 */}
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }} title={pick.smart_entry_desc || pick.winrate_desc || ''}>
+                            <div>
                               <span style={{
-                                fontSize: '0.71rem',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                fontWeight: 'bold',
-                                background: 'rgba(16, 185, 129, 0.2)',
-                                color: '#34D399',
-                                border: '1px solid rgba(16, 185, 129, 0.45)'
-                              }}>
-                                ✅ 在手原股續抱 (免掛單)
-                              </span>
-                            ) : (
-                              <div>
-                                <span style={{
-                                  fontSize: '0.7rem',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  fontWeight: 'bold',
-                                  background: pick.smart_entry_mode === 'limit_pullback' ? 'rgba(245, 158, 11, 0.22)' : 'rgba(56, 189, 248, 0.16)',
-                                  color: pick.smart_entry_mode === 'limit_pullback' ? '#FBBF24' : '#38BDF8',
-                                  border: pick.smart_entry_mode === 'limit_pullback' ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(56, 189, 248, 0.4)'
-                                }}>
-                                  {pick.smart_entry_tag || '🟢 開盤直買・防跳空'}
-                                </span>
-                                <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontFamily: 'monospace', marginTop: '2px' }}>
-                                  掛單參考: <strong style={{ color: '#F8FAFC' }}>{curr}{(pick.smart_entry_price || pick.price)?.toLocaleString()}</strong> (上限 {curr}{(pick.gap_limit_cap_price || Number((pick.price * 1.015).toFixed(2)))?.toLocaleString()})
-                                </div>
-                              </div>
-                            )}
-                          </td>
-                          {/* 型態與量價檢驗合併 */}
-                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            <span
-                              title={pick.winrate_desc || ''}
-                              style={{
-                                fontSize: '0.71rem',
+                                fontSize: '0.7rem',
                                 padding: '2px 6px',
                                 borderRadius: '4px',
                                 fontWeight: 'bold',
                                 background: badgeBg,
                                 color: badgeColor,
-                                border: `1px solid ${badgeBorder}`,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '3px',
-                                cursor: 'help'
-                              }}
-                            >
-                              {pick.winrate_tag || '🚀 穩健主升推進'}
-                            </span>
-                            {pick.churn_safe === false && (
-                              <span style={{ marginLeft: '4px', fontSize: '0.68rem', color: '#F87171', background: 'rgba(239, 68, 68, 0.18)', padding: '2px 5px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                🚨 爆量滯漲
+                                border: `1px solid ${badgeBorder}`
+                              }}>
+                                {(pick.winrate_tag || '🚀 穩健主升').split(' (')[0]}
                               </span>
-                            )}
+                            </div>
+                            <div style={{ fontSize: '0.67rem', color: isHeld ? '#34D399' : '#94A3B8', fontFamily: 'monospace', marginTop: '2px' }}>
+                              {isHeld ? '✅ 在手續抱' : `參考 ${curr}${(pick.smart_entry_price || pick.price)?.toLocaleString()}`}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -3812,83 +3729,15 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   </tbody>
                 </table>
               </div>
-
-              {/* 🌊 每月全市場動態主權活水安檢門 (4-Gatekeeper Dynamic Sovereign Pool) 即時監控面板 */}
-              {data?.dynamic_universe_status?.enabled && (
-                <div style={{
-                  marginTop: '1rem',
-                  padding: '0.9rem 1.05rem',
-                  background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(15, 23, 42, 0.85))',
-                  border: '1px solid rgba(34, 211, 238, 0.35)',
-                  borderLeft: '4px solid #06B6D4',
-                  borderRadius: '8px'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.55rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.88rem', fontWeight: 'bold', color: '#67E8F9' }}>
-                        🌊 每月全市場動態主權活水安檢門（雙層分離架構：固定 15 國溫度計 + 全市場五大安檢門自動納新）
-                      </span>
-                      <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.45)', color: '#34D399', padding: '1px 7px', borderRadius: '4px', fontWeight: 'bold' }}>
-                        ✅ 已啟用・動態擴充 {data.dynamic_universe_status.newly_admitted_count || 0} 檔新世代主權股 (總活躍池 {data.dynamic_universe_status.total_active_universe || 186} 檔)
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '0.72rem', color: '#94A3B8', fontFamily: 'monospace' }}>
-                      最新全市場掃描日：{data.dynamic_universe_status.scan_date}
-                    </span>
-                  </div>
-
-                  <div style={{ fontSize: '0.74rem', color: '#CBD5E1', lineHeight: 1.55, marginBottom: '0.65rem' }}>
-                    為確保選股池永遠咬住新世代產業龍頭、同時<strong>不汙染 S5-Shield 全球廣度溫度計</strong>且<strong>杜絕小型主力炒作與大戶高檔倒貨妖股</strong>，系統於每次運算時自動對全市場台股執行<strong>五大主權資格安檢門</strong>：
-                    <span style={{ color: '#A5F3FC', marginLeft: '0.35rem' }}>
-                      ① <strong>20D日均成交額 &ge; 15億台幣</strong> ｜ ② <strong>0 &lt; PE &lt; 45 且 ROE &ge; 15%</strong> ｜ ③ <strong>20D投信淨買超 &gt; +0.20%</strong> ｜ ④ <strong>上市滿252日且無分割斷層</strong> ｜ ⑤ <strong>4週集保大戶剪刀差 &gt; -2.0%</strong>（封殺大戶倒貨散戶）
-                    </span>
-                  </div>
-
-                  {Array.isArray(data.dynamic_universe_status.newly_admitted_stocks) && data.dynamic_universe_status.newly_admitted_stocks.length > 0 && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(245px, 1fr))', gap: '0.55rem' }}>
-                      {data.dynamic_universe_status.newly_admitted_stocks.map((stItem) => (
-                        <div
-                          key={stItem.ticker}
-                          style={{
-                            background: 'rgba(15, 23, 42, 0.78)',
-                            border: stItem.overall_rank && stItem.overall_rank <= 10 ? '1px solid rgba(52, 211, 153, 0.55)' : '1px solid rgba(148, 163, 184, 0.22)',
-                            borderRadius: '6px',
-                            padding: '0.5rem 0.7rem',
-                            fontSize: '0.74rem'
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.22rem' }}>
-                            <strong style={{ color: '#F8FAFC' }}>{stItem.name}</strong>
-                            <span style={{
-                              fontSize: '0.68rem',
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                              fontWeight: 'bold',
-                              background: stItem.overall_rank && stItem.overall_rank <= 10 ? 'rgba(16, 185, 129, 0.22)' : 'rgba(56, 189, 248, 0.15)',
-                              color: stItem.overall_rank && stItem.overall_rank <= 10 ? '#34D399' : '#38BDF8'
-                            }}>
-                              {stItem.overall_rank ? `G11-PIT 全域 #${stItem.overall_rank}` : '均線蓄勢觀察'}
-                            </span>
-                          </div>
-                          <div style={{ color: '#94A3B8', fontFamily: 'monospace', fontSize: '0.7rem' }}>
-                            20D均量 <strong style={{ color: '#FCD34D' }}>{stItem.avg_dv20_yi}億</strong> ｜ ROE <strong style={{ color: '#34D399' }}>{stItem.roe_pct}%</strong> ｜ PE <strong>{stItem.pe_ratio}x</strong> ｜ 投信 <strong style={{ color: '#67E8F9' }}>+{stItem.trust_20d_pct}%</strong>
-                            {stItem.whale_scissors_pct != null && (
-                              <span> ｜ 🐋大戶差 <strong style={{ color: stItem.whale_scissors_pct >= 0 ? '#34D399' : '#CBD5E1' }}>{stItem.whale_scissors_pct >= 0 ? '+' : ''}{stItem.whale_scissors_pct}%</strong></span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
 
           {/* 📅 2.8 G11-PIT 歷年績效與歷年購買股票種類全景明細 (2005–2026・1,734 檔真實無生存者偏誤 S&P 500 PIT + 台灣 0050∪0051 純上市 PIT) */}
           {(() => {
             const pitHistoryObj = data?.g11_pit_history || g11PitHistoryData || {};
-            const allYears = (Array.isArray(pitHistoryObj.yearly_history) ? pitHistoryObj.yearly_history : []).filter((yrItem) => yrItem.year >= 2005);
+            const allYears = [...(Array.isArray(pitHistoryObj.yearly_history) ? pitHistoryObj.yearly_history : [])]
+              .filter((yrItem) => yrItem.year >= 2005)
+              .sort((a, b) => b.year - a.year);
             const filteredYears = allYears.filter((yrItem) => {
               if (pitYearFilter === 'G1') return yrItem.year >= 2005 && yrItem.year <= 2014;
               if (pitYearFilter === 'G2') return yrItem.year >= 2015 && yrItem.year <= 2026;
@@ -4277,7 +4126,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                 <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
                                   <thead>
                                     <tr style={{ background: 'rgba(0,0,0,0.35)' }}>
-                                      <th style={{ textAlign: 'center', width: '32px' }}>#</th>
                                       <th>股票</th>
                                       <th style={{ textAlign: 'right' }}>權重</th>
                                       <th style={{ textAlign: 'right' }}>買價</th>
@@ -4292,9 +4140,6 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                       const curr = p.market === 'US' ? '$' : 'NT$';
                                       return (
                                         <tr key={`p_${rb.rebal_date}_${pIdx}`} style={{ background: 'rgba(255,255,255,0.015)' }}>
-                                          <td style={{ textAlign: 'center', fontWeight: 'bold', color: p.rank === 1 ? '#FDE047' : '#CBD5E1' }}>
-                                            #{p.rank}
-                                          </td>
                                           <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
                                               <span style={{ fontSize: '0.66rem' }}>{p.market === 'US' ? '🇺🇸' : '🇹🇼'}</span>
@@ -5114,7 +4959,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>
-                {(Array.isArray(g11PitHistoryData?.yearly_history) ? g11PitHistoryData.yearly_history : []).map((item) => {
+                {[...(Array.isArray(g11PitHistoryData?.yearly_history) ? g11PitHistoryData.yearly_history : [])].sort((a, b) => b.year - a.year).map((item) => {
                   const rNum = Number(item.return_pct || 0);
                   const isNeg = rNum < 0;
                   const isRocket = rNum >= 50.0;
@@ -5619,7 +5464,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       </div>
 
       {/* 資金存入 / 調整彈窗 Modal */}
-      {cashModalOpen && (
+      {cashModalOpen && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -5733,11 +5578,12 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 手動出場平倉彈窗 Modal */}
-      {exitModal.open && (
+      {exitModal.open && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -5871,11 +5717,12 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 編輯 / 新增全球主權歷史交易紀錄彈窗 Modal */}
-      {editTxModal.open && (
+      {editTxModal.open && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -6124,10 +5971,11 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-      {/* 編輯 / 新增全球持股部位彈窗 Modal */}
-      {editPosModal.open && (
+      {/* 編輯 / 新增全球持股部位彈窗 Modal (Portal 固定於當前螢幕正中央，免向下滑動) */}
+      {editPosModal.open && createPortal(
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
@@ -6136,13 +5984,13 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
           zIndex: 100000, backdropFilter: 'blur(4px)', padding: '1rem'
         }}>
           <div className="glass-card" style={{
-            maxWidth: '520px', width: '100%',
+            maxWidth: '540px', width: '100%',
             background: 'linear-gradient(135deg, #0F172A, #1E293B)',
-            border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '10px', padding: '1.4rem'
+            border: '1px solid rgba(16, 185, 129, 0.5)', borderRadius: '10px', padding: '1.35rem'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.15rem' }}>
-                {editPosModal.isNew ? '➕ 手動新增全球主權持股部位' : `✏️ 編輯持股部位 - ${editPosModal.name}`}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+              <h4 style={{ margin: 0, color: '#34D399', fontSize: '1.12rem' }}>
+                {editPosModal.isNew ? '➕ 新增持股部位' : `✏️ 編輯持股部位 - ${editPosModal.name}`}
               </h4>
               <button
                 onClick={() => setEditPosModal({ ...editPosModal, open: false })}
@@ -6152,15 +6000,76 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </button>
             </div>
 
+            {editPosModal.isNew && (
+              <div style={{ marginBottom: '0.85rem', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '6px', padding: '0.5rem 0.65rem' }}>
+                <div style={{ fontSize: '0.72rem', color: '#7DD3FC', marginBottom: '0.35rem', fontWeight: 'bold' }}>
+                  ⚡ 快速帶入當前 A/B 隊官方持股：
+                </div>
+                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                  {[...(officialTrancheA.picks || []), ...(officialTrancheB.picks || [])]
+                    .filter((v, i, a) => a.findIndex(t => t.ticker === v.ticker) === i)
+                    .map((qp) => {
+                      const isTw = qp.market === 'TW' || String(qp.ticker).endsWith('.TW');
+                      return (
+                        <button
+                          key={`qp_${qp.ticker}`}
+                          type="button"
+                          onClick={() => {
+                            setEditPosModal(prev => ({
+                              ...prev,
+                              ticker: qp.ticker,
+                              name: formatStockDisplayName(qp.ticker, qp.name).split(' (')[0],
+                              market: isTw ? '台股 (TWSE)' : '美股 (NYSE)',
+                              currency: isTw ? 'TWD' : 'USD',
+                              entry_price: String(qp.current_price || qp.entry_price || ''),
+                              current_price: String(qp.current_price || qp.entry_price || '')
+                            }));
+                          }}
+                          style={{
+                            fontSize: '0.71rem',
+                            padding: '2px 7px',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(56, 189, 248, 0.45)',
+                            background: 'rgba(56, 189, 248, 0.14)',
+                            color: '#E0F2FE',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {qp.ticker} {formatStockDisplayName(qp.ticker, qp.name).split(' (')[0]}
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSavePosition}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '0.7rem', marginBottom: '0.8rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>標的代碼</label>
                   <input
                     type="text"
-                    placeholder="例: MRNA, 3037.TW"
+                    placeholder="例: MPC, VLO, 2330"
                     value={editPosModal.ticker}
-                    onChange={(e) => setEditPosModal({ ...editPosModal, ticker: e.target.value })}
+                    onChange={(e) => {
+                      const rawVal = e.target.value.toUpperCase();
+                      const cleanCode = rawVal.trim();
+                      const isNumericTw = /^\d{4,6}$/.test(cleanCode);
+                      const lookupKey = isNumericTw ? `${cleanCode}.TW` : cleanCode;
+                      const matchedPick = currentPicks.find(cp => cp.ticker === lookupKey || cp.ticker === cleanCode);
+                      const mappedName = GLOBAL_TITAN_NAME_MAP[lookupKey] || GLOBAL_TITAN_NAME_MAP[cleanCode] || twStockNamesMap[cleanCode] || (matchedPick ? matchedPick.name : '');
+                      const autoIsTw = isNumericTw || cleanCode.endsWith('.TW');
+                      setEditPosModal(prev => ({
+                        ...prev,
+                        ticker: rawVal,
+                        name: mappedName ? mappedName.split(' (')[0] : prev.name,
+                        market: autoIsTw ? '台股 (TWSE)' : (cleanCode ? '美股 (NASDAQ)' : prev.market),
+                        currency: autoIsTw ? 'TWD' : (cleanCode ? 'USD' : prev.currency),
+                        current_price: matchedPick?.price ? String(matchedPick.price) : prev.current_price,
+                        entry_price: (!prev.entry_price && matchedPick?.price) ? String(matchedPick.price) : prev.entry_price
+                      }));
+                    }}
                     required
                     style={{
                       width: '100%', padding: '0.45rem',
@@ -6173,7 +6082,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <label style={{ display: 'block', fontSize: '0.76rem', color: '#94A3B8', marginBottom: '0.2rem' }}>商品/股票名稱</label>
                   <input
                     type="text"
-                    placeholder="例: 莫德納 (Moderna)"
+                    placeholder="輸入代號可自動帶出名稱"
                     value={editPosModal.name}
                     onChange={(e) => setEditPosModal({ ...editPosModal, name: e.target.value })}
                     required
@@ -6231,9 +6140,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       borderRadius: '5px', color: '#FFF', fontSize: '0.84rem'
                     }}
                   >
-                    <option value="👑 第1王者 (40%)">👑 第1王者 (40%)</option>
-                    <option value="🥈 第2主力 (30%)">🥈 第2主力 (30%)</option>
-                    <option value="🥉 第3主力 (30%)">🥉 第3主力 (30%)</option>
+                    <option value="👑 第1王者 (52%)">👑 第1王者 (52%)</option>
+                    <option value="🥈 第2主力 (24%)">🥈 第2主力 (24%)</option>
+                    <option value="🥉 第3主力 (24%)">🥉 第3主力 (24%)</option>
                     <option value="🛡️ 現金避險">🛡️ 現金避險</option>
                   </select>
                 </div>
@@ -6359,7 +6268,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
