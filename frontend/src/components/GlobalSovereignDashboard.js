@@ -824,12 +824,12 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       entry_date: '2026-11-03',
       next_rebal_date: '2026-12-01',
       exposure_pct: 100.0,
-      defense_reason: '正常進攻 (100% 滿倉・已觸發 S1 純煉油裂解排雷閥門剔除 MPC/PSX，保留上游原油與晶片巨頭)',
-      previous_rebal_note: '上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場；本期觸發 S1 裂解價差排雷閥門自動剔除純煉油股 MPC/PSX',
+      defense_reason: '正常進攻 (100% 滿倉・已觸發 S3 雙層排雷閥門：裂解價差崩跌 -33.7% 且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭)',
+      previous_rebal_note: '上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉出場；本期因裂解價差與 WTI 原油雙破月線，S3 雙層排雷閥門自動剔除 MPC/PSX 與 COP，改建倉 TXN / ADI / REGN',
       picks: [
-        { rank: 1, ticker: 'COP', name: '康菲石油', market: 'US', sector: '油氣開採 (抗通膨防禦)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-11-03', entry_price: 145.18, current_price: 139.69, period_ret_pct: -3.78, stop_loss_price: 123.40, action: '持有中 (續抱)' },
-        { rank: 2, ticker: 'TXN', name: '德州儀器', market: 'US', sector: '類比晶片龍頭 (高息防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 309.83, current_price: 310.55, period_ret_pct: 0.23, stop_loss_price: 263.36, action: '持有中 (續抱)' },
-        { rank: 3, ticker: 'ADI', name: '亞德諾半導體', market: 'US', sector: '高階類比與混合訊號晶片', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 424.48, current_price: 415.18, period_ret_pct: -2.19, stop_loss_price: 360.81, action: '持有中 (續抱)' }
+        { rank: 1, ticker: 'TXN', name: '德州儀器', market: 'US', sector: '類比晶片龍頭 (高息防禦)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-11-03', entry_price: 309.83, current_price: 310.55, period_ret_pct: 0.23, stop_loss_price: 263.36, action: '持有中 (續抱)' },
+        { rank: 2, ticker: 'ADI', name: '亞德諾半導體', market: 'US', sector: '高階類比與混合訊號晶片', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 424.48, current_price: 415.18, period_ret_pct: -2.19, stop_loss_price: 360.81, action: '持有中 (續抱)' },
+        { rank: 3, ticker: 'REGN', name: '再生元製藥', market: 'US', sector: '生物製藥巨擘 (剛性醫療防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 956.28, current_price: 985.00, period_ret_pct: 3.00, stop_loss_price: 812.84, action: '持有中 (續抱)' }
       ]
     };
     const fallbackB = {
@@ -841,8 +841,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       entry_date: '2026-10-23',
       next_rebal_date: '2026-11-22',
       exposure_pct: 100.0,
-      defense_reason: '正常進攻 (100% 滿倉・已觸發 S1 純煉油裂解排雷閥門剔除 VLO/MPC，轉向醫療與綜合防禦巨頭)',
-      previous_rebal_note: '10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S1 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK / ACN / XOM 續抱至 2026-11-22 換倉',
+      defense_reason: '正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除純煉油股 VLO/MPC；當時 WTI 油價 $99.47 仍高於月線 $95.36 故保留 XOM)',
+      previous_rebal_note: '10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S3 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK / ACN / XOM 續抱至 2026-11-22 換倉',
       picks: [
         { rank: 1, ticker: 'MRK', name: '默沙東', market: 'US', sector: '大型製藥 (剛性醫療防禦)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-10-23', entry_price: 145.02, current_price: 146.36, period_ret_pct: 0.92, stop_loss_price: 123.27, action: '持有中 (續抱)' },
         { rank: 2, ticker: 'ACN', name: '埃森哲', market: 'US', sector: '全球資訊顧問與AI轉型巨擘', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 252.01, current_price: 258.10, period_ret_pct: 2.42, stop_loss_price: 214.21, action: '持有中 (續抱)' },
@@ -1355,8 +1355,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
   const handleSyncToOfficialABTranches = async () => {
     const baseCap = totalNetAssetsTwd > 0 ? Math.round(totalNetAssetsTwd) : 2100000;
     if (!window.confirm(
-      `確定要依您目前的總資產規模 (NT$ ${baseCap.toLocaleString()})，一鍵將帳本對齊為「全球泰坦當前 A 梯隊 + B 梯隊官方標準持倉 (含 S1 純煉油裂解排雷閥門)」嗎？\n\n` +
-      `・🅰️ A 梯隊 (50% 資金・2026-11-03 進場)：COP (52%)、TXN (24%)、ADI (24%)\n` +
+      `確定要依您目前的總資產規模 (NT$ ${baseCap.toLocaleString()})，一鍵將帳本對齊為「全球泰坦當前 A 梯隊 + B 梯隊官方標準持倉 (含 S3 雙層原油與裂解排雷閥門)」嗎？\n\n` +
+      `・🅰️ A 梯隊 (50% 資金・2026-11-03 進場)：TXN (52%)、ADI (24%)、REGN (24%)\n` +
       `・🅱️ B 梯隊 (50% 資金・2026-10-23 進場)：MRK (52%)、ACN (24%)、XOM (24%)\n\n` +
       `系統將自動生成對應之標準建倉流水帳並同步儲存！`
     )) {
@@ -2482,6 +2482,18 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   🌍 <strong>宏觀與模組 C 2.0</strong>：全球寬幅 {macro.global_breadth_pct || 67.5}% ｜ QQQ乖離 <strong>{macro.qqq_bias500 || 19.65}%</strong> (&lt;30% 未過熱) × 10Y美債 {macro.us10y || 4.99}% ➔ <strong>{macro.exposure_pct || 100}% 滿倉進攻</strong>
                 </span>
               )}
+            </span>
+
+            {/* 🛢️ S3 原油與 3-2-1 裂解價差即時物理排雷雷達徽章 */}
+            <span style={{
+              fontSize: '0.74rem',
+              color: (macro.s3_upstream_oil_veto_active || macro.s1_refiner_veto_active) ? '#FECACA' : '#93C5FD',
+              background: (macro.s3_upstream_oil_veto_active || macro.s1_refiner_veto_active) ? 'rgba(239, 68, 68, 0.16)' : 'rgba(59, 130, 246, 0.14)',
+              border: (macro.s3_upstream_oil_veto_active || macro.s1_refiner_veto_active) ? '1px solid rgba(239, 68, 68, 0.45)' : '1px solid rgba(59, 130, 246, 0.35)',
+              padding: '0.25rem 0.65rem',
+              borderRadius: '5px'
+            }}>
+              🛢️ <strong>S3 能源裂解排雷雷達</strong>：WTI原油 <strong>${macro.oil_wti_bbl ?? 94.02}</strong> (20MA ${macro.oil_wti_ma20 ?? 98.41}) ｜ 3-2-1裂解 <strong>${macro.crack_spread_bbl ?? 48.87}</strong> (回落 {macro.crack_spread_dd20_pct ?? -33.1}%) ➔ <strong>{(macro.s3_upstream_oil_veto_active !== false) ? '🚨 雙破月線・自動剔除純煉油與上游原油股' : (macro.s1_refiner_veto_active ? '⚠️ 剔除純煉油股' : '🟢 正常')}</strong>
             </span>
           </div>
 

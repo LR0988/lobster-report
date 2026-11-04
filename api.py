@@ -340,7 +340,7 @@ DATABASE_TABLE_METADATA = {
     },
     "macro_indicators": {
         "name": "宏觀跨市場因子庫 (macro_indicators)",
-        "desc": "美元指數、美債殖利率、VIX、台積電 ADR 等跨市場數據",
+        "desc": "WTI原油、RBOB汽油、ULSD熱燃油、3-2-1裂解價差、美元指數、美債殖利率、費半等跨市場數據",
         "category": "總體經濟",
         "frequency": "每日更新",
         "task_type": "daily"
@@ -1261,8 +1261,14 @@ def run_scraper_task(task_type: str):
             invalidate_db_status_cache()
 
         elif task_type in ['global_sovereign', 'global_sovereign_daily', 'global_stock', 'global_stock_daily']:
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_sovereign_daily', '全球主權泰坦 18 國 ETF (global_sovereign_daily)', '步驟 1/3：正在更新全球主權 18 國 ETF 最新日K行情...', 1, 3, 25)
-            print("[*] [API Scraper] 正在執行全球主權泰坦 ETF 與旗艦個股行情更新...")
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_sovereign_daily', '全球主權泰坦 18 國 ETF 與原油裂解指標 (global_sovereign_daily / macro_indicators)', '步驟 1/3：正在更新全球主權 18 國 ETF 與 WTI 原油 / RBOB 汽油 / ULSD 熱燃油 / 3-2-1 裂解價差最新日K行情...', 1, 3, 25)
+            print("[*] [API Scraper] 正在執行全球主權泰坦 ETF、原油裂解價差與旗艦個股行情更新...")
+            try:
+                import sync_macro_indicators
+                sync_macro_indicators.sync_macro_to_sqlite(range_param="1mo")
+                add_scraper_log("✓ WTI 原油 (CL=F)、RBOB 汽油 (RB=F)、ULSD 熱燃油 (HO=F) 與 3-2-1 裂解價差已自動更新至 macro_indicators")
+            except Exception as e_m:
+                add_scraper_log(f"⚠️ 更新原油與裂解價差指標警告: {e_m}")
             try:
                 import sync_global_sovereign
                 sync_global_sovereign.sync_global_sovereign_history(full_history=False)

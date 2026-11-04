@@ -1325,39 +1325,75 @@ def get_global_sovereign_dashboard_data():
                 elif c_br >= 0.50 and cur_exp == 100:
                     ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT A/B雙梯隊 52~56% 霸主進攻)"
 
-            # 🌟 方案 S1 (選項 B)：純煉油股 3-2-1 裂解價差高檔崩跌一票否決排雷閥門 (Zero Look-Ahead Bias)
-            # 當 3-2-1 裂解價差 < 20MA 且自 20 日高點回落 >= 15% 且近 20 日跌幅 >= 10% 時，自動剔除純煉油股 (MPC/VLO/PSX/TSO/SUN/HFC/DINO/6505.TW)，保留上游原油股 (COP/XOM)
+            # 🌟 方案 S3 (選項 A)：雙層完整物理排雷閥門 (純煉油裂解崩跌 S1 + 上游原油雙破月線/高檔衰竭 S2，Zero Look-Ahead Bias)
+            # 直接從 tw_stock.db -> macro_indicators 讀取自動同步之 WTI 原油 (oil_wti)、RBOB 汽油 (gasoline)、熱燃油 (heating_oil) 與 3-2-1 裂解價差 (crack_spread_321)
             PURE_REFINERS_S1 = {"MPC", "VLO", "PSX", "TSO", "SUN", "HFC", "DINO", "6505.TW"}
+            UPSTREAM_CRUDE_S3 = {"XOM", "CVX", "COP", "OXY", "SLB", "HAL", "DVN", "EOG", "HES", "MRO", "FANG", "APA", "BKR"}
             refiner_veto_active = True
+            upstream_oil_veto_active = True
+            crack_blowoff_veto_active = True
             try:
-                import yfinance as yf
-                cl_df = yf.Ticker("CL=F").history(period="3mo")
-                rb_df = yf.Ticker("RB=F").history(period="3mo")
-                ho_df = yf.Ticker("HO=F").history(period="3mo")
-                if not cl_df.empty and not rb_df.empty and not ho_df.empty:
-                    cl_s = cl_df["Close"].tz_localize(None)
-                    rb_s = rb_df["Close"].tz_localize(None)
-                    ho_s = ho_df["Close"].tz_localize(None)
-                    df_crk = pd.DataFrame({"CL": cl_s, "RB": rb_s, "HO": ho_s}).ffill().dropna()
-                    if len(df_crk) >= 20:
-                        crk = (2.0 * df_crk["RB"] * 42.0 + 1.0 * df_crk["HO"] * 42.0 - 3.0 * df_crk["CL"]) / 3.0
-                        crk_ma20 = float(crk.rolling(20).mean().iloc[-1])
-                        crk_max20 = float(crk.rolling(20).max().iloc[-1])
-                        crk_now = float(crk.iloc[-1])
-                        crk_prev20 = float(crk.iloc[-21]) if len(crk) >= 21 else float(crk.iloc[0])
-                        crk_dd20 = (crk_now / crk_max20 - 1.0) if crk_max20 > 0 else 0.0
-                        crk_ret20 = (crk_now / crk_prev20 - 1.0) if crk_prev20 > 0 else 0.0
-                        refiner_veto_active = (crk_now < crk_ma20) and (crk_dd20 <= -0.15) and (crk_ret20 <= -0.10)
-                        if isinstance(data.get("macro_status"), dict):
-                            data["macro_status"]["crack_spread_bbl"] = round(crk_now, 2)
-                            data["macro_status"]["crack_spread_ma20"] = round(crk_ma20, 2)
-                            data["macro_status"]["crack_spread_dd20_pct"] = round(crk_dd20 * 100.0, 1)
-                            data["macro_status"]["s1_refiner_veto_active"] = bool(refiner_veto_active)
-            except Exception:
-                refiner_veto_active = True
+                c.execute(
+                    "SELECT date, oil_wti, gasoline, heating_oil, crack_spread_321 "
+                    "FROM macro_indicators WHERE oil_wti IS NOT NULL AND crack_spread_321 IS NOT NULL "
+                    "ORDER BY date DESC LIMIT 30"
+                )
+                oil_rows = c.fetchall()
+                if len(oil_rows) >= 21:
+                    wti_arr = [float(r[1]) for r in oil_rows if r[1] is not None]
+                    rb_arr = [float(r[2] or 0.0) for r in oil_rows]
+                    ho_arr = [float(r[3] or 0.0) for r in oil_rows]
+                    crk_arr = [float(r[4]) for r in oil_rows if r[4] is not None]
+                    wti_now = wti_arr[0]
+                    wti_ma20 = sum(wti_arr[:20]) / 20.0
+                    wti_max20 = max(wti_arr[:20])
+                    wti_dd20 = (wti_now / wti_max20 - 1.0) if wti_max20 > 0 else 0.0
+                    wti_below_ma20 = wti_now < wti_ma20
+
+                    crk_now = crk_arr[0]
+                    crk_ma20 = sum(crk_arr[:20]) / 20.0
+                    crk_max20 = max(crk_arr[:20])
+                    crk_prev20 = crk_arr[min(20, len(crk_arr) - 1)]
+                    crk_dd20 = (crk_now / crk_max20 - 1.0) if crk_max20 > 0 else 0.0
+                    crk_ret20 = (crk_now / crk_prev20 - 1.0) if crk_prev20 > 0 else 0.0
+
+                    refiner_veto_active = (crk_now < crk_ma20) and (crk_dd20 <= -0.15) and (crk_ret20 <= -0.10)
+                    upstream_oil_veto_active = (crk_ma20 >= 25.0) and (crk_now < crk_ma20) and (crk_dd20 <= -0.18) and wti_below_ma20
+                    crack_blowoff_veto_active = (crk_now < crk_ma20) and (crk_dd20 <= -0.20)
+
+                    if upstream_oil_veto_active:
+                        oil_tag = f"🚨 S3 雙層排雷啟動 (WTI ${wti_now:.2f}<月線${wti_ma20:.2f} 且 3-2-1裂解 ${crk_now:.2f} 回落 {crk_dd20*100:.1f}% ➔ 剔除純煉油與上游原油股)"
+                    elif refiner_veto_active:
+                        oil_tag = f"⚠️ S1 煉油排雷啟動 (3-2-1裂解 ${crk_now:.2f}<月線${crk_ma20:.2f} 回落 {crk_dd20*100:.1f}% ➔ 剔除純煉油股)"
+                    else:
+                        oil_tag = f"🟢 能源裂解正常 (WTI ${wti_now:.2f} / 3-2-1裂解 ${crk_now:.2f})"
+
+                    if isinstance(data.get("macro_status"), dict):
+                        data["macro_status"]["oil_wti_bbl"] = round(wti_now, 2)
+                        data["macro_status"]["oil_wti_ma20"] = round(wti_ma20, 2)
+                        data["macro_status"]["oil_wti_below_ma20"] = bool(wti_below_ma20)
+                        data["macro_status"]["oil_wti_dd20_pct"] = round(wti_dd20 * 100.0, 1)
+                        data["macro_status"]["gasoline_gal"] = round(rb_arr[0], 4)
+                        data["macro_status"]["heating_oil_gal"] = round(ho_arr[0], 4)
+                        data["macro_status"]["crack_spread_bbl"] = round(crk_now, 2)
+                        data["macro_status"]["crack_spread_ma20"] = round(crk_ma20, 2)
+                        data["macro_status"]["crack_spread_dd20_pct"] = round(crk_dd20 * 100.0, 1)
+                        data["macro_status"]["crack_spread_ret20_pct"] = round(crk_ret20 * 100.0, 1)
+                        data["macro_status"]["s1_refiner_veto_active"] = bool(refiner_veto_active)
+                        data["macro_status"]["s3_upstream_oil_veto_active"] = bool(upstream_oil_veto_active)
+                        data["macro_status"]["oil_crack_regime_tag"] = oil_tag
+            except Exception as e_oil:
+                print("讀取 macro_indicators 原油裂解指標警告:", e_oil)
 
             if refiner_veto_active:
                 valid_picks = [p for p in valid_picks if p.get("ticker") not in PURE_REFINERS_S1]
+            if upstream_oil_veto_active:
+                valid_picks = [p for p in valid_picks if p.get("ticker") not in UPSTREAM_CRUDE_S3]
+            elif crack_blowoff_veto_active:
+                valid_picks = [
+                    p for p in valid_picks
+                    if not (p.get("ticker") in UPSTREAM_CRUDE_S3 and float(p.get("mom_12m") or 0.0) >= 75.0 and float(p.get("mom_3m") or 0.0) >= 25.0)
+                ]
 
             # 先執行第四層：同產業/同族群分散約束 (Industry Diversification Cap = 1)
             diversified_picks = []

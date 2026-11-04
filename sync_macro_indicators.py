@@ -42,6 +42,7 @@ MACRO_TICKERS = {
     'copper': 'HG=F',      # 紐約高級銅期貨 (USD/磅) - 實體經濟景氣博士
     'aluminum': 'ALI=F',   # COMEX 鋁期貨 (USD/噸) - 工業與能源金屬
     'gasoline': 'RB=F',    # RBOB 汽油期貨 (USD/加侖) - 終端消費通膨
+    'heating_oil': 'HO=F', # NY Harbor ULSD 超低硫柴油/熱燃油期貨 (USD/加侖) - 3-2-1 裂解價差核心組件
     'nasdaq': '^IXIC',     # 那斯達克綜合指數 (美股科技成長風向球)
     'sp500': '^GSPC',      # 標普 500 指數 (美股大盤核心定價)
     'dow': '^DJI',         # 道瓊工業指數 (美股傳產與藍籌價值)
@@ -73,7 +74,7 @@ def init_macro_table():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    for col in ['tsm_adr', 'nvda', 'usdjpy', 'etf_0050', 'copper', 'aluminum', 'gasoline', 'nasdaq', 'sp500', 'dow', 'vt']:
+    for col in ['tsm_adr', 'nvda', 'usdjpy', 'etf_0050', 'copper', 'aluminum', 'gasoline', 'heating_oil', 'crack_spread_321', 'nasdaq', 'sp500', 'dow', 'vt']:
         try:
             cur.execute(f"ALTER TABLE macro_indicators ADD COLUMN {col} REAL")
         except sqlite3.OperationalError:
@@ -198,14 +199,19 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
         copper = row.get("copper") if pd.notnull(row.get("copper")) else None
         aluminum = row.get("aluminum") if pd.notnull(row.get("aluminum")) else None
         gasoline = row.get("gasoline") if pd.notnull(row.get("gasoline")) else None
+        heating_oil = row.get("heating_oil") if pd.notnull(row.get("heating_oil")) else None
+        if oil is not None and gasoline is not None and heating_oil is not None:
+            crack_spread_321 = round((2.0 * float(gasoline) * 42.0 + 1.0 * float(heating_oil) * 42.0 - 3.0 * float(oil)) / 3.0, 4)
+        else:
+            crack_spread_321 = None
         nasdaq = row.get("nasdaq") if pd.notnull(row.get("nasdaq")) else None
         sp500 = row.get("sp500") if pd.notnull(row.get("sp500")) else None
         dow = row.get("dow") if pd.notnull(row.get("dow")) else None
         vt = row.get("vt") if pd.notnull(row.get("vt")) else None
         
         cur.execute("""
-            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, copper, aluminum, gasoline, nasdaq, sp500, dow, vt, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO macro_indicators (date, us10y, oil_wti, usdtwd, sox, dxy, tsm_adr, nvda, usdjpy, etf_0050, copper, aluminum, gasoline, heating_oil, crack_spread_321, nasdaq, sp500, dow, vt, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(date) DO UPDATE SET
                 us10y = COALESCE(excluded.us10y, macro_indicators.us10y),
                 oil_wti = COALESCE(excluded.oil_wti, macro_indicators.oil_wti),
@@ -219,12 +225,14 @@ def sync_macro_to_sqlite(range_param: str = "1mo") -> int:
                 copper = COALESCE(excluded.copper, macro_indicators.copper),
                 aluminum = COALESCE(excluded.aluminum, macro_indicators.aluminum),
                 gasoline = COALESCE(excluded.gasoline, macro_indicators.gasoline),
+                heating_oil = COALESCE(excluded.heating_oil, macro_indicators.heating_oil),
+                crack_spread_321 = COALESCE(excluded.crack_spread_321, macro_indicators.crack_spread_321),
                 nasdaq = COALESCE(excluded.nasdaq, macro_indicators.nasdaq),
                 sp500 = COALESCE(excluded.sp500, macro_indicators.sp500),
                 dow = COALESCE(excluded.dow, macro_indicators.dow),
                 vt = COALESCE(excluded.vt, macro_indicators.vt),
                 updated_at = excluded.updated_at
-        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, etf0050, copper, aluminum, gasoline, nasdaq, sp500, dow, vt, now_str))
+        """, (date_str, u10, oil, twd, sox, dxy, tsm, nvda, jpy, etf0050, copper, aluminum, gasoline, heating_oil, crack_spread_321, nasdaq, sp500, dow, vt, now_str))
         upsert_count += 1
         
     conn.commit()
