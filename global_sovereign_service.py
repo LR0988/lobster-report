@@ -1325,6 +1325,40 @@ def get_global_sovereign_dashboard_data():
                 elif c_br >= 0.50 and cur_exp == 100:
                     ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT A/B雙梯隊 52~56% 霸主進攻)"
 
+            # 🌟 方案 S1 (選項 B)：純煉油股 3-2-1 裂解價差高檔崩跌一票否決排雷閥門 (Zero Look-Ahead Bias)
+            # 當 3-2-1 裂解價差 < 20MA 且自 20 日高點回落 >= 15% 且近 20 日跌幅 >= 10% 時，自動剔除純煉油股 (MPC/VLO/PSX/TSO/SUN/HFC/DINO/6505.TW)，保留上游原油股 (COP/XOM)
+            PURE_REFINERS_S1 = {"MPC", "VLO", "PSX", "TSO", "SUN", "HFC", "DINO", "6505.TW"}
+            refiner_veto_active = True
+            try:
+                import yfinance as yf
+                cl_df = yf.Ticker("CL=F").history(period="3mo")
+                rb_df = yf.Ticker("RB=F").history(period="3mo")
+                ho_df = yf.Ticker("HO=F").history(period="3mo")
+                if not cl_df.empty and not rb_df.empty and not ho_df.empty:
+                    cl_s = cl_df["Close"].tz_localize(None)
+                    rb_s = rb_df["Close"].tz_localize(None)
+                    ho_s = ho_df["Close"].tz_localize(None)
+                    df_crk = pd.DataFrame({"CL": cl_s, "RB": rb_s, "HO": ho_s}).ffill().dropna()
+                    if len(df_crk) >= 20:
+                        crk = (2.0 * df_crk["RB"] * 42.0 + 1.0 * df_crk["HO"] * 42.0 - 3.0 * df_crk["CL"]) / 3.0
+                        crk_ma20 = float(crk.rolling(20).mean().iloc[-1])
+                        crk_max20 = float(crk.rolling(20).max().iloc[-1])
+                        crk_now = float(crk.iloc[-1])
+                        crk_prev20 = float(crk.iloc[-21]) if len(crk) >= 21 else float(crk.iloc[0])
+                        crk_dd20 = (crk_now / crk_max20 - 1.0) if crk_max20 > 0 else 0.0
+                        crk_ret20 = (crk_now / crk_prev20 - 1.0) if crk_prev20 > 0 else 0.0
+                        refiner_veto_active = (crk_now < crk_ma20) and (crk_dd20 <= -0.15) and (crk_ret20 <= -0.10)
+                        if isinstance(data.get("macro_status"), dict):
+                            data["macro_status"]["crack_spread_bbl"] = round(crk_now, 2)
+                            data["macro_status"]["crack_spread_ma20"] = round(crk_ma20, 2)
+                            data["macro_status"]["crack_spread_dd20_pct"] = round(crk_dd20 * 100.0, 1)
+                            data["macro_status"]["s1_refiner_veto_active"] = bool(refiner_veto_active)
+            except Exception:
+                refiner_veto_active = True
+
+            if refiner_veto_active:
+                valid_picks = [p for p in valid_picks if p.get("ticker") not in PURE_REFINERS_S1]
+
             # 先執行第四層：同產業/同族群分散約束 (Industry Diversification Cap = 1)
             diversified_picks = []
             used_ind_groups = set()

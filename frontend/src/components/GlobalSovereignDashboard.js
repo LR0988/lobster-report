@@ -824,12 +824,12 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       entry_date: '2026-11-03',
       next_rebal_date: '2026-12-01',
       exposure_pct: 100.0,
-      defense_reason: '正常進攻 (100% 滿倉・系統已自動轉向能源與防禦巨頭)',
-      previous_rebal_note: '上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場',
+      defense_reason: '正常進攻 (100% 滿倉・已觸發 S1 純煉油裂解排雷閥門剔除 MPC/PSX，保留上游原油與晶片巨頭)',
+      previous_rebal_note: '上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場；本期觸發 S1 裂解價差排雷閥門自動剔除純煉油股 MPC/PSX',
       picks: [
-        { rank: 1, ticker: 'MPC', name: '馬拉松石油', market: 'US', sector: '能源精煉 (防禦高現流)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-11-03', entry_price: 430.00, current_price: 423.29, period_ret_pct: -1.56, stop_loss_price: 365.50, action: '持有中 (續抱)' },
-        { rank: 2, ticker: 'COP', name: '康菲石油', market: 'US', sector: '油氣開採 (抗通膨防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 145.18, current_price: 145.26, period_ret_pct: 0.06, stop_loss_price: 123.40, action: '持有中 (續抱)' },
-        { rank: 3, ticker: 'TXN', name: '德州儀器', market: 'US', sector: '類比晶片龍頭 (高息防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 309.83, current_price: 308.96, period_ret_pct: -0.28, stop_loss_price: 263.36, action: '持有中 (續抱)' }
+        { rank: 1, ticker: 'COP', name: '康菲石油', market: 'US', sector: '油氣開採 (抗通膨防禦)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-11-03', entry_price: 145.18, current_price: 139.69, period_ret_pct: -3.78, stop_loss_price: 123.40, action: '持有中 (續抱)' },
+        { rank: 2, ticker: 'TXN', name: '德州儀器', market: 'US', sector: '類比晶片龍頭 (高息防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 309.83, current_price: 310.55, period_ret_pct: 0.23, stop_loss_price: 263.36, action: '持有中 (續抱)' },
+        { rank: 3, ticker: 'ADI', name: '亞德諾半導體', market: 'US', sector: '高階類比與混合訊號晶片', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-11-03', entry_price: 424.48, current_price: 415.18, period_ret_pct: -2.19, stop_loss_price: 360.81, action: '持有中 (續抱)' }
       ]
     };
     const fallbackB = {
@@ -841,12 +841,12 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       entry_date: '2026-10-23',
       next_rebal_date: '2026-11-22',
       exposure_pct: 100.0,
-      defense_reason: '正常進攻 (100% 滿倉・系統已自動轉向能源與醫療防禦)',
-      previous_rebal_note: '本期自 2026-10-23 建倉持有至今，未觸發 -15% 硬停損，標準紀律為續抱至 2026-11-22 換倉',
+      defense_reason: '正常進攻 (100% 滿倉・已觸發 S1 純煉油裂解排雷閥門剔除 VLO/MPC，轉向醫療與綜合防禦巨頭)',
+      previous_rebal_note: '10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S1 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK / ACN / XOM 續抱至 2026-11-22 換倉',
       picks: [
-        { rank: 1, ticker: 'VLO', name: '瓦萊羅能源', market: 'US', sector: '能源精煉 (防禦高現流)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-10-23', entry_price: 428.98, current_price: 385.03, period_ret_pct: -10.25, stop_loss_price: 364.63, action: '持有中 (續抱)' },
-        { rank: 2, ticker: 'MPC', name: '馬拉松石油', market: 'US', sector: '能源精煉 (防禦高現流)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 463.40, current_price: 423.29, period_ret_pct: -8.66, stop_loss_price: 393.89, action: '持有中 (續抱)' },
-        { rank: 3, ticker: 'MRK', name: '默沙東', market: 'US', sector: '大型製藥 (剛性醫療防禦)', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 145.02, current_price: 147.09, period_ret_pct: 1.43, stop_loss_price: 123.27, action: '持有中 (續抱)' }
+        { rank: 1, ticker: 'MRK', name: '默沙東', market: 'US', sector: '大型製藥 (剛性醫療防禦)', tranche_weight_pct: 52.0, total_portfolio_weight_pct: 26.0, entry_date: '2026-10-23', entry_price: 145.02, current_price: 146.36, period_ret_pct: 0.92, stop_loss_price: 123.27, action: '持有中 (續抱)' },
+        { rank: 2, ticker: 'ACN', name: '埃森哲', market: 'US', sector: '全球資訊顧問與AI轉型巨擘', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 252.01, current_price: 258.10, period_ret_pct: 2.42, stop_loss_price: 214.21, action: '持有中 (續抱)' },
+        { rank: 3, ticker: 'XOM', name: '埃克森美孚', market: 'US', sector: '全球綜合油氣開採巨擘', tranche_weight_pct: 24.0, total_portfolio_weight_pct: 12.0, entry_date: '2026-10-23', entry_price: 179.37, current_price: 171.97, period_ret_pct: -4.13, stop_loss_price: 152.46, action: '持有中 (續抱)' }
       ]
     };
     return {
@@ -1355,9 +1355,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
   const handleSyncToOfficialABTranches = async () => {
     const baseCap = totalNetAssetsTwd > 0 ? Math.round(totalNetAssetsTwd) : 2100000;
     if (!window.confirm(
-      `確定要依您目前的總資產規模 (NT$ ${baseCap.toLocaleString()})，一鍵將帳本對齊為「全球泰坦當前 A 梯隊 + B 梯隊官方標準持倉」嗎？\n\n` +
-      `・🅰️ A 梯隊 (50% 資金・2026-11-03 進場)：MPC (52%)、COP (24%)、TXN (24%)\n` +
-      `・🅱️ B 梯隊 (50% 資金・2026-10-23 進場)：VLO (52%)、MPC (24%)、MRK (24%)\n\n` +
+      `確定要依您目前的總資產規模 (NT$ ${baseCap.toLocaleString()})，一鍵將帳本對齊為「全球泰坦當前 A 梯隊 + B 梯隊官方標準持倉 (含 S1 純煉油裂解排雷閥門)」嗎？\n\n` +
+      `・🅰️ A 梯隊 (50% 資金・2026-11-03 進場)：COP (52%)、TXN (24%)、ADI (24%)\n` +
+      `・🅱️ B 梯隊 (50% 資金・2026-10-23 進場)：MRK (52%)、ACN (24%)、XOM (24%)\n\n` +
       `系統將自動生成對應之標準建倉流水帳並同步儲存！`
     )) {
       return;
@@ -2253,7 +2253,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              1,734檔無偏誤 PIT (S&amp;P 500 + 台灣0050∪0051純上市) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>1,621.2倍 (CAGR 40.48%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-21.99%</strong> (日MDD -29.60%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>1.84</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.26</strong> ｜ G1(05-14) <strong style={{ color: '#34D399' }}>43.29%</strong> / G2(15-26) <strong style={{ color: '#34D399' }}>37.08%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>19/22 (86.4%)</strong>
+              1,734檔無偏誤 PIT (S&amp;P 500 + 台灣0050∪0051純上市 + S1純煉油裂解排雷閥門) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>1,704.9倍 (CAGR 40.80%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-21.94%</strong> (日MDD -29.53%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>1.86</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.27</strong> ｜ G1(05-14) <strong style={{ color: '#34D399' }}>43.74%</strong> / G2(15-26) <strong style={{ color: '#34D399' }}>37.30%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>19/22 (86.4%)</strong>
             </span>
             <button
               type="button"
@@ -2937,7 +2937,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   teamId: 'A',
                   visible: dashboardStationView === 'all' || dashboardStationView === 'titan_a',
                   title: '🅰️ A隊 跟單建議（1號調倉・預算 50%）',
-                  subtitle: `目標：MPC 52% / COP 24% / TXN 24%`,
+                  subtitle: `目標：COP 52% / TXN 24% / ADI 24%（S1排雷已剔除純煉油股）`,
                   accentColor: '#38BDF8',
                   bgTint: 'rgba(14, 165, 233, 0.06)',
                   rows: separatedTrancheSuggestions.trancheASuggestions
@@ -2946,7 +2946,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   teamId: 'B',
                   visible: dashboardStationView === 'all' || dashboardStationView === 'titan_b',
                   title: '🅱️ B隊 跟單建議（22號調倉・預算 50%）',
-                  subtitle: `目標：VLO 52% / MPC 24% / MRK 24%`,
+                  subtitle: `目標：MRK 52% / ACN 24% / XOM 24%（S1排雷已剔除純煉油股）`,
                   accentColor: '#C084FC',
                   bgTint: 'rgba(168, 85, 247, 0.06)',
                   rows: separatedTrancheSuggestions.trancheBSuggestions
@@ -3797,7 +3797,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         borderRadius: '4px',
                         fontWeight: 'bold'
                       }}>
-                        CAGR +40.48% ｜ 1,621.2倍 ｜ 無生存者偏誤回測
+                        CAGR +40.80% ｜ 1,704.9倍 ｜ 無生存者偏誤回測 (含S1裂解排雷)
                       </span>
                     </h4>
                     <p style={{ margin: '0.22rem 0 0 0', color: '#CBD5E1', fontSize: '0.76rem' }}>
@@ -3839,14 +3839,14 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #FBBF24' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🏆 年化報酬 (CAGR)</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>
-                      +{pitHistoryObj.cagr || 40.48}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 1621.2).toLocaleString()}倍)</span>
+                      +{pitHistoryObj.cagr || 40.80}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 1704.9).toLocaleString()}倍)</span>
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (MDD)</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
-                      {pitHistoryObj.monthly_mdd || -21.99}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 1.84})</span>
+                      {pitHistoryObj.monthly_mdd || -21.94}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 1.86})</span>
                     </div>
                   </div>
 
@@ -4029,7 +4029,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                 <div style={{ fontWeight: 'bold', color: accentColor, marginBottom: '0.25rem' }}>
                                   {teamBadge} — {ymStr}
                                 </div>
-                                <div>⏳ 尚未到達當月 22 號調倉日（目前續抱上期 10/22 B隊持倉：VLO / MPC / MRK）</div>
+                                <div>⏳ 尚未到達當月 22 號調倉日（目前續抱上期 10/22 B隊持倉：MRK / ACN / XOM）</div>
                               </div>
                             );
                           }
@@ -4556,10 +4556,10 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.73rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.16)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +40.48% ｜ 1,621.2倍 ｜ 月MDD -21.99% (日 -29.60%) ｜ Calmar 1.84 ｜ Sharpe 1.26
+                  CAGR +40.80% ｜ 1,704.9倍 ｜ 月MDD -21.94% (日 -29.53%) ｜ Calmar 1.86 ｜ Sharpe 1.27
                 </span>
                 <span style={{ fontSize: '0.73rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.18)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  G1(05-14) 43.29% / G2(15-26) 37.08% ｜ 勝年 19/22 (86.4%)
+                  G1(05-14) 43.74% / G2(15-26) 37.30% ｜ 勝年 19/22 (86.4%)
                 </span>
               </div>
             </div>
@@ -4805,14 +4805,14 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>20/23 (87.0%)</td>
                     </tr>
                     <tr style={{ background: 'rgba(245, 158, 11, 0.22)', borderLeft: '3px solid #F59E0B' }}>
-                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版) - 移除防雷與研發加權 + FIP大型股鬆綁 + exp_262/264</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>40.48%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>1,621.2x</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-21.99%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-29.60%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>1.84</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.26</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.6%</td>
+                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT 零遺漏版) - 移除防雷與研發加權 + S1純煉油裂解排雷閥門 + exp_262/264</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>40.80%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>1,704.9x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-21.94%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-29.53%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>1.86</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.27</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>64.8%</td>
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>19/22 (86.4%)</td>
                     </tr>
                   </tbody>
@@ -4955,7 +4955,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#34D399', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
                 <span>📅 2005–2026（22年零遺漏）G12-PIT Sovereign (S&amp;P 500 + 台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（2008海嘯 +29.1%、2018貿易戰 +40.2%、2022升息熊市 +13.5% 強韌防禦；2010/2011/2021 弱勢年大減損）</span>
                 <span style={{ fontSize: '0.72rem', color: '#FDE047', fontFamily: 'monospace' }}>
-                  CAGR +40.48% ｜ 1,621.2倍 ｜ 月MDD -21.99% ｜ Calmar 1.84
+                  CAGR +40.80% ｜ 1,704.9倍 ｜ 月MDD -21.94% ｜ Calmar 1.86
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>

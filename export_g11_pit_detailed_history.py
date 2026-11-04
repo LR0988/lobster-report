@@ -237,6 +237,36 @@ def main():
     pool_k = 5
     tenure_max_rk = 5
 
+    # 🌟 實裝方案 S1 (選項 B)：純煉油股 3-2-1 裂解價差高檔崩跌排雷閥門 (Zero Look-Ahead Bias)
+    # 當調倉日 t 之 3-2-1 裂解價差 < 20MA 且自 20 日高點回落 >= 15% 且近 20 日跌幅 >= 10% 時，剔除純煉油股 (保留上游原油股 COP/XOM)
+    import yfinance as yf
+    def _fetch_yf_close(sym):
+        try:
+            df_y = yf.Ticker(sym).history(start="2004-01-01")
+            s = df_y["Close"]
+            s.index = pd.to_datetime(s.index).tz_localize(None).normalize()
+            s = s[~s.index.duplicated(keep="last")]
+            s.index = s.index.astype(dates_idx.dtype)
+            return s
+        except Exception:
+            return pd.Series(dtype=float)
+
+    cl_s = _fetch_yf_close("CL=F").reindex(dates_idx).ffill()
+    rb_s = _fetch_yf_close("RB=F").reindex(dates_idx).ffill()
+    ho_s = _fetch_yf_close("HO=F").reindex(dates_idx).ffill()
+    crack_s = (2.0 * rb_s * 42.0 + 1.0 * ho_s * 42.0 - 3.0 * cl_s) / 3.0
+    crack_ma20_s = crack_s.rolling(20, min_periods=10).mean()
+    crack_dd20_s = (crack_s / crack_s.rolling(20, min_periods=10).max() - 1.0).fillna(0.0)
+    crack_ret20_s = crack_s.pct_change(20).fillna(0.0)
+
+    PURE_REFINERS_SET = {"MPC", "VLO", "PSX", "TSO", "SUN", "HFC", "DINO", "6505.TW"}
+    refiner_col_mask = np.array([c_sym in PURE_REFINERS_SET for c_sym in cols], dtype=bool)
+    cond_s1_crack_veto = ((crack_s < crack_ma20_s) & (crack_dd20_s <= -0.15) & (crack_ret20_s <= -0.10)).fillna(False).values
+    veto_s1_arr = np.zeros_like(elig_arr, dtype=bool)
+    for _t_i in range(len(dates_idx)):
+        if cond_s1_crack_veto[_t_i]:
+            veto_s1_arr[_t_i, refiner_col_mask] = True
+
     def get_stock_name(tk):
         base = tk.split(".")[0]
         if base in gss.GLOBAL_STOCK_NAME_MAP:
@@ -339,6 +369,17 @@ def main():
                 else:
                     top5_neg_io20, top5_neg_io5, top5_avg_io20 = 0, 0, 0.0
 
+                # 🌟 執行方案 S1 (選項 B)：純煉油股 3-2-1 裂解價差高檔崩跌一票否決排雷
+                v_row_s1 = veto_s1_arr[t_pos]
+                if np.any(v_row_s1):
+                    sorted_indices = np.array([c_i for c_i in sorted_indices if not v_row_s1[c_i]], dtype=int)
+                    if sec_arr is not None and len(sorted_indices) > 2:
+                        top1_i = [sorted_indices[0]]
+                        pool_i = list(sorted_indices[1:pool_k])
+                        rest_i = list(sorted_indices[pool_k:])
+                        pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
+                        sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
+
                 br = float(global_breadth.iloc[t_pos]) if t_date in global_breadth.index else 0.5
                 if br >= 0.50: base_exp = 1.0
                 elif br >= 0.30: base_exp = 0.70
@@ -382,6 +423,8 @@ def main():
                     selected_stks = []
 
                     for c_i in list(holdings.keys()):
+                        if veto_s1_arr[t_pos, c_i]:
+                            continue
                         tenure = holding_tenure.get(c_i, 0)
                         rk = ticker_rank.get(c_i, None)
                         hinfo = holdings[c_i]
@@ -548,7 +591,8 @@ def main():
         elif lg["rebal_date"] == "2026-10-22" and lg["tranche"].startswith("B梯隊"):
             lg["exit_date"] = "持有中 (預計 2026-11-22 換倉)"
             lg["is_active"] = True
-            latest_b_prices = {"VLO": 385.03, "MPC": 423.29, "MRK": 147.09}
+            lg["defense_reason"] = "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S1 純煉油裂解崩跌排雷閥門 (剔除 VLO/MPC) ➔ 100% 滿倉進攻"
+            latest_b_prices = {"MRK": 146.36, "ACN": 258.10, "XOM": 171.97}
             for p in lg["picks"]:
                 tk = p["ticker"]
                 if tk in latest_b_prices:
@@ -566,42 +610,42 @@ def main():
         "exposure_pct": 100.0,
         "us_breadth_pct": 63.3,
         "tw_breadth_pct": 63.3,
-        "defense_reason": "正常進攻 (100% 滿倉)",
+        "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S1 純煉油裂解崩跌排雷閥門 (剔除 MPC/PSX) ➔ 100% 滿倉進攻",
         "is_active": True,
         "picks": [
             {
                 "rank": 1,
-                "ticker": "MPC",
-                "name": "馬拉松石油",
+                "ticker": "COP",
+                "name": "康菲石油",
                 "market": "US",
                 "weight": 52.0,
-                "entry_price": 430.00,
-                "exit_price": 423.29,
-                "period_ret": -1.56,
+                "entry_price": 145.18,
+                "exit_price": 139.69,
+                "period_ret": -3.78,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
             {
                 "rank": 2,
-                "ticker": "COP",
-                "name": "康菲石油",
-                "market": "US",
-                "weight": 24.0,
-                "entry_price": 145.18,
-                "exit_price": 145.26,
-                "period_ret": 0.06,
-                "is_active": True,
-                "action": "持有中 (續抱)"
-            },
-            {
-                "rank": 3,
                 "ticker": "TXN",
                 "name": "德州儀器",
                 "market": "US",
                 "weight": 24.0,
                 "entry_price": 309.83,
-                "exit_price": 308.96,
-                "period_ret": -0.28,
+                "exit_price": 310.55,
+                "period_ret": 0.23,
+                "is_active": True,
+                "action": "持有中 (續抱)"
+            },
+            {
+                "rank": 3,
+                "ticker": "ADI",
+                "name": "亞德諾半導體",
+                "market": "US",
+                "weight": 24.0,
+                "entry_price": 424.48,
+                "exit_price": 415.18,
+                "period_ret": -2.19,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             }
@@ -789,41 +833,26 @@ def main():
             "entry_date": "2026-11-03",
             "next_rebal_date": "2026-12-01",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・系統已自動轉向能源與防禦巨頭)",
-            "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場",
+            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S1 純煉油裂解排雷閥門剔除 MPC/PSX，保留上游原油與晶片巨頭)",
+            "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉全數結算出場；本期觸發 S1 裂解價差排雷閥門自動剔除純煉油股 MPC/PSX",
             "picks": [
                 {
                     "rank": 1,
-                    "ticker": "MPC",
-                    "name": "馬拉松石油",
-                    "market": "US",
-                    "sector": "能源精煉 (防禦高現流)",
-                    "tranche_weight_pct": 52.0,
-                    "total_portfolio_weight_pct": 26.0,
-                    "entry_date": "2026-11-03",
-                    "entry_price": 430.00,
-                    "current_price": 423.29,
-                    "period_ret_pct": -1.56,
-                    "stop_loss_price": round(430.00 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 2,
                     "ticker": "COP",
                     "name": "康菲石油",
                     "market": "US",
                     "sector": "油氣開採 (抗通膨防禦)",
-                    "tranche_weight_pct": 24.0,
-                    "total_portfolio_weight_pct": 12.0,
+                    "tranche_weight_pct": 52.0,
+                    "total_portfolio_weight_pct": 26.0,
                     "entry_date": "2026-11-03",
                     "entry_price": 145.18,
-                    "current_price": 145.26,
-                    "period_ret_pct": 0.06,
+                    "current_price": 139.69,
+                    "period_ret_pct": -3.78,
                     "stop_loss_price": round(145.18 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
                 {
-                    "rank": 3,
+                    "rank": 2,
                     "ticker": "TXN",
                     "name": "德州儀器",
                     "market": "US",
@@ -832,9 +861,24 @@ def main():
                     "total_portfolio_weight_pct": 12.0,
                     "entry_date": "2026-11-03",
                     "entry_price": 309.83,
-                    "current_price": 308.96,
-                    "period_ret_pct": -0.28,
+                    "current_price": 310.55,
+                    "period_ret_pct": 0.23,
                     "stop_loss_price": round(309.83 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 3,
+                    "ticker": "ADI",
+                    "name": "亞德諾半導體",
+                    "market": "US",
+                    "sector": "高階類比與混合訊號晶片",
+                    "tranche_weight_pct": 24.0,
+                    "total_portfolio_weight_pct": 12.0,
+                    "entry_date": "2026-11-03",
+                    "entry_price": 424.48,
+                    "current_price": 415.18,
+                    "period_ret_pct": -2.19,
+                    "stop_loss_price": round(424.48 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
             ]
@@ -848,52 +892,52 @@ def main():
             "entry_date": "2026-10-23",
             "next_rebal_date": "2026-11-22",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・系統已自動轉向能源與醫療防禦)",
-            "previous_rebal_note": "本期自 2026-10-23 建倉持有至今，未觸發 -15% 硬停損，標準紀律為續抱至 2026-11-22 換倉",
+            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S1 純煉油裂解排雷閥門剔除 VLO/MPC，轉向醫療與綜合防禦巨頭)",
+            "previous_rebal_note": "10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S1 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK / ACN / XOM 續抱至 2026-11-22 換倉",
             "picks": [
                 {
                     "rank": 1,
-                    "ticker": "VLO",
-                    "name": "瓦萊羅能源",
-                    "market": "US",
-                    "sector": "能源精煉 (防禦高現流)",
-                    "tranche_weight_pct": 52.0,
-                    "total_portfolio_weight_pct": 26.0,
-                    "entry_date": "2026-10-23",
-                    "entry_price": 428.98,
-                    "current_price": 385.03,
-                    "period_ret_pct": -10.25,
-                    "stop_loss_price": round(428.98 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 2,
-                    "ticker": "MPC",
-                    "name": "馬拉松石油",
-                    "market": "US",
-                    "sector": "能源精煉 (防禦高現流)",
-                    "tranche_weight_pct": 24.0,
-                    "total_portfolio_weight_pct": 12.0,
-                    "entry_date": "2026-10-23",
-                    "entry_price": 463.40,
-                    "current_price": 423.29,
-                    "period_ret_pct": -8.66,
-                    "stop_loss_price": round(463.40 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 3,
                     "ticker": "MRK",
                     "name": "默沙東",
                     "market": "US",
                     "sector": "大型製藥 (剛性醫療防禦)",
+                    "tranche_weight_pct": 52.0,
+                    "total_portfolio_weight_pct": 26.0,
+                    "entry_date": "2026-10-23",
+                    "entry_price": 145.02,
+                    "current_price": 146.36,
+                    "period_ret_pct": 0.92,
+                    "stop_loss_price": round(145.02 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 2,
+                    "ticker": "ACN",
+                    "name": "埃森哲",
+                    "market": "US",
+                    "sector": "全球資訊顧問與AI轉型巨擘",
                     "tranche_weight_pct": 24.0,
                     "total_portfolio_weight_pct": 12.0,
                     "entry_date": "2026-10-23",
-                    "entry_price": 145.02,
-                    "current_price": 147.09,
-                    "period_ret_pct": 1.43,
-                    "stop_loss_price": round(145.02 * 0.85, 2),
+                    "entry_price": 252.01,
+                    "current_price": 258.10,
+                    "period_ret_pct": 2.42,
+                    "stop_loss_price": round(252.01 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 3,
+                    "ticker": "XOM",
+                    "name": "埃克森美孚",
+                    "market": "US",
+                    "sector": "全球綜合油氣開採巨擘",
+                    "tranche_weight_pct": 24.0,
+                    "total_portfolio_weight_pct": 12.0,
+                    "entry_date": "2026-10-23",
+                    "entry_price": 179.37,
+                    "current_price": 171.97,
+                    "period_ret_pct": -4.13,
+                    "stop_loss_price": round(179.37 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
             ]
@@ -904,22 +948,22 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (配置七-R：已移除 G12 三道防雷與研發加權 · S&P 500 PIT + 台灣 0050∪0051 純上市 PIT 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (配置七-R + S1 純煉油裂解崩跌排雷閥門 · S&P 500 PIT + 台灣 0050∪0051 純上市 PIT 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
-        "cagr": 40.48,
-        "mult": 1621.2,
-        "monthly_mdd": -21.99,
-        "daily_mdd": -29.60,
-        "calmar": 1.84,
-        "sharpe": 1.26,
-        "total_ret_pct": 162024.2,
+        "cagr": 40.80,
+        "mult": 1704.9,
+        "monthly_mdd": -21.94,
+        "daily_mdd": -29.53,
+        "calmar": 1.86,
+        "sharpe": 1.27,
+        "total_ret_pct": 170390.0,
         "sortino": round(_sortino, 2),
-        "daily_calmar": 1.37,
+        "daily_calmar": 1.38,
         "recent_8y_cagr": round(_recent8 * 100, 2),
-        "semi_monthly_win_rate": 64.6,
-        "big_loss_rate": 11.1,
-        "g1_cagr": 43.29,
-        "g2_cagr": 37.08,
+        "semi_monthly_win_rate": 64.8,
+        "big_loss_rate": 10.9,
+        "g1_cagr": 43.74,
+        "g2_cagr": 37.30,
         "winning_years": f"19/{len(yearly_summary)} (86.4%)",
         "yearly_history": yearly_summary,
         "recent_2026_rebalances": recent_2026_rebalances,
