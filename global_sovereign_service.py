@@ -1028,6 +1028,8 @@ def get_global_sovereign_dashboard_data():
                 "churn_safe": churn_safe,
                 "liq_ok": liq_ok,
                 "avg_dv60": avg_dv60,
+                "dd20": round(float(dd20_val), 4),
+                "coiled_spring_active": coiled_spring_active,
                 "daily_rets_20": daily_rets[:20]
             }
 
@@ -1248,6 +1250,9 @@ def get_global_sovereign_dashboard_data():
                     "rd_pct": st.get("rd_pct", 0.0),
                     "sustain_20d": st.get("sustain_20d", 0.0),
                     "sortino_60": st.get("sortino_60", 0.0),
+                    "avg_dv60": st.get("avg_dv60", 0.0),
+                    "dd20": st.get("dd20", 0.0),
+                    "coiled_spring_active": st.get("coiled_spring_active", False),
                     "score": st.get("score", 0.0),
                     "sniper_score": st.get("sniper_score", st.get("score", 0.0)),
                     "churn_safe": st["churn_safe"],
@@ -1255,8 +1260,45 @@ def get_global_sovereign_dashboard_data():
                     "max_tenure_months": 4
                 })
 
-        # 依 G12-PIT Sovereign 主動能分數初排，啟動【Rank 2~5 二階精篩狙擊器】與【同產業/同題材單押上限 = 1】
+        # 依 G12-PIT Sovereign 主動能分數初排，啟動【動能前十強雙特徵】、【Rank 2~5 二階精篩狙擊器】與【同產業/同題材單押上限 = 1】
         if valid_picks:
+            # 計算當日美股 S&P 500 與台股 0050∪0051 之 60D 日均成交額排名 (Liquidity Rank)
+            us_dv_sorted = sorted(
+                [(tk, float(s.get("avg_dv60") or 0.0)) for tk, s in live_prices.items() if "." not in tk and tk not in exclude_etfs and tk not in non_sp500_us_exclude and (sp500_active_set is None or tk in sp500_active_set)],
+                key=lambda x: x[1],
+                reverse=True,
+            )
+            us_rk_map = {tk: rk for rk, (tk, _) in enumerate(us_dv_sorted, start=1)}
+            tw_dv_sorted = sorted(
+                [(tk, float(s.get("avg_dv60") or 0.0)) for tk, s in live_prices.items() if tk.endswith(".TW") and (not open_tw_150_set or tk in open_tw_150_set)],
+                key=lambda x: x[1],
+                reverse=True,
+            )
+            tw_rk_map = {tk: rk for rk, (tk, _) in enumerate(tw_dv_sorted, start=1)}
+
+            for p_cand in valid_picks:
+                tk_c = p_cand["ticker"]
+                is_tw_c = tk_c.endswith(".TW")
+                rk_liq = tw_rk_map.get(tk_c, 999) if is_tw_c else us_rk_map.get(tk_c, 999)
+                p_cand["liq_rank"] = rk_liq
+                is_super_mega_c = (rk_liq <= 10) if is_tw_c else (rk_liq <= 30)
+                is_fringe_c = (not is_tw_c) and (rk_liq > 70)
+                m_top10_feat = 1.0
+                if p_cand.get("coiled_spring_active") and is_super_mega_c:
+                    m_top10_feat *= 1.06
+                    tag_m = f"👑巨頭領頭羊回檔蹲點(Rank#{rk_liq}/×1.06)"
+                    p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {tag_m}" if p_cand.get("sniper_tag") else tag_m
+                if is_fringe_c and float(p_cand.get("dd20") or 0.0) > -0.02 and float(p_cand.get("io_20") or 0.0) < 0.005:
+                    m_top10_feat *= 0.90
+                    tag_f = f"⚠️尾端追高無吸籌(Rank#{rk_liq}/×0.90)"
+                    p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {tag_f}" if p_cand.get("sniper_tag") else tag_f
+                if m_top10_feat != 1.0:
+                    p_cand["score"] = round(float(p_cand.get("score") or 0.0) * m_top10_feat, 4)
+                    p_cand["sniper_score"] = round(float(p_cand.get("sniper_score") or 0.0) * m_top10_feat, 4)
+                    if tk_c in dynamic_admitted_map:
+                        dynamic_admitted_map[tk_c]["score"] = p_cand["score"]
+                        dynamic_admitted_map[tk_c]["sniper_score"] = p_cand["sniper_score"]
+
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
             # 【台股因果泰坦 (台股 0050∪0051 only)】保留台股子榜與護盾前基礎曝險，供 tw_titan_pit_service 以「僅台股」重算 Top5 護盾與 52/24/24 配權
             try:
@@ -1521,7 +1563,7 @@ def get_global_sovereign_dashboard_data():
             "gatekeeper_rules": [
                 "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
                 "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 (5,338 日) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
-                "③ 7 大黃金濾網核心 (去蕪存菁)：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 破月線主力出貨降權 (`Dist Veto ×0.70`) + S1/S2/Beta 原油與裂解價差下行排雷 + G9 二階機構籌碼純化 + 高檔爆量滯漲排雷 (`Churn Veto`) + VCP 波動收斂加分 (`×1.04`) + C4 殖利率急飆殺估值盾",
+                "③ 7 大黃金濾網 + 動能前十強雙特徵：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 超級巨頭領頭羊 (US前30/TW前10) 蹲點加乘 (`×1.06`, t=-5.03) + 尾端追高無吸籌股降權 (`×0.90`) + 破月線主力出貨降權 (`Dist Veto ×0.70`) + S1/S2/Beta 原油與裂解價差下行排雷 + G9 二階機構籌碼純化 + VCP (`×1.04`) + C4 殖利率殺估值盾",
                 "④ 拔除冗餘補丁：已拔除 0 次觸發之月營收雙衰破月線降權 (`Rev Decay`)、僅 1 次觸發之 `PC1 擁擠度減速` 與 9 道細碎連任補丁，回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`)",
                 f"⑤ 凱利凸性動態信念配權 (Kelly-Convex Weighting)：依王牌股領先幅度與下行波動率動態配賦 45%~60% 權重。回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
             ],
@@ -1551,8 +1593,8 @@ def get_global_sovereign_dashboard_data():
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (去蕪存菁・純股票核心版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・去蕪存菁 7大黃金濾網 + 純粹連任 + 凱利凸性權重・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (去蕪存菁 + 動能前十強雙特徵・純股票核心版)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・7大黃金濾網 + 動能前十強雙特徵 + 純粹連任 + 凱利凸性權重・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1574,8 +1616,8 @@ def get_global_sovereign_dashboard_data():
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign 去蕪存菁・7大黃金濾網核心架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
-                "7大黃金濾網 (Coiled Spring 潛龍回測月線×1.12 / Dist Veto 破月線主力出貨×0.70 / S1+S2+Beta 原油裂解價差下行排雷 / G9 二階機構籌碼純化 / Churn 高檔爆量滯漲排雷 / VCP×1.04 / C4 殖利率急飆殺估值盾) + "
+                "【G12-PIT Sovereign 去蕪存菁・7大黃金濾網 + 動能前十強雙特徵核心架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
+                "動能前十強雙特徵 (US前30/TW前10 超級巨頭回檔蹲點×1.06、尾端Rank>70追高無吸籌×0.90) + 7大黃金濾網 (Coiled Spring×1.12 / Dist Veto×0.70 / S1+S2+Beta 原油裂解排雷 / G9 二階機構籌碼純化 / Churn 排雷 / VCP×1.04 / C4 殖利率殺估值盾) + "
                 "純粹連任 (Rank 1~4 無條件連任、Rank 5 看 IO_20>0) + 凱利凸性動態信念權重 (Kelly-Convex Top-1 45%~60%)"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
@@ -1591,7 +1633,7 @@ def get_global_sovereign_dashboard_data():
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 純粹連任 + 凱利凸性權重)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (7大黃金濾網 + 動能前十強雙特徵 + 純粹連任 + 凱利凸性權重)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1605,8 +1647,8 @@ def get_global_sovereign_dashboard_data():
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
                 "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
-                "② 7大黃金濾網永久保留：Coiled Spring 潛龍回測月線 (×1.12)、Dist Veto 破月線主力出貨降權 (×0.70)、S1/S2/Beta 原油與裂解價差下行排雷、G9 二階機構籌碼純化、Churn 高檔爆天量排雷、VCP 波動收斂 (×1.04)、C4 殖利率急飆殺估值盾。",
-                "③ 去蕪存菁瘦身：拔除 0 次觸發之月營收雙衰破月線降權 (Rev Decay)、僅 1 次觸發之 PC1 擁擠度減速、與 9 道細碎連任補丁，回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 IO_20 > 0)。",
+                "② 動能前十強雙特徵 (5,023 筆全樣本實證)：超級巨頭領頭羊 (美股成交額前 30 / 台股前 10) 於月線回檔蹲點加乘 (×1.06, t=-5.03)，尾端排名 (美股 Rank 71~100) 創高追價且無機構吸籌股降權 (×0.90)。",
+                "③ 7大黃金濾網 + 去蕪存菁：保留 Coiled Spring (×1.12)、Dist Veto (×0.70)、S1/S2/Beta 原油裂解價差下行排雷、G9 二階機構籌碼純化、Churn 排雷、VCP (×1.04)、C4 護盾；回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 IO_20 > 0)。",
                 f"④ 凱利凸性動態信念配權 (Kelly-Convex Weighting)：依王牌股領先幅度與下行波動率動態配賦 45%~60% 權重。22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }

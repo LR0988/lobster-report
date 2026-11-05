@@ -2597,10 +2597,10 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
             <strong style={{ color: '#A78BFA' }}>② 真實 S&P 500 PIT × 台灣 0050∪0051 純上市 PIT</strong>：美股當下必須位列 <strong>S&P 500 官方成分股 Top 100</strong>；台股嚴格鎖定 <strong>0050 ∪ 0051 純上市 778 檔歷史無遺漏池 (100% 排除上櫃股)</strong>。
           </div>
           <div>
-            <strong style={{ color: '#34D399' }}>③ 去蕪存菁・7 大黃金濾網核心</strong>：保留 <strong>潛龍回測月線 (×1.12)、破月線主力出貨降權 (×0.70)、S1/S2/Beta 原油裂解價差下行排雷、G9 二階機構籌碼純化、高檔爆天量排雷、VCP 波動收斂 (×1.04)</strong>。
+            <strong style={{ color: '#34D399' }}>③ 7 大黃金濾網 × 動能前十強雙特徵</strong>：保留 <strong>潛龍回測月線 (×1.12)、超級巨頭回檔蹲點加乘 (US前30/TW前10 ×1.06)、尾端追高無吸籌降權 (×0.90)、破月線主力出貨降權 (×0.70)、S1/S2/Beta 原油裂解排雷、G9 二階機構籌碼純化、VCP (×1.04)</strong>。
           </div>
           <div>
-            <strong style={{ color: '#FBBF24' }}>④ 純粹連任保護 × C4 殖利率殺估值護盾</strong>：拔除 9 道細碎連任補丁，回歸 <strong>前 4 名無條件連任、第 5 名看機構吸籌 (IO<sub>20</sub>&gt;0)</strong>，22 年 <strong style={{ color: '#34D399' }}>CAGR 43.30% (2,444.5倍)・月 MDD -22.05%・Calmar 1.96</strong>！
+            <strong style={{ color: '#FBBF24' }}>④ 純粹連任保護 × C4 殖利率殺估值護盾</strong>：拔除 9 道細碎連任補丁，回歸 <strong>前 4 名無條件連任、第 5 名看機構吸籌 (IO<sub>20</sub>&gt;0)</strong>，22 年 <strong style={{ color: '#34D399' }}>CAGR 44.73% (3,035.8倍)・月 MDD -21.73%・Calmar 2.06</strong>！
           </div>
         </div>
       </div>
@@ -4584,15 +4584,15 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 <span style={{ fontSize: '1.25rem' }}>👑</span>
                 <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球主權泰坦 2.0・G12-PIT Sovereign（去蕪存菁・7大黃金濾網 × 純粹連任 × 凱利凸性權重）完整架構說明
+                  全球主權泰坦 2.0・G12-PIT Sovereign（7大黃金濾網 × 動能前十強雙特徵 × 純粹連任 × 凱利凸性權重）完整架構說明
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.73rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.16)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +43.30% ｜ 2,444.5倍 ｜ 月MDD -22.05% (日 -30.07%) ｜ Calmar 1.96 ｜ Sharpe 1.24 ｜ Sortino 1.91
+                  CAGR +44.73% ｜ 3,035.8倍 ｜ 月MDD -21.73% (日 -30.26%) ｜ Calmar 2.06 ｜ Sharpe 1.27 ｜ Sortino 1.97
                 </span>
                 <span style={{ fontSize: '0.73rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.18)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  22年勝年 20/22 (90.9%) ｜ 拔除冗餘補丁・保留7大黃金濾網
+                  22年勝年 20/22 (90.9%) ｜ 5,023筆動能前十強雙特徵 × 7大黃金濾網
                 </span>
               </div>
             </div>
@@ -4612,7 +4612,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               marginBottom: '1rem'
             }}>
               <div>
-                <strong>Stage-1 主排序 (去蕪存菁・7大黃金濾網核心)</strong> = <strong>S<sub>G5</sub></strong> × <strong>DistVeto(0.70)</strong> × <strong>CoiledSpring(1.12)</strong> × <strong>VCP(1.04)</strong> + <strong>G9二階機構籌碼純化</strong> + <strong>S1/S2/Beta原油裂解排雷</strong>
+                <strong>Stage-1 主排序 (7大黃金濾網 + 動能前十強雙特徵)</strong> = <strong>S<sub>G5</sub></strong> × <strong>DistVeto(0.70)</strong> × <strong>CoiledSpring(1.12)</strong> × <strong>MegaCoiled(1.06)</strong> × <strong>FringeChaseVeto(0.90)</strong> × <strong>VCP(1.04)</strong> + <strong>G9二階純化</strong> + <strong>S1/S2/Beta能源排雷</strong>
               </div>
               <div style={{ color: '#A5F3FC', marginTop: '0.25rem', fontSize: '0.8rem' }}>
                 <strong>Stage-2 凱利凸性信念權重與純粹連任</strong> = <strong>Kelly-Convex 動態權重 (Top-1 45%~60%)</strong>；<strong>Rank 1~4 無條件連任、Rank 5 要求 IO<sub>20</sub>&gt;0</strong>（拔除 9 道細碎連任與 PC1/RevDecay 冗餘補丁）
@@ -4838,14 +4838,14 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>20/23 (87.0%)</td>
                     </tr>
                     <tr style={{ background: 'rgba(245, 158, 11, 0.22)', borderLeft: '3px solid #F59E0B' }}>
-                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign 去蕪存菁版・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT) - 7大黃金濾網 + S1/S2/Beta原油裂解排雷 + 純粹連任 + 凱利凸性權重</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>43.30%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>2,444.5x</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-22.05%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-30.07%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>1.96</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.24</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>65.1%</td>
+                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign 終極純股版・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT) - 7大黃金濾網 + 動能前十強雙特徵 + S1/S2/Beta原油裂解排雷 + 純粹連任 + 凱利凸性權重</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>44.73%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>3,035.8x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-21.73%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-30.26%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>2.06</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.27</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>65.4%</td>
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>20/22 (90.9%)</td>
                     </tr>
                   </tbody>

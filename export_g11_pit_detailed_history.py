@@ -178,9 +178,21 @@ def main():
     coiled_spring_g11 = np.where(coiled_mask, 1.12, 1.0)
     score_g11 = (env["s_g5_open"][cols] * dist_veto_g10 * coiled_spring_g11).astype(np.float32)
 
-    # [去蕪存菁] 拔除 0 次觸發之冗餘 rev_decay_pen，保留 VCP 波動收斂加分
+    # [去蕪存菁 + 動能前十強雙特徵]
+    # 1. VCP 波動收斂加分 (×1.04)
+    # 2. 超級巨頭領頭羊 (US Rank<=30 / TW Rank<=10) 潛龍回檔蹲點加乘 (×1.06, t=+3.74 / -5.03)
+    # 3. 尾端排名 (US Rank>70) 創高追價且無機構吸籌降權 (×0.90)
+    is_super_mega = pd.DataFrame(False, index=idx, columns=cols)
+    is_super_mega[us_tickers] = (env["us_rk_pit"] <= 30).fillna(False)
+    is_super_mega[pit_tw] = (twse_rk_pit <= 10).fillna(False)
+
+    is_fringe_rk = pd.DataFrame(False, index=idx, columns=cols)
+    is_fringe_rk[us_tickers] = (env["us_rk_pit"] > 70).fillna(False)
+
     exp262_base_mult = np.where(vcp_condition, 1.04, 1.0).astype(np.float32)
-    score_arr = (score_g11 * exp262_base_mult).values.astype(np.float32)
+    m_fringe_pen = np.where(is_fringe_rk.values & (dd20.values > -0.02) & (io_20.values < 0.005), 0.90, 1.0).astype(np.float32)
+    m_coiled_plus_mega = np.where(coiled_mask.values & is_super_mega.values, 1.06, 1.0).astype(np.float32)
+    score_arr = ((score_g11 * exp262_base_mult).values * m_fringe_pen * m_coiled_plus_mega).astype(np.float32)
 
     data4 = env["data4"]
     dates_idx = stk_adj.index
@@ -937,7 +949,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 純粹連任 + 凱利凸性權重 · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 動能前十強雙特徵 + 純粹連任 + 凱利凸性權重 · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
