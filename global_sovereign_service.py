@@ -1422,7 +1422,7 @@ def get_global_sovereign_dashboard_data():
                 pool_2_to_5.sort(key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0), reverse=True)
                 valid_picks = top1_item + pool_2_to_5 + rest_items
 
-            # 🌟 實裝 [arXiv:2611.03453] Collision-Aware Layer (PC1 共同主成分擁擠度懲罰層，PC1_thr = 0.55)
+            # [去蕪存菁] 僅計算 PC1 擁擠度供監控展示，拔除僅觸發 1 次且具負向干擾之 PC1 碰撞降速排序
             pc1_crowding_ratio_pct = 38.5
             pc1_collision_toll_active = False
             try:
@@ -1435,27 +1435,14 @@ def get_global_sovereign_dashboard_data():
                         std_v = np.std(ret_mat, axis=0) + 1e-8
                         z_mat = (ret_mat - np.mean(ret_mat, axis=0)) / std_v
                         corr_m = (z_mat.T @ z_mat) / float(min_len)
-                        eigvals, eigvecs = np.linalg.eigh(corr_m)
+                        eigvals, _ = np.linalg.eigh(corr_m)
                         pc1_var_ratio = float(eigvals[-1]) / 6.0
                         pc1_crowding_ratio_pct = round(pc1_var_ratio * 100.0, 1)
-                        pc1_vec = np.abs(eigvecs[:, -1])
-                        mode_ret5 = float(np.mean([float(p.get("mom_5d") or 0.0) for p in cand6]))
-                        mode_io5 = float(np.mean([float(p.get("io_5") or 0.0) for p in cand6]))
-                        if pc1_var_ratio >= 0.65 and (mode_ret5 < 0.0 and mode_io5 < 0.0):
-                            pc1_collision_toll_active = True
-                            scored_cand = []
-                            for idx_c, p_c in enumerate(cand6[:5]):
-                                base_s = float(p_c.get("sniper_score") or p_c.get("score") or 0.0)
-                                pen = (1.0 - 0.12 * float(pc1_vec[idx_c])) if idx_c >= 1 else 1.0
-                                p_c["collision_adjusted_score"] = round(base_s * pen, 4)
-                                scored_cand.append((base_s * pen, p_c))
-                            scored_cand.sort(key=lambda x: x[0], reverse=True)
-                            valid_picks = [x[1] for x in scored_cand] + valid_picks[5:]
                 if isinstance(data.get("macro_status"), dict):
                     data["macro_status"]["pc1_crowding_ratio_pct"] = pc1_crowding_ratio_pct
                     data["macro_status"]["pc1_collision_toll_active"] = pc1_collision_toll_active
             except Exception as e_pc1:
-                print("計算 arXiv:2611.03453 PC1 擁擠度警告:", e_pc1)
+                print("計算 PC1 擁擠度監控指標警告:", e_pc1)
 
             for idx_all, p_all in enumerate(valid_picks, start=1):
                 p_all.pop("_daily_rets_20", None)
@@ -1463,17 +1450,36 @@ def get_global_sovereign_dashboard_data():
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
             top10_picks = valid_picks[:10]
-            # G12-PIT Sovereign：基礎信念配比固定 52/24/24%
-            weights_single_tranche = [52, 24, 24]   # [已移除] 研發強度 56/22/22 加碼，固定 52/24/24
+            # G12-PIT Sovereign 去蕪存菁版：凱利凸性動態信念權重 (Kelly-Convex Dynamic Conviction Weighting, Top-1 45%~60%)
+            weights_single_tranche = [53.9, 25.0, 21.1]
+            if len(top10_picks) >= 3:
+                try:
+                    s0 = max(float(top10_picks[0].get("sniper_score") or top10_picks[0].get("score") or 0.05), 0.05)
+                    s1 = max(float(top10_picks[1].get("sniper_score") or top10_picks[1].get("score") or 0.05), 0.05)
+                    s2 = max(float(top10_picks[2].get("sniper_score") or top10_picks[2].get("score") or 0.05), 0.05)
+                    dv0 = max(float(top10_picks[0].get("vol_60d") or 0.25) * 0.75, 0.12)
+                    dv1 = max(float(top10_picks[1].get("vol_60d") or 0.25) * 0.75, 0.12)
+                    dv2 = max(float(top10_picks[2].get("vol_60d") or 0.25) * 0.75, 0.12)
+                    ratio_01 = s0 / (s1 + 1e-6)
+                    w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
+                    rem = 1.0 - w0
+                    k1 = s1 / (dv1 ** 0.35)
+                    k2 = s2 / (dv2 ** 0.35)
+                    w1 = rem * (k1 / (k1 + k2 + 1e-9))
+                    w2 = rem - w1
+                    weights_single_tranche = [round(w0 * 100.0, 1), round(w1 * 100.0, 1), round(100.0 - round(w0 * 100.0, 1) - round(w1 * 100.0, 1), 1)]
+                except Exception:
+                    weights_single_tranche = [53.9, 25.0, 21.1]
+
             for idx_p, pick in enumerate(top10_picks, start=1):
                 pick["rank"] = idx_p
                 pick["is_active"] = (idx_p <= 3)
-                # exp_264 + [ICAIF '26 / arXiv:2611.03022] 狀態空間連任棄守閥門：Rank 5~7 若破 20MA 且近 5 日主力加速倒貨 (io_5 <= -0.015) 立即撤銷保護帶
+                # [去蕪存菁] 純粹連任保護帶：前 4 名無條件連任，第 5 名需日內機構吸籌 (io_20 > 0) 且未破月線加速倒貨
                 state_io_exit = (idx_p >= 5) and (float(pick.get("price") or 0.0) < float(pick.get("ma20") or 0.0)) and (float(pick.get("io_5") or 0.0) <= -0.015)
-                pick["in_buffer_zone"] = (idx_p <= 4) or (idx_p <= 7 and float(pick.get("io_20") or 0.0) > 0.0 and float(pick.get("sustain_20d") or 0.0) >= 0.45 and not state_io_exit)
+                pick["in_buffer_zone"] = (idx_p <= 4) or (idx_p == 5 and float(pick.get("io_20") or 0.0) > 0.0 and not state_io_exit)
                 pick["weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
                 pick["tranche_weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
-                pick["total_nav_weight_pct"] = (weights_single_tranche[idx_p - 1] / 2.0) if idx_p <= 3 else 0
+                pick["total_nav_weight_pct"] = round(weights_single_tranche[idx_p - 1] / 2.0, 2) if idx_p <= 3 else 0
             data["current_picks"] = top10_picks
 
         newly_admitted_list = sorted(
@@ -1515,9 +1521,9 @@ def get_global_sovereign_dashboard_data():
             "gatekeeper_rules": [
                 "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
                 "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 (5,338 日) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
-                "③ [已移除] G12 三大進場防雷閘門與研發強度加權：消融測試顯示它們對報酬為負貢獻或無貢獻 (且研發強度靜態表含後見之明)，已拿掉；固定 Top 3 配權 52%/24%/24%",
-                "④ exp_262 正交突破共振：Sustain≥45% × Sortino60≥1.5 正交加權 ×1.04；月營收雙衰減降權",
-                f"⑤ exp_264 贏家 40~60 天主升段續抱護航 & 敗部滯漲/月營收定檢：曾浮盈 >=+5.5% 贏家受 0.09/0.13/0.16 移動鎖利與季線保護；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減立即淘汰換馬。回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
+                "③ 7 大黃金濾網核心 (去蕪存菁)：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 破月線主力出貨降權 (`Dist Veto ×0.70`) + S1/S2/Beta 原油與裂解價差下行排雷 + G9 二階機構籌碼純化 + 高檔爆量滯漲排雷 (`Churn Veto`) + VCP 波動收斂加分 (`×1.04`) + C4 殖利率急飆殺估值盾",
+                "④ 拔除冗餘補丁：已拔除 0 次觸發之月營收雙衰破月線降權 (`Rev Decay`)、僅 1 次觸發之 `PC1 擁擠度減速` 與 9 道細碎連任補丁，回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`)",
+                f"⑤ 凱利凸性動態信念配權 (Kelly-Convex Weighting)：依王牌股領先幅度與下行波動率動態配賦 45%~60% 權重。回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
         }
@@ -1545,8 +1551,8 @@ def get_global_sovereign_dashboard_data():
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (2005-2026 0050∪0051 純上市 PIT 零遺漏版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・S&P 500 + 台灣 0050∪0051 純上市 PIT 2005-2026・已移除 G12 三道防雷與研發加權・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (去蕪存菁・純股票核心版)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・去蕪存菁 7大黃金濾網 + 純粹連任 + 凱利凸性權重・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1568,14 +1574,13 @@ def get_global_sovereign_dashboard_data():
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign 2005-2026 0050∪0051 純上市零遺漏架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT (2005-2026 5,338日 100% 零遺漏) + "
-                "(已移除 G12 三大進場防雷與研發強度加權；固定 52/24/24) + "
-                "exp_262 正交突破共振(Sustain×Sortino60×月營收過濾) + exp_264 雙軌定檢(贏家>=+5.5% 享 40~60天主升段續抱與 0.09/0.13/0.16 移動鎖利；敗部滯漲與月營收雙衰減立即淘汰) + "
-                "C4(45%) / C6(20%) 外科五重護盾"
+                "【G12-PIT Sovereign 去蕪存菁・7大黃金濾網核心架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
+                "7大黃金濾網 (Coiled Spring 潛龍回測月線×1.12 / Dist Veto 破月線主力出貨×0.70 / S1+S2+Beta 原油裂解價差下行排雷 / G9 二階機構籌碼純化 / Churn 高檔爆量滯漲排雷 / VCP×1.04 / C4 殖利率急飆殺估值盾) + "
+                "純粹連任 (Rank 1~4 無條件連任、Rank 5 看 IO_20>0) + 凱利凸性動態信念權重 (Kelly-Convex Top-1 45%~60%)"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
-        # 同步更新歷年報酬率為 G12-PIT Sovereign (2005~2026，剔除無台股 0050∪0051 資料之 2004 年，22年勝年 21/22 = 95.5%)
+        # 同步更新歷年報酬率為 G12-PIT Sovereign (2005~2026)
         scheme_a_yearly = {int(r["year"]): float(r["return_pct"]) for r in _hist if r.get("year") is not None}
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
             data["yearly_performance"] = [row for row in data["yearly_performance"] if int(row.get("year", 0)) >= 2005]
@@ -1586,7 +1591,7 @@ def get_global_sovereign_dashboard_data():
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (2005-2026 S&P 500 + 台灣 0050∪0051 純上市 PIT・已移除 G12 防雷與研發加權)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 純粹連任 + 凱利凸性權重)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1599,10 +1604,10 @@ def get_global_sovereign_dashboard_data():
             "sharpe": _sh,
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
-                "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：剔除無台股 0050∪0051 資料之 2004 年，嚴格鎖定 2005-01-03 ~ 2026-10-29 共 5,338 個交易日 (美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔，100% 零遺漏且排除上櫃股)。",
-                "② [已移除] G12 三大進場防雷閘門 (×0.72/×0.72/×0.70)：消融測試顯示為負貢獻或無貢獻，已拿掉。",
-                "③ [已移除] 黃金研發強度護城河加權與 56/22/22 重倉：研發強度靜態表含全歷史後見之明且貢獻為負，已拿掉；固定 52/24/24 配權。",
-                f"④ exp_262 正交突破共振 + exp_264 贏家主升段護航與敗部定檢：曾浮盈 >=+5.5% 贏家享 40~60 天主升段續抱 (受 0.09/0.13/0.16 移動鎖利與季線約束)；浮盈 <+5.5% 滯漲且破月線或月營收雙衰減者撤銷保護帶換馬。22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
+                "② 7大黃金濾網永久保留：Coiled Spring 潛龍回測月線 (×1.12)、Dist Veto 破月線主力出貨降權 (×0.70)、S1/S2/Beta 原油與裂解價差下行排雷、G9 二階機構籌碼純化、Churn 高檔爆天量排雷、VCP 波動收斂 (×1.04)、C4 殖利率急飆殺估值盾。",
+                "③ 去蕪存菁瘦身：拔除 0 次觸發之月營收雙衰破月線降權 (Rev Decay)、僅 1 次觸發之 PC1 擁擠度減速、與 9 道細碎連任補丁，回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 IO_20 > 0)。",
+                f"④ 凱利凸性動態信念配權 (Kelly-Convex Weighting)：依王牌股領先幅度與下行波動率動態配賦 45%~60% 權重。22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 

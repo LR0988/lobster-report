@@ -164,28 +164,10 @@ def main():
     daily_ret = stk_adj.pct_change().fillna(0.0)
     down_sq_60 = (daily_ret.clip(upper=0.0) ** 2).rolling(60, min_periods=20).mean()
     sortino_60 = ((daily_ret.rolling(60, min_periods=20).mean() / (np.sqrt(down_sq_60) + 1e-6)) * np.sqrt(252.0)).fillna(0.0).astype(np.float32)
-
-    df_rev = pd.read_sql_query("SELECT revenue_date, stock_id, yoy, mom FROM monthly_revenue", conn_twse)
-
-    piv_yoy = pd.DataFrame(0.0, index=idx, columns=cols, dtype=np.float32)
-    piv_mom = pd.DataFrame(0.0, index=idx, columns=cols, dtype=np.float32)
-    if not df_rev.empty:
-        df_rev["ann_date"] = pd.to_datetime(df_rev["revenue_date"].map(_roc_to_ann_str), errors="coerce")
-        df_rev["sym"] = df_rev["stock_id"].astype(str).str.strip() + ".TW"
-        df_rev = df_rev[df_rev["sym"].isin(pit_tw) & df_rev["ann_date"].notna()]
-        if not df_rev.empty:
-            y_tab = df_rev.pivot_table(index="ann_date", columns="sym", values="yoy", aggfunc="last")
-            m_tab = df_rev.pivot_table(index="ann_date", columns="sym", values="mom", aggfunc="last")
-            u_idx = sorted(set(idx) | set(y_tab.index))
-            y_tab = y_tab.reindex(index=u_idx).ffill().reindex(idx).fillna(0.0)
-            m_tab = m_tab.reindex(index=u_idx).ffill().reindex(idx).fillna(0.0)
-            for c_sym in y_tab.columns:
-                if c_sym in piv_yoy.columns:
-                    piv_yoy[c_sym] = y_tab[c_sym].astype(np.float32)
-                    piv_mom[c_sym] = m_tab[c_sym].astype(np.float32)
+    down_sq_20 = (daily_ret.clip(upper=0.0) ** 2).rolling(20, min_periods=10).mean()
+    down_vol_20 = (np.sqrt(down_sq_20) * np.sqrt(252.0)).fillna(0.30).astype(np.float32)
 
     vcp_condition = (sustain_20d >= 0.45) & (comp_ratio <= 0.65) & (sortino_60 >= 1.5) & (turnover_growth > 0.0) & (io_20 > 0.0)
-    rev_decay_pen = np.where((piv_yoy < -5.0) & (piv_mom < -5.0) & (stk_adj < ma20), 0.75, 1.0).astype(np.float32)
 
     dist_veto_g10 = np.where((stk_adj < ma20) & (io_5 < -0.01), 0.70, 1.0)
     is_mega_us = pd.DataFrame(False, index=idx, columns=cols)
@@ -196,7 +178,8 @@ def main():
     coiled_spring_g11 = np.where(coiled_mask, 1.12, 1.0)
     score_g11 = (env["s_g5_open"][cols] * dist_veto_g10 * coiled_spring_g11).astype(np.float32)
 
-    exp262_base_mult = np.where(vcp_condition, 1.04, 1.0).astype(np.float32) * rev_decay_pen
+    # [去蕪存菁] 拔除 0 次觸發之冗餘 rev_decay_pen，保留 VCP 波動收斂加分
+    exp262_base_mult = np.where(vcp_condition, 1.04, 1.0).astype(np.float32)
     score_arr = (score_g11 * exp262_base_mult).values.astype(np.float32)
 
     data4 = env["data4"]
@@ -214,8 +197,7 @@ def main():
     rmom10_arr = r_mom10.values
     rmom5_arr = r_mom5.values
     daily_ret_arr = daily_ret.values.astype(np.float32)
-    yoy_arr = piv_yoy.values
-    mom_arr = piv_mom.values
+    down_vol20_arr = down_vol_20.values.astype(np.float32)
     io20_arr = io_20.values
     io5_arr = io_5.values
     churn_arr = env["churn_exhaustion"][cols].values
@@ -240,8 +222,7 @@ def main():
     pool_k = 5
     tenure_max_rk = 5
 
-    # 🌟 實裝方案 S3 (選項 A)：雙層完整物理排雷閥門 + [arXiv:2611.03453] PC1 共同主成分擁擠度懲罰 + [ICAIF '26] 狀態空間連任棄守閥門
-    # 直接從本機 tw_stock.db -> macro_indicators 讀取自動同步之 WTI 原油 (oil_wti)、RBOB 汽油 (gasoline)、熱燃油 (heating_oil) 與 3-2-1 裂解價差
+    # 🌟 實裝方案 S3 (S1/S2/Beta)：雙層完整能源與裂解價差下行排雷閥門
     df_mac = pd.read_sql_query(
         "SELECT date, oil_wti, gasoline, heating_oil, crack_spread_321 FROM macro_indicators ORDER BY date ASC",
         conn_twse,
@@ -258,6 +239,12 @@ def main():
     crack_ma20_s = crack_s.rolling(20, min_periods=10).mean()
     crack_dd20_s = (crack_s / crack_s.rolling(20, min_periods=10).max() - 1.0).fillna(0.0)
     crack_ret20_s = crack_s.pct_change(20).fillna(0.0)
+
+    cl_ret = cl_s.pct_change().fillna(0.0).clip(-0.15, 0.15)
+    crack_diff = (crack_s.diff() / (crack_ma20_s.abs() + 5.0)).fillna(0.0).clip(-0.20, 0.20)
+    energy_factor_ret = (0.5 * cl_ret + 0.5 * crack_diff).astype(np.float32)
+    stk_ret_clean = daily_ret.clip(-0.20, 0.20)
+    energy_corr_60 = stk_ret_clean.rolling(60, min_periods=30).corr(energy_factor_ret).fillna(0.0).astype(np.float32).values
 
     PURE_REFINERS_SET = {"MPC", "VLO", "PSX", "TSO", "SUN", "HFC", "DINO", "6505.TW"}
     UPSTREAM_CRUDE_SET = {"XOM", "CVX", "COP", "OXY", "SLB", "HAL", "DVN", "EOG", "HES", "MRO", "FANG", "APA", "BKR"}
@@ -281,6 +268,8 @@ def main():
             for _c_i in upstream_indices:
                 if mom12m_arr[_t_i, _c_i] >= 0.75 and mom3m_arr[_t_i, _c_i] >= 0.25:
                     veto_s1_arr[_t_i, _c_i] = True
+        if cond_s2a_oil_veto[_t_i] or (cond_s1_crack_veto[_t_i] and cl_s.iloc[_t_i] < cl_ma20_s.iloc[_t_i]):
+            veto_s1_arr[_t_i, energy_corr_60[_t_i] >= 0.32] = True
 
     def get_stock_name(tk):
         base = tk.split(".")[0]
@@ -297,10 +286,13 @@ def main():
     all_tranche_records = []
 
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
+        ym_groups = pd.Series(dates_idx, index=dates_idx).groupby([dates_idx.year, dates_idx.month])
         rebal_dates = []
-        for (y, m), grp in all_dates.groupby([all_dates.dt.year, all_dates.dt.month]):
+        for (y, m), grp in ym_groups:
             sub = grp[grp.dt.day >= day_target]
             rebal_dates.append(sub.iloc[0] if len(sub) > 0 else grp.iloc[-1])
+        rebal_dates = pd.DatetimeIndex(sorted(list(set(rebal_dates))))
+        rebal_dates = rebal_dates[rebal_dates >= pd.Timestamp("2005-01-01")]
 
         periods = []
         for i in range(len(rebal_dates) - 1):
@@ -313,15 +305,6 @@ def main():
             if len(fut_next) == 0: break
             t_out = fut_next[0]
             periods.append((t_date, t_in, t_out, False))
-
-        # 納入最後一個進行中的調倉期 (Active Tranche)
-        if len(rebal_dates) > 0:
-            last_r_date = rebal_dates[-1]
-            fut = dates_idx[dates_idx > last_r_date]
-            if len(fut) > 0:
-                t_in = fut[0]
-                t_out = dates_idx[-1]
-                periods.append((last_r_date, t_in, t_out, True))
 
         all_sim_dates = dates_idx[(dates_idx >= periods[0][0]) & (dates_idx <= periods[-1][2])]
         daily_equity = pd.Series(index=all_sim_dates, dtype=float)
@@ -395,28 +378,6 @@ def main():
                         pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
                         sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
 
-                # 🌟 執行 [arXiv:2611.03453] Collision-Aware Layer (PC1 共同主成分擁擠度懲罰, PC1_thr = 0.55)
-                if len(sorted_indices) >= 6 and t_pos >= 25:
-                    cand6 = sorted_indices[:6]
-                    ret_mat = daily_ret_arr[t_pos - 19 : t_pos + 1, cand6]
-                    std_v = np.std(ret_mat, axis=0) + 1e-8
-                    z_mat = (ret_mat - np.mean(ret_mat, axis=0)) / std_v
-                    corr_m = (z_mat.T @ z_mat) / 20.0
-                    eigvals, eigvecs = np.linalg.eigh(corr_m)
-                    pc1_var_ratio = float(eigvals[-1]) / 6.0
-                    pc1_vec = np.abs(eigvecs[:, -1])
-                    if pc1_var_ratio >= 0.55:
-                        mode_ret5 = float(np.mean(rmom5_arr[t_pos, cand6]))
-                        mode_io5 = float(np.mean(io5_arr[t_pos, cand6]))
-                        if mode_ret5 < 0.0 or mode_io5 < 0.0:
-                            adj_scores = []
-                            for idx_c, c_i in enumerate(cand6):
-                                base_s = float(sc_row[c_i]) * (float(sec_arr[t_pos, c_i]) if sec_arr is not None else 1.0)
-                                pen = (1.0 - 0.12 * float(pc1_vec[idx_c])) if idx_c >= 1 else 1.0
-                                adj_scores.append((base_s * pen, c_i))
-                            adj_scores.sort(key=lambda x: x[0], reverse=True)
-                            sorted_indices = np.array([x[1] for x in adj_scores] + list(sorted_indices[6:]), dtype=int)
-
                 br = float(global_breadth.iloc[t_pos]) if t_date in global_breadth.index else 0.5
                 if br >= 0.50: base_exp = 1.0
                 elif br >= 0.30: base_exp = 0.70
@@ -459,45 +420,17 @@ def main():
                     old_holdings_set = set(holdings.keys())
                     selected_stks = []
 
+                    # [去蕪存菁] 採用純粹連任規則：前4名無條件連任，第5名要求主力日內淨吸籌 (IO20>0) 且未破月線加速出貨
                     for c_i in list(holdings.keys()):
                         if veto_s1_arr[t_pos, c_i]:
                             continue
                         tenure = holding_tenure.get(c_i, 0)
                         rk = ticker_rank.get(c_i, None)
-                        hinfo = holdings[c_i]
-                        epx = hinfo.get("entry_px", float(px_adj_arr[t_pos, c_i]))
                         cur_c = float(px_adj_arr[t_pos, c_i])
-                        pk_px = max(hinfo.get("peak_px", epx), cur_c)
-                        ppnl = (pk_px / (epx + 1e-9)) - 1.0
-                        tr_dd = (pk_px - cur_c) / (pk_px + 1e-9)
                         m20_c = float(ma20_arr[t_pos, c_i])
-                        m60_c = float(ma60_arr[t_pos, c_i])
-                        sust_c = float(sustain_arr[t_pos, c_i])
-
-                        keep = False
-                        if rk is not None and tenure < 4 and rk <= tenure_max_rk:
-                            if rk <= (tenure_max_rk - 1) or float(io20_arr[t_pos, c_i]) > 0.0:
-                                keep = True
-
-                        if not keep and tenure < 4 and rk is not None and rk <= 7:
-                            if ppnl >= 0.055 and cur_c > m60_c and sust_c >= 0.45 and tr_dd < asym_stepped_winner_tr_dd(ppnl) and float(io20_arr[t_pos, c_i]) > 0.0:
-                                keep = True
-                        if keep and ppnl >= 0.25 and tr_dd >= asym_stepped_winner_tr_dd(ppnl) and rk >= 4:
-                            keep = False
-
-                        if keep and ppnl < 0.055 and rk is not None and rk >= 4:
-                            is_rev_decay = (yoy_arr[t_pos, c_i] < 0.0) and (mom_arr[t_pos, c_i] < 0.0) and (cur_c < m20_c)
-                            is_mom_decay = (cur_c < m20_c) and (float(rmom10_arr[t_pos, c_i]) < -0.02) and (float(io5_arr[t_pos, c_i]) < -0.01)
-                            if is_rev_decay or is_mom_decay:
-                                keep = False
-
-                        # 🌟 [ICAIF '26 / arXiv:2611.03022] 狀態空間短期棄守攔截閥門：若 rk >= 5 且跌破 20MA 且近 5 日主力加速倒貨 (io_5 <= -0.015)，撤銷老將保護帶
-                        if keep and rk is not None and rk >= 5:
-                            if cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015:
-                                keep = False
-
-                        if keep:
-                            selected_stks.append(c_i)
+                        if rk is not None and tenure < 4:
+                            if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
+                                selected_stks.append(c_i)
 
                     for c_i in sorted_indices:
                         if len(selected_stks) >= 3: break
@@ -515,9 +448,23 @@ def main():
                     n = min(3, len(selected_stks))
                     selected_stks = selected_stks[:n]
                     holding_tenure = {c_i: holding_tenure.get(c_i, 0) + 1 for c_i in selected_stks}
-                    bw_slice = base_weights[:n]
-                    tot_bw = sum(bw_slice)
-                    norm_weights = [w / tot_bw for w in bw_slice]
+                    if n == 3:
+                        s0 = max(float(sc_row[selected_stks[0]]), 0.05)
+                        s1 = max(float(sc_row[selected_stks[1]]), 0.05)
+                        s2 = max(float(sc_row[selected_stks[2]]), 0.05)
+                        dv0 = max(float(down_vol20_arr[t_pos, selected_stks[0]]), 0.12)
+                        dv1 = max(float(down_vol20_arr[t_pos, selected_stks[1]]), 0.12)
+                        dv2 = max(float(down_vol20_arr[t_pos, selected_stks[2]]), 0.12)
+                        ratio_01 = s0 / (s1 + 1e-6)
+                        w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
+                        rem = 1.0 - w0
+                        k1 = s1 / (dv1 ** 0.35)
+                        k2 = s2 / (dv2 ** 0.35)
+                        norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
+                    else:
+                        bw_slice = base_weights[:n]
+                        tot_bw = sum(bw_slice)
+                        norm_weights = [w / tot_bw for w in bw_slice]
                     target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
 
                     raw_tw_df = env.get("raw_px_tw", None)
@@ -652,7 +599,7 @@ def main():
         "exposure_pct": 100.0,
         "us_breadth_pct": 63.3,
         "tw_breadth_pct": 63.3,
-        "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -33.7% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) ➔ 100% 滿倉進攻",
+        "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -33.7% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
         "is_active": True,
         "picks": [
             {
@@ -660,34 +607,34 @@ def main():
                 "ticker": "TXN",
                 "name": "德州儀器",
                 "market": "US",
-                "weight": 52.0,
+                "weight": 53.9,
                 "entry_price": 309.83,
-                "exit_price": 310.55,
-                "period_ret": 0.23,
+                "exit_price": 311.49,
+                "period_ret": 0.54,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
             {
                 "rank": 2,
-                "ticker": "ADI",
-                "name": "亞德諾半導體",
+                "ticker": "REGN",
+                "name": "再生元製藥",
                 "market": "US",
-                "weight": 24.0,
-                "entry_price": 424.48,
-                "exit_price": 415.18,
-                "period_ret": -2.19,
+                "weight": 25.0,
+                "entry_price": 956.28,
+                "exit_price": 930.67,
+                "period_ret": -2.68,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
             {
                 "rank": 3,
-                "ticker": "REGN",
-                "name": "再生元製藥",
+                "ticker": "ADI",
+                "name": "亞德諾半導體",
                 "market": "US",
-                "weight": 24.0,
-                "entry_price": 956.28,
-                "exit_price": 985.00,
-                "period_ret": 3.00,
+                "weight": 21.1,
+                "entry_price": 424.48,
+                "exit_price": 406.24,
+                "period_ret": -4.30,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             }
@@ -865,7 +812,7 @@ def main():
 
     # 官方當前 A / B 梯隊獨立標準持倉 (供前端第一層與第二層 AB 分開跟單使用)
     official_active_tranches = {
-        "updated_at": "2026-11-04",
+        "updated_at": "2026-11-05",
         "tranche_a": {
             "tranche_id": "A",
             "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
@@ -875,8 +822,8 @@ def main():
             "entry_date": "2026-11-03",
             "next_rebal_date": "2026-12-01",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層排雷閥門：裂解價差崩跌 -33.7% 且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭)",
-            "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉出場；本期因裂解價差與 WTI 原油雙破月線，S3 雙層排雷閥門自動剔除 MPC/PSX 與 COP，改建倉 TXN / ADI / REGN",
+            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層能源排雷閥門：裂解價差崩跌 -33.7% 且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭・凱利凸性權重 53.9%/25.0%/21.1%)",
+            "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉出場；本期因裂解價差與 WTI 原油雙破月線，S3 雙層排雷閥門自動剔除 MPC/PSX 與 COP，改建倉 TXN (53.9%) / REGN (25.0%) / ADI (21.1%)",
             "picks": [
                 {
                     "rank": 1,
@@ -884,8 +831,8 @@ def main():
                     "name": "德州儀器",
                     "market": "US",
                     "sector": "類比晶片龍頭 (高息防禦)",
-                    "tranche_weight_pct": 52.0,
-                    "total_portfolio_weight_pct": 26.0,
+                    "tranche_weight_pct": 53.9,
+                    "total_portfolio_weight_pct": 26.95,
                     "entry_date": "2026-11-03",
                     "entry_price": 309.83,
                     "current_price": 311.49,
@@ -895,32 +842,32 @@ def main():
                 },
                 {
                     "rank": 2,
-                    "ticker": "ADI",
-                    "name": "亞德諾半導體",
-                    "market": "US",
-                    "sector": "高階類比與混合訊號晶片",
-                    "tranche_weight_pct": 24.0,
-                    "total_portfolio_weight_pct": 12.0,
-                    "entry_date": "2026-11-03",
-                    "entry_price": 424.48,
-                    "current_price": 406.24,
-                    "period_ret_pct": -4.30,
-                    "stop_loss_price": round(424.48 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 3,
                     "ticker": "REGN",
                     "name": "再生元製藥",
                     "market": "US",
                     "sector": "生物製藥巨擘 (剛性醫療防禦)",
-                    "tranche_weight_pct": 24.0,
-                    "total_portfolio_weight_pct": 12.0,
+                    "tranche_weight_pct": 25.0,
+                    "total_portfolio_weight_pct": 12.5,
                     "entry_date": "2026-11-03",
                     "entry_price": 956.28,
                     "current_price": 930.67,
                     "period_ret_pct": -2.68,
                     "stop_loss_price": round(956.28 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 3,
+                    "ticker": "ADI",
+                    "name": "亞德諾半導體",
+                    "market": "US",
+                    "sector": "高階類比與混合訊號晶片",
+                    "tranche_weight_pct": 21.1,
+                    "total_portfolio_weight_pct": 10.55,
+                    "entry_date": "2026-11-03",
+                    "entry_price": 424.48,
+                    "current_price": 406.24,
+                    "period_ret_pct": -4.30,
+                    "stop_loss_price": round(424.48 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
             ]
@@ -934,8 +881,8 @@ def main():
             "entry_date": "2026-10-23",
             "next_rebal_date": "2026-11-22",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除純煉油股 VLO/MPC；當時 WTI 油價 $99.47 仍高於月線 $95.36 故保留 XOM)",
-            "previous_rebal_note": "10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S3 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK / ACN / XOM 續抱至 2026-11-22 換倉",
+            "defense_reason": "正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除純煉油股 VLO/MPC；當時 WTI 油價 $99.47 仍高於月線 $95.36 故保留 XOM・凱利凸性權重 52.5%/25.8%/21.7%)",
+            "previous_rebal_note": "10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S3 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK (52.5%) / XOM (25.8%) / ACN (21.7%) 續抱至 2026-11-22 換倉",
             "picks": [
                 {
                     "rank": 1,
@@ -943,8 +890,8 @@ def main():
                     "name": "默沙東",
                     "market": "US",
                     "sector": "大型製藥 (剛性醫療防禦)",
-                    "tranche_weight_pct": 52.0,
-                    "total_portfolio_weight_pct": 26.0,
+                    "tranche_weight_pct": 52.5,
+                    "total_portfolio_weight_pct": 26.25,
                     "entry_date": "2026-10-23",
                     "entry_price": 145.02,
                     "current_price": 150.36,
@@ -954,32 +901,32 @@ def main():
                 },
                 {
                     "rank": 2,
-                    "ticker": "ACN",
-                    "name": "埃森哲",
-                    "market": "US",
-                    "sector": "全球資訊顧問與AI轉型巨擘",
-                    "tranche_weight_pct": 24.0,
-                    "total_portfolio_weight_pct": 12.0,
-                    "entry_date": "2026-10-23",
-                    "entry_price": 252.01,
-                    "current_price": 264.27,
-                    "period_ret_pct": 4.86,
-                    "stop_loss_price": round(252.01 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 3,
                     "ticker": "XOM",
                     "name": "埃克森美孚",
                     "market": "US",
                     "sector": "全球綜合油氣開採巨擘",
-                    "tranche_weight_pct": 24.0,
-                    "total_portfolio_weight_pct": 12.0,
+                    "tranche_weight_pct": 25.8,
+                    "total_portfolio_weight_pct": 12.9,
                     "entry_date": "2026-10-23",
                     "entry_price": 179.37,
                     "current_price": 169.27,
                     "period_ret_pct": -5.63,
                     "stop_loss_price": round(179.37 * 0.85, 2),
+                    "action": "持有中 (續抱)"
+                },
+                {
+                    "rank": 3,
+                    "ticker": "ACN",
+                    "name": "埃森哲",
+                    "market": "US",
+                    "sector": "全球資訊顧問與AI轉型巨擘",
+                    "tranche_weight_pct": 21.7,
+                    "total_portfolio_weight_pct": 10.85,
+                    "entry_date": "2026-10-23",
+                    "entry_price": 252.01,
+                    "current_price": 264.27,
+                    "period_ret_pct": 4.86,
+                    "stop_loss_price": round(252.01 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
             ]
@@ -990,23 +937,23 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (配置七-R + S3 雙層能源排雷 + arXiv:2611.03453 PC1碰撞懲罰 + ICAIF'26 狀態空間連任閥門 · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 純粹連任 + 凱利凸性權重 · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
-        "cagr": 41.40,
-        "mult": 1867.3,
-        "monthly_mdd": -22.06,
-        "daily_mdd": -29.68,
-        "calmar": 1.88,
-        "sharpe": 1.27,
-        "total_ret_pct": 186630.0,
+        "cagr": round(_cagr * 100.0, 2),
+        "mult": round(float(eq_d.iloc[-1]), 1),
+        "monthly_mdd": round(_monthly_mdd * 100.0, 2),
+        "daily_mdd": round(_daily_mdd * 100.0, 2),
+        "calmar": round(_cagr / abs(_monthly_mdd), 2),
+        "sharpe": round(_sharpe, 2),
+        "total_ret_pct": round((float(eq_d.iloc[-1]) - 1.0) * 100.0, 1),
         "sortino": round(_sortino, 2),
-        "daily_calmar": 1.40,
+        "daily_calmar": round(_cagr / abs(_daily_mdd), 2),
         "recent_8y_cagr": round(_recent8 * 100, 2),
-        "semi_monthly_win_rate": 65.1,
-        "big_loss_rate": 10.6,
-        "g1_cagr": 39.94,
-        "g2_cagr": 43.29,
-        "winning_years": f"19/{len(yearly_summary)} (86.4%)",
+        "semi_monthly_win_rate": round(_semi_win, 1),
+        "big_loss_rate": round(_big_loss, 1),
+        "g1_cagr": round(_g1 * 100.0, 2),
+        "g2_cagr": round(_g2 * 100.0, 2),
+        "winning_years": f"{win_years_cnt}/{len(yearly_summary)} ({win_years_cnt/max(1,len(yearly_summary))*100:.1f}%)",
         "yearly_history": yearly_summary,
         "recent_2026_rebalances": recent_2026_rebalances,
         "official_active_tranches": official_active_tranches,
