@@ -118,7 +118,9 @@ def sync_ml_cache(sb_conn):
 
     # 上傳全球主權泰坦最新數據 (global_sovereign_dashboard)
     try:
+        import importlib
         import global_sovereign_service
+        importlib.reload(global_sovereign_service)
         gs_data = global_sovereign_service.get_global_sovereign_dashboard_data()
         if gs_data and gs_data.get("status") == "ok":
             cur.execute("""

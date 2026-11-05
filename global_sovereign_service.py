@@ -546,6 +546,8 @@ def get_global_sovereign_dashboard_data():
                 prev_c = closes[idx_d + 1]
                 cur_c = closes[idx_d]
                 cur_o = opens[idx_d] if opens[idx_d] > 0 else cur_c
+                if idx_d < len(lows) and idx_d < len(highs) and lows[idx_d] > 0 and highs[idx_d] >= lows[idx_d]:
+                    cur_o = min(highs[idx_d], max(lows[idx_d], cur_o))
                 if prev_c > 0:
                     r_tot = (cur_c - prev_c) / prev_c
                     r_intra = max(-0.25, min(0.25, (cur_c / max(1e-6, cur_o)) - 1.0))
@@ -1123,14 +1125,16 @@ def get_global_sovereign_dashboard_data():
             if "." in ticker:
                 live_prices[ticker.split(".")[0]] = st
             cur_dt = st["price_date"]
-            if cur_dt > max_dt:
-                max_dt = cur_dt
-            if ticker.endswith(".TW") or ticker.endswith(".KS"):
+            if ticker.endswith(".TW"):
                 if cur_dt > max_tw_dt:
                     max_tw_dt = cur_dt
-            else:
+                if cur_dt > max_dt:
+                    max_dt = cur_dt
+            elif not any(ticker.endswith(ext) for ext in ['.KS', '.T', '.DE', '.SA']):
                 if cur_dt > max_us_dt:
                     max_us_dt = cur_dt
+                if cur_dt > max_dt:
+                    max_dt = cur_dt
 
             if ticker in exclude_etfs or any(ticker.endswith(ext) for ext in ['.KS', '.T', '.DE', '.SA']):
                 continue
@@ -1690,9 +1694,38 @@ def get_global_sovereign_dashboard_data():
             with open(pit_hist_file, "r", encoding="utf-8") as f_pit:
                 pit_json = json.load(f_pit)
                 if "official_active_tranches" in pit_json:
-                    data["official_active_tranches"] = pit_json["official_active_tranches"]
+                    tranches_obj = pit_json["official_active_tranches"]
+                    tranches_obj["updated_at"] = max_us_dt or max_dt or tranches_obj.get("updated_at", "2026-11-04")
+                    for tr_key in ("tranche_a", "tranche_b"):
+                        tr_item = tranches_obj.get(tr_key, {})
+                        for p_item in tr_item.get("picks", []):
+                            tk_p = p_item.get("ticker", "")
+                            st_p = live_prices.get(tk_p) or (live_prices.get(tk_p.split(".")[0]) if "." in tk_p else None)
+                            if st_p and st_p.get("price"):
+                                cur_p = round(float(st_p["price"]), 2)
+                                p_item["current_price"] = cur_p
+                                p_item["price_date"] = st_p.get("price_date") or max_us_dt or max_dt
+                                ent_p = float(p_item.get("entry_price") or cur_p)
+                                if ent_p > 0:
+                                    p_item["period_ret_pct"] = round(((cur_p / ent_p) - 1.0) * 100.0, 2)
+                    data["official_active_tranches"] = tranches_obj
                 if "recent_2026_rebalances" in pit_json:
-                    data["recent_2026_rebalances"] = pit_json["recent_2026_rebalances"]
+                    rebal_list = pit_json["recent_2026_rebalances"]
+                    for rb in rebal_list:
+                        if "持有中" in str(rb.get("exit_date", "")):
+                            w_ret = 0.0
+                            for p_rb in rb.get("picks", []):
+                                tk_r = p_rb.get("ticker", "")
+                                st_r = live_prices.get(tk_r) or (live_prices.get(tk_r.split(".")[0]) if "." in tk_r else None)
+                                if st_r and st_r.get("price"):
+                                    cur_pr = round(float(st_r["price"]), 2)
+                                    p_rb["exit_price"] = cur_pr
+                                    ent_pr = float(p_rb.get("entry_price") or cur_pr)
+                                    if ent_pr > 0:
+                                        p_rb["ret_pct"] = round(((cur_pr / ent_pr) - 1.0) * 100.0, 2)
+                                w_ret += (float(p_rb.get("weight_pct") or 0.0) / 100.0) * float(p_rb.get("ret_pct") or 0.0)
+                            rb["tranche_period_ret_pct"] = round(w_ret, 2)
+                    data["recent_2026_rebalances"] = rebal_list
     except Exception as e:
         pass
 

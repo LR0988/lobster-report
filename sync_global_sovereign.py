@@ -118,11 +118,21 @@ def sync_global_sovereign_history(full_history: bool = True):
                 return None
             tz = ZoneInfo(meta.get("exchangeTimezoneName", "America/New_York"))
             d_str = datetime.fromtimestamp(rmt, tz).strftime("%Y-%m-%d")
+            q = (res.get("indicators", {}).get("quote") or [{}])[0]
+            q_opens = [x for x in (q.get("open") or []) if x is not None]
+            q_highs = [x for x in (q.get("high") or []) if x is not None]
+            q_lows = [x for x in (q.get("low") or []) if x is not None]
+            q_vols = [x for x in (q.get("volume") or []) if x is not None]
             c = round(float(rmp), 4)
-            h = round(float(meta.get("regularMarketDayHigh") or c), 4)
-            l = round(float(meta.get("regularMarketDayLow") or c), 4)
-            o = round(float(meta.get("regularMarketOpen") or meta.get("chartPreviousClose") or c), 4)
-            v = float(meta.get("regularMarketVolume") or 0.0)
+            h = round(float(meta.get("regularMarketDayHigh") or (q_highs[-1] if q_highs else c)), 4)
+            l = round(float(meta.get("regularMarketDayLow") or (q_lows[-1] if q_lows else c)), 4)
+            raw_o = meta.get("regularMarketOpen") or (q_opens[-1] if q_opens else c)
+            o = round(float(raw_o), 4)
+            if h < max(o, c):
+                h = max(o, c)
+            if l > min(o, c):
+                l = min(o, c)
+            v = float(meta.get("regularMarketVolume") or (q_vols[-1] if q_vols else 0.0) or 0.0)
             return (t_sym, d_str, o, h, l, c, c, v)
         except Exception:
             return None

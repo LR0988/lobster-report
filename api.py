@@ -1265,12 +1265,14 @@ def run_scraper_task(task_type: str):
             print("[*] [API Scraper] 正在執行全球主權泰坦 ETF、原油裂解價差與旗艦個股行情更新...")
             try:
                 import sync_macro_indicators
+                importlib.reload(sync_macro_indicators)
                 sync_macro_indicators.sync_macro_to_sqlite(range_param="1mo")
                 add_scraper_log("✓ WTI 原油 (CL=F)、RBOB 汽油 (RB=F)、ULSD 熱燃油 (HO=F) 與 3-2-1 裂解價差已自動更新至 macro_indicators")
             except Exception as e_m:
                 add_scraper_log(f"⚠️ 更新原油與裂解價差指標警告: {e_m}")
             try:
                 import sync_global_sovereign
+                importlib.reload(sync_global_sovereign)
                 sync_global_sovereign.sync_global_sovereign_history(full_history=False)
                 add_scraper_log("✓ 全球主權泰坦 18 國 ETF 已寫入 global_sovereign_daily")
                 print("[✓] [API Scraper] 全球主權泰坦 ETF 更新完成")
@@ -1281,6 +1283,7 @@ def run_scraper_task(task_type: str):
             set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', 'S&P 500 PIT 成分股與台股 0050∪0051 純上市池 (global_stock_daily)', '步驟 2/3：正在連線抓取美股 S&P 500 PIT 成分股與交叉補齊台股 0050∪0051 純上市前 150 大最新收盤行情...', 2, 3, 60)
             try:
                 import sync_global_titan_stocks
+                importlib.reload(sync_global_titan_stocks)
                 sync_global_titan_stocks.download_and_save(full_history=False)
                 add_scraper_log("✓ S&P 500 PIT 與台股 0050∪0051 純上市最新報價已寫入 global_stock_daily 並同步更新實盤持倉現價")
                 print("[✓] [API Scraper] S&P 500 PIT 與台股 0050∪0051 資產行情更新完成")
@@ -1290,8 +1293,9 @@ def run_scraper_task(task_type: str):
                 
             set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '全球泰坦雲端同步', '步驟 3/3：正在同步全球泰坦最新數據與實盤持倉現價至雲端快照...', 3, 3, 90)
             try:
-                from stock_sync import run_full_sync
-                run_full_sync()
+                import stock_sync
+                importlib.reload(stock_sync)
+                stock_sync.run_full_sync()
                 add_scraper_log("✓ 全球泰坦雲端快照與實盤持倉報價同步完成")
             except Exception as e:
                 print(f"[x] [API Scraper] 同步雲端快照失敗: {e}")

@@ -888,8 +888,8 @@ def main():
                     "total_portfolio_weight_pct": 26.0,
                     "entry_date": "2026-11-03",
                     "entry_price": 309.83,
-                    "current_price": 310.55,
-                    "period_ret_pct": 0.23,
+                    "current_price": 311.49,
+                    "period_ret_pct": 0.54,
                     "stop_loss_price": round(309.83 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -903,8 +903,8 @@ def main():
                     "total_portfolio_weight_pct": 12.0,
                     "entry_date": "2026-11-03",
                     "entry_price": 424.48,
-                    "current_price": 415.18,
-                    "period_ret_pct": -2.19,
+                    "current_price": 406.24,
+                    "period_ret_pct": -4.30,
                     "stop_loss_price": round(424.48 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -918,8 +918,8 @@ def main():
                     "total_portfolio_weight_pct": 12.0,
                     "entry_date": "2026-11-03",
                     "entry_price": 956.28,
-                    "current_price": 985.00,
-                    "period_ret_pct": 3.00,
+                    "current_price": 930.67,
+                    "period_ret_pct": -2.68,
                     "stop_loss_price": round(956.28 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
@@ -947,8 +947,8 @@ def main():
                     "total_portfolio_weight_pct": 26.0,
                     "entry_date": "2026-10-23",
                     "entry_price": 145.02,
-                    "current_price": 146.36,
-                    "period_ret_pct": 0.92,
+                    "current_price": 150.36,
+                    "period_ret_pct": 3.68,
                     "stop_loss_price": round(145.02 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -962,8 +962,8 @@ def main():
                     "total_portfolio_weight_pct": 12.0,
                     "entry_date": "2026-10-23",
                     "entry_price": 252.01,
-                    "current_price": 258.10,
-                    "period_ret_pct": 2.42,
+                    "current_price": 264.27,
+                    "period_ret_pct": 4.86,
                     "stop_loss_price": round(252.01 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -977,8 +977,8 @@ def main():
                     "total_portfolio_weight_pct": 12.0,
                     "entry_date": "2026-10-23",
                     "entry_price": 179.37,
-                    "current_price": 171.97,
-                    "period_ret_pct": -4.13,
+                    "current_price": 169.27,
+                    "period_ret_pct": -5.63,
                     "stop_loss_price": round(179.37 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }

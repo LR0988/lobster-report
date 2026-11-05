@@ -26153,10 +26153,11 @@
           "market": "US",
           "weight": 52.0,
           "entry_price": 309.83,
-          "exit_price": 310.55,
+          "exit_price": 311.49,
           "period_ret": 0.23,
           "is_active": true,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "ret_pct": 0.54
         },
         {
           "rank": 2,
@@ -26165,10 +26166,11 @@
           "market": "US",
           "weight": 24.0,
           "entry_price": 424.48,
-          "exit_price": 415.18,
+          "exit_price": 406.24,
           "period_ret": -2.19,
           "is_active": true,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "ret_pct": -4.3
         },
         {
           "rank": 3,
@@ -26177,12 +26179,14 @@
           "market": "US",
           "weight": 24.0,
           "entry_price": 956.28,
-          "exit_price": 985.0,
+          "exit_price": 930.67,
           "period_ret": 3.0,
           "is_active": true,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "ret_pct": -2.68
         }
-      ]
+      ],
+      "period_ret_pct": -2.15
     },
     {
       "year": 2026,
@@ -26202,11 +26206,12 @@
           "market": "US",
           "weight": 52.0,
           "entry_price": 145.02,
-          "exit_price": 146.36,
+          "exit_price": 150.36,
           "period_ret": 0.92,
           "is_active": true,
           "action": "持有中 (續抱)",
-          "tenure_months": 1
+          "tenure_months": 1,
+          "ret_pct": 3.68
         },
         {
           "rank": 2,
@@ -26215,11 +26220,12 @@
           "market": "US",
           "weight": 24.0,
           "entry_price": 252.01,
-          "exit_price": 258.1,
+          "exit_price": 264.27,
           "period_ret": 2.42,
           "is_active": true,
           "action": "持有中 (續抱)",
-          "tenure_months": 1
+          "tenure_months": 1,
+          "ret_pct": 4.86
         },
         {
           "rank": 3,
@@ -26228,13 +26234,15 @@
           "market": "US",
           "weight": 24.0,
           "entry_price": 179.37,
-          "exit_price": 171.97,
+          "exit_price": 169.27,
           "period_ret": -4.13,
           "is_active": true,
           "action": "持有中 (續抱)",
-          "tenure_months": 1
+          "tenure_months": 1,
+          "ret_pct": -5.63
         }
-      ]
+      ],
+      "period_ret_pct": 0.97
     },
     {
       "year": 2026,
@@ -27249,10 +27257,11 @@
           "total_portfolio_weight_pct": 26.0,
           "entry_date": "2026-11-03",
           "entry_price": 309.83,
-          "current_price": 310.55,
-          "period_ret_pct": 0.23,
+          "current_price": 311.49,
+          "period_ret_pct": 0.54,
           "stop_loss_price": 263.36,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "price_date": "2026-11-04"
         },
         {
           "rank": 2,
@@ -27264,10 +27273,11 @@
           "total_portfolio_weight_pct": 12.0,
           "entry_date": "2026-11-03",
           "entry_price": 424.48,
-          "current_price": 415.18,
-          "period_ret_pct": -2.19,
+          "current_price": 406.24,
+          "period_ret_pct": -4.3,
           "stop_loss_price": 360.81,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "price_date": "2026-11-04"
         },
         {
           "rank": 3,
@@ -27279,10 +27289,11 @@
           "total_portfolio_weight_pct": 12.0,
           "entry_date": "2026-11-03",
           "entry_price": 956.28,
-          "current_price": 985.0,
-          "period_ret_pct": 3.0,
+          "current_price": 930.67,
+          "period_ret_pct": -2.68,
           "stop_loss_price": 812.84,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "price_date": "2026-11-04"
         }
       ]
     },
@@ -27308,10 +27319,11 @@
           "total_portfolio_weight_pct": 26.0,
           "entry_date": "2026-10-23",
           "entry_price": 145.02,
-          "current_price": 146.36,
-          "period_ret_pct": 0.92,
+          "current_price": 150.36,
+          "period_ret_pct": 3.68,
           "stop_loss_price": 123.27,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "price_date": "2026-11-04"
         },
         {
           "rank": 2,
@@ -27323,10 +27335,11 @@
           "total_portfolio_weight_pct": 12.0,
           "entry_date": "2026-10-23",
           "entry_price": 252.01,
-          "current_price": 258.1,
-          "period_ret_pct": 2.42,
+          "current_price": 264.27,
+          "period_ret_pct": 4.86,
           "stop_loss_price": 214.21,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "price_date": "2026-11-04"
         },
         {
           "rank": 3,
@@ -27338,10 +27351,11 @@
           "total_portfolio_weight_pct": 12.0,
           "entry_date": "2026-10-23",
           "entry_price": 179.37,
-          "current_price": 171.97,
-          "period_ret_pct": -4.13,
+          "current_price": 169.27,
+          "period_ret_pct": -5.63,
           "stop_loss_price": 152.46,
-          "action": "持有中 (續抱)"
+          "action": "持有中 (續抱)",
+          "price_date": "2026-11-04"
         }
       ]
     }
