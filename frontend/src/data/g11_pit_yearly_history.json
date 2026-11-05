@@ -1,36 +1,36 @@
 {
-  "strategy_version": "G12-PIT Sovereign (配置七-R + S3 雙層完整物理排雷閥門 · S&P 500 PIT + 台灣 0050∪0051 純上市 PIT 2005-2026)",
+  "strategy_version": "G12-PIT Sovereign (配置七-R + S3 雙層能源排雷 + arXiv:2611.03453 PC1碰撞懲罰 + ICAIF'26 狀態空間連任閥門 · 2005-2026)",
   "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
-  "cagr": 40.67,
-  "mult": 1671.9,
-  "monthly_mdd": -21.88,
-  "daily_mdd": -29.44,
-  "calmar": 1.86,
+  "cagr": 41.4,
+  "mult": 1867.3,
+  "monthly_mdd": -22.06,
+  "daily_mdd": -29.68,
+  "calmar": 1.88,
   "sharpe": 1.27,
-  "total_ret_pct": 167090.0,
-  "sortino": 1.99,
-  "daily_calmar": 1.38,
-  "recent_8y_cagr": 39.28,
-  "semi_monthly_win_rate": 64.9,
-  "big_loss_rate": 10.8,
-  "g1_cagr": 44.08,
-  "g2_cagr": 37.21,
+  "total_ret_pct": 186630.0,
+  "sortino": 2.03,
+  "daily_calmar": 1.4,
+  "recent_8y_cagr": 40.5,
+  "semi_monthly_win_rate": 65.1,
+  "big_loss_rate": 10.6,
+  "g1_cagr": 39.94,
+  "g2_cagr": 43.29,
   "winning_years": "19/21 (86.4%)",
   "yearly_history": [
     {
       "year": 2006,
-      "return_pct": 112.0,
+      "return_pct": 115.6,
       "spy_ret_pct": 15.85,
-      "alpha_pct": 96.16,
-      "cum_mult": 3.05,
-      "capital_twd": 3054759.0,
-      "yearly_mdd_pct": -23.64,
+      "alpha_pct": 99.76,
+      "cum_mult": 3.1,
+      "capital_twd": 3101308.0,
+      "yearly_mdd_pct": -23.62,
       "avg_exposure_pct": 91.7,
       "total_rebal_slots": 69,
-      "us_slots": 36,
-      "tw_slots": 33,
-      "us_share_pct": 52.2,
-      "tw_share_pct": 47.8,
+      "us_slots": 35,
+      "tw_slots": 34,
+      "us_share_pct": 50.7,
+      "tw_share_pct": 49.3,
       "cash_defense_periods": 1,
       "unique_stocks_count": 18,
       "unique_us_count": 11,
@@ -65,6 +65,13 @@
           "cum_period_ret": 10.7
         },
         {
+          "ticker": "2393.TW",
+          "name": "億光",
+          "market": "TW",
+          "count": 5,
+          "cum_period_ret": 35.3
+        },
+        {
           "ticker": "NVDA",
           "name": "輝達",
           "market": "US",
@@ -72,25 +79,18 @@
           "cum_period_ret": 15.0
         },
         {
-          "ticker": "GLW",
-          "name": "康寧",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": 25.2
-        },
-        {
-          "ticker": "2393.TW",
-          "name": "億光",
-          "market": "TW",
-          "count": 4,
-          "cum_period_ret": 25.0
-        },
-        {
           "ticker": "ATI",
           "name": "ATI",
           "market": "US",
           "count": 3,
           "cum_period_ret": 21.4
+        },
+        {
+          "ticker": "GLW",
+          "name": "康寧",
+          "market": "US",
+          "count": 3,
+          "cum_period_ret": 19.8
         }
       ],
       "us_stocks": [
@@ -107,16 +107,16 @@
           "cum_period_ret": 15.0
         },
         {
-          "ticker": "GLW",
-          "name": "康寧",
-          "count": 4,
-          "cum_period_ret": 25.2
-        },
-        {
           "ticker": "ATI",
           "name": "ATI",
           "count": 3,
           "cum_period_ret": 21.4
+        },
+        {
+          "ticker": "GLW",
+          "name": "康寧",
+          "count": 3,
+          "cum_period_ret": 19.8
         },
         {
           "ticker": "AMD",
@@ -153,8 +153,8 @@
         {
           "ticker": "2393.TW",
           "name": "億光",
-          "count": 4,
-          "cum_period_ret": 25.0
+          "count": 5,
+          "cum_period_ret": 35.3
         },
         {
           "ticker": "6286.TW",
@@ -1079,13 +1079,13 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "GLW",
-              "name": "康寧",
-              "market": "US",
+              "ticker": "2393.TW",
+              "name": "億光",
+              "market": "TW",
               "weight": 52.0,
-              "entry_price": 17.88,
-              "exit_price": 18.85,
-              "period_ret": 5.42,
+              "entry_price": 85.9,
+              "exit_price": 96.0,
+              "period_ret": 10.28,
               "is_active": false,
               "action": "🔄 贏家續抱",
               "tenure_months": 2
@@ -1382,12 +1382,12 @@
     },
     {
       "year": 2007,
-      "return_pct": 189.43,
+      "return_pct": 189.68,
       "spy_ret_pct": 5.15,
-      "alpha_pct": 184.28,
-      "cum_mult": 8.84,
-      "capital_twd": 8841271.0,
-      "yearly_mdd_pct": -12.57,
+      "alpha_pct": 184.54,
+      "cum_mult": 8.98,
+      "capital_twd": 8983919.0,
+      "yearly_mdd_pct": -12.56,
       "avg_exposure_pct": 92.4,
       "total_rebal_slots": 72,
       "us_slots": 54,
@@ -2785,11 +2785,11 @@
     },
     {
       "year": 2008,
-      "return_pct": 30.2,
+      "return_pct": 30.34,
       "spy_ret_pct": -36.79,
-      "alpha_pct": 66.99,
-      "cum_mult": 11.51,
-      "capital_twd": 11511187.0,
+      "alpha_pct": 67.14,
+      "cum_mult": 11.71,
+      "capital_twd": 11709946.0,
       "yearly_mdd_pct": -9.65,
       "avg_exposure_pct": 22.3,
       "total_rebal_slots": 18,
@@ -3444,18 +3444,18 @@
     },
     {
       "year": 2009,
-      "return_pct": 18.99,
+      "return_pct": 18.32,
       "spy_ret_pct": 26.35,
-      "alpha_pct": -7.36,
-      "cum_mult": 13.7,
-      "capital_twd": 13697337.0,
+      "alpha_pct": -8.03,
+      "cum_mult": 13.86,
+      "capital_twd": 13855182.0,
       "yearly_mdd_pct": -14.46,
       "avg_exposure_pct": 76.9,
       "total_rebal_slots": 60,
-      "us_slots": 47,
-      "tw_slots": 13,
-      "us_share_pct": 78.3,
-      "tw_share_pct": 21.7,
+      "us_slots": 46,
+      "tw_slots": 14,
+      "us_share_pct": 76.7,
+      "tw_share_pct": 23.3,
       "cash_defense_periods": 4,
       "unique_stocks_count": 25,
       "unique_us_count": 17,
@@ -3472,8 +3472,8 @@
           "ticker": "AMZN",
           "name": "亞馬遜",
           "market": "US",
-          "count": 7,
-          "cum_period_ret": 27.7
+          "count": 6,
+          "cum_period_ret": 25.0
         },
         {
           "ticker": "FCX",
@@ -3497,6 +3497,13 @@
           "cum_period_ret": -2.7
         },
         {
+          "ticker": "2353.TW",
+          "name": "宏碁",
+          "market": "TW",
+          "count": 3,
+          "cum_period_ret": -4.3
+        },
+        {
           "ticker": "ORLY",
           "name": "ORLY",
           "market": "US",
@@ -3509,13 +3516,6 @@
           "market": "US",
           "count": 2,
           "cum_period_ret": 6.7
-        },
-        {
-          "ticker": "3231.TW",
-          "name": "緯創",
-          "market": "TW",
-          "count": 2,
-          "cum_period_ret": 5.8
         }
       ],
       "us_stocks": [
@@ -3528,8 +3528,8 @@
         {
           "ticker": "AMZN",
           "name": "亞馬遜",
-          "count": 7,
-          "cum_period_ret": 27.7
+          "count": 6,
+          "cum_period_ret": 25.0
         },
         {
           "ticker": "FCX",
@@ -3558,6 +3558,12 @@
       ],
       "tw_stocks": [
         {
+          "ticker": "2353.TW",
+          "name": "宏碁",
+          "count": 3,
+          "cum_period_ret": -4.3
+        },
+        {
           "ticker": "3231.TW",
           "name": "緯創",
           "count": 2,
@@ -3568,12 +3574,6 @@
           "name": "聯詠",
           "count": 2,
           "cum_period_ret": 4.3
-        },
-        {
-          "ticker": "2353.TW",
-          "name": "宏碁",
-          "count": 2,
-          "cum_period_ret": 3.4
         },
         {
           "ticker": "2454.TW",
@@ -4388,23 +4388,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "AMZN",
-              "name": "亞馬遜",
-              "market": "US",
-              "weight": 52.0,
-              "entry_price": 4.01,
-              "exit_price": 4.12,
-              "period_ret": 2.69,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 2
-            },
-            {
-              "rank": 2,
               "ticker": "3034.TW",
               "name": "聯詠",
               "market": "TW",
-              "weight": 24.0,
+              "weight": 52.0,
               "entry_price": 74.0,
               "exit_price": 78.5,
               "period_ret": 9.65,
@@ -4413,7 +4400,7 @@
               "tenure_months": 1
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "JNPR",
               "name": "JNPR",
               "market": "US",
@@ -4421,6 +4408,19 @@
               "entry_price": 17.49,
               "exit_price": 19.31,
               "period_ret": 10.41,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "2353.TW",
+              "name": "宏碁",
+              "market": "TW",
+              "weight": 24.0,
+              "entry_price": 67.7,
+              "exit_price": 60.8,
+              "period_ret": -7.77,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -4687,12 +4687,12 @@
     },
     {
       "year": 2010,
-      "return_pct": -4.19,
+      "return_pct": -4.2,
       "spy_ret_pct": 15.06,
-      "alpha_pct": -19.24,
-      "cum_mult": 13.12,
-      "capital_twd": 13123802.0,
-      "yearly_mdd_pct": -30.62,
+      "alpha_pct": -19.26,
+      "cum_mult": 13.27,
+      "capital_twd": 13272912.0,
+      "yearly_mdd_pct": -30.64,
       "avg_exposure_pct": 68.8,
       "total_rebal_slots": 60,
       "us_slots": 54,
@@ -5912,36 +5912,36 @@
     },
     {
       "year": 2011,
-      "return_pct": -5.14,
+      "return_pct": 0.49,
       "spy_ret_pct": 1.9,
-      "alpha_pct": -7.03,
-      "cum_mult": 12.45,
-      "capital_twd": 12449256.0,
-      "yearly_mdd_pct": -21.24,
+      "alpha_pct": -1.4,
+      "cum_mult": 13.34,
+      "capital_twd": 13338505.0,
+      "yearly_mdd_pct": -20.64,
       "avg_exposure_pct": 67.8,
       "total_rebal_slots": 54,
-      "us_slots": 35,
-      "tw_slots": 19,
-      "us_share_pct": 64.8,
-      "tw_share_pct": 35.2,
+      "us_slots": 37,
+      "tw_slots": 17,
+      "us_share_pct": 68.5,
+      "tw_share_pct": 31.5,
       "cash_defense_periods": 6,
-      "unique_stocks_count": 19,
-      "unique_us_count": 16,
+      "unique_stocks_count": 18,
+      "unique_us_count": 15,
       "unique_tw_count": 3,
       "top_stocks": [
-        {
-          "ticker": "2498.TW",
-          "name": "宏達電",
-          "market": "TW",
-          "count": 9,
-          "cum_period_ret": 23.9
-        },
         {
           "ticker": "NFLX",
           "name": "網飛",
           "market": "US",
-          "count": 8,
-          "cum_period_ret": 51.4
+          "count": 9,
+          "cum_period_ret": 48.6
+        },
+        {
+          "ticker": "2498.TW",
+          "name": "宏達電",
+          "market": "TW",
+          "count": 7,
+          "cum_period_ret": 40.4
         },
         {
           "ticker": "2049.TW",
@@ -5990,8 +5990,8 @@
         {
           "ticker": "NFLX",
           "name": "網飛",
-          "count": 8,
-          "cum_period_ret": 51.4
+          "count": 9,
+          "cum_period_ret": 48.6
         },
         {
           "ticker": "CMG",
@@ -6018,18 +6018,18 @@
           "cum_period_ret": 6.9
         },
         {
-          "ticker": "NVDA",
-          "name": "輝達",
+          "ticker": "WYNN",
+          "name": "WYNN",
           "count": 2,
-          "cum_period_ret": -16.9
+          "cum_period_ret": 3.9
         }
       ],
       "tw_stocks": [
         {
           "ticker": "2498.TW",
           "name": "宏達電",
-          "count": 9,
-          "cum_period_ret": 23.9
+          "count": 7,
+          "cum_period_ret": 40.4
         },
         {
           "ticker": "2049.TW",
@@ -6096,13 +6096,13 @@
             },
             {
               "rank": 3,
-              "ticker": "PM",
-              "name": "PM",
+              "ticker": "SBUX",
+              "name": "SBUX",
               "market": "US",
               "weight": 16.8,
-              "entry_price": 37.84,
-              "exit_price": 39.32,
-              "period_ret": 3.92,
+              "entry_price": 16.59,
+              "exit_price": 17.14,
+              "period_ret": 3.32,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -6390,10 +6390,23 @@
           "picks": [
             {
               "rank": 1,
+              "ticker": "NFLX",
+              "name": "網飛",
+              "market": "US",
+              "weight": 37.4,
+              "entry_price": 3.94,
+              "exit_price": 3.74,
+              "period_ret": -5.17,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 4
+            },
+            {
+              "rank": 2,
               "ticker": "BKNG",
               "name": "Booking Holdings",
               "market": "US",
-              "weight": 37.4,
+              "weight": 17.3,
               "entry_price": 20.51,
               "exit_price": 20.95,
               "period_ret": 2.11,
@@ -6402,7 +6415,7 @@
               "tenure_months": 4
             },
             {
-              "rank": 2,
+              "rank": 3,
               "ticker": "BIIB",
               "name": "百健",
               "market": "US",
@@ -6410,19 +6423,6 @@
               "entry_price": 108.62,
               "exit_price": 102.04,
               "period_ret": -6.06,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 3,
-              "ticker": "NFLX",
-              "name": "網飛",
-              "market": "US",
-              "weight": 17.3,
-              "entry_price": 3.94,
-              "exit_price": 3.74,
-              "period_ret": -5.17,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -6494,10 +6494,23 @@
           "picks": [
             {
               "rank": 1,
+              "ticker": "NFLX",
+              "name": "網飛",
+              "market": "US",
+              "weight": 52.0,
+              "entry_price": 3.8,
+              "exit_price": 3.94,
+              "period_ret": 3.74,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 3
+            },
+            {
+              "rank": 2,
               "ticker": "BKNG",
               "name": "Booking Holdings",
               "market": "US",
-              "weight": 52.0,
+              "weight": 24.0,
               "entry_price": 19.85,
               "exit_price": 20.51,
               "period_ret": 3.35,
@@ -6506,7 +6519,7 @@
               "tenure_months": 3
             },
             {
-              "rank": 2,
+              "rank": 3,
               "ticker": "2049.TW",
               "name": "上銀",
               "market": "TW",
@@ -6514,19 +6527,6 @@
               "entry_price": 320.5,
               "exit_price": 311.0,
               "period_ret": -3.77,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 2
-            },
-            {
-              "rank": 3,
-              "ticker": "2498.TW",
-              "name": "宏達電",
-              "market": "TW",
-              "weight": 24.0,
-              "entry_price": 1205.0,
-              "exit_price": 1060.0,
-              "period_ret": -13.41,
               "is_active": false,
               "action": "🔄 贏家續抱",
               "tenure_months": 2
@@ -6598,10 +6598,23 @@
           "picks": [
             {
               "rank": 1,
+              "ticker": "NFLX",
+              "name": "網飛",
+              "market": "US",
+              "weight": 52.0,
+              "entry_price": 3.37,
+              "exit_price": 3.8,
+              "period_ret": 12.88,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 2,
               "ticker": "BKNG",
               "name": "Booking Holdings",
               "market": "US",
-              "weight": 52.0,
+              "weight": 24.0,
               "entry_price": 21.74,
               "exit_price": 19.85,
               "period_ret": -8.71,
@@ -6610,7 +6623,7 @@
               "tenure_months": 2
             },
             {
-              "rank": 2,
+              "rank": 3,
               "ticker": "2049.TW",
               "name": "上銀",
               "market": "TW",
@@ -6618,19 +6631,6 @@
               "entry_price": 299.0,
               "exit_price": 320.5,
               "period_ret": 10.8,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 3,
-              "ticker": "2498.TW",
-              "name": "宏達電",
-              "market": "TW",
-              "weight": 24.0,
-              "entry_price": 1210.0,
-              "exit_price": 1205.0,
-              "period_ret": -3.15,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -6710,8 +6710,8 @@
               "exit_price": 3.37,
               "period_ret": -3.73,
               "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 4
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
             },
             {
               "rank": 2,
@@ -6819,19 +6819,6 @@
             },
             {
               "rank": 2,
-              "ticker": "NFLX",
-              "name": "網飛",
-              "market": "US",
-              "weight": 24.0,
-              "entry_price": 2.93,
-              "exit_price": 3.5,
-              "period_ret": 19.43,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 3
-            },
-            {
-              "rank": 3,
               "ticker": "VIAV",
               "name": "VIAV",
               "market": "US",
@@ -6839,6 +6826,19 @@
               "entry_price": 14.21,
               "exit_price": 10.97,
               "period_ret": -22.82,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "WYNN",
+              "name": "WYNN",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 86.43,
+              "exit_price": 92.98,
+              "period_ret": 7.58,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -7057,12 +7057,12 @@
     },
     {
       "year": 2012,
-      "return_pct": 2.93,
+      "return_pct": 3.72,
       "spy_ret_pct": 15.99,
-      "alpha_pct": -13.06,
-      "cum_mult": 12.81,
-      "capital_twd": 12814241.0,
-      "yearly_mdd_pct": -20.58,
+      "alpha_pct": -12.27,
+      "cum_mult": 13.83,
+      "capital_twd": 13834151.0,
+      "yearly_mdd_pct": -21.12,
       "avg_exposure_pct": 86.3,
       "total_rebal_slots": 63,
       "us_slots": 51,
@@ -8310,19 +8310,6 @@
             },
             {
               "rank": 2,
-              "ticker": "PM",
-              "name": "PM",
-              "market": "US",
-              "weight": 24.0,
-              "entry_price": 39.32,
-              "exit_price": 38.25,
-              "period_ret": -2.73,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 2
-            },
-            {
-              "rank": 3,
               "ticker": "CMG",
               "name": "CMG",
               "market": "US",
@@ -8333,6 +8320,19 @@
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "WMB",
+              "name": "WMB",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 12.47,
+              "exit_price": 13.62,
+              "period_ret": 9.18,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
             }
           ]
         }
@@ -8340,12 +8340,12 @@
     },
     {
       "year": 2013,
-      "return_pct": 91.88,
+      "return_pct": 92.49,
       "spy_ret_pct": 32.31,
-      "alpha_pct": 59.57,
-      "cum_mult": 24.59,
-      "capital_twd": 24588087.0,
-      "yearly_mdd_pct": -9.17,
+      "alpha_pct": 60.19,
+      "cum_mult": 26.63,
+      "capital_twd": 26629977.0,
+      "yearly_mdd_pct": -9.13,
       "avg_exposure_pct": 91.5,
       "total_rebal_slots": 72,
       "us_slots": 68,
@@ -9725,12 +9725,12 @@
     },
     {
       "year": 2014,
-      "return_pct": 33.93,
+      "return_pct": 33.25,
       "spy_ret_pct": 13.46,
-      "alpha_pct": 20.47,
-      "cum_mult": 32.93,
-      "capital_twd": 32931041.0,
-      "yearly_mdd_pct": -16.61,
+      "alpha_pct": 19.78,
+      "cum_mult": 35.48,
+      "capital_twd": 35483429.0,
+      "yearly_mdd_pct": -16.92,
       "avg_exposure_pct": 90.6,
       "total_rebal_slots": 72,
       "us_slots": 65,
@@ -11110,11 +11110,11 @@
     },
     {
       "year": 2015,
-      "return_pct": 12.34,
+      "return_pct": 12.2,
       "spy_ret_pct": 1.23,
-      "alpha_pct": 11.1,
-      "cum_mult": 36.99,
-      "capital_twd": 36993634.0,
+      "alpha_pct": 10.96,
+      "cum_mult": 39.81,
+      "capital_twd": 39811888.0,
       "yearly_mdd_pct": -17.74,
       "avg_exposure_pct": 77.8,
       "total_rebal_slots": 57,
@@ -12289,12 +12289,12 @@
     },
     {
       "year": 2016,
-      "return_pct": 63.08,
+      "return_pct": 62.83,
       "spy_ret_pct": 12.0,
-      "alpha_pct": 51.09,
-      "cum_mult": 60.33,
-      "capital_twd": 60330763.0,
-      "yearly_mdd_pct": -7.27,
+      "alpha_pct": 50.83,
+      "cum_mult": 64.82,
+      "capital_twd": 64823811.0,
+      "yearly_mdd_pct": -7.48,
       "avg_exposure_pct": 79.9,
       "total_rebal_slots": 60,
       "us_slots": 60,
@@ -13495,12 +13495,12 @@
     },
     {
       "year": 2017,
-      "return_pct": 20.5,
+      "return_pct": 21.21,
       "spy_ret_pct": 21.71,
-      "alpha_pct": -1.21,
-      "cum_mult": 72.7,
-      "capital_twd": 72696033.0,
-      "yearly_mdd_pct": -15.19,
+      "alpha_pct": -0.49,
+      "cum_mult": 78.57,
+      "capital_twd": 78574214.0,
+      "yearly_mdd_pct": -15.04,
       "avg_exposure_pct": 98.3,
       "total_rebal_slots": 72,
       "us_slots": 70,
@@ -14874,12 +14874,12 @@
     },
     {
       "year": 2018,
-      "return_pct": 38.38,
+      "return_pct": 38.89,
       "spy_ret_pct": -4.57,
-      "alpha_pct": 42.95,
-      "cum_mult": 100.6,
-      "capital_twd": 100597738.0,
-      "yearly_mdd_pct": -18.0,
+      "alpha_pct": 43.46,
+      "cum_mult": 109.13,
+      "capital_twd": 109134174.0,
+      "yearly_mdd_pct": -18.26,
       "avg_exposure_pct": 65.3,
       "total_rebal_slots": 60,
       "us_slots": 54,
@@ -16093,18 +16093,18 @@
     },
     {
       "year": 2019,
-      "return_pct": 9.35,
+      "return_pct": 9.52,
       "spy_ret_pct": 31.22,
-      "alpha_pct": -21.88,
-      "cum_mult": 110.0,
-      "capital_twd": 110001351.0,
-      "yearly_mdd_pct": -14.84,
+      "alpha_pct": -21.71,
+      "cum_mult": 119.52,
+      "capital_twd": 119522042.0,
+      "yearly_mdd_pct": -14.42,
       "avg_exposure_pct": 90.7,
       "total_rebal_slots": 66,
-      "us_slots": 55,
-      "tw_slots": 11,
-      "us_share_pct": 83.3,
-      "tw_share_pct": 16.7,
+      "us_slots": 56,
+      "tw_slots": 10,
+      "us_share_pct": 84.8,
+      "tw_share_pct": 15.2,
       "cash_defense_periods": 2,
       "unique_stocks_count": 17,
       "unique_us_count": 13,
@@ -16142,8 +16142,8 @@
           "ticker": "2345.TW",
           "name": "智邦",
           "market": "TW",
-          "count": 5,
-          "cum_period_ret": 0.7
+          "count": 4,
+          "cum_period_ret": 10.7
         },
         {
           "ticker": "KLAC",
@@ -16209,8 +16209,8 @@
         {
           "ticker": "2345.TW",
           "name": "智邦",
-          "count": 5,
-          "cum_period_ret": 0.7
+          "count": 4,
+          "cum_period_ret": 10.7
         },
         {
           "ticker": "2379.TW",
@@ -16401,23 +16401,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "2345.TW",
-              "name": "智邦",
-              "market": "TW",
-              "weight": 52.0,
-              "entry_price": 173.0,
-              "exit_price": 157.0,
-              "period_ret": -9.97,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 3
-            },
-            {
-              "rank": 2,
               "ticker": "KLAC",
               "name": "科磊",
               "market": "US",
-              "weight": 24.0,
+              "weight": 52.0,
               "entry_price": 16.13,
               "exit_price": 14.65,
               "period_ret": -9.16,
@@ -16426,7 +16413,7 @@
               "tenure_months": 2
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "6669.TW",
               "name": "緯穎",
               "market": "TW",
@@ -16434,6 +16421,19 @@
               "entry_price": 532.0,
               "exit_price": 551.0,
               "period_ret": -1.26,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "LRCX",
+              "name": "科林研發",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 25.89,
+              "exit_price": 23.75,
+              "period_ret": -8.29,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -17404,12 +17404,12 @@
     },
     {
       "year": 2020,
-      "return_pct": 31.71,
+      "return_pct": 32.13,
       "spy_ret_pct": 18.33,
-      "alpha_pct": 13.38,
-      "cum_mult": 144.88,
-      "capital_twd": 144880874.0,
-      "yearly_mdd_pct": -27.19,
+      "alpha_pct": 13.79,
+      "cum_mult": 157.92,
+      "capital_twd": 157919757.0,
+      "yearly_mdd_pct": -26.88,
       "avg_exposure_pct": 82.8,
       "total_rebal_slots": 63,
       "us_slots": 57,
@@ -18675,12 +18675,12 @@
     },
     {
       "year": 2021,
-      "return_pct": -1.02,
+      "return_pct": -0.72,
       "spy_ret_pct": 28.73,
-      "alpha_pct": -29.75,
-      "cum_mult": 143.4,
-      "capital_twd": 143398156.0,
-      "yearly_mdd_pct": -26.06,
+      "alpha_pct": -29.44,
+      "cum_mult": 156.79,
+      "capital_twd": 156789816.0,
+      "yearly_mdd_pct": -25.8,
       "avg_exposure_pct": 89.8,
       "total_rebal_slots": 72,
       "us_slots": 67,
@@ -20060,12 +20060,12 @@
     },
     {
       "year": 2022,
-      "return_pct": 11.08,
+      "return_pct": 11.23,
       "spy_ret_pct": -18.18,
-      "alpha_pct": 29.25,
-      "cum_mult": 159.28,
-      "capital_twd": 159284834.0,
-      "yearly_mdd_pct": -10.14,
+      "alpha_pct": 29.4,
+      "cum_mult": 174.39,
+      "capital_twd": 174390373.0,
+      "yearly_mdd_pct": -10.05,
       "avg_exposure_pct": 26.0,
       "total_rebal_slots": 30,
       "us_slots": 30,
@@ -20866,18 +20866,18 @@
     },
     {
       "year": 2023,
-      "return_pct": 40.89,
+      "return_pct": 49.62,
       "spy_ret_pct": 26.18,
-      "alpha_pct": 14.72,
-      "cum_mult": 224.42,
-      "capital_twd": 224422067.0,
-      "yearly_mdd_pct": -12.45,
+      "alpha_pct": 23.44,
+      "cum_mult": 260.92,
+      "capital_twd": 260921632.0,
+      "yearly_mdd_pct": -11.54,
       "avg_exposure_pct": 82.1,
       "total_rebal_slots": 69,
-      "us_slots": 50,
-      "tw_slots": 19,
-      "us_share_pct": 72.5,
-      "tw_share_pct": 27.5,
+      "us_slots": 51,
+      "tw_slots": 18,
+      "us_share_pct": 73.9,
+      "tw_share_pct": 26.1,
       "cash_defense_periods": 1,
       "unique_stocks_count": 27,
       "unique_us_count": 18,
@@ -20888,7 +20888,7 @@
           "name": "輝達",
           "market": "US",
           "count": 11,
-          "cum_period_ret": 107.4
+          "cum_period_ret": 131.2
         },
         {
           "ticker": "META",
@@ -20901,8 +20901,8 @@
           "ticker": "3034.TW",
           "name": "聯詠",
           "market": "TW",
-          "count": 7,
-          "cum_period_ret": 3.0
+          "count": 6,
+          "cum_period_ret": 9.4
         },
         {
           "ticker": "FSLR",
@@ -20945,7 +20945,7 @@
           "ticker": "NVDA",
           "name": "輝達",
           "count": 11,
-          "cum_period_ret": 107.4
+          "cum_period_ret": 131.2
         },
         {
           "ticker": "META",
@@ -20982,8 +20982,8 @@
         {
           "ticker": "3034.TW",
           "name": "聯詠",
-          "count": 7,
-          "cum_period_ret": 3.0
+          "count": 6,
+          "cum_period_ret": 9.4
         },
         {
           "ticker": "3443.TW",
@@ -21406,23 +21406,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "NVDA",
-              "name": "輝達",
-              "market": "US",
-              "weight": 23.4,
-              "entry_price": 45.73,
-              "exit_price": 41.47,
-              "period_ret": -9.31,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 4
-            },
-            {
-              "rank": 2,
               "ticker": "LLY",
               "name": "禮來",
               "market": "US",
-              "weight": 10.8,
+              "weight": 23.4,
               "entry_price": 545.37,
               "exit_price": 538.88,
               "period_ret": -1.19,
@@ -21431,7 +21418,7 @@
               "tenure_months": 1
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "ANET",
               "name": "Arista Networks",
               "market": "US",
@@ -21439,6 +21426,19 @@
               "entry_price": 47.01,
               "exit_price": 44.78,
               "period_ret": -4.73,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "GE",
+              "name": "奇異航太",
+              "market": "US",
+              "weight": 10.8,
+              "entry_price": 87.41,
+              "exit_price": 86.87,
+              "period_ret": -0.63,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -21519,7 +21519,7 @@
               "period_ret": 2.06,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 3
+              "tenure_months": 4
             },
             {
               "rank": 2,
@@ -21623,7 +21623,7 @@
               "period_ret": 5.83,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "tenure_months": 3
             },
             {
               "rank": 2,
@@ -21718,26 +21718,26 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "CMG",
-              "name": "CMG",
-              "market": "US",
-              "weight": 52.0,
-              "entry_price": 41.86,
-              "exit_price": 40.75,
-              "period_ret": -2.64,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 2,
               "ticker": "NVDA",
               "name": "輝達",
               "market": "US",
-              "weight": 24.0,
+              "weight": 52.0,
               "entry_price": 30.9,
               "exit_price": 42.33,
               "period_ret": 36.99,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 2,
+              "ticker": "CMG",
+              "name": "CMG",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 41.86,
+              "exit_price": 40.75,
+              "period_ret": -2.64,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -21822,23 +21822,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "3034.TW",
-              "name": "聯詠",
-              "market": "TW",
-              "weight": 52.0,
-              "entry_price": 409.0,
-              "exit_price": 409.0,
-              "period_ret": -6.42,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 3
-            },
-            {
-              "rank": 2,
               "ticker": "FSLR",
               "name": "FSLR",
               "market": "US",
-              "weight": 24.0,
+              "weight": 52.0,
               "entry_price": 207.5,
               "exit_price": 199.24,
               "period_ret": -3.98,
@@ -21847,7 +21834,7 @@
               "tenure_months": 2
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "META",
               "name": "Meta",
               "market": "US",
@@ -21858,6 +21845,19 @@
               "is_active": false,
               "action": "🔄 贏家續抱",
               "tenure_months": 2
+            },
+            {
+              "rank": 3,
+              "ticker": "NVDA",
+              "name": "輝達",
+              "market": "US",
+              "weight": 24.0,
+              "entry_price": 26.99,
+              "exit_price": 30.9,
+              "period_ret": 14.48,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
             }
           ]
         },
@@ -22229,12 +22229,12 @@
     },
     {
       "year": 2024,
-      "return_pct": 65.82,
+      "return_pct": 66.17,
       "spy_ret_pct": 24.89,
-      "alpha_pct": 40.93,
-      "cum_mult": 372.14,
-      "capital_twd": 372138301.0,
-      "yearly_mdd_pct": -18.24,
+      "alpha_pct": 41.29,
+      "cum_mult": 433.58,
+      "capital_twd": 433577713.0,
+      "yearly_mdd_pct": -18.03,
       "avg_exposure_pct": 64.4,
       "total_rebal_slots": 72,
       "us_slots": 65,
@@ -23614,12 +23614,12 @@
     },
     {
       "year": 2025,
-      "return_pct": 40.9,
+      "return_pct": 40.68,
       "spy_ret_pct": 17.72,
-      "alpha_pct": 23.18,
-      "cum_mult": 524.34,
-      "capital_twd": 524338084.0,
-      "yearly_mdd_pct": -21.45,
+      "alpha_pct": 22.96,
+      "cum_mult": 609.97,
+      "capital_twd": 609970731.0,
+      "yearly_mdd_pct": -21.49,
       "avg_exposure_pct": 80.6,
       "total_rebal_slots": 66,
       "us_slots": 58,
@@ -24919,12 +24919,12 @@
     },
     {
       "year": 2026,
-      "return_pct": 165.06,
+      "return_pct": 164.82,
       "spy_ret_pct": 11.69,
-      "alpha_pct": 153.38,
-      "cum_mult": 1389.84,
-      "capital_twd": 1389835479.0,
-      "yearly_mdd_pct": -25.8,
+      "alpha_pct": 153.13,
+      "cum_mult": 1615.33,
+      "capital_twd": 1615329878.0,
+      "yearly_mdd_pct": -25.96,
       "avg_exposure_pct": 83.3,
       "total_rebal_slots": 63,
       "us_slots": 62,
@@ -27604,36 +27604,6 @@
         "action": "🔄 贏家續抱"
       },
       {
-        "date": "2011-05-02",
-        "entry_date": "2011-05-03",
-        "exit_date": "2011-06-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "2498.TW",
-        "name": "宏達電",
-        "market": "TW",
-        "weight_pct": 24.0,
-        "entry_price": 1210.0,
-        "exit_price": 1205.0,
-        "period_ret_pct": -3.15,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2011-06-01",
-        "entry_date": "2011-06-02",
-        "exit_date": "2011-07-05",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "2498.TW",
-        "name": "宏達電",
-        "market": "TW",
-        "weight_pct": 24.0,
-        "entry_price": 1205.0,
-        "exit_price": 1060.0,
-        "period_ret_pct": -13.41,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
         "date": "2011-01-24",
         "entry_date": "2011-01-25",
         "exit_date": "2011-02-23",
@@ -27754,6 +27724,21 @@
         "period_ret_pct": 13.46,
         "is_active": false,
         "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2006-03-22",
+        "entry_date": "2006-03-23",
+        "exit_date": "2006-04-25",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "2393.TW",
+        "name": "億光",
+        "market": "TW",
+        "weight_pct": 52.0,
+        "entry_price": 85.9,
+        "exit_price": 96.0,
+        "period_ret_pct": 10.28,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
       }
     ],
     "2474": [
@@ -28615,21 +28600,6 @@
         "period_ret_pct": 10.21,
         "is_active": false,
         "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2006-03-22",
-        "entry_date": "2006-03-23",
-        "exit_date": "2006-04-25",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "GLW",
-        "name": "康寧",
-        "market": "US",
-        "weight_pct": 52.0,
-        "entry_price": 17.88,
-        "exit_price": 18.85,
-        "period_ret_pct": 5.42,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
       },
       {
         "date": "2026-03-02",
@@ -30271,6 +30241,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2023-04-24",
+        "entry_date": "2023-04-25",
+        "exit_date": "2023-05-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "NVDA",
+        "name": "輝達",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 26.99,
+        "exit_price": 30.9,
+        "period_ret_pct": 14.48,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
         "date": "2023-05-22",
         "entry_date": "2023-05-23",
         "exit_date": "2023-06-23",
@@ -30278,12 +30263,12 @@
         "ticker": "NVDA",
         "name": "輝達",
         "market": "US",
-        "weight_pct": 24.0,
+        "weight_pct": 52.0,
         "entry_price": 30.9,
         "exit_price": 42.33,
         "period_ret_pct": 36.99,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2023-06-22",
@@ -30312,21 +30297,6 @@
         "entry_price": 44.8,
         "exit_price": 45.73,
         "period_ret_pct": 2.06,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
-        "date": "2023-08-22",
-        "entry_date": "2023-08-23",
-        "exit_date": "2023-09-25",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "NVDA",
-        "name": "輝達",
-        "market": "US",
-        "weight_pct": 23.4,
-        "entry_price": 45.73,
-        "exit_price": 41.47,
-        "period_ret_pct": -9.31,
         "is_active": false,
         "action": "🔄 贏家續抱"
       },
@@ -31981,21 +31951,6 @@
         "action": "🟢 買入建倉"
       },
       {
-        "date": "2009-05-01",
-        "entry_date": "2009-05-04",
-        "exit_date": "2009-06-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "AMZN",
-        "name": "亞馬遜",
-        "market": "US",
-        "weight_pct": 52.0,
-        "entry_price": 4.01,
-        "exit_price": 4.12,
-        "period_ret_pct": 2.69,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
         "date": "2009-11-02",
         "entry_date": "2009-11-03",
         "exit_date": "2009-12-02",
@@ -33449,7 +33404,7 @@
         "ticker": "3034.TW",
         "name": "聯詠",
         "market": "TW",
-        "weight_pct": 24.0,
+        "weight_pct": 52.0,
         "entry_price": 74.0,
         "exit_price": 78.5,
         "period_ret_pct": 9.65,
@@ -33607,21 +33562,6 @@
         "action": "🔄 贏家續抱"
       },
       {
-        "date": "2023-04-24",
-        "entry_date": "2023-04-25",
-        "exit_date": "2023-05-23",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "3034.TW",
-        "name": "聯詠",
-        "market": "TW",
-        "weight_pct": 52.0,
-        "entry_price": 409.0,
-        "exit_price": 409.0,
-        "period_ret_pct": -6.42,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
         "date": "2023-11-22",
         "entry_date": "2023-11-24",
         "exit_date": "2023-12-26",
@@ -33650,6 +33590,53 @@
         "period_ret_pct": -2.62,
         "is_active": false,
         "action": "🟢 買入建倉"
+      }
+    ],
+    "2353": [
+      {
+        "date": "2009-05-01",
+        "entry_date": "2009-05-04",
+        "exit_date": "2009-06-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "2353.TW",
+        "name": "宏碁",
+        "market": "TW",
+        "weight_pct": 24.0,
+        "entry_price": 67.7,
+        "exit_price": 60.8,
+        "period_ret_pct": -7.77,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2009-09-01",
+        "entry_date": "2009-09-02",
+        "exit_date": "2009-10-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "2353.TW",
+        "name": "宏碁",
+        "market": "TW",
+        "weight_pct": 24.0,
+        "entry_price": 76.5,
+        "exit_price": 79.2,
+        "period_ret_pct": 5.7,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2009-10-01",
+        "entry_date": "2009-10-02",
+        "exit_date": "2009-11-03",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "2353.TW",
+        "name": "宏碁",
+        "market": "TW",
+        "weight_pct": 52.0,
+        "entry_price": 79.2,
+        "exit_price": 77.2,
+        "period_ret_pct": -2.26,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
       }
     ],
     "F": [
@@ -34123,38 +34110,6 @@
         "period_ret_pct": -10.33,
         "is_active": false,
         "action": "🟢 買入建倉"
-      }
-    ],
-    "2353": [
-      {
-        "date": "2009-09-01",
-        "entry_date": "2009-09-02",
-        "exit_date": "2009-10-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "2353.TW",
-        "name": "宏碁",
-        "market": "TW",
-        "weight_pct": 24.0,
-        "entry_price": 76.5,
-        "exit_price": 79.2,
-        "period_ret_pct": 5.7,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2009-10-01",
-        "entry_date": "2009-10-02",
-        "exit_date": "2009-11-03",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "2353.TW",
-        "name": "宏碁",
-        "market": "TW",
-        "weight_pct": 52.0,
-        "entry_price": 79.2,
-        "exit_price": 77.2,
-        "period_ret_pct": -2.26,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
       }
     ],
     "2105": [
@@ -34649,6 +34604,21 @@
         "period_ret_pct": 0.69,
         "is_active": false,
         "action": "🔄 贏家續抱"
+      },
+      {
+        "date": "2011-12-01",
+        "entry_date": "2011-12-02",
+        "exit_date": "2012-01-04",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "SBUX",
+        "name": "SBUX",
+        "market": "US",
+        "weight_pct": 16.8,
+        "entry_price": 16.59,
+        "exit_price": 17.14,
+        "period_ret_pct": 3.32,
+        "is_active": false,
+        "action": "🟢 買入建倉"
       },
       {
         "date": "2011-10-24",
@@ -35497,7 +35467,7 @@
         "ticker": "BKNG",
         "name": "Booking Holdings",
         "market": "US",
-        "weight_pct": 52.0,
+        "weight_pct": 24.0,
         "entry_price": 21.74,
         "exit_price": 19.85,
         "period_ret_pct": -8.71,
@@ -35512,7 +35482,7 @@
         "ticker": "BKNG",
         "name": "Booking Holdings",
         "market": "US",
-        "weight_pct": 52.0,
+        "weight_pct": 24.0,
         "entry_price": 19.85,
         "exit_price": 20.51,
         "period_ret_pct": 3.35,
@@ -35527,7 +35497,7 @@
         "ticker": "BKNG",
         "name": "Booking Holdings",
         "market": "US",
-        "weight_pct": 37.4,
+        "weight_pct": 17.3,
         "entry_price": 20.51,
         "exit_price": 20.95,
         "period_ret_pct": 2.11,
@@ -35800,6 +35770,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2011-03-01",
+        "entry_date": "2011-03-02",
+        "exit_date": "2011-04-04",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "WYNN",
+        "name": "WYNN",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 86.43,
+        "exit_price": 92.98,
+        "period_ret_pct": 7.58,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
         "date": "2011-02-22",
         "entry_date": "2011-02-23",
         "exit_date": "2011-03-23",
@@ -36046,21 +36031,6 @@
         "action": "🔄 贏家續抱"
       },
       {
-        "date": "2011-03-01",
-        "entry_date": "2011-03-02",
-        "exit_date": "2011-04-04",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "NFLX",
-        "name": "網飛",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 2.93,
-        "exit_price": 3.5,
-        "period_ret_pct": 19.43,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
         "date": "2011-04-01",
         "entry_date": "2011-04-04",
         "exit_date": "2011-05-03",
@@ -36073,6 +36043,36 @@
         "exit_price": 3.37,
         "period_ret_pct": -3.73,
         "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2011-05-02",
+        "entry_date": "2011-05-03",
+        "exit_date": "2011-06-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "NFLX",
+        "name": "網飛",
+        "market": "US",
+        "weight_pct": 52.0,
+        "entry_price": 3.37,
+        "exit_price": 3.8,
+        "period_ret_pct": 12.88,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
+      },
+      {
+        "date": "2011-06-01",
+        "entry_date": "2011-06-02",
+        "exit_date": "2011-07-05",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "NFLX",
+        "name": "網飛",
+        "market": "US",
+        "weight_pct": 52.0,
+        "entry_price": 3.8,
+        "exit_price": 3.94,
+        "period_ret_pct": 3.74,
+        "is_active": false,
         "action": "🔄 贏家續抱"
       },
       {
@@ -36083,12 +36083,12 @@
         "ticker": "NFLX",
         "name": "網飛",
         "market": "US",
-        "weight_pct": 17.3,
+        "weight_pct": 37.4,
         "entry_price": 3.94,
         "exit_price": 3.74,
         "period_ret_pct": -5.17,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2011-01-24",
@@ -37580,7 +37580,7 @@
         "ticker": "CMG",
         "name": "CMG",
         "market": "US",
-        "weight_pct": 52.0,
+        "weight_pct": 24.0,
         "entry_price": 41.86,
         "exit_price": 40.75,
         "period_ret_pct": -2.64,
@@ -37652,98 +37652,6 @@
         "action": "🟢 買入建倉"
       }
     ],
-    "PM": [
-      {
-        "date": "2011-12-01",
-        "entry_date": "2011-12-02",
-        "exit_date": "2012-01-04",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "PM",
-        "name": "PM",
-        "market": "US",
-        "weight_pct": 16.8,
-        "entry_price": 37.84,
-        "exit_price": 39.32,
-        "period_ret_pct": 3.92,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2012-01-03",
-        "entry_date": "2012-01-04",
-        "exit_date": "2012-02-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "PM",
-        "name": "PM",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 39.32,
-        "exit_price": 38.25,
-        "period_ret_pct": -2.73,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
-        "date": "2016-04-01",
-        "entry_date": "2016-04-04",
-        "exit_date": "2016-05-03",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "PM",
-        "name": "PM",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 59.9,
-        "exit_price": 59.02,
-        "period_ret_pct": -1.48,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2025-03-03",
-        "entry_date": "2025-03-04",
-        "exit_date": "2025-04-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "PM",
-        "name": "PM",
-        "market": "US",
-        "weight_pct": 4.8,
-        "entry_price": 149.19,
-        "exit_price": 150.14,
-        "period_ret_pct": 0.63,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2025-02-24",
-        "entry_date": "2025-02-25",
-        "exit_date": "2025-03-25",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "PM",
-        "name": "PM",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 147.93,
-        "exit_price": 144.35,
-        "period_ret_pct": -2.42,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2025-03-24",
-        "entry_date": "2025-03-25",
-        "exit_date": "2025-04-23",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "PM",
-        "name": "PM",
-        "market": "US",
-        "weight_pct": 8.4,
-        "entry_price": 144.35,
-        "exit_price": 160.44,
-        "period_ret_pct": 11.14,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      }
-    ],
     "UNH": [
       {
         "date": "2011-06-22",
@@ -37787,6 +37695,83 @@
         "entry_price": 95.57,
         "exit_price": 98.06,
         "period_ret_pct": 2.61,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
+      }
+    ],
+    "WMB": [
+      {
+        "date": "2012-01-03",
+        "entry_date": "2012-01-04",
+        "exit_date": "2012-02-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "WMB",
+        "name": "WMB",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 12.47,
+        "exit_price": 13.62,
+        "period_ret_pct": 9.18,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2014-09-02",
+        "entry_date": "2014-09-03",
+        "exit_date": "2014-10-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "WMB",
+        "name": "WMB",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 30.65,
+        "exit_price": 28.33,
+        "period_ret_pct": -7.55,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2014-06-23",
+        "entry_date": "2014-06-24",
+        "exit_date": "2014-07-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "WMB",
+        "name": "WMB",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 30.05,
+        "exit_price": 29.97,
+        "period_ret_pct": -0.29,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2014-07-22",
+        "entry_date": "2014-07-23",
+        "exit_date": "2014-08-25",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "WMB",
+        "name": "WMB",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 29.97,
+        "exit_price": 30.16,
+        "period_ret_pct": 0.63,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
+      },
+      {
+        "date": "2014-08-22",
+        "entry_date": "2014-08-25",
+        "exit_date": "2014-09-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "WMB",
+        "name": "WMB",
+        "market": "US",
+        "weight_pct": 52.0,
+        "entry_price": 30.16,
+        "exit_price": 28.83,
+        "period_ret_pct": -4.4,
         "is_active": false,
         "action": "🔄 贏家續抱"
       }
@@ -38722,7 +38707,7 @@
         "ticker": "FSLR",
         "name": "FSLR",
         "market": "US",
-        "weight_pct": 24.0,
+        "weight_pct": 52.0,
         "entry_price": 207.5,
         "exit_price": 199.24,
         "period_ret_pct": -3.98,
@@ -40475,68 +40460,6 @@
         "action": "🟢 買入建倉"
       }
     ],
-    "WMB": [
-      {
-        "date": "2014-09-02",
-        "entry_date": "2014-09-03",
-        "exit_date": "2014-10-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "WMB",
-        "name": "WMB",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 30.65,
-        "exit_price": 28.33,
-        "period_ret_pct": -7.55,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2014-06-23",
-        "entry_date": "2014-06-24",
-        "exit_date": "2014-07-23",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "WMB",
-        "name": "WMB",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 30.05,
-        "exit_price": 29.97,
-        "period_ret_pct": -0.29,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2014-07-22",
-        "entry_date": "2014-07-23",
-        "exit_date": "2014-08-25",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "WMB",
-        "name": "WMB",
-        "market": "US",
-        "weight_pct": 24.0,
-        "entry_price": 29.97,
-        "exit_price": 30.16,
-        "period_ret_pct": 0.63,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
-        "date": "2014-08-22",
-        "entry_date": "2014-08-25",
-        "exit_date": "2014-09-23",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "WMB",
-        "name": "WMB",
-        "market": "US",
-        "weight_pct": 52.0,
-        "entry_price": 30.16,
-        "exit_price": 28.83,
-        "period_ret_pct": -4.4,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      }
-    ],
     "MNST": [
       {
         "date": "2014-10-01",
@@ -41147,6 +41070,68 @@
         "period_ret_pct": 3.0,
         "is_active": true,
         "action": "持有中 (續抱)"
+      }
+    ],
+    "PM": [
+      {
+        "date": "2016-04-01",
+        "entry_date": "2016-04-04",
+        "exit_date": "2016-05-03",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "PM",
+        "name": "PM",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 59.9,
+        "exit_price": 59.02,
+        "period_ret_pct": -1.48,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2025-03-03",
+        "entry_date": "2025-03-04",
+        "exit_date": "2025-04-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "PM",
+        "name": "PM",
+        "market": "US",
+        "weight_pct": 4.8,
+        "entry_price": 149.19,
+        "exit_price": 150.14,
+        "period_ret_pct": 0.63,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2025-02-24",
+        "entry_date": "2025-02-25",
+        "exit_date": "2025-03-25",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "PM",
+        "name": "PM",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 147.93,
+        "exit_price": 144.35,
+        "period_ret_pct": -2.42,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2025-03-24",
+        "entry_date": "2025-03-25",
+        "exit_date": "2025-04-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "PM",
+        "name": "PM",
+        "market": "US",
+        "weight_pct": 8.4,
+        "entry_price": 144.35,
+        "exit_price": 160.44,
+        "period_ret_pct": 11.14,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
       }
     ],
     "DHR": [
@@ -41784,6 +41769,21 @@
         "entry_price": 19.17,
         "exit_price": 16.39,
         "period_ret_pct": -14.49,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2019-11-01",
+        "entry_date": "2019-11-04",
+        "exit_date": "2019-12-03",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "LRCX",
+        "name": "科林研發",
+        "market": "US",
+        "weight_pct": 24.0,
+        "entry_price": 25.89,
+        "exit_price": 23.75,
+        "period_ret_pct": -8.29,
         "is_active": false,
         "action": "🟢 買入建倉"
       },
@@ -42923,7 +42923,7 @@
         "ticker": "LLY",
         "name": "禮來",
         "market": "US",
-        "weight_pct": 10.8,
+        "weight_pct": 23.4,
         "entry_price": 545.37,
         "exit_price": 538.88,
         "period_ret_pct": -1.19,
@@ -43215,21 +43215,6 @@
         "action": "🔄 贏家續抱"
       },
       {
-        "date": "2019-11-01",
-        "entry_date": "2019-11-04",
-        "exit_date": "2019-12-03",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "2345.TW",
-        "name": "智邦",
-        "market": "TW",
-        "weight_pct": 52.0,
-        "entry_price": 173.0,
-        "exit_price": 157.0,
-        "period_ret_pct": -9.97,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
         "date": "2019-09-23",
         "entry_date": "2019-09-24",
         "exit_date": "2019-10-23",
@@ -43314,7 +43299,7 @@
         "ticker": "KLAC",
         "name": "科磊",
         "market": "US",
-        "weight_pct": 24.0,
+        "weight_pct": 52.0,
         "entry_price": 16.13,
         "exit_price": 14.65,
         "period_ret_pct": -9.16,
@@ -45030,6 +45015,21 @@
         "entry_price": 89.13,
         "exit_price": 84.97,
         "period_ret_pct": -4.66,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2023-08-22",
+        "entry_date": "2023-08-23",
+        "exit_date": "2023-09-25",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "GE",
+        "name": "奇異航太",
+        "market": "US",
+        "weight_pct": 10.8,
+        "entry_price": 87.41,
+        "exit_price": 86.87,
+        "period_ret_pct": -0.63,
         "is_active": false,
         "action": "🟢 買入建倉"
       },

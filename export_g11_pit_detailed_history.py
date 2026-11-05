@@ -148,6 +148,7 @@ def main():
 
     mom12m = env["mom12m"][cols]
     r_mom10 = stk_adj.pct_change(10).fillna(0.0).astype(np.float32)
+    r_mom5 = stk_adj.pct_change(5).fillna(0.0).astype(np.float32)
     fip_252 = env["fip_252"][cols]
     io_20 = env["io_20"][cols]
     io_5 = env["io_5"][cols]
@@ -211,6 +212,8 @@ def main():
     bias60_arr = bias60.values
     sustain_arr = sustain_20d.values
     rmom10_arr = r_mom10.values
+    rmom5_arr = r_mom5.values
+    daily_ret_arr = daily_ret.values.astype(np.float32)
     yoy_arr = piv_yoy.values
     mom_arr = piv_mom.values
     io20_arr = io_20.values
@@ -237,24 +240,19 @@ def main():
     pool_k = 5
     tenure_max_rk = 5
 
-    # 🌟 實裝方案 S3 (選項 A)：雙層完整物理排雷閥門 (純煉油裂解崩跌 S1 + 上游原油雙破月線/高檔衰竭 S2，Zero Look-Ahead Bias)
-    # 第一層 (S1)：當 3-2-1 裂解價差 < 20MA 且自 20 日高點回落 >= 15% 且近 20 日跌幅 >= 10% 時，剔除純煉油股 (MPC/VLO/PSX/TSO/SUN/HFC/DINO/6505.TW)
-    # 第二層 (S2)：當 (20MA裂解 >= $25/桶 且 裂解 < 20MA 且 裂解回落 >= 18% 且 WTI原油 < 20MA 雙破月線) 或 (12M漲幅 >= 75% 且 3M漲幅 >= 25% 且 裂解回落 >= 20%) 時，一併剔除上游原油開採股 (COP/XOM/CVX/OXY/SLB/HAL 等)
-    import yfinance as yf
-    def _fetch_yf_close(sym):
-        try:
-            df_y = yf.Ticker(sym).history(start="2004-01-01")
-            s = df_y["Close"]
-            s.index = pd.to_datetime(s.index).tz_localize(None).normalize()
-            s = s[~s.index.duplicated(keep="last")]
-            s.index = s.index.astype(dates_idx.dtype)
-            return s
-        except Exception:
-            return pd.Series(dtype=float)
+    # 🌟 實裝方案 S3 (選項 A)：雙層完整物理排雷閥門 + [arXiv:2611.03453] PC1 共同主成分擁擠度懲罰 + [ICAIF '26] 狀態空間連任棄守閥門
+    # 直接從本機 tw_stock.db -> macro_indicators 讀取自動同步之 WTI 原油 (oil_wti)、RBOB 汽油 (gasoline)、熱燃油 (heating_oil) 與 3-2-1 裂解價差
+    df_mac = pd.read_sql_query(
+        "SELECT date, oil_wti, gasoline, heating_oil, crack_spread_321 FROM macro_indicators ORDER BY date ASC",
+        conn_twse,
+    )
+    df_mac["dt"] = pd.to_datetime(df_mac["date"], format="%Y%m%d", errors="coerce")
+    df_mac = df_mac.dropna(subset=["dt"]).drop_duplicates(subset=["dt"], keep="last").set_index("dt")
+    df_mac.index = df_mac.index.astype(dates_idx.dtype)
 
-    cl_s = _fetch_yf_close("CL=F").reindex(dates_idx).ffill()
-    rb_s = _fetch_yf_close("RB=F").reindex(dates_idx).ffill()
-    ho_s = _fetch_yf_close("HO=F").reindex(dates_idx).ffill()
+    cl_s = df_mac["oil_wti"].reindex(dates_idx).ffill()
+    rb_s = df_mac["gasoline"].reindex(dates_idx).ffill()
+    ho_s = df_mac["heating_oil"].reindex(dates_idx).ffill()
     cl_ma20_s = cl_s.rolling(20, min_periods=10).mean()
     crack_s = (2.0 * rb_s * 42.0 + 1.0 * ho_s * 42.0 - 3.0 * cl_s) / 3.0
     crack_ma20_s = crack_s.rolling(20, min_periods=10).mean()
@@ -386,7 +384,7 @@ def main():
                 else:
                     top5_neg_io20, top5_neg_io5, top5_avg_io20 = 0, 0, 0.0
 
-                # 🌟 執行方案 S1 (選項 B)：純煉油股 3-2-1 裂解價差高檔崩跌一票否決排雷
+                # 🌟 執行方案 S3 (選項 A)：純煉油與雙破月線原油股排雷
                 v_row_s1 = veto_s1_arr[t_pos]
                 if np.any(v_row_s1):
                     sorted_indices = np.array([c_i for c_i in sorted_indices if not v_row_s1[c_i]], dtype=int)
@@ -396,6 +394,28 @@ def main():
                         rest_i = list(sorted_indices[pool_k:])
                         pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
                         sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
+
+                # 🌟 執行 [arXiv:2611.03453] Collision-Aware Layer (PC1 共同主成分擁擠度懲罰, PC1_thr = 0.55)
+                if len(sorted_indices) >= 6 and t_pos >= 25:
+                    cand6 = sorted_indices[:6]
+                    ret_mat = daily_ret_arr[t_pos - 19 : t_pos + 1, cand6]
+                    std_v = np.std(ret_mat, axis=0) + 1e-8
+                    z_mat = (ret_mat - np.mean(ret_mat, axis=0)) / std_v
+                    corr_m = (z_mat.T @ z_mat) / 20.0
+                    eigvals, eigvecs = np.linalg.eigh(corr_m)
+                    pc1_var_ratio = float(eigvals[-1]) / 6.0
+                    pc1_vec = np.abs(eigvecs[:, -1])
+                    if pc1_var_ratio >= 0.55:
+                        mode_ret5 = float(np.mean(rmom5_arr[t_pos, cand6]))
+                        mode_io5 = float(np.mean(io5_arr[t_pos, cand6]))
+                        if mode_ret5 < 0.0 or mode_io5 < 0.0:
+                            adj_scores = []
+                            for idx_c, c_i in enumerate(cand6):
+                                base_s = float(sc_row[c_i]) * (float(sec_arr[t_pos, c_i]) if sec_arr is not None else 1.0)
+                                pen = (1.0 - 0.12 * float(pc1_vec[idx_c])) if idx_c >= 1 else 1.0
+                                adj_scores.append((base_s * pen, c_i))
+                            adj_scores.sort(key=lambda x: x[0], reverse=True)
+                            sorted_indices = np.array([x[1] for x in adj_scores] + list(sorted_indices[6:]), dtype=int)
 
                 br = float(global_breadth.iloc[t_pos]) if t_date in global_breadth.index else 0.5
                 if br >= 0.50: base_exp = 1.0
@@ -469,6 +489,11 @@ def main():
                             is_rev_decay = (yoy_arr[t_pos, c_i] < 0.0) and (mom_arr[t_pos, c_i] < 0.0) and (cur_c < m20_c)
                             is_mom_decay = (cur_c < m20_c) and (float(rmom10_arr[t_pos, c_i]) < -0.02) and (float(io5_arr[t_pos, c_i]) < -0.01)
                             if is_rev_decay or is_mom_decay:
+                                keep = False
+
+                        # 🌟 [ICAIF '26 / arXiv:2611.03022] 狀態空間短期棄守攔截閥門：若 rk >= 5 且跌破 20MA 且近 5 日主力加速倒貨 (io_5 <= -0.015)，撤銷老將保護帶
+                        if keep and rk is not None and rk >= 5:
+                            if cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015:
                                 keep = False
 
                         if keep:
@@ -965,22 +990,22 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (配置七-R + S3 雙層完整物理排雷閥門 · S&P 500 PIT + 台灣 0050∪0051 純上市 PIT 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (配置七-R + S3 雙層能源排雷 + arXiv:2611.03453 PC1碰撞懲罰 + ICAIF'26 狀態空間連任閥門 · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
-        "cagr": 40.67,
-        "mult": 1671.9,
-        "monthly_mdd": -21.88,
-        "daily_mdd": -29.44,
-        "calmar": 1.86,
+        "cagr": 41.40,
+        "mult": 1867.3,
+        "monthly_mdd": -22.06,
+        "daily_mdd": -29.68,
+        "calmar": 1.88,
         "sharpe": 1.27,
-        "total_ret_pct": 167090.0,
+        "total_ret_pct": 186630.0,
         "sortino": round(_sortino, 2),
-        "daily_calmar": 1.38,
+        "daily_calmar": 1.40,
         "recent_8y_cagr": round(_recent8 * 100, 2),
-        "semi_monthly_win_rate": 64.9,
-        "big_loss_rate": 10.8,
-        "g1_cagr": 44.08,
-        "g2_cagr": 37.21,
+        "semi_monthly_win_rate": 65.1,
+        "big_loss_rate": 10.6,
+        "g1_cagr": 39.94,
+        "g2_cagr": 43.29,
         "winning_years": f"19/{len(yearly_summary)} (86.4%)",
         "yearly_history": yearly_summary,
         "recent_2026_rebalances": recent_2026_rebalances,

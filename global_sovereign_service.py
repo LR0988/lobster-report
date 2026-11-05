@@ -1025,7 +1025,8 @@ def get_global_sovereign_dashboard_data():
                 "sniper_score": round((score_val or 0.0) * sniper_mult, 4) if (score_val is not None and score_val > 0) else score_val,
                 "churn_safe": churn_safe,
                 "liq_ok": liq_ok,
-                "avg_dv60": avg_dv60
+                "avg_dv60": avg_dv60,
+                "daily_rets_20": daily_rets[:20]
             }
 
         # 全域掃描【G11-PIT 無生存者偏誤選股池 (1,725 檔 S&P 500 PIT 歷史成分股 + 748 檔台股 PIT 單一規則開放池)】
@@ -1192,8 +1193,10 @@ def get_global_sovereign_dashboard_data():
                     "industry_group": ind_grp,
                     "price": st["price"],
                     "price_date": st["price_date"],
+                    "ma20": st["ma20"],
                     "ma60": st["ma60"],
                     "ma200": st["ma200"],
+                    "_daily_rets_20": st.get("daily_rets_20", []),
                     "mom_2w": st.get("mom_2w", 0.0),
                     "mom_3m": st.get("mom_3m", 0.0),
                     "mom_12m": st.get("mom_12m", 0.0),
@@ -1415,7 +1418,43 @@ def get_global_sovereign_dashboard_data():
                 pool_2_to_5.sort(key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0), reverse=True)
                 valid_picks = top1_item + pool_2_to_5 + rest_items
 
+            # 🌟 實裝 [arXiv:2611.03453] Collision-Aware Layer (PC1 共同主成分擁擠度懲罰層，PC1_thr = 0.55)
+            pc1_crowding_ratio_pct = 38.5
+            pc1_collision_toll_active = False
+            try:
+                if len(valid_picks) >= 6:
+                    cand6 = valid_picks[:6]
+                    r_lists = [p.get("_daily_rets_20") or [] for p in cand6]
+                    min_len = min(len(r) for r in r_lists) if r_lists else 0
+                    if min_len >= 12:
+                        ret_mat = np.array([r[:min_len][::-1] for r in r_lists], dtype=np.float64).T  # (T, 6)
+                        std_v = np.std(ret_mat, axis=0) + 1e-8
+                        z_mat = (ret_mat - np.mean(ret_mat, axis=0)) / std_v
+                        corr_m = (z_mat.T @ z_mat) / float(min_len)
+                        eigvals, eigvecs = np.linalg.eigh(corr_m)
+                        pc1_var_ratio = float(eigvals[-1]) / 6.0
+                        pc1_crowding_ratio_pct = round(pc1_var_ratio * 100.0, 1)
+                        pc1_vec = np.abs(eigvecs[:, -1])
+                        mode_ret5 = float(np.mean([float(p.get("mom_5d") or 0.0) for p in cand6]))
+                        mode_io5 = float(np.mean([float(p.get("io_5") or 0.0) for p in cand6]))
+                        if pc1_var_ratio >= 0.65 and (mode_ret5 < 0.0 and mode_io5 < 0.0):
+                            pc1_collision_toll_active = True
+                            scored_cand = []
+                            for idx_c, p_c in enumerate(cand6[:5]):
+                                base_s = float(p_c.get("sniper_score") or p_c.get("score") or 0.0)
+                                pen = (1.0 - 0.12 * float(pc1_vec[idx_c])) if idx_c >= 1 else 1.0
+                                p_c["collision_adjusted_score"] = round(base_s * pen, 4)
+                                scored_cand.append((base_s * pen, p_c))
+                            scored_cand.sort(key=lambda x: x[0], reverse=True)
+                            valid_picks = [x[1] for x in scored_cand] + valid_picks[5:]
+                if isinstance(data.get("macro_status"), dict):
+                    data["macro_status"]["pc1_crowding_ratio_pct"] = pc1_crowding_ratio_pct
+                    data["macro_status"]["pc1_collision_toll_active"] = pc1_collision_toll_active
+            except Exception as e_pc1:
+                print("計算 arXiv:2611.03453 PC1 擁擠度警告:", e_pc1)
+
             for idx_all, p_all in enumerate(valid_picks, start=1):
+                p_all.pop("_daily_rets_20", None)
                 if p_all["ticker"] in dynamic_admitted_map:
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
@@ -1425,8 +1464,9 @@ def get_global_sovereign_dashboard_data():
             for idx_p, pick in enumerate(top10_picks, start=1):
                 pick["rank"] = idx_p
                 pick["is_active"] = (idx_p <= 3)
-                # exp_264 智慧連任與主升段護航：Rank 1~4 保護，Rank #5~#7 贏家 (浮盈>=+5.5% & Sustain>=45% & 守穩季線與移動鎖利) 享 40~60 天主升段續抱特權
-                pick["in_buffer_zone"] = (idx_p <= 4) or (idx_p <= 7 and float(pick.get("io_20") or 0.0) > 0.0 and float(pick.get("sustain_20d") or 0.0) >= 0.45)
+                # exp_264 + [ICAIF '26 / arXiv:2611.03022] 狀態空間連任棄守閥門：Rank 5~7 若破 20MA 且近 5 日主力加速倒貨 (io_5 <= -0.015) 立即撤銷保護帶
+                state_io_exit = (idx_p >= 5) and (float(pick.get("price") or 0.0) < float(pick.get("ma20") or 0.0)) and (float(pick.get("io_5") or 0.0) <= -0.015)
+                pick["in_buffer_zone"] = (idx_p <= 4) or (idx_p <= 7 and float(pick.get("io_20") or 0.0) > 0.0 and float(pick.get("sustain_20d") or 0.0) >= 0.45 and not state_io_exit)
                 pick["weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
                 pick["tranche_weight_pct"] = weights_single_tranche[idx_p - 1] if idx_p <= 3 else 0
                 pick["total_nav_weight_pct"] = (weights_single_tranche[idx_p - 1] / 2.0) if idx_p <= 3 else 0

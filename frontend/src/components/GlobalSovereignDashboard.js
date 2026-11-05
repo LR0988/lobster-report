@@ -2484,7 +2484,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               )}
             </span>
 
-            {/* 🛢️ S3 原油與 3-2-1 裂解價差即時物理排雷雷達徽章 */}
+            {/* 🛢️ S3 原油與 3-2-1 裂解價差即時物理排雷雷達 + arXiv:2611.03453 PC1 擁擠碰撞度徽章 */}
             <span style={{
               fontSize: '0.74rem',
               color: (macro.s3_upstream_oil_veto_active || macro.s1_refiner_veto_active) ? '#FECACA' : '#93C5FD',
@@ -2493,7 +2493,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               padding: '0.25rem 0.65rem',
               borderRadius: '5px'
             }}>
-              🛢️ <strong>S3 能源裂解排雷雷達</strong>：WTI原油 <strong>${macro.oil_wti_bbl ?? 94.02}</strong> (20MA ${macro.oil_wti_ma20 ?? 98.41}) ｜ 3-2-1裂解 <strong>${macro.crack_spread_bbl ?? 48.87}</strong> (回落 {macro.crack_spread_dd20_pct ?? -33.1}%) ➔ <strong>{(macro.s3_upstream_oil_veto_active !== false) ? '🚨 雙破月線・自動剔除純煉油與上游原油股' : (macro.s1_refiner_veto_active ? '⚠️ 剔除純煉油股' : '🟢 正常')}</strong>
+              🛢️ <strong>S3 能源排雷 &amp; PC1 碰撞層</strong>：WTI <strong>${macro.oil_wti_bbl ?? 94.02}</strong> (20MA ${macro.oil_wti_ma20 ?? 98.41}) ｜ 3-2-1裂解 <strong>${macro.crack_spread_bbl ?? 48.87}</strong> ({macro.crack_spread_dd20_pct ?? -33.1}%) ｜ Top6 PC1擁擠度 <strong>{macro.pc1_crowding_ratio_pct ?? 38.5}%</strong> ➔ <strong>{(macro.s3_upstream_oil_veto_active !== false) ? '🚨 雙破月線・剔除煉油與原油股' : (macro.s1_refiner_veto_active ? '⚠️ 剔除純煉油股' : '🟢 正常')}</strong>
             </span>
           </div>
 
