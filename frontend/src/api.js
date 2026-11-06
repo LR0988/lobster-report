@@ -649,6 +649,10 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
         canSell = true;
         sellBadge = `🚀 已達 ${tier} 級獲利門檻 (${cSign}${todayLimitSell})！立即平倉`;
         sellBadgeColor = '#10B981';
+      } else if (daysHeld === 1 && gainPct <= -1.4) {
+        canSell = true;
+        sellBadge = `🛡️ 觸發買進日收破 -1.4% 保護鎖 (${gainPct}%)！隔日開盤撤退`;
+        sellBadgeColor = '#F59E0B';
       } else if (liveP <= stopLossP || gainPct <= -8.0) {
         canSell = true;
         sellBadge = `🛑 觸發 -8% 硬停損 (${cSign}${stopLossP})`;
