@@ -192,7 +192,7 @@ def main():
     exp262_base_mult = np.where(vcp_condition, 1.04, 1.0).astype(np.float32)
     m_fringe_pen = np.where(is_fringe_rk.values & (dd20.values > -0.02) & (io_20.values < 0.005), 0.90, 1.0).astype(np.float32)
     m_coiled_plus_mega = np.where(coiled_mask.values & is_super_mega.values, 1.06, 1.0).astype(np.float32)
-    score_arr = ((score_g11 * exp262_base_mult).values * m_fringe_pen * m_coiled_plus_mega).astype(np.float32)
+    champ_score_arr = ((score_g11 * exp262_base_mult).values * m_fringe_pen * m_coiled_plus_mega).astype(np.float32)
 
     data4 = env["data4"]
     dates_idx = stk_adj.index
@@ -204,10 +204,10 @@ def main():
     ma20_arr = ma20.values
     ma60_arr = ma60.values
     ma200_arr = ma200.values
-    bias60_arr = bias60.values
+    bias60_arr = ((stk_adj / (ma60 + 1e-9)) - 1.0).fillna(0.0).values.astype(np.float32)
     sustain_arr = sustain_20d.values
     rmom10_arr = r_mom10.values
-    rmom5_arr = r_mom5.values
+    rmom5_arr = stk_adj.pct_change(5, fill_method=None).fillna(0.0).values.astype(np.float32)
     daily_ret_arr = daily_ret.values.astype(np.float32)
     down_vol20_arr = down_vol_20.values.astype(np.float32)
     io20_arr = io_20.values
@@ -215,6 +215,28 @@ def main():
     churn_arr = env["churn_exhaustion"][cols].values
     elig_arr = elig_base.values
     sec_arr = g9_sec[cols].values
+
+    # 🌟 3-in-1 動能微結構濾網 (12M × 3M × 1M 死貓跳懲罰 + 爆量派發懲罰 + 量價收斂高勝率加分)
+    mom12m_arr = mom12m.values.astype(np.float32)
+    mom3m_arr = stk_adj.pct_change(63, fill_method=None).fillna(0.0).values.astype(np.float32)
+    mom1m_arr = stk_adj.pct_change(21, fill_method=None).fillna(0.0).values.astype(np.float32)
+    up_vol_df = stk_vol.where(daily_ret > 0, np.nan).rolling(20, min_periods=3).mean()
+    dn_vol_df = stk_vol.where(daily_ret < 0, np.nan).rolling(20, min_periods=3).mean()
+    vol_ratio_20d_arr = (up_vol_df / (dn_vol_df + 1.0)).fillna(1.0).clip(0.2, 5.0).values.astype(np.float32)
+    vol20_v = stk_vol.rolling(20, min_periods=5).mean().values
+    vol60_v = stk_vol.rolling(60, min_periods=15).mean().values
+    vol_surge_arr = (vol20_v / (vol60_v + 1.0)).astype(np.float32)
+
+    dead_cat_mask = (mom12m_arr < 0.40) & (mom1m_arr > 0.25)
+    vol_blowoff_mask = (vol_surge_arr > 1.60) & (io5_arr < 0.0)
+    high_wr_bonus_mask = (vol_ratio_20d_arr >= 1.15) & (down_vol20_arr <= 0.28) & (io20_arr > 0.01)
+    mult_3in1 = (
+        np.where(dead_cat_mask, 0.75, 1.0)
+        * np.where(vol_blowoff_mask, 0.75, 1.0)
+        * np.where(high_wr_bonus_mask, 1.05, 1.0)
+    ).astype(np.float32)
+    score_arr = (champ_score_arr * mult_3in1).astype(np.float32)
+    min_score_thr = 0.28
 
     global_breadth = data4["global_breadth"]
     safe_cash_ret = data4["safe_cash_ret"]
@@ -297,6 +319,72 @@ def main():
 
     all_tranche_records = []
 
+    N_DATES = len(dates_idx)
+    daily_sorted = [None] * N_DATES
+    daily_exp = np.zeros(N_DATES, dtype=np.float32)
+    br_arr = global_breadth.values
+    qb_arr = qqq_bias.values
+    rate_arr = us10y_series.values
+    qqq_p_arr = qqq_p.values
+    qqq_m60_arr = qqq_ma60.values
+
+    for t_pos in range(N_DATES):
+        sp_row = px_adj_arr[t_pos]
+        m6_row = ma60_arr[t_pos]
+        m2_row = ma200_arr[t_pos]
+        sc_row = score_arr[t_pos]
+        el_row = elig_arr[t_pos]
+        ch_row = churn_arr[t_pos]
+        valid_mask = (
+            el_row
+            & (~np.isnan(sp_row))
+            & (~np.isnan(sc_row))
+            & (~np.isnan(m6_row))
+            & (~np.isnan(m2_row))
+            & (sp_row > m6_row)
+            & (sp_row > m2_row)
+            & (sc_row > min_score_thr)
+            & (~ch_row)
+        )
+        valid_indices = np.where(valid_mask)[0]
+        if len(valid_indices) > 0:
+            sorted_indices = valid_indices[np.argsort(-sc_row[valid_indices])]
+        else:
+            sorted_indices = np.array([], dtype=int)
+        if sec_arr is not None and len(sorted_indices) > 2:
+            top1_i = [sorted_indices[0]]
+            pool_i = list(sorted_indices[1:pool_k])
+            rest_i = list(sorted_indices[pool_k:])
+            pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
+            sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
+        top5_pre = sorted_indices[:min(5, len(sorted_indices))]
+        if len(top5_pre) > 0:
+            top5_neg_io20 = int(np.sum(io20_arr[t_pos, top5_pre] < 0.0))
+            top5_neg_io5 = int(np.sum(io5_arr[t_pos, top5_pre] < 0.0))
+            top5_avg_io20 = float(np.mean(io20_arr[t_pos, top5_pre]))
+        else:
+            top5_neg_io20, top5_neg_io5, top5_avg_io20 = 0, 0, 0.0
+        v_row_s1 = veto_s1_arr[t_pos]
+        if np.any(v_row_s1):
+            sorted_indices = np.array([c_i for c_i in sorted_indices if not v_row_s1[c_i]], dtype=int)
+            if sec_arr is not None and len(sorted_indices) > 2:
+                top1_i = [sorted_indices[0]]
+                pool_i = list(sorted_indices[1:pool_k])
+                rest_i = list(sorted_indices[pool_k:])
+                pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
+                sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
+        br = float(br_arr[t_pos])
+        base_exp = 1.0 if br >= 0.50 else (0.70 if br >= 0.30 else 0.0)
+        qb = float(qb_arr[t_pos])
+        rate = float(rate_arr[t_pos])
+        qqq_below_ma60 = float(qqq_p_arr[t_pos]) < float(qqq_m60_arr[t_pos])
+        exposure = (min(base_exp, 0.50) if (qb >= 30.0 and rate >= 3.5) else base_exp) if base_exp > 0.0 else 0.0
+        if 0.30 <= br < 0.50 and qqq_below_ma60:
+            exposure = min(exposure, macro_cap)
+        exposure = macro_g11(dates_idx[t_pos], t_pos, exposure, br, qb, rate, qqq_below_ma60, top5_neg_io20, top5_neg_io5, top5_avg_io20, data4)
+        daily_sorted[t_pos] = sorted_indices
+        daily_exp[t_pos] = exposure
+
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
         ym_groups = pd.Series(dates_idx, index=dates_idx).groupby([dates_idx.year, dates_idx.month])
         rebal_dates = []
@@ -339,75 +427,10 @@ def main():
                 in_pos = dt_to_pos[t_in]
                 out_pos = dt_to_pos[t_out]
 
-                sp_row = px_adj_arr[t_pos]
-                m6_row = ma60_arr[t_pos]
-                m2_row = ma200_arr[t_pos]
+                sorted_indices = daily_sorted[t_pos]
+                exposure = float(daily_exp[t_pos])
                 sc_row = score_arr[t_pos]
-                el_row = elig_arr[t_pos]
-                ch_row = churn_arr[t_pos]
-
-                valid_mask = (
-                    el_row
-                    & (~np.isnan(sp_row))
-                    & (~np.isnan(sc_row))
-                    & (~np.isnan(m6_row))
-                    & (~np.isnan(m2_row))
-                    & (sp_row > m6_row)
-                    & (sp_row > m2_row)
-                    & (sc_row > 0)
-                    & (~ch_row)
-                )
-                valid_indices = np.where(valid_mask)[0]
-                if len(valid_indices) > 0:
-                    order_pre = np.argsort(-sc_row[valid_indices])
-                    sorted_indices = valid_indices[order_pre]
-                else:
-                    sorted_indices = np.array([], dtype=int)
-
-                if sec_arr is not None and len(sorted_indices) > 2:
-                    top1_i = [sorted_indices[0]]
-                    pool_i = list(sorted_indices[1:pool_k])
-                    rest_i = list(sorted_indices[pool_k:])
-                    pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
-                    sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
-
-                top5_pre = sorted_indices[:min(5, len(sorted_indices))]
-                if len(top5_pre) > 0:
-                    top5_neg_io20 = int(np.sum(io20_arr[t_pos, top5_pre] < 0.0))
-                    top5_neg_io5 = int(np.sum(io5_arr[t_pos, top5_pre] < 0.0))
-                    top5_avg_io20 = float(np.mean(io20_arr[t_pos, top5_pre]))
-                else:
-                    top5_neg_io20, top5_neg_io5, top5_avg_io20 = 0, 0, 0.0
-
-                # 🌟 執行方案 S3 (選項 A)：純煉油與雙破月線原油股排雷
-                v_row_s1 = veto_s1_arr[t_pos]
-                if np.any(v_row_s1):
-                    sorted_indices = np.array([c_i for c_i in sorted_indices if not v_row_s1[c_i]], dtype=int)
-                    if sec_arr is not None and len(sorted_indices) > 2:
-                        top1_i = [sorted_indices[0]]
-                        pool_i = list(sorted_indices[1:pool_k])
-                        rest_i = list(sorted_indices[pool_k:])
-                        pool_i.sort(key=lambda c_i: float(sc_row[c_i]) * float(sec_arr[t_pos, c_i]), reverse=True)
-                        sorted_indices = np.array(top1_i + pool_i + rest_i, dtype=int)
-
-                br = float(global_breadth.iloc[t_pos]) if t_date in global_breadth.index else 0.5
-                if br >= 0.50: base_exp = 1.0
-                elif br >= 0.30: base_exp = 0.70
-                else: base_exp = 0.0
-
-                qb = float(qqq_bias.iloc[t_pos]) if t_date in qqq_bias.index else 0.0
-                rate = float(us10y_series.iloc[t_pos]) if t_date in us10y_series.index else 0.0
-                qqq_below_ma60 = float(qqq_p.iloc[t_pos]) < float(qqq_ma60.iloc[t_pos])
-
-                if base_exp > 0.0:
-                    if qb >= 30.0 and rate >= 3.5: exposure = min(base_exp, 0.50)
-                    else: exposure = base_exp
-                else: exposure = 0.0
-
-                if 0.30 <= br < 0.50 and qqq_below_ma60:
-                    exposure = min(exposure, macro_cap)
-
-                exposure = macro_g11(t_date, t_pos, exposure, br, qb, rate, qqq_below_ma60, top5_neg_io20, top5_neg_io5, top5_avg_io20, data4)
+                br = float(br_arr[t_pos])
                 ticker_rank = {int(c_i): rk + 1 for rk, c_i in enumerate(sorted_indices)}
 
                 if exposure <= 0 or len(sorted_indices) == 0:
@@ -432,15 +455,27 @@ def main():
                     old_holdings_set = set(holdings.keys())
                     selected_stks = []
 
-                    # [去蕪存菁] 採用純粹連任規則：前4名無條件連任，第5名要求主力日內淨吸籌 (IO20>0) 且未破月線加速出貨
+                    # [3D 動能演化動態任期 + 純粹連任規則]
+                    # 1. 預設最長任期 4 期；若短線爆發過熱 (3M>150% & 1M>35%) 縮短為 2 期；若黃金加速主升段 (12M 100~280% & 3M 40~110% & 1M<=32%) 延長為 5 期
+                    # 2. 前4名無條件連任，第5名要求主力日內淨吸籌 (IO20>0) 且未破月線加速出貨，且分數 >= 0.28
                     for c_i in list(holdings.keys()):
                         if veto_s1_arr[t_pos, c_i]:
+                            continue
+                        if float(sc_row[c_i]) < min_score_thr:
                             continue
                         tenure = holding_tenure.get(c_i, 0)
                         rk = ticker_rank.get(c_i, None)
                         cur_c = float(px_adj_arr[t_pos, c_i])
                         m20_c = float(ma20_arr[t_pos, c_i])
-                        if rk is not None and tenure < 4:
+                        max_t = 4
+                        m12_v = float(mom12m_arr[t_pos, c_i])
+                        m3_v = float(mom3m_arr[t_pos, c_i])
+                        m1_v = float(mom1m_arr[t_pos, c_i])
+                        if m3_v > 1.50 and m1_v > 0.35:
+                            max_t = 2
+                        elif 1.00 <= m12_v <= 2.80 and 0.40 <= m3_v <= 1.10 and m1_v <= 0.32:
+                            max_t = 5
+                        if rk is not None and tenure < max_t:
                             if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
                                 selected_stks.append(c_i)
 
@@ -477,7 +512,26 @@ def main():
                         bw_slice = base_weights[:n]
                         tot_bw = sum(bw_slice)
                         norm_weights = [w / tot_bw for w in bw_slice]
-                    target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
+
+                    # 🌟 1B Top-3 內部過熱降權轉移 (Bias60 > 25% & Ret5 > 5% ➔ 降權 35% 轉移給同梯未過熱強股)
+                    adj_weights = list(norm_weights)
+                    oh_flags = [
+                        (float(bias60_arr[t_pos, selected_stks[i]]) > 0.25 and float(rmom5_arr[t_pos, selected_stks[i]]) > 0.05)
+                        for i in range(n)
+                    ]
+                    non_oh_idx = [i for i in range(n) if not oh_flags[i]]
+                    if len(non_oh_idx) > 0 and any(oh_flags):
+                        cut_sum = 0.0
+                        for i in range(n):
+                            if oh_flags[i]:
+                                c_w = adj_weights[i] * (1.0 - 0.65)
+                                adj_weights[i] -= c_w
+                                cut_sum += c_w
+                        add_each = cut_sum / len(non_oh_idx)
+                        for i in non_oh_idx:
+                            adj_weights[i] += add_each
+
+                    target_alloc = {selected_stks[idx_s]: adj_weights[idx_s] * exposure for idx_s in range(n)}
 
                     raw_tw_df = env.get("raw_px_tw", None)
                     period_picks_info = []
@@ -501,14 +555,18 @@ def main():
                                 disp_out = raw_in * (1.0 + p_ret / 100.0) if (np.isnan(raw_out) or raw_out <= 0) else raw_out
 
                         is_retained = c_i in old_holdings_set
-                        action_label = "🔄 贏家續抱" if is_retained else "🟢 買入建倉"
+                        is_tilted_down = (oh_flags[idx_s] and len(non_oh_idx) > 0)
+                        if is_retained:
+                            action_label = "🔄 贏家續抱 (過熱降權)" if is_tilted_down else "🔄 贏家續抱"
+                        else:
+                            action_label = "🟢 買入建倉 (過熱降權)" if is_tilted_down else "🟢 買入建倉"
 
                         period_picks_info.append({
                             "rank": idx_s + 1,
                             "ticker": sym,
                             "name": get_stock_name(sym),
                             "market": "TW" if sym.endswith(".TW") else "US",
-                            "weight": round(norm_weights[idx_s] * exposure * 100.0, 1),
+                            "weight": round(adj_weights[idx_s] * exposure * 100.0, 1),
                             "entry_price": round(disp_in, 2),
                             "exit_price": round(disp_out, 2),
                             "period_ret": round(p_ret, 2),
@@ -537,17 +595,18 @@ def main():
                             del holdings[c_i]
 
                     cur_val = cash + sum(holdings[c_i]["shares"] * px_open_arr[in_pos, c_i] for c_i in holdings)
-                    for c_i, tgt_w in target_alloc.items():
+                    for idx_s, c_i in enumerate(selected_stks):
+                        tgt_w = target_alloc[c_i]
                         if c_i in holdings:
                             op = float(px_open_arr[in_pos, c_i])
                             cur_sh = holdings[c_i]["shares"]
                             cur_w = (cur_sh * op) / cur_val if cur_val > 0 else 0.0
-                            if abs(cur_w - tgt_w) > drift_tol and (cur_val * tgt_w) < (cur_sh * op):
+                            force_trim = oh_flags[idx_s]
+                            if (abs(cur_w - tgt_w) > drift_tol or force_trim) and (cur_val * tgt_w) < (cur_sh * op):
                                 sell_sh = ((cur_sh * op) - (cur_val * tgt_w)) / op
                                 cash += sell_sh * op * (1.0 - fee_sell_arr[c_i])
                                 holdings[c_i]["shares"] -= sell_sh
 
-                    buy_orders = []
                     for c_i, tgt_w in target_alloc.items():
                         op = float(px_open_arr[in_pos, c_i])
                         cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
@@ -555,13 +614,8 @@ def main():
                         if c_i in holdings and abs(cur_w - tgt_w) <= drift_tol:
                             continue
                         diff_val = (cur_val * tgt_w) - (cur_sh * op)
-                        if diff_val > 0 and op > 0:
-                            buy_orders.append((c_i, diff_val))
-
-                    for c_i, diff_val in buy_orders:
-                        actual_buy = min(cash, diff_val)
-                        if actual_buy > 0:
-                            op = float(px_open_arr[in_pos, c_i])
+                        if diff_val > 0 and op > 0 and cash > 0:
+                            actual_buy = min(cash, diff_val)
                             sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
                             cash -= actual_buy
                             if c_i in holdings:
@@ -570,10 +624,62 @@ def main():
                                 holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
 
                 p_idx += 1
+            elif cur_pos >= 2:
+                # 🌟 閒置現金全天候入場機制 (Any-Day Idle Cash Entry)
+                t_pos = cur_pos - 1
+                in_pos = cur_pos
+                sorted_indices = daily_sorted[t_pos]
+                exposure = float(daily_exp[t_pos])
+                sc_row = score_arr[t_pos]
+                if exposure > 0 and len(sorted_indices) > 0:
+                    cur_stk_val = sum(holdings[c_i]["shares"] * float(px_open_arr[in_pos, c_i]) for c_i in holdings if not np.isnan(px_open_arr[in_pos, c_i]))
+                    cur_tot_val = cash + cur_stk_val
+                    cur_exp_ratio = cur_stk_val / cur_tot_val if cur_tot_val > 0 else 0.0
+                    if (exposure - cur_exp_ratio) >= 0.15:
+                        selected_stks = list(holdings.keys())
+                        for c_i in sorted_indices:
+                            if len(selected_stks) >= 3: break
+                            c_i = int(c_i)
+                            if c_i not in selected_stks:
+                                selected_stks.append(c_i)
+                                holding_tenure[c_i] = 1
+                        n = min(3, len(selected_stks))
+                        selected_stks = selected_stks[:n]
+                        if n == 3:
+                            s0 = max(float(sc_row[selected_stks[0]]), 0.05)
+                            s1 = max(float(sc_row[selected_stks[1]]), 0.05)
+                            s2 = max(float(sc_row[selected_stks[2]]), 0.05)
+                            dv0 = max(float(down_vol20_arr[t_pos, selected_stks[0]]), 0.12)
+                            dv1 = max(float(down_vol20_arr[t_pos, selected_stks[1]]), 0.12)
+                            dv2 = max(float(down_vol20_arr[t_pos, selected_stks[2]]), 0.12)
+                            ratio_01 = s0 / (s1 + 1e-6)
+                            w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
+                            rem = 1.0 - w0
+                            k1 = s1 / (dv1 ** 0.35)
+                            k2 = s2 / (dv2 ** 0.35)
+                            norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
+                        else:
+                            bw_slice = base_weights[:n]
+                            tot_bw = sum(bw_slice)
+                            norm_weights = [w / tot_bw for w in bw_slice]
+                        target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
+                        for c_i, tgt_w in target_alloc.items():
+                            op = float(px_open_arr[in_pos, c_i])
+                            cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
+                            diff_val = (cur_tot_val * tgt_w) - (cur_sh * op)
+                            if diff_val > (cur_tot_val * 0.05) and op > 0 and cash > 0:
+                                actual_buy = min(cash, diff_val)
+                                sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
+                                cash -= actual_buy
+                                if c_i in holdings:
+                                    holdings[c_i]["shares"] += sh
+                                else:
+                                    holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
 
             val = cash
             for c_i, hinfo in holdings.items():
-                val += hinfo["shares"] * px_adj_arr[cur_pos, c_i]
+                if not np.isnan(px_adj_arr[cur_pos, c_i]):
+                    val += hinfo["shares"] * float(px_adj_arr[cur_pos, c_i])
             daily_equity.loc[current_dt] = val
 
         return daily_equity
@@ -658,16 +764,22 @@ def main():
     eq_d = (eq_a.loc[common_idx] + eq_b.loc[common_idx]) / 1000000.0
     eq_d = eq_d / float(eq_d.iloc[0])
 
-    # 計算各年度績效與 SPY
+    # 計算各年度績效與 SPY (完整涵蓋 2005–2026 共 22 個年度)
     spy_p = data4["px_adj"]["SPY"].loc[common_idx]
-    all_yr_rets = eq_d.resample("YE").last().pct_change().dropna()
-    all_spy_rets = spy_p.resample("YE").last().pct_change().dropna()
     yr_eq = eq_d.resample("YE").last()
+    spy_yr = spy_p.resample("YE").last()
+    all_yr_rets = yr_eq.pct_change()
+    all_yr_rets.iloc[0] = (float(yr_eq.iloc[0]) / float(eq_d.iloc[0])) - 1.0
+    all_spy_rets = spy_yr.pct_change()
+    all_spy_rets.iloc[0] = (float(spy_yr.iloc[0]) / float(spy_p.iloc[0])) - 1.0
 
     yearly_mdd_map = {}
     for y, sub_eq in eq_d.groupby(eq_d.index.year):
-        peak = sub_eq.cummax()
-        dd = (sub_eq / peak - 1.0) * 100.0
+        prev_eq = eq_d[eq_d.index < sub_eq.index[0]]
+        p_start = prev_eq.iloc[-1] if len(prev_eq) > 0 else sub_eq.iloc[0]
+        c_curve = pd.concat([pd.Series([p_start], index=[sub_eq.index[0] - pd.Timedelta(days=1)]), sub_eq])
+        peak = c_curve.cummax()
+        dd = (c_curve / peak - 1.0) * 100.0
         yearly_mdd_map[y] = round(float(dd.min()), 2)
 
     yearly_summary = []
@@ -806,11 +918,13 @@ def main():
     _sharpe = float(_r.mean() * 252 / (_r.std() * np.sqrt(252) + 1e-12))
 
     def _cg(e):
-        e = e.loc[common_idx]
+        e = e.dropna()
         y = (e.index[-1] - e.index[0]).days / 365.25
         return (float(e.iloc[-1]) / float(e.iloc[0])) ** (1 / y) - 1
 
-    _g1, _g2 = _cg(eq_a), _cg(eq_b)
+    _tr_a_cagr, _tr_b_cagr = _cg(eq_a.loc[common_idx]), _cg(eq_b.loc[common_idx])
+    _g1 = _cg(eq_d[eq_d.index <= "2015-12-31"])
+    _g2 = _cg(eq_d[eq_d.index >= "2016-01-01"])
     _sortino = float(_r.mean() * 252 / (np.sqrt((np.minimum(_r, 0) ** 2).mean()) * np.sqrt(252) + 1e-12))
     _e8 = eq_d.loc[eq_d.index[-1] - pd.DateOffset(years=8):]
     _recent8 = (float(_e8.iloc[-1]) / float(_e8.iloc[0])) ** (365.25 / max((_e8.index[-1] - _e8.index[0]).days, 1)) - 1
@@ -824,7 +938,7 @@ def main():
 
     # 官方當前 A / B 梯隊獨立標準持倉 (供前端第一層與第二層 AB 分開跟單使用)
     official_active_tranches = {
-        "updated_at": "2026-11-05",
+        "updated_at": "2026-11-06",
         "tranche_a": {
             "tranche_id": "A",
             "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
@@ -945,11 +1059,11 @@ def main():
         }
     }
 
-    print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f}")
+    print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f} | G1 {_g1*100:.2f}% / G2 {_g2*100:.2f}% | WinYrs {win_years_cnt}/{len(yearly_summary)}")
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 動能前十強雙特徵 + 純粹連任 + 凱利凸性權重 · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 3D微結構動能演化 + 動態任期(2/4/5期) + Top3過熱降權轉移(Bias60>25%&Ret5>5%減碼35%) + 凱利凸性權重 · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
@@ -965,6 +1079,8 @@ def main():
         "big_loss_rate": round(_big_loss, 1),
         "g1_cagr": round(_g1 * 100.0, 2),
         "g2_cagr": round(_g2 * 100.0, 2),
+        "tranche_a_cagr": round(_tr_a_cagr * 100.0, 2),
+        "tranche_b_cagr": round(_tr_b_cagr * 100.0, 2),
         "winning_years": f"{win_years_cnt}/{len(yearly_summary)} ({win_years_cnt/max(1,len(yearly_summary))*100:.1f}%)",
         "yearly_history": yearly_summary,
         "recent_2026_rebalances": recent_2026_rebalances,

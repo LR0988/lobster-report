@@ -1492,7 +1492,7 @@ def get_global_sovereign_dashboard_data():
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
             top10_picks = valid_picks[:10]
-            # G12-PIT Sovereign 去蕪存菁版：凱利凸性動態信念權重 (Kelly-Convex Dynamic Conviction Weighting, Top-1 45%~60%)
+            # G12-PIT Sovereign 去蕪存菁版：凱利凸性動態信念權重 + 1B Top-3 內部過熱降權轉移 (Bias60>25% & Ret5>5% ➔ Scale=0.65)
             weights_single_tranche = [53.9, 25.0, 21.1]
             if len(top10_picks) >= 3:
                 try:
@@ -1509,7 +1509,25 @@ def get_global_sovereign_dashboard_data():
                     k2 = s2 / (dv2 ** 0.35)
                     w1 = rem * (k1 / (k1 + k2 + 1e-9))
                     w2 = rem - w1
-                    weights_single_tranche = [round(w0 * 100.0, 1), round(w1 * 100.0, 1), round(100.0 - round(w0 * 100.0, 1) - round(w1 * 100.0, 1), 1)]
+                    adj_w = [w0, w1, w2]
+                    oh_flags = [
+                        (float(top10_picks[i].get("bias_ma60") or 0.0) > 25.0 and float(top10_picks[i].get("mom_5d") or 0.0) > 5.0)
+                        for i in range(3)
+                    ]
+                    non_oh_idx = [i for i in range(3) if not oh_flags[i]]
+                    if len(non_oh_idx) > 0 and any(oh_flags):
+                        cut_sum = 0.0
+                        for i in range(3):
+                            if oh_flags[i]:
+                                c_w = adj_w[i] * (1.0 - 0.65)
+                                adj_w[i] -= c_w
+                                cut_sum += c_w
+                        add_each = cut_sum / len(non_oh_idx)
+                        for i in non_oh_idx:
+                            adj_w[i] += add_each
+                    r0 = round(adj_w[0] * 100.0, 1)
+                    r1 = round(adj_w[1] * 100.0, 1)
+                    weights_single_tranche = [r0, r1, round(100.0 - r0 - r1, 1)]
                 except Exception:
                     weights_single_tranche = [53.9, 25.0, 21.1]
 
@@ -1563,9 +1581,9 @@ def get_global_sovereign_dashboard_data():
             "gatekeeper_rules": [
                 "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
                 "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 (5,338 日) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
-                "③ 7 大黃金濾網 + 動能前十強雙特徵：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 超級巨頭領頭羊 (US前30/TW前10) 蹲點加乘 (`×1.06`, t=-5.03) + 尾端追高無吸籌股降權 (`×0.90`) + 破月線主力出貨降權 (`Dist Veto ×0.70`) + S1/S2/Beta 原油與裂解價差下行排雷 + G9 二階機構籌碼純化 + VCP (`×1.04`) + C4 殖利率殺估值盾",
-                "④ 拔除冗餘補丁：已拔除 0 次觸發之月營收雙衰破月線降權 (`Rev Decay`)、僅 1 次觸發之 `PC1 擁擠度減速` 與 9 道細碎連任補丁，回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`)",
-                f"⑤ 凱利凸性動態信念配權 (Kelly-Convex Weighting)：依王牌股領先幅度與下行波動率動態配賦 45%~60% 權重。回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
+                "③ 7 大黃金濾網 + 3D 微結構動能演化：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 超級巨頭領頭羊 (US前30/TW前10) 蹲點加乘 (`×1.06`) + 12M×3M×1M 死貓跳懲罰 (`×0.75`) + 爆量派發懲罰 (`×0.75`) + 量價收斂高勝率加乘 (`×1.05`) + S1/S2/Beta 原油與裂解價差下行排雷 + 最低動能門檻 (`Score >= 0.28`)",
+                "④ 3D 動能演化動態任期 (2/4/5期) + 純粹連任：預設最長 4 期；短線噴發過熱 (`3M>150% & 1M>35%`) 縮短為 2 期；黃金加速主升段 (`12M 100~280% & 3M 40~110% & 1M<=32%`) 延長為 5 期；Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`",
+                f"⑤ 凱利凸性動態權重 + Top-3 內部過熱降權轉移 (`Bias60>25% & Ret5>5%` 減碼 35% 轉移給同梯未過熱強股)：回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、日MDD {_dm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
         }
@@ -1593,8 +1611,8 @@ def get_global_sovereign_dashboard_data():
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (去蕪存菁 + 動能前十強雙特徵・純股票核心版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・7大黃金濾網 + 動能前十強雙特徵 + 純粹連任 + 凱利凸性權重・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign (去蕪存菁 + 3D微結構動能 + Top3過熱降權轉移・純股票核心版)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign・7大黃金濾網 + 3D微結構動能 + 動態任期(2/4/5期) + Top3過熱降權轉移・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1616,9 +1634,9 @@ def get_global_sovereign_dashboard_data():
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign 去蕪存菁・7大黃金濾網 + 動能前十強雙特徵核心架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
-                "動能前十強雙特徵 (US前30/TW前10 超級巨頭回檔蹲點×1.06、尾端Rank>70追高無吸籌×0.90) + 7大黃金濾網 (Coiled Spring×1.12 / Dist Veto×0.70 / S1+S2+Beta 原油裂解排雷 / G9 二階機構籌碼純化 / Churn 排雷 / VCP×1.04 / C4 殖利率殺估值盾) + "
-                "純粹連任 (Rank 1~4 無條件連任、Rank 5 看 IO_20>0) + 凱利凸性動態信念權重 (Kelly-Convex Top-1 45%~60%)"
+                "【G12-PIT Sovereign 去蕪存菁・7大黃金濾網 + 3D微結構動能 + Top3過熱降權轉移核心架構】美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
+                "3D微結構動能濾網 (12M×3M×1M 死貓跳×0.75 / 爆量派發×0.75 / 量價收斂高勝率×1.05 / Score>=0.28) + 7大黃金濾網 (Coiled Spring×1.12 / 超級巨頭蹲點×1.06 / S1+S2+Beta 原油裂解排雷 / G9 二階機構籌碼純化 / VCP×1.04 / C4 殖利率殺估值盾) + "
+                "3D動態任期 (2/4/5期) + 凱利凸性動態權重 × Top-3內部過熱降權轉移 (Bias60>25%&Ret5>5%減碼35%轉移給同梯未過熱強股)"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
@@ -1633,7 +1651,7 @@ def get_global_sovereign_dashboard_data():
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (7大黃金濾網 + 動能前十強雙特徵 + 純粹連任 + 凱利凸性權重)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign (7大黃金濾網 + 3D微結構動能 + 動態任期 + Top3過熱降權轉移)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1647,9 +1665,9 @@ def get_global_sovereign_dashboard_data():
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
                 "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
-                "② 動能前十強雙特徵 (5,023 筆全樣本實證)：超級巨頭領頭羊 (美股成交額前 30 / 台股前 10) 於月線回檔蹲點加乘 (×1.06, t=-5.03)，尾端排名 (美股 Rank 71~100) 創高追價且無機構吸籌股降權 (×0.90)。",
-                "③ 7大黃金濾網 + 去蕪存菁：保留 Coiled Spring (×1.12)、Dist Veto (×0.70)、S1/S2/Beta 原油裂解價差下行排雷、G9 二階機構籌碼純化、Churn 排雷、VCP (×1.04)、C4 護盾；回歸純粹連任 (Rank 1~4 無條件連任，Rank 5 看 IO_20 > 0)。",
-                f"④ 凱利凸性動態信念配權 (Kelly-Convex Weighting)：依王牌股領先幅度與下行波動率動態配賦 45%~60% 權重。22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                "② 3D 微結構動能濾網與動態任期 (2/4/5 期)：結合 12M×3M×1M 死貓跳懲罰 (×0.75)、爆量派發懲罰 (×0.75)、量價收斂加分 (×1.05) 與最低動能門檻 (Score>=0.28)；短線暴衝股 (3M>150%&1M>35%) 任期縮為 2 期，黃金加速主升股延長為 5 期。",
+                "③ 7大黃金濾網 + 去蕪存菁：保留 Coiled Spring (×1.12)、超級巨頭蹲點 (×1.06)、Dist Veto (×0.70)、S1/S2/Beta 原油裂解價差下行排雷、G9 二階機構籌碼純化、VCP (×1.04)、C4 護盾；純粹連任 (Rank 1~4 無條件連任，Rank 5 看 IO_20 > 0)。",
+                f"④ 凱利凸性動態權重 × Top-3 內部過熱降權轉移：當 Top-3 內有短線過熱股 (Bias60>25% & Ret5>5%) 自動減碼 35% 並轉移給同梯未過熱蓄勢強股。22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 

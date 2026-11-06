@@ -2263,7 +2263,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <h3 style={{ margin: 0, color: '#60A5FA', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              👑 全球主權泰坦 2.0 (G12-PIT Sovereign：7大黃金濾網 × 動能前十強雙特徵 × 凱利凸性權重 終極純股版)
+              👑 全球主權泰坦 2.0 (G12-PIT Sovereign：7大黃金濾網 × 3D微結構動能 × 動態任期 × Top3過熱降權轉移 終極純股版)
             </h3>
             <span style={{
               fontSize: '0.75rem',
@@ -2274,7 +2274,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              1,734檔無偏誤 PIT (S&amp;P 500 + 台灣0050∪0051純上市 + 7大黃金濾網 + 動能前十強雙特徵) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>3,035.8倍 (CAGR 44.73%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-21.73%</strong> (日MDD -30.26%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.06</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.27</strong> ｜ Sortino <strong style={{ color: '#67E8F9' }}>2.17</strong> ｜ G1(05-14) <strong style={{ color: '#34D399' }}>47.37%</strong> / G2(15-26) <strong style={{ color: '#34D399' }}>40.31%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>20/22 (90.9%)</strong>
+              1,734檔無偏誤 PIT (S&amp;P 500 + 台灣0050∪0051純上市 + 7大黃金濾網 + 3D微結構動能 + Top3過熱降權轉移) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>7,063.4倍 (CAGR 50.48%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-27.11%</strong> (日MDD -35.79%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>1.86</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.28</strong> ｜ Sortino <strong style={{ color: '#67E8F9' }}>2.15</strong> ｜ G1(05-15) <strong style={{ color: '#34D399' }}>51.22%</strong> / G2(16-26) <strong style={{ color: '#34D399' }}>50.25%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>21/22 (95.5%)</strong>
             </span>
             <button
               type="button"
@@ -2597,10 +2597,10 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
             <strong style={{ color: '#A78BFA' }}>② 真實 S&P 500 PIT × 台灣 0050∪0051 純上市 PIT</strong>：美股當下必須位列 <strong>S&P 500 官方成分股 Top 100</strong>；台股嚴格鎖定 <strong>0050 ∪ 0051 純上市 778 檔歷史無遺漏池 (100% 排除上櫃股)</strong>。
           </div>
           <div>
-            <strong style={{ color: '#34D399' }}>③ 7 大黃金濾網 × 動能前十強雙特徵</strong>：保留 <strong>潛龍回測月線 (×1.12)、超級巨頭回檔蹲點加乘 (US前30/TW前10 ×1.06)、尾端追高無吸籌降權 (×0.90)、破月線主力出貨降權 (×0.70)、S1/S2/Beta 原油裂解排雷、G9 二階機構籌碼純化、VCP (×1.04)</strong>。
+            <strong style={{ color: '#34D399' }}>③ 7 大黃金濾網 × 3D 微結構動能演化</strong>：保留 <strong>潛龍回測月線 (×1.12)、超級巨頭回檔蹲點加乘 (US前30/TW前10 ×1.06)、12M×3M×1M 死貓跳懲罰 (×0.75)、爆量派發懲罰 (×0.75)、量價收斂高勝率加分 (×1.05)、S1/S2/Beta 原油裂解排雷、最低動能門檻 (Score&ge;0.28)</strong>。
           </div>
           <div>
-            <strong style={{ color: '#FBBF24' }}>④ 純粹連任保護 × C4 殖利率殺估值護盾</strong>：拔除 9 道細碎連任補丁，回歸 <strong>前 4 名無條件連任、第 5 名看機構吸籌 (IO<sub>20</sub>&gt;0)</strong>，22 年 <strong style={{ color: '#34D399' }}>CAGR 44.73% (3,035.8倍)・月 MDD -21.73%・Calmar 2.06</strong>！
+            <strong style={{ color: '#FBBF24' }}>④ 3D 動態任期 (2/4/5期) × Top-3 內部過熱降權轉移</strong>：短線過熱股 (Bias60&gt;25%&amp;Ret5&gt;5%) 自動減碼 35% 轉移給同梯未過熱強股，22 年 <strong style={{ color: '#34D399' }}>CAGR 50.48% (7,063.4倍)・月 MDD -27.11%・日 MDD -35.79%・Calmar 1.86・勝年 21/22 (95.5%)</strong>！
           </div>
         </div>
       </div>
@@ -3772,8 +3772,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               .filter((yrItem) => yrItem.year >= 2005)
               .sort((a, b) => b.year - a.year);
             const filteredYears = allYears.filter((yrItem) => {
-              if (pitYearFilter === 'G1') return yrItem.year >= 2005 && yrItem.year <= 2014;
-              if (pitYearFilter === 'G2') return yrItem.year >= 2015 && yrItem.year <= 2026;
+              if (pitYearFilter === 'G1') return yrItem.year >= 2005 && yrItem.year <= 2015;
+              if (pitYearFilter === 'G2') return yrItem.year >= 2016 && yrItem.year <= 2026;
               if (pitYearFilter === 'BEAR') return [2008, 2011, 2018, 2022].includes(yrItem.year);
               return true;
             });
@@ -3830,7 +3830,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         borderRadius: '4px',
                         fontWeight: 'bold'
                       }}>
-                        CAGR +44.73% ｜ 3,035.8倍 ｜ 無生存者偏誤回測 (7大黃金濾網 × 動能前十強雙特徵)
+                        CAGR +50.48% ｜ 7,063.4倍 ｜ 無生存者偏誤回測 (7大黃金濾網 × 3D微結構動能 × Top3過熱降權轉移)
                       </span>
                     </h4>
                     <p style={{ margin: '0.22rem 0 0 0', color: '#CBD5E1', fontSize: '0.76rem' }}>
@@ -3842,8 +3842,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                     {[
                       { key: 'ALL', label: '🌐 全部 (2005–2026)' },
-                      { key: 'G1', label: '🏛️ 早年 (2005–2014)' },
-                      { key: 'G2', label: '🚀 近年 (2015–2026)' },
+                      { key: 'G1', label: '🏛️ 早年 (2005–2015)' },
+                      { key: 'G2', label: '🚀 近年 (2016–2026)' },
                       { key: 'BEAR', label: '🛡️ 股災年 (08/11/18/22)' }
                     ].map((btn) => (
                       <button
@@ -3872,21 +3872,21 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #FBBF24' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🏆 年化報酬 (CAGR)</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>
-                      +{pitHistoryObj.cagr || 44.73}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 3035.8).toLocaleString()}倍)</span>
+                      +{pitHistoryObj.cagr || 50.48}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 7063.4).toLocaleString()}倍)</span>
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (MDD)</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
-                      {pitHistoryObj.monthly_mdd || -21.73}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 2.06})</span>
+                      {pitHistoryObj.monthly_mdd || -27.11}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 1.86})</span>
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>⚖️ 雙世代年化報酬</div>
                     <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
-                      05-14: +{pitHistoryObj.g1_cagr || 47.37}% ｜ 15-26: +{pitHistoryObj.g2_cagr || 40.31}%
+                      05-15: +{pitHistoryObj.g1_cagr || 51.22}% ｜ 16-26: +{pitHistoryObj.g2_cagr || 50.25}%
                     </div>
                   </div>
 
@@ -3900,7 +3900,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #A855F7' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🔥 股災年表現</div>
                     <div style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#E9D5FF', fontFamily: 'monospace' }}>
-                      08年+41%・18年+40%・22年+11%
+                      08年+52%・18年+40%・22年+4%
                     </div>
                   </div>
                 </div>
@@ -4584,15 +4584,15 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 <span style={{ fontSize: '1.25rem' }}>👑</span>
                 <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球主權泰坦 2.0・G12-PIT Sovereign（7大黃金濾網 × 動能前十強雙特徵 × 純粹連任 × 凱利凸性權重）完整架構說明
+                  全球主權泰坦 2.0・G12-PIT Sovereign（7大黃金濾網 × 3D微結構動能 × 動態任期 × Top3過熱降權轉移）完整架構說明
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.73rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.16)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +44.73% ｜ 3,035.8倍 ｜ 月MDD -21.73% (日 -30.26%) ｜ Calmar 2.06 ｜ Sharpe 1.27 ｜ Sortino 2.17
+                  CAGR +50.48% ｜ 7,063.4倍 ｜ 月MDD -27.11% (日 -35.79%) ｜ Calmar 1.86 ｜ Sharpe 1.28 ｜ Sortino 2.15
                 </span>
                 <span style={{ fontSize: '0.73rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.18)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  22年勝年 20/22 (90.9%) ｜ 5,023筆動能前十強雙特徵 × 7大黃金濾網
+                  22年勝年 21/22 (95.5%) ｜ 3D微結構動能 × 動態任期(2/4/5期) × Top3過熱降權轉移
                 </span>
               </div>
             </div>
@@ -4612,10 +4612,10 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               marginBottom: '1rem'
             }}>
               <div>
-                <strong>Stage-1 主排序 (7大黃金濾網 + 動能前十強雙特徵)</strong> = <strong>S<sub>G5</sub></strong> × <strong>DistVeto(0.70)</strong> × <strong>CoiledSpring(1.12)</strong> × <strong>MegaCoiled(1.06)</strong> × <strong>FringeChaseVeto(0.90)</strong> × <strong>VCP(1.04)</strong> + <strong>G9二階純化</strong> + <strong>S1/S2/Beta能源排雷</strong>
+                <strong>Stage-1 主排序 (7大黃金濾網 + 3D微結構動能演化)</strong> = <strong>S<sub>G5</sub></strong> × <strong>DistVeto(0.70)</strong> × <strong>CoiledSpring(1.12)</strong> × <strong>MegaCoiled(1.06)</strong> × <strong>3in1微結構(死貓跳0.75/爆量派發0.75/量價收斂1.05)</strong> × <strong>VCP(1.04)</strong> + <strong>Score&ge;0.28</strong> + <strong>S1/S2/Beta能源排雷</strong>
               </div>
               <div style={{ color: '#A5F3FC', marginTop: '0.25rem', fontSize: '0.8rem' }}>
-                <strong>Stage-2 凱利凸性信念權重與純粹連任</strong> = <strong>Kelly-Convex 動態權重 (Top-1 45%~60%)</strong>；<strong>Rank 1~4 無條件連任、Rank 5 要求 IO<sub>20</sub>&gt;0</strong>（拔除 9 道細碎連任與 PC1/RevDecay 冗餘補丁）
+                <strong>Stage-2 凱利凸性信念權重 × Top-3內部過熱降權轉移 × 3D動態任期</strong> = <strong>Kelly-Convex (Top-1 45%~60%) × 過熱股(Bias60&gt;25%&amp;Ret5&gt;5%)減碼35%轉移</strong>；<strong>動態任期(2/4/5期)・Rank 1~4 無條件連任、Rank 5 要求 IO<sub>20</sub>&gt;0</strong>
               </div>
             </div>
 
@@ -4838,15 +4838,15 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>20/23 (87.0%)</td>
                     </tr>
                     <tr style={{ background: 'rgba(245, 158, 11, 0.22)', borderLeft: '3px solid #F59E0B' }}>
-                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign 終極純股版・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT) - 7大黃金濾網 + 動能前十強雙特徵 + S1/S2/Beta原油裂解排雷 + 純粹連任 + 凱利凸性權重</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>44.73%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>3,035.8x</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-21.73%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-30.26%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>2.06</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.27</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>65.4%</td>
-                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>20/22 (90.9%)</td>
+                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12 (G12-PIT Sovereign 終極純股版・2005–2026 S&amp;P 500 + 台灣 0050∪0051 純上市 PIT) - 7大黃金濾網 + 3D微結構動能 + 動態任期(2/4/5期) + Top3過熱降權轉移 + 凱利凸性權重</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>50.48%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>7,063.4x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-27.11%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-35.79%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>1.86</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.28</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>62.0%</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>21/22 (95.5%)</td>
                     </tr>
                   </tbody>
                 </table>
@@ -4986,9 +4986,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               padding: '0.85rem 1rem'
             }}>
               <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#34D399', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span>📅 2005–2026（22年零遺漏）G12-PIT Sovereign (S&amp;P 500 + 台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（2008海嘯 +41.3%、2018貿易戰 +40.5%、2022升息熊市 +10.9% 強韌防禦；2010年轉正 +6.8%、2011/2021 弱勢年極微幅收斂）</span>
+                <span>📅 2005–2026（22年零遺漏）G12-PIT Sovereign (S&amp;P 500 + 台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（2008海嘯 +52.3%、2018貿易戰 +40.2%、2020熔斷 +33.5%、2022升息熊市 +3.9% 強韌防禦；2012年逆轉正報酬 +0.6%，22年高達 21/22 [95.5%] 勝年）</span>
                 <span style={{ fontSize: '0.72rem', color: '#FDE047', fontFamily: 'monospace' }}>
-                  CAGR +44.73% ｜ 3,035.8倍 ｜ 月MDD -21.73% ｜ Calmar 2.06 ｜ Sortino 2.17
+                  CAGR +50.48% ｜ 7,063.4倍 ｜ 月MDD -27.11% ｜ 日MDD -35.79% ｜ Calmar 1.86 ｜ Sharpe 1.28 ｜ Sortino 2.15
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>
