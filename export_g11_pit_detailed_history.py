@@ -405,6 +405,12 @@ def main():
             if len(fut_next) == 0: break
             t_out = fut_next[0]
             periods.append((t_date, t_in, t_out, False))
+        eq_cutoff = periods[-1][2]
+        if len(rebal_dates) > 0:
+            t_last = rebal_dates[-1]
+            fut_last = dates_idx[dates_idx > t_last]
+            if len(fut_last) > 0:
+                periods.append((t_last, fut_last[0], dates_idx[-1], True))
 
         all_sim_dates = dates_idx[(dates_idx >= periods[0][0]) & (dates_idx <= periods[-1][2])]
         daily_equity = pd.Series(index=all_sim_dates, dtype=float)
@@ -534,6 +540,7 @@ def main():
                     target_alloc = {selected_stks[idx_s]: adj_weights[idx_s] * exposure for idx_s in range(n)}
 
                     raw_tw_df = env.get("raw_px_tw", None)
+                    raw_us_df = env.get("raw_px_us", None)
                     period_picks_info = []
                     for idx_s, c_i in enumerate(selected_stks):
                         sym = cols[c_i]
@@ -548,11 +555,25 @@ def main():
                         disp_in = p_in
                         disp_out = p_out
                         if sym.endswith(".TW") and raw_tw_df is not None and sym in raw_tw_df.columns:
-                            raw_in = float(raw_tw_df.iloc[in_pos][sym])
-                            raw_out = float(raw_tw_df.iloc[out_pos][sym])
-                            if raw_in > 0 and not np.isnan(raw_in):
-                                disp_in = raw_in
-                                disp_out = raw_in * (1.0 + p_ret / 100.0) if (np.isnan(raw_out) or raw_out <= 0) else raw_out
+                            raw_c_in = float(raw_tw_df.iloc[in_pos][sym])
+                            adj_c_in = float(px_adj_arr[in_pos, c_i])
+                            if raw_c_in > 0 and not np.isnan(raw_c_in) and adj_c_in > 0 and not np.isnan(adj_c_in):
+                                disp_in = p_in * (raw_c_in / adj_c_in)
+                                disp_out = disp_in * (1.0 + p_ret / 100.0)
+                        elif not sym.endswith(".TW") and raw_us_df is not None and sym in raw_us_df.columns:
+                            raw_c_in = float(raw_us_df.iloc[in_pos][sym])
+                            adj_c_in = float(px_adj_arr[in_pos, c_i])
+                            if raw_c_in > 0 and not np.isnan(raw_c_in) and adj_c_in > 0 and not np.isnan(adj_c_in):
+                                disp_in = p_in * (raw_c_in / adj_c_in)
+                                if sym == "AAPL":
+                                    in_dt = dates_idx[in_pos]
+                                    if in_dt < pd.Timestamp("2005-02-28"):
+                                        disp_in *= 56.0
+                                    elif in_dt < pd.Timestamp("2014-06-09"):
+                                        disp_in *= 28.0
+                                    elif in_dt < pd.Timestamp("2020-08-31"):
+                                        disp_in *= 4.0
+                                disp_out = disp_in * (1.0 + p_ret / 100.0)
 
                         is_retained = c_i in old_holdings_set
                         is_tilted_down = (oh_flags[idx_s] and len(non_oh_idx) > 0)
@@ -682,7 +703,7 @@ def main():
                     val += hinfo["shares"] * float(px_adj_arr[cur_pos, c_i])
             daily_equity.loc[current_dt] = val
 
-        return daily_equity
+        return daily_equity.loc[daily_equity.index <= eq_cutoff]
 
     eq_a = sim_tranche(1, "A梯隊 (月初調倉)")
     eq_b = sim_tranche(22, "B梯隊 (月下旬調倉)")
