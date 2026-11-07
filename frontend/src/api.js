@@ -528,7 +528,7 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
     const base = await resolveApiBase();
     if (base) {
       try {
-        const res = await fetch(`${base}/api/oversold_sniper/dashboard`);
+        const res = await fetch(`${base}/api/oversold_sniper/dashboard?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
           if (json.status === 'ok') {
@@ -540,10 +540,10 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
       }
     }
 
-    // 雲端 Supabase 備援讀取 (確保異地或手機存取時立即取得最新 10/23 掃描成果)
+    // 雲端 Supabase 備援讀取 (確保異地或手機存取時立即取得最新掃描成果)
     if (!serverData) {
       try {
-        const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.oversold_sniper_dashboard&select=payload');
+        const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.oversold_sniper_dashboard&select=payload&t=${Date.now()}`);
         if (supRes.ok) {
           const rows = await supRes.json();
           if (rows && rows.length > 0 && rows[0].payload) {
@@ -738,7 +738,7 @@ export async function apiGetOversoldSniperDashboard(cachedServerData = null) {
   return serverData;
 }
 
-// ⚡ 觸發全市場重新連線掃描 (抓取 10/23 最新即時行情並重算)
+// ⚡ 觸發全市場重新連線掃描 (強制無快取直連 tw_stock.db 抓取最新交易日並重算)
 export async function apiTriggerOversoldSniperScan() {
   const base = await resolveApiBase(true);
   let freshData = null;
@@ -747,9 +747,10 @@ export async function apiTriggerOversoldSniperScan() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s
-      const res = await fetch(`${base}/api/oversold_sniper/scan`, {
+      const res = await fetch(`${base}/api/oversold_sniper/scan?t=${Date.now()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -762,7 +763,7 @@ export async function apiTriggerOversoldSniperScan() {
     } catch (err) {
       console.warn(`POST 重新掃描異常，嘗試 GET refresh:`, err.message);
       try {
-        const res2 = await fetch(`${base}/api/oversold_sniper/dashboard?refresh=1`);
+        const res2 = await fetch(`${base}/api/oversold_sniper/dashboard?refresh=1&t=${Date.now()}`, { cache: 'no-store' });
         if (res2.ok) {
           const json2 = await res2.json();
           if (json2.status === 'ok') {

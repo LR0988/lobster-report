@@ -216,6 +216,20 @@ def get_oversold_sniper_dashboard_data():
 
     radar_candidates = []
     market_date = datetime.now().strftime("%Y-%m-%d")
+    d_tw_fmt = market_date
+    d_us_fmt = market_date
+    d_idx_fmt = market_date
+    d_inst_fmt = market_date
+    tw_daily_stock_count = 0
+    tw_inst_count = 0
+    us_daily_count = 0
+    latest_idx_close_val = 0.0
+    anchor_2330_info = {"stock_id": "2330", "name": "台積電", "date": market_date, "close": 0.0, "low": 0.0}
+    anchor_0050_info = {"stock_id": "0050", "name": "元大台灣50", "date": market_date, "close": 0.0, "low": 0.0}
+    db_file_mtime_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    is_all_tw_synced = True
+    sync_status_badge = "✅ 台股核心表同步對齊"
+    sync_status_detail = ""
     total_scanned = 0
     trigger_count = 0
     live_price_map = {}
@@ -235,17 +249,112 @@ def get_oversold_sniper_dashboard_data():
     }
 
     try:
-        # 1. 取得最新交易日 (分別記錄台股與美股最新收盤日，確保前端雙市場時間戳記 100% 透明)
-        max_d_tw_res = conn.execute("SELECT max(date) FROM daily_stock WHERE stock_id != 'HOLIDAY'").fetchone()
-        max_d_glb_res = conn.execute("SELECT max(date) FROM global_stock_daily").fetchone()
-        max_d_us_res = conn.execute("SELECT max(date) FROM global_stock_daily WHERE ticker IN ('AAPL', 'NVDA', 'MSFT', 'SPY')").fetchone()
-        d_tw = str(max_d_tw_res[0]) if (max_d_tw_res and max_d_tw_res[0]) else "20261027"
+        # 0. 自動清除 global_stock_daily 中可能殘留的無高低價殘缺列 (防止假日或即時測試列污染日期)
+        try:
+            conn.execute("DELETE FROM global_stock_daily WHERE high IS NULL OR low IS NULL OR close IS NULL OR close <= 0")
+            conn.commit()
+        except Exception:
+            pass
+
+        # 1. 取得各資料表真實最新交易日與筆數 (嚴格要求有效收盤價與成交量且當日覆蓋檔數 >= 100，彻底杜絕單一測試列或假日列污染日期)
+        tw_stock_date_row = conn.execute("""
+            SELECT date, COUNT(DISTINCT stock_id) as cnt
+            FROM daily_stock
+            WHERE stock_id != 'HOLIDAY' AND closing_price > 0 AND trade_volume > 0
+            GROUP BY date
+            HAVING COUNT(DISTINCT stock_id) >= 100
+            ORDER BY date DESC
+            LIMIT 1
+        """).fetchone()
+        if tw_stock_date_row and tw_stock_date_row[0]:
+            d_tw = str(tw_stock_date_row[0])
+            tw_daily_stock_count = int(tw_stock_date_row[1])
+        else:
+            max_d_tw_res = conn.execute("SELECT max(date) FROM daily_stock WHERE stock_id != 'HOLIDAY' AND closing_price > 0").fetchone()
+            d_tw = str(max_d_tw_res[0]) if (max_d_tw_res and max_d_tw_res[0]) else "20261027"
+            tw_daily_stock_count = 0
+
         d_tw_fmt = f"{d_tw[:4]}-{d_tw[4:6]}-{d_tw[6:]}" if len(d_tw) == 8 else d_tw[:10]
-        d_glb = str(max_d_glb_res[0])[:10] if (max_d_glb_res and max_d_glb_res[0]) else "2026-10-27"
+
+        # 大盤指數最新日期與收盤價
+        idx_latest_row = conn.execute("""
+            SELECT date, close FROM daily_index WHERE close > 0 ORDER BY date DESC LIMIT 1
+        """).fetchone()
+        d_idx_raw = str(idx_latest_row[0]) if (idx_latest_row and idx_latest_row[0]) else d_tw
+        d_idx_fmt = f"{d_idx_raw[:4]}-{d_idx_raw[4:6]}-{d_idx_raw[6:]}" if len(d_idx_raw) == 8 else d_idx_raw[:10]
+        latest_idx_close_val = round(float(idx_latest_row[1]), 2) if (idx_latest_row and idx_latest_row[1]) else 0.0
+
+        # 三大法人最新日期與覆蓋檔數
+        inst_latest_row = conn.execute("""
+            SELECT date, COUNT(DISTINCT stock_id) as cnt
+            FROM institutional_trades
+            GROUP BY date
+            HAVING COUNT(DISTINCT stock_id) >= 50
+            ORDER BY date DESC
+            LIMIT 1
+        """).fetchone()
+        d_inst_raw = str(inst_latest_row[0]) if (inst_latest_row and inst_latest_row[0]) else d_tw
+        d_inst_fmt = f"{d_inst_raw[:4]}-{d_inst_raw[4:6]}-{d_inst_raw[6:]}" if len(d_inst_raw) == 8 else d_inst_raw[:10]
+        tw_inst_count = int(inst_latest_row[1]) if (inst_latest_row and inst_latest_row[1]) else 0
+
+        # 全球美股最新完整日K日期與覆蓋檔數
+        glb_latest_row = conn.execute("""
+            SELECT date, COUNT(DISTINCT ticker) as cnt
+            FROM global_stock_daily
+            WHERE close > 0 AND high IS NOT NULL AND low IS NOT NULL
+            GROUP BY date
+            HAVING COUNT(DISTINCT ticker) >= 30
+            ORDER BY date DESC
+            LIMIT 1
+        """).fetchone()
+        if glb_latest_row and glb_latest_row[0]:
+            d_glb = str(glb_latest_row[0])[:10]
+            us_daily_count = int(glb_latest_row[1])
+        else:
+            max_d_glb_res = conn.execute("SELECT max(date) FROM global_stock_daily WHERE close > 0").fetchone()
+            d_glb = str(max_d_glb_res[0])[:10] if (max_d_glb_res and max_d_glb_res[0]) else d_tw_fmt
+            us_daily_count = 0
+
+        max_d_us_res = conn.execute("""
+            SELECT max(date) FROM global_stock_daily
+            WHERE ticker IN ('AAPL', 'NVDA', 'MSFT', 'SPY') AND close > 0 AND high IS NOT NULL
+        """).fetchone()
         d_us_fmt = str(max_d_us_res[0])[:10] if (max_d_us_res and max_d_us_res[0]) else d_glb
-        market_date = max(d_tw_fmt, d_glb)
+
+        # 核心防呆鐵律：主顯示日期 market_date 永遠錨定台股日K真實最新交易日 d_tw_fmt，絕不被跨日或測試列污染！
+        market_date = d_tw_fmt
         min_active_tw_date = (pd.to_datetime(d_tw_fmt) - pd.Timedelta(days=10)).strftime('%Y%m%d')
         min_active_glb_date = (pd.to_datetime(d_glb) - pd.Timedelta(days=10)).strftime('%Y-%m-%d')
+
+        # 讀取代表性基準標的 (2330 台積電、0050 元大台灣50) 於該最新日之真實價格供前端肉眼對帳驗收
+        anchor_2330_row = conn.execute(
+            "SELECT date, closing_price, lowest_price, trade_volume FROM daily_stock WHERE stock_id = '2330' AND closing_price > 0 ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        anchor_0050_row = conn.execute(
+            "SELECT date, closing_price, lowest_price, trade_volume FROM daily_stock WHERE stock_id = '0050' AND closing_price > 0 ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        anchor_2330_info = {
+            "stock_id": "2330",
+            "name": "台積電",
+            "date": f"{str(anchor_2330_row[0])[:4]}-{str(anchor_2330_row[0])[4:6]}-{str(anchor_2330_row[0])[6:]}" if (anchor_2330_row and len(str(anchor_2330_row[0])) == 8) else d_tw_fmt,
+            "close": float(anchor_2330_row[1]) if anchor_2330_row else 0.0,
+            "low": float(anchor_2330_row[2]) if anchor_2330_row else 0.0
+        }
+        anchor_0050_info = {
+            "stock_id": "0050",
+            "name": "元大台灣50",
+            "date": f"{str(anchor_0050_row[0])[:4]}-{str(anchor_0050_row[0])[4:6]}-{str(anchor_0050_row[0])[6:]}" if (anchor_0050_row and len(str(anchor_0050_row[0])) == 8) else d_tw_fmt,
+            "close": float(anchor_0050_row[1]) if anchor_0050_row else 0.0,
+            "low": float(anchor_0050_row[2]) if anchor_0050_row else 0.0
+        }
+        db_file_mtime_str = datetime.fromtimestamp(os.path.getmtime(DB_PATH)).strftime("%Y-%m-%d %H:%M:%S")
+        is_all_tw_synced = bool(d_tw_fmt == d_idx_fmt == d_inst_fmt)
+        if is_all_tw_synced:
+            sync_status_badge = f"✅ 台股三大核心表 100% 同步對齊 ({d_tw_fmt})"
+            sync_status_detail = f"daily_stock ({tw_daily_stock_count:,}檔)、daily_index ({latest_idx_close_val:,.2f}) 與 institutional_trades ({tw_inst_count:,}檔) 均已同步更新至 {d_tw_fmt}"
+        else:
+            sync_status_badge = f"⚠️ 資料表日期存在差異 (以台股日K {d_tw_fmt} 為主)"
+            sync_status_detail = f"台股日K={d_tw_fmt} ({tw_daily_stock_count:,}檔) ｜ 加權指數={d_idx_fmt} ｜ 三大法人={d_inst_fmt} ({tw_inst_count:,}檔)"
 
         # 2. 讀取大盤指數 (daily_index) 計算 200MA、60MA 與大盤 Z-Score
         idx_start_date = (pd.to_datetime(d_tw_fmt) - pd.Timedelta(days=420)).strftime('%Y%m%d')
@@ -1230,7 +1339,38 @@ def get_oversold_sniper_dashboard_data():
             "global_stocks_scanned": len([c for c in radar_candidates if c["country"] != "台灣"]),
             "latest_trade_date": market_date,
             "tw_latest_date": d_tw_fmt,
-            "us_latest_date": d_us_fmt
+            "us_latest_date": d_us_fmt,
+            "tw_daily_stock_date": d_tw_fmt,
+            "tw_daily_stock_count": tw_daily_stock_count,
+            "tw_index_date": d_idx_fmt,
+            "tw_index_close": latest_idx_close_val,
+            "tw_inst_date": d_inst_fmt,
+            "tw_inst_count": tw_inst_count,
+            "us_daily_date": d_us_fmt,
+            "us_daily_count": us_daily_count,
+            "anchor_2330": anchor_2330_info,
+            "anchor_0050": anchor_0050_info,
+            "db_file_mtime": db_file_mtime_str,
+            "is_all_tw_synced": is_all_tw_synced,
+            "sync_status_badge": sync_status_badge,
+            "sync_status_detail": sync_status_detail
+        },
+        "db_verification": {
+            "tw_daily_stock_date": d_tw_fmt,
+            "tw_daily_stock_count": tw_daily_stock_count,
+            "tw_scanned_count": len([c for c in radar_candidates if c["country"] == "台灣"]),
+            "tw_index_date": d_idx_fmt,
+            "tw_index_close": latest_idx_close_val,
+            "tw_inst_date": d_inst_fmt,
+            "tw_inst_count": tw_inst_count,
+            "us_daily_date": d_us_fmt,
+            "us_daily_count": us_daily_count,
+            "anchor_2330": anchor_2330_info,
+            "anchor_0050": anchor_0050_info,
+            "db_file_mtime": db_file_mtime_str,
+            "is_all_tw_synced": is_all_tw_synced,
+            "sync_status_badge": sync_status_badge,
+            "sync_status_detail": sync_status_detail
         },
         "user_performance": {
             "total_closed_trades": tot_closed,
@@ -1318,38 +1458,21 @@ def sync_sniper_dashboard_to_supabase(dashboard_data):
         print(f"同步超賣快打至 Supabase 警告: {e}")
 
 def sync_live_quotes_for_sniper():
-    """連線即時抓取持倉標的與重點強勢股最新行情，寫入 SQLite"""
+    """
+    清理殘缺測試列並確保 tw_stock.db 日期純淨度：
+    不再強行塞入無 High/Low 的當日假時間戳，確保 100% 忠實讀取使用者更新後的 tw_stock.db 真實交易日！
+    """
     try:
-        import yfinance as yf
         conn = sqlite3.connect(DB_PATH)
         ensure_user_sniper_table(conn)
-
-        active_tickers = [r[0] for r in conn.execute("SELECT DISTINCT ticker FROM user_sniper_trades WHERE status IN ('OPEN', 'ACTIVE')").fetchall()]
-        scan_tickers = list(set(active_tickers + [
-            'DXCM', 'WEGE3.SA', 'ASML', 'BKR', 'ASX', 'SIEGY', 'MUFG', 'GOOG', 'GOOGL',
-            'NVDA', 'TSLA', 'AAPL', 'MSFT', 'META', 'AMD', 'AVGO', 'COST', 'NFLX', 'LLY',
-            '1513.TW', '2330.TW', '2308.TW', '0050.TW', '2317.TW', '2454.TW'
-        ]))
-
-        today_str = datetime.now().strftime('%Y-%m-%d')
-        for t in scan_tickers:
-            try:
-                tick = yf.Ticker(t)
-                last_p = tick.fast_info.get('lastPrice', None)
-                if last_p is not None and last_p > 0:
-                    conn.execute("""
-                        INSERT OR REPLACE INTO global_stock_daily (ticker, date, close, volume)
-                        VALUES (?, ?, ?, 1000000)
-                    """, (t, today_str, round(float(last_p), 2)))
-            except Exception:
-                pass
+        conn.execute("DELETE FROM global_stock_daily WHERE high IS NULL OR low IS NULL OR close IS NULL OR close <= 0")
         conn.commit()
         conn.close()
     except Exception as e:
-        print(f"抓取最新即時行情警告: {e}")
+        print(f"清理殘缺行情列警告: {e}")
 
 def run_full_rescan():
-    """完整重新掃描：連線抓取最新行情 -> 運算五維雙境與 S/B 分級停利 -> 存入 SQLite 與預設檔 -> 同步 Supabase"""
+    """完整重新掃描：清理殘缺列 -> 直連 tw_stock.db 讀取最新真實交易日 -> 運算五維雙境與 S/B 分級停利 -> 存入預設檔與同步 Supabase"""
     sync_live_quotes_for_sniper()
     return get_oversold_sniper_dashboard_data()
 
