@@ -167,10 +167,10 @@ def _resolve_display_name(ticker: str, cursor=None) -> str:
             pass
     return ticker
 
-def get_global_sovereign_dashboard_data():
+def get_global_sovereign_dashboard_data(force_refresh: bool = False):
     """
     直接從 tw_stock.db 的 global_stock_daily 及 global_sovereign_positions 資料表
-    即時計算最新收盤價、均線、動能與損益指標
+    即時計算最新收盤價、均線、動能與損益指標 (零靜態快取短路)
     """
     data = None
     if os.path.exists(TEMPLATE_PATH):
@@ -1793,6 +1793,13 @@ def get_global_sovereign_dashboard_data():
                     data["recent_2026_rebalances"] = rebal_list
     except Exception as e:
         pass
+
+    try:
+        if os.path.exists(os.path.dirname(TEMPLATE_PATH)):
+            with open(TEMPLATE_PATH, "w", encoding="utf-8") as f_out:
+                json.dump(data, f_out, ensure_ascii=False, indent=2)
+    except Exception as e_save:
+        print("同步寫入 defaultGlobalSovereignData.json 警告:", e_save)
 
     return data
 

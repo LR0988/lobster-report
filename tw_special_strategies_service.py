@@ -682,13 +682,26 @@ def compute_tw_special_strategies(save_json: bool = True):
         'squeeze_recent_trades': sqz_recent_trades
     }
 
+    # 整合櫃買中心 (TPEx) 落難天使好球帶可轉債即時雷達 (titan_candidates)，確保與 tw_stock.db 100% 即時同步不脫鉤
+    tpex_radar_data = {}
+    try:
+        import importlib
+        import generate_real_tpex_radar
+        importlib.reload(generate_real_tpex_radar)
+        tpex_radar_data = generate_real_tpex_radar.generate_real_radar() or {}
+    except Exception as e_tpex:
+        print("即時計算 TPEx 可轉債好球帶雷達警告:", e_tpex)
+
     # 組裝分頁二 Payload (⚡ 可轉債主力與急跌狙擊)
     asymmetric_alpha_payload = {
         'status': 'ok',
-        'strategy_group': '⚡ 台股可轉債 (CB/CBAS) 主力鎖碼 × 強勢股 RSI(2) 急跌反彈狙擊',
-        'latest_data_date': latest_dt_fmt,
+        'strategy_group': tpex_radar_data.get('strategy_group') or '🎯 台股可轉債（CB / CBAS）落難天使好球帶狙擊艙 【上限：CB 5,000萬 / CBAS 300萬】',
+        'latest_data_date': tpex_radar_data.get('latest_data_date') or latest_dt_fmt,
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'data_source': 'tw_stock.db (2016~2026 集保千張大戶 × 自營商避險買盤 × Connors RSI(2) 即時運算)',
+        'data_source': tpex_radar_data.get('data_source') or 'tw_stock.db (2016~2026 集保千張大戶 × 自營商避險買盤 × Connors RSI(2) 即時運算)',
+        'titan_candidates': tpex_radar_data.get('titan_candidates', []),
+        'active_holdings': tpex_radar_data.get('active_holdings', []),
+        'trade_history': tpex_radar_data.get('trade_history', []),
         'summary_kpi': {
             'cbas_backtest_cagr_pct': bt_strats.get('cbas_asymmetric', {}).get('cagr_pct', 18.24),
             'cbas_win_rate_pct': bt_strats.get('cbas_asymmetric', {}).get('win_rate_pct', 52.63),
@@ -743,20 +756,22 @@ def _load_fallback_jsons():
 
 
 def get_tw_event_radar_data():
-    res = compute_tw_special_strategies(save_json=False)
+    res = compute_tw_special_strategies(save_json=True)
     return res.get('tw_event_radar', {})
 
 
 def get_tw_asymmetric_alpha_data():
-    if os.path.exists(ASYM_JSON_PATH):
-        try:
-            with open(ASYM_JSON_PATH, "r", encoding="utf-8") as f:
-                d = json.load(f)
-                if "titan_candidates" in d:
-                    return d
-        except Exception:
-            pass
-    res = compute_tw_special_strategies(save_json=False)
+    """直連 tw_stock.db 即時運算可轉債落難天使好球帶雷達與非對稱狙擊指標 (零靜態快取短路)"""
+    try:
+        import importlib
+        import generate_real_tpex_radar
+        importlib.reload(generate_real_tpex_radar)
+        live_radar = generate_real_tpex_radar.generate_real_radar()
+        if live_radar and "titan_candidates" in live_radar:
+            return live_radar
+    except Exception as e:
+        print("即時運算可轉債好球帶雷達異常，嘗試完整計算:", e)
+    res = compute_tw_special_strategies(save_json=True)
     return res.get('tw_asymmetric_alpha', {})
 
 

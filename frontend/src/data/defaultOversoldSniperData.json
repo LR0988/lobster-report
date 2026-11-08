@@ -29,7 +29,7 @@
     "active_mode_badge": "🛑 大盤跌破 200MA 年線保護 (台股 2026-11-06 全系統暫停買單・僅供監控)",
     "active_mode_desc": "台股最新交易日 (2026-11-06) 加權指數 (39701.64) 位於 200MA 年線 (41016.02) 之下，系統自動啟動最高級別空頭保護：唯一可買強制鎖死為 0 檔，但下方雷達仍完整顯示今日 (2026-11-06) 個股超賣監控清單！"
   },
-  "generated_at": "2026-11-07 11:11:33",
+  "generated_at": "2026-11-08 13:16:17",
   "market_date": "2026-11-06",
   "tw_market_date": "2026-11-06",
   "us_market_date": "2026-11-06",
@@ -63,7 +63,7 @@
       "close": 92.5,
       "low": 87.55
     },
-    "db_file_mtime": "2026-11-07 11:11:24",
+    "db_file_mtime": "2026-11-08 12:49:17",
     "is_all_tw_synced": true,
     "sync_status_badge": "✅ 台股三大核心表 100% 同步對齊 (2026-11-06)",
     "sync_status_detail": "daily_stock (6,627檔)、daily_index (39,701.64) 與 institutional_trades (6,412檔) 均已同步更新至 2026-11-06"
@@ -92,7 +92,7 @@
       "close": 92.5,
       "low": 87.55
     },
-    "db_file_mtime": "2026-11-07 11:11:24",
+    "db_file_mtime": "2026-11-08 12:49:17",
     "is_all_tw_synced": true,
     "sync_status_badge": "✅ 台股三大核心表 100% 同步對齊 (2026-11-06)",
     "sync_status_detail": "daily_stock (6,627檔)、daily_index (39,701.64) 與 institutional_trades (6,412檔) 均已同步更新至 2026-11-06"

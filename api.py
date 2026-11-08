@@ -1230,11 +1230,22 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步全球泰坦個股警告: {e}")
                 print(f"[x] [API Scraper] 同步全球泰坦個股失敗: {e}")
                 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'titan_signals', '步驟 8/9：重算台股大凹洞母子艦隊 & 全球因果泰坦最新訊號', '步驟 8/9：正在以最新資料庫重算「台股因果泰坦 (大凹洞母子艦隊)」與「全球主權泰坦 2.0」實盤訊號...', 8, 9, 88)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'titan_signals', '步驟 8/9：即時重算四大核心策略 (全球泰坦 / 台股因果 / 超賣快打 / 可轉債)', '步驟 8/9：正在同步櫃買可轉債報價，並以最新資料庫即時重算「全球泰坦」、「台股因果」、「超賣快打」與「可轉債」四大策略...', 8, 9, 88)
+            try:
+                import sync_tpex_cb_data
+                conn_cb = sqlite3.connect(DB_PATH)
+                sync_tpex_cb_data.init_cb_tables(conn_cb)
+                conn_cb.close()
+                sync_tpex_cb_data.fetch_tpex_cb_metadata()
+                sync_tpex_cb_data.fetch_real_cb_quotes_for_candidates()
+                add_scraper_log("✓ 櫃買中心 (TPEx) 可轉債最新發行條件與等價收盤行情已寫入 tpex_cb_metadata / tpex_cb_quotes")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 同步櫃買可轉債行情警告: {e}")
+
             try:
                 import exp264_titan_sync
                 add_scraper_log("⏳ 正在以最新資料庫重算台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT)...")
-                add_scraper_log("✓ " + exp264_titan_sync.run())
+                add_scraper_log("✓ " + exp264_titan_sync.run(force_rebuild=True))
             except Exception as e:
                 add_scraper_log(f"⚠️ 台股因果泰坦更新警告: {e}")
                 print(f"[x] [API Scraper] 台股因果泰坦更新失敗: {e}")
@@ -1245,6 +1256,20 @@ def run_scraper_task(task_type: str):
                 add_scraper_log("✓ 全球高流動性主權泰坦 2.0 最新報價與實盤持倉已同步刷新")
             except Exception as e:
                 add_scraper_log(f"⚠️ 全球主權泰坦刷新警告: {e}")
+
+            try:
+                import oversold_sniper_service
+                oversold_sniper_service.run_full_rescan()
+                add_scraper_log("✓ 強勢股極端超賣快打 3.0 雷達與法人自救訊號已同步刷新")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 超賣快打刷新警告: {e}")
+
+            try:
+                import tw_special_strategies_service
+                tw_special_strategies_service.compute_tw_special_strategies(save_json=True)
+                add_scraper_log("✓ 可轉債 (CB/CBAS) 落難天使好球帶雷達已同步刷新")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 可轉債好球帶雷達刷新警告: {e}")
 
             set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '步驟 9/9：全資料庫雲端預覽快照、雙泰坦看板與總筆數同步', '步驟 9/9：正在將全市場 24 表最新快照、台股母子艦隊與全球泰坦看板同步至雲端 Supabase...', 9, 9, 96)
             try:
@@ -4349,53 +4374,95 @@ _causal_titan_lock = threading.Lock()
 
 @app.get("/api/causal_titan/dashboard")
 def get_causal_titan_dashboard(refresh: bool = False):
-    """台股因果泰坦 (上限1億, exp_264)：直連本機 tw_stock.db。
-    若資料庫最新交易日比目前快照新 (或 refresh=true)，立即以本機資料庫重算 exp_264 後回傳。"""
+    """台股因果泰坦 (上限1億, 大凹洞母子艦隊 PIT)：直連本機 tw_stock.db。
+    只要 daily_stock / institutional_trades / monthly_revenue / global_sovereign_daily 有任何更新或 refresh=true，
+    立即以本機資料庫重算最新訊號與持倉報價後回傳 (零延遲)。"""
+    import importlib
     import json as _json
     import sqlite3 as _sqlite3
-    import exp264_titan_sync
+    import tw_titan_pit_service
+    importlib.reload(tw_titan_pit_service)
     json_path = os.path.join(BASE_DIR, "frontend", "src", "data", "taiwan_causal_titan_data.json")
     db_path = os.path.join(BASE_DIR, "tw_stock.db")
-    def _snap_date():
-        try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                return str(_json.load(f).get("strategy_info", {}).get("latest_data_date", "")).replace("-", "")
-        except Exception:
-            return ""
-    db_latest = ""
+
+    db_latest, db_fp = "", ""
     try:
-        conn = _sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=10)
-        db_latest = conn.execute("SELECT MAX(date) FROM daily_index").fetchone()[0] or ""
-        conn.close()
+        db_latest, db_fp = tw_titan_pit_service.db_fingerprint()
     except Exception as e:
-        print(f"[x] 讀取 tw_stock.db 最新日期失敗: {e}")
+        print(f"[x] 讀取 tw_stock.db 指紋失敗: {e}")
+
+    snap_dt = tw_titan_pit_service.snapshot_date()
+    snap_fp = tw_titan_pit_service.snapshot_fingerprint()
+    need_recompute = bool(refresh or (db_latest and db_latest != snap_dt) or (db_fp and db_fp != snap_fp))
+
     recomputed, err = False, None
-    if refresh or (db_latest and db_latest > _snap_date()):
+    if need_recompute:
         with _causal_titan_lock:
-            if refresh or db_latest > _snap_date():     # 鎖內再確認，避免重複重算
+            snap_dt_now = tw_titan_pit_service.snapshot_date()
+            snap_fp_now = tw_titan_pit_service.snapshot_fingerprint()
+            if refresh or (db_latest and db_latest != snap_dt_now) or (db_fp and db_fp != snap_fp_now):
                 try:
-                    exp264_titan_sync.run()
+                    tw_titan_pit_service.refresh_live(force_rebuild=refresh)
                     recomputed = True
                 except Exception as e:
                     err = str(e)
                     print(f"[x] 台股因果泰坦重算失敗: {e}")
+
     with open(json_path, "r", encoding="utf-8") as f:
         data = _json.load(f)
+
+    # 即時直連 tw_stock.db 同步 current_positions 與 ranked 觀察池最新現價 (確保盤後或同日重抓後 0 秒差反映)
+    try:
+        conn = _sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=10)
+        for pos in data.get("current_positions", []):
+            sid = str(pos.get("stock_id") or "").replace(".TW", "").strip()
+            if sid:
+                row = conn.execute(
+                    "SELECT date, closing_price FROM daily_stock WHERE stock_id = ? AND closing_price > 0 ORDER BY date DESC LIMIT 1",
+                    (sid,)
+                ).fetchone()
+                if row and row[1]:
+                    d_raw = str(row[0]).strip()
+                    d_fmt = f"{d_raw[:4]}-{d_raw[4:6]}-{d_raw[6:8]}" if len(d_raw) == 8 else d_raw
+                    live_px = round(float(row[1]), 2)
+                    ent_px = float(pos.get("entry_price") or live_px)
+                    pos["current_price"] = live_px
+                    pos["latest_price"] = live_px
+                    pos["strategy_current_price"] = live_px
+                    pos["price_date"] = d_fmt
+                    if ent_px > 0:
+                        pnl = round((live_px / ent_px - 1.0) * 100.0, 2)
+                        pos["unrealized_return_pct"] = pnl
+                        pos["pnl_pct"] = pnl
+        conn.close()
+    except Exception:
+        pass
+
     data["status"] = "ok"
-    data["live_source"] = {"db": "tw_stock.db (本機)", "db_latest_date": db_latest, "snapshot_date": _snap_date(),
-                           "recomputed": recomputed, "error": err}
+    data["live_source"] = {
+        "db": "tw_stock.db (本機 SQLite 直連實時運算)",
+        "db_latest_date": f"{db_latest[:4]}-{db_latest[4:6]}-{db_latest[6:8]}" if len(db_latest) == 8 else db_latest,
+        "snapshot_date": f"{snap_dt[:4]}-{snap_dt[4:6]}-{snap_dt[6:8]}" if len(snap_dt) == 8 else snap_dt,
+        "db_fingerprint": db_fp,
+        "recomputed": recomputed,
+        "error": err
+    }
     return data
 
 @app.get("/api/tw_event_radar/dashboard")
 def get_tw_event_radar_dashboard():
     """台股事件與ETF吃豆腐看板：高股息ETF換股提前卡位預測 + 個股期貨逆價差與軋空事件掃描"""
+    import importlib
     import tw_special_strategies_service
+    importlib.reload(tw_special_strategies_service)
     return tw_special_strategies_service.get_tw_event_radar_data()
 
 @app.get("/api/tw_asymmetric_alpha/dashboard")
 def get_tw_asymmetric_alpha_dashboard():
-    """台股可轉債主力與急跌狙擊看板：CB/CBAS千張大戶鎖碼雷達 + 強勢股Connors RSI(2)極端急跌反彈"""
+    """台股可轉債主力與急跌狙擊看板：直連 tw_stock.db 即時運算 CB/CBAS 落難天使好球帶雷達"""
+    import importlib
     import tw_special_strategies_service
+    importlib.reload(tw_special_strategies_service)
     return tw_special_strategies_service.get_tw_asymmetric_alpha_data()
 
 @app.get("/api/oversold_sniper/dashboard")

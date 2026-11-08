@@ -15,11 +15,12 @@ DB_PATH = os.path.join(BASE_DIR, "tw_stock.db")
 
 
 def db_latest_date() -> str:
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, timeout=10)
-    try:
-        return conn.execute("SELECT MAX(date) FROM daily_stock WHERE LENGTH(stock_id)=4").fetchone()[0] or ""
-    finally:
-        conn.close()
+    db_max_date, _ = phoenix_engine.get_db_fingerprint()
+    return db_max_date
+
+
+def db_fingerprint() -> tuple:
+    return phoenix_engine.get_db_fingerprint()
 
 
 def snapshot_date() -> str:
@@ -30,12 +31,20 @@ def snapshot_date() -> str:
         return ""
 
 
+def snapshot_fingerprint() -> str:
+    try:
+        with open(JSON_PATH, "r", encoding="utf-8") as f:
+            return str(json.load(f).get("strategy_info", {}).get("db_fingerprint", ""))
+    except Exception:
+        return ""
+
+
 def refresh_live(force_rebuild: bool = False) -> dict:
     return phoenix_engine.export_to_frontend(force_rebuild=force_rebuild)
 
 
-def run() -> str:
-    d = refresh_live(force_rebuild=False)
+def run(force_rebuild: bool = False) -> str:
+    d = refresh_live(force_rebuild=force_rebuild)
     sig = d["live_signal"]
     return (
         f"written 台股因果泰坦(大凹洞母子艦隊 PIT) 訊號 {d['strategy_info']['latest_data_date']} "

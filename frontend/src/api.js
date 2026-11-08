@@ -361,13 +361,13 @@ export async function apiUpdateTitanCash(data) {
 }
 
 // ==========================================
-// 🌍 全球主權旗艦策略 Dashboard API (直接連線筆電本機 tw_stock.db)
+// 🌍 全球主權旗艦策略 Dashboard API (直接連線筆電本機 tw_stock.db，零快取即時運算)
 // ==========================================
 export async function apiGetGlobalSovereignDashboard() {
   const base = await resolveApiBase();
-  // 1. 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新演算結果
+  // 1. 優先直接向筆電本機 FastAPI / tw_stock.db 獲取最新即時演算結果
   try {
-    const res = await fetch(`${base}/api/global_sovereign/dashboard`);
+    const res = await fetch(`${base}/api/global_sovereign/dashboard?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       if (json.status === 'ok') {
@@ -378,9 +378,9 @@ export async function apiGetGlobalSovereignDashboard() {
     console.warn(`筆電本機 ${base}/api/global_sovereign/dashboard 未連線，嘗試備援:`, err.message);
   }
 
-  // 2. 備援：自 Supabase 讀取雲端快照 (筆電關機時提供離線唯讀)
+  // 2. 備援：自 Supabase 讀取雲端最新同步快照 (筆電關機時提供離線唯讀)
   try {
-    const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.global_sovereign_dashboard&select=payload');
+    const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.global_sovereign_dashboard&select=payload&t=${Date.now()}`);
     if (supRes.ok) {
       const rows = await supRes.json();
       if (rows && rows.length > 0 && rows[0].payload) {
@@ -506,18 +506,32 @@ export async function loadSniperTradesFromSupabase() {
 }
 
 export async function apiGetCausalTitanDashboard(refresh = false) {
-  // 台股因果泰坦 (exp_264)：直連筆電本機 API -> tw_stock.db；連不上回傳 null (前端沿用內建快照)
+  // 台股因果泰坦 (大凹洞母子艦隊 PIT)：優先直連筆電本機 API -> tw_stock.db 即時運算；備援讀取 Supabase stock_ml_cache
   const base = await resolveApiBase();
-  if (!base) return null;
-  try {
-    const res = await fetch(`${base}/api/causal_titan/dashboard${refresh ? '?refresh=true' : ''}`);
-    if (res.ok) {
-      const json = await res.json();
-      if (json && json.status === 'ok') return json;
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/causal_titan/dashboard?${refresh ? 'refresh=true&' : ''}t=${Date.now()}`, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.status === 'ok') return json;
+      }
+    } catch (err) {
+      console.warn(`筆電本機 ${base}/api/causal_titan/dashboard 連線異常，嘗試雲端備援:`, err.message);
     }
-  } catch (err) {
-    console.warn(`筆電本機 ${base}/api/causal_titan/dashboard 連線異常:`, err.message);
   }
+  try {
+    const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.causal_titan_dashboard&select=payload&t=${Date.now()}`);
+    if (supRes.ok) {
+      const rows = await supRes.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        const parsed = typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+        if (parsed) {
+          parsed.status = 'ok';
+          return parsed;
+        }
+      }
+    }
+  } catch (e) {}
   return null;
 }
 
@@ -1270,12 +1284,12 @@ export async function apiSaveTaiwanTitanPortfolio(portfolioData) {
 }
 
 // ==========================================
-// 🎯 台股事件與ETF吃豆腐策略 Dashboard API (優先直連本機 tw_stock.db)
+// 🎯 台股事件與ETF吃豆腐策略 Dashboard API (優先直連本機 tw_stock.db，零快取即時運算)
 // ==========================================
 export async function apiGetTwEventRadarDashboard() {
   const base = await resolveApiBase();
   try {
-    const res = await fetch(`${base}/api/tw_event_radar/dashboard`);
+    const res = await fetch(`${base}/api/tw_event_radar/dashboard?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       if (json && json.status === 'ok') {
@@ -1287,7 +1301,7 @@ export async function apiGetTwEventRadarDashboard() {
   }
 
   try {
-    const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.tw_event_radar_dashboard&select=payload');
+    const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.tw_event_radar_dashboard&select=payload&t=${Date.now()}`);
     if (supRes.ok) {
       const rows = await supRes.json();
       if (rows && rows.length > 0 && rows[0].payload) {
@@ -1300,12 +1314,12 @@ export async function apiGetTwEventRadarDashboard() {
 }
 
 // ==========================================
-// ⚡ 台股可轉債主力與急跌狙擊 Dashboard API (優先直連本機 tw_stock.db)
+// ⚡ 台股可轉債主力與急跌狙擊 Dashboard API (優先直連本機 tw_stock.db，零快取即時運算)
 // ==========================================
 export async function apiGetTwAsymmetricAlphaDashboard() {
   const base = await resolveApiBase();
   try {
-    const res = await fetch(`${base}/api/tw_asymmetric_alpha/dashboard`);
+    const res = await fetch(`${base}/api/tw_asymmetric_alpha/dashboard?t=${Date.now()}`, { cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       if (json && json.status === 'ok') {
@@ -1317,7 +1331,7 @@ export async function apiGetTwAsymmetricAlphaDashboard() {
   }
 
   try {
-    const supRes = await supabaseDirectFetch('/stock_ml_cache?model_type=eq.tw_asymmetric_alpha_dashboard&select=payload');
+    const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.tw_asymmetric_alpha_dashboard&select=payload&t=${Date.now()}`);
     if (supRes.ok) {
       const rows = await supRes.json();
       if (rows && rows.length > 0 && rows[0].payload) {

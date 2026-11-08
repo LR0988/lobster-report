@@ -45,16 +45,34 @@ GLOBAL_SOV_JSON_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "defaul
 ENGINE_CACHE_PATH = "/tmp/tw_phoenix_pit_v3_20261106.pkl"
 
 
+def get_db_fingerprint(conn=None):
+    close_conn = False
+    if conn is None:
+        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, timeout=15)
+        close_conn = True
+    try:
+        db_max_date = conn.execute("SELECT MAX(date) FROM daily_stock WHERE LENGTH(stock_id)=4 AND closing_price > 0").fetchone()[0] or "20261106"
+        stk_cnt = conn.execute("SELECT COUNT(*) FROM daily_stock WHERE date = ? AND LENGTH(stock_id)=4", (db_max_date,)).fetchone()[0] or 0
+        inst_max = conn.execute("SELECT MAX(date) FROM institutional_trades").fetchone()[0] or ""
+        rev_row = conn.execute("SELECT MAX(revenue_date), COUNT(*) FROM monthly_revenue").fetchone() or ("", 0)
+        gs_max = conn.execute("SELECT MAX(date) FROM global_sovereign_daily WHERE close IS NOT NULL").fetchone()[0] or ""
+        fp = f"{db_max_date}:{stk_cnt}:{inst_max}:{rev_row[0]}:{rev_row[1]}:{gs_max}"
+        return db_max_date, fp
+    finally:
+        if close_conn:
+            conn.close()
+
+
 def _build_or_load_full_matrices(force_rebuild=False):
     t0 = time.time()
     conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, timeout=15)
-    db_max_date = conn.execute("SELECT MAX(date) FROM daily_stock WHERE LENGTH(stock_id)=4").fetchone()[0] or "20261106"
+    db_max_date, db_fingerprint = get_db_fingerprint(conn)
 
     if not force_rebuild and os.path.exists(ENGINE_CACHE_PATH):
         try:
             with open(ENGINE_CACHE_PATH, "rb") as f:
                 c = pickle.load(f)
-            if c.get("db_max_date") == db_max_date:
+            if c.get("db_fingerprint") == db_fingerprint and c.get("db_max_date") == db_max_date:
                 conn.close()
                 return c
         except Exception:
@@ -247,6 +265,7 @@ def _build_or_load_full_matrices(force_rebuild=False):
 
     res = {
         "db_max_date": db_max_date,
+        "db_fingerprint": db_fingerprint,
         "base_idx": base_idx,
         "full_idx": full_idx,
         "pit_tw": pit_tw,
@@ -635,7 +654,8 @@ def run_simulation(force_rebuild=False):
         "s_arr": s_arr,
         "a_arr": a_arr,
         "ranked_watch": ranked_watch,
-        "db_max_date": m["db_max_date"]
+        "db_max_date": m["db_max_date"],
+        "db_fingerprint": m.get("db_fingerprint", "")
     }
 
 
@@ -942,6 +962,7 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "exit_rule": "E5 六段式非對稱移動停損停利 (-7.8%&破20MA停損 / 32日殭屍出場 / +14%保本盾 / +35%派發 / +55%鎖利 / 雙日破60MA) + 全球寬幅 <35% 母艦撤退",
             "transaction_friction": "個股買 0.07% / 賣 0.37% (含 0.3% 證交稅) · 0050 ETF 買 0.04% / 賣 0.14% · 賣股資金 T+1 交割延遲",
             "latest_data_date": latest_dt_str,
+            "db_fingerprint": sim.get("db_fingerprint", ""),
             "capital_cap_twd": 100000000,
             "capacity_rule": "20日均成交值 ≥ 8,000萬新台幣 + 真實上市滿 1 年 (250日內真實交易 ≥ 200日)",
             "capacity_hit_rate": 0.0,

@@ -6,8 +6,8 @@ exp264_titan_sync.py (相容入口)
 import tw_titan_pit_service
 
 
-def run(timeout: int = 1800) -> str:
-    return tw_titan_pit_service.run()
+def run(timeout: int = 1800, force_rebuild: bool = False) -> str:
+    return tw_titan_pit_service.run(force_rebuild=force_rebuild)
 
 
 if __name__ == "__main__":

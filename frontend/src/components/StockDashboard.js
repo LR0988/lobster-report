@@ -8382,27 +8382,27 @@ function StockDashboard() {
 
         {/* ===== 👑 台股因果量化泰坦旗艦看板 ===== */}
         {activeTab === 'taiwan_causal_titan' && (
-          <TaiwanCausalTitanDashboard />
+          <TaiwanCausalTitanDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
         {/* ===== 🌍 全球主權泰坦動能看板 ===== */}
         {activeTab === 'global_sovereign' && (
           <GlobalSovereignDashboard 
             key={scraperLiveStatus?.finished_at || 'init'} 
-            onTriggerScraper={() => handleTriggerDbScraper('global_sovereign', '全球泰坦 18 國主權 ETF 與 228 檔旗艦個股', 'global_stock_daily')}
-            isScraperRunning={Boolean(scraperLiveStatus?.is_running && scraperLiveStatus?.task_type === 'global_sovereign')}
+            onTriggerScraper={() => handleTriggerDbScraper('all', '全市場 24 張核心資料表與四大策略訊號', 'all_tables')}
+            isScraperRunning={Boolean(scraperLiveStatus?.is_running)}
             scraperStatus={scraperLiveStatus}
           />
         )}
 
         {/* ===== 🎯 極端超賣快打專屬戰情室 ===== */}
         {activeTab === 'oversold_sniper' && (
-          <OversoldSniperDashboard />
+          <OversoldSniperDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
         {/* ===== ⚡ 可轉債主力鎖碼與急跌反彈狙擊戰情室 ===== */}
         {activeTab === 'asymmetric_alpha' && (
-          <TwAsymmetricAlphaDashboard />
+          <TwAsymmetricAlphaDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
         {/* ===== 🗄️ 資料庫與爬蟲戰情中心 (合併全新設計) ===== */}

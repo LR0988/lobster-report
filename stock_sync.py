@@ -139,9 +139,46 @@ def sync_ml_cache(sb_conn):
     except Exception as e:
         print(f"  ✗ 同步全球主權泰坦失敗: {e}")
 
+    # 上傳台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT) 最新數據 (causal_titan_dashboard)
+    try:
+        import importlib
+        import tw_titan_pit_service
+        importlib.reload(tw_titan_pit_service)
+        ct_data = tw_titan_pit_service.refresh_live(force_rebuild=False)
+        if ct_data:
+            ct_data["status"] = "ok"
+            cur.execute("""
+                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (model_type) DO UPDATE
+                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+            """, ("causal_titan_dashboard", json.dumps(ct_data, ensure_ascii=False)))
+            print("  ✓ 台股因果泰坦 (大凹洞母子艦隊 PIT) 最新即時數據同步至 stock_ml_cache 完成")
+    except Exception as e:
+        print(f"  ✗ 同步台股因果泰坦失敗: {e}")
+
+    # 上傳強勢股超賣快打 3.0 最新數據 (oversold_sniper_dashboard)
+    try:
+        import importlib
+        import oversold_sniper_service
+        importlib.reload(oversold_sniper_service)
+        os_data = oversold_sniper_service.get_oversold_sniper_dashboard_data()
+        if os_data and os_data.get("status") == "ok":
+            cur.execute("""
+                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (model_type) DO UPDATE
+                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+            """, ("oversold_sniper_dashboard", json.dumps(os_data, ensure_ascii=False)))
+            print("  ✓ 強勢股超賣快打 3.0 最新即時數據同步至 stock_ml_cache 完成")
+    except Exception as e:
+        print(f"  ✗ 同步強勢股超賣快打失敗: {e}")
+
     # 上傳台股事件與ETF吃豆腐 & 可轉債主力與急跌狙擊最新數據
     try:
+        import importlib
         import tw_special_strategies_service
+        importlib.reload(tw_special_strategies_service)
         sp_out = tw_special_strategies_service.compute_tw_special_strategies(save_json=True)
         for cache_key, payload_obj in [
             ("tw_event_radar_dashboard", sp_out.get("tw_event_radar")),
@@ -154,7 +191,7 @@ def sync_ml_cache(sb_conn):
                     ON CONFLICT (model_type) DO UPDATE
                     SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
                 """, (cache_key, json.dumps(payload_obj, ensure_ascii=False)))
-        print("  ✓ 台股事件吃豆腐與可轉債/RSI(2)急跌狙擊同步至 stock_ml_cache 完成")
+        print("  ✓ 台股事件吃豆腐與可轉債落難天使好球帶雷達同步至 stock_ml_cache 完成")
     except Exception as e:
         print(f"  ✗ 同步台股特殊策略失敗: {e}")
 

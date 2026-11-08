@@ -11,6 +11,7 @@
   "exit_rule": "E5 六段式非對稱移動停損停利 (-7.8%&破20MA停損 / 32日殭屍出場 / +14%保本盾 / +35%派發 / +55%鎖利 / 雙日破60MA) + 全球寬幅 <35% 母艦撤退",
   "transaction_friction": "個股買 0.07% / 賣 0.37% (含 0.3% 證交稅) · 0050 ETF 買 0.04% / 賣 0.14% · 賣股資金 T+1 交割延遲",
   "latest_data_date": "2026-11-06",
+  "db_fingerprint": "20261106:1991:20261106:11510:253264:2026-11-06",
   "capital_cap_twd": 100000000,
   "capacity_rule": "20日均成交值 ≥ 8,000萬新台幣 + 真實上市滿 1 年 (250日內真實交易 ≥ 200日)",
   "capacity_hit_rate": 0.0,
@@ -2414,7 +2415,7 @@
   }
  ],
  "live_signal": {
-  "generated_at": "2026-11-07 20:04:40",
+  "generated_at": "2026-11-08 13:16:11",
   "exposure_pct": 0.0,
   "base_exposure_pct": 0.0,
   "etf_mother_ship_pct": 0.0,

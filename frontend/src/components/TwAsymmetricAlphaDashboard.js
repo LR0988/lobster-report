@@ -116,16 +116,42 @@ export default function TwAsymmetricAlphaDashboard() {
     setTimeout(() => setNotice(''), 4200);
   };
 
-  const fetchLatest = async () => {
+  const fetchLatest = async (isManual = true) => {
     setLoading(true);
     try {
       const live = await apiGetTwAsymmetricAlphaDashboard();
       if (live && live.status === 'ok' && Array.isArray(live.titan_candidates)) {
         setData(live);
-        showToast('✅ 已同步最新落難天使好球帶可轉債掃描資料！');
+        // 同步以最新即時運算出的 CB/CBAS 價格刷新使用者進行中持倉現價與未實現損益
+        const candMap = {};
+        live.titan_candidates.forEach(c => {
+          if (c.cb_code) candMap[String(c.cb_code)] = c;
+        });
+        setActiveHoldings(prev => prev.map(pos => {
+          const match = candMap[String(pos.cb_code)];
+          if (!match) return pos;
+          const liveP = String(pos.mode || 'CBAS').toUpperCase() === 'CBAS' ? match.cbas_quote : match.cb_price;
+          if (!liveP || liveP <= 0) return pos;
+          const entP = parseFloat(pos.entry_price) || liveP;
+          const lotsN = parseInt(pos.lots, 10) || 1;
+          const pnlPct = parseFloat((((liveP - entP) / entP) * 100).toFixed(2));
+          const pnlTwd = Math.round((liveP - entP) * 1000 * lotsN);
+          return {
+            ...pos,
+            current_price: liveP,
+            price_date: live.latest_data_date || pos.price_date,
+            unrealized_pnl_pct: pnlPct,
+            unrealized_pnl_twd: pnlTwd
+          };
+        }));
+        if (isManual) {
+          showToast(`✅ 已直連 tw_stock.db 即時重算最新落難天使好球帶可轉債雷達 (${live.latest_data_date || '最新'})！`);
+        }
       } else {
         setData(defaultAsymData);
-        showToast('✅ 已重整至最新落難天使好球帶可轉債雷達 (2026-10-25)！');
+        if (isManual) {
+          showToast(`✅ 已重整至最新落難天使好球帶可轉債雷達 (${defaultAsymData?.latest_data_date || '最新'})！`);
+        }
       }
     } catch (e) {
       setData(defaultAsymData);
@@ -133,6 +159,11 @@ export default function TwAsymmetricAlphaDashboard() {
       setLoading(false);
     }
   };
+
+  // 開啟「💎 可轉債」分頁時立即直連 tw_stock.db 即時運算最新可轉債好球帶雷達 (零靜態延遲)
+  useEffect(() => {
+    fetchLatest(false);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 計算每檔槽位預算 (固定最多 3 檔槽位，每檔 1/3)
   const activeSlotBudget = useMemo(() => {
