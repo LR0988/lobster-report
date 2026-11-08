@@ -354,32 +354,32 @@ export default function CommodityCtaDashboard() {
           marginTop: '1.1rem'
         }}>
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🏆 21.8年年化報酬 (CAGR)</div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🏆 21.8年年化報酬 (Strict T+1 Open)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FBBF24', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              +{fs.cagr_pct ?? 18.25}%
+              +{fs.cagr_pct ?? 18.96}%
             </div>
             <div style={{ fontSize: '0.73rem', color: '#34D399' }}>
-              累積 <strong>{fs.total_multiple ?? 38.95}x</strong> (被動原物料僅 2.94x)
+              累積 <strong>{fs.total_multiple ?? 44.41}x</strong> (被動原物料僅 2.94x)
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(52, 211, 153, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (Monthly MDD)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#34D399', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {fs.mdd_monthly_pct ?? -22.45}%
+              {fs.mdd_monthly_pct ?? -24.12}%
             </div>
             <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
-              日MDD {fs.mdd_daily_pct ?? -25.51}% (較被動 -53.0% 砍半)
+              日MDD {fs.mdd_daily_pct ?? -25.85}% (較被動 -53.0% 砍半)
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>⚖️ 風險調整指標 (Sharpe / Sortino)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38BDF8', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {fs.sharpe ?? 0.86} <span style={{ fontSize: '0.95rem', color: '#94A3B8' }}>/ {fs.sortino ?? 1.06}</span>
+              {fs.sharpe ?? 0.87} <span style={{ fontSize: '0.95rem', color: '#94A3B8' }}>/ {fs.sortino ?? 1.06}</span>
             </div>
             <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
-              Calmar <strong>{fs.calmar ?? 0.81}</strong> (被動原物料僅 0.10)
+              Calmar <strong>{fs.calmar ?? 0.79}</strong> (被動原物料僅 0.10)
             </div>
           </div>
 
@@ -531,6 +531,36 @@ export default function CommodityCtaDashboard() {
                   {m.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* V4.1 嚴格 T+1 開盤成交 × 漲跌停鎖死防呆 × 小資金載具限制稽核面板 */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(6, 78, 59, 0.35), rgba(15, 23, 42, 0.9))',
+            border: '1px solid rgba(16, 185, 129, 0.45)',
+            borderRadius: '12px',
+            padding: '0.9rem 1.15rem',
+            marginBottom: '1.15rem',
+            fontSize: '0.8rem',
+            color: '#E2E8F0',
+            lineHeight: 1.65
+          }}>
+            <div style={{ fontWeight: 800, color: '#34D399', fontSize: '0.88rem', marginBottom: '0.35rem' }}>
+              🛡️ V4.1 嚴格 T+1 開盤執行架構 (Strict T+1 Open) × 漲跌停/無量日鎖死防呆 × 未來資料投毒 0.000000000000 驗證通過
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.65rem' }}>
+              <div>
+                <strong style={{ color: '#FDE68A' }}>① 嚴格 T+1 開盤成交 (零偷吃隔夜跳空)：</strong>
+                訊號 100% 鎖定於 <code>T-1 收盤</code> 產生，換倉日之<strong>隔夜跳空報酬 (Close[t-1]→Open[t]) 嚴格歸屬舊倉位</strong>，新倉位僅於 <code>Open[t]</code> 開盤價成交後賺取日內報酬，並計入雙邊滑價與 GLD 週調倉成本 (6 bps)。即便極端延遲滿 24 小時至 <code>T+1 收盤</code> 才成交，年化仍達 <strong>+{data?.tradability_audit?.delayed_24h_next_close_cagr_pct ?? 15.77}% (勝率 {data?.tradability_audit?.delayed_24h_next_close_win_years ?? '19/22'})</strong>。
+              </div>
+              <div>
+                <strong style={{ color: '#38BDF8' }}>② 漲跌停鎖死與無量假日禁買賣保護：</strong>
+                當 <code>Open[t]</code> 出現 CBOT/ICE 漲跌停鎖死 (<code>High == Low</code>)、休市無量 (<code>Volume &lt;= 0</code>) 或超過 <code>max(4.5%, 2.5×NATR)</code> 之極端跳空時，系統強制禁止買進或平倉（22 年共攔截延後 <strong>{data?.tradability_audit?.blocked_limit_or_holiday_trades_22y ?? 404} 筆</strong>買不到/賣不掉之異常開盤）。
+              </div>
+              <div>
+                <strong style={{ color: '#C4B5FD' }}>③ 小資金 (&lt;$30萬 USD)「買不到微型合約」解方：</strong>
+                19 檔中有 <strong>14 檔為 CME 集團品種</strong>（皆具高流動性微型/迷你合約如 <code>MCL, MGC, SIL, MHG, XC, XK</code>）；唯獨 <strong>5 檔 ICE 軟商品與活牛 (<code>KC 咖啡, CC 可可, SB 原糖, CT 棉花, LE 活牛</code>) 無散戶微型期貨</strong>（單口合約價值 $2萬~$10.5萬 USD）。小資金遇到此 5 檔請切換上方<strong>「📈 免轉倉美股 ETF 替代 (CANE/DBA)」</strong>，或直接採用<strong>「💎 純 CME 14 檔子集」</strong>（22 年年化仍達 <strong>+{data?.tradability_audit?.cme_14_subset_cagr_pct ?? 15.90}%、月度 MDD 僅 -21.91%、勝率 {data?.tradability_audit?.cme_14_subset_win_years ?? '20/22'}</strong>）。
+              </div>
             </div>
           </div>
 

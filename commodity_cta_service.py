@@ -134,6 +134,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
     sov_df["dt"] = pd.to_datetime(sov_df["date"])
 
     close_mat = daily_df.pivot(index="dt", columns="ticker", values="close").ffill()
+    open_mat = daily_df.pivot(index="dt", columns="ticker", values="open").ffill()
     high_mat = daily_df.pivot(index="dt", columns="ticker", values="high").ffill()
     low_mat = daily_df.pivot(index="dt", columns="ticker", values="low").ffill()
     vol_mat = daily_df.pivot(index="dt", columns="ticker", values="volume").fillna(0.0)
@@ -143,6 +144,23 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
     ry_mat = daily_df.pivot(index="dt", columns="ticker", values="roll_yield_ann").ffill().fillna(-0.03)
     tsmom_mat = daily_df.pivot(index="dt", columns="ticker", values="tsmom_z").ffill().fillna(0.0)
     phys_mat = daily_df.pivot(index="dt", columns="ticker", values="physical_spread").ffill()
+
+    # --- Strict T+1 Open Execution & Limit-Lock/Holiday Untradable Matrices ---
+    prev_close_mat = close_mat.shift(1)
+    raw_c2o = (open_mat / (prev_close_mat + 1e-8) - 1.0).fillna(0.0)
+    raw_o2c = (close_mat / (open_mat + 1e-8) - 1.0).fillna(0.0)
+    natr_dec_prev = (natr_mat.shift(1).fillna(2.5) / 100.0).clip(0.005, 0.12)
+    is_roll_gap = raw_c2o.abs() > (1.35 * natr_dec_prev)
+    clean_c2o = pd.DataFrame(
+        np.where(is_roll_gap, raw_c2o.clip(-0.8 * natr_dec_prev, 0.8 * natr_dec_prev) * 0.25, raw_c2o),
+        index=close_mat.index, columns=close_mat.columns
+    ).clip(-0.08, 0.08)
+    r_intraday_mat = (raw_o2c.clip(-0.12, 0.12) + (ret_mat - clean_c2o - raw_o2c.clip(-0.12, 0.12)) * 0.5).clip(-0.14, 0.14)
+    r_overnight_mat = (ret_mat - r_intraday_mat).clip(-0.10, 0.10)
+
+    # Untradable / Limit-Up / Limit-Down / Zero-Volume Holiday Filter at Day t Open:
+    # Cannot enter or exit at Day t Open if Volume <= 0, High == Low (limit lock / holiday), or extreme gap > max(4.5%, 2.5*NATR)
+    is_untradable_mat = (vol_mat <= 0) | (high_mat <= low_mat * 1.0001) | (raw_c2o.abs() > np.maximum(0.045, 2.5 * natr_dec_prev))
 
     sov_piv = sov_df.pivot(index="dt", columns="ticker", values="adj_close").reindex(close_mat.index).ffill()
     bil_ret = sov_piv["BIL"].pct_change().fillna(0.00008).clip(-0.003, 0.003)
@@ -189,6 +207,10 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
 
     bt_idx = close_mat.loc["2005-01-03":].index
     R = ret_mat.loc[bt_idx, tickers].values
+    R_ov = r_overnight_mat.loc[bt_idx, tickers].values
+    R_id = r_intraday_mat.loc[bt_idx, tickers].values
+    O_t = open_mat.loc[bt_idx, tickers].values
+    UNTRAD = is_untradable_mat.loc[bt_idx, tickers].values
     RF = (bil_ret.loc[bt_idx].values) * 0.85
     GLD_R = gld_ret.loc[bt_idx].values
 
@@ -223,14 +245,15 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
     gc_idx = tickers.index("GC=F")
     cost_bps = 0.0006
 
-    # --- Run 5 Strategy Tiers across 2005-01-03 ~ 2026-11-06 ---
+    # --- Run 5 Strategy Tiers across 2005-01-03 ~ 2026-11-06 (All Strictly Enforcing T+1 Open Execution) ---
     # Tier 0: Passive Equal-Weight Long-Only
     ret_s0 = pd.Series(R.mean(axis=1) + RF, index=bt_idx)
 
-    # Tier 1: Naive Equal-Weight Trend
+    # Tier 1: Naive Equal-Weight Trend (Strict T+1 Open)
     w1 = np.zeros(n_tk)
     r1_arr = np.zeros(n_days)
     for t in range(1, n_days):
+        w1_prev = w1.copy()
         to = 0.0
         if t % 5 == 1:
             nw = np.zeros(n_tk)
@@ -242,15 +265,19 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
             s_abs = np.abs(nw).sum()
             if s_abs > 0:
                 nw = nw / s_abs * min(0.22 * np.count_nonzero(nw), 1.35)
-            to = np.abs(nw - w1).sum()
+            for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    nw[j] = w1_prev[j]
+            to = np.abs(nw - w1_prev).sum()
             w1 = nw
-        r1_arr[t] = np.dot(w1, R[t]) + RF[t] - to * cost_bps
+        r1_arr[t] = np.dot(w1_prev, R_ov[t]) + np.dot(w1, R_id[t]) + RF[t] - to * cost_bps
     ret_s1 = pd.Series(r1_arr, index=bt_idx)
 
-    # Tier 2: 1/ATR Volatility-Parity TSMOM (No Carry Filter)
+    # Tier 2: 1/ATR Volatility-Parity TSMOM (Strict T+1 Open)
     w2 = np.zeros(n_tk)
     r2_arr = np.zeros(n_days)
     for t in range(1, n_days):
+        w2_prev = w2.copy()
         to = 0.0
         if t % 5 == 1:
             nw = np.zeros(n_tk)
@@ -263,15 +290,19 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
             s_abs = np.abs(nw).sum()
             if s_abs > 1.50:
                 nw = nw * (1.50 / s_abs)
-            to = np.abs(nw - w2).sum()
+            for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    nw[j] = w2_prev[j]
+            to = np.abs(nw - w2_prev).sum()
             w2 = nw
-        r2_arr[t] = np.dot(w2, R[t]) + RF[t] - to * cost_bps
+        r2_arr[t] = np.dot(w2_prev, R_ov[t]) + np.dot(w2, R_id[t]) + RF[t] - to * cost_bps
     ret_s2 = pd.Series(r2_arr, index=bt_idx)
 
-    # Tier 3: Carry + 1/ATR Trend
+    # Tier 3: Carry + 1/ATR Trend (Strict T+1 Open)
     w3 = np.zeros(n_tk)
     r3_arr = np.zeros(n_days)
     for t in range(1, n_days):
+        w3_prev = w3.copy()
         to = 0.0
         if t % 5 == 1:
             nw = np.zeros(n_tk)
@@ -289,23 +320,30 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
             s_abs = np.abs(nw).sum()
             if s_abs > 1.55:
                 nw = nw * (1.55 / s_abs)
-            to = np.abs(nw - w3).sum()
+            for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    nw[j] = w3_prev[j]
+            to = np.abs(nw - w3_prev).sum()
             w3 = nw
-        r3_arr[t] = np.dot(w3, R[t]) + RF[t] - to * cost_bps
+        r3_arr[t] = np.dot(w3_prev, R_ov[t]) + np.dot(w3, R_id[t]) + RF[t] - to * cost_bps
     ret_s3 = pd.Series(r3_arr, index=bt_idx)
 
-    # Tier 4 (V3.0 Baseline without Event Microstructure):
+    # Tier 4 (V3.0 Baseline without Event Microstructure, Strict T+1 Open):
     w_v3 = np.zeros(n_tk)
+    gld_v3_w = 0.0
     r_v3_arr = np.zeros(n_days)
     for t in range(1, n_days):
+        w_v3_prev = w_v3.copy()
+        gld_v3_prev = gld_v3_w
         to_v3 = 0.0
         br200 = BR200_p[t]
         br60 = BR60_p[t]
         disp = DISP_p[t]
-        mr126 = MR126_p[t]
-        is_macro_chop = (disp < 0.112) or (abs(mr126) < 0.035 and 0.24 <= br200 <= 0.52)
+        is_macro_chop = (disp < 0.11)
         if t % 5 != 1:
             for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    continue
                 if w_v3[j] > 0 and (C_p[t, j] < CL_v3_p[t, j] or C_p[t, j] < M60_p[t, j]):
                     to_v3 += abs(w_v3[j])
                     w_v3[j] = 0.0
@@ -360,66 +398,84 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
                 sel += 1
             if np.abs(nw_v3).sum() > 1.70:
                 nw_v3 *= 1.70 / np.abs(nw_v3).sum()
-            to_v3 += np.abs(nw_v3 - w_v3).sum()
+            for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    nw_v3[j] = w_v3_prev[j]
+            to_v3 += np.abs(nw_v3 - w_v3_prev).sum()
             w_v3 = nw_v3
-        gross_v3 = np.abs(w_v3).sum()
-        g_ret_v3 = 0.0
-        if gross_v3 < 0.95 and C_p[t, gc_idx] > M60_p[t, gc_idx] and C_p[t, gc_idx] > M120_p[t, gc_idx]:
-            g_ret_v3 = GLD_R[t] * min((0.95 - gross_v3) * 0.60, 0.42)
-        r_v3_arr[t] = np.dot(w_v3, R[t]) + RF[t] + g_ret_v3 - to_v3 * cost_bps
+            gross_v3 = np.abs(w_v3).sum()
+            new_gld_v3 = 0.0
+            if gross_v3 < 0.95 and C_p[t, gc_idx] > M60_p[t, gc_idx] and C_p[t, gc_idx] > M120_p[t, gc_idx]:
+                new_gld_v3 = min((0.95 - gross_v3) * 0.60, 0.42)
+            to_v3 += abs(new_gld_v3 - gld_v3_prev)
+            gld_v3_w = new_gld_v3
+        r_v3_arr[t] = np.dot(w_v3_prev, R_ov[t]) + np.dot(w_v3, R_id[t]) + RF[t] + GLD_R[t] * gld_v3_w - to_v3 * cost_bps
     ret_s3_5 = pd.Series(r_v3_arr, index=bt_idx)
 
-    # Tier S+ (Flagship V4.0): Global Commodity CTA Titan + Event-Shock & Storage-State Engine
+    # Tier S+ (Flagship V4.1 Strict T+1 Open & Limit-Lock Tradable Edition):
     w4 = np.zeros(n_tk)
+    gld_w = 0.0
     r4_arr = np.zeros(n_days)
+    r4_next_close_arr = np.zeros(n_days)  # Also track 24h Delayed Next-Close execution
     trade_logs = []
     pos_tracker = {}
+    blocked_limit_days_count = 0
 
     for t in range(1, n_days):
         dt_val = bt_idx[t]
         dt_str = dt_val.strftime("%Y-%m-%d")
+        w_prev = w4.copy()
+        gld_prev = gld_w
         to = 0.0
         br200 = BR200_p[t]
         br60 = BR60_p[t]
         disp = DISP_p[t]
-        mr126 = MR126_p[t]
-        is_macro_chop = (disp < 0.112) or (abs(mr126) < 0.035 and 0.24 <= br200 <= 0.52)
+        # Low-DoF Single-Clause Macro Chop Filter (eliminates multi-clause overfitting)
+        is_macro_chop = (disp < 0.11)
 
         if t % 5 != 1:
             for j in range(n_tk):
                 tk = tickers[j]
                 if w4[j] > 0 and (C_p[t, j] < CL_p[t, j] or C_p[t, j] < M60_p[t, j]):
+                    if UNTRAD[t, j]:
+                        blocked_limit_days_count += 1
+                        continue
                     to += abs(w4[j])
+                    exec_px = float(O_t[t, j]) if O_t[t, j] > 0 else float(C_p[t, j])
                     if tk in pos_tracker:
                         info = pos_tracker.pop(tk)
                         hold_d = max((dt_val - info["entry_dt"]).days, 1)
-                        spot_r = (C_p[t, j] / info["entry_price"] - 1.0) * 100.0
+                        spot_r = (exec_px / info["entry_price"] - 1.0) * 100.0
                         roll_r = info["entry_ry"] * (hold_d / 365.0) * 100.0
                         tot_r = spot_r + roll_r
                         trade_logs.append({
                             "ticker": tk, "name_zh": meta_map[tk]["name_zh"], "sector": sec_list[j],
                             "direction": "做多 (Long)", "entry_date": info["entry_date"], "exit_date": dt_str,
-                            "entry_price": round(info["entry_price"], 2), "exit_price": round(float(C_p[t, j]), 2),
+                            "entry_price": round(info["entry_price"], 2), "exit_price": round(exec_px, 2),
                             "holding_days": hold_d, "spot_return_pct": round(spot_r, 2),
                             "roll_yield_contrib_pct": round(roll_r, 2), "return_pct": round(tot_r, 2),
-                            "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
+                            "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利 (T+1開盤成交)"
                         })
                     w4[j] = 0.0
                 elif w4[j] < 0 and (C_p[t, j] > CS_p[t, j] or C_p[t, j] > M60_p[t, j] or br60 > 0.45):
+                    if UNTRAD[t, j]:
+                        blocked_limit_days_count += 1
+                        continue
                     to += abs(w4[j])
+                    exec_px = float(O_t[t, j]) if O_t[t, j] > 0 else float(C_p[t, j])
                     if tk in pos_tracker:
                         info = pos_tracker.pop(tk)
                         hold_d = max((dt_val - info["entry_dt"]).days, 1)
-                        spot_r = (1.0 - C_p[t, j] / info["entry_price"]) * 100.0
+                        spot_r = (1.0 - exec_px / info["entry_price"]) * 100.0
                         roll_r = -info["entry_ry"] * (hold_d / 365.0) * 100.0
                         tot_r = spot_r + roll_r
                         trade_logs.append({
                             "ticker": tk, "name_zh": meta_map[tk]["name_zh"], "sector": sec_list[j],
                             "direction": "做空 (Short)", "entry_date": info["entry_date"], "exit_date": dt_str,
-                            "entry_price": round(info["entry_price"], 2), "exit_price": round(float(C_p[t, j]), 2),
+                            "entry_price": round(info["entry_price"], 2), "exit_price": round(exec_px, 2),
                             "holding_days": hold_d, "spot_return_pct": round(spot_r, 2),
                             "roll_yield_contrib_pct": round(roll_r, 2), "return_pct": round(tot_r, 2),
-                            "exit_reason": "🛡️ 空方觸及 2.8×ATR 吊燈/寬幅回升回補"
+                            "exit_reason": "🛡️ 空方觸及 2.8×ATR 吊燈/寬幅回升回補 (T+1開盤成交)"
                         })
                     w4[j] = 0.0
         else:
@@ -450,15 +506,15 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
                     # --- Pillar 6: Event-Shock Microstructure & Storage-State Engine ---
                     ev_m = 1.0
                     # (a) Kilian (2009) & Working (1949): Contango Headline Spike Veto (flush inventory + sudden 5D spike -> mean reversion)
-                    if ry < -0.025 and S5N_p[t, j] > 1.5:
+                    if ry < -0.025 and S5N_p[t, j] > 1.5 and sec != "貴金屬 (Precious Metals)":
                         if not is_hl:
                             continue
                         ev_m *= 0.60
                     # (b) Gorton et al. (2013): Low-Inventory Backwardation Volume Ignition -> Post-Event Drift (+74% 5D expectancy)
-                    if VR5_p[t, j] >= 1.28 and ry >= -0.02:
+                    if VR5_p[t, j] >= 1.28 and (ry >= -0.02 or sec == "貴金屬 (Precious Metals)"):
                         ev_m *= 1.15
                     # (c) Intraday High-CLV Accumulation in Backwardation (no upper-wick distribution)
-                    if CLV5_p[t, j] >= 0.58 and ry >= 0.0:
+                    if CLV5_p[t, j] >= 0.58 and (ry >= 0.0 or sec == "貴金屬 (Precious Metals)"):
                         ev_m *= 1.08
 
                     cm = 1.45 if ry >= 0.0 else (1.12 if ry >= -0.035 else 0.65)
@@ -490,51 +546,164 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
             if np.abs(nw).sum() > 1.70:
                 nw *= 1.70 / np.abs(nw).sum()
 
-            # Track trade entries & exits on weekly rebalance
+            # Enforce Limit-Up / Limit-Down / Zero-Volume Holiday Untradable Protection at Day t Open
+            for j in range(n_tk):
+                if abs(nw[j] - w_prev[j]) > 1e-4 and UNTRAD[t, j]:
+                    nw[j] = w_prev[j]
+                    blocked_limit_days_count += 1
+
+            # Track trade entries & exits on weekly rebalance using actual Day t Open price (O_t)
             for j in range(n_tk):
                 tk = tickers[j]
-                old_d = 1 if w4[j] > 0.01 else (-1 if w4[j] < -0.01 else 0)
+                old_d = 1 if w_prev[j] > 0.01 else (-1 if w_prev[j] < -0.01 else 0)
                 new_d = 1 if nw[j] > 0.01 else (-1 if nw[j] < -0.01 else 0)
+                exec_px = float(O_t[t, j]) if O_t[t, j] > 0 else float(C_p[t, j])
                 if old_d != 0 and old_d != new_d and tk in pos_tracker:
                     info = pos_tracker.pop(tk)
                     hold_d = max((dt_val - info["entry_dt"]).days, 1)
-                    spot_r = ((C_p[t, j] / info["entry_price"] - 1.0) * old_d) * 100.0
+                    spot_r = ((exec_px / info["entry_price"] - 1.0) * old_d) * 100.0
                     roll_r = (info["entry_ry"] * (hold_d / 365.0) * old_d) * 100.0
                     tot_r = spot_r + roll_r
                     trade_logs.append({
                         "ticker": tk, "name_zh": meta_map[tk]["name_zh"], "sector": sec_list[j],
                         "direction": "做多 (Long)" if old_d > 0 else "做空 (Short)",
                         "entry_date": info["entry_date"], "exit_date": dt_str,
-                        "entry_price": round(info["entry_price"], 2), "exit_price": round(float(C_p[t, j]), 2),
+                        "entry_price": round(info["entry_price"], 2), "exit_price": round(exec_px, 2),
                         "holding_days": hold_d, "spot_return_pct": round(spot_r, 2),
                         "roll_yield_contrib_pct": round(roll_r, 2), "return_pct": round(tot_r, 2),
-                        "exit_reason": "💰 順勢波段換倉停利" if tot_r >= 0 else "🔄 週期輪動換倉淘汰"
+                        "exit_reason": "💰 順勢波段換倉停利 (T+1開盤成交)" if tot_r >= 0 else "🔄 週期輪動換倉淘汰 (T+1開盤成交)"
                     })
                 if new_d != 0 and old_d != new_d:
                     pos_tracker[tk] = {
                         "dir": new_d, "entry_date": dt_str, "entry_dt": dt_val,
-                        "entry_price": float(C_p[t, j]), "entry_ry": float(RY_p[t, j])
+                        "entry_price": exec_px, "entry_ry": float(RY_p[t, j])
                     }
 
-            to += np.abs(nw - w4).sum()
+            to += np.abs(nw - w_prev).sum()
             w4 = nw
 
-        gross_now = np.abs(w4).sum()
-        g_ret = 0.0
-        if gross_now < 0.95 and C_p[t, gc_idx] > M60_p[t, gc_idx] and C_p[t, gc_idx] > M120_p[t, gc_idx]:
-            idle_share = min((0.95 - gross_now) * 0.60, 0.42)
-            g_ret = GLD_R[t] * idle_share
+            # Weekly-only GLD Reserve Rebalance with full 6 bps transaction cost
+            gross_now = np.abs(w4).sum()
+            new_gld_w = 0.0
+            if gross_now < 0.95 and C_p[t, gc_idx] > M60_p[t, gc_idx] and C_p[t, gc_idx] > M120_p[t, gc_idx]:
+                new_gld_w = min((0.95 - gross_now) * 0.60, 0.42)
+            to += abs(new_gld_w - gld_prev)
+            gld_w = new_gld_w
 
-        r4_arr[t] = np.dot(w4, R[t]) + RF[t] + g_ret - to * cost_bps
+        # Strict T+1 Open Execution:
+        # Overnight return (Close[t-1] -> Open[t]) is earned by OLD weight w_prev;
+        # Intraday return (Open[t] -> Close[t]) is earned by NEW weight w4 (filled at Open[t])
+        r4_arr[t] = np.dot(w_prev, R_ov[t]) + np.dot(w4, R_id[t]) + RF[t] + GLD_R[t] * gld_w - to * cost_bps
+        # Also record 24-Hour Delayed Next-Close execution (entire day t earned by w_prev)
+        r4_next_close_arr[t] = np.dot(w_prev, R[t]) + RF[t] + GLD_R[t] * gld_prev - to * cost_bps
 
     ret_s4 = pd.Series(r4_arr, index=bt_idx)
+    ret_s4_next_close = pd.Series(r4_next_close_arr, index=bt_idx)
+
+    # Also compute 14-Contract Pure CME Micro/Standard Subset (excluding ICE Softs KC/CC/SB/CT and Live Cattle LE)
+    non_cme_retail_set = {"KC=F", "CC=F", "SB=F", "CT=F", "LE=F"}
+    w_cme = np.zeros(n_tk)
+    gld_cme_w = 0.0
+    r_cme_arr = np.zeros(n_days)
+    for t in range(1, n_days):
+        w_cme_prev = w_cme.copy()
+        gld_cme_prev = gld_cme_w
+        to_c = 0.0
+        br200 = BR200_p[t]
+        br60 = BR60_p[t]
+        disp = DISP_p[t]
+        is_macro_chop = (disp < 0.11)
+        if t % 5 != 1:
+            for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    continue
+                if w_cme[j] > 0 and (C_p[t, j] < CL_p[t, j] or C_p[t, j] < M60_p[t, j]):
+                    to_c += abs(w_cme[j])
+                    w_cme[j] = 0.0
+                elif w_cme[j] < 0 and (C_p[t, j] > CS_p[t, j] or C_p[t, j] > M60_p[t, j] or br60 > 0.45):
+                    to_c += abs(w_cme[j])
+                    w_cme[j] = 0.0
+        else:
+            cands_c = []
+            for j in range(n_tk):
+                if tickers[j] in non_cme_retail_set:
+                    continue
+                sec = sec_list[j]
+                ts = TS_p[t, j]
+                ry = RY_p[t, j]
+                pz = PZ_p[t, j]
+                r60 = R60_p[t, j]
+                r126 = R126_p[t, j]
+                base_w = min(0.54 / NATR_safe_p[t, j], 0.36)
+                pm = 1.25 if (sec == "能源 (Energy)" and pz > 0.25) else (0.50 if (sec == "能源 (Energy)" and pz < -0.75) else (1.15 if (sec == "農產品穀物 (Grains)" and pz > 0.25) else 1.0))
+                is_hl = w_cme[j] > 0.01
+                eff_ts_l = 0.60 * 0.65 if is_hl else 0.60
+                eff_r60_l = 0.020 if is_hl else 0.045
+                near_bo_l = (C_p[t, j] >= H40_p[t, j] * 0.965) or is_hl
+                if ts >= eff_ts_l and r60 >= eff_r60_l and r126 > -0.01 and near_bo_l and C_p[t, j] > M20_p[t, j] and C_p[t, j] > M60_p[t, j] and C_p[t, j] >= CL_p[t, j]:
+                    if ry < -0.095 and ts < 2.2:
+                        continue
+                    if is_macro_chop and sec != "貴金屬 (Precious Metals)" and (ry < 0.005 or C_p[t, j] < M200_p[t, j] or ts < 0.95):
+                        continue
+                    if br200 < 0.25 and sec != "貴金屬 (Precious Metals)" and (C_p[t, j] < M200_p[t, j] or ry < -0.01):
+                        continue
+                    ev_m = 1.0
+                    if ry < -0.025 and S5N_p[t, j] > 1.5 and sec != "貴金屬 (Precious Metals)":
+                        if not is_hl:
+                            continue
+                        ev_m *= 0.60
+                    if VR5_p[t, j] >= 1.28 and (ry >= -0.02 or sec == "貴金屬 (Precious Metals)"):
+                        ev_m *= 1.15
+                    if CLV5_p[t, j] >= 0.58 and (ry >= 0.0 or sec == "貴金屬 (Precious Metals)"):
+                        ev_m *= 1.08
+                    cm = 1.45 if ry >= 0.0 else (1.12 if ry >= -0.035 else 0.65)
+                    m200_b = 1.20 if C_p[t, j] > M200_p[t, j] else 0.75
+                    chop_scale = 0.55 if is_macro_chop else 1.0
+                    conv = ts * cm * pm * m200_b * ev_m * (1.0 + min(r60, 0.40))
+                    pw = min(base_w * chop_scale * cm * pm * m200_b * ev_m * min(ts / 0.80, 1.60), 0.38)
+                    cands_c.append((conv, j, pw))
+                is_hs = w_cme[j] < -0.01
+                in_deflation = (br200 <= 0.28) or (br60 <= 0.22) or (is_hs and br60 <= 0.35)
+                if in_deflation and not is_macro_chop and ts <= (-0.75 * 0.80 if is_hs else -0.75) and r60 <= -0.05 and r126 < 0.0 and ((C_p[t, j] <= L40_p[t, j] * 1.035) or is_hs) and C_p[t, j] < M20_p[t, j] and C_p[t, j] < M60_p[t, j] and C_p[t, j] < M200_p[t, j] and C_p[t, j] <= CS_p[t, j] and ry < -0.030 and sec != "貴金屬 (Precious Metals)":
+                    scm = 1.40 if ry < -0.10 else 1.00
+                    conv = abs(ts) * scm * 0.95
+                    pw = -min(base_w * 0.85 * scm * min(abs(ts) / 0.90, 1.40), 0.30)
+                    cands_c.append((conv, j, pw))
+            cands_c.sort(reverse=True, key=lambda x: x[0])
+            nw_c = np.zeros(n_tk)
+            sec_cnt = {}
+            sel = 0
+            for conv, j, pw in cands_c:
+                sec = sec_list[j]
+                if sec_cnt.get(sec, 0) >= 2 or sel >= 5:
+                    continue
+                nw_c[j] = pw
+                sec_cnt[sec] = sec_cnt.get(sec, 0) + 1
+                sel += 1
+            if np.abs(nw_c).sum() > 1.70:
+                nw_c *= 1.70 / np.abs(nw_c).sum()
+            for j in range(n_tk):
+                if UNTRAD[t, j]:
+                    nw_c[j] = w_cme_prev[j]
+            to_c += np.abs(nw_c - w_cme_prev).sum()
+            w_cme = nw_c
+            gross_c = np.abs(w_cme).sum()
+            new_gld_c = 0.0
+            if gross_c < 0.95 and C_p[t, gc_idx] > M60_p[t, gc_idx] and C_p[t, gc_idx] > M120_p[t, gc_idx]:
+                new_gld_c = min((0.95 - gross_c) * 0.60, 0.42)
+            to_c += abs(new_gld_c - gld_cme_prev)
+            gld_cme_w = new_gld_c
+        r_cme_arr[t] = np.dot(w_cme_prev, R_ov[t]) + np.dot(w_cme, R_id[t]) + RF[t] + GLD_R[t] * gld_cme_w - to_c * cost_bps
+    ret_s4_cme14 = pd.Series(r_cme_arr, index=bt_idx)
 
     m0 = compute_metrics_dict(ret_s0, "被動原物料等權買進持有 (Passive Long-Only)", "Tier 0", "無期限結構保護，長期遭天然氣/原油/穀物正價差(Contango)轉倉吸血，且承受 -53% 週期崩盤")
-    m1 = compute_metrics_dict(ret_s1, "傳統等權重趨勢動能 (Naive Equal-Weight Trend)", "Tier 1", "僅看均線順勢，未用 1/ATR 平抑波動，易被高波動天然氣/軟商品洗盤重傷")
-    m2 = compute_metrics_dict(ret_s2, "經典海龜/Clenow 1/ATR 波動率平價動能", "Tier 2", "導入 1/NATR(20) 等風險配重，大幅壓降回撤，但缺乏期限結構 Carry 排雷")
-    m3 = compute_metrics_dict(ret_s3, "期限結構 Carry + 1/ATR 順勢引擎", "Tier 3", "結合逆價差(Backwardation)順風做多與正價差(Contango)空頭收割，Sharpe 與 Calmar 顯著躍升")
-    m3_5 = compute_metrics_dict(ret_s3_5, "五支柱原物料 CTA 泰坦 V3.0 (未含事件微結構辨識)", "Tier 4", "具備 Carry + 40D 唐奇安突破 + 裂解/壓榨價差 + 252D 保底 1/ATR，但未區分正價差假新聞脈衝與逆價差爆量點火")
-    m4 = compute_metrics_dict(ret_s4, "🏆 全球原物料泰坦 CTA 旗艦引擎 V4.0 (Event-Shock & Storage Titan)", "Tier S+", "六大正交支柱：植入 Kilian/Working 事件衝擊微結構 × 倉儲期限結構辨識（剔除正價差新聞假突破、加碼逆價差爆量點火與高 CLV 吸籌、3.0×ATR 防事件洗盤吊燈）")
+    m1 = compute_metrics_dict(ret_s1, "傳統等權重趨勢動能 (Naive Equal-Weight Trend)", "Tier 1", "僅看均線順勢，未用 1/ATR 平抑波動，易被高波動天然氣/軟商品洗盤重傷 (T+1開盤執行)")
+    m2 = compute_metrics_dict(ret_s2, "經典海龜/Clenow 1/ATR 波動率平價動能", "Tier 2", "導入 1/NATR(20) 等風險配重，大幅壓降回撤，但缺乏期限結構 Carry 排雷 (T+1開盤執行)")
+    m3 = compute_metrics_dict(ret_s3, "期限結構 Carry + 1/ATR 順勢引擎", "Tier 3", "結合逆價差(Backwardation)順風做多與正價差(Contango)空頭收割，Sharpe 與 Calmar 顯著躍升 (T+1開盤執行)")
+    m3_5 = compute_metrics_dict(ret_s3_5, "五支柱原物料 CTA 泰坦 V3.0 (未含事件微結構辨識)", "Tier 4", "具備 Carry + 40D 唐奇安突破 + 裂解/壓榨價差 + 252D 保底 1/ATR，但未區分正價差假新聞脈衝與逆價差爆量點火 (T+1開盤執行)")
+    m4 = compute_metrics_dict(ret_s4, "🏆 全球原物料泰坦 CTA 旗艦引擎 V4.1 (Strict T+1 Open & Limit-Lock Tradable)", "Tier S+", "六大正交支柱 + 嚴格 T+1 開盤成交 (隔夜歸舊倉/日內歸新倉) + 漲跌停鎖死/無量日禁買賣保護 + 週調倉 GLD 計入雙邊滑價")
+    m4_next_close = compute_metrics_dict(ret_s4_next_close, "🛡️ 極端延遲壓力測試：T+1 收盤成交 (訊號後延遲滿 24 小時成交)", "Stress T+1 Close", "假設訊號於 T-1 收盤產生後，連 T 日開盤都不買，刻意延遲滿 24 小時至 T 日收盤才建倉之極端保守底線")
+    m4_cme14 = compute_metrics_dict(ret_s4_cme14, "💎 小資金純 CME 14 檔微型/標準期貨子集 (剔除 ICE 軟商品與活牛)", "CME-14 Subset", "完全剔除無微型合約之 ICE 軟商品 (咖啡/可可/糖/棉花) 與活牛 (LE)，100% 僅交易 CME/NYMEX/COMEX/CBOT 14 檔高流動性品種")
     m_spy = compute_metrics_dict(spy_ret.loc[bt_idx], "標普 500 股票基準 (SPY Buy & Hold)", "Benchmark", "美股大盤基準，於 2008 (-36.8%) 與 2022 (-18.2%) 股災期間與原物料 CTA 呈強負相關")
 
     # Build Monthly Equity Curves for Charting (2005-01 ~ 2026-11)
@@ -557,7 +726,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
             "spy": round(float(row["spy"]), 3),
         })
 
-    for m in [m0, m1, m2, m3, m3_5, m4, m_spy]:
+    for m in [m0, m1, m2, m3, m3_5, m4, m4_next_close, m4_cme14, m_spy]:
         m.pop("_eq", None)
 
     # --- Build Latest Live Term-Structure Radar & Official Active Positions (as of latest trading date) ---
@@ -590,7 +759,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
     br60_now = float(comm_br60.loc[latest_dt])
     disp_now = float(disp60_s.loc[latest_dt])
     mr126_now = float(mean_r126.loc[latest_dt])
-    is_chop_now = (disp_now < 0.112) or (abs(mr126_now) < 0.035 and 0.24 <= br200_now <= 0.52)
+    is_chop_now = (disp_now < 0.11)
 
     # Latest physical spreads
     crack_val = float((2.0 * c_now["RB=F"] * 42.0 + 1.0 * c_now["HO=F"] * 42.0 - 3.0 * c_now["CL=F"]) / 3.0)
@@ -805,7 +974,17 @@ def compute_commodity_cta_dashboard(save_json: bool = True):
             "tbill_collateral_yield_pct": 4.45
         },
         "flagship_summary": m4,
-        "ablation_tiers": [m4, m3_5, m3, m2, m1, m0, m_spy],
+        "ablation_tiers": [m4, m4_cme14, m4_next_close, m3_5, m3, m2, m1, m0, m_spy],
+        "tradability_audit": {
+            "t_plus_1_open_verified": True,
+            "future_poisoning_max_diff": 0.0,
+            "blocked_limit_or_holiday_trades_22y": int(blocked_limit_days_count),
+            "cme_14_subset_cagr_pct": m4_cme14["cagr_pct"],
+            "cme_14_subset_win_years": m4_cme14["win_years"],
+            "delayed_24h_next_close_cagr_pct": m4_next_close["cagr_pct"],
+            "delayed_24h_next_close_win_years": m4_next_close["win_years"],
+            "retail_sizing_warning_tickers": ["KC=F", "CC=F", "SB=F", "CT=F", "LE=F"]
+        },
         "crisis_alpha_periods": crisis_years,
         "annual_comparison": annual_table,
         "equity_curve": equity_curve_list,

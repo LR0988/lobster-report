@@ -53,17 +53,8 @@ for tk, grp in daily_df.groupby("ticker"):
     s_high_ser = pd.Series(s_high, index=idx)
     s_low_ser = pd.Series(s_low, index=idx)
 
-    # 2. Clean 1-day isolated bad data spikes (where |r_t| > 10% and reverses > 60% the next day)
-    raw_ret = s_close_ser.pct_change().fillna(0.0)
-    next_ret = raw_ret.shift(-1).fillna(0.0)
-    bad_reversal = (raw_ret.abs() > 0.10) & ((raw_ret * next_ret) < -0.008)
-    for dt_bad in idx[bad_reversal]:
-        loc_i = idx.get_loc(dt_bad)
-        if loc_i > 0:
-            s_close_ser.iloc[loc_i] = s_close_ser.iloc[loc_i - 1]
-            s_open_ser.iloc[loc_i] = s_close_ser.iloc[loc_i - 1]
-            s_high_ser.iloc[loc_i] = s_close_ser.iloc[loc_i - 1]
-            s_low_ser.iloc[loc_i] = s_close_ser.iloc[loc_i - 1]
+    # Note: Zero future-looking (.shift(-1)) data cleaning is permitted (Point-in-Time strict compliance).
+    # Only contemporaneous broken bars where Close falls outside [Low, High] are repaired above.
 
     # Recompute True Range & ATR(20)
     prev_c = s_close_ser.shift(1)
