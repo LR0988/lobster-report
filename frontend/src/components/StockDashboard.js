@@ -8441,64 +8441,74 @@ function StockDashboard() {
               </div>
             </div>
 
-            {/* 2. 一鍵全局立即更新控制列 */}
-            <div className="db-quick-bar">
-              <div>
-                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>⚡ 爬蟲即時控制與資料庫同步</span>
+            {/* 2. 一鍵全局立即更新控制列 (單一總控按鈕，免除多按鈕繁瑣操作) */}
+            <div className="db-quick-bar" style={{
+              background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95))',
+              border: '1px solid rgba(59, 130, 246, 0.35)',
+              borderRadius: '14px',
+              padding: '1.25rem 1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1.2rem'
+            }}>
+              <div style={{ flex: '1 1 480px' }}>
+                <h3 style={{ margin: '0 0 0.4rem 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#F8FAFC' }}>
+                  <span>🚀 一鍵全自動更新全部資料庫與雙泰坦實盤訊號</span>
+                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '999px', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
+                    9 大模組全自動串聯
+                  </span>
                 </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  點擊下方按鈕將立即啟動背景非同步爬蟲，自動連線交易所補齊最新市場資料。
+                <p style={{ margin: '0 0 0.6rem 0', fontSize: '0.86rem', color: '#94A3B8', lineHeight: '1.5' }}>
+                  無須分開點擊多個按鈕！點擊右側單一總控按鈕，系統即自動依序完成全市場 24 張資料表補齊、重算策略訊號並同步至雲端：
                 </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', fontSize: '0.76rem' }}>
+                  {[
+                    '① 台股日K/法人/期貨',
+                    '② 全市場最新月營收',
+                    '③ 集保千張大戶籌碼',
+                    '④ 大盤加權指數与廣度',
+                    '⑤ 總經與原油裂解價差',
+                    '⑥ 選擇權 P/C Ratio',
+                    '⑦ 全球18國ETF與美股S&P500',
+                    '⑧ 重算台股母子艦隊＆全球泰坦',
+                    '⑨ 同步 Supabase 雲端快取'
+                  ].map((stepLabel, idx) => (
+                    <span key={idx} style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#CBD5E1'
+                    }}>
+                      {stepLabel}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="db-quick-buttons">
+              <div className="db-quick-buttons" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <button
                   className="db-btn-update"
-                  onClick={() => handleTriggerDbScraper('daily', '全市場所有數據 (台股+法人+大盤+總經+期權+全球泰坦)', 'daily_stock')}
+                  style={{
+                    padding: '0.85rem 1.6rem',
+                    fontSize: '1.02rem',
+                    fontWeight: 'bold',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #2563EB, #06B6D4)',
+                    boxShadow: '0 6px 20px rgba(37, 99, 235, 0.4)'
+                  }}
+                  onClick={() => handleTriggerDbScraper('all', '全資料庫 24 表與雙泰坦訊號一鍵全量更新', 'all_tables')}
                   disabled={dbUpdatingTableId !== null}
                 >
-                  {dbUpdatingTableId === 'daily_stock' || dbUpdatingTableId === 'global_daily' ? (
+                  {dbUpdatingTableId !== null ? (
                     <>
-                      <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
-                      <span>全市場更新中...</span>
+                      <span className="loader" style={{ width: '16px', height: '16px', borderWidth: '2px' }}></span>
+                      <span>正在一鍵全量更新中...</span>
                     </>
                   ) : (
                     <>
-                      <span>🌐 立即更新全市場所有數據 (台股/法人/期權/全球泰坦/總經)</span>
-                    </>
-                  )}
-                </button>
-                <button
-                  className="db-btn-update"
-                  style={{ background: 'linear-gradient(135deg, #2563EB, #3B82F6)' }}
-                  onClick={() => handleTriggerDbScraper('global_sovereign', '全球泰坦 18 國主權 ETF 與 228 檔旗艦個股', 'global_stock_daily')}
-                  disabled={dbUpdatingTableId !== null}
-                >
-                  {dbUpdatingTableId === 'global_stock_daily' || dbUpdatingTableId === 'global_sovereign_daily' ? (
-                    <>
-                      <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
-                      <span>更新全球泰坦中...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>🌍 立即更新全球泰坦 (主權ETF+跨國個股)</span>
-                    </>
-                  )}
-                </button>
-                <button
-                  className="db-btn-update"
-                  style={{ background: 'linear-gradient(135deg, #059669, #10B981)' }}
-                  onClick={() => handleTriggerDbScraper('revenue', '全市場最新月營收公告', 'monthly_revenue')}
-                  disabled={dbUpdatingTableId !== null}
-                >
-                  {dbUpdatingTableId === 'monthly_revenue' ? (
-                    <>
-                      <span className="loader" style={{ width: '14px', height: '14px', borderWidth: '2px' }}></span>
-                      <span>抓取營收中...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>📈 立即更新最新月營收</span>
+                      <span>🚀 一鍵更新全部資料庫 (台股/月營收/法人/集保/全球泰坦/雲端)</span>
                     </>
                   )}
                 </button>
@@ -8506,7 +8516,7 @@ function StockDashboard() {
                   className="btn btn-secondary"
                   onClick={fetchDbStatus}
                   title="重新整理資料庫與爬蟲狀態"
-                  style={{ padding: '0.6rem 0.9rem', fontSize: '0.88rem' }}
+                  style={{ padding: '0.8rem 1rem', fontSize: '0.9rem' }}
                 >
                   🔄 刷新狀態
                 </button>
@@ -8703,7 +8713,7 @@ function StockDashboard() {
                   <div>
                     <h3 style={{ margin: '0 0 0.25rem 0' }}>🗄️ 所有資料庫資料表狀態清單</h3>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                      請點選任一資料表進入詳細瀏覽（支援全量百萬筆資料伺服器端分頁翻頁、精準篩選與欄位排序），或點擊「立即更新」觸發對應資料庫同步。
+                      請點選任一資料表進入詳細瀏覽（支援全量百萬筆資料伺服器端分頁翻頁、精準篩選與欄位排序）。如需更新數據，請直接點擊上方「🚀 一鍵更新全部資料庫」按鈕。
                     </p>
                   </div>
                   {/* 分類篩選按鈕 */}
@@ -8818,15 +8828,6 @@ function StockDashboard() {
                           >
                             🔍 檢視資料表 ({(table.row_count || 0).toLocaleString()} 筆)
                           </button>
-                          <button
-                            className="btn btn-secondary"
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
-                            onClick={() => handleTriggerDbScraper(table.task_type, table.name, table.id)}
-                            disabled={dbUpdatingTableId === table.id}
-                            title={`立即觸發 ${table.name} 更新任務`}
-                          >
-                            {dbUpdatingTableId === table.id ? '⏳ 更新中' : '⚡ 立即更新'}
-                          </button>
                         </div>
                       </div>
                     ))}
@@ -8893,18 +8894,6 @@ function StockDashboard() {
                         </option>
                       ))}
                     </select>
-
-                    <button
-                      className="db-btn-update"
-                      style={{ padding: '0.45rem 0.9rem', fontSize: '0.85rem' }}
-                      onClick={() => {
-                        const curTable = dbTablesList.find(t => t.id === activeDbTable);
-                        handleTriggerDbScraper(curTable?.task_type || 'daily', curTable?.name || activeDbTable, activeDbTable);
-                      }}
-                      disabled={dbUpdatingTableId === activeDbTable}
-                    >
-                      {dbUpdatingTableId === activeDbTable ? '⏳ 抓取更新中...' : '⚡ 立即更新此表'}
-                    </button>
 
                     <button
                       className="btn btn-secondary"

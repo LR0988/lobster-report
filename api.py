@@ -1160,12 +1160,28 @@ def run_scraper_task(task_type: str):
         pass
     try:
         if task_type in ('daily', 'all'):
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'daily_stock', '台股每日個股行情與法人期貨 (TWSE/TPEx/TAIFEX)', '步驟 1/7：正在連線臺灣證交所、櫃買中心與期交所爬取今日全市場價量、三大法人與期貨未平倉...', 1, 7, 14)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'daily_stock', '步驟 1/9：台股每日個股行情與法人期貨 (TWSE/TPEx/TAIFEX)', '步驟 1/9：正在連線臺灣證交所、櫃買中心與期交所爬取今日全市場價量、三大法人與期貨未平倉...', 1, 9, 10)
             print("[*] [API Scraper] 正在執行每日個股爬蟲 (TWSE + TPEx + 三大法人 + 期貨)...")
             scraper.main()
             add_scraper_log("✓ 台股上市櫃每日價量、三大法人與期貨數據已寫入 daily_stock / institutional_trades / institutional_futures")
+
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'monthly_revenue', '步驟 2/9：全市場最新月營收公告 (monthly_revenue)', '步驟 2/9：正在爬取公開資訊觀測站全市場最新月營收與 YoY/MoM 年月增率...', 2, 9, 22)
+            try:
+                scraper.fetch_and_save_revenue()
+                add_scraper_log("✓ 全市場最新月營收公告已寫入 monthly_revenue")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 更新月營收警告: {e}")
+                print(f"[x] [API Scraper] 更新月營收失敗: {e}")
+
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'shareholder_concentration', '步驟 3/9：集保股權分散千張大戶籌碼 (shareholder_concentration)', '步驟 3/9：正在自臺灣集中保管結算所抓取最新集保股權分散大戶籌碼...', 3, 9, 33)
+            try:
+                scraper.fetch_tdcc_concentration()
+                add_scraper_log("✓ 最新集保股權分散千張大戶籌碼已寫入 shareholder_concentration")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 更新集保股權分散警告: {e}")
+                print(f"[x] [API Scraper] 更新集保股權分散失敗: {e}")
             
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'daily_index', '大盤加權指數與市場廣度 (daily_index / market_breadth)', '步驟 2/7：正在更新大盤加權指數 (TAIEX) 歷史走勢與漲跌家數市場廣度...', 2, 7, 28)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'daily_index', '步驟 4/9：大盤加權指數與市場廣度 (daily_index / market_breadth)', '步驟 4/9：正在更新大盤加權指數 (TAIEX) 歷史走勢與漲跌家數市場廣度...', 4, 9, 44)
             try:
                 import sync_market_index
                 sync_market_index.sync_taiex_to_sqlite(range_param="1mo")
@@ -1175,17 +1191,17 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步大盤指數警告: {e}")
                 print(f"[x] [API Scraper] 同步大盤指數失敗: {e}")
                 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'macro_indicators', '宏觀跨市場指標 (macro_indicators)', '步驟 3/7：正在同步美國 10 年期公債殖利率、美元指數、費半、原油等 16 項跨市場指標...', 3, 7, 42)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'macro_indicators', '步驟 5/9：宏觀跨市場指標與裂解價差 (macro_indicators)', '步驟 5/9：正在同步美債殖利率、美元指數、費半、WTI原油與3-2-1裂解價差等跨市場指標...', 5, 9, 55)
             try:
                 import sync_macro_indicators
                 sync_macro_indicators.sync_macro_to_sqlite(range_param="1mo")
-                add_scraper_log("✓ 宏觀跨市場指標同步完成並寫入 macro_indicators")
+                add_scraper_log("✓ 宏觀跨市場指標與原油裂解價差同步完成並寫入 macro_indicators")
                 print("[✓] [API Scraper] 宏觀跨市場指標同步完成")
             except Exception as e:
                 add_scraper_log(f"⚠️ 同步宏觀指標警告: {e}")
                 print(f"[x] [API Scraper] 同步宏觀指標失敗: {e}")
                 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'options_pc_ratio', '臺指選擇權 P/C Ratio (options_pc_ratio)', '步驟 4/7：正在自期交所抓取選擇權 Put/Call Ratio 籌碼多空指標...', 4, 7, 56)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'options_pc_ratio', '步驟 6/9：臺指選擇權 P/C Ratio (options_pc_ratio)', '步驟 6/9：正在自期交所抓取選擇權 Put/Call Ratio 籌碼多空指標...', 6, 9, 65)
             try:
                 import sync_options_pc_ratio
                 sync_options_pc_ratio.sync_options_pc_ratio()
@@ -1195,7 +1211,7 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步選擇權 P/C Ratio 警告: {e}")
                 print(f"[x] [API Scraper] 同步選擇權 P/C Ratio 失敗: {e}")
 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_sovereign_daily', '全球主權泰坦 18 國 ETF (global_sovereign_daily)', '步驟 5/7：正在連線抓取全球 18 國主權 ETF (SPY, QQQ, EWT, EWY, EWJ 等) 最新日K行情...', 5, 7, 70)
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_sovereign_daily', '步驟 7/9：全球主權 18 國 ETF 與美股 S&P 500 PIT 池 (global_sovereign / global_stock)', '步驟 7/9：正在連線抓取全球 18 國主權 ETF 與美股 S&P 500 PIT / 台股旗艦池最新收盤行情...', 7, 9, 78)
             try:
                 import sync_global_sovereign
                 sync_global_sovereign.sync_global_sovereign_history(full_history=False)
@@ -1205,7 +1221,6 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步全球主權 ETF 警告: {e}")
                 print(f"[x] [API Scraper] 同步全球主權 ETF 失敗: {e}")
 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'global_stock_daily', 'S&P 500 PIT 成分股與台股 0050∪0051 純上市池 (global_stock_daily)', '步驟 6/7：正在連線抓取美股 S&P 500 PIT 成分股與交叉補齊台股 0050∪0051 純上市池最新行情並更新實盤現價...', 6, 7, 85)
             try:
                 import sync_global_titan_stocks
                 sync_global_titan_stocks.download_and_save(full_history=False)
@@ -1215,19 +1230,27 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步全球泰坦個股警告: {e}")
                 print(f"[x] [API Scraper] 同步全球泰坦個股失敗: {e}")
                 
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'titan_signals', '步驟 8/9：重算台股大凹洞母子艦隊 & 全球因果泰坦最新訊號', '步驟 8/9：正在以最新資料庫重算「台股因果泰坦 (大凹洞母子艦隊)」與「全球主權泰坦 2.0」實盤訊號...', 8, 9, 88)
             try:
                 import exp264_titan_sync
-                add_scraper_log("⏳ 正在以最新資料庫重算台股因果泰坦 (exp_264，上限1億)...")
+                add_scraper_log("⏳ 正在以最新資料庫重算台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT)...")
                 add_scraper_log("✓ " + exp264_titan_sync.run())
             except Exception as e:
-                add_scraper_log(f"⚠️ 台股因果泰坦 (exp_264) 更新警告: {e}")
+                add_scraper_log(f"⚠️ 台股因果泰坦更新警告: {e}")
                 print(f"[x] [API Scraper] 台股因果泰坦更新失敗: {e}")
 
-            set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '全資料庫雲端預覽快照、泰坦實盤與總筆數同步', '步驟 7/7：正在將全市場 24 表最新快照、全球泰坦看板與實盤持倉報價同步至雲端 Supabase...', 7, 7, 95)
+            try:
+                import global_sovereign_service
+                global_sovereign_service.get_global_sovereign_dashboard_data(force_refresh=True)
+                add_scraper_log("✓ 全球高流動性主權泰坦 2.0 最新報價與實盤持倉已同步刷新")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 全球主權泰坦刷新警告: {e}")
+
+            set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '步驟 9/9：全資料庫雲端預覽快照、雙泰坦看板與總筆數同步', '步驟 9/9：正在將全市場 24 表最新快照、台股母子艦隊與全球泰坦看板同步至雲端 Supabase...', 9, 9, 96)
             try:
                 from stock_sync import run_full_sync
                 run_full_sync()
-                add_scraper_log("✓ 雲端 Supabase 快照、全球泰坦看板與即時資料量同步完成")
+                add_scraper_log("✓ 雲端 Supabase 快照、台股母子艦隊與全球泰坦看板同步完成")
                 print("[✓] [API Scraper] 雲端 Supabase 同步完成")
             except Exception as e:
                 add_scraper_log(f"⚠️ 同步雲端快照警告: {e}")
@@ -1238,7 +1261,7 @@ def run_scraper_task(task_type: str):
             except Exception as e:
                 print(f"[x] [API Scraper] 警示檢查失敗: {e}")
                 
-            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'daily_stock', '全市場與全球泰坦更新完成', '🎉 今日台股全市場、三大法人、大盤總經、選擇權與全球泰坦旗艦數據已全數同步更新完成！', 7, 7, 100, status="success")
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'all_tables', '全資料庫與雙泰坦一鍵更新完成', '🎉 台股價量、月營收、法人期權、集保大戶、全球主權ETF、美股S&P500與雙泰坦策略訊號已全數一鍵更新完成！', 9, 9, 100, status="success")
             invalidate_db_status_cache()
 
         elif task_type == 'revenue':
@@ -1408,7 +1431,8 @@ def start_scraper(task_type: str, background_tasks: BackgroundTasks):
         raise HTTPException(status_code=400, detail=f"Invalid task type: {task_type}")
     
     table_map = {
-        'daily': ('daily_stock', '台股每日個股行情 (TWSE/TPEx)'),
+        'all': ('all_tables', '全資料庫 24 表與雙泰坦訊號一鍵全量更新'),
+        'daily': ('all_tables', '全資料庫 24 表與雙泰坦訊號一鍵全量更新'),
         'revenue': ('monthly_revenue', '全市場最新月營收'),
         'global_stock': ('global_stock_daily', '全球泰坦旗艦資產'),
         'global_stock_daily': ('global_stock_daily', '全球泰坦旗艦資產'),
