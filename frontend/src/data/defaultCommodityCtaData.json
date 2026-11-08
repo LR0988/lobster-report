@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "updated_at": "2026-11-08 20:21:51",
+  "updated_at": "2026-11-08 21:54:41",
   "market_date": "2026-11-06",
   "db_source": "tw_stock.db (commodity_futures_daily: 108,522 筆 & commodity_futures_metadata: 19 大主力合約)",
   "macro_regime": {
@@ -16,51 +16,93 @@
   },
   "flagship_summary": {
     "tier": "Tier S+",
-    "name": "🏆 全球原物料泰坦 CTA 旗艦引擎 (Flagship CTA Titan)",
-    "desc": "五大正交支柱：期限結構 Carry × 多週期 TSMOM + 40D 唐奇安突破 × 裂解/壓榨價差催化 × 252D 保底 1/ATR 配重 × 不對稱通縮放空與低離散度護盾",
-    "cagr_pct": 16.79,
-    "total_multiple": 29.68,
-    "mdd_monthly_pct": -23.53,
-    "mdd_daily_pct": -25.85,
-    "sharpe": 0.81,
-    "sortino": 1.0,
-    "calmar": 0.71,
-    "ann_vol_pct": 19.0,
-    "monthly_win_rate_pct": 54.6,
+    "name": "🏆 全球原物料泰坦 CTA 旗艦引擎 V4.0 (Event-Shock & Storage Titan)",
+    "desc": "六大正交支柱：植入 Kilian/Working 事件衝擊微結構 × 倉儲期限結構辨識（剔除正價差新聞假突破、加碼逆價差爆量點火與高 CLV 吸籌、3.0×ATR 防事件洗盤吊燈）",
+    "cagr_pct": 18.25,
+    "total_multiple": 38.95,
+    "mdd_monthly_pct": -22.45,
+    "mdd_daily_pct": -25.51,
+    "sharpe": 0.86,
+    "sortino": 1.06,
+    "calmar": 0.81,
+    "ann_vol_pct": 19.48,
+    "monthly_win_rate_pct": 55.0,
     "win_years": "20/22",
     "win_years_pct": 90.9,
-    "g1_cagr_pct": 18.96,
-    "g2_cagr_pct": 14.62,
+    "g1_cagr_pct": 19.09,
+    "g2_cagr_pct": 17.4,
     "annual_returns": {
-      "2005": 25.51,
-      "2006": 22.42,
-      "2007": 29.99,
-      "2008": 81.57,
-      "2009": 7.48,
-      "2010": 25.78,
-      "2011": 11.93,
-      "2012": 8.84,
-      "2013": -1.89,
-      "2014": 10.29,
-      "2015": 4.67,
-      "2016": 4.48,
-      "2017": 2.58,
-      "2018": -6.57,
-      "2019": 3.04,
-      "2020": 27.33,
-      "2021": 20.12,
-      "2022": 8.38,
-      "2023": 12.1,
-      "2024": 59.53,
-      "2025": 30.44,
-      "2026": 9.94
+      "2005": 24.78,
+      "2006": 25.44,
+      "2007": 23.71,
+      "2008": 80.99,
+      "2009": 9.72,
+      "2010": 26.83,
+      "2011": 18.89,
+      "2012": 7.76,
+      "2013": -2.41,
+      "2014": 10.42,
+      "2015": 1.67,
+      "2016": 3.87,
+      "2017": 3.69,
+      "2018": -6.31,
+      "2019": 2.6,
+      "2020": 39.06,
+      "2021": 15.48,
+      "2022": 25.96,
+      "2023": 12.54,
+      "2024": 67.76,
+      "2025": 28.38,
+      "2026": 12.08
     }
   },
   "ablation_tiers": [
     {
       "tier": "Tier S+",
-      "name": "🏆 全球原物料泰坦 CTA 旗艦引擎 (Flagship CTA Titan)",
-      "desc": "五大正交支柱：期限結構 Carry × 多週期 TSMOM + 40D 唐奇安突破 × 裂解/壓榨價差催化 × 252D 保底 1/ATR 配重 × 不對稱通縮放空與低離散度護盾",
+      "name": "🏆 全球原物料泰坦 CTA 旗艦引擎 V4.0 (Event-Shock & Storage Titan)",
+      "desc": "六大正交支柱：植入 Kilian/Working 事件衝擊微結構 × 倉儲期限結構辨識（剔除正價差新聞假突破、加碼逆價差爆量點火與高 CLV 吸籌、3.0×ATR 防事件洗盤吊燈）",
+      "cagr_pct": 18.25,
+      "total_multiple": 38.95,
+      "mdd_monthly_pct": -22.45,
+      "mdd_daily_pct": -25.51,
+      "sharpe": 0.86,
+      "sortino": 1.06,
+      "calmar": 0.81,
+      "ann_vol_pct": 19.48,
+      "monthly_win_rate_pct": 55.0,
+      "win_years": "20/22",
+      "win_years_pct": 90.9,
+      "g1_cagr_pct": 19.09,
+      "g2_cagr_pct": 17.4,
+      "annual_returns": {
+        "2005": 24.78,
+        "2006": 25.44,
+        "2007": 23.71,
+        "2008": 80.99,
+        "2009": 9.72,
+        "2010": 26.83,
+        "2011": 18.89,
+        "2012": 7.76,
+        "2013": -2.41,
+        "2014": 10.42,
+        "2015": 1.67,
+        "2016": 3.87,
+        "2017": 3.69,
+        "2018": -6.31,
+        "2019": 2.6,
+        "2020": 39.06,
+        "2021": 15.48,
+        "2022": 25.96,
+        "2023": 12.54,
+        "2024": 67.76,
+        "2025": 28.38,
+        "2026": 12.08
+      }
+    },
+    {
+      "tier": "Tier 4",
+      "name": "五支柱原物料 CTA 泰坦 V3.0 (未含事件微結構辨識)",
+      "desc": "具備 Carry + 40D 唐奇安突破 + 裂解/壓榨價差 + 252D 保底 1/ATR，但未區分正價差假新聞脈衝與逆價差爆量點火",
       "cagr_pct": 16.79,
       "total_multiple": 29.68,
       "mdd_monthly_pct": -23.53,
@@ -315,7 +357,7 @@
       "period": "2008 全球金融海嘯",
       "year": "2008",
       "desc": "原油上半年飆至 $147 後崩盤、黃金避險與空頭正價差收割雙擊",
-      "cta_pct": 81.57,
+      "cta_pct": 80.99,
       "passive_pct": -29.19,
       "spy_pct": -36.8
     },
@@ -323,7 +365,7 @@
       "period": "2010–2011 量化寬鬆通膨潮",
       "year": "2010",
       "desc": "QE2 點火黃金、白銀($49)、棉花與穀物多頭主升段",
-      "cta_pct": 25.78,
+      "cta_pct": 26.83,
       "passive_pct": 31.84,
       "spy_pct": 15.06
     },
@@ -331,7 +373,7 @@
       "period": "2014–2015 頁岩油供給崩盤",
       "year": "2014",
       "desc": "原油與農產品深正價差崩跌，不對稱通縮放空引擎完美收割",
-      "cta_pct": 10.29,
+      "cta_pct": 10.42,
       "passive_pct": -14.65,
       "spy_pct": 13.46
     },
@@ -339,7 +381,7 @@
       "period": "2020 疫情熔斷與負油價風暴",
       "year": "2020",
       "desc": "提前換月避開 4 月 WTI 交割異常，下半年精準捕捉貴金屬與銅穀物 V 轉",
-      "cta_pct": 27.33,
+      "cta_pct": 39.06,
       "passive_pct": 18.94,
       "spy_pct": 18.33
     },
@@ -347,7 +389,7 @@
       "period": "2022 暴力升息股債雙殺熊市",
       "year": "2022",
       "desc": "俄烏戰爭能源/小麥逆價差暴衝，在標普大跌 -18% 下創造 Crisis Alpha",
-      "cta_pct": 8.38,
+      "cta_pct": 25.96,
       "passive_pct": 14.03,
       "spy_pct": -18.18
     },
@@ -355,7 +397,7 @@
       "period": "2024–2026 黃金與軟商品超級週期",
       "year": "2024",
       "desc": "央行購金推升黃金突破 $4,000、可可與咖啡供給斷裂逆價差狂飆",
-      "cta_pct": 59.53,
+      "cta_pct": 67.76,
       "passive_pct": 9.84,
       "spy_pct": 24.89
     }
@@ -363,7 +405,7 @@
   "annual_comparison": [
     {
       "year": "2005",
-      "cta_titan_pct": 25.51,
+      "cta_titan_pct": 24.78,
       "carry_atr_pct": 3.37,
       "vol_parity_pct": 7.61,
       "passive_comm_pct": 13.09,
@@ -371,7 +413,7 @@
     },
     {
       "year": "2006",
-      "cta_titan_pct": 22.42,
+      "cta_titan_pct": 25.44,
       "carry_atr_pct": 20.94,
       "vol_parity_pct": 16.19,
       "passive_comm_pct": 0.87,
@@ -379,7 +421,7 @@
     },
     {
       "year": "2007",
-      "cta_titan_pct": 29.99,
+      "cta_titan_pct": 23.71,
       "carry_atr_pct": 37.96,
       "vol_parity_pct": 34.27,
       "passive_comm_pct": 31.82,
@@ -387,7 +429,7 @@
     },
     {
       "year": "2008",
-      "cta_titan_pct": 81.57,
+      "cta_titan_pct": 80.99,
       "carry_atr_pct": 72.45,
       "vol_parity_pct": 55.54,
       "passive_comm_pct": -29.19,
@@ -395,7 +437,7 @@
     },
     {
       "year": "2009",
-      "cta_titan_pct": 7.48,
+      "cta_titan_pct": 9.72,
       "carry_atr_pct": -5.38,
       "vol_parity_pct": -3.32,
       "passive_comm_pct": 28.23,
@@ -403,7 +445,7 @@
     },
     {
       "year": "2010",
-      "cta_titan_pct": 25.78,
+      "cta_titan_pct": 26.83,
       "carry_atr_pct": 21.15,
       "vol_parity_pct": 31.26,
       "passive_comm_pct": 31.84,
@@ -411,7 +453,7 @@
     },
     {
       "year": "2011",
-      "cta_titan_pct": 11.93,
+      "cta_titan_pct": 18.89,
       "carry_atr_pct": 10.87,
       "vol_parity_pct": -5.1,
       "passive_comm_pct": -6.42,
@@ -419,7 +461,7 @@
     },
     {
       "year": "2012",
-      "cta_titan_pct": 8.84,
+      "cta_titan_pct": 7.76,
       "carry_atr_pct": 6.18,
       "vol_parity_pct": 2.93,
       "passive_comm_pct": 1.01,
@@ -427,7 +469,7 @@
     },
     {
       "year": "2013",
-      "cta_titan_pct": -1.89,
+      "cta_titan_pct": -2.41,
       "carry_atr_pct": -1.68,
       "vol_parity_pct": 2.69,
       "passive_comm_pct": -5.13,
@@ -435,7 +477,7 @@
     },
     {
       "year": "2014",
-      "cta_titan_pct": 10.29,
+      "cta_titan_pct": 10.42,
       "carry_atr_pct": 18.74,
       "vol_parity_pct": 21.5,
       "passive_comm_pct": -14.65,
@@ -443,7 +485,7 @@
     },
     {
       "year": "2015",
-      "cta_titan_pct": 4.67,
+      "cta_titan_pct": 1.67,
       "carry_atr_pct": -11.94,
       "vol_parity_pct": -11.05,
       "passive_comm_pct": -18.72,
@@ -451,7 +493,7 @@
     },
     {
       "year": "2016",
-      "cta_titan_pct": 4.48,
+      "cta_titan_pct": 3.87,
       "carry_atr_pct": 13.01,
       "vol_parity_pct": 2.31,
       "passive_comm_pct": 13.61,
@@ -459,7 +501,7 @@
     },
     {
       "year": "2017",
-      "cta_titan_pct": 2.58,
+      "cta_titan_pct": 3.69,
       "carry_atr_pct": -13.44,
       "vol_parity_pct": -12.7,
       "passive_comm_pct": 0.26,
@@ -467,7 +509,7 @@
     },
     {
       "year": "2018",
-      "cta_titan_pct": -6.57,
+      "cta_titan_pct": -6.31,
       "carry_atr_pct": -9.74,
       "vol_parity_pct": -10.12,
       "passive_comm_pct": -10.02,
@@ -475,7 +517,7 @@
     },
     {
       "year": "2019",
-      "cta_titan_pct": 3.04,
+      "cta_titan_pct": 2.6,
       "carry_atr_pct": -6.92,
       "vol_parity_pct": -7.84,
       "passive_comm_pct": 5.38,
@@ -483,7 +525,7 @@
     },
     {
       "year": "2020",
-      "cta_titan_pct": 27.33,
+      "cta_titan_pct": 39.06,
       "carry_atr_pct": 49.06,
       "vol_parity_pct": 41.07,
       "passive_comm_pct": 18.94,
@@ -491,7 +533,7 @@
     },
     {
       "year": "2021",
-      "cta_titan_pct": 20.12,
+      "cta_titan_pct": 15.48,
       "carry_atr_pct": 18.46,
       "vol_parity_pct": 26.48,
       "passive_comm_pct": 29.86,
@@ -499,7 +541,7 @@
     },
     {
       "year": "2022",
-      "cta_titan_pct": 8.38,
+      "cta_titan_pct": 25.96,
       "carry_atr_pct": 6.7,
       "vol_parity_pct": 18.33,
       "passive_comm_pct": 14.03,
@@ -507,7 +549,7 @@
     },
     {
       "year": "2023",
-      "cta_titan_pct": 12.1,
+      "cta_titan_pct": 12.54,
       "carry_atr_pct": 7.67,
       "vol_parity_pct": 9.0,
       "passive_comm_pct": -3.3,
@@ -515,7 +557,7 @@
     },
     {
       "year": "2024",
-      "cta_titan_pct": 59.53,
+      "cta_titan_pct": 67.76,
       "carry_atr_pct": 49.73,
       "vol_parity_pct": 30.47,
       "passive_comm_pct": 9.84,
@@ -523,7 +565,7 @@
     },
     {
       "year": "2025",
-      "cta_titan_pct": 30.44,
+      "cta_titan_pct": 28.38,
       "carry_atr_pct": 17.03,
       "vol_parity_pct": 19.23,
       "passive_comm_pct": 7.19,
@@ -531,7 +573,7 @@
     },
     {
       "year": "2026",
-      "cta_titan_pct": 9.94,
+      "cta_titan_pct": 12.08,
       "carry_atr_pct": 3.65,
       "vol_parity_pct": 4.01,
       "passive_comm_pct": 21.37,
@@ -549,7 +591,7 @@
     },
     {
       "date": "2005-02",
-      "cta_titan": 1.052,
+      "cta_titan": 1.056,
       "carry_atr": 0.94,
       "vol_parity": 0.96,
       "passive_comm": 1.06,
@@ -557,7 +599,7 @@
     },
     {
       "date": "2005-03",
-      "cta_titan": 1.069,
+      "cta_titan": 1.077,
       "carry_atr": 0.962,
       "vol_parity": 0.981,
       "passive_comm": 1.092,
@@ -565,7 +607,7 @@
     },
     {
       "date": "2005-04",
-      "cta_titan": 1.003,
+      "cta_titan": 1.007,
       "carry_atr": 0.883,
       "vol_parity": 0.897,
       "passive_comm": 1.056,
@@ -573,7 +615,7 @@
     },
     {
       "date": "2005-05",
-      "cta_titan": 0.984,
+      "cta_titan": 0.987,
       "carry_atr": 0.859,
       "vol_parity": 0.873,
       "passive_comm": 1.061,
@@ -581,7 +623,7 @@
     },
     {
       "date": "2005-06",
-      "cta_titan": 0.983,
+      "cta_titan": 0.976,
       "carry_atr": 0.843,
       "vol_parity": 0.855,
       "passive_comm": 1.085,
@@ -589,7 +631,7 @@
     },
     {
       "date": "2005-07",
-      "cta_titan": 0.977,
+      "cta_titan": 0.97,
       "carry_atr": 0.856,
       "vol_parity": 0.869,
       "passive_comm": 1.112,
@@ -597,7 +639,7 @@
     },
     {
       "date": "2005-08",
-      "cta_titan": 1.12,
+      "cta_titan": 1.114,
       "carry_atr": 0.941,
       "vol_parity": 0.934,
       "passive_comm": 1.125,
@@ -605,7 +647,7 @@
     },
     {
       "date": "2005-09",
-      "cta_titan": 1.124,
+      "cta_titan": 1.118,
       "carry_atr": 0.926,
       "vol_parity": 0.951,
       "passive_comm": 1.14,
@@ -613,7 +655,7 @@
     },
     {
       "date": "2005-10",
-      "cta_titan": 1.122,
+      "cta_titan": 1.126,
       "carry_atr": 0.944,
       "vol_parity": 0.967,
       "passive_comm": 1.097,
@@ -621,7 +663,7 @@
     },
     {
       "date": "2005-11",
-      "cta_titan": 1.19,
+      "cta_titan": 1.197,
       "carry_atr": 1.006,
       "vol_parity": 1.046,
       "passive_comm": 1.091,
@@ -629,7 +671,7 @@
     },
     {
       "date": "2005-12",
-      "cta_titan": 1.255,
+      "cta_titan": 1.248,
       "carry_atr": 1.034,
       "vol_parity": 1.076,
       "passive_comm": 1.131,
@@ -637,7 +679,7 @@
     },
     {
       "date": "2006-01",
-      "cta_titan": 1.322,
+      "cta_titan": 1.306,
       "carry_atr": 1.106,
       "vol_parity": 1.162,
       "passive_comm": 1.168,
@@ -645,7 +687,7 @@
     },
     {
       "date": "2006-02",
-      "cta_titan": 1.307,
+      "cta_titan": 1.291,
       "carry_atr": 1.084,
       "vol_parity": 1.127,
       "passive_comm": 1.124,
@@ -653,7 +695,7 @@
     },
     {
       "date": "2006-03",
-      "cta_titan": 1.41,
+      "cta_titan": 1.395,
       "carry_atr": 1.192,
       "vol_parity": 1.223,
       "passive_comm": 1.147,
@@ -661,7 +703,7 @@
     },
     {
       "date": "2006-04",
-      "cta_titan": 1.617,
+      "cta_titan": 1.595,
       "carry_atr": 1.37,
       "vol_parity": 1.377,
       "passive_comm": 1.187,
@@ -669,7 +711,7 @@
     },
     {
       "date": "2006-05",
-      "cta_titan": 1.627,
+      "cta_titan": 1.637,
       "carry_atr": 1.432,
       "vol_parity": 1.434,
       "passive_comm": 1.187,
@@ -677,7 +719,7 @@
     },
     {
       "date": "2006-06",
-      "cta_titan": 1.618,
+      "cta_titan": 1.628,
       "carry_atr": 1.449,
       "vol_parity": 1.384,
       "passive_comm": 1.186,
@@ -685,7 +727,7 @@
     },
     {
       "date": "2006-07",
-      "cta_titan": 1.536,
+      "cta_titan": 1.558,
       "carry_atr": 1.376,
       "vol_parity": 1.344,
       "passive_comm": 1.186,
@@ -693,7 +735,7 @@
     },
     {
       "date": "2006-08",
-      "cta_titan": 1.494,
+      "cta_titan": 1.516,
       "carry_atr": 1.419,
       "vol_parity": 1.358,
       "passive_comm": 1.136,
@@ -701,7 +743,7 @@
     },
     {
       "date": "2006-09",
-      "cta_titan": 1.442,
+      "cta_titan": 1.464,
       "carry_atr": 1.299,
       "vol_parity": 1.294,
       "passive_comm": 1.08,
@@ -709,7 +751,7 @@
     },
     {
       "date": "2006-10",
-      "cta_titan": 1.488,
+      "cta_titan": 1.513,
       "carry_atr": 1.303,
       "vol_parity": 1.281,
       "passive_comm": 1.116,
@@ -717,7 +759,7 @@
     },
     {
       "date": "2006-11",
-      "cta_titan": 1.623,
+      "cta_titan": 1.651,
       "carry_atr": 1.366,
       "vol_parity": 1.326,
       "passive_comm": 1.18,
@@ -725,7 +767,7 @@
     },
     {
       "date": "2006-12",
-      "cta_titan": 1.536,
+      "cta_titan": 1.565,
       "carry_atr": 1.25,
       "vol_parity": 1.25,
       "passive_comm": 1.141,
@@ -733,7 +775,7 @@
     },
     {
       "date": "2007-01",
-      "cta_titan": 1.441,
+      "cta_titan": 1.456,
       "carry_atr": 1.19,
       "vol_parity": 1.225,
       "passive_comm": 1.131,
@@ -741,7 +783,7 @@
     },
     {
       "date": "2007-02",
-      "cta_titan": 1.487,
+      "cta_titan": 1.495,
       "carry_atr": 1.247,
       "vol_parity": 1.27,
       "passive_comm": 1.185,
@@ -749,7 +791,7 @@
     },
     {
       "date": "2007-03",
-      "cta_titan": 1.478,
+      "cta_titan": 1.464,
       "carry_atr": 1.228,
       "vol_parity": 1.257,
       "passive_comm": 1.192,
@@ -757,7 +799,7 @@
     },
     {
       "date": "2007-04",
-      "cta_titan": 1.496,
+      "cta_titan": 1.488,
       "carry_atr": 1.27,
       "vol_parity": 1.314,
       "passive_comm": 1.201,
@@ -765,7 +807,7 @@
     },
     {
       "date": "2007-05",
-      "cta_titan": 1.516,
+      "cta_titan": 1.482,
       "carry_atr": 1.26,
       "vol_parity": 1.303,
       "passive_comm": 1.224,
@@ -773,7 +815,7 @@
     },
     {
       "date": "2007-06",
-      "cta_titan": 1.483,
+      "cta_titan": 1.451,
       "carry_atr": 1.257,
       "vol_parity": 1.318,
       "passive_comm": 1.242,
@@ -781,7 +823,7 @@
     },
     {
       "date": "2007-07",
-      "cta_titan": 1.476,
+      "cta_titan": 1.449,
       "carry_atr": 1.273,
       "vol_parity": 1.35,
       "passive_comm": 1.274,
@@ -789,7 +831,7 @@
     },
     {
       "date": "2007-08",
-      "cta_titan": 1.502,
+      "cta_titan": 1.47,
       "carry_atr": 1.288,
       "vol_parity": 1.301,
       "passive_comm": 1.26,
@@ -797,7 +839,7 @@
     },
     {
       "date": "2007-09",
-      "cta_titan": 1.741,
+      "cta_titan": 1.707,
       "carry_atr": 1.473,
       "vol_parity": 1.459,
       "passive_comm": 1.376,
@@ -805,7 +847,7 @@
     },
     {
       "date": "2007-10",
-      "cta_titan": 1.772,
+      "cta_titan": 1.727,
       "carry_atr": 1.54,
       "vol_parity": 1.528,
       "passive_comm": 1.425,
@@ -813,7 +855,7 @@
     },
     {
       "date": "2007-11",
-      "cta_titan": 1.809,
+      "cta_titan": 1.748,
       "carry_atr": 1.53,
       "vol_parity": 1.53,
       "passive_comm": 1.417,
@@ -821,7 +863,7 @@
     },
     {
       "date": "2007-12",
-      "cta_titan": 1.997,
+      "cta_titan": 1.936,
       "carry_atr": 1.725,
       "vol_parity": 1.679,
       "passive_comm": 1.504,
@@ -829,7 +871,7 @@
     },
     {
       "date": "2008-01",
-      "cta_titan": 2.095,
+      "cta_titan": 2.064,
       "carry_atr": 1.931,
       "vol_parity": 1.861,
       "passive_comm": 1.573,
@@ -837,7 +879,7 @@
     },
     {
       "date": "2008-02",
-      "cta_titan": 2.614,
+      "cta_titan": 2.575,
       "carry_atr": 2.238,
       "vol_parity": 2.154,
       "passive_comm": 1.766,
@@ -845,7 +887,7 @@
     },
     {
       "date": "2008-03",
-      "cta_titan": 2.258,
+      "cta_titan": 2.197,
       "carry_atr": 1.962,
       "vol_parity": 1.97,
       "passive_comm": 1.629,
@@ -853,7 +895,7 @@
     },
     {
       "date": "2008-04",
-      "cta_titan": 2.335,
+      "cta_titan": 2.28,
       "carry_atr": 1.967,
       "vol_parity": 2.036,
       "passive_comm": 1.704,
@@ -861,7 +903,7 @@
     },
     {
       "date": "2008-05",
-      "cta_titan": 2.452,
+      "cta_titan": 2.395,
       "carry_atr": 2.197,
       "vol_parity": 2.25,
       "passive_comm": 1.768,
@@ -869,7 +911,7 @@
     },
     {
       "date": "2008-06",
-      "cta_titan": 2.856,
+      "cta_titan": 2.862,
       "carry_atr": 2.599,
       "vol_parity": 2.624,
       "passive_comm": 1.965,
@@ -877,7 +919,7 @@
     },
     {
       "date": "2008-07",
-      "cta_titan": 2.586,
+      "cta_titan": 2.561,
       "carry_atr": 2.392,
       "vol_parity": 2.231,
       "passive_comm": 1.796,
@@ -885,7 +927,7 @@
     },
     {
       "date": "2008-08",
-      "cta_titan": 2.55,
+      "cta_titan": 2.524,
       "carry_atr": 2.362,
       "vol_parity": 2.213,
       "passive_comm": 1.71,
@@ -893,7 +935,7 @@
     },
     {
       "date": "2008-09",
-      "cta_titan": 2.517,
+      "cta_titan": 2.492,
       "carry_atr": 2.315,
       "vol_parity": 2.182,
       "passive_comm": 1.499,
@@ -901,7 +943,7 @@
     },
     {
       "date": "2008-10",
-      "cta_titan": 3.122,
+      "cta_titan": 3.091,
       "carry_atr": 2.756,
       "vol_parity": 2.477,
       "passive_comm": 1.168,
@@ -909,7 +951,7 @@
     },
     {
       "date": "2008-11",
-      "cta_titan": 3.286,
+      "cta_titan": 3.253,
       "carry_atr": 2.868,
       "vol_parity": 2.543,
       "passive_comm": 1.092,
@@ -917,7 +959,7 @@
     },
     {
       "date": "2008-12",
-      "cta_titan": 3.626,
+      "cta_titan": 3.504,
       "carry_atr": 2.974,
       "vol_parity": 2.611,
       "passive_comm": 1.065,
@@ -925,7 +967,7 @@
     },
     {
       "date": "2009-01",
-      "cta_titan": 3.681,
+      "cta_titan": 3.557,
       "carry_atr": 2.926,
       "vol_parity": 2.586,
       "passive_comm": 1.073,
@@ -933,7 +975,7 @@
     },
     {
       "date": "2009-02",
-      "cta_titan": 3.664,
+      "cta_titan": 3.532,
       "carry_atr": 2.891,
       "vol_parity": 2.553,
       "passive_comm": 1.035,
@@ -941,7 +983,7 @@
     },
     {
       "date": "2009-03",
-      "cta_titan": 3.627,
+      "cta_titan": 3.496,
       "carry_atr": 2.825,
       "vol_parity": 2.511,
       "passive_comm": 1.069,
@@ -949,7 +991,7 @@
     },
     {
       "date": "2009-04",
-      "cta_titan": 3.648,
+      "cta_titan": 3.516,
       "carry_atr": 2.845,
       "vol_parity": 2.523,
       "passive_comm": 1.099,
@@ -957,7 +999,7 @@
     },
     {
       "date": "2009-05",
-      "cta_titan": 3.961,
+      "cta_titan": 3.822,
       "carry_atr": 3.028,
       "vol_parity": 2.657,
       "passive_comm": 1.255,
@@ -965,7 +1007,7 @@
     },
     {
       "date": "2009-06",
-      "cta_titan": 3.721,
+      "cta_titan": 3.573,
       "carry_atr": 2.796,
       "vol_parity": 2.547,
       "passive_comm": 1.215,
@@ -973,7 +1015,7 @@
     },
     {
       "date": "2009-07",
-      "cta_titan": 3.819,
+      "cta_titan": 3.667,
       "carry_atr": 2.714,
       "vol_parity": 2.43,
       "passive_comm": 1.23,
@@ -981,7 +1023,7 @@
     },
     {
       "date": "2009-08",
-      "cta_titan": 4.02,
+      "cta_titan": 3.84,
       "carry_atr": 2.871,
       "vol_parity": 2.498,
       "passive_comm": 1.238,
@@ -989,7 +1031,7 @@
     },
     {
       "date": "2009-09",
-      "cta_titan": 3.787,
+      "cta_titan": 3.644,
       "carry_atr": 2.765,
       "vol_parity": 2.479,
       "passive_comm": 1.235,
@@ -997,7 +1039,7 @@
     },
     {
       "date": "2009-10",
-      "cta_titan": 3.738,
+      "cta_titan": 3.696,
       "carry_atr": 2.691,
       "vol_parity": 2.421,
       "passive_comm": 1.289,
@@ -1005,7 +1047,7 @@
     },
     {
       "date": "2009-11",
-      "cta_titan": 3.908,
+      "cta_titan": 3.862,
       "carry_atr": 2.842,
       "vol_parity": 2.567,
       "passive_comm": 1.342,
@@ -1013,7 +1055,7 @@
     },
     {
       "date": "2009-12",
-      "cta_titan": 3.898,
+      "cta_titan": 3.845,
       "carry_atr": 2.814,
       "vol_parity": 2.525,
       "passive_comm": 1.365,
@@ -1021,7 +1063,7 @@
     },
     {
       "date": "2010-01",
-      "cta_titan": 3.841,
+      "cta_titan": 3.782,
       "carry_atr": 2.678,
       "vol_parity": 2.319,
       "passive_comm": 1.286,
@@ -1029,7 +1071,7 @@
     },
     {
       "date": "2010-02",
-      "cta_titan": 3.761,
+      "cta_titan": 3.703,
       "carry_atr": 2.669,
       "vol_parity": 2.324,
       "passive_comm": 1.321,
@@ -1037,7 +1079,7 @@
     },
     {
       "date": "2010-03",
-      "cta_titan": 3.754,
+      "cta_titan": 3.686,
       "carry_atr": 2.775,
       "vol_parity": 2.429,
       "passive_comm": 1.291,
@@ -1045,7 +1087,7 @@
     },
     {
       "date": "2010-04",
-      "cta_titan": 3.882,
+      "cta_titan": 3.801,
       "carry_atr": 2.869,
       "vol_parity": 2.509,
       "passive_comm": 1.339,
@@ -1053,7 +1095,7 @@
     },
     {
       "date": "2010-05",
-      "cta_titan": 3.719,
+      "cta_titan": 3.633,
       "carry_atr": 2.559,
       "vol_parity": 2.31,
       "passive_comm": 1.272,
@@ -1061,7 +1103,7 @@
     },
     {
       "date": "2010-06",
-      "cta_titan": 3.784,
+      "cta_titan": 3.701,
       "carry_atr": 2.536,
       "vol_parity": 2.296,
       "passive_comm": 1.31,
@@ -1069,7 +1111,7 @@
     },
     {
       "date": "2010-07",
-      "cta_titan": 3.649,
+      "cta_titan": 3.559,
       "carry_atr": 2.593,
       "vol_parity": 2.387,
       "passive_comm": 1.417,
@@ -1077,7 +1119,7 @@
     },
     {
       "date": "2010-08",
-      "cta_titan": 3.525,
+      "cta_titan": 3.497,
       "carry_atr": 2.591,
       "vol_parity": 2.391,
       "passive_comm": 1.388,
@@ -1085,7 +1127,7 @@
     },
     {
       "date": "2010-09",
-      "cta_titan": 4.177,
+      "cta_titan": 4.144,
       "carry_atr": 2.853,
       "vol_parity": 2.64,
       "passive_comm": 1.504,
@@ -1093,7 +1135,7 @@
     },
     {
       "date": "2010-10",
-      "cta_titan": 4.423,
+      "cta_titan": 4.386,
       "carry_atr": 3.036,
       "vol_parity": 2.83,
       "passive_comm": 1.591,
@@ -1101,7 +1143,7 @@
     },
     {
       "date": "2010-11",
-      "cta_titan": 4.434,
+      "cta_titan": 4.342,
       "carry_atr": 3.036,
       "vol_parity": 2.882,
       "passive_comm": 1.617,
@@ -1109,7 +1151,7 @@
     },
     {
       "date": "2010-12",
-      "cta_titan": 4.902,
+      "cta_titan": 4.877,
       "carry_atr": 3.409,
       "vol_parity": 3.314,
       "passive_comm": 1.8,
@@ -1117,7 +1159,7 @@
     },
     {
       "date": "2011-01",
-      "cta_titan": 4.923,
+      "cta_titan": 4.947,
       "carry_atr": 3.525,
       "vol_parity": 3.414,
       "passive_comm": 1.857,
@@ -1125,7 +1167,7 @@
     },
     {
       "date": "2011-02",
-      "cta_titan": 5.37,
+      "cta_titan": 5.573,
       "carry_atr": 3.861,
       "vol_parity": 3.663,
       "passive_comm": 1.949,
@@ -1133,7 +1175,7 @@
     },
     {
       "date": "2011-03",
-      "cta_titan": 5.738,
+      "cta_titan": 5.942,
       "carry_atr": 4.077,
       "vol_parity": 3.805,
       "passive_comm": 1.991,
@@ -1141,7 +1183,7 @@
     },
     {
       "date": "2011-04",
-      "cta_titan": 6.611,
+      "cta_titan": 6.931,
       "carry_atr": 4.495,
       "vol_parity": 4.094,
       "passive_comm": 2.056,
@@ -1149,7 +1191,7 @@
     },
     {
       "date": "2011-05",
-      "cta_titan": 5.49,
+      "cta_titan": 5.759,
       "carry_atr": 4.015,
       "vol_parity": 3.524,
       "passive_comm": 1.961,
@@ -1157,7 +1199,7 @@
     },
     {
       "date": "2011-06",
-      "cta_titan": 5.226,
+      "cta_titan": 5.474,
       "carry_atr": 3.941,
       "vol_parity": 3.472,
       "passive_comm": 1.904,
@@ -1165,7 +1207,7 @@
     },
     {
       "date": "2011-07",
-      "cta_titan": 5.418,
+      "cta_titan": 5.676,
       "carry_atr": 4.024,
       "vol_parity": 3.527,
       "passive_comm": 1.938,
@@ -1173,7 +1215,7 @@
     },
     {
       "date": "2011-08",
-      "cta_titan": 5.672,
+      "cta_titan": 5.995,
       "carry_atr": 4.074,
       "vol_parity": 3.567,
       "passive_comm": 2.0,
@@ -1181,7 +1223,7 @@
     },
     {
       "date": "2011-09",
-      "cta_titan": 5.325,
+      "cta_titan": 5.626,
       "carry_atr": 3.902,
       "vol_parity": 3.278,
       "passive_comm": 1.728,
@@ -1189,7 +1231,7 @@
     },
     {
       "date": "2011-10",
-      "cta_titan": 5.284,
+      "cta_titan": 5.582,
       "carry_atr": 3.681,
       "vol_parity": 3.11,
       "passive_comm": 1.803,
@@ -1197,7 +1239,7 @@
     },
     {
       "date": "2011-11",
-      "cta_titan": 5.101,
+      "cta_titan": 5.39,
       "carry_atr": 3.742,
       "vol_parity": 3.168,
       "passive_comm": 1.73,
@@ -1205,7 +1247,7 @@
     },
     {
       "date": "2011-12",
-      "cta_titan": 5.488,
+      "cta_titan": 5.798,
       "carry_atr": 3.78,
       "vol_parity": 3.145,
       "passive_comm": 1.684,
@@ -1213,7 +1255,7 @@
     },
     {
       "date": "2012-01",
-      "cta_titan": 5.524,
+      "cta_titan": 5.837,
       "carry_atr": 3.768,
       "vol_parity": 3.136,
       "passive_comm": 1.734,
@@ -1221,7 +1263,7 @@
     },
     {
       "date": "2012-02",
-      "cta_titan": 5.587,
+      "cta_titan": 5.903,
       "carry_atr": 3.862,
       "vol_parity": 3.213,
       "passive_comm": 1.797,
@@ -1229,7 +1271,7 @@
     },
     {
       "date": "2012-03",
-      "cta_titan": 5.73,
+      "cta_titan": 6.054,
       "carry_atr": 4.106,
       "vol_parity": 3.39,
       "passive_comm": 1.753,
@@ -1237,7 +1279,7 @@
     },
     {
       "date": "2012-04",
-      "cta_titan": 6.088,
+      "cta_titan": 6.432,
       "carry_atr": 4.389,
       "vol_parity": 3.505,
       "passive_comm": 1.743,
@@ -1245,7 +1287,7 @@
     },
     {
       "date": "2012-05",
-      "cta_titan": 6.054,
+      "cta_titan": 6.38,
       "carry_atr": 4.36,
       "vol_parity": 3.511,
       "passive_comm": 1.588,
@@ -1253,7 +1295,7 @@
     },
     {
       "date": "2012-06",
-      "cta_titan": 6.131,
+      "cta_titan": 6.459,
       "carry_atr": 4.155,
       "vol_parity": 3.45,
       "passive_comm": 1.671,
@@ -1261,7 +1303,7 @@
     },
     {
       "date": "2012-07",
-      "cta_titan": 6.988,
+      "cta_titan": 7.367,
       "carry_atr": 4.695,
       "vol_parity": 3.749,
       "passive_comm": 1.782,
@@ -1269,7 +1311,7 @@
     },
     {
       "date": "2012-08",
-      "cta_titan": 6.857,
+      "cta_titan": 7.234,
       "carry_atr": 4.593,
       "vol_parity": 3.783,
       "passive_comm": 1.822,
@@ -1277,7 +1319,7 @@
     },
     {
       "date": "2012-09",
-      "cta_titan": 6.356,
+      "cta_titan": 6.685,
       "carry_atr": 4.405,
       "vol_parity": 3.604,
       "passive_comm": 1.82,
@@ -1285,7 +1327,7 @@
     },
     {
       "date": "2012-10",
-      "cta_titan": 6.172,
+      "cta_titan": 6.458,
       "carry_atr": 4.16,
       "vol_parity": 3.355,
       "passive_comm": 1.757,
@@ -1293,7 +1335,7 @@
     },
     {
       "date": "2012-11",
-      "cta_titan": 5.974,
+      "cta_titan": 6.249,
       "carry_atr": 4.074,
       "vol_parity": 3.281,
       "passive_comm": 1.742,
@@ -1301,7 +1343,7 @@
     },
     {
       "date": "2012-12",
-      "cta_titan": 5.973,
+      "cta_titan": 6.248,
       "carry_atr": 4.014,
       "vol_parity": 3.237,
       "passive_comm": 1.701,
@@ -1309,7 +1351,7 @@
     },
     {
       "date": "2013-01",
-      "cta_titan": 5.945,
+      "cta_titan": 6.219,
       "carry_atr": 4.0,
       "vol_parity": 3.255,
       "passive_comm": 1.752,
@@ -1317,7 +1359,7 @@
     },
     {
       "date": "2013-02",
-      "cta_titan": 5.89,
+      "cta_titan": 6.16,
       "carry_atr": 3.869,
       "vol_parity": 3.175,
       "passive_comm": 1.694,
@@ -1325,7 +1367,7 @@
     },
     {
       "date": "2013-03",
-      "cta_titan": 5.905,
+      "cta_titan": 6.157,
       "carry_atr": 3.81,
       "vol_parity": 3.159,
       "passive_comm": 1.692,
@@ -1333,7 +1375,7 @@
     },
     {
       "date": "2013-04",
-      "cta_titan": 5.903,
+      "cta_titan": 6.156,
       "carry_atr": 3.653,
       "vol_parity": 3.137,
       "passive_comm": 1.659,
@@ -1341,7 +1383,7 @@
     },
     {
       "date": "2013-05",
-      "cta_titan": 5.905,
+      "cta_titan": 6.157,
       "carry_atr": 3.688,
       "vol_parity": 3.13,
       "passive_comm": 1.639,
@@ -1349,7 +1391,7 @@
     },
     {
       "date": "2013-06",
-      "cta_titan": 6.04,
+      "cta_titan": 6.294,
       "carry_atr": 3.901,
       "vol_parity": 3.285,
       "passive_comm": 1.61,
@@ -1357,7 +1399,7 @@
     },
     {
       "date": "2013-07",
-      "cta_titan": 6.267,
+      "cta_titan": 6.536,
       "carry_atr": 4.088,
       "vol_parity": 3.395,
       "passive_comm": 1.63,
@@ -1365,7 +1407,7 @@
     },
     {
       "date": "2013-08",
-      "cta_titan": 6.125,
+      "cta_titan": 6.38,
       "carry_atr": 3.808,
       "vol_parity": 3.227,
       "passive_comm": 1.672,
@@ -1373,7 +1415,7 @@
     },
     {
       "date": "2013-09",
-      "cta_titan": 6.038,
+      "cta_titan": 6.285,
       "carry_atr": 3.778,
       "vol_parity": 3.213,
       "passive_comm": 1.626,
@@ -1381,7 +1423,7 @@
     },
     {
       "date": "2013-10",
-      "cta_titan": 5.913,
+      "cta_titan": 6.154,
       "carry_atr": 3.819,
       "vol_parity": 3.235,
       "passive_comm": 1.608,
@@ -1389,7 +1431,7 @@
     },
     {
       "date": "2013-11",
-      "cta_titan": 5.883,
+      "cta_titan": 6.122,
       "carry_atr": 3.891,
       "vol_parity": 3.303,
       "passive_comm": 1.607,
@@ -1397,7 +1439,7 @@
     },
     {
       "date": "2013-12",
-      "cta_titan": 5.86,
+      "cta_titan": 6.097,
       "carry_atr": 3.946,
       "vol_parity": 3.324,
       "passive_comm": 1.614,
@@ -1405,7 +1447,7 @@
     },
     {
       "date": "2014-01",
-      "cta_titan": 5.894,
+      "cta_titan": 6.133,
       "carry_atr": 4.067,
       "vol_parity": 3.374,
       "passive_comm": 1.621,
@@ -1413,7 +1455,7 @@
     },
     {
       "date": "2014-02",
-      "cta_titan": 6.396,
+      "cta_titan": 6.624,
       "carry_atr": 4.246,
       "vol_parity": 3.544,
       "passive_comm": 1.734,
@@ -1421,7 +1463,7 @@
     },
     {
       "date": "2014-03",
-      "cta_titan": 6.227,
+      "cta_titan": 6.445,
       "carry_atr": 4.003,
       "vol_parity": 3.508,
       "passive_comm": 1.739,
@@ -1429,7 +1471,7 @@
     },
     {
       "date": "2014-04",
-      "cta_titan": 6.296,
+      "cta_titan": 6.554,
       "carry_atr": 3.947,
       "vol_parity": 3.52,
       "passive_comm": 1.777,
@@ -1437,7 +1479,7 @@
     },
     {
       "date": "2014-05",
-      "cta_titan": 5.966,
+      "cta_titan": 6.211,
       "carry_atr": 3.854,
       "vol_parity": 3.393,
       "passive_comm": 1.724,
@@ -1445,7 +1487,7 @@
     },
     {
       "date": "2014-06",
-      "cta_titan": 5.851,
+      "cta_titan": 6.091,
       "carry_atr": 3.904,
       "vol_parity": 3.404,
       "passive_comm": 1.716,
@@ -1453,7 +1495,7 @@
     },
     {
       "date": "2014-07",
-      "cta_titan": 5.738,
+      "cta_titan": 6.009,
       "carry_atr": 4.092,
       "vol_parity": 3.586,
       "passive_comm": 1.624,
@@ -1461,7 +1503,7 @@
     },
     {
       "date": "2014-08",
-      "cta_titan": 5.679,
+      "cta_titan": 5.948,
       "carry_atr": 4.003,
       "vol_parity": 3.567,
       "passive_comm": 1.625,
@@ -1469,7 +1511,7 @@
     },
     {
       "date": "2014-09",
-      "cta_titan": 6.018,
+      "cta_titan": 6.302,
       "carry_atr": 4.281,
       "vol_parity": 3.751,
       "passive_comm": 1.536,
@@ -1477,7 +1519,7 @@
     },
     {
       "date": "2014-10",
-      "cta_titan": 5.687,
+      "cta_titan": 5.952,
       "carry_atr": 4.264,
       "vol_parity": 3.805,
       "passive_comm": 1.551,
@@ -1485,7 +1527,7 @@
     },
     {
       "date": "2014-11",
-      "cta_titan": 5.955,
+      "cta_titan": 6.232,
       "carry_atr": 4.442,
       "vol_parity": 3.962,
       "passive_comm": 1.49,
@@ -1493,7 +1535,7 @@
     },
     {
       "date": "2014-12",
-      "cta_titan": 6.463,
+      "cta_titan": 6.733,
       "carry_atr": 4.686,
       "vol_parity": 4.039,
       "passive_comm": 1.378,
@@ -1501,7 +1543,7 @@
     },
     {
       "date": "2015-01",
-      "cta_titan": 6.855,
+      "cta_titan": 7.142,
       "carry_atr": 4.789,
       "vol_parity": 4.076,
       "passive_comm": 1.313,
@@ -1509,7 +1551,7 @@
     },
     {
       "date": "2015-02",
-      "cta_titan": 6.399,
+      "cta_titan": 6.624,
       "carry_atr": 4.55,
       "vol_parity": 3.914,
       "passive_comm": 1.383,
@@ -1517,7 +1559,7 @@
     },
     {
       "date": "2015-03",
-      "cta_titan": 6.548,
+      "cta_titan": 6.779,
       "carry_atr": 4.533,
       "vol_parity": 3.886,
       "passive_comm": 1.298,
@@ -1525,7 +1567,7 @@
     },
     {
       "date": "2015-04",
-      "cta_titan": 6.416,
+      "cta_titan": 6.643,
       "carry_atr": 4.37,
       "vol_parity": 3.801,
       "passive_comm": 1.352,
@@ -1533,7 +1575,7 @@
     },
     {
       "date": "2015-05",
-      "cta_titan": 6.396,
+      "cta_titan": 6.621,
       "carry_atr": 4.311,
       "vol_parity": 3.759,
       "passive_comm": 1.328,
@@ -1541,7 +1583,7 @@
     },
     {
       "date": "2015-06",
-      "cta_titan": 6.35,
+      "cta_titan": 6.574,
       "carry_atr": 4.148,
       "vol_parity": 3.634,
       "passive_comm": 1.376,
@@ -1549,7 +1591,7 @@
     },
     {
       "date": "2015-07",
-      "cta_titan": 6.211,
+      "cta_titan": 6.431,
       "carry_atr": 4.17,
       "vol_parity": 3.639,
       "passive_comm": 1.252,
@@ -1557,7 +1599,7 @@
     },
     {
       "date": "2015-08",
-      "cta_titan": 6.447,
+      "cta_titan": 6.591,
       "carry_atr": 4.052,
       "vol_parity": 3.531,
       "passive_comm": 1.228,
@@ -1565,7 +1607,7 @@
     },
     {
       "date": "2015-09",
-      "cta_titan": 6.514,
+      "cta_titan": 6.629,
       "carry_atr": 4.143,
       "vol_parity": 3.587,
       "passive_comm": 1.192,
@@ -1573,7 +1615,7 @@
     },
     {
       "date": "2015-10",
-      "cta_titan": 6.542,
+      "cta_titan": 6.662,
       "carry_atr": 4.024,
       "vol_parity": 3.46,
       "passive_comm": 1.216,
@@ -1581,7 +1623,7 @@
     },
     {
       "date": "2015-11",
-      "cta_titan": 6.671,
+      "cta_titan": 6.792,
       "carry_atr": 4.083,
       "vol_parity": 3.524,
       "passive_comm": 1.144,
@@ -1589,7 +1631,7 @@
     },
     {
       "date": "2015-12",
-      "cta_titan": 6.765,
+      "cta_titan": 6.845,
       "carry_atr": 4.126,
       "vol_parity": 3.592,
       "passive_comm": 1.12,
@@ -1597,7 +1639,7 @@
     },
     {
       "date": "2016-01",
-      "cta_titan": 6.845,
+      "cta_titan": 6.878,
       "carry_atr": 4.166,
       "vol_parity": 3.61,
       "passive_comm": 1.084,
@@ -1605,7 +1647,7 @@
     },
     {
       "date": "2016-02",
-      "cta_titan": 6.957,
+      "cta_titan": 6.982,
       "carry_atr": 4.195,
       "vol_parity": 3.636,
       "passive_comm": 1.071,
@@ -1613,7 +1655,7 @@
     },
     {
       "date": "2016-03",
-      "cta_titan": 6.759,
+      "cta_titan": 6.771,
       "carry_atr": 4.079,
       "vol_parity": 3.532,
       "passive_comm": 1.125,
@@ -1621,7 +1663,7 @@
     },
     {
       "date": "2016-04",
-      "cta_titan": 7.113,
+      "cta_titan": 7.124,
       "carry_atr": 4.259,
       "vol_parity": 3.676,
       "passive_comm": 1.214,
@@ -1629,7 +1671,7 @@
     },
     {
       "date": "2016-05",
-      "cta_titan": 7.686,
+      "cta_titan": 7.701,
       "carry_atr": 4.533,
       "vol_parity": 3.756,
       "passive_comm": 1.235,
@@ -1637,7 +1679,7 @@
     },
     {
       "date": "2016-06",
-      "cta_titan": 8.283,
+      "cta_titan": 8.237,
       "carry_atr": 4.82,
       "vol_parity": 4.047,
       "passive_comm": 1.28,
@@ -1645,7 +1687,7 @@
     },
     {
       "date": "2016-07",
-      "cta_titan": 8.039,
+      "cta_titan": 7.995,
       "carry_atr": 4.929,
       "vol_parity": 4.078,
       "passive_comm": 1.235,
@@ -1653,7 +1695,7 @@
     },
     {
       "date": "2016-08",
-      "cta_titan": 7.647,
+      "cta_titan": 7.605,
       "carry_atr": 4.715,
       "vol_parity": 3.877,
       "passive_comm": 1.219,
@@ -1661,7 +1703,7 @@
     },
     {
       "date": "2016-09",
-      "cta_titan": 7.326,
+      "cta_titan": 7.378,
       "carry_atr": 4.551,
       "vol_parity": 3.799,
       "passive_comm": 1.257,
@@ -1669,7 +1711,7 @@
     },
     {
       "date": "2016-10",
-      "cta_titan": 7.182,
+      "cta_titan": 7.237,
       "carry_atr": 4.445,
       "vol_parity": 3.619,
       "passive_comm": 1.26,
@@ -1677,7 +1719,7 @@
     },
     {
       "date": "2016-11",
-      "cta_titan": 7.255,
+      "cta_titan": 7.302,
       "carry_atr": 4.479,
       "vol_parity": 3.584,
       "passive_comm": 1.263,
@@ -1685,7 +1727,7 @@
     },
     {
       "date": "2016-12",
-      "cta_titan": 7.068,
+      "cta_titan": 7.111,
       "carry_atr": 4.663,
       "vol_parity": 3.675,
       "passive_comm": 1.272,
@@ -1693,7 +1735,7 @@
     },
     {
       "date": "2017-01",
-      "cta_titan": 6.987,
+      "cta_titan": 7.03,
       "carry_atr": 4.53,
       "vol_parity": 3.595,
       "passive_comm": 1.29,
@@ -1701,7 +1743,7 @@
     },
     {
       "date": "2017-02",
-      "cta_titan": 6.883,
+      "cta_titan": 6.925,
       "carry_atr": 4.421,
       "vol_parity": 3.615,
       "passive_comm": 1.289,
@@ -1709,7 +1751,7 @@
     },
     {
       "date": "2017-03",
-      "cta_titan": 6.867,
+      "cta_titan": 6.91,
       "carry_atr": 4.082,
       "vol_parity": 3.366,
       "passive_comm": 1.248,
@@ -1717,7 +1759,7 @@
     },
     {
       "date": "2017-04",
-      "cta_titan": 7.063,
+      "cta_titan": 7.107,
       "carry_atr": 4.258,
       "vol_parity": 3.445,
       "passive_comm": 1.226,
@@ -1725,7 +1767,7 @@
     },
     {
       "date": "2017-05",
-      "cta_titan": 7.039,
+      "cta_titan": 7.082,
       "carry_atr": 4.095,
       "vol_parity": 3.32,
       "passive_comm": 1.213,
@@ -1733,7 +1775,7 @@
     },
     {
       "date": "2017-06",
-      "cta_titan": 6.973,
+      "cta_titan": 7.016,
       "carry_atr": 3.932,
       "vol_parity": 3.218,
       "passive_comm": 1.202,
@@ -1741,7 +1783,7 @@
     },
     {
       "date": "2017-07",
-      "cta_titan": 7.026,
+      "cta_titan": 7.07,
       "carry_atr": 3.906,
       "vol_parity": 3.139,
       "passive_comm": 1.246,
@@ -1749,7 +1791,7 @@
     },
     {
       "date": "2017-08",
-      "cta_titan": 7.319,
+      "cta_titan": 7.364,
       "carry_atr": 4.022,
       "vol_parity": 3.215,
       "passive_comm": 1.227,
@@ -1757,7 +1799,7 @@
     },
     {
       "date": "2017-09",
-      "cta_titan": 7.258,
+      "cta_titan": 7.374,
       "carry_atr": 3.872,
       "vol_parity": 3.079,
       "passive_comm": 1.228,
@@ -1765,7 +1807,7 @@
     },
     {
       "date": "2017-10",
-      "cta_titan": 7.002,
+      "cta_titan": 7.113,
       "carry_atr": 3.806,
       "vol_parity": 3.085,
       "passive_comm": 1.248,
@@ -1773,7 +1815,7 @@
     },
     {
       "date": "2017-11",
-      "cta_titan": 7.1,
+      "cta_titan": 7.219,
       "carry_atr": 3.781,
       "vol_parity": 3.056,
       "passive_comm": 1.257,
@@ -1781,7 +1823,7 @@
     },
     {
       "date": "2017-12",
-      "cta_titan": 7.25,
+      "cta_titan": 7.373,
       "carry_atr": 4.036,
       "vol_parity": 3.209,
       "passive_comm": 1.276,
@@ -1789,7 +1831,7 @@
     },
     {
       "date": "2018-01",
-      "cta_titan": 7.362,
+      "cta_titan": 7.531,
       "carry_atr": 4.164,
       "vol_parity": 3.272,
       "passive_comm": 1.303,
@@ -1797,7 +1839,7 @@
     },
     {
       "date": "2018-02",
-      "cta_titan": 7.508,
+      "cta_titan": 7.683,
       "carry_atr": 4.06,
       "vol_parity": 3.116,
       "passive_comm": 1.302,
@@ -1805,7 +1847,7 @@
     },
     {
       "date": "2018-03",
-      "cta_titan": 7.079,
+      "cta_titan": 7.24,
       "carry_atr": 3.813,
       "vol_parity": 2.973,
       "passive_comm": 1.298,
@@ -1813,7 +1855,7 @@
     },
     {
       "date": "2018-04",
-      "cta_titan": 6.936,
+      "cta_titan": 7.096,
       "carry_atr": 3.982,
       "vol_parity": 3.116,
       "passive_comm": 1.337,
@@ -1821,7 +1863,7 @@
     },
     {
       "date": "2018-05",
-      "cta_titan": 6.95,
+      "cta_titan": 7.112,
       "carry_atr": 3.942,
       "vol_parity": 3.092,
       "passive_comm": 1.351,
@@ -1829,7 +1871,7 @@
     },
     {
       "date": "2018-06",
-      "cta_titan": 6.738,
+      "cta_titan": 6.893,
       "carry_atr": 3.733,
       "vol_parity": 2.923,
       "passive_comm": 1.297,
@@ -1837,7 +1879,7 @@
     },
     {
       "date": "2018-07",
-      "cta_titan": 6.618,
+      "cta_titan": 6.756,
       "carry_atr": 3.606,
       "vol_parity": 2.845,
       "passive_comm": 1.274,
@@ -1845,7 +1887,7 @@
     },
     {
       "date": "2018-08",
-      "cta_titan": 6.626,
+      "cta_titan": 6.765,
       "carry_atr": 3.695,
       "vol_parity": 2.925,
       "passive_comm": 1.24,
@@ -1853,7 +1895,7 @@
     },
     {
       "date": "2018-09",
-      "cta_titan": 6.634,
+      "cta_titan": 6.773,
       "carry_atr": 3.629,
       "vol_parity": 2.902,
       "passive_comm": 1.241,
@@ -1861,7 +1903,7 @@
     },
     {
       "date": "2018-10",
-      "cta_titan": 6.618,
+      "cta_titan": 6.748,
       "carry_atr": 3.419,
       "vol_parity": 2.736,
       "passive_comm": 1.241,
@@ -1869,7 +1911,7 @@
     },
     {
       "date": "2018-11",
-      "cta_titan": 6.679,
+      "cta_titan": 6.81,
       "carry_atr": 3.528,
       "vol_parity": 2.814,
       "passive_comm": 1.202,
@@ -1877,7 +1919,7 @@
     },
     {
       "date": "2018-12",
-      "cta_titan": 6.774,
+      "cta_titan": 6.908,
       "carry_atr": 3.643,
       "vol_parity": 2.884,
       "passive_comm": 1.148,
@@ -1885,7 +1927,7 @@
     },
     {
       "date": "2019-01",
-      "cta_titan": 6.791,
+      "cta_titan": 6.925,
       "carry_atr": 3.489,
       "vol_parity": 2.759,
       "passive_comm": 1.192,
@@ -1893,7 +1935,7 @@
     },
     {
       "date": "2019-02",
-      "cta_titan": 6.799,
+      "cta_titan": 6.927,
       "carry_atr": 3.514,
       "vol_parity": 2.798,
       "passive_comm": 1.198,
@@ -1901,7 +1943,7 @@
     },
     {
       "date": "2019-03",
-      "cta_titan": 6.66,
+      "cta_titan": 6.821,
       "carry_atr": 3.428,
       "vol_parity": 2.699,
       "passive_comm": 1.189,
@@ -1909,7 +1951,7 @@
     },
     {
       "date": "2019-04",
-      "cta_titan": 6.735,
+      "cta_titan": 6.898,
       "carry_atr": 3.526,
       "vol_parity": 2.773,
       "passive_comm": 1.187,
@@ -1917,7 +1959,7 @@
     },
     {
       "date": "2019-05",
-      "cta_titan": 6.64,
+      "cta_titan": 6.801,
       "carry_atr": 3.441,
       "vol_parity": 2.715,
       "passive_comm": 1.167,
@@ -1925,7 +1967,7 @@
     },
     {
       "date": "2019-06",
-      "cta_titan": 6.844,
+      "cta_titan": 6.999,
       "carry_atr": 3.425,
       "vol_parity": 2.704,
       "passive_comm": 1.196,
@@ -1933,7 +1975,7 @@
     },
     {
       "date": "2019-07",
-      "cta_titan": 6.886,
+      "cta_titan": 7.042,
       "carry_atr": 3.389,
       "vol_parity": 2.672,
       "passive_comm": 1.167,
@@ -1941,7 +1983,7 @@
     },
     {
       "date": "2019-08",
-      "cta_titan": 7.167,
+      "cta_titan": 7.33,
       "carry_atr": 3.5,
       "vol_parity": 2.733,
       "passive_comm": 1.121,
@@ -1949,7 +1991,7 @@
     },
     {
       "date": "2019-09",
-      "cta_titan": 7.051,
+      "cta_titan": 7.211,
       "carry_atr": 3.357,
       "vol_parity": 2.615,
       "passive_comm": 1.124,
@@ -1957,7 +1999,7 @@
     },
     {
       "date": "2019-10",
-      "cta_titan": 7.032,
+      "cta_titan": 7.191,
       "carry_atr": 3.274,
       "vol_parity": 2.579,
       "passive_comm": 1.154,
@@ -1965,7 +2007,7 @@
     },
     {
       "date": "2019-11",
-      "cta_titan": 6.814,
+      "cta_titan": 6.948,
       "carry_atr": 3.288,
       "vol_parity": 2.59,
       "passive_comm": 1.155,
@@ -1973,7 +2015,7 @@
     },
     {
       "date": "2019-12",
-      "cta_titan": 6.98,
+      "cta_titan": 7.088,
       "carry_atr": 3.391,
       "vol_parity": 2.658,
       "passive_comm": 1.21,
@@ -1981,7 +2023,7 @@
     },
     {
       "date": "2020-01",
-      "cta_titan": 6.765,
+      "cta_titan": 6.92,
       "carry_atr": 3.358,
       "vol_parity": 2.603,
       "passive_comm": 1.131,
@@ -1989,7 +2031,7 @@
     },
     {
       "date": "2020-02",
-      "cta_titan": 6.728,
+      "cta_titan": 6.897,
       "carry_atr": 3.301,
       "vol_parity": 2.554,
       "passive_comm": 1.084,
@@ -1997,7 +2039,7 @@
     },
     {
       "date": "2020-03",
-      "cta_titan": 7.084,
+      "cta_titan": 7.26,
       "carry_atr": 3.379,
       "vol_parity": 2.618,
       "passive_comm": 0.966,
@@ -2005,7 +2047,7 @@
     },
     {
       "date": "2020-04",
-      "cta_titan": 7.022,
+      "cta_titan": 7.196,
       "carry_atr": 3.292,
       "vol_parity": 2.562,
       "passive_comm": 0.968,
@@ -2013,7 +2055,7 @@
     },
     {
       "date": "2020-05",
-      "cta_titan": 6.757,
+      "cta_titan": 6.924,
       "carry_atr": 3.208,
       "vol_parity": 2.541,
       "passive_comm": 1.074,
@@ -2021,7 +2063,7 @@
     },
     {
       "date": "2020-06",
-      "cta_titan": 6.868,
+      "cta_titan": 7.038,
       "carry_atr": 3.333,
       "vol_parity": 2.675,
       "passive_comm": 1.125,
@@ -2029,7 +2071,7 @@
     },
     {
       "date": "2020-07",
-      "cta_titan": 7.387,
+      "cta_titan": 7.571,
       "carry_atr": 3.692,
       "vol_parity": 2.917,
       "passive_comm": 1.184,
@@ -2037,7 +2079,7 @@
     },
     {
       "date": "2020-08",
-      "cta_titan": 7.417,
+      "cta_titan": 7.777,
       "carry_atr": 3.999,
       "vol_parity": 3.15,
       "passive_comm": 1.27,
@@ -2045,7 +2087,7 @@
     },
     {
       "date": "2020-09",
-      "cta_titan": 7.214,
+      "cta_titan": 7.642,
       "carry_atr": 3.982,
       "vol_parity": 3.067,
       "passive_comm": 1.233,
@@ -2053,7 +2095,7 @@
     },
     {
       "date": "2020-10",
-      "cta_titan": 7.553,
+      "cta_titan": 7.999,
       "carry_atr": 4.194,
       "vol_parity": 3.101,
       "passive_comm": 1.23,
@@ -2061,7 +2103,7 @@
     },
     {
       "date": "2020-11",
-      "cta_titan": 7.922,
+      "cta_titan": 8.524,
       "carry_atr": 4.462,
       "vol_parity": 3.341,
       "passive_comm": 1.337,
@@ -2069,7 +2111,7 @@
     },
     {
       "date": "2020-12",
-      "cta_titan": 8.888,
+      "cta_titan": 9.856,
       "carry_atr": 5.055,
       "vol_parity": 3.75,
       "passive_comm": 1.439,
@@ -2077,7 +2119,7 @@
     },
     {
       "date": "2021-01",
-      "cta_titan": 9.386,
+      "cta_titan": 9.944,
       "carry_atr": 5.28,
       "vol_parity": 3.962,
       "passive_comm": 1.49,
@@ -2085,7 +2127,7 @@
     },
     {
       "date": "2021-02",
-      "cta_titan": 11.141,
+      "cta_titan": 12.103,
       "carry_atr": 6.243,
       "vol_parity": 4.523,
       "passive_comm": 1.605,
@@ -2093,7 +2135,7 @@
     },
     {
       "date": "2021-03",
-      "cta_titan": 10.943,
+      "cta_titan": 11.798,
       "carry_atr": 6.077,
       "vol_parity": 4.474,
       "passive_comm": 1.577,
@@ -2101,7 +2143,7 @@
     },
     {
       "date": "2021-04",
-      "cta_titan": 13.282,
+      "cta_titan": 14.31,
       "carry_atr": 6.864,
       "vol_parity": 5.187,
       "passive_comm": 1.741,
@@ -2109,7 +2151,7 @@
     },
     {
       "date": "2021-05",
-      "cta_titan": 12.232,
+      "cta_titan": 13.377,
       "carry_atr": 6.674,
       "vol_parity": 5.193,
       "passive_comm": 1.741,
@@ -2117,7 +2159,7 @@
     },
     {
       "date": "2021-06",
-      "cta_titan": 11.606,
+      "cta_titan": 12.766,
       "carry_atr": 6.846,
       "vol_parity": 5.387,
       "passive_comm": 1.792,
@@ -2125,7 +2167,7 @@
     },
     {
       "date": "2021-07",
-      "cta_titan": 10.865,
+      "cta_titan": 11.882,
       "carry_atr": 6.346,
       "vol_parity": 5.155,
       "passive_comm": 1.803,
@@ -2133,7 +2175,7 @@
     },
     {
       "date": "2021-08",
-      "cta_titan": 10.535,
+      "cta_titan": 11.48,
       "carry_atr": 6.093,
       "vol_parity": 4.998,
       "passive_comm": 1.801,
@@ -2141,7 +2183,7 @@
     },
     {
       "date": "2021-09",
-      "cta_titan": 10.698,
+      "cta_titan": 11.649,
       "carry_atr": 6.41,
       "vol_parity": 5.274,
       "passive_comm": 1.817,
@@ -2149,7 +2191,7 @@
     },
     {
       "date": "2021-10",
-      "cta_titan": 10.716,
+      "cta_titan": 11.541,
       "carry_atr": 6.452,
       "vol_parity": 5.295,
       "passive_comm": 1.892,
@@ -2157,7 +2199,7 @@
     },
     {
       "date": "2021-11",
-      "cta_titan": 10.615,
+      "cta_titan": 11.371,
       "carry_atr": 5.892,
       "vol_parity": 4.695,
       "passive_comm": 1.794,
@@ -2165,7 +2207,7 @@
     },
     {
       "date": "2021-12",
-      "cta_titan": 10.676,
+      "cta_titan": 11.382,
       "carry_atr": 5.988,
       "vol_parity": 4.743,
       "passive_comm": 1.868,
@@ -2173,7 +2215,7 @@
     },
     {
       "date": "2022-01",
-      "cta_titan": 11.031,
+      "cta_titan": 11.708,
       "carry_atr": 6.441,
       "vol_parity": 5.158,
       "passive_comm": 1.986,
@@ -2181,7 +2223,7 @@
     },
     {
       "date": "2022-02",
-      "cta_titan": 11.993,
+      "cta_titan": 12.794,
       "carry_atr": 6.974,
       "vol_parity": 5.561,
       "passive_comm": 2.065,
@@ -2189,7 +2231,7 @@
     },
     {
       "date": "2022-03",
-      "cta_titan": 12.244,
+      "cta_titan": 13.61,
       "carry_atr": 7.234,
       "vol_parity": 5.942,
       "passive_comm": 2.244,
@@ -2197,7 +2239,7 @@
     },
     {
       "date": "2022-04",
-      "cta_titan": 13.278,
+      "cta_titan": 15.137,
       "carry_atr": 7.698,
       "vol_parity": 6.403,
       "passive_comm": 2.35,
@@ -2205,7 +2247,7 @@
     },
     {
       "date": "2022-05",
-      "cta_titan": 12.451,
+      "cta_titan": 15.59,
       "carry_atr": 7.711,
       "vol_parity": 6.418,
       "passive_comm": 2.359,
@@ -2213,7 +2255,7 @@
     },
     {
       "date": "2022-06",
-      "cta_titan": 11.882,
+      "cta_titan": 14.719,
       "carry_atr": 7.013,
       "vol_parity": 5.884,
       "passive_comm": 2.222,
@@ -2221,7 +2263,7 @@
     },
     {
       "date": "2022-07",
-      "cta_titan": 11.886,
+      "cta_titan": 14.724,
       "carry_atr": 7.011,
       "vol_parity": 5.992,
       "passive_comm": 2.219,
@@ -2229,7 +2271,7 @@
     },
     {
       "date": "2022-08",
-      "cta_titan": 11.947,
+      "cta_titan": 14.793,
       "carry_atr": 7.195,
       "vol_parity": 6.112,
       "passive_comm": 2.231,
@@ -2237,7 +2279,7 @@
     },
     {
       "date": "2022-09",
-      "cta_titan": 11.812,
+      "cta_titan": 14.626,
       "carry_atr": 6.87,
       "vol_parity": 5.823,
       "passive_comm": 2.115,
@@ -2245,7 +2287,7 @@
     },
     {
       "date": "2022-10",
-      "cta_titan": 11.613,
+      "cta_titan": 14.388,
       "carry_atr": 6.879,
       "vol_parity": 5.896,
       "passive_comm": 2.111,
@@ -2253,7 +2295,7 @@
     },
     {
       "date": "2022-11",
-      "cta_titan": 11.525,
+      "cta_titan": 14.28,
       "carry_atr": 6.614,
       "vol_parity": 5.716,
       "passive_comm": 2.137,
@@ -2261,7 +2303,7 @@
     },
     {
       "date": "2022-12",
-      "cta_titan": 11.571,
+      "cta_titan": 14.337,
       "carry_atr": 6.389,
       "vol_parity": 5.612,
       "passive_comm": 2.13,
@@ -2269,7 +2311,7 @@
     },
     {
       "date": "2023-01",
-      "cta_titan": 12.035,
+      "cta_titan": 14.718,
       "carry_atr": 6.48,
       "vol_parity": 5.767,
       "passive_comm": 2.113,
@@ -2277,7 +2319,7 @@
     },
     {
       "date": "2023-02",
-      "cta_titan": 11.448,
+      "cta_titan": 14.0,
       "carry_atr": 6.45,
       "vol_parity": 5.698,
       "passive_comm": 2.062,
@@ -2285,7 +2327,7 @@
     },
     {
       "date": "2023-03",
-      "cta_titan": 11.647,
+      "cta_titan": 14.243,
       "carry_atr": 6.343,
       "vol_parity": 5.562,
       "passive_comm": 2.059,
@@ -2293,7 +2335,7 @@
     },
     {
       "date": "2023-04",
-      "cta_titan": 12.597,
+      "cta_titan": 15.385,
       "carry_atr": 7.045,
       "vol_parity": 6.12,
       "passive_comm": 2.069,
@@ -2301,7 +2343,7 @@
     },
     {
       "date": "2023-05",
-      "cta_titan": 12.148,
+      "cta_titan": 14.808,
       "carry_atr": 6.762,
       "vol_parity": 6.02,
       "passive_comm": 1.965,
@@ -2309,7 +2351,7 @@
     },
     {
       "date": "2023-06",
-      "cta_titan": 12.543,
+      "cta_titan": 15.289,
       "carry_atr": 6.695,
       "vol_parity": 6.067,
       "passive_comm": 2.068,
@@ -2317,7 +2359,7 @@
     },
     {
       "date": "2023-07",
-      "cta_titan": 12.269,
+      "cta_titan": 14.927,
       "carry_atr": 6.74,
       "vol_parity": 6.155,
       "passive_comm": 2.19,
@@ -2325,7 +2367,7 @@
     },
     {
       "date": "2023-08",
-      "cta_titan": 12.062,
+      "cta_titan": 14.815,
       "carry_atr": 6.419,
       "vol_parity": 6.068,
       "passive_comm": 2.169,
@@ -2333,7 +2375,7 @@
     },
     {
       "date": "2023-09",
-      "cta_titan": 12.421,
+      "cta_titan": 15.272,
       "carry_atr": 6.835,
       "vol_parity": 6.313,
       "passive_comm": 2.138,
@@ -2341,7 +2383,7 @@
     },
     {
       "date": "2023-10",
-      "cta_titan": 12.53,
+      "cta_titan": 15.413,
       "carry_atr": 6.618,
       "vol_parity": 6.053,
       "passive_comm": 2.142,
@@ -2349,7 +2391,7 @@
     },
     {
       "date": "2023-11",
-      "cta_titan": 13.325,
+      "cta_titan": 16.342,
       "carry_atr": 7.079,
       "vol_parity": 6.268,
       "passive_comm": 2.142,
@@ -2357,7 +2399,7 @@
     },
     {
       "date": "2023-12",
-      "cta_titan": 12.971,
+      "cta_titan": 16.135,
       "carry_atr": 6.879,
       "vol_parity": 6.117,
       "passive_comm": 2.06,
@@ -2365,7 +2407,7 @@
     },
     {
       "date": "2024-01",
-      "cta_titan": 13.188,
+      "cta_titan": 16.405,
       "carry_atr": 7.357,
       "vol_parity": 6.426,
       "passive_comm": 2.093,
@@ -2373,7 +2415,7 @@
     },
     {
       "date": "2024-02",
-      "cta_titan": 15.667,
+      "cta_titan": 19.489,
       "carry_atr": 8.881,
       "vol_parity": 7.381,
       "passive_comm": 2.093,
@@ -2381,7 +2423,7 @@
     },
     {
       "date": "2024-03",
-      "cta_titan": 18.678,
+      "cta_titan": 23.262,
       "carry_atr": 9.511,
       "vol_parity": 7.644,
       "passive_comm": 2.187,
@@ -2389,7 +2431,7 @@
     },
     {
       "date": "2024-04",
-      "cta_titan": 20.411,
+      "cta_titan": 25.793,
       "carry_atr": 10.107,
       "vol_parity": 7.98,
       "passive_comm": 2.199,
@@ -2397,7 +2439,7 @@
     },
     {
       "date": "2024-05",
-      "cta_titan": 20.284,
+      "cta_titan": 25.929,
       "carry_atr": 10.36,
       "vol_parity": 7.96,
       "passive_comm": 2.245,
@@ -2405,7 +2447,7 @@
     },
     {
       "date": "2024-06",
-      "cta_titan": 19.32,
+      "cta_titan": 24.862,
       "carry_atr": 10.372,
       "vol_parity": 8.038,
       "passive_comm": 2.217,
@@ -2413,7 +2455,7 @@
     },
     {
       "date": "2024-07",
-      "cta_titan": 18.97,
+      "cta_titan": 24.395,
       "carry_atr": 9.933,
       "vol_parity": 7.853,
       "passive_comm": 2.147,
@@ -2421,7 +2463,7 @@
     },
     {
       "date": "2024-08",
-      "cta_titan": 19.303,
+      "cta_titan": 24.825,
       "carry_atr": 10.009,
       "vol_parity": 7.917,
       "passive_comm": 2.129,
@@ -2429,7 +2471,7 @@
     },
     {
       "date": "2024-09",
-      "cta_titan": 20.434,
+      "cta_titan": 26.295,
       "carry_atr": 10.256,
       "vol_parity": 8.058,
       "passive_comm": 2.239,
@@ -2437,7 +2479,7 @@
     },
     {
       "date": "2024-10",
-      "cta_titan": 20.858,
+      "cta_titan": 26.84,
       "carry_atr": 10.027,
       "vol_parity": 7.909,
       "passive_comm": 2.186,
@@ -2445,7 +2487,7 @@
     },
     {
       "date": "2024-11",
-      "cta_titan": 21.133,
+      "cta_titan": 27.234,
       "carry_atr": 10.019,
       "vol_parity": 7.827,
       "passive_comm": 2.237,
@@ -2453,7 +2495,7 @@
     },
     {
       "date": "2024-12",
-      "cta_titan": 20.693,
+      "cta_titan": 27.067,
       "carry_atr": 10.3,
       "vol_parity": 7.981,
       "passive_comm": 2.263,
@@ -2461,7 +2503,7 @@
     },
     {
       "date": "2025-01",
-      "cta_titan": 21.112,
+      "cta_titan": 27.465,
       "carry_atr": 10.454,
       "vol_parity": 8.116,
       "passive_comm": 2.355,
@@ -2469,7 +2511,7 @@
     },
     {
       "date": "2025-02",
-      "cta_titan": 20.868,
+      "cta_titan": 27.187,
       "carry_atr": 10.274,
       "vol_parity": 7.869,
       "passive_comm": 2.31,
@@ -2477,7 +2519,7 @@
     },
     {
       "date": "2025-03",
-      "cta_titan": 21.886,
+      "cta_titan": 28.508,
       "carry_atr": 10.739,
       "vol_parity": 8.299,
       "passive_comm": 2.399,
@@ -2485,7 +2527,7 @@
     },
     {
       "date": "2025-04",
-      "cta_titan": 21.783,
+      "cta_titan": 28.195,
       "carry_atr": 9.705,
       "vol_parity": 7.664,
       "passive_comm": 2.316,
@@ -2493,7 +2535,7 @@
     },
     {
       "date": "2025-05",
-      "cta_titan": 21.288,
+      "cta_titan": 27.416,
       "carry_atr": 9.325,
       "vol_parity": 7.485,
       "passive_comm": 2.295,
@@ -2501,7 +2543,7 @@
     },
     {
       "date": "2025-06",
-      "cta_titan": 20.983,
+      "cta_titan": 27.023,
       "carry_atr": 9.542,
       "vol_parity": 7.749,
       "passive_comm": 2.322,
@@ -2509,7 +2551,7 @@
     },
     {
       "date": "2025-07",
-      "cta_titan": 22.888,
+      "cta_titan": 29.116,
       "carry_atr": 9.954,
       "vol_parity": 8.068,
       "passive_comm": 2.352,
@@ -2517,7 +2559,7 @@
     },
     {
       "date": "2025-08",
-      "cta_titan": 23.676,
+      "cta_titan": 30.111,
       "carry_atr": 10.324,
       "vol_parity": 8.31,
       "passive_comm": 2.397,
@@ -2525,7 +2567,7 @@
     },
     {
       "date": "2025-09",
-      "cta_titan": 25.424,
+      "cta_titan": 32.285,
       "carry_atr": 11.472,
       "vol_parity": 8.989,
       "passive_comm": 2.393,
@@ -2533,7 +2575,7 @@
     },
     {
       "date": "2025-10",
-      "cta_titan": 25.257,
+      "cta_titan": 32.094,
       "carry_atr": 11.314,
       "vol_parity": 8.856,
       "passive_comm": 2.43,
@@ -2541,7 +2583,7 @@
     },
     {
       "date": "2025-11",
-      "cta_titan": 25.709,
+      "cta_titan": 32.678,
       "carry_atr": 11.578,
       "vol_parity": 9.228,
       "passive_comm": 2.466,
@@ -2549,7 +2591,7 @@
     },
     {
       "date": "2025-12",
-      "cta_titan": 26.993,
+      "cta_titan": 34.748,
       "carry_atr": 12.054,
       "vol_parity": 9.515,
       "passive_comm": 2.426,
@@ -2557,7 +2599,7 @@
     },
     {
       "date": "2026-01",
-      "cta_titan": 29.656,
+      "cta_titan": 38.365,
       "carry_atr": 13.42,
       "vol_parity": 10.293,
       "passive_comm": 2.61,
@@ -2565,7 +2607,7 @@
     },
     {
       "date": "2026-02",
-      "cta_titan": 30.596,
+      "cta_titan": 39.535,
       "carry_atr": 14.381,
       "vol_parity": 11.042,
       "passive_comm": 2.64,
@@ -2573,7 +2615,7 @@
     },
     {
       "date": "2026-03",
-      "cta_titan": 35.936,
+      "cta_titan": 46.478,
       "carry_atr": 15.977,
       "vol_parity": 11.985,
       "passive_comm": 2.895,
@@ -2581,7 +2623,7 @@
     },
     {
       "date": "2026-04",
-      "cta_titan": 38.81,
+      "cta_titan": 50.218,
       "carry_atr": 16.931,
       "vol_parity": 12.861,
       "passive_comm": 3.027,
@@ -2589,7 +2631,7 @@
     },
     {
       "date": "2026-05",
-      "cta_titan": 33.487,
+      "cta_titan": 43.408,
       "carry_atr": 15.542,
       "vol_parity": 12.037,
       "passive_comm": 2.915,
@@ -2597,7 +2639,7 @@
     },
     {
       "date": "2026-06",
-      "cta_titan": 31.855,
+      "cta_titan": 41.42,
       "carry_atr": 14.878,
       "vol_parity": 11.621,
       "passive_comm": 2.767,
@@ -2605,7 +2647,7 @@
     },
     {
       "date": "2026-07",
-      "cta_titan": 32.166,
+      "cta_titan": 41.874,
       "carry_atr": 13.986,
       "vol_parity": 11.017,
       "passive_comm": 2.894,
@@ -2613,7 +2655,7 @@
     },
     {
       "date": "2026-08",
-      "cta_titan": 32.858,
+      "cta_titan": 43.0,
       "carry_atr": 14.281,
       "vol_parity": 11.268,
       "passive_comm": 3.156,
@@ -2621,7 +2663,7 @@
     },
     {
       "date": "2026-09",
-      "cta_titan": 32.556,
+      "cta_titan": 42.555,
       "carry_atr": 13.973,
       "vol_parity": 10.913,
       "passive_comm": 3.131,
@@ -2629,7 +2671,7 @@
     },
     {
       "date": "2026-10",
-      "cta_titan": 31.068,
+      "cta_titan": 40.865,
       "carry_atr": 13.657,
       "vol_parity": 10.686,
       "passive_comm": 3.049,
@@ -2637,7 +2679,7 @@
     },
     {
       "date": "2026-11",
-      "cta_titan": 29.676,
+      "cta_titan": 38.945,
       "carry_atr": 12.493,
       "vol_parity": 9.896,
       "passive_comm": 2.944,
@@ -2666,10 +2708,13 @@
       "above_ma200": false,
       "atr_20": 7.112,
       "natr_20_pct": 1.61,
-      "chandelier_long_stop": 464.51,
-      "chandelier_short_stop": 458.49,
+      "chandelier_long_stop": 461.66,
+      "chandelier_short_stop": 459.92,
       "signal_status": "📉 正價差破線放空正選 (Contango Short Active)",
       "signal_dir": "SHORT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.1,
+      "clv_5d_pct": 38.0,
       "std_symbol": "ZC",
       "std_unit": "5,000 英斗(美分×50)",
       "std_multiplier": 50.0,
@@ -2687,7 +2732,7 @@
       "rank": 1,
       "direction": "做空 (Short)",
       "target_weight_pct": 26.0,
-      "active_stop_price": 458.49,
+      "active_stop_price": 459.92,
       "official_entry_date": "2026-11-06",
       "official_entry_price": 441.5,
       "unrealized_return_pct": 0.0
@@ -2707,16 +2752,19 @@
       "ret_126d_pct": -2.93,
       "tsmom_z": 0.92,
       "phys_spread_z": -2.14,
-      "cta_composite_score": 0.9,
+      "cta_composite_score": 1.03,
       "above_ma20": false,
       "above_ma60": false,
       "above_ma200": true,
       "atr_20": 4.95,
       "natr_20_pct": 5.04,
-      "chandelier_long_stop": 104.77,
-      "chandelier_short_stop": 107.49,
+      "chandelier_long_stop": 102.79,
+      "chandelier_short_stop": 108.48,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "🔥 逆價差事件爆量點火 (1.15x Post-Event Drift)",
+      "vol_ratio_5d": 1.4,
+      "clv_5d_pct": 38.6,
       "std_symbol": "BZ",
       "std_unit": "1,000 桶",
       "std_multiplier": 1000.0,
@@ -2733,7 +2781,7 @@
       "roll_months": "1-12月 (月底換月)",
       "rank": 2,
       "direction": "做多 (Long)",
-      "target_weight_pct": 10.7,
+      "target_weight_pct": 12.3,
       "active_stop_price": 87.43,
       "official_entry_date": "2026-11-06",
       "official_entry_price": 98.32,
@@ -2760,10 +2808,13 @@
       "above_ma200": true,
       "atr_20": 0.547,
       "natr_20_pct": 3.0,
-      "chandelier_long_stop": 19.71,
-      "chandelier_short_stop": 19.66,
+      "chandelier_long_stop": 19.49,
+      "chandelier_short_stop": 19.77,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.01,
+      "clv_5d_pct": 28.4,
       "std_symbol": "SB",
       "std_unit": "112,000 磅(美分×1120)",
       "std_multiplier": 1120.0,
@@ -2807,10 +2858,13 @@
       "above_ma200": false,
       "atr_20": 1.147,
       "natr_20_pct": 1.84,
-      "chandelier_long_stop": 65.32,
-      "chandelier_short_stop": 65.22,
+      "chandelier_long_stop": 64.86,
+      "chandelier_short_stop": 65.45,
       "signal_status": "📉 正價差破線放空正選 (Contango Short Active)",
       "signal_dir": "SHORT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 2.43,
+      "clv_5d_pct": 39.1,
       "std_symbol": "ZL",
       "std_unit": "60,000 磅(美分×600)",
       "std_multiplier": 600.0,
@@ -2828,7 +2882,7 @@
       "rank": 4,
       "direction": "做空 (Short)",
       "target_weight_pct": 20.7,
-      "active_stop_price": 65.22,
+      "active_stop_price": 65.45,
       "official_entry_date": "2026-11-06",
       "official_entry_price": 62.26,
       "unrealized_return_pct": 0.0
@@ -2854,10 +2908,13 @@
       "above_ma200": true,
       "atr_20": 0.217,
       "natr_20_pct": 5.0,
-      "chandelier_long_stop": 4.42,
-      "chandelier_short_stop": 4.77,
+      "chandelier_long_stop": 4.33,
+      "chandelier_short_stop": 4.81,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.23,
+      "clv_5d_pct": 45.6,
       "std_symbol": "HO",
       "std_unit": "42,000 加侖",
       "std_multiplier": 42000.0,
@@ -2903,10 +2960,13 @@
       "above_ma200": false,
       "atr_20": 7.112,
       "natr_20_pct": 1.61,
-      "chandelier_long_stop": 464.51,
-      "chandelier_short_stop": 458.49,
+      "chandelier_long_stop": 461.66,
+      "chandelier_short_stop": 459.92,
       "signal_status": "📉 正價差破線放空正選 (Contango Short Active)",
       "signal_dir": "SHORT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.1,
+      "clv_5d_pct": 38.0,
       "std_symbol": "ZC",
       "std_unit": "5,000 英斗(美分×50)",
       "std_multiplier": 50.0,
@@ -2937,16 +2997,19 @@
       "ret_126d_pct": -2.93,
       "tsmom_z": 0.92,
       "phys_spread_z": -2.14,
-      "cta_composite_score": 0.9,
+      "cta_composite_score": 1.03,
       "above_ma20": false,
       "above_ma60": false,
       "above_ma200": true,
       "atr_20": 4.95,
       "natr_20_pct": 5.04,
-      "chandelier_long_stop": 104.77,
-      "chandelier_short_stop": 107.49,
+      "chandelier_long_stop": 102.79,
+      "chandelier_short_stop": 108.48,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "🔥 逆價差事件爆量點火 (1.15x Post-Event Drift)",
+      "vol_ratio_5d": 1.4,
+      "clv_5d_pct": 38.6,
       "std_symbol": "BZ",
       "std_unit": "1,000 桶",
       "std_multiplier": 1000.0,
@@ -2983,10 +3046,13 @@
       "above_ma200": true,
       "atr_20": 0.547,
       "natr_20_pct": 3.0,
-      "chandelier_long_stop": 19.71,
-      "chandelier_short_stop": 19.66,
+      "chandelier_long_stop": 19.49,
+      "chandelier_short_stop": 19.77,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.01,
+      "clv_5d_pct": 28.4,
       "std_symbol": "SB",
       "std_unit": "112,000 磅(美分×1120)",
       "std_multiplier": 1120.0,
@@ -3023,10 +3089,13 @@
       "above_ma200": false,
       "atr_20": 1.147,
       "natr_20_pct": 1.84,
-      "chandelier_long_stop": 65.32,
-      "chandelier_short_stop": 65.22,
+      "chandelier_long_stop": 64.86,
+      "chandelier_short_stop": 65.45,
       "signal_status": "📉 正價差破線放空正選 (Contango Short Active)",
       "signal_dir": "SHORT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 2.43,
+      "clv_5d_pct": 39.1,
       "std_symbol": "ZL",
       "std_unit": "60,000 磅(美分×600)",
       "std_multiplier": 600.0,
@@ -3063,10 +3132,13 @@
       "above_ma200": false,
       "atr_20": 13.787,
       "natr_20_pct": 2.33,
-      "chandelier_long_stop": 637.4,
-      "chandelier_short_stop": 627.1,
+      "chandelier_long_stop": 631.89,
+      "chandelier_short_stop": 629.86,
       "signal_status": "📉 正價差破線放空正選 (Contango Short Active)",
       "signal_dir": "SHORT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.58,
+      "clv_5d_pct": 41.6,
       "std_symbol": "ZW",
       "std_unit": "5,000 英斗(美分×50)",
       "std_multiplier": 50.0,
@@ -3103,10 +3175,13 @@
       "above_ma200": true,
       "atr_20": 0.217,
       "natr_20_pct": 5.0,
-      "chandelier_long_stop": 4.42,
-      "chandelier_short_stop": 4.77,
+      "chandelier_long_stop": 4.33,
+      "chandelier_short_stop": 4.81,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.23,
+      "clv_5d_pct": 45.6,
       "std_symbol": "HO",
       "std_unit": "42,000 加侖",
       "std_multiplier": 42000.0,
@@ -3143,10 +3218,13 @@
       "above_ma200": true,
       "atr_20": 4.836,
       "natr_20_pct": 5.32,
-      "chandelier_long_stop": 91.55,
-      "chandelier_short_stop": 100.69,
+      "chandelier_long_stop": 89.61,
+      "chandelier_short_stop": 101.66,
       "signal_status": "🔥 逆價差長牛回檔買點 (Backwardation Coiled Spring)",
       "signal_dir": "LONG",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.27,
+      "clv_5d_pct": 41.7,
       "std_symbol": "CL",
       "std_unit": "1,000 桶",
       "std_multiplier": 1000.0,
@@ -3183,10 +3261,13 @@
       "above_ma200": false,
       "atr_20": 0.131,
       "natr_20_pct": 4.73,
-      "chandelier_long_stop": 2.97,
-      "chandelier_short_stop": 3.07,
+      "chandelier_long_stop": 2.92,
+      "chandelier_short_stop": 3.1,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.22,
+      "clv_5d_pct": 39.2,
       "std_symbol": "RB",
       "std_unit": "42,000 加侖",
       "std_multiplier": 42000.0,
@@ -3217,16 +3298,19 @@
       "ret_126d_pct": -24.93,
       "tsmom_z": 0.22,
       "phys_spread_z": 0.0,
-      "cta_composite_score": 0.11,
+      "cta_composite_score": 0.12,
       "above_ma20": false,
       "above_ma60": false,
       "above_ma200": false,
       "atr_20": 32.695,
       "natr_20_pct": 2.13,
-      "chandelier_long_stop": 1594.39,
-      "chandelier_short_stop": 1517.41,
+      "chandelier_long_stop": 1581.32,
+      "chandelier_short_stop": 1523.95,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "🔥 逆價差事件爆量點火 (1.15x Post-Event Drift)",
+      "vol_ratio_5d": 7.89,
+      "clv_5d_pct": 63.6,
       "std_symbol": "PL",
       "std_unit": "50 盎司",
       "std_multiplier": 50.0,
@@ -3263,10 +3347,13 @@
       "above_ma200": false,
       "atr_20": 0.152,
       "natr_20_pct": 5.08,
-      "chandelier_long_stop": 2.89,
-      "chandelier_short_stop": 3.0,
+      "chandelier_long_stop": 2.83,
+      "chandelier_short_stop": 3.03,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 0.99,
+      "clv_5d_pct": 47.7,
       "std_symbol": "NG",
       "std_unit": "10,000 MMBtu",
       "std_multiplier": 10000.0,
@@ -3303,10 +3390,13 @@
       "above_ma200": false,
       "atr_20": 6.505,
       "natr_20_pct": 2.04,
-      "chandelier_long_stop": 358.69,
-      "chandelier_short_stop": 334.11,
+      "chandelier_long_stop": 356.09,
+      "chandelier_short_stop": 335.41,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 2.15,
+      "clv_5d_pct": 39.4,
       "std_symbol": "ZM",
       "std_unit": "100 短噸",
       "std_multiplier": 100.0,
@@ -3343,10 +3433,13 @@
       "above_ma200": false,
       "atr_20": 2.424,
       "natr_20_pct": 1.13,
-      "chandelier_long_stop": 224.12,
-      "chandelier_short_stop": 220.35,
+      "chandelier_long_stop": 223.15,
+      "chandelier_short_stop": 220.84,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 2.72,
+      "clv_5d_pct": 34.0,
       "std_symbol": "LE",
       "std_unit": "40,000 磅(美分×400)",
       "std_multiplier": 400.0,
@@ -3377,16 +3470,19 @@
       "ret_126d_pct": -35.39,
       "tsmom_z": -0.5,
       "phys_spread_z": 0.0,
-      "cta_composite_score": -0.24,
+      "cta_composite_score": -0.28,
       "above_ma20": false,
       "above_ma60": false,
       "above_ma200": false,
       "atr_20": 1.412,
       "natr_20_pct": 2.72,
-      "chandelier_long_stop": 56.47,
-      "chandelier_short_stop": 52.77,
+      "chandelier_long_stop": 55.91,
+      "chandelier_short_stop": 53.05,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "🔥 逆價差事件爆量點火 (1.15x Post-Event Drift)",
+      "vol_ratio_5d": 6.73,
+      "clv_5d_pct": 70.9,
       "std_symbol": "SI",
       "std_unit": "5,000 盎司",
       "std_multiplier": 5000.0,
@@ -3401,46 +3497,6 @@
       "micro_1atr_risk_usd": 1412.0,
       "etf_proxy": "SLV",
       "roll_months": "3, 5, 7, 9, 12月"
-    },
-    {
-      "ticker": "GC=F",
-      "name_zh": "COMEX 黃金",
-      "sector": "貴金屬 (Precious Metals)",
-      "exchange": "COMEX",
-      "front_price": 4074.9,
-      "deferred_ticker": "GCG27.CMX",
-      "deferred_price": 4107.5,
-      "live_roll_yield_pct": -4.76,
-      "curve_structure": "正價差 (Contango)",
-      "ret_20d_pct": -3.35,
-      "ret_60d_pct": -7.82,
-      "ret_126d_pct": -13.86,
-      "tsmom_z": -0.57,
-      "phys_spread_z": 0.0,
-      "cta_composite_score": -0.28,
-      "above_ma20": false,
-      "above_ma60": false,
-      "above_ma200": false,
-      "atr_20": 80.29,
-      "natr_20_pct": 1.97,
-      "chandelier_long_stop": 3981.85,
-      "chandelier_short_stop": 4107.65,
-      "signal_status": "⏳ 區間觀望 (等待突破)",
-      "signal_dir": "FLAT",
-      "std_symbol": "GC",
-      "std_unit": "100 盎司",
-      "std_multiplier": 100.0,
-      "std_notional_usd": 407490.0,
-      "std_margin_usd": 11500.0,
-      "std_1atr_risk_usd": 8029.0,
-      "micro_symbol": "MGC",
-      "micro_unit": "10 盎司",
-      "micro_multiplier": 10.0,
-      "micro_notional_usd": 40749.0,
-      "micro_margin_usd": 1150.0,
-      "micro_1atr_risk_usd": 803.0,
-      "etf_proxy": "GLD",
-      "roll_months": "2, 4, 6, 8, 10, 12月"
     },
     {
       "ticker": "HG=F",
@@ -3463,10 +3519,13 @@
       "above_ma200": true,
       "atr_20": 0.102,
       "natr_20_pct": 1.64,
-      "chandelier_long_stop": 6.43,
-      "chandelier_short_stop": 6.5,
+      "chandelier_long_stop": 6.39,
+      "chandelier_short_stop": 6.52,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 5.11,
+      "clv_5d_pct": 52.2,
       "std_symbol": "HG",
       "std_unit": "25,000 磅",
       "std_multiplier": 25000.0,
@@ -3481,6 +3540,49 @@
       "micro_1atr_risk_usd": 256.0,
       "etf_proxy": "CPER",
       "roll_months": "3, 5, 7, 9, 12月"
+    },
+    {
+      "ticker": "GC=F",
+      "name_zh": "COMEX 黃金",
+      "sector": "貴金屬 (Precious Metals)",
+      "exchange": "COMEX",
+      "front_price": 4074.9,
+      "deferred_ticker": "GCG27.CMX",
+      "deferred_price": 4107.5,
+      "live_roll_yield_pct": -4.76,
+      "curve_structure": "正價差 (Contango)",
+      "ret_20d_pct": -3.35,
+      "ret_60d_pct": -7.82,
+      "ret_126d_pct": -13.86,
+      "tsmom_z": -0.57,
+      "phys_spread_z": 0.0,
+      "cta_composite_score": -0.3,
+      "above_ma20": false,
+      "above_ma60": false,
+      "above_ma200": false,
+      "atr_20": 80.29,
+      "natr_20_pct": 1.97,
+      "chandelier_long_stop": 3949.73,
+      "chandelier_short_stop": 4123.71,
+      "signal_status": "⏳ 區間觀望 (等待突破)",
+      "signal_dir": "FLAT",
+      "event_signal_badge": "💎 逆價差強收盤吸籌 (1.08x High-CLV)",
+      "vol_ratio_5d": 1.13,
+      "clv_5d_pct": 66.1,
+      "std_symbol": "GC",
+      "std_unit": "100 盎司",
+      "std_multiplier": 100.0,
+      "std_notional_usd": 407490.0,
+      "std_margin_usd": 11500.0,
+      "std_1atr_risk_usd": 8029.0,
+      "micro_symbol": "MGC",
+      "micro_unit": "10 盎司",
+      "micro_multiplier": 10.0,
+      "micro_notional_usd": 40749.0,
+      "micro_margin_usd": 1150.0,
+      "micro_1atr_risk_usd": 803.0,
+      "etf_proxy": "GLD",
+      "roll_months": "2, 4, 6, 8, 10, 12月"
     },
     {
       "ticker": "CC=F",
@@ -3503,10 +3605,13 @@
       "above_ma200": true,
       "atr_20": 224.0,
       "natr_20_pct": 4.23,
-      "chandelier_long_stop": 5260.6,
-      "chandelier_short_stop": 5763.4,
+      "chandelier_long_stop": 5171.0,
+      "chandelier_short_stop": 5808.2,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 1.75,
+      "clv_5d_pct": 47.5,
       "std_symbol": "CC",
       "std_unit": "10 公噸",
       "std_multiplier": 10.0,
@@ -3543,10 +3648,13 @@
       "above_ma200": true,
       "atr_20": 1.313,
       "natr_20_pct": 1.66,
-      "chandelier_long_stop": 78.41,
-      "chandelier_short_stop": 80.46,
+      "chandelier_long_stop": 77.89,
+      "chandelier_short_stop": 80.72,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 3.35,
+      "clv_5d_pct": 50.5,
       "std_symbol": "CT",
       "std_unit": "50,000 磅(美分×500)",
       "std_multiplier": 500.0,
@@ -3583,10 +3691,13 @@
       "above_ma200": true,
       "atr_20": 16.413,
       "natr_20_pct": 1.37,
-      "chandelier_long_stop": 1245.08,
-      "chandelier_short_stop": 1223.67,
+      "chandelier_long_stop": 1238.51,
+      "chandelier_short_stop": 1226.95,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "⚖️ 常態量價結構",
+      "vol_ratio_5d": 0.26,
+      "clv_5d_pct": 34.0,
       "std_symbol": "ZS",
       "std_unit": "5,000 英斗(美分×50)",
       "std_multiplier": 50.0,
@@ -3617,16 +3728,19 @@
       "ret_126d_pct": -3.3,
       "tsmom_z": -0.64,
       "phys_spread_z": 0.0,
-      "cta_composite_score": -0.7,
+      "cta_composite_score": -0.81,
       "above_ma20": false,
       "above_ma60": false,
       "above_ma200": false,
       "atr_20": 10.285,
       "natr_20_pct": 3.67,
-      "chandelier_long_stop": 289.41,
-      "chandelier_short_stop": 303.89,
+      "chandelier_long_stop": 285.29,
+      "chandelier_short_stop": 305.95,
       "signal_status": "⏳ 區間觀望 (等待突破)",
       "signal_dir": "FLAT",
+      "event_signal_badge": "🔥 逆價差事件爆量點火 (1.15x Post-Event Drift)",
+      "vol_ratio_5d": 1.77,
+      "clv_5d_pct": 29.8,
       "std_symbol": "KC",
       "std_unit": "37,500 磅(美分×375)",
       "std_multiplier": 375.0,
@@ -3657,7 +3771,7 @@
       "spot_return_pct": -14.67,
       "roll_yield_contrib_pct": 0.3,
       "return_pct": -14.37,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "BZ=F",
@@ -3665,14 +3779,14 @@
       "sector": "能源 (Energy)",
       "direction": "做多 (Long)",
       "entry_date": "2026-10-19",
-      "exit_date": "2026-11-03",
+      "exit_date": "2026-11-04",
       "entry_price": 109.86,
-      "exit_price": 104.77,
-      "holding_days": 15,
-      "spot_return_pct": -4.63,
-      "roll_yield_contrib_pct": 0.86,
-      "return_pct": -3.77,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 103.6,
+      "holding_days": 16,
+      "spot_return_pct": -5.7,
+      "roll_yield_contrib_pct": 0.92,
+      "return_pct": -4.78,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "SB=F",
@@ -3680,14 +3794,14 @@
       "sector": "軟性與農畜 (Softs)",
       "direction": "做多 (Long)",
       "entry_date": "2026-10-05",
-      "exit_date": "2026-10-27",
+      "exit_date": "2026-11-02",
       "entry_price": 19.93,
-      "exit_price": 19.1,
-      "holding_days": 22,
-      "spot_return_pct": -4.16,
-      "roll_yield_contrib_pct": 0.15,
-      "return_pct": -4.01,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 19.36,
+      "holding_days": 28,
+      "spot_return_pct": -2.86,
+      "roll_yield_contrib_pct": 0.19,
+      "return_pct": -2.67,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "ZM=F",
@@ -3705,19 +3819,19 @@
       "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
-      "ticker": "HG=F",
-      "name_zh": "COMEX 高級銅",
-      "sector": "工業金屬 (Industrial Metals)",
+      "ticker": "ZM=F",
+      "name_zh": "CBOT 豆粕",
+      "sector": "農產品穀物 (Grains)",
       "direction": "做多 (Long)",
-      "entry_date": "2026-10-12",
-      "exit_date": "2026-10-16",
-      "entry_price": 6.64,
-      "exit_price": 6.51,
-      "holding_days": 4,
-      "spot_return_pct": -1.97,
-      "roll_yield_contrib_pct": -0.03,
-      "return_pct": -2.01,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "entry_date": "2026-09-04",
+      "exit_date": "2026-10-05",
+      "entry_price": 345.2,
+      "exit_price": 344.7,
+      "holding_days": 31,
+      "spot_return_pct": -0.14,
+      "roll_yield_contrib_pct": 0.45,
+      "return_pct": 0.31,
+      "exit_reason": "💰 順勢波段換倉停利"
     },
     {
       "ticker": "ZS=F",
@@ -3750,21 +3864,6 @@
       "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
-      "ticker": "ZM=F",
-      "name_zh": "CBOT 豆粕",
-      "sector": "農產品穀物 (Grains)",
-      "direction": "做多 (Long)",
-      "entry_date": "2026-09-04",
-      "exit_date": "2026-10-02",
-      "entry_price": 345.2,
-      "exit_price": 352.1,
-      "holding_days": 28,
-      "spot_return_pct": 2.0,
-      "roll_yield_contrib_pct": 0.41,
-      "return_pct": 2.41,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
       "ticker": "HG=F",
       "name_zh": "COMEX 高級銅",
       "sector": "工業金屬 (Industrial Metals)",
@@ -3777,7 +3876,7 @@
       "spot_return_pct": -2.01,
       "roll_yield_contrib_pct": -0.08,
       "return_pct": -2.1,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "HO=F",
@@ -3852,7 +3951,7 @@
       "spot_return_pct": -0.74,
       "roll_yield_contrib_pct": 0.15,
       "return_pct": -0.59,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "RB=F",
@@ -3867,7 +3966,7 @@
       "spot_return_pct": -7.36,
       "roll_yield_contrib_pct": 0.09,
       "return_pct": -7.27,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "HG=F",
@@ -3875,14 +3974,14 @@
       "sector": "工業金屬 (Industrial Metals)",
       "direction": "做多 (Long)",
       "entry_date": "2026-08-14",
-      "exit_date": "2026-08-19",
+      "exit_date": "2026-08-21",
       "entry_price": 6.59,
-      "exit_price": 6.48,
-      "holding_days": 5,
-      "spot_return_pct": -1.67,
-      "roll_yield_contrib_pct": 0.03,
-      "return_pct": -1.63,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 6.46,
+      "holding_days": 7,
+      "spot_return_pct": -2.01,
+      "roll_yield_contrib_pct": 0.05,
+      "return_pct": -1.96,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "HO=F",
@@ -3890,14 +3989,14 @@
       "sector": "能源 (Energy)",
       "direction": "做多 (Long)",
       "entry_date": "2026-07-17",
-      "exit_date": "2026-08-05",
+      "exit_date": "2026-08-07",
       "entry_price": 4.03,
-      "exit_price": 3.77,
-      "holding_days": 19,
-      "spot_return_pct": -6.46,
-      "roll_yield_contrib_pct": 0.44,
-      "return_pct": -6.01,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 3.88,
+      "holding_days": 21,
+      "spot_return_pct": -3.69,
+      "roll_yield_contrib_pct": 0.49,
+      "return_pct": -3.2,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "ZS=F",
@@ -3912,7 +4011,7 @@
       "spot_return_pct": -4.81,
       "roll_yield_contrib_pct": 0.01,
       "return_pct": -4.8,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "ZW=F",
@@ -3935,14 +4034,14 @@
       "sector": "工業金屬 (Industrial Metals)",
       "direction": "做多 (Long)",
       "entry_date": "2026-06-17",
-      "exit_date": "2026-06-23",
+      "exit_date": "2026-06-24",
       "entry_price": 6.49,
-      "exit_price": 6.36,
-      "holding_days": 6,
-      "spot_return_pct": -2.04,
-      "roll_yield_contrib_pct": 0.06,
-      "return_pct": -1.98,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 6.14,
+      "holding_days": 7,
+      "spot_return_pct": -5.36,
+      "roll_yield_contrib_pct": 0.07,
+      "return_pct": -5.3,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "ZL=F",
@@ -3950,14 +4049,14 @@
       "sector": "農產品穀物 (Grains)",
       "direction": "做多 (Long)",
       "entry_date": "2026-06-03",
-      "exit_date": "2026-06-08",
+      "exit_date": "2026-06-10",
       "entry_price": 78.41,
-      "exit_price": 74.12,
-      "holding_days": 5,
-      "spot_return_pct": -5.47,
-      "roll_yield_contrib_pct": 0.09,
-      "return_pct": -5.38,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 74.91,
+      "holding_days": 7,
+      "spot_return_pct": -4.46,
+      "roll_yield_contrib_pct": 0.13,
+      "return_pct": -4.34,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "HG=F",
@@ -3965,14 +4064,14 @@
       "sector": "工業金屬 (Industrial Metals)",
       "direction": "做多 (Long)",
       "entry_date": "2026-06-03",
-      "exit_date": "2026-06-08",
+      "exit_date": "2026-06-10",
       "entry_price": 6.65,
-      "exit_price": 6.26,
-      "holding_days": 5,
-      "spot_return_pct": -5.8,
-      "roll_yield_contrib_pct": 0.07,
-      "return_pct": -5.73,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 6.3,
+      "holding_days": 7,
+      "spot_return_pct": -5.22,
+      "roll_yield_contrib_pct": 0.1,
+      "return_pct": -5.12,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "ZM=F",
@@ -4020,6 +4119,36 @@
       "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
+      "ticker": "ZL=F",
+      "name_zh": "CBOT 豆油",
+      "sector": "農產品穀物 (Grains)",
+      "direction": "做多 (Long)",
+      "entry_date": "2026-04-21",
+      "exit_date": "2026-05-22",
+      "entry_price": 69.63,
+      "exit_price": 73.87,
+      "holding_days": 31,
+      "spot_return_pct": 6.09,
+      "roll_yield_contrib_pct": 0.43,
+      "return_pct": 6.51,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
+    },
+    {
+      "ticker": "HG=F",
+      "name_zh": "COMEX 高級銅",
+      "sector": "工業金屬 (Industrial Metals)",
+      "direction": "做多 (Long)",
+      "entry_date": "2026-05-12",
+      "exit_date": "2026-05-20",
+      "entry_price": 6.41,
+      "exit_price": 6.17,
+      "holding_days": 8,
+      "spot_return_pct": -3.87,
+      "roll_yield_contrib_pct": 0.1,
+      "return_pct": -3.77,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
+    },
+    {
       "ticker": "CT=F",
       "name_zh": "ICE 2號棉花",
       "sector": "軟性與農畜 (Softs)",
@@ -4032,37 +4161,7 @@
       "spot_return_pct": 16.05,
       "roll_yield_contrib_pct": -0.07,
       "return_pct": 15.98,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
-      "ticker": "ZL=F",
-      "name_zh": "CBOT 豆油",
-      "sector": "農產品穀物 (Grains)",
-      "direction": "做多 (Long)",
-      "entry_date": "2026-04-21",
-      "exit_date": "2026-05-18",
-      "entry_price": 69.63,
-      "exit_price": 73.88,
-      "holding_days": 27,
-      "spot_return_pct": 6.1,
-      "roll_yield_contrib_pct": 0.37,
-      "return_pct": 6.47,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
-      "ticker": "HG=F",
-      "name_zh": "COMEX 高級銅",
-      "sector": "工業金屬 (Industrial Metals)",
-      "direction": "做多 (Long)",
-      "entry_date": "2026-05-12",
-      "exit_date": "2026-05-18",
-      "entry_price": 6.41,
-      "exit_price": 6.25,
-      "holding_days": 6,
-      "spot_return_pct": -2.53,
-      "roll_yield_contrib_pct": 0.08,
-      "return_pct": -2.45,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "LE=F",
@@ -4070,14 +4169,14 @@
       "sector": "軟性與農畜 (Softs)",
       "direction": "做多 (Long)",
       "entry_date": "2026-04-07",
-      "exit_date": "2026-05-08",
+      "exit_date": "2026-05-12",
       "entry_price": 248.03,
-      "exit_price": 250.05,
-      "holding_days": 31,
-      "spot_return_pct": 0.82,
+      "exit_price": 249.4,
+      "holding_days": 35,
+      "spot_return_pct": 0.55,
       "roll_yield_contrib_pct": 0.02,
-      "return_pct": 0.83,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "return_pct": 0.57,
+      "exit_reason": "💰 順勢波段換倉停利"
     },
     {
       "ticker": "ZM=F",
@@ -4175,14 +4274,14 @@
       "sector": "農產品穀物 (Grains)",
       "direction": "做多 (Long)",
       "entry_date": "2026-03-09",
-      "exit_date": "2026-03-17",
+      "exit_date": "2026-03-23",
       "entry_price": 1185.0,
-      "exit_price": 1155.25,
-      "holding_days": 8,
-      "spot_return_pct": -2.51,
-      "roll_yield_contrib_pct": 0.03,
-      "return_pct": -2.48,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 1161.25,
+      "holding_days": 14,
+      "spot_return_pct": -2.0,
+      "roll_yield_contrib_pct": 0.06,
+      "return_pct": -1.95,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "GC=F",
@@ -4242,7 +4341,7 @@
       "spot_return_pct": -3.88,
       "roll_yield_contrib_pct": 0.02,
       "return_pct": -3.86,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "BZ=F",
@@ -4287,7 +4386,7 @@
       "spot_return_pct": -56.61,
       "roll_yield_contrib_pct": 0.19,
       "return_pct": -56.42,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "SI=F",
@@ -4302,22 +4401,22 @@
       "spot_return_pct": 34.02,
       "roll_yield_contrib_pct": 2.38,
       "return_pct": 36.39,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "GC=F",
       "name_zh": "COMEX 黃金",
       "sector": "貴金屬 (Precious Metals)",
       "direction": "做多 (Long)",
-      "entry_date": "2026-01-08",
+      "entry_date": "2025-12-02",
       "exit_date": "2026-02-02",
-      "entry_price": 4462.5,
+      "entry_price": 4274.8,
       "exit_price": 4745.1,
-      "holding_days": 25,
-      "spot_return_pct": 6.33,
-      "roll_yield_contrib_pct": 0.39,
-      "return_pct": 6.72,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "holding_days": 62,
+      "spot_return_pct": 11.0,
+      "roll_yield_contrib_pct": 1.03,
+      "return_pct": 12.03,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "HG=F",
@@ -4335,49 +4434,19 @@
       "exit_reason": "💰 順勢波段換倉停利"
     },
     {
-      "ticker": "PL=F",
-      "name_zh": "NYMEX 白金",
-      "sector": "貴金屬 (Precious Metals)",
-      "direction": "做多 (Long)",
-      "entry_date": "2025-12-31",
-      "exit_date": "2026-01-02",
-      "entry_price": 2232.3,
-      "exit_price": 2034.5,
-      "holding_days": 2,
-      "spot_return_pct": -8.86,
-      "roll_yield_contrib_pct": 0.11,
-      "return_pct": -8.75,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
-      "ticker": "GC=F",
-      "name_zh": "COMEX 黃金",
-      "sector": "貴金屬 (Precious Metals)",
-      "direction": "做多 (Long)",
-      "entry_date": "2025-12-02",
-      "exit_date": "2025-12-30",
-      "entry_price": 4274.8,
-      "exit_price": 4343.6,
-      "holding_days": 28,
-      "spot_return_pct": 1.61,
-      "roll_yield_contrib_pct": 0.47,
-      "return_pct": 2.08,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
       "ticker": "NG=F",
       "name_zh": "亨利港天然氣",
       "sector": "能源 (Energy)",
       "direction": "做多 (Long)",
       "entry_date": "2025-11-17",
-      "exit_date": "2025-12-10",
+      "exit_date": "2025-12-12",
       "entry_price": 4.57,
-      "exit_price": 4.57,
-      "holding_days": 23,
-      "spot_return_pct": 0.18,
-      "roll_yield_contrib_pct": -0.29,
-      "return_pct": -0.12,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 4.23,
+      "holding_days": 25,
+      "spot_return_pct": -7.34,
+      "roll_yield_contrib_pct": -0.32,
+      "return_pct": -7.66,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "ZS=F",
@@ -4392,7 +4461,7 @@
       "spot_return_pct": 0.5,
       "roll_yield_contrib_pct": 0.0,
       "return_pct": 0.5,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "ZM=F",
@@ -4437,7 +4506,22 @@
       "spot_return_pct": -3.29,
       "roll_yield_contrib_pct": 0.05,
       "return_pct": -3.24,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
+    },
+    {
+      "ticker": "GC=F",
+      "name_zh": "COMEX 黃金",
+      "sector": "貴金屬 (Precious Metals)",
+      "direction": "做多 (Long)",
+      "entry_date": "2025-09-08",
+      "exit_date": "2025-10-29",
+      "entry_price": 3653.3,
+      "exit_price": 3983.1,
+      "holding_days": 51,
+      "spot_return_pct": 9.03,
+      "roll_yield_contrib_pct": 0.64,
+      "return_pct": 9.66,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "LE=F",
@@ -4455,21 +4539,6 @@
       "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
-      "ticker": "GC=F",
-      "name_zh": "COMEX 黃金",
-      "sector": "貴金屬 (Precious Metals)",
-      "direction": "做多 (Long)",
-      "entry_date": "2025-09-08",
-      "exit_date": "2025-10-23",
-      "entry_price": 3653.3,
-      "exit_price": 4065.4,
-      "holding_days": 45,
-      "spot_return_pct": 11.28,
-      "roll_yield_contrib_pct": 0.56,
-      "return_pct": 11.84,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
       "ticker": "SI=F",
       "name_zh": "COMEX 白銀",
       "sector": "貴金屬 (Precious Metals)",
@@ -4482,7 +4551,7 @@
       "spot_return_pct": 24.78,
       "roll_yield_contrib_pct": 0.23,
       "return_pct": 25.01,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "KC=F",
@@ -4490,14 +4559,14 @@
       "sector": "軟性與農畜 (Softs)",
       "direction": "做多 (Long)",
       "entry_date": "2025-09-15",
-      "exit_date": "2025-09-18",
+      "exit_date": "2025-09-19",
       "entry_price": 410.65,
-      "exit_price": 388.55,
-      "holding_days": 3,
-      "spot_return_pct": -5.38,
-      "roll_yield_contrib_pct": 0.04,
-      "return_pct": -5.34,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 385.85,
+      "holding_days": 4,
+      "spot_return_pct": -6.04,
+      "roll_yield_contrib_pct": 0.06,
+      "return_pct": -5.98,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "LE=F",
@@ -4557,7 +4626,7 @@
       "spot_return_pct": -1.3,
       "roll_yield_contrib_pct": 0.02,
       "return_pct": -1.27,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "ZL=F",
@@ -4590,6 +4659,21 @@
       "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
+      "ticker": "SI=F",
+      "name_zh": "COMEX 白銀",
+      "sector": "貴金屬 (Precious Metals)",
+      "direction": "做多 (Long)",
+      "entry_date": "2025-06-27",
+      "exit_date": "2025-08-01",
+      "entry_price": 36.59,
+      "exit_price": 36.55,
+      "holding_days": 35,
+      "spot_return_pct": -0.09,
+      "roll_yield_contrib_pct": 0.25,
+      "return_pct": 0.16,
+      "exit_reason": "💰 順勢波段換倉停利"
+    },
+    {
       "ticker": "PL=F",
       "name_zh": "NYMEX 白金",
       "sector": "貴金屬 (Precious Metals)",
@@ -4602,22 +4686,7 @@
       "spot_return_pct": 8.16,
       "roll_yield_contrib_pct": 1.18,
       "return_pct": 9.34,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
-      "ticker": "SI=F",
-      "name_zh": "COMEX 白銀",
-      "sector": "貴金屬 (Precious Metals)",
-      "direction": "做多 (Long)",
-      "entry_date": "2025-06-27",
-      "exit_date": "2025-07-31",
-      "entry_price": 36.59,
-      "exit_price": 37.57,
-      "holding_days": 34,
-      "spot_return_pct": 2.68,
-      "roll_yield_contrib_pct": 0.25,
-      "return_pct": 2.92,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "LE=F",
@@ -4662,7 +4731,7 @@
       "spot_return_pct": -10.21,
       "roll_yield_contrib_pct": 0.12,
       "return_pct": -10.09,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "LE=F",
@@ -4715,14 +4784,14 @@
       "sector": "貴金屬 (Precious Metals)",
       "direction": "做多 (Long)",
       "entry_date": "2025-03-18",
-      "exit_date": "2025-04-07",
+      "exit_date": "2025-04-08",
       "entry_price": 3006.1,
-      "exit_price": 3035.4,
-      "holding_days": 20,
-      "spot_return_pct": 0.97,
-      "roll_yield_contrib_pct": 0.19,
-      "return_pct": 1.17,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 2973.6,
+      "holding_days": 21,
+      "spot_return_pct": -1.08,
+      "roll_yield_contrib_pct": 0.2,
+      "return_pct": -0.88,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     },
     {
       "ticker": "HG=F",
@@ -4737,7 +4806,7 @@
       "spot_return_pct": -2.48,
       "roll_yield_contrib_pct": 0.14,
       "return_pct": -2.34,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "SI=F",
@@ -4752,7 +4821,7 @@
       "spot_return_pct": -6.54,
       "roll_yield_contrib_pct": 0.08,
       "return_pct": -6.46,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
     },
     {
       "ticker": "LE=F",
@@ -4790,14 +4859,29 @@
       "sector": "貴金屬 (Precious Metals)",
       "direction": "做多 (Long)",
       "entry_date": "2025-02-10",
-      "exit_date": "2025-02-26",
+      "exit_date": "2025-03-03",
       "entry_price": 32.34,
-      "exit_price": 31.8,
-      "holding_days": 16,
-      "spot_return_pct": -1.65,
-      "roll_yield_contrib_pct": 0.03,
-      "return_pct": -1.62,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 31.22,
+      "holding_days": 21,
+      "spot_return_pct": -3.45,
+      "roll_yield_contrib_pct": 0.04,
+      "return_pct": -3.41,
+      "exit_reason": "🛡️ 觸及 3.0×ATR 防事件洗盤吊燈/季線移動停利"
+    },
+    {
+      "ticker": "KC=F",
+      "name_zh": "ICE 阿拉比卡咖啡",
+      "sector": "軟性與農畜 (Softs)",
+      "direction": "做多 (Long)",
+      "entry_date": "2025-01-27",
+      "exit_date": "2025-02-25",
+      "entry_price": 347.55,
+      "exit_price": 393.8,
+      "holding_days": 29,
+      "spot_return_pct": 13.31,
+      "roll_yield_contrib_pct": 0.61,
+      "return_pct": 13.92,
+      "exit_reason": "💰 順勢波段換倉停利"
     },
     {
       "ticker": "ZC=F",
@@ -4815,34 +4899,64 @@
       "exit_reason": "💰 順勢波段換倉停利"
     },
     {
-      "ticker": "KC=F",
-      "name_zh": "ICE 阿拉比卡咖啡",
-      "sector": "軟性與農畜 (Softs)",
-      "direction": "做多 (Long)",
-      "entry_date": "2025-01-27",
-      "exit_date": "2025-02-21",
-      "entry_price": 347.55,
-      "exit_price": 395.75,
-      "holding_days": 25,
-      "spot_return_pct": 13.87,
-      "roll_yield_contrib_pct": 0.53,
-      "return_pct": 14.4,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
-    },
-    {
       "ticker": "HG=F",
       "name_zh": "COMEX 高級銅",
       "sector": "工業金屬 (Industrial Metals)",
       "direction": "做多 (Long)",
       "entry_date": "2025-02-10",
-      "exit_date": "2025-02-20",
+      "exit_date": "2025-02-25",
       "entry_price": 4.58,
-      "exit_price": 4.56,
-      "holding_days": 10,
-      "spot_return_pct": -0.53,
-      "roll_yield_contrib_pct": 0.04,
-      "return_pct": -0.5,
-      "exit_reason": "🛡️ 觸及 2.6×ATR 吊燈/季線移動停利停損"
+      "exit_price": 4.52,
+      "holding_days": 15,
+      "spot_return_pct": -1.41,
+      "roll_yield_contrib_pct": 0.06,
+      "return_pct": -1.35,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
+    },
+    {
+      "ticker": "LE=F",
+      "name_zh": "CME 活牛",
+      "sector": "軟性與農畜 (Softs)",
+      "direction": "做多 (Long)",
+      "entry_date": "2025-01-17",
+      "exit_date": "2025-02-10",
+      "entry_price": 196.6,
+      "exit_price": 200.78,
+      "holding_days": 24,
+      "spot_return_pct": 2.12,
+      "roll_yield_contrib_pct": -0.03,
+      "return_pct": 2.09,
+      "exit_reason": "💰 順勢波段換倉停利"
+    },
+    {
+      "ticker": "PL=F",
+      "name_zh": "NYMEX 白金",
+      "sector": "貴金屬 (Precious Metals)",
+      "direction": "做多 (Long)",
+      "entry_date": "2025-02-03",
+      "exit_date": "2025-02-10",
+      "entry_price": 1033.2,
+      "exit_price": 1011.1,
+      "holding_days": 7,
+      "spot_return_pct": -2.14,
+      "roll_yield_contrib_pct": 0.02,
+      "return_pct": -2.11,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
+    },
+    {
+      "ticker": "HO=F",
+      "name_zh": "ULSD 熱燃油(柴油)",
+      "sector": "能源 (Energy)",
+      "direction": "做多 (Long)",
+      "entry_date": "2025-01-17",
+      "exit_date": "2025-02-03",
+      "entry_price": 2.62,
+      "exit_price": 2.48,
+      "holding_days": 17,
+      "spot_return_pct": -5.07,
+      "roll_yield_contrib_pct": 0.12,
+      "return_pct": -4.96,
+      "exit_reason": "🔄 週期輪動換倉淘汰"
     }
   ],
   "user_trades": [],
@@ -4861,9 +4975,9 @@
     },
     {
       "id": "P3",
-      "title": "支柱三：252日保底之 1/ATR(20) 波動率目標配重與板塊上限",
+      "title": "支柱三：252日保底之 1/ATR(20) 波動率目標配重與 3.0×ATR 防洗盤吊燈",
       "metric": "Risk Unit / max(NATR_20, Median_252D)",
-      "desc": "天然氣年化波動率達 50%，黃金僅 18%。透過 1/NATR(20) 讓每口合約承擔相同日波動風險，並以 252 日中位數保底防止低波箱體期槓桿虛胖；單一板塊嚴格限持 2 檔，搭配 2.6×ATR 吊燈移動停損。"
+      "desc": "天然氣年化波動率達 50%，黃金僅 18%。透過 1/NATR(20) 讓每口合約承擔相同日波動風險，並以 252 日中位數保底防止低波箱體期槓桿虛胖；單一板塊嚴格限持 2 檔，搭配 3.0×ATR 防事件震盪洗盤吊燈移動停損。"
     },
     {
       "id": "P4",
@@ -4876,6 +4990,12 @@
       "title": "支柱五：不對稱通縮放空閘門 × 橫截面離散度護盾 + 短債生息",
       "metric": "Breadth <= 28% 解鎖放空 / 離散度 < 11.2% 降頻",
       "desc": "原物料具供給衝擊正偏態，平時盲目放空極易遭軋空；唯有全市場處於系統性通縮崩盤 (廣度<=28%) 且該商品處於正價差庫存過剩時才啟動放空收割 (2008 +81%、2014 +18%)。期貨僅佔約 15% 保證金，85% 閒置資金停泊 BIL 短債與黃金趨勢儲備。"
+    },
+    {
+      "id": "P6",
+      "title": "支柱六：事件衝擊微結構 × 倉儲期限結構辨識引擎 (Kilian 2009 / Working 1949)",
+      "metric": "正價差新聞暴衝禁買 / 逆價差爆量點火 1.15x",
+      "desc": "根據 Kilian (2009) 與 Working 倉儲理論：庫存充裕(正價差<-2.5%)下的突發 5 日新聞急拉(>1.5×NATR)屬預防性恐慌假突破(期望值僅+0.005%)，一律禁買；反之低庫存逆價差下的爆量突破(5D量>1.28×60D均量)與高 CLV 收盤吸籌，將觸發實體搶貨之事後趨勢漂移(Post-Event Drift，週報酬提升+74%)，給予 1.15x~1.24x 順勢加碼。"
     }
   ]
 }

@@ -356,30 +356,30 @@ export default function CommodityCtaDashboard() {
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🏆 21.8年年化報酬 (CAGR)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FBBF24', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              +{fs.cagr_pct ?? 16.79}%
+              +{fs.cagr_pct ?? 18.25}%
             </div>
             <div style={{ fontSize: '0.73rem', color: '#34D399' }}>
-              累積 <strong>{fs.total_multiple ?? 29.68}x</strong> (被動原物料僅 2.94x)
+              累積 <strong>{fs.total_multiple ?? 38.95}x</strong> (被動原物料僅 2.94x)
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(52, 211, 153, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (Monthly MDD)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#34D399', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {fs.mdd_monthly_pct ?? -23.53}%
+              {fs.mdd_monthly_pct ?? -22.45}%
             </div>
             <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
-              日MDD {fs.mdd_daily_pct ?? -25.85}% (較被動 -53.0% 砍半)
+              日MDD {fs.mdd_daily_pct ?? -25.51}% (較被動 -53.0% 砍半)
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>⚖️ 風險調整指標 (Sharpe / Sortino)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38BDF8', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {fs.sharpe ?? 0.81} <span style={{ fontSize: '0.95rem', color: '#94A3B8' }}>/ {fs.sortino ?? 1.00}</span>
+              {fs.sharpe ?? 0.86} <span style={{ fontSize: '0.95rem', color: '#94A3B8' }}>/ {fs.sortino ?? 1.06}</span>
             </div>
             <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
-              Calmar <strong>{fs.calmar ?? 0.71}</strong> (被動原物料僅 0.10)
+              Calmar <strong>{fs.calmar ?? 0.81}</strong> (被動原物料僅 0.10)
             </div>
           </div>
 
@@ -606,6 +606,9 @@ export default function CommodityCtaDashboard() {
                         <td style={{ fontWeight: 800, color: '#F8FAFC' }}>
                           {pos.name_zh} <span style={{ color: '#94A3B8', fontSize: '0.74rem' }}>({pos.ticker})</span>
                           <div style={{ fontSize: '0.7rem', color: '#38BDF8', marginTop: '2px' }}>{pos.signal_status}</div>
+                          {pos.event_signal_badge && (
+                            <div style={{ fontSize: '0.68rem', color: '#FBBF24', marginTop: '2px' }}>{pos.event_signal_badge}</div>
+                          )}
                         </td>
                         <td style={{ color: '#CBD5E1', fontSize: '0.76rem' }}>{pos.sector}</td>
                         <td>
@@ -818,6 +821,11 @@ export default function CommodityCtaDashboard() {
                       <td style={{ fontSize: '0.71rem', color: '#94A3B8' }}>{r.roll_months}</td>
                       <td style={{ fontSize: '0.75rem', fontWeight: 700, color: r.signal_dir === 'LONG' ? '#34D399' : r.signal_dir === 'SHORT' ? '#FCA5A5' : '#94A3B8' }}>
                         {r.signal_status}
+                        {r.event_signal_badge && (
+                          <div style={{ fontSize: '0.68rem', color: '#FBBF24', fontWeight: 600, marginTop: '2px' }}>
+                            {r.event_signal_badge} (量比 {r.vol_ratio_5d ?? 1.0}x / CLV {r.clv_5d_pct ?? 50}%)
+                          </div>
+                        )}
                       </td>
                       <td>
                         <StockChartButton ticker={r.ticker} name={r.name_zh} />
