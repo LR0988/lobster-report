@@ -449,13 +449,34 @@ DATABASE_TABLE_METADATA = {
         "category": "泰坦實作",
         "frequency": "即時同步",
         "task_type": "global_sovereign"
+    },
+    "commodity_futures_daily": {
+        "name": "全球原物料期貨日線與期限結構庫 (commodity_futures_daily)",
+        "desc": "19 大全球核心原物料期貨(能源/貴金屬/銅/穀物/軟商品) 2004~2026 日線、ATR_20、轉倉收益率(Carry)與裂解/壓榨價差",
+        "category": "全球資產",
+        "frequency": "每日更新",
+        "task_type": "commodity_cta"
+    },
+    "commodity_futures_metadata": {
+        "name": "全球原物料期貨合約規格表 (commodity_futures_metadata)",
+        "desc": "19 大原物料標準期貨與微型期貨(Micro)合約乘數、保證金、對應 ETF 與即時近遠月逆價差/正價差結構",
+        "category": "全球資產",
+        "frequency": "規格與曲線",
+        "task_type": "commodity_cta"
+    },
+    "commodity_cta_user_trades": {
+        "name": "原物料期貨 CTA 實盤跟單帳本 (commodity_cta_user_trades)",
+        "desc": "個人原物料標準海期、微型海期(MCL/MGC/SIL/MHG)與原物料 ETF 實戰部位與平倉損益紀錄",
+        "category": "泰坦實作",
+        "frequency": "即時同步",
+        "task_type": "commodity_cta"
     }
 }
 
 _DB_STATUS_CACHE = None
 _DB_STATUS_CACHE_TIME = 0
 _DB_TABLE_COUNTS = {}
-_LARGE_TABLES = {'daily_stock', 'institutional_trades', 'shareholder_concentration', 'global_stock_daily', 'futures_1m', 'futures_5m'}
+_LARGE_TABLES = {'daily_stock', 'institutional_trades', 'shareholder_concentration', 'global_stock_daily', 'commodity_futures_daily', 'futures_1m', 'futures_5m'}
 
 def _refresh_large_table_counts_bg():
     def _worker():
@@ -775,6 +796,20 @@ def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
                     out["d"].append(d)
                     out["o"].append(round((o or c) * k, 2)); out["h"].append(round((h or c) * k, 2))
                     out["l"].append(round((l or c) * k, 2)); out["c"].append(round(c * k, 2))
+                    out["v"].append(int(v or 0))
+        if out is None:
+            # 查詢全球原物料期貨日線庫 (commodity_futures_daily)
+            comm_rows = conn.execute(
+                "SELECT date, open, high, low, close, volume FROM commodity_futures_daily "
+                "WHERE ticker=? AND close>0 ORDER BY date DESC LIMIT ?", (tk, days)).fetchall()[::-1]
+            if len(comm_rows) >= 5:
+                meta_r = conn.execute("SELECT name_zh FROM commodity_futures_metadata WHERE ticker=?", (tk,)).fetchone()
+                c_name = meta_r[0] if meta_r else tk
+                out = {"market": "FUT", "name": c_name, "d": [], "o": [], "h": [], "l": [], "c": [], "v": []}
+                for d, o, h, l, c, v in comm_rows:
+                    out["d"].append(d)
+                    out["o"].append(round(float(o or c), 3)); out["h"].append(round(float(h or c), 3))
+                    out["l"].append(round(float(l or c), 3)); out["c"].append(round(float(c), 3))
                     out["v"].append(int(v or 0))
         if out is None:
             raise HTTPException(status_code=404, detail=f"tw_stock.db 查無 {tk} 的日K資料")
@@ -1435,6 +1470,23 @@ def run_scraper_task(task_type: str):
             set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'shareholder_concentration', '集保股權分散表更新完成', '🎉 集保股權分散籌碼更新完成！', 1, 1, 100, status="success")
             invalidate_db_status_cache()
 
+        elif task_type in ['commodity_cta', 'commodity_futures_daily', 'commodity_futures_metadata']:
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'commodity_futures_daily', '全球 19 大原物料期貨與期限結構 (commodity_futures_daily)', '步驟 1/2：正在連線抓取 19 大原物料主力連續期貨、遠月期限結構合約與裂解/壓榨價差...', 1, 2, 45)
+            try:
+                import ingest_commodity_futures_to_db
+                importlib.reload(ingest_commodity_futures_to_db)
+                ingest_commodity_futures_to_db.fetch_all_and_ingest()
+                import subprocess
+                subprocess.run([sys.executable, os.path.join(BASE_DIR, "fix_futures_clean_roll_returns.py")], check=False)
+                import commodity_cta_service
+                importlib.reload(commodity_cta_service)
+                commodity_cta_service.compute_commodity_cta_dashboard(save_json=True)
+                add_scraper_log("✓ 19 大原物料期貨日線、期限結構 Carry 與 CTA 泰坦訊號已更新至 tw_stock.db")
+            except Exception as e:
+                add_scraper_log(f"⚠️ 更新原物料期貨 CTA 資料庫警告: {e}")
+            set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', 'commodity_futures_daily', '全球原物料期貨 CTA 更新完成', '🎉 全球 19 大原物料期貨與期限結構 CTA 戰情數據更新完成！', 2, 2, 100, status="success")
+            invalidate_db_status_cache()
+
     except BaseException as e:
         set_scraper_progress(task_type, 'tw_stock.db (本機 SQLite)', '', '更新異常中斷', f'❌ 執行過程發生錯誤: {str(e)}', 0, 1, 0, status="error", error=str(e))
         print(f"[x] [API Scraper] 任務 {task_type} 異常中斷: {e}")
@@ -1447,7 +1499,8 @@ VALID_SCRAPER_TASKS = [
     'options', 'options_pc_ratio', 
     'index', 'daily_index',
     'futures', 'futures_chips', 'institutional_futures',
-    'tdcc', 'shareholder_concentration', 'concentration'
+    'tdcc', 'shareholder_concentration', 'concentration',
+    'commodity_cta', 'commodity_futures_daily', 'commodity_futures_metadata'
 ]
 
 @app.post("/api/scraper/{task_type}")
@@ -4464,6 +4517,60 @@ def get_tw_asymmetric_alpha_dashboard():
     import tw_special_strategies_service
     importlib.reload(tw_special_strategies_service)
     return tw_special_strategies_service.get_tw_asymmetric_alpha_data()
+
+@app.get("/api/commodity_cta/dashboard")
+def get_commodity_cta_dashboard(refresh: bool = False):
+    """全球原物料期貨 CTA 泰坦看板：直連 tw_stock.db (commodity_futures_daily & commodity_futures_metadata) 運算期限結構 Carry × 多週期動能 × 1/ATR 配重"""
+    import importlib
+    import commodity_cta_service
+    importlib.reload(commodity_cta_service)
+    if refresh:
+        return commodity_cta_service.compute_commodity_cta_dashboard(save_json=True)
+    if os.path.exists(commodity_cta_service.DEFAULT_CTA_JSON_PATH):
+        try:
+            with open(commodity_cta_service.DEFAULT_CTA_JSON_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # 確保 user_trades 即時從 tw_stock.db 讀取最新狀態
+            conn = sqlite3.connect(DB_NAME)
+            commodity_cta_service._ensure_user_cta_table(conn)
+            ut_df = pd.read_sql_query("SELECT * FROM commodity_cta_user_trades ORDER BY entry_date DESC", conn)
+            conn.close()
+            data["user_trades"] = ut_df.to_dict(orient="records") if len(ut_df) > 0 else []
+            return data
+        except Exception:
+            pass
+    return commodity_cta_service.compute_commodity_cta_dashboard(save_json=True)
+
+@app.post("/api/commodity_cta/scan")
+def trigger_commodity_cta_rescan():
+    """重新運算全球 19 大原物料期貨期限結構與 CTA 動能部位"""
+    import importlib
+    import commodity_cta_service
+    importlib.reload(commodity_cta_service)
+    fresh = commodity_cta_service.compute_commodity_cta_dashboard(save_json=True)
+    return {
+        "status": "ok",
+        "message": f"已從 tw_stock.db 完成 19 大原物料期貨與期限結構即時重算（最新交易日：{fresh.get('market_date', '--')}）！",
+        "data": fresh
+    }
+
+@app.post("/api/commodity_cta/trades")
+def create_commodity_cta_trade(payload: dict = Body(...)):
+    """新增原物料期貨 CTA 實盤跟單部位 (寫入 tw_stock.db commodity_cta_user_trades)"""
+    import commodity_cta_service
+    return commodity_cta_service.add_user_cta_trade(payload)
+
+@app.post("/api/commodity_cta/trades/{trade_id}/close")
+def close_commodity_cta_trade_api(trade_id: str, payload: dict = Body(...)):
+    """平倉原物料期貨 CTA 實盤跟單部位"""
+    import commodity_cta_service
+    return commodity_cta_service.close_user_cta_trade(trade_id, payload)
+
+@app.delete("/api/commodity_cta/trades/{trade_id}")
+def delete_commodity_cta_trade_api(trade_id: str):
+    """刪除原物料期貨 CTA 實盤跟單紀錄"""
+    import commodity_cta_service
+    return commodity_cta_service.delete_user_cta_trade(trade_id)
 
 @app.get("/api/oversold_sniper/dashboard")
 @app.get("/api/oversold_sniper/radar")

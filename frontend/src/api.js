@@ -1343,3 +1343,70 @@ export async function apiGetTwAsymmetricAlphaDashboard() {
   return null;
 }
 
+// ==========================================
+// 🛢️ 全球原物料期貨 CTA 泰坦 Dashboard API (直連本機 tw_stock.db commodity_futures_daily + Supabase 雲端同步)
+// ==========================================
+export async function apiGetCommodityCtaDashboard(refresh = false) {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/commodity_cta/dashboard?refresh=${refresh ? 'true' : 'false'}&t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.status === 'ok') {
+        return json;
+      }
+    }
+  } catch (err) {
+    console.warn(`本機 ${base}/api/commodity_cta/dashboard 未連線，嘗試雲端備援:`, err.message);
+  }
+
+  try {
+    const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.commodity_cta_dashboard&select=payload&t=${Date.now()}`);
+    if (supRes.ok) {
+      const rows = await supRes.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        return typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+export async function apiTriggerCommodityCtaRescan() {
+  const base = await resolveApiBase();
+  const res = await fetch(`${base}/api/commodity_cta/scan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return await res.json();
+}
+
+export async function apiAddCommodityCtaTrade(payload) {
+  const base = await resolveApiBase();
+  const res = await fetch(`${base}/api/commodity_cta/trades`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+export async function apiCloseCommodityCtaTrade(tradeId, payload) {
+  const base = await resolveApiBase();
+  const res = await fetch(`${base}/api/commodity_cta/trades/${encodeURIComponent(tradeId)}/close`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+export async function apiDeleteCommodityCtaTrade(tradeId) {
+  const base = await resolveApiBase();
+  const res = await fetch(`${base}/api/commodity_cta/trades/${encodeURIComponent(tradeId)}`, {
+    method: 'DELETE'
+  });
+  return await res.json();
+}
+

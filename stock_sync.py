@@ -195,6 +195,23 @@ def sync_ml_cache(sb_conn):
     except Exception as e:
         print(f"  ✗ 同步台股特殊策略失敗: {e}")
 
+    # 上傳全球原物料期貨 CTA 泰坦最新數據 (commodity_cta_dashboard)
+    try:
+        import importlib
+        import commodity_cta_service
+        importlib.reload(commodity_cta_service)
+        cta_data = commodity_cta_service.get_commodity_cta_dashboard_data(force_refresh=False)
+        if cta_data and cta_data.get("status") == "ok":
+            cur.execute("""
+                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (model_type) DO UPDATE
+                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+            """, ("commodity_cta_dashboard", json.dumps(cta_data, ensure_ascii=False)))
+            print("  ✓ 全球原物料期貨 CTA 泰坦最新即時數據同步至 stock_ml_cache 完成")
+    except Exception as e:
+        print(f"  ✗ 同步全球原物料期貨 CTA 泰坦失敗: {e}")
+
     sb_conn.commit()
 
 def sync_portfolio(sb_conn, local_conn):

@@ -18,6 +18,7 @@ import GlobalSovereignDashboard from './GlobalSovereignDashboard';
 import TaiwanCausalTitanDashboard from './TaiwanCausalTitanDashboard';
 import OversoldSniperDashboard from './OversoldSniperDashboard';
 import TwAsymmetricAlphaDashboard from './TwAsymmetricAlphaDashboard';
+import CommodityCtaDashboard from './CommodityCtaDashboard';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
 
@@ -902,6 +903,45 @@ const DEFAULT_DB_TABLES = [
     row_count: 4,
     latest_date: '2026/10/11',
     columns_count: 2,
+    status: 'active'
+  },
+  {
+    id: 'commodity_futures_daily',
+    name: '全球原物料期貨日K與期限結構 (commodity_futures_daily)',
+    desc: '19大主力原物料期貨2004~2026主力連續合約、ETF代理、ATR波動率與展期收益率時序表',
+    category: '全球資產與原物料',
+    categoryKey: 'global',
+    frequency: '每日收盤更新',
+    task_type: 'commodity_cta',
+    row_count: 108522,
+    latest_date: '2026-11-06',
+    columns_count: 15,
+    status: 'active'
+  },
+  {
+    id: 'commodity_futures_metadata',
+    name: '全球原物料期貨合約規格與保證金 (commodity_futures_metadata)',
+    desc: 'CME/NYMEX/COMEX/CBOT/ICE 19大主力與微型期貨合約乘數、保證金與正逆價差基準表',
+    category: '全球資產與原物料',
+    categoryKey: 'global',
+    frequency: '每日更新',
+    task_type: 'commodity_cta',
+    row_count: 19,
+    latest_date: '2026-11-06',
+    columns_count: 15,
+    status: 'active'
+  },
+  {
+    id: 'commodity_cta_user_trades',
+    name: '原物料期貨CTA實盤部位紀錄 (commodity_cta_user_trades)',
+    desc: '全球原物料期貨CTA實盤建倉、平倉與ATR停損部位追蹤表',
+    category: '泰坦實作',
+    categoryKey: 'titan',
+    frequency: '即時同步更新',
+    task_type: 'commodity_cta',
+    row_count: 0,
+    latest_date: '2026-11-06',
+    columns_count: 14,
     status: 'active'
   }
 ];
@@ -4259,6 +4299,7 @@ function StockDashboard() {
             { id: 'market_ml', label: '📊 股市策略總覽' },
             { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦 (上限1億)' },
             { id: 'global_sovereign', label: '👑 全球主權泰坦 (無上限)' },
+            { id: 'commodity_cta', label: '🛢️ 全球原物料期貨 CTA (無上限)' },
             { id: 'oversold_sniper', label: '🎯 超賣快打 (上限500萬)' },
             { id: 'asymmetric_alpha', label: '⚡ 可轉債暴擊 (CB:5000萬/CBAS:300萬)' },
             { id: 'podcast', label: '🎧 Podcast 觀點', badge: podcastProgress?.is_active ? `⏳ 分析中 (${podcastProgress.current_job_index || 1}/${podcastProgress.total_jobs || 1})` : null },
@@ -8393,6 +8434,11 @@ function StockDashboard() {
             isScraperRunning={Boolean(scraperLiveStatus?.is_running)}
             scraperStatus={scraperLiveStatus}
           />
+        )}
+
+        {/* ===== 🛢️ 全球原物料期貨 CTA 戰情室 ===== */}
+        {activeTab === 'commodity_cta' && (
+          <CommodityCtaDashboard key={scraperLiveStatus?.finished_at || 'init'} />
         )}
 
         {/* ===== 🎯 極端超賣快打專屬戰情室 ===== */}

@@ -396,3 +396,24 @@ flowchart TD
   - **死因（主升段飆股必經 -15%~-22% 劇烈洗盤）**：實證發現最終大賺 `+50%` 以上的超級大贏家，在連任期間從階段高點回撤 (`Intra-Tenure MDD`) 的中位數高達 `-11.06%`，90 分位數更高達 **`-22.20%`**！設 `-12% ~ -15%` 移動停損會精準把所有翻倍飆股在半山腰洗掉，CAGR 跌至 `37.76% ~ 42.19%`。
 - **🪦 墓碑 #41：將短線過熱股直接踢出 Top-3 並換入 Rank 4~6 次級股**
   - **死因（次級股期望值劣於王牌股）**：把 `Bias60 > 25%` 的 Top-3 強股直接剔除換成 Rank 4~6，會錯失強勢龍頭的續航力，導致 CAGR 倒退 `-1.5% ~ -2.8%`；唯有「保留 Top-3 席次、僅在 Top-3 內部減碼 35% 轉移給未過熱隊友 (`1B Overheat Weight Tilt`)」才能同時降回撤又創收益新高！
+
+---
+
+## 十一、 2026-11-08 全球原物料期貨 CTA 泰坦 (`Global Commodity CTA Titan V3.0`) 21.85 年實證（`CAGR +16.79% / 29.68x / 月 MDD -23.53% / 勝年 20/22`）與原物料三大墓碑 (`Graveyard #42 ~ #44`)
+
+### 1. 🏆 全球原物料期貨五大正交支柱與五階消融實證 (`2005–2026`, 19 大主力合約扣除 6 bps 摩擦與真實展期損益)
+- **核心生產模組**：[`ingest_commodity_futures_to_db.py`](file:///Users/huanggin-chen/openclaw_test/ingest_commodity_futures_to_db.py)、[`fix_futures_clean_roll_returns.py`](file:///Users/huanggin-chen/openclaw_test/fix_futures_clean_roll_returns.py)、[`commodity_cta_service.py`](file:///Users/huanggin-chen/openclaw_test/commodity_cta_service.py)
+- **五階消融對照表 (`2005-01 ~ 2026-11`)**：
+  - **Tier 0 (`Passive Long-Only Equal-Weight`)**：`CAGR +5.07%` (`2.94x`) ｜ 月 MDD `-53.03%` ｜ Sharpe `0.28` ｜ Calmar `0.10` ｜ 勝年 `15/22`（長期被能源與農產品正價差 Contango 轉倉流血拖累）
+  - **Tier 1 (`Naive Equal-Weight Trend`)**：`CAGR +10.52%` (`8.90x`) ｜ 月 MDD `-48.01%` ｜ Sharpe `0.48` ｜ Calmar `0.22` ｜ 勝年 `16/22`（未做波動率平價，單一天然氣與原油波動綁架全組合）
+  - **Tier 2 (`1/ATR Vol-Parity TSMOM`)**：`CAGR +11.06%` (`9.90x`) ｜ 月 MDD `-37.92%` ｜ Sharpe `0.60` ｜ Calmar `0.29` ｜ 勝年 `16/22`（`1/NATR_20` 等風險配重使月 MDD 大降 `-10.09%`）
+  - **Tier 3 (`Carry + 1/ATR Trend`)**：`CAGR +12.25%` (`12.49x`) ｜ 月 MDD `-34.92%` ｜ Sharpe `0.61` ｜ Calmar `0.35` ｜ 勝年 `16/22`（做多逆價差 Backwardation + 趨勢共振）
+  - **🏆 Tier S+ (`Global Commodity CTA Titan V3.0`)**：**`CAGR +16.79%` (`29.68x`)** ｜ **月 MDD `-23.53%`** ｜ **日 MDD `-25.85%`** ｜ **Sharpe `0.81`** ｜ **Sortino `1.00`** ｜ **Calmar `0.71`** ｜ **勝年 `20/22 (90.9%)`** ｜ **雙世代 `G1 (05-15) +18.96% / G2 (16-26) +14.62%`**。
+
+### 2. 🪦 嚴格打假淘汰之原物料期貨三大墓碑 (`Graveyard #42 ~ #44`)
+- **🪦 墓碑 #42：直接使用未除權連續期貨 (`CL=F / NG=F`) 計算報酬率 + 2020-04-20 WTI 負油價拼接破圖**
+  - **死因**：連續近月合約換月日會產生 $(F_2 - F_1)/F_1$ 的假跳空，且 `2020-04-20` WTI 近月交割前夕跌至 `-$37.63` 會導致連續報酬分母崩潰。必須剝離換月拼接跳空、於 `2020-04-16~24` 改用布蘭特原油 (`BZ=F`) 代理，並疊加真實延遲展期收益率 (`roll_yield_ann / 252`)。
+- **🪦 墓碑 #43：將股票的 `FIP 路徑平滑度濾網 (Frog-in-the-Pan)` 套用於原物料期貨**
+  - **死因**：原物料大行情往往源於俄烏戰爭、OPEC 減產、極端霜凍等供給斷鏈跳空暴漲；加入 `fip_min > 0` 會把最具爆發力的供給衝擊主升段擋在門外（CAGR 倒退 `-1.38%`）。改用 **`40D 唐奇安通道突破 (Donchian Breakout)`** 才能精準捕捉原物料右尾趨勢。
+- **🪦 墓碑 #44：死水盤 `1/NATR` 盲目放大槓桿 + 常態盤雙向對稱放空原物料**
+  - **死因**：在 `2013` 與 `2017–2019` 原物料低波動盤整年，`NATR_20` 壓縮至歷史低檔、橫截面 60D 離散度 `< 11.2%`，且動能相關係數轉負（2013 年 `IC = -0.1424`）；此時若不設 `NATR` 252 日動態底線且貿然雙向放空，會遭雙巴洗盤。設下 **`NATR` 動態底線 + 離散度閘門 + 僅在系統性通縮崩盤 (`Breadth_200MA <= 28%` 且正價差 `Roll Yield < -3%`) 開放放空**，一舉將勝年推升至 `20/22 年 (90.9%)`！
