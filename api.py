@@ -788,11 +788,64 @@ def _ensure_and_get_quarterly_eps(conn, sid: str):
 
 
 def _attach_tw_fundamentals(conn, sid: str, out: dict, pe_by_date: dict = None):
-    """為台股 K 線圖附加月營收 (單月億元/YoY/MoM/3M均/12M均) 與單季/近四季 EPS 及本益比序列。"""
+    """為台股 K 線圖附加月營收 (單月億元/YoY/MoM/3M均/12M均)、單季/近四季 EPS 及本益比，並自動補齊缺漏之上市融資融券餘額。"""
     dates = out.get("d") or []
     if not dates:
         return
     last_bar_dt = dates[-1]
+
+    # 0. 自動檢查並補齊融資融券餘額 (過去 TWSE MI_MARGN 改版放至 tables[1] 導致上市個股 margin_balance 缺漏)
+    mb_arr = out.get("mb")
+    sb_arr = out.get("sb")
+    valid_mb_cnt = sum(1 for x in (mb_arr or []) if x is not None)
+    if valid_mb_cnt < len(dates) * 0.6:
+        try:
+            import requests as _req
+            resp = _req.get(
+                "https://api.finmindtrade.com/api/v4/data",
+                params={
+                    "dataset": "TaiwanStockMarginPurchaseShortSale",
+                    "data_id": sid,
+                    "start_date": dates[0],
+                },
+                timeout=4.0
+            ).json()
+            mg_rows = resp.get("data") or []
+            if mg_rows:
+                mg_map = {}
+                upd_batch = []
+                for x in mg_rows:
+                    d_str = str(x.get("date") or "").strip()
+                    if not d_str:
+                        continue
+                    m_buy = int(x.get("MarginPurchaseBuy") or 0)
+                    m_sell = int(x.get("MarginPurchaseSell") or 0)
+                    m_bal = int(x.get("MarginPurchaseTodayBalance") or 0)
+                    s_buy = int(x.get("ShortSaleBuy") or 0)
+                    s_sell = int(x.get("ShortSaleSell") or 0)
+                    s_bal = int(x.get("ShortSaleTodayBalance") or 0)
+                    mg_map[d_str] = (m_bal, s_bal)
+                    upd_batch.append((m_buy, m_sell, m_bal, s_buy, s_sell, s_bal, d_str.replace("-", ""), sid))
+                if upd_batch:
+                    conn.executemany(
+                        "UPDATE daily_stock SET margin_buy=?, margin_sell=?, margin_balance=?, "
+                        "short_buy=?, short_sell=?, short_balance=? WHERE date=? AND stock_id=?",
+                        upd_batch
+                    )
+                    conn.commit()
+                new_mb, new_sb = [], []
+                cur_m, cur_s = None, None
+                for i_dt, dt_s in enumerate(dates):
+                    if dt_s in mg_map:
+                        cur_m, cur_s = mg_map[dt_s]
+                    elif mb_arr and i_dt < len(mb_arr) and mb_arr[i_dt] is not None:
+                        cur_m, cur_s = mb_arr[i_dt], sb_arr[i_dt]
+                    new_mb.append(cur_m)
+                    new_sb.append(cur_s)
+                out["mb"] = new_mb
+                out["sb"] = new_sb
+        except Exception as e:
+            print(f"[chart] backfill margin/short for {sid} warning: {e}")
 
     # 1. 月營收序列 (monthly_revenue: current_month_rev 單位為千元 -> 轉為億元)
     rev_rows = conn.execute(

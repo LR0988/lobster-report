@@ -157,7 +157,7 @@ const StockChartModal = ({ req, onClose }) => {
     const dates = data.d, n = dates.length;
     const chart = createChart(boxRef.current, {
       autoSize: true,
-      layout: { background: { color: '#0B1220' }, textColor: '#94A3B8', panes: { separatorColor: '#1E293B' } },
+      layout: { background: { color: '#0B1220' }, textColor: '#94A3B8', panes: { separatorColor: '#1E293B' }, attributionLogo: false },
       grid: { vertLines: { color: 'rgba(148,163,184,0.07)' }, horzLines: { color: 'rgba(148,163,184,0.07)' } },
       crosshair: { mode: CrosshairMode.Normal },
       rightPriceScale: { borderColor: '#1E293B' },
