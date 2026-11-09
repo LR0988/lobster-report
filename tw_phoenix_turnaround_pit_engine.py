@@ -410,10 +410,17 @@ def run_simulation(force_rebuild=False):
     c_mkt = (tw_breadth_ma60 >= 0.35)
 
     pool = (c_liq & c_trough & c_trend & c_breakout & c_rev & c_inst).mul(c_mkt, axis=0).fillna(False).astype(bool)
-    # 🔥 鳳凰回馬槍 (MA20 洗盤重返機制)：曾通過初選母池且首波已證明動能 (+14%保本盾 / +35%派發破MA20洗出) 之標的，
-    # 於出場後 3~60 個交易日內，若基本面營收拐點 (c_rev) 與四線多頭趨勢 (c_trend) 未變，
-    # 當洗盤結束重新站回 MA20 並突破近 20 日整理平台高點 (px > high_20_prev) 時，啟動二次上車 (每波限重返 1 次)
-    re_mask = (c_liq & c_rev & c_trend & (px > ma20) & (px > high_20_prev) & (bias60 <= 0.25)).mul(c_mkt, axis=0).fillna(False).astype(bool)
+    # 🔥 鳳凰回馬槍 (MA20 洗盤重返機制)：曾通過初選母池且首波已證明動能 (+14%保本盾 / +35%派發破MA20 / 首波曾漲>=12%遭時間洗出) 之標的，
+    # 於出場後 3~60 個交易日內，若基本面營收拐點未變 (針對首波未漲完50%之初段洗盤股，若單月YoY>=15%且法人買超>=5%或單月>12M均線1.05倍，
+    # 豁免台股2月農曆年短月造成之rqoq假性負值，並容許洗盤後季線微幅走平 ma60_slope20>=-1%)，
+    # 當洗盤結束重新站回 MA20 並突破近 20 日整理平台高點 (px > high_20_prev) 時，優先啟動二次上車 (每波限重返 1 次)
+    c_rev_re = c_rev | ((rymin24 <= -10.0) & (ryoy >= 15.0) & ((rcur12 >= 1.05) | (tot_inst20 >= 0.05)))
+    c_trend_re = (
+        (px >= ma60 * 0.99) & (px > ma120) & (px > ma200)
+        & (ma60_slope20 >= -0.01) & (ma200_slope20 >= -0.01) & higher_low_base
+    )
+    re_mask_base = (c_liq & c_rev & c_trend & (px > ma20) & (px > high_20_prev) & (bias60 <= 0.25)).mul(c_mkt, axis=0).fillna(False).astype(bool)
+    re_mask_ext = (c_liq & c_rev_re & c_trend_re & (px > ma20) & (px > high_20_prev) & (bias60 <= 0.25)).mul(c_mkt, axis=0).fillna(False).astype(bool)
     # 廢除人為 S/A 分級 (奧卡姆剃刀零分級參數)：所有通過母池檢驗之轉機突擊艦均一配置 50% 倉位 (最多2檔)
     s_mask = pool.copy()
     a_mask = pd.DataFrame(False, index=idx, columns=pit_tw)
@@ -435,7 +442,8 @@ def run_simulation(force_rebuild=False):
     ma60_arr = ma60.reindex(dates).values
     io5_arr = io5.reindex(dates).values
     s_arr = s_mask.reindex(dates).values
-    re_arr = re_mask.reindex(dates).values
+    re_base_arr = re_mask_base.reindex(dates).values
+    re_ext_arr = re_mask_ext.reindex(dates).values
     a_arr = a_mask.reindex(dates).values
     sc_arr = score_df.reindex(dates).values
     raw_sc_arr = raw_score_df.reindex(dates).values
@@ -519,8 +527,13 @@ def run_simulation(force_rebuild=False):
                     "is_reentry": is_re,
                     "leader": True
                 })
-                if p.get("reentry_count", 0) < 1 and ("保本護盾" in p["exit_reason"] or "主力派發" in p["exit_reason"]):
-                    last_exit[c] = (d, exit_px, p.get("reentry_count", 0) + 1)
+                pk_ret_ex = (p["peak_px"] / p["entry_px"]) - 1.0
+                if p.get("reentry_count", 0) < 1 and (
+                    "保本護盾" in p["exit_reason"]
+                    or "主力派發" in p["exit_reason"]
+                    or ("殭屍" in p["exit_reason"] and pk_ret_ex >= 0.12)
+                ):
+                    last_exit[c] = (d, exit_px, p.get("reentry_count", 0) + 1, net_ret)
             else:
                 still.append(p)
         active = still
@@ -533,13 +546,17 @@ def run_simulation(force_rebuild=False):
         held_c = {p["c"] for p in active}
         cands = [c for c in cands if c not in held_c and not np.isnan(sc_arr[d - 1, c])]
         re_set = set()
-        for c, (ex_d, ex_px, r_cnt) in list(last_exit.items()):
+        for c, (ex_d, ex_px, r_cnt, prev_net_ret) in list(last_exit.items()):
             if 3 <= (d - 1 - ex_d) <= 60 and c not in held_c and c not in cands:
-                if re_arr[d - 1, c]:
+                ok_re = re_base_arr[d - 1, c] if prev_net_ret >= 0.50 else re_ext_arr[d - 1, c]
+                if ok_re:
                     cands.append(c)
                     re_set.add(c)
         cands.sort(
-            key=lambda c: sc_arr[d - 1, c] if not np.isnan(sc_arr[d - 1, c]) else (raw_sc_arr[d - 1, c] if not np.isnan(raw_sc_arr[d - 1, c]) else 0.0),
+            key=lambda c: (
+                1 if c in re_set else 0,
+                sc_arr[d - 1, c] if not np.isnan(sc_arr[d - 1, c]) else (raw_sc_arr[d - 1, c] if not np.isnan(raw_sc_arr[d - 1, c]) else 0.0),
+            ),
             reverse=True
         )
 
