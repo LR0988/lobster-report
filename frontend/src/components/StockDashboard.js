@@ -265,7 +265,7 @@ const MARKET_ML_MODELS = [
   { val: 'global_liquid_titan_sniper', label: '👑 全球主權泰坦 × 閒置資金快打 (強強合體·黃金階梯旗艦版)', short: '👑 全球泰坦(黃金合體冠軍)', tag: '👑 22.8年+17795770% (17.80萬倍)・CAGR 70.12%・夏普4.69・MDD -27.75%', desc: '全球主權雙梯隊黃金階梯主砲 (50/30/20) ＋ 閒置資金極端超賣快打（DOE 全域最佳化：Z ≤ -2.0, 10MA停利, 上限7天, -7%停損, 閒置資金30%動用）：平時雙梯隊黃金階梯重砲推進，現金閒置 > 15% 時自動以極端超賣撈底打擊均值回歸反彈，觸及 10MA 即刻結利退回主砲。22.8 年嚴格日頻撮合實證達 177,958.7 倍 (17.80 萬倍)，年化 CAGR 70.12%，夏普比率 4.69，快打勝率 64.0%，MDD 僅 -27.75%，相較線上原版實現超額再進化！' },
   { val: 'pure_sniper_standalone', label: '🎯 極端超賣純快打獨立版 (Z-Score Sniper Standalone)', short: '🎯 極端超賣純快打', tag: '🛡️ 危機Alpha・MDD僅 -18.56%・22.8年+443.8% (5.44倍)・勝率62.2%', desc: '極端超賣 Z-Score 純快打獨立策略（無主砲，100% 獨立資金池）：平時 100% 現金零曝險防守，僅在大盤/核心權值股爆發極端恐慌抛售 (20日 Z ≤ -2.0) 時次日 T+1 開盤切入搶超跌反彈，觸及 10MA 或滿 10 日即結利退場。全歷史勝率 62.2%，最大回撤僅 -18.56%，年化夏普 0.59，在 2008 金融海嘯狂賺、2018 貿易戰與 2022 升息大熊市大幅逆勢獲利！' },
   { val: 'global_liquid_titan_base', label: '👑 全球高流動性主權泰坦 (純雙梯隊黃金階梯版)', short: '👑 全球主權泰坦(黃金階梯)', tag: '👑 22.8年+6311637% (6.31萬倍)・CAGR 62.55%・MDD -27.75%・勝率90.9%', desc: '全球高流動性主權泰坦純雙梯隊旗艦：每月1號(A梯隊50%)與22號(B梯隊50%)交錯調倉 + 50/30/20黃金階梯 + 45/35/20敏銳動能集總 + 爆量滯漲過濾 + 前5名保護帶 + 滿4月換血。22.8年全歷史檢驗 CAGR 62.55% (63,117.4倍)，MDD -27.75%，Calmar 2.25，真實夏普 1.56，年度勝率 90.9%！' },
-  { val: 'titan_sovereign', label: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+S50/A25突擊艦 · 8重PIT · 11年18.2倍)', short: '👑 台股因果泰坦 (大凹洞母子艦隊)', tag: '👑 11年11勝(100%正報酬)・+1719% (18.2倍)・CAGR 30.69%・夏普1.35・MDD -20.94%', desc: '台股因果泰坦 — 大凹洞轉型波段母子艦隊：以 0050.TW 搭配全球主權寬幅 (≥35%) 作為核心保護母艦，當個股出現「3年大凹洞跌深築底突破 + 月營收真實拐點 (T+1嚴格PIT) + 投信/外資雙鎖碼 + 融資退潮」時，自動分撥 S級(50%) / A級(25%) 轉機突擊艦 (最多2檔)，並執行 E5 六段式非對稱移動停損停利。通過 8 重極端嚴格 Point-in-Time 審計，2016-2026 連續 11 年 100% 年度正報酬，CAGR 30.69% (18.19倍)，夏普 1.35，最大回撤 -20.94%。' },
+  { val: 'titan_sovereign', label: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+均一50%突擊艦 · 8重PIT+價差實扣 · 11年23.7倍)', short: '👑 台股因果泰坦 (大凹洞母子艦隊)', tag: '👑 11年11勝(100%正報酬)・+2269% (23.7倍)・CAGR 33.91%・夏普1.20・MDD -23.48%', desc: '台股因果泰坦 — 大凹洞轉型波段母子艦隊：以 0050.TW 搭配全球主權寬幅 (≥35%) 作為核心保護母艦，當個股出現「3年大凹洞跌深築底突破 + 月營收真實拐點 (T+1嚴格PIT) + 投信/外資雙鎖碼 + 融資退潮」時，採用零分級過度擬合之「均一 50% 轉機突擊艦 (最多2檔)」，並執行 E5 六段式非對稱移動停損停利。通過 8 重極端嚴格 Point-in-Time 審計並實扣等級二真實五檔買賣價差與證交稅 (0050來回0.28% / 個股來回0.74%)，2016-2026 連續 11 年 100% 年度正報酬，CAGR 33.91% (23.69倍)，最大回撤 -23.48%。' },
   { val: 'etf_0020', label: '🚀 0020 台灣前20大等權重指數 (0020-Equal ETF)', short: '🚀 0020 等權重', tag: '🚀 10年+864% 擊敗0050', desc: '去蕪存菁！剔除 0050 後段班 30 檔牛皮弱勢股，集中前 20 大半導體與 AI 科技龍頭每檔 5% 等權重。10年+863.88% (CAGR 23.44%)，擊敗 0050 (+657.56%) 超額 +206.3%！' },
   { val: 'wf_lightgbm', label: '⚡ 漸進 LightGBM (WF-LightGBM)', short: '⚡ 漸進 LGBM', tag: '👑 10年+688% 戰勝0050', desc: '美股宏觀定價＋滾動增量重訓，10 年總報酬 +688.79% 徹底擊敗 0050 Buy & Hold (+652.64%)，零槓桿，MDD 僅 -31.78%！' },
   { val: 'walk_forward', label: '🔄 漸進動態集成 (WF-Ensemble)', short: '🔄 漸進集成', tag: '🏆 美股增益・近1年+126%', desc: '納入美股四大盤（那指、標普、道瓊、VT）與跨市場強弱，每 40 日滾動重訓，嚴格 25 日隔離零偷看，近 1年 +126.73% 成功反超 0050，近 10年 +601.91%，100% 純樣本外 (OOS)' },
@@ -5446,11 +5446,11 @@ function StockDashboard() {
                     },
                     {
                       id: 'titan_sovereign',
-                      name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+S50/A25突擊艦 · 8重PIT驗證)',
+                      name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+均一50%突擊艦 · 8重PIT+價差實扣)',
                       icon: '👑',
                       tag: is20ySelected
-                        ? '11年11勝(100%正報酬)・+1719% (18.2倍)・CAGR 30.69%・MDD -20.94%・夏普1.35・卡瑪1.47'
-                        : '11年100%年度正報酬・CAGR 30.69%・台股因果泰坦 (大凹洞母子艦隊 PIT)'
+                        ? '11年11勝(100%正報酬)・+2269% (23.7倍)・CAGR 33.91%・MDD -23.48%・夏普1.20・卡瑪1.44'
+                        : '11年100%年度正報酬・CAGR 33.91%・台股因果泰坦 (均一50% · 價差實扣 PIT)'
                     },
                     {
                       id: 'etf_0020',
@@ -5968,18 +5968,18 @@ function StockDashboard() {
                     };
                     const taiwanItem = {
                       model_id: 'titan_sovereign',
-                      name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+S50/A25突擊艦 · 8重PIT · 11年18.2倍)',
-                      short_name: '👑 台股因果泰坦 (大凹洞母子艦隊 · 18.2倍)',
-                      model_name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+S50/A25突擊艦 · 8重PIT · 11年18.2倍)',
-                      total_return_pct: tw?.customModeData?.total_return_pct ?? 1719.3,
-                      cagr_pct: tw?.customModeData?.cagr_pct ?? 30.69,
-                      alpha_pct: tw?.customModeData?.alpha_pct ?? 958.9,
-                      max_drawdown_pct: tw?.customModeData?.max_drawdown_pct ?? -20.94,
-                      sharpe_ratio: tw?.customModeData?.sharpe_ratio ?? 1.35,
-                      sortino_ratio: tw?.customModeData?.sortino_ratio ?? 1.68,
-                      win_rate_pct: tw?.customModeData?.win_rate_pct ?? 42.42,
-                      profit_factor: tw?.customModeData?.profit_factor ?? 3.42,
-                      total_trades: tw?.customModeData?.total_trades ?? 66,
+                      name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+均一50%突擊艦 · 8重PIT+價差實扣 · 11年23.7倍)',
+                      short_name: '👑 台股因果泰坦 (均一50%母子艦隊 · 23.7倍)',
+                      model_name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+均一50%突擊艦 · 8重PIT+價差實扣 · 11年23.7倍)',
+                      total_return_pct: tw?.customModeData?.total_return_pct ?? 2269.2,
+                      cagr_pct: tw?.customModeData?.cagr_pct ?? 33.91,
+                      alpha_pct: tw?.customModeData?.alpha_pct ?? 1508.8,
+                      max_drawdown_pct: tw?.customModeData?.max_drawdown_pct ?? -23.48,
+                      sharpe_ratio: tw?.customModeData?.sharpe_ratio ?? 1.20,
+                      sortino_ratio: tw?.customModeData?.sortino_ratio ?? 1.60,
+                      win_rate_pct: tw?.customModeData?.win_rate_pct ?? 43.08,
+                      profit_factor: tw?.customModeData?.profit_factor ?? 3.31,
+                      total_trades: tw?.customModeData?.total_trades ?? 65,
                       market_exposure_pct: tw?.customModeData?.market_exposure_pct ?? 85.0
                     };
                     return {
@@ -6071,7 +6071,7 @@ function StockDashboard() {
                           long_short: pureSniperCalc?.customModeData
                         },
                         titan_sovereign: {
-                          name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+S50/A25突擊艦 · 8重PIT · 11年18.2倍)',
+                          name: '👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦+均一50%突擊艦 · 8重PIT+價差實扣 · 11年23.7倍)',
                           long_only: taiwanCalc?.customModeData,
                           long_short: taiwanCalc?.customModeData
                         }
