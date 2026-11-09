@@ -227,15 +227,16 @@ const StockChartModal = ({ req, onClose }) => {
       const xIdx = hasExit ? findBarIdx(tr.exit_date) : -1;
       const retVal = Number(tr.return_pct ?? tr.pnl_pct ?? tr.period_ret ?? tr.period_ret_pct ?? 0);
       const isPrimary = req.trade && (tr === req.trade || (tr.entry_date === req.trade.entry_date && tr.exit_date === req.trade.exit_date));
+      const isReentry = Boolean(tr.is_reentry || String(tr.role || tr.tier || '').includes('回馬槍'));
 
       if (eIdx >= 0) {
         allMarkers.push({
           time: dates[eIdx],
           position: 'belowBar',
           shape: 'arrowUp',
-          color: '#FBBF24',
+          color: isReentry ? '#FB923C' : '#FBBF24',
           size: isPrimary ? 2 : 1,
-          text: `🟢 買進 ${dates[eIdx]}${tr.entry_price ? ` @$${fmt(tr.entry_price)}` : ''}`,
+          text: `${isReentry ? '🔥 回馬槍買進' : '🟢 買進'} ${dates[eIdx]}${tr.entry_price ? ` @$${fmt(tr.entry_price)}` : ''}`,
         });
       }
       if (xIdx >= 0) {
@@ -249,34 +250,14 @@ const StockChartModal = ({ req, onClose }) => {
         });
       }
 
-      if (isPrimary && eIdx >= 0) {
+      if (eIdx >= 0) {
         const ePx = getAlignedPx(tr.entry_price, eIdx, 'o');
         const endIdx = xIdx >= eIdx ? xIdx : Math.min(n - 1, eIdx + 25);
         const xPx = xIdx >= 0 ? getAlignedPx(tr.exit_price, xIdx, 'o') : data.c[n - 1];
-        if (ePx != null) {
-          main.createPriceLine({
-            price: ePx,
-            color: '#FBBF24',
-            lineStyle: LineStyle.Dashed,
-            lineWidth: 2,
-            axisLabelVisible: true,
-            title: `🟢 買進 $${fmt(tr.entry_price || ePx)}`,
-          });
-        }
-        if (xIdx >= 0 && xPx != null) {
-          main.createPriceLine({
-            price: xPx,
-            color: retVal >= 0 ? '#38BDF8' : '#F472B6',
-            lineStyle: LineStyle.Dashed,
-            lineWidth: 2,
-            axisLabelVisible: true,
-            title: `🎯 出場 $${fmt(tr.exit_price || xPx)} (${retVal >= 0 ? '+' : ''}${retVal.toFixed(1)}%)`,
-          });
-        }
         if (ePx != null && xPx != null && endIdx > eIdx) {
           chart.addSeries(LineSeries, {
-            color: retVal >= 0 ? '#FBBF24' : '#F472B6',
-            lineWidth: 2,
+            color: retVal >= 0 ? (isReentry ? '#FB923C' : '#FBBF24') : '#F472B6',
+            lineWidth: isPrimary ? 2 : 2,
             lineStyle: LineStyle.Dashed,
             priceLineVisible: false,
             lastValueVisible: false,
@@ -286,9 +267,42 @@ const StockChartModal = ({ req, onClose }) => {
             { time: dates[endIdx], value: xPx },
           ]);
         }
-        const span = Math.max(15, endIdx - eIdx);
-        const pad = Math.max(25, Math.round(span * 0.45));
-        focusTradeRange = { from: Math.max(0, eIdx - pad), to: Math.min(n + 2, endIdx + pad) };
+        if (isPrimary) {
+          if (ePx != null) {
+            main.createPriceLine({
+              price: ePx,
+              color: isReentry ? '#FB923C' : '#FBBF24',
+              lineStyle: LineStyle.Dashed,
+              lineWidth: 2,
+              axisLabelVisible: true,
+              title: `${isReentry ? '🔥 回馬槍' : '🟢 買進'} $${fmt(tr.entry_price || ePx)}`,
+            });
+          }
+          if (xIdx >= 0 && xPx != null) {
+            main.createPriceLine({
+              price: xPx,
+              color: retVal >= 0 ? '#38BDF8' : '#F472B6',
+              lineStyle: LineStyle.Dashed,
+              lineWidth: 2,
+              axisLabelVisible: true,
+              title: `🎯 出場 $${fmt(tr.exit_price || xPx)} (${retVal >= 0 ? '+' : ''}${retVal.toFixed(1)}%)`,
+            });
+          }
+          // 若同檔股票在前後 100 根 K 棒內有二波回馬槍或首波交易，自動將視野涵蓋兩波完整走勢
+          let minBar = eIdx;
+          let maxBar = endIdx;
+          tradeList.forEach((other) => {
+            const oe = findBarIdx(other.entry_date);
+            const ox = other.exit_date ? findBarIdx(other.exit_date) : oe;
+            if (oe >= 0 && Math.abs(oe - eIdx) <= 120) {
+              minBar = Math.min(minBar, oe);
+              if (ox >= oe) maxBar = Math.max(maxBar, ox);
+            }
+          });
+          const span = Math.max(15, maxBar - minBar);
+          const pad = Math.max(25, Math.round(span * 0.35));
+          focusTradeRange = { from: Math.max(0, minBar - pad), to: Math.min(n + 2, maxBar + pad) };
+        }
       }
     });
 

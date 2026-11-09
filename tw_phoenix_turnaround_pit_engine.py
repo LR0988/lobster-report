@@ -325,6 +325,7 @@ def run_simulation(force_rebuild=False):
     low_120 = px.rolling(120, min_periods=40).min()
     low_60 = px.rolling(60, min_periods=20).min()
     high_60_prev = px.shift(1).rolling(60, min_periods=20).max()
+    high_20_prev = px.shift(1).rolling(20, min_periods=10).max()
 
     trough_750 = (low_120 / (high_750 + 1e-9)) - 1.0
     still_750 = (px / (high_750 + 1e-9)) - 1.0
@@ -409,10 +410,15 @@ def run_simulation(force_rebuild=False):
     c_mkt = (tw_breadth_ma60 >= 0.35)
 
     pool = (c_liq & c_trough & c_trend & c_breakout & c_rev & c_inst).mul(c_mkt, axis=0).fillna(False).astype(bool)
+    # 🔥 鳳凰回馬槍 (MA20 洗盤重返機制)：曾通過初選母池且首波已證明動能 (+14%保本盾 / +35%派發破MA20洗出) 之標的，
+    # 於出場後 3~60 個交易日內，若基本面營收拐點 (c_rev) 與四線多頭趨勢 (c_trend) 未變，
+    # 當洗盤結束重新站回 MA20 並突破近 20 日整理平台高點 (px > high_20_prev) 時，啟動二次上車 (每波限重返 1 次)
+    re_mask = (c_liq & c_rev & c_trend & (px > ma20) & (px > high_20_prev) & (bias60 <= 0.25)).mul(c_mkt, axis=0).fillna(False).astype(bool)
     # 廢除人為 S/A 分級 (奧卡姆剃刀零分級參數)：所有通過母池檢驗之轉機突擊艦均一配置 50% 倉位 (最多2檔)
     s_mask = pool.copy()
     a_mask = pd.DataFrame(False, index=idx, columns=pit_tw)
-    score_df = (tot_inst20 * 100.0 + io20 * 50.0 + rqoq * 20.0).where(pool, np.nan)
+    raw_score_df = (tot_inst20 * 100.0 + io20 * 50.0 + rqoq * 20.0)
+    score_df = raw_score_df.where(pool, np.nan)
 
     dates = idx[idx >= "2016-01-04"]
     n_days = len(dates)
@@ -429,8 +435,10 @@ def run_simulation(force_rebuild=False):
     ma60_arr = ma60.reindex(dates).values
     io5_arr = io5.reindex(dates).values
     s_arr = s_mask.reindex(dates).values
+    re_arr = re_mask.reindex(dates).values
     a_arr = a_mask.reindex(dates).values
     sc_arr = score_df.reindex(dates).values
+    raw_sc_arr = raw_score_df.reindex(dates).values
 
     px_50_c = m["s50_c"].reindex(dates).values
     px_50_o = m["s50_o"].reindex(dates).values
@@ -460,6 +468,8 @@ def run_simulation(force_rebuild=False):
     active = []
     pending_reinvest_cash = 0.0
     trades = []
+    # 🔥 鳳凰洗盤觀察名單：記錄首波已驗證動能 (+14%保本盾 / +35%派發破MA20) 出場之標的 -> (exit_d, exit_px, reentry_count)
+    last_exit = {}
 
     for d in range(1, n_days):
         gb_ok = (gb_prev[d] >= 0.35)
@@ -487,12 +497,17 @@ def run_simulation(force_rebuild=False):
                 net_ret = (proceeds / p["entry_notional"]) - 1.0
                 sid = pit_tw[c].replace(".TW", "")
                 sname = name_map.get(pit_tw[c], sid)
-                role_str = f"👑 轉機突擊艦 ({int(p['target_w']*100)}%均一倉)"
+                is_re = bool(p.get("is_reentry", False))
+                role_str = (
+                    f"🔥 鳳凰回馬槍 ({int(p['target_w']*100)}%均一倉)"
+                    if is_re
+                    else f"👑 轉機突擊艦 ({int(p['target_w']*100)}%均一倉)"
+                )
                 trades.append({
                     "stock_id": sid,
                     "stock_name": sname,
                     "role": role_str,
-                    "tier": "均一50%",
+                    "tier": "🔥回馬槍50%" if is_re else "均一50%",
                     "weight_pct": round(p["target_w"] * 100, 1),
                     "entry_date": dates[p["entry_d"]].strftime("%Y-%m-%d"),
                     "exit_date": dates[d].strftime("%Y-%m-%d"),
@@ -501,8 +516,11 @@ def run_simulation(force_rebuild=False):
                     "return_pct": round(float(net_ret * 100.0), 2),
                     "holding_days": int(d - p["entry_d"]),
                     "exit_reason": p["exit_reason"],
+                    "is_reentry": is_re,
                     "leader": True
                 })
+                if p.get("reentry_count", 0) < 1 and ("保本護盾" in p["exit_reason"] or "主力派發" in p["exit_reason"]):
+                    last_exit[c] = (d, exit_px, p.get("reentry_count", 0) + 1)
             else:
                 still.append(p)
         active = still
@@ -514,11 +532,22 @@ def run_simulation(force_rebuild=False):
         cands = np.where(s_arr[d - 1])[0]
         held_c = {p["c"] for p in active}
         cands = [c for c in cands if c not in held_c and not np.isnan(sc_arr[d - 1, c])]
-        cands.sort(key=lambda c: sc_arr[d - 1, c], reverse=True)
+        re_set = set()
+        for c, (ex_d, ex_px, r_cnt) in list(last_exit.items()):
+            if 3 <= (d - 1 - ex_d) <= 60 and c not in held_c and c not in cands:
+                if re_arr[d - 1, c]:
+                    cands.append(c)
+                    re_set.add(c)
+        cands.sort(
+            key=lambda c: sc_arr[d - 1, c] if not np.isnan(sc_arr[d - 1, c]) else (raw_sc_arr[d - 1, c] if not np.isnan(raw_sc_arr[d - 1, c]) else 0.0),
+            reverse=True
+        )
 
         while len(active) < 2 and len(cands) > 0:
             c_pick = cands.pop(0)
-            tier, target_w = "均一50%", 0.50
+            is_re_pick = c_pick in re_set
+            tier = "🔥回馬槍50%" if is_re_pick else "均一50%"
+            target_w = 0.50
 
             used_w = sum(p["target_w"] for p in active)
             max_stk_w = 1.00
@@ -556,13 +585,17 @@ def run_simulation(force_rebuild=False):
                     continue
 
             cash -= actual_cost
+            r_cnt = last_exit[c_pick][2] if is_re_pick else 0
+            if is_re_pick:
+                del last_exit[c_pick]
             raw_epx = raw_o_arr[d, c_pick] if (not np.isnan(raw_o_arr[d, c_pick]) and raw_o_arr[d, c_pick] > 0) else raw_c_arr[d, c_pick]
             active.append({
                 "c": c_pick, "tier": tier, "target_w": alloc_w,
                 "shares": planned_shares, "entry_notional": actual_cost,
                 "entry_px": open_px, "raw_entry_px": raw_epx,
                 "entry_d": d, "peak_px": open_px,
-                "exit_pending": False, "exit_reason": ""
+                "exit_pending": False, "exit_reason": "",
+                "is_reentry": is_re_pick, "reentry_count": r_cnt
             })
 
         if gb_ok and cash > 1e-5:
@@ -806,12 +839,17 @@ def export_to_frontend(force_rebuild=False) -> dict:
         m60_px = round(float(sim["raw_m60_arr"][-1, c]), 2)
         stop_px = round(max(epx * (1.0 - 0.078), m60_px * 0.985), 2)
         pnl_pct = round((cpx / epx - 1.0) * 100.0, 2) if epx > 0 else 0.0
-        role_str = f"👑 轉機突擊艦 ({int(w_pct)}%均一倉)"
+        is_re_pos = bool(p.get("is_reentry", False))
+        role_str = (
+            f"🔥 鳳凰回馬槍 ({int(w_pct)}%均一倉)"
+            if is_re_pos
+            else f"👑 轉機突擊艦 ({int(w_pct)}%均一倉)"
+        )
         positions.append({
             "id": f"pos_{sid}",
             "stock_id": sid,
             "stock_name": sname,
-            "industry": "大凹洞轉型波段突擊艦",
+            "industry": "鳳凰回馬槍二波突擊艦" if is_re_pos else "大凹洞轉型波段突擊艦",
             "role": role_str,
             "weight_pct": w_pct,
             "target_weight_pct": w_pct,
@@ -919,15 +957,15 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "desc": "平時由 0050 母艦吃下台股長期 Beta，全球寬幅 <35% 時隔日開盤撤退避開系統性崩盤。"
         },
         {
-            "factor": "5. E5 六段式非對稱移動停損停利 (Asymmetric Wave Exit)",
-            "name": "E5 六段式非對稱移動停損停利 (Asymmetric Wave Exit)",
-            "code": "Stop -7.8%&<MA20 | Zombie 32d | Shield +14% | Lock +35%/+55%/+80%",
-            "ic_t_stat": "單筆最大虧損嚴控 -8%~-10% · 大波段完整抱住 +50%~+97%",
-            "invariance_ratio": 0.91,
-            "source": "價格均線結構 × 峰值回撤 × 5日法人資金流向 (IO5)",
-            "mechanism": "進場後若跌破 -7.8% 且破 20MA 立即停損；持有滿 32 天未達 +14% 且破線轉弱則清理殭屍股；獲利超過 +14% 啟動保本盾，超過 +35% / +55% / +80% 依峰值回撤與雙日破季線鎖定大波段獲利。",
-            "scientific_basis": "截斷虧損、讓獲利奔跑 (Cut Losses Short, Let Profits Run) 非對稱期望值工程",
-            "desc": "六段式動態出場：小虧果斷砍、殭屍股不戀棧、大飆股抱完完整主升段。"
+            "factor": "5. E5 六段式移動停損停利 × 🔥鳳凰回馬槍洗盤重返 (Phoenix Re-Entry)",
+            "name": "E5 六段式移動停損停利 × 🔥鳳凰回馬槍洗盤重返 (Phoenix Re-Entry)",
+            "code": "Stop <MA20 & Re-Entry: c_rev & c_trend & px > MA20 & px > High_20 (60d Window)",
+            "ic_t_stat": "單筆嚴控虧損 · 洗盤重返再抓台玻+79% / 威剛+59% / 緯穎+24%",
+            "invariance_ratio": 0.93,
+            "source": "MA20 防守止損 × 60日觀察期突破20日平台高點回馬槍",
+            "mechanism": "跌破 MA20 時嚴格出場退回 0050 保命（避開大立光-33%、光環-45% 等真崩跌）；但凡首波已驗證動能 (+14%保本 / +35%派發破MA20) 之轉機股列入 60 日鳳凰觀察名單，只要營收拐點 (c_rev) 與四線多頭 (c_trend) 仍在，重新站上 MA20 並突破 20 日高點即發動『🔥鳳凰回馬槍』二次上車！",
+            "scientific_basis": "Minervini / 海龜法則 Second-Chance Re-Entry × 零新增魔法參數復用",
+            "desc": "破 MA20 先出場保命，60 日內若營收與季線多頭未變且突破 20 日高點，啟動回馬槍二次上車。"
         },
         {
             "factor": "6. 八重極端嚴格 Point-in-Time 實盤防偽驗證 (8-Gate PIT Audit)",
@@ -944,15 +982,15 @@ def export_to_frontend(force_rebuild=False) -> dict:
 
     out = {
         "strategy_info": {
-            "name": "👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦 + 均一50%突擊艦)",
-            "subtitle": "0050 全球寬幅保護母艦 (≥35%續抱 / <35%次日開盤撤退) × 均一 50% 大凹洞營收拐點突擊艦 (最多2檔) · 8 重 PIT + 等級二真實買賣價差與稅費實扣",
-            "version": "Phoenix-PIT v4.0 (均一50%零過度擬合 · 等級二真實價差實扣版)",
+            "name": "👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦 + 均一50%突擊艦 + 🔥鳳凰回馬槍)",
+            "subtitle": "0050 全球寬幅保護母艦 × 均一 50% 大凹洞營收拐點突擊艦 × 🔥鳳凰回馬槍 (MA20洗盤重返) · 8 重 PIT + 等級二真實買賣價差與稅費實扣",
+            "version": "Phoenix-PIT v5.0 (均一50% + 🔥鳳凰回馬槍洗盤重返 · 等級二真實價差實扣版)",
             "rebalance_freq": "每日收盤自動掃描 · 次一交易日開盤執行 (事件驅動)",
             "next_rebalance_date": "每日盤後動態更新 (次日09:00開盤執行)",
             "current_rebalance_date": latest_dt_str,
             "holding_count": len(positions),
-            "allocation_type": "0050 保護母艦 (閒置資金停泊) + 大凹洞轉機突擊艦 (均一 50% 倉位，最多同時 2 檔，廢除人為 S/A 分級)",
-            "exit_rule": "E5 六段式非對稱移動停損停利 (-7.8%&破20MA停損 / 32日殭屍出場 / +14%保本盾 / +35%派發 / +55%鎖利 / 雙日破60MA) + 全球寬幅 <35% 母艦撤退",
+            "allocation_type": "0050 保護母艦 (閒置資金停泊) + 大凹洞轉機突擊艦 / 🔥鳳凰回馬槍 (均一 50% 倉位，最多同時 2 檔，廢除人為 S/A 分級)",
+            "exit_rule": "E5 六段式移動停損停利 (-7.8%&破20MA停損 / 32日殭屍出場 / +14%保本盾 / +35%派發 / +55%鎖利 / 雙日破60MA) + 🔥60日鳳凰回馬槍 (破MA20保本/派發後突破20日高點二次上車)",
             "transaction_friction": "等級二實戰摩擦成本：個股買 0.22% / 賣 0.52% (含 0.30% 證交稅 + 0.07% 手續費 + 雙向 0.15% 買賣價差，來回 0.74%) · 0050 ETF 買 0.09% / 賣 0.19% (含 0.10% 證交稅 + 0.04% 手續費 + 雙向 0.05% 買賣價差，來回 0.28%) · 賣股資金 T+1 交割延遲",
             "latest_data_date": latest_dt_str,
             "db_fingerprint": sim.get("db_fingerprint", ""),

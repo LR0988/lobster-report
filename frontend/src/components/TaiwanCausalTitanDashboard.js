@@ -2456,7 +2456,7 @@ export default function TaiwanCausalTitanDashboard() {
                         />
                       </span>
                     </td>
-                    <td style={{ padding: '0.65rem 0.5rem', color: '#93C5FD' }}>{t.role}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', color: String(t.role || '').includes('回馬槍') ? '#FDBA74' : '#93C5FD', fontWeight: String(t.role || '').includes('回馬槍') ? 'bold' : 'normal' }}>{t.role}</td>
                     <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace' }}>
                       {t.entry_date} (${t.entry_price})
                     </td>
@@ -2492,10 +2492,10 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 大凹洞轉型 × 月營收拐點 × E5 六段式出場</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 大凹洞轉型 × E5 六段式出場 × 🔥 鳳凰回馬槍洗盤重返</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>四大結構濾網：</strong>(1) 過去 3 年曾深跌 ≥35% 且離前高 ≥15%、底部墊高突破 60 日高點；(2) 過去 24 個月曾衰退 ≤-10%，最新月營收 3M/12M 黃金交叉 ≥1.03 且季增 ≥5%（嚴格於每月 10 號遇假日順延 + 1 交易日收盤生效）；(3) 20日外資+投信鎖碼 ≥3% 且 500日融資水位 ≤90%。<br />
-                • <strong>E5 六段式非對稱移動出場：</strong>① 初段停損 (-7.8% 且破 20MA)；② 32日殭屍時間停損；③ +14% 保本護盾；④ +35% 主力派發停利；⑤ +55%~+80% 中高空鎖利；⑥ +80% 回撤 16% 或連續 2 日跌破 60MA 季線 1.5%。
+                • <strong>E5 六段式出場 × 🔥 鳳凰回馬槍（MA20 洗盤重返）：</strong>跌破 20MA 時果斷出場退回 0050 保命（避開大立光-33%、光環-45% 等真崩跌）；但凡首波已驗證動能 (+14%保本盾 / +35%派發破20MA) 之標的自動列入 60 日鳳凰觀察名單，只要營收拐點與季線四線多頭仍在，一旦洗盤結束重新站上 20MA 並突破 20 日高點，立即發動「🔥 鳳凰回馬槍」二次上車（完整捕獲台玻+79%、威剛+59%、緯穎+24% 二波主升段）！
               </p>
             </div>
 
