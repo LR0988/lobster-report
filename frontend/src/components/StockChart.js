@@ -35,7 +35,10 @@ const MA_DEFS = [
 ];
 const VMA_DEFS = [{ n: 5, color: '#FBBF24' }, { n: 20, color: '#F472B6' }, { n: 60, color: '#34D399' }];
 const SUBS = [
-  { key: 'vol', label: '成交量' }, { key: 'kd', label: 'KD' }, { key: 'macd', label: 'MACD' },
+  { key: 'vol', label: '成交量' },
+  { key: 'rev', label: '月營收', tw: true },
+  { key: 'eps', label: 'EPS/本益比', tw: true },
+  { key: 'kd', label: 'KD' }, { key: 'macd', label: 'MACD' },
   { key: 'rsi', label: 'RSI' }, { key: 'bias', label: '乖離率' }, { key: 'dmi', label: 'DMI/ADX' },
   { key: 'wr', label: '威廉%R' }, { key: 'obv', label: 'OBV' }, { key: 'atr', label: 'ATR' },
   { key: 'fi', label: '外資', tw: true }, { key: 'tr', label: '投信', tw: true },
@@ -46,13 +49,24 @@ const TYPES = [{ k: 'candle', l: 'K線' }, { k: 'bar', l: '美國線' }, { k: 'l
 
 const DEFAULT_PREFS = {
   type: 'candle', ma: [5, 20, 60], vma: [5, 20], boll: false, hilo: true, signals: false, log: false,
-  subs: ['vol', 'kd'], upColor: null, range: 126, days: 1500,
-  profile: true, profWin: 60, profBins: 50,
+  subs: ['vol', 'rev', 'eps', 'kd'], upColor: null, range: 126, days: 1500,
+  profile: true, profWin: 60, profBins: 50, prefsVer: 2,
 };
 const loadPrefs = () => {
   try {
-    const p = { ...DEFAULT_PREFS, ...(JSON.parse(localStorage.getItem('stockChartPrefs')) || {}) };
+    const raw = JSON.parse(localStorage.getItem('stockChartPrefs')) || {};
+    const p = { ...DEFAULT_PREFS, ...raw };
     p.days = Math.max(p.days || 0, DEFAULT_PREFS.days); // 舊設定存的 750 日不夠看「全部」
+    if (!raw.prefsVer || raw.prefsVer < 2) {
+      const curSubs = Array.isArray(p.subs) ? [...p.subs] : ['vol', 'kd'];
+      const nextSubs = [];
+      if (curSubs.includes('vol')) nextSubs.push('vol');
+      nextSubs.push('rev', 'eps');
+      curSubs.forEach((k) => { if (!nextSubs.includes(k)) nextSubs.push(k); });
+      p.subs = nextSubs;
+      p.prefsVer = 2;
+      try { localStorage.setItem('stockChartPrefs', JSON.stringify(p)); } catch {}
+    }
     return p;
   }
   catch { return DEFAULT_PREFS; }
@@ -325,6 +339,43 @@ const StockChartModal = ({ req, onClose }) => {
       if (key === 'vol') {
         hist(pane, data.v, (_, i) => ((data.c[i] >= (data.o[i] ?? data.c[i])) ? UP : DN) + 'CC');
         VMA_DEFS.filter(({ n: k }) => prefs.vma.includes(k)).forEach(({ n: k, color }) => mk({ color }, pane).setData(toLine(dates, calc.vm[k])));
+      } else if (key === 'rev') {
+        const revArr = data.rev || [];
+        const yoyArr = data.rev_yoy || [];
+        const ma3Arr = data.rev_ma3 || [];
+        const ma12Arr = data.rev_ma12 || [];
+        chart.addSeries(HistogramSeries, { priceLineVisible: false, lastValueVisible: false }, pane)
+          .setData(dates.map((t, i) => (revArr[i] == null ? { time: t } : {
+            time: t,
+            value: revArr[i],
+            color: ((yoyArr[i] ?? 0) >= 0 ? UP : DN) + '99',
+          })));
+        mk({ color: '#FBBF24', lineWidth: 2 }, pane).setData(toLine(dates, ma3Arr));
+        mk({ color: '#A78BFA', lineWidth: 2 }, pane).setData(toLine(dates, ma12Arr));
+        if (yoyArr.some((x) => x != null)) {
+          const yoyS = mk({ color: '#38BDF8', lineWidth: 1, priceScaleId: 'left' }, pane);
+          yoyS.setData(toLine(dates, yoyArr));
+          guide(yoyS, 0, '#475569');
+          chart.priceScale('left', pane).applyOptions({ visible: true, borderColor: '#1E293B' });
+        }
+      } else if (key === 'eps') {
+        const epsQArr = data.eps_q || [];
+        const epsTtmArr = data.eps_ttm || [];
+        const peArr = data.pe || [];
+        const epsHist = chart.addSeries(HistogramSeries, { priceLineVisible: false, lastValueVisible: false }, pane);
+        epsHist.setData(dates.map((t, i) => (epsQArr[i] == null ? { time: t } : {
+          time: t,
+          value: epsQArr[i],
+          color: (epsQArr[i] >= 0 ? UP : DN) + 'BB',
+        })));
+        guide(epsHist, 0, '#64748B');
+        if (epsTtmArr.some((x) => x != null)) {
+          mk({ color: '#FBBF24', lineWidth: 2 }, pane).setData(toLine(dates, epsTtmArr));
+        }
+        if (peArr.some((x) => x != null && x > 0)) {
+          mk({ color: '#2DD4BF', lineWidth: 1, lineStyle: LineStyle.Dashed, priceScaleId: 'left' }, pane).setData(toLine(dates, peArr));
+          chart.priceScale('left', pane).applyOptions({ visible: true, borderColor: '#1E293B' });
+        }
       } else if (key === 'kd') {
         const K = mk({ color: '#FBBF24' }, pane); K.setData(toLine(dates, calc.kd.K));
         mk({ color: '#38BDF8' }, pane).setData(toLine(dates, calc.kd.D));
@@ -386,6 +437,45 @@ const StockChartModal = ({ req, onClose }) => {
       const g = cv.getContext('2d');
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.clearRect(0, 0, W, H);
+      // 繪製各副圖左上角指標浮水印標籤 (讓使用者一眼辨識墊在底下的月營收、EPS等副圖)
+      let accY = panes[0] ? panes[0].getHeight() : 0;
+      const paneTitleMap = {
+        vol: '📊 成交量 (張) · 黃MV5 / 粉MV20',
+        rev: '📈 月營收 (億·右軸) · 黃3M均 / 紫12M均 (黃金交叉=營收拐點) · 藍線YoY年增%(左軸)',
+        eps: '💰 單季EPS (元·柱狀右軸) · 黃線近四季累計EPS (右軸) · 青虛線本益比PE (左軸)',
+        kd: '⚡ KD 隨機指標 (K9, D3)',
+        macd: '📉 MACD (12, 26, 9)',
+        rsi: '🧭 RSI 相對強弱 (6, 14)',
+        bias: '📏 均線乖離率 BIAS (5, 20, 60)',
+        dmi: '🎯 DMI / ADX 趨向指標',
+        wr: '📐 威廉指標 %R (14)',
+        obv: '🌊 OBV 能量潮',
+        atr: '🎢 ATR 真實波幅 (14)',
+        fi: '🏦 外資買賣超 (張)',
+        tr: '🏦 投信買賣超 (張)',
+        de: '🏦 自營商買賣超 (張)',
+        mg: '💳 融資餘額 (粉·右軸) / 融券餘額 (藍·左軸)',
+      };
+      let leftAxisW = 0;
+      try { leftAxisW = chart.priceScale('left').width(); } catch (e) { leftAxisW = 0; }
+      const labelX = Math.max(10, leftAxisW + 8);
+      for (let pIdx = 1; pIdx < panes.length; pIdx++) {
+        const pH = panes[pIdx]?.getHeight() || 0;
+        const sKey = subs[pIdx - 1];
+        const titleTxt = paneTitleMap[sKey] || sKey;
+        if (pH > 18 && titleTxt) {
+          g.save();
+          g.font = 'bold 11px sans-serif';
+          const tw = g.measureText(titleTxt).width;
+          g.fillStyle = 'rgba(15, 23, 42, 0.78)';
+          g.fillRect(labelX - 4, accY + 4, tw + 10, 16);
+          g.fillStyle = sKey === 'rev' ? '#38BDF8' : (sKey === 'eps' ? '#FBBF24' : '#94A3B8');
+          g.textAlign = 'left';
+          g.fillText(titleTxt, labelX, accY + 15);
+          g.restore();
+        }
+        accY += pH;
+      }
       if (!prefs.profile) return;
       const lr = chart.timeScale().getVisibleLogicalRange();
       let a = 0, b = n - 1;
@@ -520,6 +610,17 @@ const StockChartModal = ({ req, onClose }) => {
     const g = (a) => fmt(a?.[i]);
     const parts = {
       vol: [[`量`, fmt(data.v[i], 0), '#E2E8F0'], ...VMA_DEFS.filter((d) => prefs.vma.includes(d.n)).map((d) => [`MV${d.n}`, fmt(calc.vm[d.n][i], 0), d.color])],
+      rev: [
+        [data.rev_ym?.[i] ? `[${data.rev_ym[i]}]單月` : '單月', data.rev?.[i] != null ? `${fmt(data.rev[i], 2)}億` : '-', '#E2E8F0'],
+        ['YoY', data.rev_yoy?.[i] != null ? `${data.rev_yoy[i] >= 0 ? '+' : ''}${fmt(data.rev_yoy[i], 1)}%` : '-', (data.rev_yoy?.[i] ?? 0) >= 0 ? UP : DN],
+        ['3M均', data.rev_ma3?.[i] != null ? `${fmt(data.rev_ma3[i], 2)}億` : '-', '#FBBF24'],
+        ['12M均', data.rev_ma12?.[i] != null ? `${fmt(data.rev_ma12[i], 2)}億` : '-', '#A78BFA'],
+      ],
+      eps: [
+        [data.eps_q_label?.[i] ? `[${data.eps_q_label[i]}]單季` : '單季', data.eps_q?.[i] != null ? `${fmt(data.eps_q[i], 2)}元` : '-', (data.eps_q?.[i] ?? 0) >= 0 ? UP : DN],
+        ['近四季TTM', data.eps_ttm?.[i] != null ? `${fmt(data.eps_ttm[i], 2)}元` : '-', '#FBBF24'],
+        ['PE', data.pe?.[i] != null ? `${fmt(data.pe[i], 1)}倍` : '-', '#2DD4BF'],
+      ],
       kd: [['K', g(calc.kd.K), '#FBBF24'], ['D', g(calc.kd.D), '#38BDF8']],
       macd: [['DIF', g(calc.macd.dif), '#FBBF24'], ['DEA', g(calc.macd.dea), '#38BDF8'], ['柱', g(calc.macd.hist), '#E2E8F0']],
       rsi: [['RSI6', g(calc.rsi6), '#FBBF24'], ['RSI14', g(calc.rsi14), '#A78BFA']],

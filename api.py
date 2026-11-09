@@ -739,10 +739,172 @@ def get_futures_kbars(
 # ================================
 # 1.5 個股技術線圖資料 (即時讀取本機 tw_stock.db，不經任何上傳)
 # ================================
+def _ensure_and_get_quarterly_eps(conn, sid: str):
+    """從 tw_stock.db 讀取單季 EPS (quarterly_eps)；若尚無快取則即時向 FinMind 抓取並寫入本機 DB。"""
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS quarterly_eps (
+                stock_id TEXT,
+                quarter_date TEXT,
+                eps REAL,
+                updated_at TEXT,
+                PRIMARY KEY (stock_id, quarter_date)
+            )
+        """)
+        rows = conn.execute(
+            "SELECT quarter_date, eps FROM quarterly_eps WHERE stock_id=? ORDER BY quarter_date ASC",
+            (sid,)
+        ).fetchall()
+        if not rows:
+            import requests as _req
+            resp = _req.get(
+                "https://api.finmindtrade.com/api/v4/data",
+                params={
+                    "dataset": "TaiwanStockFinancialStatements",
+                    "data_id": sid,
+                    "start_date": "2014-01-01"
+                },
+                timeout=3.5
+            ).json()
+            eps_items = [
+                (sid, str(x.get("date")).strip(), float(x.get("value")), datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                for x in (resp.get("data") or [])
+                if x.get("type") == "EPS" and x.get("date") and x.get("value") is not None
+            ]
+            if eps_items:
+                conn.executemany(
+                    "INSERT OR REPLACE INTO quarterly_eps (stock_id, quarter_date, eps, updated_at) VALUES (?, ?, ?, ?)",
+                    eps_items
+                )
+                conn.commit()
+                rows = conn.execute(
+                    "SELECT quarter_date, eps FROM quarterly_eps WHERE stock_id=? ORDER BY quarter_date ASC",
+                    (sid,)
+                ).fetchall()
+        return [(str(r[0]), float(r[1])) for r in rows]
+    except Exception as e:
+        print(f"[chart] _ensure_and_get_quarterly_eps({sid}) warning: {e}")
+        return []
+
+
+def _attach_tw_fundamentals(conn, sid: str, out: dict, pe_by_date: dict = None):
+    """為台股 K 線圖附加月營收 (單月億元/YoY/MoM/3M均/12M均) 與單季/近四季 EPS 及本益比序列。"""
+    dates = out.get("d") or []
+    if not dates:
+        return
+    last_bar_dt = dates[-1]
+
+    # 1. 月營收序列 (monthly_revenue: current_month_rev 單位為千元 -> 轉為億元)
+    rev_rows = conn.execute(
+        "SELECT revenue_date, current_month_rev, yoy, mom FROM monthly_revenue "
+        "WHERE TRIM(stock_id)=? AND current_month_rev > 0 ORDER BY CAST(revenue_date AS INTEGER) ASC",
+        (sid,)
+    ).fetchall()
+    rev_records = []
+    rev_vals_yi = []
+    for idx_r, (r_ym, r_cur, r_yoy, r_mom) in enumerate(rev_rows):
+        try:
+            ym = int(str(r_ym).strip())
+            y = (ym // 100) + 1911 if (ym // 100) < 1900 else (ym // 100)
+            m = ym % 100
+            if not (1 <= m <= 12):
+                continue
+            ny, nm = (y + 1, 1) if m == 12 else (y, m + 1)
+            ann_dt = f"{ny:04d}-{nm:02d}-10"
+            if idx_r == len(rev_rows) - 1 and ann_dt > last_bar_dt:
+                ann_dt = min(f"{ny:04d}-{nm:02d}-01", last_bar_dt)
+            val_yi = float(r_cur) / 100000.0  # 千元 -> 億元
+            rev_vals_yi.append(val_yi)
+            w3 = rev_vals_yi[max(0, len(rev_vals_yi) - 3):]
+            w12 = rev_vals_yi[max(0, len(rev_vals_yi) - 12):]
+            dec = 3 if val_yi < 1.0 else 2
+            rev_records.append({
+                "eff_dt": ann_dt,
+                "ym": f"{y:04d}/{m:02d}",
+                "rev": round(val_yi, dec),
+                "yoy": round(float(r_yoy), 2) if r_yoy is not None else None,
+                "mom": round(float(r_mom), 2) if r_mom is not None else None,
+                "ma3": round(sum(w3) / len(w3), dec) if len(w3) >= 2 else round(val_yi, dec),
+                "ma12": round(sum(w12) / len(w12), dec) if len(w12) >= 4 else round(val_yi, dec),
+            })
+        except Exception:
+            continue
+
+    rev_records.sort(key=lambda x: x["eff_dt"])
+    out["rev"], out["rev_yoy"], out["rev_mom"], out["rev_ma3"], out["rev_ma12"], out["rev_ym"] = [], [], [], [], [], []
+    p_r = 0
+    cur_r = None
+    for dt_s in dates:
+        while p_r < len(rev_records) and rev_records[p_r]["eff_dt"] <= dt_s:
+            cur_r = rev_records[p_r]
+            p_r += 1
+        if cur_r:
+            out["rev"].append(cur_r["rev"])
+            out["rev_yoy"].append(cur_r["yoy"])
+            out["rev_mom"].append(cur_r["mom"])
+            out["rev_ma3"].append(cur_r["ma3"])
+            out["rev_ma12"].append(cur_r["ma12"])
+            out["rev_ym"].append(cur_r["ym"])
+        else:
+            out["rev"].append(None)
+            out["rev_yoy"].append(None)
+            out["rev_mom"].append(None)
+            out["rev_ma3"].append(None)
+            out["rev_ma12"].append(None)
+            out["rev_ym"].append(None)
+
+    # 2. 單季 EPS / 近四季累計 EPS (TTM) / 本益比 (PE)
+    q_rows = _ensure_and_get_quarterly_eps(conn, sid)
+    q_records = []
+    q_vals = []
+    for q_dt, eps_v in q_rows:
+        try:
+            y_str, m_str = q_dt[:4], q_dt[5:7]
+            m_int = int(m_str)
+            q_num = 1 if m_int <= 3 else (2 if m_int <= 6 else (3 if m_int <= 9 else 4))
+            q_vals.append(eps_v)
+            w4 = q_vals[max(0, len(q_vals) - 4):]
+            ttm_v = round(sum(w4), 2) if len(w4) == 4 else round(sum(w4) * (4.0 / len(w4)), 2)
+            q_records.append({
+                "eff_dt": q_dt,
+                "q_label": f"{y_str}Q{q_num}",
+                "eps_q": round(eps_v, 2),
+                "eps_ttm": ttm_v,
+            })
+        except Exception:
+            continue
+
+    q_records.sort(key=lambda x: x["eff_dt"])
+    out["eps_q"], out["eps_ttm"], out["pe"], out["eps_q_label"] = [], [], [], []
+    p_q = 0
+    cur_q = None
+    pe_map = pe_by_date or {}
+    for idx_d, dt_s in enumerate(dates):
+        while p_q < len(q_records) and q_records[p_q]["eff_dt"] <= dt_s:
+            cur_q = q_records[p_q]
+            p_q += 1
+        d_raw = dt_s.replace("-", "")
+        pe_raw = pe_map.get(d_raw)
+        pe_val = round(float(pe_raw), 2) if (pe_raw is not None and float(pe_raw) > 0) else None
+        c_px = out["c"][idx_d]
+        if cur_q:
+            out["eps_q"].append(cur_q["eps_q"])
+            out["eps_ttm"].append(cur_q["eps_ttm"])
+            out["eps_q_label"].append(cur_q["q_label"])
+            if pe_val is None and cur_q["eps_ttm"] and cur_q["eps_ttm"] > 0 and c_px:
+                pe_val = round(float(c_px) / cur_q["eps_ttm"], 2)
+        else:
+            implied_ttm = round(float(c_px) / pe_val, 2) if (pe_val and pe_val > 0 and c_px) else None
+            out["eps_q"].append(round(implied_ttm / 4.0, 2) if implied_ttm is not None else None)
+            out["eps_ttm"].append(implied_ttm)
+            out["eps_q_label"].append("TTM反推" if implied_ttm is not None else None)
+        out["pe"].append(pe_val)
+
+
 @app.get("/api/chart/{ticker}")
 def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
-    """回傳單一標的日K (OHLCV)；台股另附三大法人買賣超(張)與融資/融券餘額。
-    台股: daily_stock (+ institutional_trades)；美股/其他: global_stock_daily (adjust=True 時以 adj_close 還原)。
+    """回傳單一標的日K (OHLCV)；台股另附三大法人買賣超(張)、融資/融券餘額、月營收與單季/近四季EPS。
+    台股: daily_stock (+ institutional_trades + monthly_revenue + quarterly_eps)；美股/其他: global_stock_daily。
     """
     from fastapi.responses import JSONResponse
     days = max(30, min(int(days), 6000))
@@ -751,11 +913,12 @@ def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
     conn = get_db_connection()
     try:
         out = None
+        pe_by_date = {}
+        sid = tk.split(".")[0] if is_tw else ""
         if is_tw:
-            sid = tk.split(".")[0]
             rows = conn.execute(
                 "SELECT date, opening_price, highest_price, lowest_price, closing_price, trade_volume, "
-                "margin_balance, short_balance, stock_name FROM daily_stock "
+                "margin_balance, short_balance, stock_name, pe_ratio FROM daily_stock "
                 "WHERE stock_id=? AND closing_price>0 ORDER BY date DESC LIMIT ?", (sid, days)).fetchall()[::-1]
             if len(rows) >= 5:
                 inst = {r[0]: (r[1], r[2], r[3]) for r in conn.execute(
@@ -765,8 +928,9 @@ def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
                 kz = lambda x: None if x is None else int(x // 1000)  # 股 -> 張
                 out = {"market": "TW", "name": rows[0][8] or "", "d": [], "o": [], "h": [], "l": [], "c": [],
                        "v": [], "fi": [], "tr": [], "de": [], "mb": [], "sb": []}
-                for d, o, h, l, c, v, mb, sb, _n in rows:
+                for d, o, h, l, c, v, mb, sb, _n, pe_r in rows:
                     f, t, dl = inst.get(d, (None, None, None))
+                    pe_by_date[str(d)] = pe_r
                     out["d"].append(f"{d[:4]}-{d[4:6]}-{d[6:]}")
                     out["o"].append(rd(o or c)); out["h"].append(rd(h or c))
                     out["l"].append(rd(l or c)); out["c"].append(rd(c))
@@ -797,6 +961,8 @@ def get_stock_chart_data(ticker: str, days: int = 750, adjust: bool = True):
                     out["o"].append(round((o or c) * k, 2)); out["h"].append(round((h or c) * k, 2))
                     out["l"].append(round((l or c) * k, 2)); out["c"].append(round(c * k, 2))
                     out["v"].append(int(v or 0))
+        if is_tw and out is not None and sid:
+            _attach_tw_fundamentals(conn, sid, out, pe_by_date)
         if out is None:
             # 查詢全球原物料期貨日線庫 (commodity_futures_daily)
             comm_rows = conn.execute(
