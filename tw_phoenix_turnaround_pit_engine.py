@@ -407,7 +407,15 @@ def run_simulation(force_rebuild=False):
         & ((io20 >= 0.03) | (tot_inst20 >= 0.06))
         & (margin_ratio500 <= 0.90) & (fip60 <= 0.15) & (io5 <= 0.08)
     )
-    c_mkt = (tw_breadth_ma60 >= 0.35)
+    # ⚡ 真恐慌洗盤後廣度衝力提早打開 (True Washout Breadth Thrust Early Open):
+    # 平時要求台股季線寬幅 >= 35%；但若近 20 日內經歷過極度恐慌大洗盤 (寬幅曾慘跌至 <= 19%，即超過 8 成股票跌破季線)，
+    # 當恐慌結束、季線寬幅在 5 日內急速暴衝 >= +6% 並站上 29% (且全球主權寬幅 >= 50% 確認非全球熊市) 時，提早打開進場閘門！
+    tw_br_chg5 = tw_breadth_ma60 - tw_breadth_ma60.shift(5).fillna(0.0)
+    tw_br_min20 = tw_breadth_ma60.rolling(20, min_periods=5).min()
+    gb_s = m["gb_full"].reindex(idx).ffill().fillna(0.0)
+    c_mkt = (tw_breadth_ma60 >= 0.35) | (
+        (tw_br_min20 <= 0.19) & (tw_breadth_ma60 >= 0.29) & (tw_br_chg5 >= 0.06) & (gb_s >= 0.50)
+    )
 
     pool = (c_liq & c_trough & c_trend & c_breakout & c_rev & c_inst).mul(c_mkt, axis=0).fillna(False).astype(bool)
     # 🔥 鳳凰回馬槍 (MA20 洗盤重返機制)：曾通過初選母池且首波已證明動能 (+14%保本盾 / +35%派發破MA20 / 首波曾漲>=12%遭時間洗出) 之標的，
@@ -656,7 +664,7 @@ def run_simulation(force_rebuild=False):
 
         nav[d] = cash + pending_reinvest_cash + etf_shares * px_50_c[d] + stk_val_close
 
-    # Radar candidates on the latest date (for observation watchlist)
+    # Radar candidates on the latest date (for observation watchlist & filtered-out diagnostic table)
     raw_score_latest = (tot_inst20.iloc[-1] * 100.0 + io20.iloc[-1] * 50.0 + rqoq.iloc[-1] * 20.0)
     watch_mask = (c_liq.iloc[-1] & c_trough.iloc[-1] & c_rev.iloc[-1] & (tot_inst20.iloc[-1] > 0.01)).fillna(False)
     watch_syms = raw_score_latest[watch_mask].sort_values(ascending=False).head(8).index.tolist()
@@ -674,6 +682,169 @@ def run_simulation(force_rebuild=False):
             "inst20_pct": round(float(tot_inst20.iloc[-1].get(sym, 0.0) * 100.0), 2)
         })
 
+    # Detailed Filtered-Out Candidates Table (當前系統計算但遭濾網攔截之闖關候選股明細)
+    held_syms_now = {pit_tw[p["c"]] for p in active if not p.get("exit_pending")}
+    re_watch_map = {}
+    for c_idx, (ex_d, ex_px, r_cnt, prev_net_ret) in list(last_exit.items()):
+        days_since = (n_days - 1) - ex_d
+        if 1 <= days_since <= 60:
+            sym_re = pit_tw[c_idx]
+            if sym_re not in held_syms_now:
+                re_watch_map[sym_re] = {
+                    "days_since_exit": int(days_since),
+                    "prev_net_ret_pct": round(float(prev_net_ret * 100.0), 1),
+                    "exit_date": dates[ex_d].strftime("%Y-%m-%d")
+                }
+
+    broad_cand_mask = (
+        c_liq.iloc[-1]
+        & (
+            (c_trough.iloc[-1] & c_rev.iloc[-1] & (tot_inst20.iloc[-1] > 0.005))
+            | (c_trough.iloc[-1] & c_inst.iloc[-1] & (ryoy.iloc[-1] > 0.0))
+            | (c_trough.iloc[-1] & c_trend.iloc[-1])
+            | (c_rev.iloc[-1] & c_inst.iloc[-1] & c_trend.iloc[-1])
+        )
+    ).fillna(False)
+    cand_syms_all = list(re_watch_map.keys())
+    for s_w in raw_score_latest[broad_cand_mask].sort_values(ascending=False).index.tolist():
+        if s_w not in cand_syms_all and s_w not in held_syms_now:
+            cand_syms_all.append(s_w)
+
+    mkt_ok_now = bool(c_mkt.iloc[-1])
+    tw_br_now_pct = round(float(tw_breadth_ma60.reindex(dates).iloc[-1] * 100.0), 1)
+    tw_min20_pct = round(float(tw_br_min20.reindex(dates).iloc[-1] * 100.0), 1)
+    tw_chg5_pct = round(float(tw_br_chg5.reindex(dates).iloc[-1] * 100.0), 1)
+
+    filtered_candidates_raw = []
+    for sym in cand_syms_all:
+        sid = sym.replace(".TW", "")
+        is_re_cand = sym in re_watch_map
+        re_info = re_watch_map.get(sym)
+
+        trough_ok = bool(c_trough.iloc[-1].get(sym, False))
+        rev_ok = bool(c_rev_re.iloc[-1].get(sym, False) if is_re_cand else c_rev.iloc[-1].get(sym, False))
+        inst_ok = bool((tot_inst20.iloc[-1].get(sym, 0.0) >= 0.01) if is_re_cand else c_inst.iloc[-1].get(sym, False))
+        trend_ok = bool(c_trend_re.iloc[-1].get(sym, False) if is_re_cand else c_trend.iloc[-1].get(sym, False))
+        if is_re_cand:
+            brk_ok = bool((px.iloc[-1].get(sym, 0.0) > ma20.iloc[-1].get(sym, 1e9)) and (px.iloc[-1].get(sym, 0.0) > high_20_prev.iloc[-1].get(sym, 1e9)) and (bias60.iloc[-1].get(sym, 1.0) <= 0.25))
+        else:
+            brk_ok = bool(c_breakout.iloc[-1].get(sym, False))
+
+        px_val = float(px.iloc[-1].get(sym, 0.0))
+        ma20_val = float(ma20.iloc[-1].get(sym, 0.0))
+        ma60_val = float(ma60.iloc[-1].get(sym, 0.0))
+        ma120_val = float(ma120.iloc[-1].get(sym, 0.0))
+        ma200_val = float(ma200.iloc[-1].get(sym, 0.0))
+        hi60_val = float(high_60_prev.iloc[-1].get(sym, 0.0))
+        hi20_val = float(high_20_prev.iloc[-1].get(sym, 0.0))
+        trough_v = round(float(trough_750.iloc[-1].get(sym, 0.0) * 100.0), 1)
+        still_v = round(float(still_750.iloc[-1].get(sym, 0.0) * 100.0), 1)
+        recov_v = round(float(recov_from_low.iloc[-1].get(sym, 0.0) * 100.0), 1)
+        yoy_v = round(float(ryoy.iloc[-1].get(sym, 0.0)), 1)
+        qoq_v = round(float(rqoq.iloc[-1].get(sym, 0.0) * 100.0), 1)
+        inst_v = round(float(tot_inst20.iloc[-1].get(sym, 0.0) * 100.0), 2)
+        mg_v = round(float(margin_ratio500.iloc[-1].get(sym, 0.0) * 100.0), 1)
+        fip_v = round(float(fip60.iloc[-1].get(sym, 0.0)), 2)
+        bias_v = round(float(bias60.iloc[-1].get(sym, 0.0) * 100.0), 1)
+        dist_hi60 = round(((px_val / (hi60_val + 1e-9)) - 1.0) * 100.0, 1) if hi60_val > 0 else 0.0
+        dist_hi20 = round(((px_val / (hi20_val + 1e-9)) - 1.0) * 100.0, 1) if hi20_val > 0 else 0.0
+
+        reasons = []
+        if not trough_ok and not is_re_cand:
+            if trough_v > -35.0:
+                reasons.append(f"3年深跌僅 {trough_v}% (需 ≤ -35%)")
+            elif still_v > -15.0:
+                reasons.append(f"距3年高點僅 {still_v}% (需 ≤ -15% 防高檔追價)")
+        if not rev_ok:
+            reasons.append(f"營收拐點未達標 (YoY {yoy_v:+.1f}% / QoQ {qoq_v:+.1f}%)")
+        if not inst_ok:
+            if inst_v < 3.0:
+                reasons.append(f"20日法人買超偏弱 ({inst_v}% < 3%)")
+            elif mg_v > 90.0:
+                reasons.append(f"500日融資水位過高 ({mg_v}% > 90%)")
+            elif fip_v > 0.15:
+                reasons.append(f"FIP動能過熱 ({fip_v} > 0.15)")
+            else:
+                reasons.append("近5日法人爆量或結構未達標")
+        if not trend_ok:
+            sub_t = []
+            if px_val <= ma60_val:
+                sub_t.append("跌破60MA季線")
+            if px_val <= ma120_val:
+                sub_t.append("低於120MA半年線")
+            if px_val <= ma200_val:
+                sub_t.append("低於200MA年線")
+            if float(ma60_slope20.iloc[-1].get(sym, 0.0)) <= (0.0 if not is_re_cand else -0.01):
+                sub_t.append("季線斜率下彎")
+            if not bool(higher_low_base.iloc[-1].get(sym, False)):
+                sub_t.append("60日底未高於120日底")
+            reasons.append("均線趨勢未齊 (" + "、".join(sub_t or ["未過多頭排列"]) + ")")
+        if not brk_ok:
+            if is_re_cand:
+                sub_b = []
+                if px_val <= ma20_val:
+                    sub_b.append("未站回20MA月線")
+                if px_val <= hi20_val:
+                    sub_b.append(f"距20日高點差 {dist_hi20:+.1f}%")
+                if bias_v > 25.0:
+                    sub_b.append(f"季線乖離 {bias_v}% > 25%")
+                reasons.append("回馬槍突破未觸發 (" + "、".join(sub_b or ["等待突破"]) + ")")
+            else:
+                sub_b = []
+                if px_val <= hi60_val:
+                    sub_b.append(f"距60日高點差 {dist_hi60:+.1f}%")
+                if recov_v < 10.0:
+                    sub_b.append(f"底部反彈僅 {recov_v}% (<10%)")
+                if recov_v > 60.0:
+                    sub_b.append(f"底部已反彈 {recov_v}% (>60%不追高)")
+                if bias_v > 25.0:
+                    sub_b.append(f"季線乖離 {bias_v}% > 25%")
+                reasons.append("突破條件未觸發 (" + "、".join(sub_b or ["量比或乖離超標"]) + ")")
+        if not mkt_ok_now:
+            reasons.append(f"大盤寬幅護盾攔截 (台股寬幅 {tw_br_now_pct}% < 35%，待回升≥29%且5日衝力≥+6%提早開門)")
+
+        gates_list = [trough_ok or is_re_cand, rev_ok, inst_ok, trend_ok, brk_ok, mkt_ok_now]
+        gates_passed = int(sum(1 for g in gates_list if g))
+
+        filtered_candidates_raw.append({
+            "rank": 0,
+            "stock_id": sid,
+            "name": name_map.get(sym, sid),
+            "pool_type": f"🔥 鳳凰回馬槍觀察池 (出場{re_info['days_since_exit']}日·首波{re_info['prev_net_ret_pct']:+.1f}%)" if is_re_cand else ("👑 大凹洞營收拐點池" if (trough_ok and rev_ok) else "🔍 準轉機潛力觀察池"),
+            "is_reentry_watch": is_re_cand,
+            "score": round(float(raw_score_latest.get(sym, 0.0)), 2),
+            "price": round(float(raw_close.iloc[-1].get(sym, 0.0)), 2),
+            "ma20_price": round(float(raw_ma20.iloc[-1].get(sym, 0.0)), 2),
+            "ma60_price": round(float(raw_ma60.iloc[-1].get(sym, 0.0)), 2),
+            "trough_pct": trough_v,
+            "still_trough_pct": still_v,
+            "recov_pct": recov_v,
+            "rev_yoy": yoy_v,
+            "rev_qoq": qoq_v,
+            "inst20_pct": inst_v,
+            "margin_pct": mg_v,
+            "dist_breakout_pct": dist_hi20 if is_re_cand else dist_hi60,
+            "gates_passed": gates_passed,
+            "total_gates": 6,
+            "gate_status": {
+                "trough": trough_ok or is_re_cand,
+                "rev": rev_ok,
+                "inst": inst_ok,
+                "trend": trend_ok,
+                "breakout": brk_ok,
+                "mkt": mkt_ok_now
+            },
+            "filter_reasons": reasons
+        })
+
+    filtered_candidates_raw.sort(
+        key=lambda x: (1 if x["is_reentry_watch"] else 0, 1 if x["gates_passed"] >= 4 else 0, x["score"]),
+        reverse=True
+    )
+    filtered_candidates = filtered_candidates_raw[:16]
+    for i_fc, fc in enumerate(filtered_candidates):
+        fc["rank"] = i_fc + 1
+
     return {
         "dates": dates,
         "nav": pd.Series(nav, index=dates),
@@ -686,6 +857,9 @@ def run_simulation(force_rebuild=False):
         "cash": cash + pending_reinvest_cash,
         "gb_latest": float(gb_arr[-1]),
         "tw_br_latest": float(tw_breadth_ma60.reindex(dates).iloc[-1]),
+        "tw_br_min20_latest": tw_min20_pct,
+        "tw_br_chg5_latest": tw_chg5_pct,
+        "mkt_ok_latest": mkt_ok_now,
         "pit_tw": pit_tw,
         "name_map": name_map,
         "raw_c_arr": raw_c_arr,
@@ -697,6 +871,7 @@ def run_simulation(force_rebuild=False):
         "s_arr": s_arr,
         "a_arr": a_arr,
         "ranked_watch": ranked_watch,
+        "filtered_candidates": filtered_candidates,
         "db_max_date": m["db_max_date"],
         "db_fingerprint": m.get("db_fingerprint", "")
     }
@@ -1000,8 +1175,8 @@ def export_to_frontend(force_rebuild=False) -> dict:
     out = {
         "strategy_info": {
             "name": "👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050母艦 + 均一50%突擊艦 + 🔥鳳凰回馬槍)",
-            "subtitle": "0050 全球寬幅保護母艦 × 均一 50% 大凹洞營收拐點突擊艦 × 🔥鳳凰回馬槍 (MA20洗盤重返) · 8 重 PIT + 等級二真實買賣價差與稅費實扣",
-            "version": "Phoenix-PIT v5.0 (均一50% + 🔥鳳凰回馬槍洗盤重返 · 等級二真實價差實扣版)",
+            "subtitle": "0050 全球寬幅保護母艦 × 均一 50% 大凹洞營收拐點突擊艦 × 🔥鳳凰回馬槍 × ⚡真恐慌洗盤後廣度衝力早開 · 8 重 PIT + 等級二真實買賣價差與稅費實扣",
+            "version": "Phoenix-PIT v5.2 (均一50% + 🔥鳳凰回馬槍 + ⚡廣度衝力早開 · 等級二真實價差實扣版)",
             "rebalance_freq": "每日收盤自動掃描 · 次一交易日開盤執行 (事件驅動)",
             "next_rebalance_date": "每日盤後動態更新 (次日09:00開盤執行)",
             "current_rebalance_date": latest_dt_str,
@@ -1040,6 +1215,7 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "beat_market_years": sum(1 for y in yearly_stats if y["beat_market"])
         },
         "current_positions": positions,
+        "filtered_candidates": sim["filtered_candidates"],
         "curve": curve,
         "yearly_stats": yearly_stats,
         "trades": list(reversed(trades_asc)),
@@ -1054,7 +1230,11 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "global_regime": regime_str,
             "breadth_pct": gb_pct,
             "tw_breadth_pct": tw_br_pct,
-            "ranked": sim["ranked_watch"]
+            "tw_br_min20_pct": sim.get("tw_br_min20_latest", tw_br_pct),
+            "tw_br_chg5_pct": sim.get("tw_br_chg5_latest", 0.0),
+            "mkt_ok": sim.get("mkt_ok_latest", False),
+            "ranked": sim["ranked_watch"],
+            "filtered_candidates": sim["filtered_candidates"]
         }
     }
 

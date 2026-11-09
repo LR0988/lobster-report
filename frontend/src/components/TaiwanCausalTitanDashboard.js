@@ -1480,7 +1480,7 @@ export default function TaiwanCausalTitanDashboard() {
                 </span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94A3B8' }}>
-                全球複合寬幅：<strong>{data?.live_signal?.breadth_pct ?? '-'}%</strong> (門檻 35%) · 台股中線寬幅：<strong>{data?.live_signal?.tw_breadth_pct ?? '-'}%</strong> (門檻 35%)
+                全球複合寬幅：<strong>{data?.live_signal?.breadth_pct ?? '-'}%</strong> (門檻 35%) · 台股中線寬幅：<strong>{data?.live_signal?.tw_breadth_pct ?? '-'}%</strong> (常規 35% / ⚡真恐慌≤19%後衝力早開≥29% · 5日衝力 {(data?.live_signal?.tw_br_chg5_pct ?? 0) >= 0 ? '+' : ''}{data?.live_signal?.tw_br_chg5_pct ?? 0}%)
               </div>
             </div>
             {Array.isArray(data?.live_signal?.ranked) && data.live_signal.ranked.length > 0 && (
@@ -1779,6 +1779,151 @@ export default function TaiwanCausalTitanDashboard() {
               </table>
             </div>
           </div>
+
+          {/* 1.5 當前系統計算但遭濾網攔截之候選股明細表 (六道濾網闖關診斷) */}
+          {Array.isArray(data?.filtered_candidates || data?.live_signal?.filtered_candidates) && (data?.filtered_candidates || data?.live_signal?.filtered_candidates).length > 0 && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.85) 100%)',
+              border: '1px solid rgba(168, 85, 247, 0.35)',
+              borderTop: '3px solid #A855F7',
+              borderRadius: '12px',
+              padding: '1.2rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+                <div>
+                  <h4 style={{ margin: 0, color: '#C084FC', fontSize: '1.12rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    🛡️ 當前系統計算但被過濾掉的候選股明細表 (六道濾網闖關診斷 · 共 {(data?.filtered_candidates || data?.live_signal?.filtered_candidates).length} 檔)
+                  </h4>
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
+                    列出最新交易日 ({strategy_info.latest_data_date}) 已進入系統大凹洞營收拐點池 / 鳳凰回馬槍池，但因部分濾網尚未通過而被攔截之潛力股與具體卡關原因（點擊 📊 可查看 K 線圖）。
+                  </p>
+                </div>
+                <div style={{
+                  background: 'rgba(168, 85, 247, 0.15)',
+                  border: '1px solid rgba(168, 85, 247, 0.4)',
+                  color: '#E9D5FF',
+                  padding: '0.28rem 0.65rem',
+                  borderRadius: '6px',
+                  fontSize: '0.75rem',
+                  fontFamily: 'monospace'
+                }}>
+                  六道關卡：①3年凹洞 · ②月營收拐點 · ③法人鎖碼 · ④均線四線多頭 · ⑤突破60日高 · ⑥大盤寬幅放行
+                </div>
+              </div>
+
+              <div style={{ overflowX: 'auto', maxHeight: '460px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.81rem' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: '#1E293B', zIndex: 2 }}>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.15)', color: '#94A3B8' }}>
+                      <th style={{ padding: '0.55rem 0.45rem', width: '42px', textAlign: 'center' }}>排序</th>
+                      <th style={{ padding: '0.55rem 0.45rem' }}>標的 (K線)</th>
+                      <th style={{ padding: '0.55rem 0.45rem' }}>所屬觀察池</th>
+                      <th style={{ padding: '0.55rem 0.45rem', textAlign: 'right' }}>現價 / 季線</th>
+                      <th style={{ padding: '0.55rem 0.45rem', textAlign: 'right' }}>3年凹洞 / 距高點</th>
+                      <th style={{ padding: '0.55rem 0.45rem', textAlign: 'right' }}>營收 YoY / QoQ</th>
+                      <th style={{ padding: '0.55rem 0.45rem', textAlign: 'right' }}>20日法人 / 融資</th>
+                      <th style={{ padding: '0.55rem 0.45rem', textAlign: 'center' }}>六道闖關狀態</th>
+                      <th style={{ padding: '0.55rem 0.45rem' }}>系統攔截過濾原因 (差哪一步觸發)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(data?.filtered_candidates || data?.live_signal?.filtered_candidates || []).map((fc) => {
+                      const gs = fc.gate_status || {};
+                      const badgeStyle = (ok) => ({
+                        display: 'inline-block',
+                        padding: '0.12rem 0.35rem',
+                        borderRadius: '4px',
+                        fontSize: '0.7rem',
+                        fontWeight: 'bold',
+                        marginRight: '0.22rem',
+                        marginBottom: '0.15rem',
+                        background: ok ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.15)',
+                        color: ok ? '#34D399' : '#F87171',
+                        border: `1px solid ${ok ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.35)'}`
+                      });
+                      return (
+                        <tr key={fc.stock_id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)', background: fc.gates_passed >= 4 ? 'rgba(168, 85, 247, 0.08)' : 'transparent' }}>
+                          <td style={{ padding: '0.55rem 0.45rem', textAlign: 'center', fontFamily: 'monospace', color: '#94A3B8', fontWeight: 'bold' }}>
+                            #{fc.rank}
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', whiteSpace: 'nowrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <strong style={{ color: '#F8FAFC' }}>{fc.stock_id} {fc.name}</strong>
+                              <StockChartButton
+                                ticker={`${fc.stock_id}.TW`}
+                                name={fc.name}
+                                trades={trades.filter(x => x.stock_id === fc.stock_id)}
+                              />
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#FBBF24', fontFamily: 'monospace' }}>
+                              綜合積分: {fc.score}
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem' }}>
+                            <span style={{
+                              padding: '0.15rem 0.45rem',
+                              borderRadius: '4px',
+                              fontSize: '0.72rem',
+                              fontWeight: 'bold',
+                              background: fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.2)' : 'rgba(56, 189, 248, 0.15)',
+                              color: fc.is_reentry_watch ? '#FDBA74' : '#7DD3FC',
+                              border: `1px solid ${fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.45)' : 'rgba(56, 189, 248, 0.35)'}`
+                            }}>
+                              {fc.pool_type}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ color: '#F8FAFC', fontWeight: 'bold' }}>${fc.price}</div>
+                            <div style={{ fontSize: '0.7rem', color: fc.price > fc.ma60_price ? '#34D399' : '#94A3B8' }}>
+                              60MA: ${fc.ma60_price}
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ color: '#38BDF8', fontWeight: 'bold' }}>{fc.trough_pct}%</div>
+                            <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>距高: {fc.still_trough_pct}%</div>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ color: fc.rev_yoy >= 0 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
+                              {fc.rev_yoy >= 0 ? '+' : ''}{fc.rev_yoy}%
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: fc.rev_qoq >= 5 ? '#FDE68A' : '#94A3B8' }}>
+                              QoQ: {fc.rev_qoq >= 0 ? '+' : ''}{fc.rev_qoq}%
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', textAlign: 'right', fontFamily: 'monospace' }}>
+                            <div style={{ color: fc.inst20_pct >= 3 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
+                              {fc.inst20_pct >= 0 ? '+' : ''}{fc.inst20_pct}%
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: fc.margin_pct <= 90 ? '#94A3B8' : '#F87171' }}>
+                              融資: {fc.margin_pct}%
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', textAlign: 'center', minWidth: '185px' }}>
+                            <div style={{ marginBottom: '0.2rem', fontSize: '0.73rem', fontWeight: 'bold', color: fc.gates_passed >= 4 ? '#C084FC' : '#CBD5E1' }}>
+                              通過 {fc.gates_passed} / {fc.total_gates} 關
+                            </div>
+                            <div>
+                              <span style={badgeStyle(gs.trough)}>{gs.trough ? '✓' : '✗'}凹洞</span>
+                              <span style={badgeStyle(gs.rev)}>{gs.rev ? '✓' : '✗'}營收</span>
+                              <span style={badgeStyle(gs.inst)}>{gs.inst ? '✓' : '✗'}法人</span>
+                              <span style={badgeStyle(gs.trend)}>{gs.trend ? '✓' : '✗'}均線</span>
+                              <span style={badgeStyle(gs.breakout)}>{gs.breakout ? '✓' : '✗'}突破</span>
+                              <span style={badgeStyle(gs.mkt)}>{gs.mkt ? '✓' : '✗'}寬幅</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '0.55rem 0.45rem', color: '#FCA5A5', fontSize: '0.76rem', lineHeight: '1.45' }}>
+                            {(fc.filter_reasons || []).map((reason, rIdx) => (
+                              <div key={rIdx}>• {reason}</div>
+                            ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* 2. 當前實盤持股部位清單 (100% 嚴格由歷史流水帳 txHistory 動態推導) */}
           <div style={{
