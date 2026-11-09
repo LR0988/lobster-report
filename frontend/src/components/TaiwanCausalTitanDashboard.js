@@ -1229,7 +1229,7 @@ export default function TaiwanCausalTitanDashboard() {
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              0050 全球寬幅保護母艦 (≥35%續抱 / &lt;35%次日開盤撤退) + S級50% / A級25% 大凹洞轉型突擊艦 (月營收T+1拐點 × 法人雙鎖碼 × E5六段式停利) · <strong>通過 8 重極端嚴格 PIT 審計 · 2016-2026 連續 11 年 100% 正報酬</strong>
+              0050 全球寬幅保護母艦 (≥35%續抱 / &lt;35%次日開盤撤退) + 均一 50% 倉位大凹洞轉機突擊艦 (月營收T+1拐點 × 法人雙鎖碼 × 🔥鳳凰回馬槍 × 等級二實盤稅費價差) · <strong>通過 8 重極端嚴格 PIT 審計 · 11 年擊敗 0050 共 {kpis.beat_market_years || 9} 年 (9勝2敗) · 連續 11 年正報酬</strong>
             </p>
           </div>
 
@@ -1299,8 +1299,10 @@ export default function TaiwanCausalTitanDashboard() {
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#C084FC', fontFamily: 'monospace' }}>{kpis.calmar}</div>
           </div>
           <div>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>正報酬年度勝率</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>100% ({kpis.winning_years || 11}/{kpis.total_years || 11})</div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>擊敗 0050 年度勝率</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>
+              {kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}% ({kpis.beat_market_years || 9}/{kpis.total_years || 11}勝)
+            </div>
           </div>
         </div>
       </div>
@@ -1424,7 +1426,7 @@ export default function TaiwanCausalTitanDashboard() {
         {[
           { id: 'portfolio', label: '🎯 實盤跟單與調倉指揮部' },
           { id: 'curve', label: `📈 11年 ${kpis.total_multiple?.toLocaleString()}x 淨值曲線 (Log)` },
-          { id: 'yearly', label: '🏆 歷年年度勝率與報酬 (2016-2026 · 100%全勝)' },
+          { id: 'yearly', label: `🏆 歷年 vs 0050 報酬對比 (${kpis.beat_market_years || 9}/${kpis.total_years || 11}勝 · ${kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}%)` },
           { id: 'alphas', label: '🔬 六大因果支柱與 8重PIT驗證' },
           { id: 'trades', label: `📋 回測歷史全交易紀錄 (${trades.length}筆)` },
           { id: 'rules', label: '📖 策略 SOP 與 8重PIT風控法典' }
@@ -2179,7 +2181,7 @@ export default function TaiwanCausalTitanDashboard() {
                 📈 11 年 (2016 - 2026) 母子艦隊 vs 0050.TW 累積淨值走勢 (Log10 對數刻度 · 8重嚴格PIT)
               </h4>
               <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.82rem', color: '#94A3B8' }}>
-                0050 全球寬幅保護母艦 + S50/A25 大凹洞突擊艦 · 個股買 0.07%/賣 0.37% · 0050 買 0.04%/賣 0.14% · T+1 換股交割延遲嚴格計入
+                0050 全球寬幅保護母艦 + 均一 50% 大凹洞突擊艦 + 🔥鳳凰回馬槍 · 等級二實戰摩擦 (個股買 0.22%/賣 0.52% · 0050 買 0.09%/賣 0.19%) · T+1 換股交割延遲嚴格計入
               </p>
             </div>
             <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem' }}>
@@ -2272,10 +2274,10 @@ export default function TaiwanCausalTitanDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.2rem' }}>
-                🏆 2016 - 2026 歷年年度績效與大凹洞突擊艦實戰對比 ({yearly_stats.length} 年正報酬勝率 100%)
+                🏆 2016 - 2026 歷年年度績效 vs 0050.TW 實戰對比 ({yearly_stats.length} 年中 {kpis.beat_market_years || 9} 年擊敗 0050 · 勝率 {kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}% · 連續 {yearly_stats.length} 年正報酬)
               </h4>
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                0050 全球寬幅保護母艦 (≥35%續抱 / &lt;35%次日開盤撤退) + S級50% / A級25% 大凹洞轉型突擊艦 · 8 重極端嚴格 PIT 驗證
+                0050 全球寬幅保護母艦 (≥35%續抱 / &lt;35%次日開盤撤退) + 均一 50% 大凹洞轉型突擊艦 + 🔥鳳凰回馬槍 · 8 重極端嚴格 PIT 驗證
               </p>
             </div>
           </div>
@@ -2286,9 +2288,9 @@ export default function TaiwanCausalTitanDashboard() {
                 <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.15)', color: '#94A3B8' }}>
                   <th style={{ padding: '0.7rem 0.6rem' }}>年度</th>
                   <th style={{ padding: '0.7rem 0.6rem' }}>策略報酬率</th>
-                  <th style={{ padding: '0.7rem 0.6rem' }}>加權大盤報酬</th>
-                  <th style={{ padding: '0.7rem 0.6rem' }}>超額 Alpha</th>
-                  <th style={{ padding: '0.7rem 0.6rem' }}>年度勝負</th>
+                  <th style={{ padding: '0.7rem 0.6rem' }}>0050 基準報酬</th>
+                  <th style={{ padding: '0.7rem 0.6rem' }}>vs 0050 超額 Alpha</th>
+                  <th style={{ padding: '0.7rem 0.6rem' }}>vs 0050 年度勝負</th>
                   <th style={{ padding: '0.7rem 0.6rem' }}>該年個股勝率</th>
                   <th style={{ padding: '0.7rem 0.6rem' }}>該年最強飆股</th>
                   <th style={{ padding: '0.7rem 0.6rem' }}>績效條狀圖</th>
@@ -2299,7 +2301,7 @@ export default function TaiwanCausalTitanDashboard() {
                   const retPct = Number(y.strategy_ret ?? y.return_pct ?? 0);
                   const taiexPct = Number(y.taiex_ret ?? y.taiex_pct ?? 0);
                   const alpha = Number(y.alpha ?? (retPct - taiexPct));
-                  const isWin = y.is_positive !== undefined ? y.is_positive : (retPct > taiexPct);
+                  const isWin = y.beat_market !== undefined ? y.beat_market : (retPct > taiexPct);
                   const tStat = yearlyTradeStats[String(y.year)];
 
                   return (
@@ -2325,7 +2327,7 @@ export default function TaiwanCausalTitanDashboard() {
                           fontSize: '0.75rem',
                           fontWeight: 'bold'
                         }}>
-                          {isWin ? '🏆 完勝大盤' : '落後大盤'}
+                          {isWin ? '🏆 擊敗 0050' : (retPct >= 0 ? '⚠️ 落後 0050 (正報酬)' : '❌ 落後 0050')}
                         </span>
                       </td>
                       <td style={{ padding: '0.7rem 0.6rem', fontFamily: 'monospace' }}>

@@ -2482,7 +2482,7 @@
    "factor": "4. 0050 全球寬幅保護母艦 (Mother Ship Shield)",
    "name": "0050 全球寬幅保護母艦 (Mother Ship Shield)",
    "code": "Global_Breadth[d-1] >= 35% -> Hold 0050 @ Open[d]",
-   "ic_t_stat": "2016-2026 連續 11 年 100% 正報酬 (11/11 全勝)",
+   "ic_t_stat": "11年 vs 0050 9勝2敗 (81.8%) · 連續11年正報酬",
    "invariance_ratio": 0.95,
    "source": "15國主權 ETF + SPY/QQQ/EWT 雙頻複合寬幅",
    "mechanism": "閒置資金平時停泊於 0050.TW 享受台股權值股長期複利；一旦全球複合寬幅跌破 35%（如 2018Q4、2020/03、2022 升息熊市、2026/11 初），次日開盤 0050 立即撤退為現金，與轉機突擊艦形成完美互補。",
@@ -2513,7 +2513,7 @@
   }
  ],
  "live_signal": {
-  "generated_at": "2026-11-09 12:11:09",
+  "generated_at": "2026-11-09 12:31:59",
   "exposure_pct": 0.0,
   "base_exposure_pct": 0.0,
   "etf_mother_ship_pct": 0.0,
