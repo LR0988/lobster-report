@@ -1865,9 +1865,9 @@ export default function TaiwanCausalTitanDashboard() {
                               borderRadius: '4px',
                               fontSize: '0.72rem',
                               fontWeight: 'bold',
-                              background: fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.2)' : 'rgba(56, 189, 248, 0.15)',
-                              color: fc.is_reentry_watch ? '#FDBA74' : '#7DD3FC',
-                              border: `1px solid ${fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.45)' : 'rgba(56, 189, 248, 0.35)'}`
+                              background: fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.2)' : (!gs.trough ? 'rgba(239, 68, 68, 0.18)' : 'rgba(56, 189, 248, 0.15)'),
+                              color: fc.is_reentry_watch ? '#FDBA74' : (!gs.trough ? '#FCA5A5' : '#7DD3FC'),
+                              border: `1px solid ${fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.45)' : (!gs.trough ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)')}`
                             }}>
                               {fc.pool_type}
                             </span>
@@ -1879,8 +1879,8 @@ export default function TaiwanCausalTitanDashboard() {
                             </div>
                           </td>
                           <td style={{ padding: '0.55rem 0.45rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                            <div style={{ color: '#38BDF8', fontWeight: 'bold' }}>{fc.trough_pct}%</div>
-                            <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>距高: {fc.still_trough_pct}%</div>
+                            <div style={{ color: fc.trough_pct <= -35 ? '#38BDF8' : '#F87171', fontWeight: 'bold' }}>{fc.trough_pct}%</div>
+                            <div style={{ fontSize: '0.7rem', color: fc.still_trough_pct <= -15 ? '#94A3B8' : '#F87171', fontWeight: fc.still_trough_pct > -15 ? 'bold' : 'normal' }}>距高: {fc.still_trough_pct}%</div>
                           </td>
                           <td style={{ padding: '0.55rem 0.45rem', textAlign: 'right', fontFamily: 'monospace' }}>
                             <div style={{ color: fc.rev_yoy >= 0 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>

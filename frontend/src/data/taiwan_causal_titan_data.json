@@ -319,7 +319,7 @@
    "rank": 9,
    "stock_id": "4938",
    "name": "和碩",
-   "pool_type": "🔍 準轉機潛力觀察池",
+   "pool_type": "🚫 高檔非凹洞剔除池",
    "is_reentry_watch": false,
    "score": 23.06,
    "price": 95.4,
@@ -589,6 +589,75 @@
     "近5日法人爆量或結構未達標",
     "均線趨勢未齊 (跌破60MA季線、低於120MA半年線、季線斜率下彎)",
     "突破條件未觸發 (距60日高點差 -12.3%)",
+    "大盤寬幅護盾攔截 (台股寬幅 9.0% < 35%，待回升≥29%且5日衝力≥+6%提早開門)"
+   ]
+  },
+  {
+   "rank": 17,
+   "stock_id": "2379",
+   "name": "瑞昱",
+   "pool_type": "🚫 高檔非凹洞剔除池",
+   "is_reentry_watch": false,
+   "score": 15.92,
+   "price": 743.0,
+   "ma20_price": 769.0,
+   "ma60_price": 743.82,
+   "trough_pct": -37.0,
+   "still_trough_pct": -13.0,
+   "recov_pct": 38.0,
+   "rev_yoy": 32.1,
+   "rev_qoq": -2.4,
+   "inst20_pct": 10.94,
+   "margin_pct": 70.0,
+   "dist_breakout_pct": -7.5,
+   "gates_passed": 2,
+   "total_gates": 6,
+   "gate_status": {
+    "trough": false,
+    "rev": false,
+    "inst": true,
+    "trend": true,
+    "breakout": false,
+    "mkt": false
+   },
+   "filter_reasons": [
+    "距3年高點僅 -13.0% (需 ≤ -15% 防高檔追價)",
+    "營收拐點未達標 (YoY +32.1% / QoQ -2.4%)",
+    "突破條件未觸發 (距60日高點差 -7.5%)",
+    "大盤寬幅護盾攔截 (台股寬幅 9.0% < 35%，待回升≥29%且5日衝力≥+6%提早開門)"
+   ]
+  },
+  {
+   "rank": 18,
+   "stock_id": "2377",
+   "name": "微星",
+   "pool_type": "👑 大凹洞營收拐點池",
+   "is_reentry_watch": false,
+   "score": 15.49,
+   "price": 143.0,
+   "ma20_price": 157.4,
+   "ma60_price": 153.2,
+   "trough_pct": -47.2,
+   "still_trough_pct": -27.9,
+   "recov_pct": 36.7,
+   "rev_yoy": 1.8,
+   "rev_qoq": 14.1,
+   "inst20_pct": 8.45,
+   "margin_pct": 70.0,
+   "dist_breakout_pct": -15.1,
+   "gates_passed": 3,
+   "total_gates": 6,
+   "gate_status": {
+    "trough": true,
+    "rev": true,
+    "inst": true,
+    "trend": false,
+    "breakout": false,
+    "mkt": false
+   },
+   "filter_reasons": [
+    "均線趨勢未齊 (跌破60MA季線、低於120MA半年線)",
+    "突破條件未觸發 (距60日高點差 -15.1%)",
     "大盤寬幅護盾攔截 (台股寬幅 9.0% < 35%，待回升≥29%且5日衝力≥+6%提早開門)"
    ]
   }
@@ -3113,7 +3182,7 @@
   }
  ],
  "live_signal": {
-  "generated_at": "2026-11-09 16:53:05",
+  "generated_at": "2026-11-09 17:27:47",
   "exposure_pct": 0.0,
   "base_exposure_pct": 0.0,
   "etf_mother_ship_pct": 0.0,
@@ -3485,7 +3554,7 @@
     "rank": 9,
     "stock_id": "4938",
     "name": "和碩",
-    "pool_type": "🔍 準轉機潛力觀察池",
+    "pool_type": "🚫 高檔非凹洞剔除池",
     "is_reentry_watch": false,
     "score": 23.06,
     "price": 95.4,
@@ -3755,6 +3824,75 @@
      "近5日法人爆量或結構未達標",
      "均線趨勢未齊 (跌破60MA季線、低於120MA半年線、季線斜率下彎)",
      "突破條件未觸發 (距60日高點差 -12.3%)",
+     "大盤寬幅護盾攔截 (台股寬幅 9.0% < 35%，待回升≥29%且5日衝力≥+6%提早開門)"
+    ]
+   },
+   {
+    "rank": 17,
+    "stock_id": "2379",
+    "name": "瑞昱",
+    "pool_type": "🚫 高檔非凹洞剔除池",
+    "is_reentry_watch": false,
+    "score": 15.92,
+    "price": 743.0,
+    "ma20_price": 769.0,
+    "ma60_price": 743.82,
+    "trough_pct": -37.0,
+    "still_trough_pct": -13.0,
+    "recov_pct": 38.0,
+    "rev_yoy": 32.1,
+    "rev_qoq": -2.4,
+    "inst20_pct": 10.94,
+    "margin_pct": 70.0,
+    "dist_breakout_pct": -7.5,
+    "gates_passed": 2,
+    "total_gates": 6,
+    "gate_status": {
+     "trough": false,
+     "rev": false,
+     "inst": true,
+     "trend": true,
+     "breakout": false,
+     "mkt": false
+    },
+    "filter_reasons": [
+     "距3年高點僅 -13.0% (需 ≤ -15% 防高檔追價)",
+     "營收拐點未達標 (YoY +32.1% / QoQ -2.4%)",
+     "突破條件未觸發 (距60日高點差 -7.5%)",
+     "大盤寬幅護盾攔截 (台股寬幅 9.0% < 35%，待回升≥29%且5日衝力≥+6%提早開門)"
+    ]
+   },
+   {
+    "rank": 18,
+    "stock_id": "2377",
+    "name": "微星",
+    "pool_type": "👑 大凹洞營收拐點池",
+    "is_reentry_watch": false,
+    "score": 15.49,
+    "price": 143.0,
+    "ma20_price": 157.4,
+    "ma60_price": 153.2,
+    "trough_pct": -47.2,
+    "still_trough_pct": -27.9,
+    "recov_pct": 36.7,
+    "rev_yoy": 1.8,
+    "rev_qoq": 14.1,
+    "inst20_pct": 8.45,
+    "margin_pct": 70.0,
+    "dist_breakout_pct": -15.1,
+    "gates_passed": 3,
+    "total_gates": 6,
+    "gate_status": {
+     "trough": true,
+     "rev": true,
+     "inst": true,
+     "trend": false,
+     "breakout": false,
+     "mkt": false
+    },
+    "filter_reasons": [
+     "均線趨勢未齊 (跌破60MA季線、低於120MA半年線)",
+     "突破條件未觸發 (距60日高點差 -15.1%)",
      "大盤寬幅護盾攔截 (台股寬幅 9.0% < 35%，待回升≥29%且5日衝力≥+6%提早開門)"
     ]
    }

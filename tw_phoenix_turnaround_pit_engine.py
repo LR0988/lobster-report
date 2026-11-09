@@ -703,6 +703,7 @@ def run_simulation(force_rebuild=False):
             | (c_trough.iloc[-1] & c_inst.iloc[-1] & (ryoy.iloc[-1] > 0.0))
             | (c_trough.iloc[-1] & c_trend.iloc[-1])
             | (c_rev.iloc[-1] & c_inst.iloc[-1] & c_trend.iloc[-1])
+            | (c_inst.iloc[-1] & c_trend.iloc[-1] & (tot_inst20.iloc[-1] >= 0.08))
         )
     ).fillna(False)
     cand_syms_all = list(re_watch_map.keys())
@@ -810,7 +811,7 @@ def run_simulation(force_rebuild=False):
             "rank": 0,
             "stock_id": sid,
             "name": name_map.get(sym, sid),
-            "pool_type": f"🔥 鳳凰回馬槍觀察池 (出場{re_info['days_since_exit']}日·首波{re_info['prev_net_ret_pct']:+.1f}%)" if is_re_cand else ("👑 大凹洞營收拐點池" if (trough_ok and rev_ok) else "🔍 準轉機潛力觀察池"),
+            "pool_type": f"🔥 鳳凰回馬槍觀察池 (出場{re_info['days_since_exit']}日·首波{re_info['prev_net_ret_pct']:+.1f}%)" if is_re_cand else ("👑 大凹洞營收拐點池" if (trough_ok and rev_ok) else ("🚫 高檔非凹洞剔除池" if not trough_ok else "🔍 準轉機潛力觀察池")),
             "is_reentry_watch": is_re_cand,
             "score": round(float(raw_score_latest.get(sym, 0.0)), 2),
             "price": round(float(raw_close.iloc[-1].get(sym, 0.0)), 2),
@@ -841,7 +842,7 @@ def run_simulation(force_rebuild=False):
         key=lambda x: (1 if x["is_reentry_watch"] else 0, 1 if x["gates_passed"] >= 4 else 0, x["score"]),
         reverse=True
     )
-    filtered_candidates = filtered_candidates_raw[:16]
+    filtered_candidates = filtered_candidates_raw[:18]
     for i_fc, fc in enumerate(filtered_candidates):
         fc["rank"] = i_fc + 1
 

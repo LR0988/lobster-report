@@ -1278,7 +1278,9 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 同步櫃買可轉債行情警告: {e}")
 
             try:
+                import importlib
                 import exp264_titan_sync
+                importlib.reload(exp264_titan_sync)
                 add_scraper_log("⏳ 正在以最新資料庫重算台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT)...")
                 add_scraper_log("✓ " + exp264_titan_sync.run(force_rebuild=True))
             except Exception as e:
@@ -1286,21 +1288,27 @@ def run_scraper_task(task_type: str):
                 print(f"[x] [API Scraper] 台股因果泰坦更新失敗: {e}")
 
             try:
+                import importlib
                 import global_sovereign_service
+                importlib.reload(global_sovereign_service)
                 global_sovereign_service.get_global_sovereign_dashboard_data(force_refresh=True)
                 add_scraper_log("✓ 全球高流動性主權泰坦 2.0 最新報價與實盤持倉已同步刷新")
             except Exception as e:
                 add_scraper_log(f"⚠️ 全球主權泰坦刷新警告: {e}")
 
             try:
+                import importlib
                 import oversold_sniper_service
+                importlib.reload(oversold_sniper_service)
                 oversold_sniper_service.run_full_rescan()
                 add_scraper_log("✓ 強勢股極端超賣快打 3.0 雷達與法人自救訊號已同步刷新")
             except Exception as e:
                 add_scraper_log(f"⚠️ 超賣快打刷新警告: {e}")
 
             try:
+                import importlib
                 import tw_special_strategies_service
+                importlib.reload(tw_special_strategies_service)
                 tw_special_strategies_service.compute_tw_special_strategies(save_json=True)
                 add_scraper_log("✓ 可轉債 (CB/CBAS) 落難天使好球帶雷達已同步刷新")
             except Exception as e:
@@ -1308,8 +1316,10 @@ def run_scraper_task(task_type: str):
 
             set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '步驟 9/9：全資料庫雲端預覽快照、雙泰坦看板與總筆數同步', '步驟 9/9：正在將全市場 24 表最新快照、台股母子艦隊與全球泰坦看板同步至雲端 Supabase...', 9, 9, 96)
             try:
-                from stock_sync import run_full_sync
-                run_full_sync()
+                import importlib
+                import stock_sync
+                importlib.reload(stock_sync)
+                stock_sync.run_full_sync()
                 add_scraper_log("✓ 雲端 Supabase 快照、台股母子艦隊與全球泰坦看板同步完成")
                 print("[✓] [API Scraper] 雲端 Supabase 同步完成")
             except Exception as e:

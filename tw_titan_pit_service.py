@@ -40,6 +40,8 @@ def snapshot_fingerprint() -> str:
 
 
 def refresh_live(force_rebuild: bool = False) -> dict:
+    import importlib
+    importlib.reload(phoenix_engine)
     return phoenix_engine.export_to_frontend(force_rebuild=force_rebuild)
 
 
