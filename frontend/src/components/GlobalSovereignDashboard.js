@@ -3974,16 +3974,50 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
                     return (
                       <div style={{ marginTop: '0.55rem', padding: '0.6rem 0.75rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                          <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                          <span style={{ color: '#34D399', fontWeight: 'bold', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                             ✅ {matchedTrades[0]?.ticker} ({matchedTrades[0]?.name}) 共入選 {matchedTrades.length} 次調倉
+                            <StockChartButton
+                              ticker={matchedTrades[0]?.ticker}
+                              name={matchedTrades[0]?.name}
+                              trade={{
+                                entry_date: matchedTrades[0]?.entry_date || matchedTrades[0]?.date,
+                                exit_date: matchedTrades[0]?.exit_date,
+                                entry_price: matchedTrades[0]?.entry_price,
+                                exit_price: matchedTrades[0]?.exit_price,
+                                return_pct: matchedTrades[0]?.period_ret_pct,
+                                role: matchedTrades[0]?.tranche
+                              }}
+                              trades={matchedTrades.map(m => ({
+                                entry_date: m.entry_date || m.date,
+                                exit_date: m.exit_date,
+                                entry_price: m.entry_price,
+                                exit_price: m.exit_price,
+                                return_pct: m.period_ret_pct,
+                                role: m.tranche
+                              }))}
+                            />
                           </span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.45rem' }}>
                           {matchedTrades.slice(0, 6).map((tr, idx) => (
                             <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.55rem', borderRadius: '4px', borderLeft: tr.is_active ? '3px solid #10B981' : '3px solid #38BDF8', fontSize: '0.73rem' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#FDE047', fontWeight: 'bold' }}>
-                                <span>📅 {tr.date} ({tr.tranche})</span>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#FDE047', fontWeight: 'bold' }}>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  📅 {tr.date} ({tr.tranche})
+                                  <StockChartButton
+                                    ticker={tr.ticker}
+                                    name={tr.name}
+                                    trade={{
+                                      entry_date: tr.entry_date || tr.date,
+                                      exit_date: tr.exit_date,
+                                      entry_price: tr.entry_price,
+                                      exit_price: tr.exit_price,
+                                      return_pct: tr.period_ret_pct,
+                                      role: tr.tranche
+                                    }}
+                                  />
+                                </span>
                                 <span style={{ color: tr.period_ret_pct >= 0 ? '#34D399' : '#FCA5A5' }}>
                                   {tr.period_ret_pct >= 0 ? '+' : ''}{tr.period_ret_pct}%
                                 </span>
@@ -4182,7 +4216,18 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                                               <span style={{ color: '#F8FAFC', fontWeight: 'bold' }}>
                                                 {formatStockDisplayName(p.ticker, p.name).split(' (')[0]}
                                               </span>
-                                              <StockChartButton ticker={p.ticker} name={p.name} />
+                                              <StockChartButton
+                                                ticker={p.ticker}
+                                                name={p.name}
+                                                trade={{
+                                                  entry_date: rb.entry_date || rb.rebal_date,
+                                                  exit_date: rb.exit_date,
+                                                  entry_price: p.entry_price,
+                                                  exit_price: p.exit_price,
+                                                  return_pct: p.period_ret,
+                                                  role: rb.tranche_label || `Tranche #${rb.tranche_id || ''}`
+                                                }}
+                                              />
                                             </div>
                                           </td>
                                           <td style={{ textAlign: 'right', fontFamily: 'monospace', color: accentColor, fontWeight: 'bold' }}>

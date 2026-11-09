@@ -2134,7 +2134,22 @@ export default function TwAsymmetricAlphaDashboard() {
                         <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{t.year}</td>
                         <td>
                           <strong style={{ color: '#F8FAFC' }}>{t.cb_name} ({t.cb_code})</strong>
-                          <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{t.stock_name} ({t.ticker}) · {t.industry} <StockChartButton ticker={t.ticker} name={t.stock_name} style={{ marginLeft: '0.4rem' }} /></div>
+                          <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>
+                            {t.stock_name} ({t.ticker}) · {t.industry}
+                            <StockChartButton
+                              ticker={t.ticker}
+                              name={t.stock_name}
+                              trade={{
+                                entry_date: t.entry_date,
+                                exit_date: t.exit_date,
+                                return_pct: t.pnl_pct,
+                                exit_reason: t.exit_reason,
+                                hold_days: t.holding_days,
+                                role: `${t.cb_name} (${t.cb_code})`
+                              }}
+                              style={{ marginLeft: '0.4rem' }}
+                            />
+                          </div>
                         </td>
                         <td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
                           {t.entry_date} ➔ {t.exit_date}

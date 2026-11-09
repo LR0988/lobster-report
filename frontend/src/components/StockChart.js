@@ -16,11 +16,11 @@ import * as ind from './chartIndicators';
 const EVT = 'open-stock-chart';
 export const openStockChart = (detail) => window.dispatchEvent(new CustomEvent(EVT, { detail }));
 
-export const StockChartButton = ({ ticker, name, levels, label = '📈', style }) => (
+export const StockChartButton = ({ ticker, name, levels, trade, trades, label = '📈', style }) => (
   <button
     type="button"
-    title={`開啟 ${name || ticker} 技術線圖`}
-    onClick={(e) => { e.stopPropagation(); openStockChart({ ticker, name, levels }); }}
+    title={trade?.entry_date ? `開啟 ${name || ticker} K線圖 (標記進場 ${trade.entry_date} ➔ 出場 ${trade.exit_date || '持有中'})` : `開啟 ${name || ticker} 技術線圖`}
+    onClick={(e) => { e.stopPropagation(); openStockChart({ ticker, name, levels, trade, trades }); }}
     style={{
       cursor: 'pointer', fontSize: '0.78rem', fontWeight: 'bold', padding: '2px 5px', borderRadius: '4px',
       border: '1px solid rgba(96,165,250,0.55)', background: 'rgba(59,130,246,0.15)', color: '#93C5FD',
@@ -88,14 +88,17 @@ const StockChartModal = ({ req, onClose }) => {
     try {
       let base = await resolveApiBase();
       const sym = encodeURIComponent(req.ticker);
+      const effectiveDays = (req.trade?.entry_date || (Array.isArray(req.trades) && req.trades.length > 0))
+        ? Math.max(prefs.days, 6000)
+        : prefs.days;
       let res;
       try {
-        res = await fetch(`${base}/api/chart/${sym}?days=${prefs.days}`, { cache: 'no-store' });
+        res = await fetch(`${base}/api/chart/${sym}?days=${effectiveDays}`, { cache: 'no-store' });
         if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
       } catch (firstErr) {
         // 若首次連線失敗或非 404 錯誤，強制從 Supabase 刷新最新通道網址重試一次
         base = await resolveApiBase(true);
-        res = await fetch(`${base}/api/chart/${sym}?days=${prefs.days}`, { cache: 'no-store' });
+        res = await fetch(`${base}/api/chart/${sym}?days=${effectiveDays}`, { cache: 'no-store' });
       }
       if (!res.ok) throw new Error(res.status === 404 ? `本機資料庫查無 ${req.ticker} 日K資料` : `本機 API 回應 ${res.status}`);
       setData(await res.json()); setState('ok');
@@ -104,7 +107,7 @@ const StockChartModal = ({ req, onClose }) => {
         ? '連不到本機 API 通道。請確認筆電上的 uvicorn 與 manage_tunnel.py 正在執行。' : e.message);
       setState('error');
     }
-  }, [req.ticker, prefs.days]);
+  }, [req.ticker, req.trade, req.trades, prefs.days]);
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
@@ -177,11 +180,121 @@ const StockChartModal = ({ req, onClose }) => {
     (req.levels || []).forEach((lv) => main.createPriceLine({
       price: lv.price, color: lv.color || '#FDE047', lineStyle: LineStyle.Solid, lineWidth: 1, axisLabelVisible: true, title: lv.label || '',
     }));
+
+    // ---- 回測 / 交易進出點標記與波段軌跡線 ----
+    const normDateStr = (s) => {
+      if (!s) return '';
+      const str = String(s).trim().replace(/\//g, '-').slice(0, 10);
+      if (/^\d{8}$/.test(str)) return `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}`;
+      return /^\d{4}-\d{2}-\d{2}$/.test(str) ? str : '';
+    };
+    const findBarIdx = (targetStr) => {
+      const nd = normDateStr(targetStr);
+      if (!nd || !dates.length) return -1;
+      const exact = dates.indexOf(nd);
+      if (exact >= 0) return exact;
+      const next = dates.findIndex((d) => d >= nd);
+      return next >= 0 ? next : dates.length - 1;
+    };
+    const getAlignedPx = (rawPx, barIdx, field = 'o') => {
+      if (barIdx < 0 || barIdx >= n) return null;
+      const barPx = data[field]?.[barIdx] ?? data.c[barIdx];
+      const numPx = Number(rawPx);
+      if (numPx > 0 && barPx > 0 && numPx / barPx >= 0.7 && numPx / barPx <= 1.4) {
+        return numPx;
+      }
+      return barPx;
+    };
+
+    const allMarkers = [];
     if (prefs.signals && prefs.ma.includes(5) && prefs.ma.includes(20)) {
-      createSeriesMarkers(main, ind.crossovers(calc.m[5], calc.m[20]).map(({ i, dir }) => ({
-        time: dates[i], position: dir > 0 ? 'belowBar' : 'aboveBar', shape: dir > 0 ? 'arrowUp' : 'arrowDown',
-        color: dir > 0 ? UP : DN, text: dir > 0 ? '金' : '死',
-      })));
+      ind.crossovers(calc.m[5], calc.m[20]).forEach(({ i, dir }) => {
+        allMarkers.push({
+          time: dates[i], position: dir > 0 ? 'belowBar' : 'aboveBar', shape: dir > 0 ? 'arrowUp' : 'arrowDown',
+          color: dir > 0 ? UP : DN, text: dir > 0 ? '金' : '死',
+        });
+      });
+    }
+
+    const tradeList = Array.isArray(req.trades) && req.trades.length > 0
+      ? req.trades
+      : (req.trade ? [req.trade] : []);
+    let focusTradeRange = null;
+
+    tradeList.forEach((tr) => {
+      const eIdx = findBarIdx(tr.entry_date);
+      const hasExit = tr.exit_date && !String(tr.exit_date).includes('持有');
+      const xIdx = hasExit ? findBarIdx(tr.exit_date) : -1;
+      const retVal = Number(tr.return_pct ?? tr.pnl_pct ?? tr.period_ret ?? tr.period_ret_pct ?? 0);
+      const isPrimary = req.trade && (tr === req.trade || (tr.entry_date === req.trade.entry_date && tr.exit_date === req.trade.exit_date));
+
+      if (eIdx >= 0) {
+        allMarkers.push({
+          time: dates[eIdx],
+          position: 'belowBar',
+          shape: 'arrowUp',
+          color: '#FBBF24',
+          size: isPrimary ? 2 : 1,
+          text: `🟢 買進 ${dates[eIdx]}${tr.entry_price ? ` @$${fmt(tr.entry_price)}` : ''}`,
+        });
+      }
+      if (xIdx >= 0) {
+        allMarkers.push({
+          time: dates[xIdx],
+          position: 'aboveBar',
+          shape: 'arrowDown',
+          color: retVal >= 0 ? '#38BDF8' : '#F472B6',
+          size: isPrimary ? 2 : 1,
+          text: `🎯 出場 ${dates[xIdx]}${tr.exit_price ? ` @$${fmt(tr.exit_price)}` : ''} (${retVal >= 0 ? '+' : ''}${retVal.toFixed(1)}%)`,
+        });
+      }
+
+      if (isPrimary && eIdx >= 0) {
+        const ePx = getAlignedPx(tr.entry_price, eIdx, 'o');
+        const endIdx = xIdx >= eIdx ? xIdx : Math.min(n - 1, eIdx + 25);
+        const xPx = xIdx >= 0 ? getAlignedPx(tr.exit_price, xIdx, 'o') : data.c[n - 1];
+        if (ePx != null) {
+          main.createPriceLine({
+            price: ePx,
+            color: '#FBBF24',
+            lineStyle: LineStyle.Dashed,
+            lineWidth: 2,
+            axisLabelVisible: true,
+            title: `🟢 買進 $${fmt(tr.entry_price || ePx)}`,
+          });
+        }
+        if (xIdx >= 0 && xPx != null) {
+          main.createPriceLine({
+            price: xPx,
+            color: retVal >= 0 ? '#38BDF8' : '#F472B6',
+            lineStyle: LineStyle.Dashed,
+            lineWidth: 2,
+            axisLabelVisible: true,
+            title: `🎯 出場 $${fmt(tr.exit_price || xPx)} (${retVal >= 0 ? '+' : ''}${retVal.toFixed(1)}%)`,
+          });
+        }
+        if (ePx != null && xPx != null && endIdx > eIdx) {
+          chart.addSeries(LineSeries, {
+            color: retVal >= 0 ? '#FBBF24' : '#F472B6',
+            lineWidth: 2,
+            lineStyle: LineStyle.Dashed,
+            priceLineVisible: false,
+            lastValueVisible: false,
+            crosshairMarkerVisible: false,
+          }, 0).setData([
+            { time: dates[eIdx], value: ePx },
+            { time: dates[endIdx], value: xPx },
+          ]);
+        }
+        const span = Math.max(15, endIdx - eIdx);
+        const pad = Math.max(25, Math.round(span * 0.45));
+        focusTradeRange = { from: Math.max(0, eIdx - pad), to: Math.min(n + 2, endIdx + pad) };
+      }
+    });
+
+    if (allMarkers.length > 0) {
+      allMarkers.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
+      createSeriesMarkers(main, allMarkers);
     }
 
     // 對數座標只套用在主圖 (副圖的量/買賣超含 0 或負值，不可用對數)
@@ -244,8 +357,8 @@ const StockChartModal = ({ req, onClose }) => {
     panes[0]?.setStretchFactor(4);
     for (let i = 1; i < panes.length; i++) panes[i].setStretchFactor(1.2);
 
-    // 可視範圍 (保留使用者縮放；首次依 prefs.range)
-    const want = rangeRef.current || (prefs.range ? { from: n - prefs.range, to: n + 3 } : null);
+    // 可視範圍 (保留使用者縮放；若有傳入回測交易則優先聚焦該筆交易進出場區間；否則依 prefs.range)
+    const want = rangeRef.current || focusTradeRange || (prefs.range ? { from: n - prefs.range, to: n + 3 } : null);
     if (want) chart.timeScale().setVisibleLogicalRange(want); else chart.timeScale().fitContent();
     chart.timeScale().subscribeVisibleLogicalRangeChange((r) => { if (r) rangeRef.current = r; });
 
@@ -356,6 +469,29 @@ const StockChartModal = ({ req, onClose }) => {
     rangeRef.current = lr; c.timeScale().setVisibleLogicalRange(lr);
   };
 
+  const focusTrade = () => {
+    if (!req.trade || !data || !chartRef.current) return;
+    const dates = data.d, n = dates.length;
+    const norm = (s) => (s ? String(s).trim().replace(/\//g, '-').slice(0, 10) : '');
+    const findIdx = (s) => {
+      const nd = norm(s);
+      if (!nd) return -1;
+      const ex = dates.indexOf(nd);
+      if (ex >= 0) return ex;
+      const nx = dates.findIndex((d) => d >= nd);
+      return nx >= 0 ? nx : n - 1;
+    };
+    const eIdx = findIdx(req.trade.entry_date);
+    if (eIdx < 0) return;
+    const hasExit = req.trade.exit_date && !String(req.trade.exit_date).includes('持有');
+    const xIdx = hasExit ? findIdx(req.trade.exit_date) : Math.min(n - 1, eIdx + 25);
+    const endIdx = Math.max(eIdx + 5, xIdx);
+    const pad = Math.max(25, Math.round((endIdx - eIdx) * 0.45));
+    const lr = { from: Math.max(0, eIdx - pad), to: Math.min(n + 2, endIdx + pad) };
+    rangeRef.current = lr;
+    chartRef.current.timeScale().setVisibleLogicalRange(lr);
+  };
+
   // ---- legend ----
   const i = hover ?? (data ? data.d.length - 1 : 0);
   const legend = data && calc ? (() => {
@@ -383,6 +519,8 @@ const StockChartModal = ({ req, onClose }) => {
     return parts;
   };
 
+  const tradeRet = req.trade ? Number(req.trade.return_pct ?? req.trade.pnl_pct ?? req.trade.period_ret ?? req.trade.period_ret_pct ?? 0) : null;
+
   return (
     <div onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{
       position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(2,6,23,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -398,9 +536,47 @@ const StockChartModal = ({ req, onClose }) => {
           )}
           {data && <span style={{ fontSize: '0.7rem', color: '#64748B' }}>本機資料庫 · 最新 {data.last_date} · 共 {data.d.length} 日</span>}
           <span style={{ flex: 1 }} />
+          {req.trade && (
+            <button type="button" onClick={focusTrade} style={{ cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold', padding: '3px 10px', borderRadius: '4px', border: '1px solid #F59E0B', background: 'rgba(245, 158, 11, 0.2)', color: '#FDE68A' }}>
+              🎯 聚焦進出場點
+            </button>
+          )}
           <button type="button" onClick={load} style={{ cursor: 'pointer', fontSize: '0.75rem', padding: '3px 9px', borderRadius: '4px', border: '1px solid #334155', background: '#1E293B', color: '#CBD5E1' }}>↻ 重新整理</button>
           <button type="button" onClick={onClose} style={{ cursor: 'pointer', fontSize: '0.9rem', padding: '1px 9px', borderRadius: '4px', border: '1px solid #334155', background: '#1E293B', color: '#CBD5E1' }}>✕</button>
         </div>
+
+        {/* 回測交易進出點復盤橫幅 (若有傳入 trade 才顯示) */}
+        {req.trade && (
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.6rem 1.2rem',
+            padding: '0.45rem 0.9rem', background: 'linear-gradient(90deg, rgba(245,158,11,0.14) 0%, rgba(56,189,248,0.12) 100%)',
+            borderBottom: '1px solid rgba(245,158,11,0.35)', fontSize: '0.78rem'
+          }}>
+            <span style={{ fontWeight: 'bold', color: '#FDE68A' }}>📍 回測進出點 K 線復盤：</span>
+            <span style={{ fontFamily: 'monospace', color: '#FBBF24', fontWeight: 'bold' }}>
+              🟢 買進：{req.trade.entry_date} {req.trade.entry_price ? `@ $${fmt(req.trade.entry_price)}` : ''}
+            </span>
+            <span style={{ color: '#64748B' }}>➔</span>
+            <span style={{ fontFamily: 'monospace', color: tradeRet >= 0 ? '#38BDF8' : '#F472B6', fontWeight: 'bold' }}>
+              🎯 出場：{req.trade.exit_date || '持有中'} {req.trade.exit_price ? `@ $${fmt(req.trade.exit_price)}` : ''}
+            </span>
+            {tradeRet != null && (
+              <span style={{
+                fontFamily: 'monospace', fontWeight: 'bold', padding: '1px 7px', borderRadius: '4px',
+                background: tradeRet >= 0 ? 'rgba(16,185,129,0.22)' : 'rgba(239,68,68,0.22)',
+                color: tradeRet >= 0 ? '#34D399' : '#F87171', border: `1px solid ${tradeRet >= 0 ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)'}`
+              }}>
+                單筆報酬：{tradeRet >= 0 ? '+' : ''}{tradeRet.toFixed(2)}%
+              </span>
+            )}
+            {req.trade.holding_days != null && (
+              <span style={{ color: '#CBD5E1', fontFamily: 'monospace' }}>⏱️ 持有 {req.trade.holding_days} 天</span>
+            )}
+            {(req.trade.exit_reason || req.trade.role) && (
+              <span style={{ color: '#93C5FD' }}>📌 {req.trade.exit_reason || req.trade.role}</span>
+            )}
+          </div>
+        )}
 
         {/* 工具列 */}
         <div style={{ display: 'flex', gap: '0.35rem 0.9rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.4rem 0.9rem', borderBottom: '1px solid #1E293B' }}>
@@ -487,7 +663,8 @@ const StockChartHost = () => {
     window.addEventListener(EVT, h);
     return () => window.removeEventListener(EVT, h);
   }, []);
-  return req ? <StockChartModal key={req.ticker} req={req} onClose={() => setReq(null)} /> : null;
+  const modalKey = req ? `${req.ticker}_${req.trade?.entry_date || ''}_${req.trade?.exit_date || ''}` : '';
+  return req ? <StockChartModal key={modalKey} req={req} onClose={() => setReq(null)} /> : null;
 };
 
 export default StockChartHost;

@@ -2337,8 +2337,14 @@ export default function TaiwanCausalTitanDashboard() {
                       </td>
                       <td style={{ padding: '0.7rem 0.6rem', fontSize: '0.78rem' }}>
                         {tStat?.best ? (
-                          <span style={{ color: '#FDE68A' }}>
+                          <span style={{ color: '#FDE68A', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                             {tStat.best.stock_name} <strong style={{ color: '#34D399', fontFamily: 'monospace' }}>(+{tStat.best.return_pct.toFixed(1)}%)</strong>
+                            <StockChartButton
+                              ticker={`${String(tStat.best.stock_id).split('.')[0]}.TW`}
+                              name={tStat.best.stock_name}
+                              trade={tStat.best}
+                              trades={trades.filter(x => x.stock_id === tStat.best.stock_id)}
+                            />
                           </span>
                         ) : '-'}
                       </td>
@@ -2440,7 +2446,15 @@ export default function TaiwanCausalTitanDashboard() {
                 {trades.slice(0, 150).map((t, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                     <td style={{ padding: '0.65rem 0.5rem', fontWeight: 'bold', color: '#F8FAFC' }}>
-                      {t.stock_id} {t.stock_name}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span>{t.stock_id} {t.stock_name}</span>
+                        <StockChartButton
+                          ticker={`${String(t.stock_id).split('.')[0]}.TW`}
+                          name={t.stock_name}
+                          trade={t}
+                          trades={trades.filter(x => x.stock_id === t.stock_id)}
+                        />
+                      </span>
                     </td>
                     <td style={{ padding: '0.65rem 0.5rem', color: '#93C5FD' }}>{t.role}</td>
                     <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace' }}>
@@ -2470,10 +2484,10 @@ export default function TaiwanCausalTitanDashboard() {
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 母艦 × 突擊艦雙引擎互補架構</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 母艦 × 突擊艦雙引擎互補架構 (零過度擬合均一 50% 倉位)</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>🛸 0050 全球寬幅保護母艦：</strong>當全球 15 國主權與美台核心複合寬幅 (Global Breadth) ≥ 35% 時，所有未配置於突擊艦之資金 100% 停泊於 0050.TW 享受台股權值 Beta；一旦全球寬幅 &lt; 35%，次一交易日開盤 0050 立即撤退為 0% 現金避險。<br />
-                • <strong>👑 S級 (50%) / 🦅 A級 (25%) 轉機突擊艦：</strong>最多同時持有 2 檔；若僅觸發 A 級訊號，強制保留至少 30% 之 0050 母艦底倉；若觸發 S 級鑽石訊號（投信強鎖碼 + 營收季增 ≥6% + 機構吸籌 IO20 ≥4%），單筆重倉 50% 出擊。
+                • <strong>🛸 0050 全球寬幅保護母艦：</strong>當全球 15 國主權與美台核心複合寬幅 (Global Breadth) ≥ 35% 時，所有未配置於突擊艦之資金 100% 停泊於 0050.TW 享受台股權值 Beta；一旦全球寬幅 &lt; 35%，次一交易日開盤 0050 立即撤退為 0% 現金避險（來回實扣 0.28% 稅費與五檔價差）。<br />
+                • <strong>👑 轉機突擊艦 (均一 50% 倉位，最多同時 2 檔)：</strong>徹底廢除容易漏接底部外資壓盤吃貨飆股的人為 S/A 分級參數，凡通過母池四大結構濾網之轉機股一律平等配置 50% 倉位（個股來回實扣 0.74% 證交稅、手續費與真實買賣價差）。
               </p>
             </div>
 

@@ -19,6 +19,7 @@ import TaiwanCausalTitanDashboard from './TaiwanCausalTitanDashboard';
 import OversoldSniperDashboard from './OversoldSniperDashboard';
 import TwAsymmetricAlphaDashboard from './TwAsymmetricAlphaDashboard';
 import CommodityCtaDashboard from './CommodityCtaDashboard';
+import { StockChartButton } from './StockChart';
 import defaultGlobalSovereignData from '../data/defaultGlobalSovereignData.json';
 import './StockDashboard.css';
 
@@ -8346,7 +8347,20 @@ function StockDashboard() {
                                         <tr key={idx} style={{ background: idx % 2 === 0 ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.02)' }}>
                                           {hasStockDetail && (
                                             <td style={{ fontWeight: 'bold', color: '#FDE68A' }}>
-                                              {t.stock_name} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>({t.stock_id})</span>
+                                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                                <span>{t.stock_name} <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>({t.stock_id})</span></span>
+                                                {t.stock_id && t.stock_id !== '--' && (
+                                                  <StockChartButton
+                                                    ticker={/^\d+$/.test(String(t.stock_id).trim()) ? `${String(t.stock_id).trim()}.TW` : String(t.stock_id).trim()}
+                                                    name={t.stock_name}
+                                                    trade={{
+                                                      ...t,
+                                                      entry_date: formatDateStr(t.entry_date),
+                                                      exit_date: formatDateStr(t.exit_date)
+                                                    }}
+                                                  />
+                                                )}
+                                              </span>
                                             </td>
                                           )}
                                           {hasStockDetail && (

@@ -2389,6 +2389,7 @@ export default function OversoldSniperDashboard() {
                           <div style={{ fontWeight: 'bold', color: '#F8FAFC' }}>{trade.name}</div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                             {trade.ticker}
+                            <StockChartButton ticker={trade.ticker} name={trade.name} trade={trade} style={{ marginLeft: '0.4rem' }} />
                           </div>
                         </td>
                         <td>
@@ -2895,7 +2896,7 @@ export default function OversoldSniperDashboard() {
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#94A3B8', fontFamily: 'monospace' }}>
                             {t.ticker} {t.natr_pct ? `｜NATR ${t.natr_pct}%` : ''}
-                            <StockChartButton ticker={t.ticker} name={t.name} style={{ marginLeft: '0.4rem' }} />
+                            <StockChartButton ticker={t.ticker} name={t.name} trade={t} style={{ marginLeft: '0.4rem' }} />
                           </div>
                         </td>
                         <td style={{ fontSize: '0.74rem', color: '#CBD5E1' }}>
