@@ -441,6 +441,18 @@ def insert_margin_data(data_list):
     if not data_list: return
     conn = get_db_connection()
     cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS stock_margin_daily (
+            date TEXT, stock_id TEXT,
+            margin_buy INTEGER, margin_sell INTEGER, margin_balance INTEGER,
+            short_buy INTEGER, short_sell INTEGER, short_balance INTEGER,
+            PRIMARY KEY (date, stock_id)
+        )
+    """)
+    cursor.executemany(
+        "INSERT OR REPLACE INTO stock_margin_daily VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        data_list
+    )
     for row in data_list:
         cursor.execute('UPDATE daily_stock SET margin_buy=?, margin_sell=?, margin_balance=?, short_buy=?, short_sell=?, short_balance=? WHERE date=? AND stock_id=?', (row[2], row[3], row[4], row[5], row[6], row[7], row[0], row[1]))
     conn.commit()

@@ -794,9 +794,39 @@ def _attach_tw_fundamentals(conn, sid: str, out: dict, pe_by_date: dict = None):
         return
     last_bar_dt = dates[-1]
 
-    # 0. 自動檢查並補齊融資融券餘額 (過去 TWSE MI_MARGN 改版放至 tables[1] 導致上市個股 margin_balance 缺漏)
+    # 0. 優先自本機高速索引表 stock_margin_daily 讀取完整融資融券歷史，若仍缺漏則自動向 FinMind 補齊並回寫
     mb_arr = out.get("mb")
     sb_arr = out.get("sb")
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS stock_margin_daily (
+                date TEXT, stock_id TEXT,
+                margin_buy INTEGER, margin_sell INTEGER, margin_balance INTEGER,
+                short_buy INTEGER, short_sell INTEGER, short_balance INTEGER,
+                PRIMARY KEY (date, stock_id)
+            )
+        """)
+        d0_raw = dates[0].replace("-", "")
+        smd_rows = conn.execute(
+            "SELECT date, margin_balance, short_balance FROM stock_margin_daily WHERE stock_id=? AND date>=? ORDER BY date ASC",
+            (sid, d0_raw)
+        ).fetchall()
+        if len(smd_rows) >= len(dates) * 0.5:
+            smd_map = {f"{r[0][:4]}-{r[0][4:6]}-{r[0][6:]}": (r[1], r[2]) for r in smd_rows if len(str(r[0])) == 8}
+            new_mb, new_sb = [], []
+            cur_m, cur_s = None, None
+            for i_dt, dt_s in enumerate(dates):
+                if dt_s in smd_map:
+                    cur_m, cur_s = smd_map[dt_s]
+                elif mb_arr and i_dt < len(mb_arr) and mb_arr[i_dt] is not None:
+                    cur_m, cur_s = mb_arr[i_dt], sb_arr[i_dt]
+                new_mb.append(cur_m)
+                new_sb.append(cur_s)
+            out["mb"], out["sb"] = new_mb, new_sb
+            mb_arr, sb_arr = new_mb, new_sb
+    except Exception:
+        pass
+
     valid_mb_cnt = sum(1 for x in (mb_arr or []) if x is not None)
     if valid_mb_cnt < len(dates) * 0.6:
         try:
@@ -813,7 +843,7 @@ def _attach_tw_fundamentals(conn, sid: str, out: dict, pe_by_date: dict = None):
             mg_rows = resp.get("data") or []
             if mg_rows:
                 mg_map = {}
-                upd_batch = []
+                smd_batch = []
                 for x in mg_rows:
                     d_str = str(x.get("date") or "").strip()
                     if not d_str:
@@ -825,12 +855,11 @@ def _attach_tw_fundamentals(conn, sid: str, out: dict, pe_by_date: dict = None):
                     s_sell = int(x.get("ShortSaleSell") or 0)
                     s_bal = int(x.get("ShortSaleTodayBalance") or 0)
                     mg_map[d_str] = (m_bal, s_bal)
-                    upd_batch.append((m_buy, m_sell, m_bal, s_buy, s_sell, s_bal, d_str.replace("-", ""), sid))
-                if upd_batch:
+                    smd_batch.append((d_str.replace("-", ""), sid, m_buy, m_sell, m_bal, s_buy, s_sell, s_bal))
+                if smd_batch:
                     conn.executemany(
-                        "UPDATE daily_stock SET margin_buy=?, margin_sell=?, margin_balance=?, "
-                        "short_buy=?, short_sell=?, short_balance=? WHERE date=? AND stock_id=?",
-                        upd_batch
+                        "INSERT OR REPLACE INTO stock_margin_daily VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        smd_batch
                     )
                     conn.commit()
                 new_mb, new_sb = [], []
@@ -840,10 +869,16 @@ def _attach_tw_fundamentals(conn, sid: str, out: dict, pe_by_date: dict = None):
                         cur_m, cur_s = mg_map[dt_s]
                     elif mb_arr and i_dt < len(mb_arr) and mb_arr[i_dt] is not None:
                         cur_m, cur_s = mb_arr[i_dt], sb_arr[i_dt]
-                    new_mb.append(cur_m)
-                    new_sb.append(cur_s)
-                out["mb"] = new_mb
-                out["sb"] = new_sb
+                out["mb"] = [mg_map.get(dt_s, (None, None))[0] for dt_s in dates]
+                # Forward-fill across minor gaps
+                f_mb, f_sb = [], []
+                cm, cs = None, None
+                for dt_s in dates:
+                    if dt_s in mg_map:
+                        cm, cs = mg_map[dt_s]
+                    f_mb.append(cm)
+                    f_sb.append(cs)
+                out["mb"], out["sb"] = f_mb, f_sb
         except Exception as e:
             print(f"[chart] backfill margin/short for {sid} warning: {e}")
 

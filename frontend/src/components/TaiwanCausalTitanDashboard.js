@@ -1894,9 +1894,14 @@ export default function TaiwanCausalTitanDashboard() {
                             <div style={{ color: fc.inst20_pct >= 3 ? '#34D399' : '#F87171', fontWeight: 'bold' }}>
                               {fc.inst20_pct >= 0 ? '+' : ''}{fc.inst20_pct}%
                             </div>
-                            <div style={{ fontSize: '0.7rem', color: fc.margin_pct <= 90 ? '#94A3B8' : '#F87171' }}>
-                              融資: {fc.margin_pct}%
+                            <div style={{ fontSize: '0.68rem', color: fc.margin_pct <= 90 ? '#94A3B8' : '#F87171' }}>
+                              資位:{fc.margin_pct}%{fc.mg_flow20_pct != null ? ` · 資流:${fc.mg_flow20_pct >= 0 ? '+' : ''}${fc.mg_flow20_pct}%` : ''}
                             </div>
+                            {fc.sm_ratio_pct != null && (
+                              <div style={{ fontSize: '0.68rem', color: fc.sm_ratio_pct >= 3 ? '#FDE68A' : '#64748B' }}>
+                                券資比: {fc.sm_ratio_pct}%{fc.sm_ratio_pct >= 3 ? ' 🔥' : ''}
+                              </div>
+                            )}
                           </td>
                           <td style={{ padding: '0.55rem 0.45rem', textAlign: 'center', minWidth: '185px' }}>
                             <div style={{ marginBottom: '0.2rem', fontSize: '0.73rem', fontWeight: 'bold', color: fc.gates_passed >= 4 ? '#C084FC' : '#CBD5E1' }}>
