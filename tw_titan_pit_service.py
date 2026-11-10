@@ -4,10 +4,12 @@ tw_titan_pit_service.py
 直接串接 tw_phoenix_turnaround_pit_engine.py (8 重極端嚴格 Point-in-Time 驗證引擎)，
 動態產出 taiwan_causal_titan_data.json 與同步 defaultMarketMlData.json。
 """
+import importlib
 import json
 import os
 import sqlite3
 import tw_phoenix_turnaround_pit_engine as phoenix_engine
+importlib.reload(phoenix_engine)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_PATH = os.path.join(BASE_DIR, "frontend", "src", "data", "taiwan_causal_titan_data.json")

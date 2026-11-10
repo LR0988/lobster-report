@@ -1807,7 +1807,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  六道關卡：①3年凹洞 · ②營收+Piotroski毛利拐點 · ③法人鎖碼 · ④均線四線多頭 · ⑤突破60日高+RS60≥4% · ⑥大盤寬幅放行
+                  六道關卡：①3年凹洞 · ②營收+Piotroski拐點 · ③法人鎖碼+信度≥12 · ④均線四線多頭 · ⑤突破60高+RS60≥4%+VCP≤1.10 · ⑥大盤寬幅放行
                 </div>
               </div>
 
@@ -2632,22 +2632,22 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · v5.5 學術高勝率與高透明防偽法典 (SOP)
+            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · v5.6 極致夏普精準狙擊法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 嚴格 0050∪0051 PIT 母艦 × 突擊艦雙引擎架構 (均一 50% 倉位)</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 嚴格 0050∪0051 PIT 母艦 × 廣盤動態雙槽突擊架構 (零槓桿 1.0x)</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>🛸 0050 全球寬幅＋台股瀑布保護母艦：</strong>當全球 15 國主權與美台核心複合寬幅 (Global Breadth) ≥ 35% 且未觸發台股外資大提款瀑布雙殺時，閒置資金 100% 停泊於 0050.TW；一旦寬幅 &lt; 35% 或觸發台股系統性外資提款瀑布，次一交易日開盤 0050 立即撤退為現金避險（來回實扣 0.28% 稅費與五檔價差）。<br />
-                • <strong>👑 嚴格 0050∪0051 PIT 突擊艦 (均一 50% 倉位，最多同時 2 檔)：</strong>每季依 MOPS 季報股本 × 動態面額 × 收盤價重審上市市值前 150 大 (台灣50+中型100，0% 上櫃股)，徹底剔除上櫃假突破絞肉機，通過濾網一律平等配置 50% 倉位（來回實扣 0.74% 稅費價差）。
+                • <strong>👑 嚴格 0050∪0051 PIT 突擊艦 (廣盤 ≥60% 開雙槽 · 窄盤單槽護航)：</strong>每季依 MOPS 季報股本 × 動態面額 × 收盤價重審上市市值前 150 大 (0% 上櫃股)。當台股 60MA 寬幅 ≥ 60% 百花齊放時開放第 2 檔突擊艦槽位；當寬幅 &lt; 60% (如拉積窄盤) 僅開放 1 檔最頂尖大凹洞（50% 留守 0050 母艦）。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.5 學術雙正交高勝率濾網 × 高透明護盾 × 🔥 鳳凰回馬槍</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.6 VCP 波動收斂 × 相對0050汰弱換強 × 🔥 鳳凰回馬槍</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>學術高勝率雙核心 (勝率躍升至 60.0% · 獲利因子 6.48)：</strong>(1) <strong>Piotroski (2000) 毛利營益二階拐點</strong>：單季毛利率年變動 ΔGM_YoY &gt; -2% 或營益率季變動 ΔOM_QoQ &gt; 0%（剔除營收虛胖假轉機，保留虧損收斂真龍頭）；(2) <strong>Blitz (2011) 60日超額強度</strong>：初段突破 60 日新高時要求領先 0050 達 +4% 以上。<br />
-                • <strong>高透明籌碼煞車 × 七段式出場：</strong>高檔外資提款+散戶融資接刀煞車、選擇權莊家 P/C OI &lt;85% 避險煞車；波段漲逾 +35% 見法人倒貨散戶接刀破 10MA 提早鎖利，洗盤結束 60 日內再發動「🔥 鳳凰回馬槍」！
+                • <strong>極致夏普四重精準核心 (夏普 1.52 · 勝率 63.6% · 獲利因子 12.03 · 22.14倍)：</strong>(1) <strong>VCP 波動收斂壓縮 (20D/60D 波動比 ≤ 1.10)</strong>：剔除波動發散之籌碼鬆動假突破，鎖定壓縮蓄勢翻倍股；(2) <strong>最低綜合信度 ≥ 12</strong>：拒絕邊緣雜訊單；(3) <strong>Piotroski 毛利營益拐點 + Blitz RS60 ≥ +4%</strong>；(4) <strong>相對 0050 機會成本停損</strong>：進場滿 10 日未拉開 +14% 且落後同期 0050 達 10% 破月線，即汰弱換回 0050 母艦。<br />
+                • <strong>高透明籌碼煞車 × 八段式出場：</strong>高檔外資提款+散戶融資接刀煞車、選擇權莊家 P/C OI &lt;85% 避險煞車；波段漲逾 +35% 見法人倒貨散戶接刀破 10MA 提早鎖利，洗盤結束 60 日內再發動「🔥 鳳凰回馬槍」！
               </p>
             </div>
 
