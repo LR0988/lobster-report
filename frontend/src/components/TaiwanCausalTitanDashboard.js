@@ -2632,29 +2632,29 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 大凹洞轉型波段母子艦隊 · 實戰紀律與 8重PIT法典 (SOP)
+            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · 實戰紀律與 v5.4 高透明防偽法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 母艦 × 突擊艦雙引擎互補架構 (零過度擬合均一 50% 倉位)</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 嚴格 0050∪0051 PIT 母艦 × 突擊艦雙引擎架構 (均一 50% 倉位)</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>🛸 0050 全球寬幅保護母艦：</strong>當全球 15 國主權與美台核心複合寬幅 (Global Breadth) ≥ 35% 時，所有未配置於突擊艦之資金 100% 停泊於 0050.TW 享受台股權值 Beta；一旦全球寬幅 &lt; 35%，次一交易日開盤 0050 立即撤退為 0% 現金避險（來回實扣 0.28% 稅費與五檔價差）。<br />
-                • <strong>👑 轉機突擊艦 (均一 50% 倉位，最多同時 2 檔)：</strong>徹底廢除容易漏接底部外資壓盤吃貨飆股的人為 S/A 分級參數，凡通過母池四大結構濾網之轉機股一律平等配置 50% 倉位（個股來回實扣 0.74% 證交稅、手續費與真實買賣價差）。
+                • <strong>🛸 0050 全球寬幅＋台股瀑布保護母艦：</strong>當全球 15 國主權與美台核心複合寬幅 (Global Breadth) ≥ 35% 且未觸發台股外資大提款瀑布雙殺時，閒置資金 100% 停泊於 0050.TW；一旦寬幅 &lt; 35% 或觸發台股系統性外資提款瀑布，次一交易日開盤 0050 立即撤退為現金避險（來回實扣 0.28% 稅費與五檔價差）。<br />
+                • <strong>👑 嚴格 0050∪0051 PIT 突擊艦 (均一 50% 倉位，最多同時 2 檔)：</strong>每季依 MOPS 季報股本 × 動態面額 × 收盤價重審上市市值前 150 大 (台灣50+中型100，0% 上櫃股)，徹底剔除上櫃假突破絞肉機，通過濾網一律平等配置 50% 倉位（來回實扣 0.74% 稅費價差）。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 大凹洞轉型 × E5 六段式出場 × 🔥 鳳凰回馬槍洗盤重返</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.4 台股高透明護盾 × 七段式出場 × 🔥 鳳凰回馬槍</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>四大結構濾網：</strong>(1) 過去 3 年曾深跌 ≥35% 且離前高 ≥15%、底部墊高突破 60 日高點；(2) 過去 24 個月曾衰退 ≤-10%，最新月營收 3M/12M 黃金交叉 ≥1.03 且季增 ≥5%（嚴格於每月 10 號遇假日順延 + 1 交易日收盤生效）；(3) 20日外資+投信鎖碼 ≥3% 且 500日融資水位 ≤90%。<br />
-                • <strong>E5 六段式出場 × 🔥 鳳凰回馬槍（MA20 洗盤重返）：</strong>跌破 20MA 時果斷出場退回 0050 保命（避開大立光-33%、光環-45% 等真崩跌）；但凡首波已驗證動能 (+14%保本盾 / +35%派發破20MA) 之標的自動列入 60 日鳳凰觀察名單，只要營收拐點與季線四線多頭仍在，一旦洗盤結束重新站上 20MA 並突破 20 日高點，立即發動「🔥 鳳凰回馬槍」二次上車（完整捕獲台玻+79%、威剛+59%、緯穎+24% 二波主升段）！
+                • <strong>五大高透明進場把關：</strong>(1) 過去 3 年深跌 ≥35% 且離前高 ≥15%、突破 60 日高點；(2) 月營收實質翻揚且排除 MOPS 季報 TTM 毛利率 &lt;8% 同時本業虧損之雙爛股；(3) 20日法人鎖碼 ≥3%、500日融資 ≤90% 且優先排序資減券增軋空股；(4) 高檔外資提款+散戶融資接刀煞車與選擇權莊家 P/C OI &lt;85% 避險煞車。<br />
+                • <strong>七段式出場 × 🔥 鳳凰回馬槍：</strong>中段漲逾 +35% 若見法人倒貨、散戶融資接刀破 10MA 即提早鎖利；洗盤結束 60 日內站回 20MA 並突破 20 日高點再發動「🔥 鳳凰回馬槍」二次上車！
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #10B981' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. 八重極端嚴格 Point-in-Time (PIT) 防偽驗證</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. 純台股真實交易曆 × 25,277 筆官方公司行動完整還原</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>零未來函數與實盤摩擦：</strong>(A) 0050 次日開盤價交割並扣 ETF 稅費；(B) 月營收遇週末假日順延 + 1 交易日緩衝；(C) 過去 250 日真實成交 ≥200 日（排除新上市常數回填）；(D) 盤前 08:50 依昨收核定股數 + 賣股資金 T+1 才可買回 0050；(E) 台股 ±10% 漲跌停鎖死檢驗；(F) 涵蓋 37 檔已下市/併購股之無倖存者偏差池；(G) 上櫃 2016-2017 歷史漲跌完整還原；(H) 真實新台幣價格映射。
+                • <strong>機構級資料防偽：</strong>(A) 100% 運行於證交所真實開盤日曆 (2016–2026 共 2,635 交易日，零連假幽靈單)；(B) 串接證交所 TWT49U/TWTAUU/TWTB8U 與櫃買中心共 25,277 筆官方除權息、現金減資、股票分割參考價與股數除權對齊；(C) 月營收遇假日順延 + 1 交易日緩衝；(D) 盤前 08:50 依昨收核定股數 + 賣股 T+1 交割延遲 + 漲跌停鎖死檢驗；(E) 全市場 2,047 檔含 148 檔已下市股檢驗踩雷數 = 0 筆。
               </p>
             </div>
           </div>
