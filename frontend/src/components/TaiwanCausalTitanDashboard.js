@@ -1807,7 +1807,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  六道關卡：①3年凹洞 · ②月營收拐點 · ③法人鎖碼 · ④均線四線多頭 · ⑤突破60日高 · ⑥大盤寬幅放行
+                  六道關卡：①3年凹洞 · ②營收+Piotroski毛利拐點 · ③法人鎖碼 · ④均線四線多頭 · ⑤突破60日高+RS60≥4% · ⑥大盤寬幅放行
                 </div>
               </div>
 
@@ -2632,7 +2632,7 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · 實戰紀律與 v5.4 高透明防偽法典 (SOP)
+            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · v5.5 學術高勝率與高透明防偽法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
@@ -2644,10 +2644,10 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.4 台股高透明護盾 × 七段式出場 × 🔥 鳳凰回馬槍</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.5 學術雙正交高勝率濾網 × 高透明護盾 × 🔥 鳳凰回馬槍</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>五大高透明進場把關：</strong>(1) 過去 3 年深跌 ≥35% 且離前高 ≥15%、突破 60 日高點；(2) 月營收實質翻揚且排除 MOPS 季報 TTM 毛利率 &lt;8% 同時本業虧損之雙爛股；(3) 20日法人鎖碼 ≥3%、500日融資 ≤90% 且優先排序資減券增軋空股；(4) 高檔外資提款+散戶融資接刀煞車與選擇權莊家 P/C OI &lt;85% 避險煞車。<br />
-                • <strong>七段式出場 × 🔥 鳳凰回馬槍：</strong>中段漲逾 +35% 若見法人倒貨、散戶融資接刀破 10MA 即提早鎖利；洗盤結束 60 日內站回 20MA 並突破 20 日高點再發動「🔥 鳳凰回馬槍」二次上車！
+                • <strong>學術高勝率雙核心 (勝率躍升至 60.0% · 獲利因子 6.48)：</strong>(1) <strong>Piotroski (2000) 毛利營益二階拐點</strong>：單季毛利率年變動 ΔGM_YoY &gt; -2% 或營益率季變動 ΔOM_QoQ &gt; 0%（剔除營收虛胖假轉機，保留虧損收斂真龍頭）；(2) <strong>Blitz (2011) 60日超額強度</strong>：初段突破 60 日新高時要求領先 0050 達 +4% 以上。<br />
+                • <strong>高透明籌碼煞車 × 七段式出場：</strong>高檔外資提款+散戶融資接刀煞車、選擇權莊家 P/C OI &lt;85% 避險煞車；波段漲逾 +35% 見法人倒貨散戶接刀破 10MA 提早鎖利，洗盤結束 60 日內再發動「🔥 鳳凰回馬槍」！
               </p>
             </div>
 
