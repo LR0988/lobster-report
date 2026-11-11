@@ -56,7 +56,7 @@ def build_exposure_reason(exp_pct: float, br_val: float) -> str:
         else:
             return f"全球寬幅 {br_pct}% (30~50% 警戒區) × 選擇權異常放量避險 ➔ 半倉防禦 50%"
     elif abs(exp - 45.0) < 1.0:
-        return f"全球寬幅 {br_pct}%，觸發 C4 護盾 (10Y美債20日急升 ≥0.22% × 高乖離科技轉弱) ➔ 降倉至 45%"
+        return f"全球寬幅 {br_pct}%，觸發 C4 護盾 / Top5 領頭羊集體跌破月線護盾 (≥4/5 破 20MA 且 QQQ 破月線) ➔ 降倉至 45%"
     elif abs(exp - 35.0) < 1.0:
         return f"全球寬幅 {br_pct}% (30~50% 警戒區) 且 QQQ 跌破 60MA 季線 (M1減震器) ➔ 降倉至 35%"
     elif abs(exp - 20.0) < 1.0:
@@ -64,7 +64,7 @@ def build_exposure_reason(exp_pct: float, br_val: float) -> str:
     elif exp <= 0.5:
         return f"全球寬幅 {br_pct}% (<30% 全面空頭警戒區) ➔ 100% 空倉抱現金避險"
     else:
-        return f"全球寬幅 {br_pct}%，依宏觀動能護盾動態調節 ➔ 曝險 {exp:.0f}%"
+        return f"全球寬幅 {br_pct}%，觸發大盤下行半波動率連續縮放護盾 (Moreira & Muir 2017 / Wang & Yan 2021) ➔ 動態曝險 {exp:.1f}%"
 
 def _roc_to_ann_str(ym) -> str:
     ym_s = str(ym).strip()
@@ -327,6 +327,13 @@ def main():
     rate_arr = us10y_series.values
     qqq_p_arr = qqq_p.values
     qqq_m60_arr = qqq_ma60.values
+    qqq_ma20 = qqq_p.rolling(20, min_periods=5).mean()
+    qqq_m20_arr = qqq_ma20.values
+    qqq_ret = qqq_p.pct_change().fillna(0.0)
+    qqq_dvol20 = (np.sqrt((qqq_ret.clip(upper=0.0) ** 2).rolling(20, min_periods=10).mean()) * np.sqrt(252.0)).fillna(0.15).values
+    spy_p_full = data4["px_adj"]["SPY"]
+    spy_ret = spy_p_full.pct_change().fillna(0.0)
+    spy_dvol20 = (np.sqrt((spy_ret.clip(upper=0.0) ** 2).rolling(20, min_periods=10).mean()) * np.sqrt(252.0)).fillna(0.15).values
 
     for t_pos in range(N_DATES):
         sp_row = px_adj_arr[t_pos]
@@ -382,6 +389,18 @@ def main():
         if 0.30 <= br < 0.50 and qqq_below_ma60:
             exposure = min(exposure, macro_cap)
         exposure = macro_g11(dates_idx[t_pos], t_pos, exposure, br, qb, rate, qqq_below_ma60, top5_neg_io20, top5_neg_io5, top5_avg_io20, data4)
+        # 🌟 學術文獻驗證升級 (Moreira & Muir 2017 JF / Wang & Yan 2021 JBF / Han, Zhou & Zhu 2016 JFE):
+        # 1. 大盤 20日下行半波動率連續縮放 (當 QQQ < MA20 且 max(QQQ_dvol20, SPY_dvol20) > 20% 時，曝險按 0.20 / mdv 連續降檔)
+        # 2. Top-5 領頭羊集體破月線減震器 (當 Top-5 中 >= 4 檔跌破 20MA 且 QQQ < MA20 時，曝險上限鎖定 45%)
+        if exposure > 0:
+            mdv = max(float(qqq_dvol20[t_pos]), float(spy_dvol20[t_pos]))
+            if mdv > 0.20 and float(qqq_p_arr[t_pos]) < float(qqq_m20_arr[t_pos]):
+                exposure = exposure * max(0.35, 0.20 / mdv)
+            if len(sorted_indices) > 0:
+                t5_slice = sorted_indices[:min(5, len(sorted_indices))]
+                n_below_ma20 = int(np.sum(px_adj_arr[t_pos, t5_slice] < ma20_arr[t_pos, t5_slice]))
+                if n_below_ma20 >= 4 and float(qqq_p_arr[t_pos]) < float(qqq_m20_arr[t_pos]):
+                    exposure = min(exposure, 0.45)
         daily_sorted[t_pos] = sorted_indices
         daily_exp[t_pos] = exposure
 
@@ -420,6 +439,7 @@ def main():
         pending_orders = []
         p_idx = 0
         num_p = len(periods)
+        last_rebal_br = 1.0
 
         for current_dt in all_sim_dates:
             cur_pos = dt_to_pos[current_dt]
@@ -437,6 +457,7 @@ def main():
                 exposure = float(daily_exp[t_pos])
                 sc_row = score_arr[t_pos]
                 br = float(br_arr[t_pos])
+                last_rebal_br = br
                 ticker_rank = {int(c_i): rk + 1 for rk, c_i in enumerate(sorted_indices)}
 
                 if exposure <= 0 or len(sorted_indices) == 0:
@@ -646,7 +667,9 @@ def main():
 
                 p_idx += 1
             elif cur_pos >= 2:
-                # 🌟 閒置現金全天候入場機制 (Any-Day Idle Cash Entry)
+                # 🌟 市場狀態轉換閒置現金入場閘門 (Cooper, Gutierrez & Hameed 2004 JF Market-State Transition Gate)
+                # 僅限上次調倉日處於空頭/警戒區 (last_rebal_br < 0.50)，且盤中正式翻多 (br >= 0.50 & QQQ > MA20) 時啟動進場；
+                # 嚴禁在多頭調倉日主動啟動過熱/殖利率/下行波動護盾 (Module C 2.0 / C1~C4 / Downside-Vol) 減碼後於月中擅自回補！
                 t_pos = cur_pos - 1
                 in_pos = cur_pos
                 sorted_indices = daily_sorted[t_pos]
@@ -656,7 +679,12 @@ def main():
                     cur_stk_val = sum(holdings[c_i]["shares"] * float(px_open_arr[in_pos, c_i]) for c_i in holdings if not np.isnan(px_open_arr[in_pos, c_i]))
                     cur_tot_val = cash + cur_stk_val
                     cur_exp_ratio = cur_stk_val / cur_tot_val if cur_tot_val > 0 else 0.0
-                    if (exposure - cur_exp_ratio) >= 0.15:
+                    if (
+                        ((exposure - cur_exp_ratio) >= 0.15)
+                        and (last_rebal_br < 0.50)
+                        and (float(br_arr[t_pos]) >= 0.50)
+                        and (float(qqq_p_arr[t_pos]) > float(qqq_m20_arr[t_pos]))
+                    ):
                         selected_stks = list(holdings.keys())
                         for c_i in sorted_indices:
                             if len(selected_stks) >= 3: break
@@ -1084,7 +1112,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 3D微結構動能演化 + 動態任期(2/4/5期) + Top3過熱降權轉移(Bias60>25%&Ret5>5%減碼35%) + 凱利凸性權重 · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 3D微結構動能演化 + 動態任期(2/4/5期) + Top3過熱降權轉移 + 市場狀態轉換入場閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017 / Wang & Yan 2021) + Top5領頭羊破月線護盾(Han 2016 JFE) · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
