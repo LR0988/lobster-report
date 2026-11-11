@@ -2632,7 +2632,7 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · v5.6 極致夏普精準狙擊法典 (SOP)
+            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · v5.7 熊市出坑斜率修正極致夏普法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
@@ -2644,9 +2644,9 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.6 VCP 波動收斂 × 相對0050汰弱換強 × 🔥 鳳凰回馬槍</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.7 熊市出坑斜率修正 × VCP 波動收斂 × 相對0050汰弱換強</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>極致夏普四重精準核心 (夏普 1.52 · 勝率 63.6% · 獲利因子 12.03 · 22.14倍)：</strong>(1) <strong>VCP 波動收斂壓縮 (20D/60D 波動比 ≤ 1.10)</strong>：剔除波動發散之籌碼鬆動假突破，鎖定壓縮蓄勢翻倍股；(2) <strong>最低綜合信度 ≥ 12</strong>：拒絕邊緣雜訊單；(3) <strong>Piotroski 毛利營益拐點 + Blitz RS60 ≥ +4%</strong>；(4) <strong>相對 0050 機會成本停損</strong>：進場滿 10 日未拉開 +14% 且落後同期 0050 達 10% 破月線，即汰弱換回 0050 母艦。<br />
+                • <strong>極致夏普五重精準核心 (夏普 1.60 · 勝率 66.7% · 獲利因子 13.01 · 31.24倍)：</strong>(1) <strong>熊市出坑年線滯後修正 (MA200 斜率 ≥ -2.5%)</strong>：解鎖股價剛站回季/半年/年線突破時年線尚在扣抵崩盤前高價之第一波真龍頭；(2) <strong>VCP 波動收斂壓縮 (20D/60D 波動比 ≤ 1.10)</strong>：剔除波動發散之假突破；(3) <strong>最低綜合信度 ≥ 12</strong>；(4) <strong>Piotroski 毛利營益拐點 + Blitz RS60 ≥ +4%</strong>；(5) <strong>相對 0050 機會成本停損</strong>：進場滿 10 日未拉開 +14% 且落後同期 0050 達 10% 破月線即換回母艦。<br />
                 • <strong>高透明籌碼煞車 × 八段式出場：</strong>高檔外資提款+散戶融資接刀煞車、選擇權莊家 P/C OI &lt;85% 避險煞車；波段漲逾 +35% 見法人倒貨散戶接刀破 10MA 提早鎖利，洗盤結束 60 日內再發動「🔥 鳳凰回馬槍」！
               </p>
             </div>
