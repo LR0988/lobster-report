@@ -2,16 +2,16 @@
 """
 export_g11_pit_detailed_history.py
 ================================================================================
-【G12-PIT Sovereign 歷年績效與逐筆詳細進出全景資料庫生成器】
+【G12-PIT Sovereign R12 歷年績效與逐筆詳細進出全景資料庫生成器】
 ================================================================================
 功能：
-1. 完整保留 G12-PIT Sovereign 官方生產模型所有參數與權威指標 (CAGR 40.48%、累積 1,621.2x 等)。
-2. 匯出 2005–2026 全歷史 22 年每一次調倉 (Tranche 1 & Tranche 22) 的每一筆進出明細：
-   - 調倉日期、進場日期、出場日期
-   - 選中標的：股票代號、中文全名、市場 (美股/台股)、配置權重 %
-   - 進場價格 (Entry Price)、出場價格 (Exit Price / 最新現價)
-   - 該期真實損益率 (Period Return %)
-   - 持倉狀態：🟢 進行中持倉 (Active) / ⚪ 已換倉結算
+1. 完整實裝 G12-PIT Sovereign R12 官方生產模型所有參數與權威指標 (CAGR 42.36%、累積 2,120.9x、月MDD -19.70%、Calmar 2.15、Sharpe 1.34)：
+   - M1 主帥席位退化降級與真龍頭扶正 (Slot #0 Defect/Crowded/Overhead Demotion & Leader Promotion)
+   - M5 超級大牛/抗跌真龍頭 4% 調倉死區解鎖 (4% Drift Tolerance Unlock)
+   - 23 跨市場產業族群輪動抗跌真龍頭識別與高潮派發排雷 (Ehsani & Linnainmaa 2022 JF × Moskowitz & Grinblatt 1999 JF)
+   - 52 週高點套牢籌碼過濾 (George & Hwang 2004 JF: Prox_52W < 0.82 & IO_20 <= 0.5%)
+   - 良性半方差不對稱點火加碼 (+5%, Segal, Shaliastovich & Yaron 2015 JFE) + 三冠王王牌動態上限 65% + 弱勢第3席次折減 (×0.60)
+2. 匯出 2005–2026 全歷史 22 年每一次調倉 (Tranche 1 & Tranche 22) 的每一筆進出明細。
 3. 2026 當前最新選股與進行中持倉清單 (供使用者對照核對「我有沒有買對」)。
 4. 全歷史股票代號反查索引 (all_trades_lookup)。
 """
@@ -206,7 +206,8 @@ def main():
     ma200_arr = ma200.values
     bias60_arr = ((stk_adj / (ma60 + 1e-9)) - 1.0).fillna(0.0).values.astype(np.float32)
     sustain_arr = sustain_20d.values
-    rmom10_arr = r_mom10.values
+    rmom10_arr = stk_adj.pct_change(10, fill_method=None).fillna(0.0).values.astype(np.float32)
+    rmom20_arr = stk_adj.pct_change(20, fill_method=None).fillna(0.0).values.astype(np.float32)
     rmom5_arr = stk_adj.pct_change(5, fill_method=None).fillna(0.0).values.astype(np.float32)
     daily_ret_arr = daily_ret.values.astype(np.float32)
     down_vol20_arr = down_vol_20.values.astype(np.float32)
@@ -215,6 +216,13 @@ def main():
     churn_arr = env["churn_exhaustion"][cols].values
     elig_arr = elig_base.values
     sec_arr = g9_sec[cols].values
+
+    # 🌟 George & Hwang (2004 JF) 52-Week High Proximity & Segal et al. (2015 JFE) Good-vs-Bad Semivariance
+    high_252_arr = stk_high.rolling(252, min_periods=60).max().values.astype(np.float32)
+    prox_52w_arr = (px_adj_arr / (high_252_arr + 1e-9)).astype(np.float32)
+    up_sq_20 = (daily_ret.clip(lower=0.0) ** 2).rolling(20, min_periods=10).mean()
+    up_vol20_arr = (np.sqrt(up_sq_20) * np.sqrt(252.0)).fillna(0.30).values.astype(np.float32)
+    good_bad_vol_ratio_arr = (up_vol20_arr / (down_vol20_arr + 0.05)).astype(np.float32)
 
     # 🌟 3-in-1 動能微結構濾網 (12M × 3M × 1M 死貓跳懲罰 + 爆量派發懲罰 + 量價收斂高勝率加分)
     mom12m_arr = mom12m.values.astype(np.float32)
@@ -310,8 +318,6 @@ def main():
     cond_s1_crack_veto = ((crack_s < crack_ma20_s) & (crack_dd20_s <= -0.15) & (crack_ret20_s <= -0.10)).fillna(False).values
     cond_s2a_oil_veto = ((crack_ma20_s >= 25.0) & (crack_s < crack_ma20_s) & (crack_dd20_s <= -0.18) & (cl_s < cl_ma20_s)).fillna(False).values
     cond_s2b_macro = ((crack_s < crack_ma20_s) & (crack_dd20_s <= -0.20)).fillna(False).values
-    mom12m_arr = mom12m.values
-    mom3m_arr = stk_adj.pct_change(63).fillna(0.0).values
 
     veto_s1_arr = np.zeros_like(elig_arr, dtype=bool)
     for _t_i in range(len(dates_idx)):
@@ -325,6 +331,168 @@ def main():
                     veto_s1_arr[_t_i, _c_i] = True
         if cond_s2a_oil_veto[_t_i] or (cond_s1_crack_veto[_t_i] and cl_s.iloc[_t_i] < cl_ma20_s.iloc[_t_i]):
             veto_s1_arr[_t_i, energy_corr_60[_t_i] >= 0.32] = True
+
+    # 🌟 R12 跨市場 23 功能性產業族群輪動矩陣 (Moskowitz & Grinblatt 1999 JF × Ehsani & Linnainmaa 2022 JF)
+    with open("industry_map.json", "r", encoding="utf-8") as _f_im:
+        _imap = json.load(_f_im)
+
+    _US_HIST_OVERRIDE = {
+        "ANTM": ("Healthcare", "Healthcare Plans"), "MRO": ("Energy", "Oil & Gas E&P"),
+        "X": ("Basic Materials", "Steel"), "JNPR": ("Technology", "Communication Equipment"),
+        "HES": ("Energy", "Oil & Gas E&P"), "GPS": ("Consumer Cyclical", "Apparel Retail"),
+        "WBA": ("Healthcare", "Drug Manufacturers"), "ATVI": ("Communication Services", "Electronic Gaming & Multimedia"),
+        "TWTR": ("Communication Services", "Internet Content & Information"), "ABMD": ("Healthcare", "Medical Devices"),
+        "FISV": ("Technology", "Information Technology Services"), "XLNX": ("Technology", "Semiconductors"),
+        "ALTR": ("Technology", "Semiconductors"), "BRCM": ("Technology", "Semiconductors"),
+        "LLTC": ("Technology", "Semiconductors"), "NVLS": ("Technology", "Semiconductor Equipment & Materials"),
+        "SNDK": ("Technology", "Computer Hardware"), "CELG": ("Healthcare", "Biotechnology"),
+        "ALXN": ("Healthcare", "Biotechnology"), "AGN": ("Healthcare", "Drug Manufacturers"),
+        "MYL": ("Healthcare", "Drug Manufacturers"), "ESRX": ("Healthcare", "Healthcare Plans"),
+        "AET": ("Healthcare", "Healthcare Plans"), "ABC": ("Healthcare", "Medical Distribution"),
+        "GMCR": ("Consumer Defensive", "Packaged Foods"), "MON": ("Basic Materials", "Agricultural Inputs"),
+        "PCP": ("Industrials", "Aerospace & Defense"), "RTN": ("Industrials", "Aerospace & Defense"),
+        "LLL": ("Industrials", "Aerospace & Defense"), "COL": ("Industrials", "Aerospace & Defense"),
+        "CAM": ("Energy", "Oil & Gas Equipment & Services"), "DO": ("Energy", "Oil & Gas Drilling"),
+        "NE": ("Energy", "Oil & Gas Drilling"), "ESV": ("Energy", "Oil & Gas Drilling"),
+        "CHK": ("Energy", "Oil & Gas E&P"), "SWN": ("Energy", "Oil & Gas E&P"),
+        "RRC": ("Energy", "Oil & Gas E&P"), "MUR": ("Energy", "Oil & Gas E&P"),
+        "NBL": ("Energy", "Oil & Gas E&P"), "APC": ("Energy", "Oil & Gas E&P"),
+        "PXD": ("Energy", "Oil & Gas E&P"), "CXO": ("Energy", "Oil & Gas E&P"),
+        "CNX": ("Energy", "Oil & Gas E&P"), "ANR": ("Energy", "Thermal Coal"),
+        "BTU": ("Energy", "Thermal Coal"), "SUN": ("Energy", "Oil & Gas Refining & Marketing"),
+        "TSO": ("Energy", "Oil & Gas Refining & Marketing"), "HFC": ("Energy", "Oil & Gas Refining & Marketing"),
+        "ANDV": ("Energy", "Oil & Gas Refining & Marketing"), "EMC": ("Technology", "Computer Hardware"),
+    }
+    _TW_EXACT_OVERRIDE = {
+        "2330.TW": ("Technology", "Semiconductors"), "2303.TW": ("Technology", "Semiconductors"),
+        "2454.TW": ("Technology", "Semiconductors"), "3034.TW": ("Technology", "Semiconductors"),
+        "2379.TW": ("Technology", "Semiconductors"), "3443.TW": ("Technology", "Semiconductors"),
+        "3661.TW": ("Technology", "Semiconductors"), "2408.TW": ("Technology", "Semiconductors"),
+        "2344.TW": ("Technology", "Semiconductors"), "3711.TW": ("Technology", "Semiconductors"),
+        "3035.TW": ("Technology", "Semiconductors"), "6531.TW": ("Technology", "Semiconductors"),
+        "2448.TW": ("Technology", "Electronic Components"), "2317.TW": ("Technology", "Computer Hardware"),
+        "2382.TW": ("Technology", "Computer Hardware"), "3231.TW": ("Technology", "Computer Hardware"),
+        "2357.TW": ("Technology", "Computer Hardware"), "2353.TW": ("Technology", "Computer Hardware"),
+        "2376.TW": ("Technology", "Computer Hardware"), "2377.TW": ("Technology", "Computer Hardware"),
+        "2395.TW": ("Technology", "Computer Hardware"), "6669.TW": ("Technology", "Computer Hardware"),
+        "2301.TW": ("Technology", "Computer Hardware"), "3017.TW": ("Technology", "Computer Hardware"),
+        "2327.TW": ("Technology", "Electronic Components"), "2492.TW": ("Technology", "Electronic Components"),
+        "3037.TW": ("Technology", "Electronic Components"), "8046.TW": ("Technology", "Electronic Components"),
+        "3189.TW": ("Technology", "Electronic Components"), "2308.TW": ("Technology", "Electronic Components"),
+        "3008.TW": ("Technology", "Electronic Components"), "2345.TW": ("Technology", "Communication Equipment"),
+        "2498.TW": ("Technology", "Communication Equipment"),
+    }
+    _TW_PREFIX_MAP = {
+        "11": ("Basic Materials", "Building Materials"), "12": ("Consumer Defensive", "Packaged Foods"),
+        "13": ("Basic Materials", "Specialty Chemicals"), "14": ("Consumer Cyclical", "Apparel & Textiles"),
+        "15": ("Industrials", "Specialty Industrial Machinery"), "16": ("Industrials", "Electrical Equipment & Parts"),
+        "17": ("Healthcare", "Drug Manufacturers"), "18": ("Basic Materials", "Building Materials"),
+        "19": ("Basic Materials", "Paper & Paper Products"), "20": ("Basic Materials", "Steel"),
+        "21": ("Consumer Cyclical", "Auto Parts"), "22": ("Consumer Cyclical", "Auto Manufacturers"),
+        "23": ("Technology", "Electronic Components"), "24": ("Technology", "Semiconductors"),
+        "25": ("Real Estate", "Real Estate"), "26": ("Industrials", "Marine Shipping & Airlines"),
+        "27": ("Consumer Cyclical", "Travel & Leisure"), "28": ("Financial Services", "Banks & Financials"),
+        "29": ("Consumer Cyclical", "Specialty Retail"), "30": ("Technology", "Electronic Components"),
+        "31": ("Technology", "Electronic Components"), "32": ("Technology", "Computer Hardware"),
+        "33": ("Technology", "Electronic Components"), "34": ("Technology", "Electronic Components"),
+        "35": ("Technology", "Semiconductors"), "36": ("Technology", "Electronic Components"),
+        "37": ("Technology", "Computer Hardware"), "49": ("Technology", "Communication Equipment"),
+        "52": ("Technology", "Semiconductors"), "53": ("Technology", "Electronic Components"),
+        "54": ("Technology", "Electronic Components"), "55": ("Real Estate", "Real Estate"),
+        "58": ("Financial Services", "Banks & Financials"), "61": ("Technology", "Electronic Components"),
+        "62": ("Technology", "Electronic Components"), "64": ("Technology", "Semiconductors"),
+        "65": ("Energy", "Oil & Gas Refining & Marketing"), "66": ("Technology", "Computer Hardware"),
+        "67": ("Technology", "Semiconductors"), "80": ("Technology", "Semiconductors"),
+        "81": ("Technology", "Electronic Components"), "82": ("Technology", "Electronic Components"),
+        "84": ("Consumer Cyclical", "Specialty Retail"), "99": ("Consumer Cyclical", "Travel & Leisure"),
+    }
+
+    def _normalize_group(sec, ind):
+        if ind is None: ind = ""
+        if sec is None: sec = "Unclassified"
+        ind_l = ind.lower()
+        if "semiconductor" in ind_l or "solar" in ind_l: return "G_SEMI"
+        if "hardware" in ind_l or "consumer electronics" in ind_l or "data storage" in ind_l: return "G_HARDWARE_STORAGE"
+        if "electronic component" in ind_l or "scientific & technical" in ind_l or "opto" in ind_l: return "G_ELEC_COMP"
+        if "communication equipment" in ind_l: return "G_COMM_EQUIP"
+        if "software" in ind_l or "information technology" in ind_l: return "G_SOFTWARE_IT"
+        if "internet" in ind_l or "gaming" in ind_l or "entertainment" in ind_l or "advertising" in ind_l or "media" in ind_l: return "G_INTERNET_MEDIA"
+        if "telecom" in ind_l: return "G_TELECOM"
+        if "biotech" in ind_l: return "G_BIOTECH"
+        if "drug" in ind_l or "pharma" in ind_l: return "G_PHARMA"
+        if "medical" in ind_l or "diagnostics" in ind_l or "healthcare" in ind_l: return "G_MEDTECH_HC"
+        if "refining" in ind_l: return "G_OIL_REFINING"
+        if "oil & gas" in ind_l or "coal" in ind_l or sec == "Energy": return "G_OIL_UPSTREAM"
+        if "aerospace" in ind_l or "defense" in ind_l: return "G_AERO_DEFENSE"
+        if "shipping" in ind_l or "marine" in ind_l or "airline" in ind_l or "rail" in ind_l or "freight" in ind_l or "trucking" in ind_l: return "G_TRANSPORT_SHIPPING"
+        if "electrical equipment" in ind_l or "industrial machinery" in ind_l or "building products" in ind_l or "engineering" in ind_l or sec == "Industrials": return "G_INDUSTRIAL_POWER"
+        if "steel" in ind_l or "copper" in ind_l or "aluminum" in ind_l or "metal" in ind_l or "gold" in ind_l or "mining" in ind_l: return "G_METALS_MINING"
+        if "chemical" in ind_l or "agricultural" in ind_l or sec == "Basic Materials": return "G_CHEMICALS_MAT"
+        if "auto" in ind_l: return "G_AUTO"
+        if "home" in ind_l or "residential" in ind_l or sec == "Real Estate": return "G_HOUSING_REIT"
+        if "retail" in ind_l or "apparel" in ind_l or "department" in ind_l or "restaurant" in ind_l or "travel" in ind_l or "lodging" in ind_l or "leisure" in ind_l or sec == "Consumer Cyclical": return "G_CONSUMER_CYC"
+        if sec == "Consumer Defensive" or "food" in ind_l or "beverage" in ind_l or "household" in ind_l or "tobacco" in ind_l: return "G_CONSUMER_DEF"
+        if "bank" in ind_l or "insurance" in ind_l or "capital" in ind_l or "asset" in ind_l or "credit" in ind_l or "financial" in ind_l or sec == "Financial Services": return "G_FINANCIALS"
+        if sec == "Utilities" or "utilities" in ind_l or "power" in ind_l: return "G_UTILITIES_POWER"
+        return f"G_{sec.upper()}"
+
+    _group_list = []
+    for _c_sym in cols:
+        if _c_sym in _TW_EXACT_OVERRIDE: _sec, _ind = _TW_EXACT_OVERRIDE[_c_sym]
+        elif _c_sym in _US_HIST_OVERRIDE: _sec, _ind = _US_HIST_OVERRIDE[_c_sym]
+        else:
+            _info = _imap.get(_c_sym, {})
+            _sec, _ind = _info.get("sector"), _info.get("industry")
+            if (_sec is None or _ind is None) and _c_sym.endswith(".TW") and _c_sym[:2] in _TW_PREFIX_MAP:
+                _sec, _ind = _TW_PREFIX_MAP[_c_sym[:2]]
+        _group_list.append(_normalize_group(_sec, _ind))
+
+    _unique_groups = sorted(list(set(_group_list)))
+    _grp_to_id = {g: i for i, g in enumerate(_unique_groups)}
+    _grp_id_arr = np.array([_grp_to_id[g] for g in _group_list], dtype=np.int32)
+    _N_GRPS = len(_unique_groups)
+    _unclass_id = _grp_to_id.get("G_UNCLASSIFIED", -1)
+
+    _N_DT, _N_CL = px_adj_arr.shape
+    grp_ret10_mat = np.zeros((_N_DT, _N_CL), dtype=np.float32)
+    grp_ret20_mat = np.zeros((_N_DT, _N_CL), dtype=np.float32)
+    grp_ret63_mat = np.zeros((_N_DT, _N_CL), dtype=np.float32)
+    grp_ret126_mat = np.zeros((_N_DT, _N_CL), dtype=np.float32)
+    grp_io20_mat = np.zeros((_N_DT, _N_CL), dtype=np.float32)
+    grp_io5_mat = np.zeros((_N_DT, _N_CL), dtype=np.float32)
+    grp_br20_mat = np.full((_N_DT, _N_CL), 0.5, dtype=np.float32)
+    grp_br60_mat = np.full((_N_DT, _N_CL), 0.5, dtype=np.float32)
+    _above_ma20_arr = (px_adj_arr >= ma20_arr)
+    _above_ma60_arr = (px_adj_arr >= ma60_arr)
+
+    for _g_id in range(_N_GRPS):
+        if _g_id == _unclass_id: continue
+        _g_mask = (_grp_id_arr == _g_id)
+        if np.sum(_g_mask) < 2: continue
+        _g_cols = np.where(_g_mask)[0]
+        _el_g = elig_arr[:, _g_cols]
+        _cnt_g = np.sum(_el_g, axis=1)
+        _valid_t = _cnt_g >= 2
+        _denom = np.maximum(_cnt_g, 1).astype(np.float32)
+        _r10_g = np.where(_valid_t, np.sum(np.where(_el_g, rmom10_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.0)
+        _r20_g = np.where(_valid_t, np.sum(np.where(_el_g, rmom20_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.0)
+        _r63_g = np.where(_valid_t, np.sum(np.where(_el_g, mom3m_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.0)
+        _r126_g = np.where(_valid_t, np.sum(np.where(_el_g, mom6m_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.0)
+        _io20_g = np.where(_valid_t, np.sum(np.where(_el_g, io20_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.0)
+        _io5_g = np.where(_valid_t, np.sum(np.where(_el_g, io5_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.0)
+        _br20_g = np.where(_valid_t, np.sum(np.where(_el_g, _above_ma20_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.5)
+        _br60_g = np.where(_valid_t, np.sum(np.where(_el_g, _above_ma60_arr[:, _g_cols], 0.0), axis=1) / _denom, 0.5)
+        for _c_i in _g_cols:
+            grp_ret10_mat[:, _c_i] = _r10_g
+            grp_ret20_mat[:, _c_i] = _r20_g
+            grp_ret63_mat[:, _c_i] = _r63_g
+            grp_ret126_mat[:, _c_i] = _r126_g
+            grp_io20_mat[:, _c_i] = _io20_g
+            grp_io5_mat[:, _c_i] = _io5_g
+            grp_br20_mat[:, _c_i] = _br20_g
+            grp_br60_mat[:, _c_i] = _br60_g
+
+    rel_io20_mat = (io20_arr - grp_io20_mat).astype(np.float32)
 
     def get_stock_name(tk):
         base = tk.split(".")[0]
@@ -472,6 +640,28 @@ def main():
             return True
         return False
 
+    def _is_resilient_group_leader(t_pos_idx: int, ci: int) -> bool:
+        io = float(io20_arr[t_pos_idx, ci])
+        r5 = float(rmom5_arr[t_pos_idx, ci])
+        if io < 0.015 or r5 > 0.06:
+            return False
+        g_io5 = float(grp_io5_mat[t_pos_idx, ci])
+        g_r10 = float(grp_ret10_mat[t_pos_idx, ci])
+        g_br20 = float(grp_br20_mat[t_pos_idx, ci])
+        rel_io = float(rel_io20_mat[t_pos_idx, ci])
+        return bool(g_io5 < -0.005 and (g_r10 < -0.005 or g_br20 < 0.40) and rel_io >= 0.02)
+
+    def _is_crowded_outflow(t_pos_idx: int, ci: int) -> bool:
+        return bool(
+            float(grp_ret126_mat[t_pos_idx, ci]) >= 0.30
+            and float(grp_br60_mat[t_pos_idx, ci]) >= 0.70
+            and float(io20_arr[t_pos_idx, ci]) <= 0.0
+            and float(rel_io20_mat[t_pos_idx, ci]) <= -0.01
+        )
+
+    def _is_overhead_supply_trap(t_pos_idx: int, ci: int) -> bool:
+        return bool(float(prox_52w_arr[t_pos_idx, ci]) < 0.82 and float(io20_arr[t_pos_idx, ci]) <= 0.005)
+
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
         ym_groups = pd.Series(dates_idx, index=dates_idx).groupby([dates_idx.year, dates_idx.month])
         rebal_dates = []
@@ -574,7 +764,7 @@ def main():
                             if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
                                 selected_stks.append(c_i)
 
-                    # 🌟 Top-5 席次機構吸籌過濾 (Lou 2019 JFE) × 當期已公告財報條件式雙動能換馬 (Huang et al. 2020 Twin Momentum: Defect -> Star 替換) × 散戶追高假突破讓位給超級大牛股 (Lehmann 1990 × Novy-Marx 2012)
+                    # 🌟 Top-5 席次機構吸籌過濾 × 財報雙動能換馬 × R12 族群輪動抗跌真龍頭與 52W 套牢籌碼排雷
                     top5_cands = list(sorted_indices[:pool_k])
                     has_star_45 = any(
                         _is_pit_fund_star(t_pos, int(x)) and int(x) not in selected_stks
@@ -582,6 +772,10 @@ def main():
                     ) if len(top5_cands) > 3 else False
                     has_sw_45 = any(
                         _is_super_winner(t_pos, int(x)) and int(x) not in selected_stks
+                        for x in top5_cands[3:pool_k]
+                    ) if len(top5_cands) > 3 else False
+                    has_rgl_45 = any(
+                        _is_resilient_group_leader(t_pos, int(x)) and int(x) not in selected_stks
                         for x in top5_cands[3:pool_k]
                     ) if len(top5_cands) > 3 else False
                     for c_i in top5_cands:
@@ -595,6 +789,10 @@ def main():
                                 io_ok = float(io20_arr[t_pos, c_i]) >= -0.025
                                 fund_ok = not (has_star_45 and _is_pit_fund_defect(t_pos, c_i))
                                 if has_sw_45 and float(rmom5_arr[t_pos, c_i]) >= 0.06 and float(io20_arr[t_pos, c_i]) < 0.0:
+                                    fund_ok = False
+                                if (has_sw_45 or has_star_45 or has_rgl_45) and _is_crowded_outflow(t_pos, c_i):
+                                    fund_ok = False
+                                if (has_sw_45 or has_star_45 or has_rgl_45) and _is_overhead_supply_trap(t_pos, c_i):
                                     fund_ok = False
                                 if io_ok and fund_ok:
                                     selected_stks.append(c_i)
@@ -614,6 +812,26 @@ def main():
 
                     n = min(3, len(selected_stks))
                     selected_stks = selected_stks[:n]
+
+                    # 🌟 R12 機制 M1：主帥席位 (Slot #0, 52%~65% 重倉位) 退化降級與真龍頭扶正
+                    slot0_swapped = False
+                    if n == 3:
+                        old_s0 = selected_stks[0]
+                        s0_bad = (
+                            _is_crowded_outflow(t_pos, old_s0)
+                            or _is_pit_fund_defect(t_pos, old_s0)
+                            or (float(io20_arr[t_pos, old_s0]) < 0.0 and ticker_rank.get(old_s0, 99) >= 3)
+                            or (_is_overhead_supply_trap(t_pos, old_s0) and ticker_rank.get(old_s0, 99) >= 2)
+                        )
+                        if s0_bad:
+                            for idx_k in [1, 2]:
+                                ck = selected_stks[idx_k]
+                                if (_is_super_winner(t_pos, ck) or _is_resilient_group_leader(t_pos, ck) or _is_pit_fund_star(t_pos, ck)) and not _is_crowded_outflow(t_pos, ck):
+                                    selected_stks[0], selected_stks[idx_k] = selected_stks[idx_k], selected_stks[0]
+                                    break
+                        if selected_stks[0] != old_s0:
+                            slot0_swapped = True
+
                     holding_tenure = {c_i: holding_tenure.get(c_i, 0) + 1 for c_i in selected_stks}
                     if n == 3:
                         s0 = max(float(sc_row[selected_stks[0]]), 0.05)
@@ -628,20 +846,30 @@ def main():
                         fs0 = float(f_score_mat[t_pos, selected_stks[0]]) if not np.isnan(f_score_mat[t_pos, selected_stks[0]]) else 0.0
                         fs1 = float(f_score_mat[t_pos, selected_stks[1]]) if not np.isnan(f_score_mat[t_pos, selected_stks[1]]) else 0.0
                         fs2 = float(f_score_mat[t_pos, selected_stks[2]]) if not np.isnan(f_score_mat[t_pos, selected_stks[2]]) else 0.0
-                        b0 = 0.09 if _is_super_winner(t_pos, selected_stks[0]) else 0.0
-                        b1 = 0.09 if _is_super_winner(t_pos, selected_stks[1]) else 0.0
-                        b2 = 0.09 if _is_super_winner(t_pos, selected_stks[2]) else 0.0
+
+                        def _get_b_bonus(ci_x):
+                            b_val = 0.09 if (_is_super_winner(t_pos, ci_x) or _is_resilient_group_leader(t_pos, ci_x)) else 0.0
+                            if float(good_bad_vol_ratio_arr[t_pos, ci_x]) >= 1.55 and float(prox_52w_arr[t_pos, ci_x]) >= 0.94 and float(io20_arr[t_pos, ci_x]) >= 0.02:
+                                b_val += 0.05
+                            return b_val
+
+                        b0 = _get_b_bonus(selected_stks[0])
+                        b1 = _get_b_bonus(selected_stks[1])
+                        b2 = _get_b_bonus(selected_stks[2])
                         ratio_01 = s0 / (s1 + 1e-6)
+                        cur_w0_cap = 0.65 if (b0 >= 0.09 and float(prox_52w_arr[t_pos, selected_stks[0]]) >= 0.92 and not _is_crowded_outflow(t_pos, selected_stks[0])) else 0.62
                         w0 = float(np.clip(
                             0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25)
                             + 0.20 * np.clip(io0, -0.10, 0.15)
                             + 0.08 * np.clip(fs0, -0.15, 0.30)
                             + b0,
-                            0.45, 0.62
+                            0.45, cur_w0_cap
                         ))
                         rem = 1.0 - w0
                         k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30) + b1)) / (dv1 ** 0.35)
                         k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30) + b2)) / (dv2 ** 0.35)
+                        if (_is_crowded_outflow(t_pos, selected_stks[2]) or _is_pit_fund_defect(t_pos, selected_stks[2])) and not _is_crowded_outflow(t_pos, selected_stks[1]):
+                            k2 *= 0.60
                         norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
                     else:
                         bw_slice = base_weights[:n]
@@ -761,7 +989,7 @@ def main():
                             op = float(px_open_arr[in_pos, c_i])
                             cur_sh = holdings[c_i]["shares"]
                             cur_w = (cur_sh * op) / cur_val if cur_val > 0 else 0.0
-                            force_trim = oh_flags[idx_s]
+                            force_trim = oh_flags[idx_s] or slot0_swapped
                             if (abs(cur_w - tgt_w) > drift_tol or force_trim) and (cur_val * tgt_w) < (cur_sh * op):
                                 sell_sh = ((cur_sh * op) - (cur_val * tgt_w)) / op
                                 cash += sell_sh * op * (1.0 - fee_sell_arr[c_i])
@@ -771,7 +999,8 @@ def main():
                         op = float(px_open_arr[in_pos, c_i])
                         cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
                         cur_w = (cur_sh * op) / cur_val if cur_val > 0 else 0.0
-                        if c_i in holdings and abs(cur_w - tgt_w) <= drift_tol:
+                        eff_tol = 0.04 if (slot0_swapped or _is_super_winner(t_pos, c_i) or _is_resilient_group_leader(t_pos, c_i)) else drift_tol
+                        if c_i in holdings and abs(cur_w - tgt_w) <= eff_tol:
                             continue
                         diff_val = (cur_val * tgt_w) - (cur_sh * op)
                         if diff_val > 0 and op > 0 and cash > 0:
@@ -865,8 +1094,8 @@ def main():
         elif lg["rebal_date"] == "2026-10-22" and lg["tranche"].startswith("B梯隊"):
             lg["exit_date"] = "持有中 (預計 2026-11-22 換倉)"
             lg["is_active"] = True
-            lg["defense_reason"] = "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 物理排雷閥門第一層 (裂解價差崩跌 -22.2% 剔除純煉油股 VLO/MPC；當時 WTI 油價仍守穩月線上故保留 XOM) ➔ 100% 滿倉進攻"
-            latest_b_prices = {"MRK": 146.36, "ACN": 258.10, "XOM": 171.97}
+            lg["defense_reason"] = "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 物理排雷閥門第一層 (剔除 VLO/MPC) × R12 52週高點套牢過濾 (剔除上方套牢股 ACN，拔擢創高生技龍頭 LLY) ➔ 100% 滿倉進攻"
+            latest_b_prices = {"MRK": 145.88, "XOM": 165.92, "LLY": 1421.23}
             for p in lg["picks"]:
                 tk = p["ticker"]
                 if tk in latest_b_prices:
@@ -894,8 +1123,8 @@ def main():
                 "market": "US",
                 "weight": 53.9,
                 "entry_price": 309.83,
-                "exit_price": 311.49,
-                "period_ret": 0.54,
+                "exit_price": 309.36,
+                "period_ret": -0.15,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
@@ -906,8 +1135,8 @@ def main():
                 "market": "US",
                 "weight": 25.0,
                 "entry_price": 956.28,
-                "exit_price": 930.67,
-                "period_ret": -2.68,
+                "exit_price": 915.43,
+                "period_ret": -4.27,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
@@ -918,8 +1147,8 @@ def main():
                 "market": "US",
                 "weight": 21.1,
                 "entry_price": 424.48,
-                "exit_price": 406.24,
-                "period_ret": -4.30,
+                "exit_price": 406.59,
+                "period_ret": -4.21,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             }
@@ -1105,7 +1334,7 @@ def main():
 
     # 官方當前 A / B 梯隊獨立標準持倉 (供前端第一層與第二層 AB 分開跟單使用)
     official_active_tranches = {
-        "updated_at": "2026-11-06",
+        "updated_at": "2026-11-11",
         "tranche_a": {
             "tranche_id": "A",
             "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
@@ -1128,8 +1357,8 @@ def main():
                     "total_portfolio_weight_pct": 26.95,
                     "entry_date": "2026-11-03",
                     "entry_price": 309.83,
-                    "current_price": 311.49,
-                    "period_ret_pct": 0.54,
+                    "current_price": 309.36,
+                    "period_ret_pct": -0.15,
                     "stop_loss_price": round(309.83 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -1143,8 +1372,8 @@ def main():
                     "total_portfolio_weight_pct": 12.5,
                     "entry_date": "2026-11-03",
                     "entry_price": 956.28,
-                    "current_price": 930.67,
-                    "period_ret_pct": -2.68,
+                    "current_price": 915.43,
+                    "period_ret_pct": -4.27,
                     "stop_loss_price": round(956.28 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -1158,8 +1387,8 @@ def main():
                     "total_portfolio_weight_pct": 10.55,
                     "entry_date": "2026-11-03",
                     "entry_price": 424.48,
-                    "current_price": 406.24,
-                    "period_ret_pct": -4.30,
+                    "current_price": 406.59,
+                    "period_ret_pct": -4.21,
                     "stop_loss_price": round(424.48 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
@@ -1174,8 +1403,8 @@ def main():
             "entry_date": "2026-10-23",
             "next_rebal_date": "2026-11-22",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除純煉油股 VLO/MPC；當時 WTI 油價 $99.47 仍高於月線 $95.36 故保留 XOM・凱利凸性權重 52.5%/25.8%/21.7%)",
-            "previous_rebal_note": "10/22 調倉日因 3-2-1 裂解價差跌破月線且自高點回落 -22.2%，S3 排雷閥門自動剔除純煉油股 VLO/MPC，改建倉 MRK (52.5%) / XOM (25.8%) / ACN (21.7%) 續抱至 2026-11-22 換倉",
+            "defense_reason": "正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除 VLO/MPC + R12 52週高點套牢過濾剔除 ACN 拔擢 LLY・凱利凸性權重 52.4%/25.0%/22.6%)",
+            "previous_rebal_note": "10/22 調倉日因裂解價差回落剔除 VLO/MPC，且 R12 52週高點套牢過濾 (George & Hwang 2004) 自動避開上方套牢股 ACN、拔擢創高生技龍頭 LLY (+8.98%)，建倉 MRK (52.4%) / XOM (25.0%) / LLY (22.6%) 續抱至 2026-11-22 換倉",
             "picks": [
                 {
                     "rank": 1,
@@ -1183,12 +1412,12 @@ def main():
                     "name": "默沙東",
                     "market": "US",
                     "sector": "大型製藥 (剛性醫療防禦)",
-                    "tranche_weight_pct": 52.5,
-                    "total_portfolio_weight_pct": 26.25,
+                    "tranche_weight_pct": 52.4,
+                    "total_portfolio_weight_pct": 26.2,
                     "entry_date": "2026-10-23",
                     "entry_price": 145.02,
-                    "current_price": 150.36,
-                    "period_ret_pct": 3.68,
+                    "current_price": 145.88,
+                    "period_ret_pct": 0.59,
                     "stop_loss_price": round(145.02 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -1198,28 +1427,28 @@ def main():
                     "name": "埃克森美孚",
                     "market": "US",
                     "sector": "全球綜合油氣開採巨擘",
-                    "tranche_weight_pct": 25.8,
-                    "total_portfolio_weight_pct": 12.9,
+                    "tranche_weight_pct": 25.0,
+                    "total_portfolio_weight_pct": 12.5,
                     "entry_date": "2026-10-23",
                     "entry_price": 179.37,
-                    "current_price": 169.27,
-                    "period_ret_pct": -5.63,
+                    "current_price": 165.92,
+                    "period_ret_pct": -7.50,
                     "stop_loss_price": round(179.37 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
                 {
                     "rank": 3,
-                    "ticker": "ACN",
-                    "name": "埃森哲",
+                    "ticker": "LLY",
+                    "name": "禮來",
                     "market": "US",
-                    "sector": "全球資訊顧問與AI轉型巨擘",
-                    "tranche_weight_pct": 21.7,
-                    "total_portfolio_weight_pct": 10.85,
+                    "sector": "全球減重與創新製藥領頭羊",
+                    "tranche_weight_pct": 22.6,
+                    "total_portfolio_weight_pct": 11.3,
                     "entry_date": "2026-10-23",
-                    "entry_price": 252.01,
-                    "current_price": 264.27,
-                    "period_ret_pct": 4.86,
-                    "stop_loss_price": round(252.01 * 0.85, 2),
+                    "entry_price": 1304.15,
+                    "current_price": 1421.23,
+                    "period_ret_pct": 8.98,
+                    "stop_loss_price": round(1304.15 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
             ]
@@ -1230,7 +1459,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + Top5當期財報雙動能換馬(Huang 2020) + 席次機構吸籌過濾(Lou 2019 JFE) + 5日極值收高力竭阻尼(Bogousslavsky 2021) + 雙動能凱利權重 + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign R12 (7大黃金濾網 + M1主帥退化降級扶正 + M5真龍頭4%調倉死區解鎖 + 23族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52週高點套牢過濾(George & Hwang 2004) + 良性半方差不對稱加碼(Segal 2015 JFE) + 三冠王動態上限65% + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
