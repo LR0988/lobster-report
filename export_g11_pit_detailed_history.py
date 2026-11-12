@@ -230,10 +230,16 @@ def main():
     dead_cat_mask = (mom12m_arr < 0.40) & (mom1m_arr > 0.25)
     vol_blowoff_mask = (vol_surge_arr > 1.60) & (io5_arr < 0.0)
     high_wr_bonus_mask = (vol_ratio_20d_arr >= 1.15) & (down_vol20_arr <= 0.28) & (io20_arr > 0.01)
+    # 🌟 5日極值收高力竭阻尼 (Bogousslavsky 2021 JFE × Jegadeesh 1990 JF: CLV_5D > 0.80 & Ret_5D > 10% & Bias60 > 25% ➔ ×0.85)
+    hl_range_df = (stk_high - stk_low).replace(0, np.nan)
+    clv_daily_df = ((stk_adj - stk_low) / (hl_range_df + 1e-9)).clip(0.0, 1.0).fillna(0.5)
+    clv5_arr = clv_daily_df.rolling(5, min_periods=2).mean().fillna(0.5).values.astype(np.float32)
+    climax_exhaust_mask = (clv5_arr > 0.80) & (rmom5_arr > 0.10) & (bias60_arr > 0.25)
     mult_3in1 = (
         np.where(dead_cat_mask, 0.75, 1.0)
         * np.where(vol_blowoff_mask, 0.75, 1.0)
         * np.where(high_wr_bonus_mask, 1.05, 1.0)
+        * np.where(climax_exhaust_mask, 0.85, 1.0)
     ).astype(np.float32)
     score_arr = (champ_score_arr * mult_3in1).astype(np.float32)
     min_score_thr = 0.28
@@ -506,6 +512,15 @@ def main():
                             if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
                                 selected_stks.append(c_i)
 
+                    # 🌟 Top-5 席次機構吸籌過濾 (Lou, Polk & Skouras 2019 JFE: 保留第1名王牌，第2~3名優先選取 Top-5 內 IO_20 >= -2.5% 非機構派發股)
+                    for c_i in sorted_indices[:pool_k]:
+                        if len(selected_stks) >= 3: break
+                        c_i = int(c_i)
+                        tenure = holding_tenure.get(c_i, 0)
+                        if c_i not in selected_stks and tenure < 4:
+                            if c_i == int(sorted_indices[0]) or float(io20_arr[t_pos, c_i]) >= -0.025:
+                                selected_stks.append(c_i)
+
                     for c_i in sorted_indices:
                         if len(selected_stks) >= 3: break
                         c_i = int(c_i)
@@ -529,11 +544,14 @@ def main():
                         dv0 = max(float(down_vol20_arr[t_pos, selected_stks[0]]), 0.12)
                         dv1 = max(float(down_vol20_arr[t_pos, selected_stks[1]]), 0.12)
                         dv2 = max(float(down_vol20_arr[t_pos, selected_stks[2]]), 0.12)
+                        io0 = float(io20_arr[t_pos, selected_stks[0]])
+                        io1 = float(io20_arr[t_pos, selected_stks[1]])
+                        io2 = float(io20_arr[t_pos, selected_stks[2]])
                         ratio_01 = s0 / (s1 + 1e-6)
-                        w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
+                        w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25) + 0.20 * np.clip(io0, -0.10, 0.15), 0.45, 0.60))
                         rem = 1.0 - w0
-                        k1 = s1 / (dv1 ** 0.35)
-                        k2 = s2 / (dv2 ** 0.35)
+                        k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15))) / (dv1 ** 0.35)
+                        k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15))) / (dv2 ** 0.35)
                         norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
                     else:
                         bw_slice = base_weights[:n]
@@ -1112,7 +1130,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 3D微結構動能演化 + 動態任期(2/4/5期) + Top3過熱降權轉移 + 市場狀態轉換入場閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017 / Wang & Yan 2021) + Top5領頭羊破月線護盾(Han 2016 JFE) · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 3D微結構動能 + Top5席次機構吸籌過濾(Lou 2019 JFE) + 5日極值收高力竭阻尼(Bogousslavsky 2021) + IO20強化凱利權重 + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
