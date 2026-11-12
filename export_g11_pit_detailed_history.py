@@ -218,6 +218,9 @@ def main():
 
     # 🌟 3-in-1 動能微結構濾網 (12M × 3M × 1M 死貓跳懲罰 + 爆量派發懲罰 + 量價收斂高勝率加分)
     mom12m_arr = mom12m.values.astype(np.float32)
+    mom6m_arr = stk_adj.pct_change(126, fill_method=None).fillna(0.0).values.astype(np.float32)
+    nm_7_12_arr = (((1.0 + mom12m_arr) / (1.0 + np.maximum(mom6m_arr, -0.80))) - 1.0).astype(np.float32)
+    dd20_arr = dd20.values.astype(np.float32)
     mom3m_arr = stk_adj.pct_change(63, fill_method=None).fillna(0.0).values.astype(np.float32)
     mom1m_arr = stk_adj.pct_change(21, fill_method=None).fillna(0.0).values.astype(np.float32)
     up_vol_df = stk_vol.where(daily_ret > 0, np.nan).rolling(20, min_periods=3).mean()
@@ -227,6 +230,15 @@ def main():
     vol60_v = stk_vol.rolling(60, min_periods=15).mean().values
     vol_surge_arr = (vol20_v / (vol60_v + 1.0)).astype(np.float32)
 
+    # 預先載入嚴格 Point-In-Time (filed <= t_date) 當期已公告財報成長矩陣 (SEC EDGAR 10-Q/10-K + 台股季報三率/月營收)
+    from pit_fundamental_service import load_or_build_pit_fund_matrices, auto_refresh_live_candidates_sec_edgar
+    _fcache = load_or_build_pit_fund_matrices(dates_idx, cols)
+    rev_yoy_mat = _fcache["rev_yoy_mat"]
+    rev_acc_mat = _fcache["rev_acc_mat"]
+    mgn_exp_mat = _fcache["mgn_exp_mat"]
+    surp_mat = _fcache["surp_mat"]
+    f_score_mat = _fcache["f_score_mat"]
+
     dead_cat_mask = (mom12m_arr < 0.40) & (mom1m_arr > 0.25)
     vol_blowoff_mask = (vol_surge_arr > 1.60) & (io5_arr < 0.0)
     high_wr_bonus_mask = (vol_ratio_20d_arr >= 1.15) & (down_vol20_arr <= 0.28) & (io20_arr > 0.01)
@@ -235,11 +247,14 @@ def main():
     clv_daily_df = ((stk_adj - stk_low) / (hl_range_df + 1e-9)).clip(0.0, 1.0).fillna(0.5)
     clv5_arr = clv_daily_df.rolling(5, min_periods=2).mean().fillna(0.5).values.astype(np.float32)
     climax_exhaust_mask = (clv5_arr > 0.80) & (rmom5_arr > 0.10) & (bias60_arr > 0.25)
+    # 🌟 假突破散戶追高攔截 (Lehmann 1990 QJE × Lou 2019 JFE: Ret_5D >= 6% & IO_20 <= -1% & 無財報支撐 ➔ ×0.90)
+    fake_breakout_mask = (rmom5_arr >= 0.06) & (io20_arr <= -0.01) & (np.nan_to_num(f_score_mat, nan=0.0) <= 0.0)
     mult_3in1 = (
         np.where(dead_cat_mask, 0.75, 1.0)
         * np.where(vol_blowoff_mask, 0.75, 1.0)
         * np.where(high_wr_bonus_mask, 1.05, 1.0)
         * np.where(climax_exhaust_mask, 0.85, 1.0)
+        * np.where(fake_breakout_mask, 0.90, 1.0)
     ).astype(np.float32)
     score_arr = (champ_score_arr * mult_3in1).astype(np.float32)
     min_score_thr = 0.28
@@ -410,16 +425,10 @@ def main():
         daily_sorted[t_pos] = sorted_indices
         daily_exp[t_pos] = exposure
 
-    # 載入嚴格 Point-In-Time (filed <= t_date) 當期已公告財報成長矩陣 (SEC EDGAR 10-Q/10-K + 台股季報三率/月營收)
-    from pit_fundamental_service import load_or_build_pit_fund_matrices, auto_refresh_live_candidates_sec_edgar
+    # 主動刷新最新實盤 Top-10 候選股之 SEC EDGAR 10-Q/10-K 當期財報
     if daily_sorted[-1] is not None and len(daily_sorted[-1]) > 0:
         live_top10_syms = [cols[int(i)] for i in daily_sorted[-1][:10]]
         auto_refresh_live_candidates_sec_edgar(live_top10_syms, force=False)
-    _fcache = load_or_build_pit_fund_matrices(dates_idx, cols)
-    rev_yoy_mat = _fcache["rev_yoy_mat"]
-    mgn_exp_mat = _fcache["mgn_exp_mat"]
-    surp_mat = _fcache["surp_mat"]
-    f_score_mat = _fcache["f_score_mat"]
 
     def _is_pit_fund_defect(t_pos_idx: int, ci: int) -> bool:
         ry = rev_yoy_mat[t_pos_idx, ci]
@@ -446,6 +455,21 @@ def main():
             return bool(ry >= 0.14 and me >= 0.0)
         if not np.isnan(ry):
             return bool(ry >= 0.20)
+        return False
+
+    def _is_super_winner(t_pos_idx: int, ci: int) -> bool:
+        io = float(io20_arr[t_pos_idx, ci])
+        if io < 0.025:
+            return False
+        fs = float(f_score_mat[t_pos_idx, ci]) if not np.isnan(f_score_mat[t_pos_idx, ci]) else 0.0
+        ra = float(rev_acc_mat[t_pos_idx, ci]) if not np.isnan(rev_acc_mat[t_pos_idx, ci]) else 0.0
+        nm = float(nm_7_12_arr[t_pos_idx, ci]) if not np.isnan(nm_7_12_arr[t_pos_idx, ci]) else 0.0
+        dd = float(dd20_arr[t_pos_idx, ci])
+        r5 = float(rmom5_arr[t_pos_idx, ci])
+        if fs >= 0.10 or (fs >= 0.05 and ra >= 0.02):
+            return True
+        if nm >= 0.55 and dd <= -0.035 and r5 <= 0.06:
+            return True
         return False
 
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
@@ -550,10 +574,14 @@ def main():
                             if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
                                 selected_stks.append(c_i)
 
-                    # 🌟 Top-5 席次機構吸籌過濾 (Lou 2019 JFE) × 當期已公告財報條件式雙動能換馬 (Huang et al. 2020 Twin Momentum: Defect -> Star 替換)
+                    # 🌟 Top-5 席次機構吸籌過濾 (Lou 2019 JFE) × 當期已公告財報條件式雙動能換馬 (Huang et al. 2020 Twin Momentum: Defect -> Star 替換) × 散戶追高假突破讓位給超級大牛股 (Lehmann 1990 × Novy-Marx 2012)
                     top5_cands = list(sorted_indices[:pool_k])
                     has_star_45 = any(
                         _is_pit_fund_star(t_pos, int(x)) and int(x) not in selected_stks
+                        for x in top5_cands[3:pool_k]
+                    ) if len(top5_cands) > 3 else False
+                    has_sw_45 = any(
+                        _is_super_winner(t_pos, int(x)) and int(x) not in selected_stks
                         for x in top5_cands[3:pool_k]
                     ) if len(top5_cands) > 3 else False
                     for c_i in top5_cands:
@@ -566,6 +594,8 @@ def main():
                             else:
                                 io_ok = float(io20_arr[t_pos, c_i]) >= -0.025
                                 fund_ok = not (has_star_45 and _is_pit_fund_defect(t_pos, c_i))
+                                if has_sw_45 and float(rmom5_arr[t_pos, c_i]) >= 0.06 and float(io20_arr[t_pos, c_i]) < 0.0:
+                                    fund_ok = False
                                 if io_ok and fund_ok:
                                     selected_stks.append(c_i)
 
@@ -598,34 +628,48 @@ def main():
                         fs0 = float(f_score_mat[t_pos, selected_stks[0]]) if not np.isnan(f_score_mat[t_pos, selected_stks[0]]) else 0.0
                         fs1 = float(f_score_mat[t_pos, selected_stks[1]]) if not np.isnan(f_score_mat[t_pos, selected_stks[1]]) else 0.0
                         fs2 = float(f_score_mat[t_pos, selected_stks[2]]) if not np.isnan(f_score_mat[t_pos, selected_stks[2]]) else 0.0
+                        b0 = 0.09 if _is_super_winner(t_pos, selected_stks[0]) else 0.0
+                        b1 = 0.09 if _is_super_winner(t_pos, selected_stks[1]) else 0.0
+                        b2 = 0.09 if _is_super_winner(t_pos, selected_stks[2]) else 0.0
                         ratio_01 = s0 / (s1 + 1e-6)
                         w0 = float(np.clip(
                             0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25)
                             + 0.20 * np.clip(io0, -0.10, 0.15)
-                            + 0.08 * np.clip(fs0, -0.15, 0.30),
-                            0.45, 0.60
+                            + 0.08 * np.clip(fs0, -0.15, 0.30)
+                            + b0,
+                            0.45, 0.62
                         ))
                         rem = 1.0 - w0
-                        k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30))) / (dv1 ** 0.35)
-                        k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30))) / (dv2 ** 0.35)
+                        k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30) + b1)) / (dv1 ** 0.35)
+                        k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30) + b2)) / (dv2 ** 0.35)
                         norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
                     else:
                         bw_slice = base_weights[:n]
                         tot_bw = sum(bw_slice)
                         norm_weights = [w / tot_bw for w in bw_slice]
 
-                    # 🌟 1B Top-3 內部過熱降權轉移 (Bias60 > 25% & Ret5 > 5% ➔ 降權 35% 轉移給同梯未過熱強股)
+                    # 🌟 1B Top-3 內部過熱降權轉移 + 超級大牛股溫和過熱保護 (Gervais et al. 2001 JF × Da et al. 2014 RFS: Soft_85_Below_45)
                     adj_weights = list(norm_weights)
-                    oh_flags = [
-                        (float(bias60_arr[t_pos, selected_stks[i]]) > 0.25 and float(rmom5_arr[t_pos, selected_stks[i]]) > 0.05)
-                        for i in range(n)
-                    ]
+                    oh_flags = []
+                    oh_retains = []
+                    for i in range(n):
+                        ci = selected_stks[i]
+                        b60 = float(bias60_arr[t_pos, ci])
+                        r5 = float(rmom5_arr[t_pos, ci])
+                        is_oh = (b60 > 0.25 and r5 > 0.05)
+                        retain_mult = 0.65
+                        if is_oh:
+                            is_sw_i = _is_super_winner(t_pos, ci) or (float(io20_arr[t_pos, ci]) >= 0.03 and not _is_pit_fund_defect(t_pos, ci))
+                            if is_sw_i and b60 <= 0.45:
+                                retain_mult = 0.85
+                        oh_flags.append(is_oh)
+                        oh_retains.append(retain_mult)
                     non_oh_idx = [i for i in range(n) if not oh_flags[i]]
                     if len(non_oh_idx) > 0 and any(oh_flags):
                         cut_sum = 0.0
                         for i in range(n):
                             if oh_flags[i]:
-                                c_w = adj_weights[i] * (1.0 - 0.65)
+                                c_w = adj_weights[i] * (1.0 - oh_retains[i])
                                 adj_weights[i] -= c_w
                                 cut_sum += c_w
                         add_each = cut_sum / len(non_oh_idx)

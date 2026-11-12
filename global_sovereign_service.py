@@ -490,7 +490,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             mom2w = round(float((closes[0] / closes[min(10, len(closes)-1)] - 1.0) * 100.0), 1) if len(closes) > 10 else 0.0
             mom1m = round(float((closes[0] / closes[min(21, len(closes)-1)] - 1.0) * 100.0), 1) if len(closes) > 21 else 0.0
             mom3m = round(float((closes[0] / closes[min(63, len(closes)-1)] - 1.0) * 100.0), 1) if len(closes) > 63 else None
+            mom6m = round(float((closes[0] / closes[min(126, len(closes)-1)] - 1.0) * 100.0), 1) if len(closes) > 126 else 0.0
             mom12m = round(float((closes[0] / closes[min(252, len(closes)-1)] - 1.0) * 100.0), 1) if len(closes) > 1 else None
+            nm_7_12 = round(float(((1.0 + (mom12m or 0.0) / 100.0) / max(0.20, 1.0 + (mom6m or 0.0) / 100.0)) - 1.0), 4)
 
             # 60D 日均成交額 (台股 >= 3,000萬 TWD / 美股 >= 500萬 USD)
             dv60_window = min(60, len(closes))
@@ -977,7 +979,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 "mom_2w": mom2w,
                 "mom_1m": mom1m,
                 "mom_3m": mom3m,
+                "mom_6m": mom6m,
                 "mom_12m": mom12m,
+                "nm_7_12": nm_7_12,
                 "bias_ma60": bias_ma60_pct,
                 "prox_52w": prox_52w_pct,
                 "winrate_tag": winrate_tag,
@@ -1205,7 +1209,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     "_daily_rets_20": st.get("daily_rets_20", []),
                     "mom_2w": st.get("mom_2w", 0.0),
                     "mom_3m": st.get("mom_3m", 0.0),
+                    "mom_6m": st.get("mom_6m", 0.0),
                     "mom_12m": st.get("mom_12m", 0.0),
+                    "nm_7_12": st.get("nm_7_12", 0.0),
                     "bias_ma60": st.get("bias_ma60", 0.0),
                     "prox_52w": st.get("prox_52w", 100.0),
                     "winrate_tag": st.get("winrate_tag", "🚀 穩健主升推進"),
@@ -1492,31 +1498,52 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
             top10_picks = valid_picks[:10]
-            # 🌟 主動執行當期已公布 PIT 財報雙動能檢核 (SEC EDGAR 10-Q/10-K + Yahoo EPS Surprise + 台股季報三率/月營收)
+            # 🌟 主動執行當期已公布 PIT 財報雙動能檢核 + R11 超級大牛股右尾點火印記 (Super-Winner Right-Tail Ignition) 與散戶追高假突破雙重攔截
             try:
                 from pit_fundamental_service import auto_refresh_live_candidates_sec_edgar, evaluate_live_ticker_pit_fundamentals
                 auto_refresh_live_candidates_sec_edgar([p["ticker"] for p in top10_picks], force=False)
                 for p in top10_picks:
-                    fm = evaluate_live_ticker_pit_fundamentals(p["ticker"], io20_val=float(p.get("io_20") or 0.0))
+                    io20_v = float(p.get("io_20") or 0.0)
+                    fm = evaluate_live_ticker_pit_fundamentals(p["ticker"], io20_val=io20_v)
                     p["pit_rev_yoy_pct"] = round(float(fm["rev_yoy"]) * 100.0, 1) if not np.isnan(fm["rev_yoy"]) else None
+                    p["pit_rev_accel_pct"] = round(float(fm["rev_accel"]) * 100.0, 1) if not np.isnan(fm["rev_accel"]) else None
                     p["pit_op_margin_exp_pct"] = round(float(fm["margin_expand"]) * 100.0, 1) if not np.isnan(fm["margin_expand"]) else None
                     p["pit_eps_surprise_pct"] = round(float(fm["eps_surprise"]) * 100.0, 1) if not np.isnan(fm["eps_surprise"]) else None
+                    f_sc = float(fm["f_score"] or 0.0)
+                    r_acc = float(fm["rev_accel"]) if not np.isnan(fm["rev_accel"]) else 0.0
+                    is_def = bool(fm["is_defect"])
+                    nm_v = float(p.get("nm_7_12") or 0.0)
+                    dd20_v = float(p.get("dd20") or 0.0)
+                    mom5_v = float(p.get("mom_5d") or 0.0)
+                    # R11 Super-Winner Ignition Signature (Lou 2019 JFE x Novy-Marx 2012/2015 JFE x Loh & Warachka 2012 JFE)
+                    sw_fund_ok = (f_sc >= 0.10) or (f_sc >= 0.05 and r_acc >= 0.02)
+                    sw_tech_ok = (nm_v >= 0.55) and (dd20_v <= -0.035) and (mom5_v <= 6.0)
+                    is_sw = bool((io20_v >= 0.025) and (not is_def) and (sw_fund_ok or sw_tech_ok))
                     p["pit_f_score"] = fm["f_score"]
                     p["pit_is_star"] = fm["is_star"]
-                    p["pit_is_defect"] = fm["is_defect"]
-                    p["pit_fund_tag"] = fm["fund_tag"]
+                    p["pit_is_defect"] = is_def
+                    p["is_super_winner"] = is_sw
+                    p["pit_fund_tag"] = "🚀 超級大牛點火印記 × " + fm["fund_tag"] if is_sw else fm["fund_tag"]
+                    # Stage 1 Fake-Breakout Retail Chasing Veto (×0.90)
+                    if mom5_v >= 6.0 and io20_v <= -0.01 and f_sc <= 0.0:
+                        p["score"] = round(float(p.get("score") or 0.0) * 0.90, 4)
+                        p["sniper_score"] = round(float(p.get("sniper_score") or 0.0) * 0.90, 4)
 
-                # 若 Top-5 中第 4~5 名存在「🏆 財報高成長明星」，且第 2~3 名出現「⚠️ 當期財報瑕疵」或機構派發 (IO_20 < -2.5%)，自動執行條件式換馬
+                # 若 Top-5 中第 4~5 名存在「🏆 財報高成長明星」或「🚀 超級大牛點火印記」，對第 2~3 名財報瑕疵/機構派發/散戶隔夜追高假突破執行條件式換馬
                 if len(top10_picks) >= 5:
                     top5_live = top10_picks[:5]
                     rest_live = top10_picks[5:]
                     has_star_45 = any(bool(x.get("pit_is_star")) for x in top5_live[3:5])
+                    has_sw_45 = any(bool(x.get("is_super_winner")) for x in top5_live[3:5])
                     chosen_top3 = [top5_live[0]]
                     deferred = []
                     for cand in top5_live[1:]:
-                        io_ok = float(cand.get("io_20") or 0.0) >= -0.025
+                        io_v = float(cand.get("io_20") or 0.0)
+                        m5_v = float(cand.get("mom_5d") or 0.0)
+                        io_ok = io_v >= -0.025
                         fund_ok = not (has_star_45 and bool(cand.get("pit_is_defect")))
-                        if len(chosen_top3) < 3 and io_ok and fund_ok:
+                        chasing_veto = has_sw_45 and (m5_v >= 6.0) and (io_v < 0.0) and (not bool(cand.get("is_super_winner")))
+                        if len(chosen_top3) < 3 and io_ok and fund_ok and (not chasing_veto):
                             chosen_top3.append(cand)
                         else:
                             deferred.append(cand)
@@ -1524,7 +1551,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             except Exception as e_pit_live:
                 print("即時當期 PIT 財報雙動能檢核警告:", e_pit_live)
 
-            # G12-PIT Sovereign 去蕪存菁版：雙動能凱利凸性動態信念權重 (IO_20 + PIT 財報成長 F_Score) + 1B Top-3 內部過熱降權轉移
+            # G12-PIT Sovereign R11：超級大牛右尾點火凱利凸性加碼 (+9% / 上限 62%) + 軟性過熱保護 (Soft_85_Below_45)
             weights_single_tranche = [53.9, 25.0, 21.1]
             if len(top10_picks) >= 3:
                 try:
@@ -1540,16 +1567,20 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     fs0 = float(top10_picks[0].get("pit_f_score") or 0.0)
                     fs1 = float(top10_picks[1].get("pit_f_score") or 0.0)
                     fs2 = float(top10_picks[2].get("pit_f_score") or 0.0)
+                    sw0 = 0.09 if bool(top10_picks[0].get("is_super_winner")) else 0.0
+                    sw1 = 0.09 if bool(top10_picks[1].get("is_super_winner")) else 0.0
+                    sw2 = 0.09 if bool(top10_picks[2].get("is_super_winner")) else 0.0
                     ratio_01 = s0 / (s1 + 1e-6)
                     w0 = float(np.clip(
                         0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25)
                         + 0.20 * np.clip(io0, -0.10, 0.15)
-                        + 0.08 * np.clip(fs0, -0.15, 0.30),
-                        0.45, 0.60
+                        + 0.08 * np.clip(fs0, -0.15, 0.30)
+                        + sw0,
+                        0.45, 0.62
                     ))
                     rem = 1.0 - w0
-                    k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30))) / (dv1 ** 0.35)
-                    k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30))) / (dv2 ** 0.35)
+                    k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30) + sw1)) / (dv1 ** 0.35)
+                    k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30) + sw2)) / (dv2 ** 0.35)
                     w1 = rem * (k1 / (k1 + k2 + 1e-9))
                     w2 = rem - w1
                     adj_w = [w0, w1, w2]
@@ -1562,7 +1593,11 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         cut_sum = 0.0
                         for i in range(3):
                             if oh_flags[i]:
-                                c_w = adj_w[i] * (1.0 - 0.65)
+                                b_i = float(top10_picks[i].get("bias_ma60") or 0.0)
+                                io_i = float(top10_picks[i].get("io_20") or 0.0)
+                                is_sw_i = bool(top10_picks[i].get("is_super_winner")) or (io_i >= 0.03 and not bool(top10_picks[i].get("pit_is_defect")))
+                                retain_mult = 0.85 if (is_sw_i and b_i <= 45.0) else 0.65
+                                c_w = adj_w[i] * (1.0 - retain_mult)
                                 adj_w[i] -= c_w
                                 cut_sum += c_w
                         add_each = cut_sum / len(non_oh_idx)
