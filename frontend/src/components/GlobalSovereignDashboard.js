@@ -1108,7 +1108,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
       // 若 100% 滿倉：各隊佔 26%, 12%, 12%，雙隊合計 52%, 24%, 24%
       // 若 70% 減持：各隊佔 18.2%, 8.4%, 8.4%，雙隊合計 36.4%, 16.8%, 16.8%
       // 若 45% 護盾減震 (C4)：各隊佔 11.7%, 5.4%, 5.4%，雙隊合計 23.4%, 10.8%, 10.8%
-      const weightTranchePct = pRank === 1 ? 52 : 24; // 梯隊內比例 52%, 24%, 24%
+      const weightTranchePct = pick.weight_pct !== undefined ? Number(pick.weight_pct) : (pRank === 1 ? 52 : 24); // R12 動態凱利凸性與財報瑕疵折減權重
       const weightTeamPct = weightTranchePct * 0.5 * exposureMultiplier; // 各隊佔總資產
       const totalWeightPct = weightTranchePct * exposureMultiplier;       // 雙隊合併佔總資產
 
@@ -3587,7 +3587,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       <th style={{ textAlign: 'center' }}>目標配比</th>
                       <th style={{ textAlign: 'right' }}>現價 (季線乖離)</th>
                       <th style={{ textAlign: 'right', color: '#34D399' }}>動能 (3M / 12M)</th>
-                      <th style={{ textAlign: 'left', color: '#C084FC', maxWidth: '210px' }}>飆股特質</th>
+                      <th style={{ textAlign: 'left', color: '#C084FC', maxWidth: '245px' }}>飆股特質與當期 PIT 財報</th>
                       <th style={{ textAlign: 'right', color: '#FBBF24' }}>總分</th>
                       <th style={{ textAlign: 'center', color: '#38BDF8' }}>買點與型態</th>
                     </tr>
@@ -3611,8 +3611,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       const isBuf = pickRank > 3 && pickRank <= 5;
                       const curr = pick.currency === 'USD' ? '$' : 'NT$';
                       const isHeld = userPositions.some(p => p.ticker === pick.ticker || (p.ticker && pick.ticker && p.ticker.split('.')[0] === pick.ticker.split('.')[0]));
-                      const singleW = isTop3 ? (pickRank === 1 ? 52 : 24) : 0;
-                      const navHalfW = singleW / 2;
+                      const singleW = isTop3 ? (pick.weight_pct !== undefined ? Number(pick.weight_pct) : (pickRank === 1 ? 52 : 24)) : 0;
+                      const navHalfW = Math.round(singleW * 5) / 10;
+                      const isDefectTrimmed = isTop3 && pickRank === 3 && Boolean(pick.pit_is_defect);
 
                       const grade = pick.winrate_grade || 'steady';
                       let badgeBg = 'rgba(56, 189, 248, 0.15)';
@@ -3676,9 +3677,16 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                           </td>
                           <td style={{ textAlign: 'center', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
                             {isTop3 ? (
-                              <span style={{ color: '#6EE7B7', fontWeight: 'bold' }}>
-                                單隊 {singleW}% <span style={{ color: '#94A3B8', fontSize: '0.71rem' }}>(總資金{navHalfW}%)</span>
-                              </span>
+                              <div>
+                                <span style={{ color: isDefectTrimmed ? '#FBBF24' : '#6EE7B7', fontWeight: 'bold' }}>
+                                  單隊 {singleW}% <span style={{ color: '#94A3B8', fontSize: '0.71rem' }}>(總資金{navHalfW}%)</span>
+                                </span>
+                                {isDefectTrimmed && (
+                                  <div style={{ fontSize: '0.66rem', color: '#F87171', fontWeight: 'bold', marginTop: '1px' }}>
+                                    ⚠️ 財報瑕疵 ×0.60 砍倉
+                                  </div>
+                                )}
+                              </div>
                             ) : isBuf ? (
                               <span style={{ color: pickRank === 5 && io20Val <= 0 ? '#FBBF24' : '#93C5FD', fontSize: '0.73rem' }}>
                                 {pickRank <= 4 ? '在手續抱保護' : (io20Val > 0 ? '在手續抱' : '觀察換血')}
@@ -3711,9 +3719,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                               12M <strong style={{ color: '#6EE7B7' }}>+{pick.mom_12m}%</strong>
                             </div>
                           </td>
-                          {/* 飆股特質：精簡且限制寬度、允許換行，絕不擠壓其他欄位 */}
-                          <td style={{ maxWidth: '210px', whiteSpace: 'normal', lineHeight: 1.35 }} title={pick.sniper_desc || pick.sniper_tag || ''}>
-                            <div>
+                          {/* 飆股特質與當期 PIT 財報檢核：同步渲染 SEC EDGAR / 台股當期 PIT 財報標籤與真實數據 */}
+                          <td style={{ maxWidth: '245px', whiteSpace: 'normal', lineHeight: 1.35 }} title={pick.sniper_desc || pick.sniper_tag || ''}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', alignItems: 'center' }}>
                               <span style={{
                                 display: 'inline-block',
                                 fontSize: '0.7rem',
@@ -3726,7 +3734,45 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                               }}>
                                 {shortSniperTag}
                               </span>
+                              {pick.pit_fund_tag && (
+                                <span style={{
+                                  display: 'inline-block',
+                                  fontSize: '0.68rem',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  background: pick.pit_is_defect
+                                    ? 'rgba(239, 68, 68, 0.22)'
+                                    : ((pick.pit_is_star || pick.is_super_winner) ? 'rgba(245, 158, 11, 0.22)' : 'rgba(56, 189, 248, 0.14)'),
+                                  color: pick.pit_is_defect
+                                    ? '#FCA5A5'
+                                    : ((pick.pit_is_star || pick.is_super_winner) ? '#FCD34D' : '#93C5FD'),
+                                  border: `1px solid ${pick.pit_is_defect
+                                    ? 'rgba(239, 68, 68, 0.55)'
+                                    : ((pick.pit_is_star || pick.is_super_winner) ? 'rgba(245, 158, 11, 0.55)' : 'rgba(56, 189, 248, 0.3)')}`
+                                }}>
+                                  {pick.pit_fund_tag}
+                                </span>
+                              )}
                             </div>
+                            {(pick.pit_rev_yoy_pct != null || pick.pit_op_margin_exp_pct != null || pick.pit_eps_surprise_pct != null) && (
+                              <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontFamily: 'monospace', marginTop: '3px' }}>
+                                {pick.pit_rev_yoy_pct != null && (
+                                  <span>
+                                    營收YoY <strong style={{ color: pick.pit_rev_yoy_pct >= 14 ? '#34D399' : (pick.pit_rev_yoy_pct < 0 ? '#F87171' : '#CBD5E1') }}>
+                                      {pick.pit_rev_yoy_pct >= 0 ? '+' : ''}{pick.pit_rev_yoy_pct}%
+                                    </strong>
+                                  </span>
+                                )}
+                                {pick.pit_op_margin_exp_pct != null && (
+                                  <span>
+                                    {pick.pit_rev_yoy_pct != null ? ' · ' : ''}營益率 <strong style={{ color: pick.pit_op_margin_exp_pct >= 0 ? '#34D399' : (pick.pit_op_margin_exp_pct <= -10 ? '#F87171' : '#FBBF24') }}>
+                                      {pick.pit_op_margin_exp_pct >= 0 ? '+' : ''}{pick.pit_op_margin_exp_pct}%
+                                    </strong>
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {(pick.roe_pct != null || pick.pe_ratio != null) && (
                               <div style={{ fontSize: '0.67rem', color: '#94A3B8', fontFamily: 'monospace', marginTop: '2px' }}>
                                 ROE <strong style={{ color: (pick.roe_pct || 0) >= 20 ? '#34D399' : '#CBD5E1' }}>{pick.roe_pct ?? '-'}%</strong> · PE <strong>{pick.pe_ratio ?? '-'}x</strong>
