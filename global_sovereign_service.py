@@ -1492,7 +1492,39 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
             top10_picks = valid_picks[:10]
-            # G12-PIT Sovereign 去蕪存菁版：凱利凸性動態信念權重 + 1B Top-3 內部過熱降權轉移 (Bias60>25% & Ret5>5% ➔ Scale=0.65)
+            # 🌟 主動執行當期已公布 PIT 財報雙動能檢核 (SEC EDGAR 10-Q/10-K + Yahoo EPS Surprise + 台股季報三率/月營收)
+            try:
+                from pit_fundamental_service import auto_refresh_live_candidates_sec_edgar, evaluate_live_ticker_pit_fundamentals
+                auto_refresh_live_candidates_sec_edgar([p["ticker"] for p in top10_picks], force=False)
+                for p in top10_picks:
+                    fm = evaluate_live_ticker_pit_fundamentals(p["ticker"], io20_val=float(p.get("io_20") or 0.0))
+                    p["pit_rev_yoy_pct"] = round(float(fm["rev_yoy"]) * 100.0, 1) if not np.isnan(fm["rev_yoy"]) else None
+                    p["pit_op_margin_exp_pct"] = round(float(fm["margin_expand"]) * 100.0, 1) if not np.isnan(fm["margin_expand"]) else None
+                    p["pit_eps_surprise_pct"] = round(float(fm["eps_surprise"]) * 100.0, 1) if not np.isnan(fm["eps_surprise"]) else None
+                    p["pit_f_score"] = fm["f_score"]
+                    p["pit_is_star"] = fm["is_star"]
+                    p["pit_is_defect"] = fm["is_defect"]
+                    p["pit_fund_tag"] = fm["fund_tag"]
+
+                # 若 Top-5 中第 4~5 名存在「🏆 財報高成長明星」，且第 2~3 名出現「⚠️ 當期財報瑕疵」或機構派發 (IO_20 < -2.5%)，自動執行條件式換馬
+                if len(top10_picks) >= 5:
+                    top5_live = top10_picks[:5]
+                    rest_live = top10_picks[5:]
+                    has_star_45 = any(bool(x.get("pit_is_star")) for x in top5_live[3:5])
+                    chosen_top3 = [top5_live[0]]
+                    deferred = []
+                    for cand in top5_live[1:]:
+                        io_ok = float(cand.get("io_20") or 0.0) >= -0.025
+                        fund_ok = not (has_star_45 and bool(cand.get("pit_is_defect")))
+                        if len(chosen_top3) < 3 and io_ok and fund_ok:
+                            chosen_top3.append(cand)
+                        else:
+                            deferred.append(cand)
+                    top10_picks = chosen_top3 + deferred + rest_live
+            except Exception as e_pit_live:
+                print("即時當期 PIT 財報雙動能檢核警告:", e_pit_live)
+
+            # G12-PIT Sovereign 去蕪存菁版：雙動能凱利凸性動態信念權重 (IO_20 + PIT 財報成長 F_Score) + 1B Top-3 內部過熱降權轉移
             weights_single_tranche = [53.9, 25.0, 21.1]
             if len(top10_picks) >= 3:
                 try:
@@ -1502,11 +1534,22 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     dv0 = max(float(top10_picks[0].get("vol_60d") or 0.25) * 0.75, 0.12)
                     dv1 = max(float(top10_picks[1].get("vol_60d") or 0.25) * 0.75, 0.12)
                     dv2 = max(float(top10_picks[2].get("vol_60d") or 0.25) * 0.75, 0.12)
+                    io0 = float(top10_picks[0].get("io_20") or 0.0)
+                    io1 = float(top10_picks[1].get("io_20") or 0.0)
+                    io2 = float(top10_picks[2].get("io_20") or 0.0)
+                    fs0 = float(top10_picks[0].get("pit_f_score") or 0.0)
+                    fs1 = float(top10_picks[1].get("pit_f_score") or 0.0)
+                    fs2 = float(top10_picks[2].get("pit_f_score") or 0.0)
                     ratio_01 = s0 / (s1 + 1e-6)
-                    w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
+                    w0 = float(np.clip(
+                        0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25)
+                        + 0.20 * np.clip(io0, -0.10, 0.15)
+                        + 0.08 * np.clip(fs0, -0.15, 0.30),
+                        0.45, 0.60
+                    ))
                     rem = 1.0 - w0
-                    k1 = s1 / (dv1 ** 0.35)
-                    k2 = s2 / (dv2 ** 0.35)
+                    k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30))) / (dv1 ** 0.35)
+                    k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30))) / (dv2 ** 0.35)
                     w1 = rem * (k1 / (k1 + k2 + 1e-9))
                     w2 = rem - w1
                     adj_w = [w0, w1, w2]

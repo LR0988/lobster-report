@@ -410,6 +410,44 @@ def main():
         daily_sorted[t_pos] = sorted_indices
         daily_exp[t_pos] = exposure
 
+    # 載入嚴格 Point-In-Time (filed <= t_date) 當期已公告財報成長矩陣 (SEC EDGAR 10-Q/10-K + 台股季報三率/月營收)
+    from pit_fundamental_service import load_or_build_pit_fund_matrices, auto_refresh_live_candidates_sec_edgar
+    if daily_sorted[-1] is not None and len(daily_sorted[-1]) > 0:
+        live_top10_syms = [cols[int(i)] for i in daily_sorted[-1][:10]]
+        auto_refresh_live_candidates_sec_edgar(live_top10_syms, force=False)
+    _fcache = load_or_build_pit_fund_matrices(dates_idx, cols)
+    rev_yoy_mat = _fcache["rev_yoy_mat"]
+    mgn_exp_mat = _fcache["mgn_exp_mat"]
+    surp_mat = _fcache["surp_mat"]
+    f_score_mat = _fcache["f_score_mat"]
+
+    def _is_pit_fund_defect(t_pos_idx: int, ci: int) -> bool:
+        ry = rev_yoy_mat[t_pos_idx, ci]
+        me = mgn_exp_mat[t_pos_idx, ci]
+        su = surp_mat[t_pos_idx, ci]
+        if not np.isnan(su) and su < -0.01:
+            return True
+        if not np.isnan(ry) and ry < -0.15:
+            return True
+        if (not np.isnan(me) and me < -0.10) and (np.isnan(ry) or ry < 0.20):
+            return True
+        return False
+
+    def _is_pit_fund_star(t_pos_idx: int, ci: int) -> bool:
+        ry = rev_yoy_mat[t_pos_idx, ci]
+        me = mgn_exp_mat[t_pos_idx, ci]
+        su = surp_mat[t_pos_idx, ci]
+        io = io20_arr[t_pos_idx, ci]
+        if io < 0.0:
+            return False
+        if not np.isnan(su) and su < 0.0:
+            return False
+        if not np.isnan(ry) and not np.isnan(me):
+            return bool(ry >= 0.14 and me >= 0.0)
+        if not np.isnan(ry):
+            return bool(ry >= 0.20)
+        return False
+
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
         ym_groups = pd.Series(dates_idx, index=dates_idx).groupby([dates_idx.year, dates_idx.month])
         rebal_dates = []
@@ -512,14 +550,24 @@ def main():
                             if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
                                 selected_stks.append(c_i)
 
-                    # 🌟 Top-5 席次機構吸籌過濾 (Lou, Polk & Skouras 2019 JFE: 保留第1名王牌，第2~3名優先選取 Top-5 內 IO_20 >= -2.5% 非機構派發股)
-                    for c_i in sorted_indices[:pool_k]:
+                    # 🌟 Top-5 席次機構吸籌過濾 (Lou 2019 JFE) × 當期已公告財報條件式雙動能換馬 (Huang et al. 2020 Twin Momentum: Defect -> Star 替換)
+                    top5_cands = list(sorted_indices[:pool_k])
+                    has_star_45 = any(
+                        _is_pit_fund_star(t_pos, int(x)) and int(x) not in selected_stks
+                        for x in top5_cands[3:pool_k]
+                    ) if len(top5_cands) > 3 else False
+                    for c_i in top5_cands:
                         if len(selected_stks) >= 3: break
                         c_i = int(c_i)
                         tenure = holding_tenure.get(c_i, 0)
                         if c_i not in selected_stks and tenure < 4:
-                            if c_i == int(sorted_indices[0]) or float(io20_arr[t_pos, c_i]) >= -0.025:
+                            if c_i == int(sorted_indices[0]):
                                 selected_stks.append(c_i)
+                            else:
+                                io_ok = float(io20_arr[t_pos, c_i]) >= -0.025
+                                fund_ok = not (has_star_45 and _is_pit_fund_defect(t_pos, c_i))
+                                if io_ok and fund_ok:
+                                    selected_stks.append(c_i)
 
                     for c_i in sorted_indices:
                         if len(selected_stks) >= 3: break
@@ -547,11 +595,19 @@ def main():
                         io0 = float(io20_arr[t_pos, selected_stks[0]])
                         io1 = float(io20_arr[t_pos, selected_stks[1]])
                         io2 = float(io20_arr[t_pos, selected_stks[2]])
+                        fs0 = float(f_score_mat[t_pos, selected_stks[0]]) if not np.isnan(f_score_mat[t_pos, selected_stks[0]]) else 0.0
+                        fs1 = float(f_score_mat[t_pos, selected_stks[1]]) if not np.isnan(f_score_mat[t_pos, selected_stks[1]]) else 0.0
+                        fs2 = float(f_score_mat[t_pos, selected_stks[2]]) if not np.isnan(f_score_mat[t_pos, selected_stks[2]]) else 0.0
                         ratio_01 = s0 / (s1 + 1e-6)
-                        w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25) + 0.20 * np.clip(io0, -0.10, 0.15), 0.45, 0.60))
+                        w0 = float(np.clip(
+                            0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25)
+                            + 0.20 * np.clip(io0, -0.10, 0.15)
+                            + 0.08 * np.clip(fs0, -0.15, 0.30),
+                            0.45, 0.60
+                        ))
                         rem = 1.0 - w0
-                        k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15))) / (dv1 ** 0.35)
-                        k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15))) / (dv2 ** 0.35)
+                        k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30))) / (dv1 ** 0.35)
+                        k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30))) / (dv2 ** 0.35)
                         norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
                     else:
                         bw_slice = base_weights[:n]
@@ -1130,7 +1186,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + 3D微結構動能 + Top5席次機構吸籌過濾(Lou 2019 JFE) + 5日極值收高力竭阻尼(Bogousslavsky 2021) + IO20強化凱利權重 + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign (去蕪存菁・7大黃金濾網 + Top5當期財報雙動能換馬(Huang 2020) + 席次機構吸籌過濾(Lou 2019 JFE) + 5日極值收高力竭阻尼(Bogousslavsky 2021) + 雙動能凱利權重 + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
