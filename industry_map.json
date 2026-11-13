@@ -85,7 +85,7 @@
   },
   "2317.TW": {
     "sector": "Technology",
-    "industry": "Electronic Components"
+    "industry": "Computer Hardware"
   },
   "2324.TW": {
     "sector": "Technology",
@@ -317,7 +317,7 @@
   },
   "3017.TW": {
     "sector": "Technology",
-    "industry": "Electronic Components"
+    "industry": "Computer Hardware"
   },
   "3023.TW": {
     "sector": "Technology",
@@ -369,7 +369,7 @@
   },
   "3189.TW": {
     "sector": "Technology",
-    "industry": "Semiconductor Equipment & Materials"
+    "industry": "Electronic Components"
   },
   "3231.TW": {
     "sector": "Technology",
@@ -597,7 +597,7 @@
   },
   "6533.TW": {
     "sector": "Technology",
-    "industry": "Semiconductor Equipment & Materials"
+    "industry": "Semiconductors"
   },
   "6669.TW": {
     "sector": "Technology",
@@ -1640,24 +1640,24 @@
     "industry": "Auto Parts"
   },
   "ABC": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Medical Distribution"
   },
   "ABEV3.SA": {
     "sector": "Consumer Defensive",
     "industry": "Beverages - Brewers"
   },
   "ABK": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "ABMD": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Medical Devices"
   },
   "ABS": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Grocery"
   },
   "ACGL": {
     "sector": "Financial Services",
@@ -1676,8 +1676,8 @@
     "industry": "Farm Products"
   },
   "ADS": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Credit Services"
   },
   "ADT": {
     "sector": "Industrials",
@@ -1692,16 +1692,16 @@
     "industry": "Utilities - Diversified"
   },
   "AET": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Healthcare Plans"
   },
   "AFL": {
     "sector": "Financial Services",
     "industry": "Insurance - Life"
   },
   "AGC": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "AIG": {
     "sector": "Financial Services",
@@ -1732,8 +1732,8 @@
     "industry": "Software - Infrastructure"
   },
   "AL": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Aluminum"
   },
   "ALB": {
     "sector": "Basic Materials",
@@ -1756,16 +1756,16 @@
     "industry": "Security & Protection Services"
   },
   "ALTR": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "ALV.DE": {
     "sector": "Financial Services",
     "industry": "Insurance - Diversified"
   },
   "ALXN": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "AM": {
     "sector": "Energy",
@@ -1788,8 +1788,8 @@
     "industry": "REIT - Residential"
   },
   "AMLN": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "AMP": {
     "sector": "Financial Services",
@@ -1804,24 +1804,24 @@
     "industry": "Auto & Truck Dealerships"
   },
   "ANDV": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas Refining & Marketing"
   },
   "ANF": {
     "sector": "Consumer Cyclical",
     "industry": "Apparel Retail"
   },
   "ANR": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Thermal Coal"
   },
   "ANSS": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "ANTM": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Healthcare Plans"
   },
   "AON": {
     "sector": "Financial Services",
@@ -1852,8 +1852,8 @@
     "industry": "Oil & Gas E&P"
   },
   "ARC": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "ARE": {
     "sector": "Real Estate",
@@ -1864,8 +1864,8 @@
     "industry": "Asset Management"
   },
   "ARNC": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Aluminum"
   },
   "ASC": {
     "sector": "Industrials",
@@ -1884,12 +1884,12 @@
     "industry": "Specialty Retail"
   },
   "AT": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Telecom Services"
   },
   "ATGE": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Education"
   },
   "ATI": {
     "sector": "Industrials",
@@ -1900,8 +1900,8 @@
     "industry": "Utilities - Regulated Gas"
   },
   "ATVI": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Electronic Gaming & Multimedia"
   },
   "AVB": {
     "sector": "Real Estate",
@@ -1916,8 +1916,8 @@
     "industry": "Utilities - Regulated Water"
   },
   "AYE": {
-    "sector": null,
-    "industry": null
+    "sector": "Utilities",
+    "industry": "Utilities"
   },
   "AYI": {
     "sector": "Industrials",
@@ -1936,8 +1936,8 @@
     "industry": "Medical Instruments & Supplies"
   },
   "BBBY": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
   },
   "BBDC4.SA": {
     "sector": "Financial Services",
@@ -1980,8 +1980,8 @@
     "industry": "Farm Products"
   },
   "BGEN": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "BHF": {
     "sector": "Financial Services",
@@ -1992,24 +1992,24 @@
     "industry": "Internet Content & Information"
   },
   "BIG": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Discount Stores"
   },
   "BIO": {
     "sector": "Healthcare",
     "industry": "Medical Devices"
   },
   "BK": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Asset Management"
   },
   "BLDR": {
     "sector": "Industrials",
     "industry": "Building Products & Equipment"
   },
   "BLL": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Packaging"
   },
   "BMC": {
     "sector": "Technology",
@@ -2020,8 +2020,8 @@
     "industry": "Biotechnology"
   },
   "BMS": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Packaging"
   },
   "BNL": {
     "sector": "Real Estate",
@@ -2056,8 +2056,8 @@
     "industry": "REIT - Office"
   },
   "CA": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "CAG": {
     "sector": "Consumer Defensive",
@@ -2084,16 +2084,16 @@
     "industry": "Specialty Retail"
   },
   "CBB": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Telecom Services"
   },
   "CBE": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Electrical Equipment"
   },
   "CBH": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "CBOE": {
     "sector": "Financial Services",
@@ -2108,8 +2108,8 @@
     "industry": "Banks - Regional"
   },
   "CCE": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Beverages"
   },
   "CCEP": {
     "sector": "Consumer Defensive",
@@ -2132,8 +2132,8 @@
     "industry": "Beverages - Brewers"
   },
   "CDAY": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "CDW": {
     "sector": "Technology",
@@ -2148,8 +2148,8 @@
     "industry": "Software"
   },
   "CERN": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "CF": {
     "sector": "Basic Materials",
@@ -2172,12 +2172,12 @@
     "industry": "Household & Personal Products"
   },
   "CHIR": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "CHK": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "CHKP": {
     "sector": "Technology",
@@ -2212,8 +2212,8 @@
     "industry": "Household & Personal Products"
   },
   "CMA": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "CME": {
     "sector": "Financial Services",
@@ -2224,8 +2224,8 @@
     "industry": "Utilities - Regulated Electric"
   },
   "CMVT": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "CNC": {
     "sector": "Healthcare",
@@ -2240,16 +2240,16 @@
     "industry": "Oil & Gas E&P"
   },
   "CNXT": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "COG": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "COL": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
   },
   "COMS": {
     "sector": "Technology",
@@ -2268,8 +2268,8 @@
     "industry": "Household & Personal Products"
   },
   "COV": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Medical Devices"
   },
   "CPB": {
     "sector": "Consumer Defensive",
@@ -2300,48 +2300,48 @@
     "industry": "Diagnostics & Research"
   },
   "CSC": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Information Technology Services"
   },
   "CSRA": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Information Technology Services"
   },
   "CTB": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
   },
   "CTLT": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "CTRA": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "CTVA": {
     "sector": "Basic Materials",
     "industry": "Agricultural Inputs"
   },
   "CTXS": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "CVG": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Telecom Services"
   },
   "CVH": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Healthcare Plans"
   },
   "CVNA": {
     "sector": "Consumer Cyclical",
     "industry": "Auto & Truck Dealerships"
   },
   "CXO": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "CZR": {
     "sector": "Consumer Cyclical",
@@ -2372,8 +2372,8 @@
     "industry": "Footwear & Accessories"
   },
   "DFS": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Credit Services"
   },
   "DG": {
     "sector": "Consumer Defensive",
@@ -2388,16 +2388,16 @@
     "industry": "Residential Construction"
   },
   "DISCA": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "DISCK": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "DISH": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "DLR": {
     "sector": "Real Estate",
@@ -2408,12 +2408,12 @@
     "industry": "Conglomerates"
   },
   "DNB": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Financial Data"
   },
   "DNR": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "DOC": {
     "sector": "Real Estate",
@@ -2436,8 +2436,8 @@
     "industry": "Restaurants"
   },
   "DRE": {
-    "sector": null,
-    "industry": null
+    "sector": "Real Estate",
+    "industry": "REIT"
   },
   "DRI": {
     "sector": "Consumer Cyclical",
@@ -2480,8 +2480,8 @@
     "industry": "Oil & Gas Integrated"
   },
   "ECH": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "ECHO": {
     "sector": "Communication Services",
@@ -2496,8 +2496,8 @@
     "industry": "Utilities - Regulated Electric"
   },
   "EFU": {
-    "sector": null,
-    "industry": null
+    "sector": "Utilities",
+    "industry": "Utilities"
   },
   "EFX": {
     "sector": "Industrials",
@@ -2516,8 +2516,8 @@
     "industry": "Household & Personal Products"
   },
   "EMC": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "EME": {
     "sector": "Industrials",
@@ -2532,8 +2532,8 @@
     "industry": "Specialty Industrial Machinery"
   },
   "ENDP": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "ENPH": {
     "sector": "Technology",
@@ -2576,16 +2576,16 @@
     "industry": "Utilities - Regulated Electric"
   },
   "ESRX": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Healthcare Plans"
   },
   "ESS": {
     "sector": "Real Estate",
     "industry": "REIT - Residential"
   },
   "ETFC": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Capital Markets"
   },
   "ETR": {
     "sector": "Utilities",
@@ -2596,8 +2596,8 @@
     "industry": "Internet Retail"
   },
   "EVHC": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Healthcare Plans"
   },
   "EVRG": {
     "sector": "Utilities",
@@ -2624,8 +2624,8 @@
     "industry": "Internet Content & Information"
   },
   "FBHS": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Building Products"
   },
   "FCN": {
     "sector": "Industrials",
@@ -2656,32 +2656,32 @@
     "industry": "Banks - Regional"
   },
   "FI": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Information Technology Services"
   },
   "FIS": {
     "sector": "Technology",
     "industry": "Information Technology Services"
   },
   "FISV": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Information Technology Services"
   },
   "FITB": {
     "sector": "Financial Services",
     "industry": "Banks - Regional"
   },
   "FL": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel Retail"
   },
   "FLEX": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "FLIR": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
   },
   "FLR": {
     "sector": "Industrials",
@@ -2692,8 +2692,8 @@
     "industry": "Specialty Industrial Machinery"
   },
   "FLT": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Information Technology Services"
   },
   "FMC": {
     "sector": "Basic Materials",
@@ -2720,8 +2720,8 @@
     "industry": "Entertainment"
   },
   "FRC": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "FRO": {
     "sector": "Energy",
@@ -2776,12 +2776,12 @@
     "industry": "Insurance - Life"
   },
   "GLD": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "GLK": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
   },
   "GME": {
     "sector": "Consumer Cyclical",
@@ -2820,24 +2820,24 @@
     "industry": "Specialty Business Services"
   },
   "GPS": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel Retail"
   },
   "GR": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
   },
   "GRA": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
   },
   "GRMN": {
     "sector": "Technology",
     "industry": "Scientific & Technical Instruments"
   },
   "GRN": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "GSX": {
     "sector": "Industrials",
@@ -2876,16 +2876,16 @@
     "industry": "Banks - Regional"
   },
   "HBI": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel"
   },
   "HES": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "HFC": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas Refining & Marketing"
   },
   "HI": {
     "sector": "Industrials",
@@ -2900,16 +2900,16 @@
     "industry": "Aerospace & Defense"
   },
   "HNZ": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Packaged Foods"
   },
   "HOG": {
     "sector": "Consumer Cyclical",
     "industry": "Recreational Vehicles"
   },
   "HOLX": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Medical Devices"
   },
   "HOT": {
     "sector": "Consumer Cyclical",
@@ -2952,8 +2952,8 @@
     "industry": "Healthcare Plans"
   },
   "IAC": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Internet Content"
   },
   "IBKR": {
     "sector": "Financial Services",
@@ -2972,16 +2972,16 @@
     "industry": "Specialty Chemicals"
   },
   "IGT": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Gambling"
   },
   "INCY": {
     "sector": "Healthcare",
     "industry": "Biotechnology"
   },
   "INFO": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Financial Data"
   },
   "INFY": {
     "sector": "Technology",
@@ -3000,8 +3000,8 @@
     "industry": "Packaging & Containers"
   },
   "IPG": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Advertising"
   },
   "IPGP": {
     "sector": "Technology",
@@ -3068,24 +3068,24 @@
     "industry": "Information Technology Services"
   },
   "JNPR": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "JNY": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel"
   },
   "JP": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "JWN": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Department Stores"
   },
   "K": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Packaged Foods"
   },
   "KBH": {
     "sector": "Consumer Cyclical",
@@ -3124,16 +3124,16 @@
     "industry": "Grocery Stores"
   },
   "KSE": {
-    "sector": null,
-    "industry": null
+    "sector": "Utilities",
+    "industry": "Utilities"
   },
   "KSS": {
     "sector": "Consumer Cyclical",
     "industry": "Department Stores"
   },
   "KSU": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Railroads"
   },
   "L": {
     "sector": "Financial Services",
@@ -3160,8 +3160,8 @@
     "industry": "Information Technology Services"
   },
   "LEAP": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Telecom Services"
   },
   "LEG": {
     "sector": "Consumer Cyclical",
@@ -3200,16 +3200,16 @@
     "industry": "Auto Parts"
   },
   "LM": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Asset Management"
   },
   "LNC": {
     "sector": "Financial Services",
     "industry": "Insurance - Life"
   },
   "LNCR": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Healthcare Plans"
   },
   "LNT": {
     "sector": "Utilities",
@@ -3224,24 +3224,24 @@
     "industry": "Building Products & Equipment"
   },
   "LSI": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "LSXMA": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "LSXMK": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "LU": {
     "sector": "Financial Services",
     "industry": "Credit Services"
   },
   "LUB": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Restaurants"
   },
   "LUMN": {
     "sector": "Communication Services",
@@ -3304,24 +3304,24 @@
     "industry": "Medical Care Facilities"
   },
   "MDP": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Publishing"
   },
   "MEDI": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "MEE": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Thermal Coal"
   },
   "MET": {
     "sector": "Financial Services",
     "industry": "Insurance - Life"
   },
   "MFE": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "MGM": {
     "sector": "Consumer Cyclical",
@@ -3348,12 +3348,12 @@
     "industry": "Building Materials"
   },
   "MLNM": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "MMC": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "MMI": {
     "sector": "Real Estate",
@@ -3364,8 +3364,8 @@
     "industry": "Conglomerates"
   },
   "MNK": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "MNR": {
     "sector": "Energy",
@@ -3376,20 +3376,20 @@
     "industry": "Healthcare Plans"
   },
   "MOLX": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "MON": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Agricultural Inputs"
   },
   "MOS": {
     "sector": "Basic Materials",
     "industry": "Agricultural Inputs"
   },
   "MRO": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "MSCI": {
     "sector": "Financial Services",
@@ -3416,8 +3416,8 @@
     "industry": "Insurance - Specialty"
   },
   "MTL": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Steel"
   },
   "MTW": {
     "sector": "Industrials",
@@ -3428,24 +3428,24 @@
     "industry": "Oil & Gas E&P"
   },
   "MXIM": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "MYL": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "NAV": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Trucking"
   },
   "NAVI": {
     "sector": "Financial Services",
     "industry": "Credit Services"
   },
   "NBL": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "NBR": {
     "sector": "Energy",
@@ -3460,8 +3460,8 @@
     "industry": "Travel Services"
   },
   "NCR": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "NDAQ": {
     "sector": "Financial Services",
@@ -3476,28 +3476,28 @@
     "industry": "Oil & Gas Drilling"
   },
   "NFX": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "NI": {
     "sector": "Utilities",
     "industry": "Utilities - Regulated Gas"
   },
   "NIHD": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Telecom Services"
   },
   "NKTR": {
     "sector": "Healthcare",
     "industry": "Biotechnology"
   },
   "NLOK": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "NLSN": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Consulting"
   },
   "NOC": {
     "sector": "Industrials",
@@ -3516,8 +3516,8 @@
     "industry": "Railroads"
   },
   "NSM": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "NTAP": {
     "sector": "Technology",
@@ -3532,8 +3532,8 @@
     "industry": "Asset Management"
   },
   "NUAN": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "NUE": {
     "sector": "Basic Materials",
@@ -3560,16 +3560,16 @@
     "industry": "Publishing"
   },
   "NYX": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Capital Markets"
   },
   "O": {
     "sector": "Real Estate",
     "industry": "REIT - Retail"
   },
   "ODP": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
   },
   "OI": {
     "sector": "Consumer Cyclical",
@@ -3588,8 +3588,8 @@
     "industry": "Advertising Agencies"
   },
   "ONE": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "OTIS": {
     "sector": "Industrials",
@@ -3608,40 +3608,40 @@
     "industry": "Software - Application"
   },
   "PBCT": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "PBI": {
     "sector": "Industrials",
     "industry": "Integrated Freight & Logistics"
   },
   "PBY": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
   },
   "PCH": {
-    "sector": null,
-    "industry": null
+    "sector": "Real Estate",
+    "industry": "REIT"
   },
   "PCL": {
     "sector": "Real Estate",
     "industry": "REIT - Specialty"
   },
   "PCP": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
   },
   "PD": {
     "sector": "Technology",
     "industry": "Software - Application"
   },
   "PDCO": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Medical Distribution"
   },
   "PEAK": {
-    "sector": null,
-    "industry": null
+    "sector": "Real Estate",
+    "industry": "REIT"
   },
   "PEG": {
     "sector": "Utilities",
@@ -3652,8 +3652,8 @@
     "industry": "Resorts & Casinos"
   },
   "PETM": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
   },
   "PETR4.SA": {
     "sector": "Energy",
@@ -3664,8 +3664,8 @@
     "industry": "Asset Management"
   },
   "PHB": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "PHM": {
     "sector": "Consumer Cyclical",
@@ -3676,16 +3676,16 @@
     "industry": "Packaging & Containers"
   },
   "PKI": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Diagnostics & Research"
   },
   "PLD": {
     "sector": "Real Estate",
     "industry": "REIT - Industrial"
   },
   "PLL": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
   },
   "PNC": {
     "sector": "Financial Services",
@@ -3732,8 +3732,8 @@
     "industry": "REIT - Industrial"
   },
   "PSFT": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "PTC": {
     "sector": "Technology",
@@ -3752,24 +3752,24 @@
     "industry": "Apparel Manufacturing"
   },
   "PXD": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "QEP": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "QGEN": {
     "sector": "Healthcare",
     "industry": "Diagnostics & Research"
   },
   "QQQ": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "QRTEA": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Internet Retail"
   },
   "QRVO": {
     "sector": "Technology",
@@ -3780,12 +3780,12 @@
     "industry": "Rental & Leasing Services"
   },
   "RAD": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Drug Retailers"
   },
   "RE": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "REG": {
     "sector": "Real Estate",
@@ -3840,28 +3840,28 @@
     "industry": "Waste Management"
   },
   "RSH": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
   },
   "RX": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Diagnostics & Research"
   },
   "RYAAY": {
     "sector": "Industrials",
     "industry": "Airlines"
   },
   "RYI": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Steel"
   },
   "SAF": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "SAI": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Information Technology Services"
   },
   "SANM": {
     "sector": "Technology",
@@ -3892,16 +3892,16 @@
     "industry": "Banks - Regional"
   },
   "SCG": {
-    "sector": null,
-    "industry": null
+    "sector": "Utilities",
+    "industry": "Utilities"
   },
   "SCI": {
     "sector": "Consumer Cyclical",
     "industry": "Personal Services"
   },
   "SDS": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "SE": {
     "sector": "Consumer Cyclical",
@@ -3912,20 +3912,20 @@
     "industry": "Solar"
   },
   "SEE": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Packaging"
   },
   "SGEN": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "SGP": {
     "sector": "Healthcare",
     "industry": "Biotechnology"
   },
   "SHPG": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "SIE.DE": {
     "sector": "Industrials",
@@ -3944,8 +3944,8 @@
     "industry": "Entertainment"
   },
   "SIVB": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "SJM": {
     "sector": "Consumer Defensive",
@@ -3964,20 +3964,20 @@
     "industry": "Credit Services"
   },
   "SLR": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "SNA": {
     "sector": "Industrials",
     "industry": "Tools & Accessories"
   },
   "SNI": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "SNV": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "SO": {
     "sector": "Utilities",
@@ -3988,16 +3988,16 @@
     "industry": "REIT - Retail"
   },
   "SPLK": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Software"
   },
   "SPY": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "SRCL": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Waste Management"
   },
   "SRE": {
     "sector": "Utilities",
@@ -4020,8 +4020,8 @@
     "industry": "Steel"
   },
   "STR": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "STT": {
     "sector": "Financial Services",
@@ -4032,20 +4032,20 @@
     "industry": "Beverages - Brewers"
   },
   "SUB": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks"
   },
   "SUN": {
     "sector": "Energy",
     "industry": "Oil & Gas Refining & Marketing"
   },
   "SUNW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "SVU": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Grocery"
   },
   "SWK": {
     "sector": "Industrials",
@@ -4056,8 +4056,8 @@
     "industry": "Semiconductors"
   },
   "SWN": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "SYF": {
     "sector": "Financial Services",
@@ -4124,8 +4124,8 @@
     "industry": "Medical Instruments & Supplies"
   },
   "TGNA": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Broadcasting"
   },
   "THC": {
     "sector": "Healthcare",
@@ -4140,16 +4140,16 @@
     "industry": "Other Industrial Metals & Mining"
   },
   "TIF": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Luxury Goods"
   },
   "TKR": {
     "sector": "Industrials",
     "industry": "Tools & Accessories"
   },
   "TLAB": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "TPL": {
     "sector": "Energy",
@@ -4160,8 +4160,8 @@
     "industry": "Luxury Goods"
   },
   "TRB": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Publishing"
   },
   "TRGP": {
     "sector": "Energy",
@@ -4188,8 +4188,8 @@
     "industry": "Specialty Retail"
   },
   "TSG": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Gambling"
   },
   "TSN": {
     "sector": "Consumer Defensive",
@@ -4204,16 +4204,16 @@
     "industry": "Electronic Gaming & Multimedia"
   },
   "TUP": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Household"
   },
   "TWTR": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Internet Content & Information"
   },
   "TWX": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "TX": {
     "sector": "Basic Materials",
@@ -4240,8 +4240,8 @@
     "industry": "Airlines"
   },
   "UCC": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "UCL": {
     "sector": "Communication Services",
@@ -4264,8 +4264,8 @@
     "industry": "Specialty Retail"
   },
   "UN": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Household Products"
   },
   "UNM": {
     "sector": "Financial Services",
@@ -4292,16 +4292,16 @@
     "industry": "Banks - Regional"
   },
   "UST": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Tobacco"
   },
   "VALE3.SA": {
     "sector": "Basic Materials",
     "industry": "Other Industrial Metals & Mining"
   },
   "VAR": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Medical Devices"
   },
   "VEEV": {
     "sector": "Healthcare",
@@ -4312,8 +4312,8 @@
     "industry": "Apparel Manufacturing"
   },
   "VIAC": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Entertainment"
   },
   "VIAV": {
     "sector": "Technology",
@@ -4332,8 +4332,8 @@
     "industry": "Building Materials"
   },
   "VMED": {
-    "sector": null,
-    "industry": null
+    "sector": "Communication Services",
+    "industry": "Telecom Services"
   },
   "VNO": {
     "sector": "Real Estate",
@@ -4344,8 +4344,8 @@
     "industry": "Scientific & Technical Instruments"
   },
   "VO": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "VOD": {
     "sector": "Communication Services",
@@ -4380,8 +4380,8 @@
     "industry": "Internet Content & Information"
   },
   "WBA": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "WEC": {
     "sector": "Utilities",
@@ -4396,20 +4396,20 @@
     "industry": "Restaurants"
   },
   "WFR": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "WHR": {
     "sector": "Consumer Cyclical",
     "industry": "Furnishings, Fixtures & Appliances"
   },
   "WLL": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "WLTW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "WM": {
     "sector": "Industrials",
@@ -4424,16 +4424,16 @@
     "industry": "Metal Fabrication"
   },
   "WPX": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "WRB": {
     "sector": "Financial Services",
     "industry": "Insurance - Property & Casualty"
   },
   "WRK": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Packaging"
   },
   "WSM": {
     "sector": "Consumer Cyclical",
@@ -4452,28 +4452,28 @@
     "industry": "REIT - Specialty"
   },
   "WYND": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Lodging"
   },
   "WYNN": {
     "sector": "Consumer Cyclical",
     "industry": "Resorts & Casinos"
   },
   "X": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Steel"
   },
   "XEC": {
-    "sector": null,
-    "industry": null
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
   },
   "XL": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Insurance"
   },
   "XLNX": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "XRAY": {
     "sector": "Healthcare",
@@ -4488,8 +4488,8 @@
     "industry": "Specialty Industrial Machinery"
   },
   "YRCW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Trucking"
   },
   "YUM": {
     "sector": "Consumer Cyclical",
@@ -4608,8 +4608,8 @@
     "industry": "Packaged Foods"
   },
   "1262.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Packaged Foods"
   },
   "1304.TW": {
     "sector": "Basic Materials",
@@ -4736,12 +4736,12 @@
     "industry": "Electrical Equipment & Parts"
   },
   "1565.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
   },
   "1569.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
   },
   "1589.TW": {
     "sector": "Industrials",
@@ -4756,24 +4756,24 @@
     "industry": "Leisure"
   },
   "1606.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
   },
   "1609.TW": {
     "sector": "Industrials",
     "industry": "Electrical Equipment & Parts"
   },
   "1701.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
   },
   "1702.TW": {
     "sector": "Consumer Defensive",
     "industry": "Packaged Foods"
   },
   "1704.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
   },
   "1707.TW": {
     "sector": "Healthcare",
@@ -4824,8 +4824,8 @@
     "industry": "Chemicals"
   },
   "1729.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "1732.TW": {
     "sector": "Consumer Defensive",
@@ -4852,8 +4852,8 @@
     "industry": "Biotechnology"
   },
   "1785.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
   },
   "1789.TW": {
     "sector": "Healthcare",
@@ -4868,8 +4868,8 @@
     "industry": "Building Products & Equipment"
   },
   "1815.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Building Materials"
   },
   "1903.TW": {
     "sector": "Consumer Defensive",
@@ -4992,8 +4992,8 @@
     "industry": "Auto Parts"
   },
   "2311.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2312.TW": {
     "sector": "Technology",
@@ -5004,8 +5004,8 @@
     "industry": "Communication Equipment"
   },
   "2315.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2316.TW": {
     "sector": "Technology",
@@ -5016,8 +5016,8 @@
     "industry": "Computer Hardware"
   },
   "2325.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2329.TW": {
     "sector": "Technology",
@@ -5032,16 +5032,16 @@
     "industry": "Communication Equipment"
   },
   "2336.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2338.TW": {
     "sector": "Technology",
     "industry": "Semiconductor Equipment & Materials"
   },
   "2341.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2342.TW": {
     "sector": "Technology",
@@ -5056,8 +5056,8 @@
     "industry": "Computer Hardware"
   },
   "2350.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2351.TW": {
     "sector": "Technology",
@@ -5084,8 +5084,8 @@
     "industry": "Computer Hardware"
   },
   "2366.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2367.TW": {
     "sector": "Technology",
@@ -5112,8 +5112,8 @@
     "industry": "Computer Hardware"
   },
   "2384.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2385.TW": {
     "sector": "Technology",
@@ -5132,8 +5132,8 @@
     "industry": "Security & Protection Services"
   },
   "2391.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2392.TW": {
     "sector": "Technology",
@@ -5144,12 +5144,12 @@
     "industry": "Electronic Components"
   },
   "2394.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2396.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2399.TW": {
     "sector": "Technology",
@@ -5164,8 +5164,8 @@
     "industry": "Electronic Components"
   },
   "2403.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2405.TW": {
     "sector": "Technology",
@@ -5180,8 +5180,8 @@
     "industry": "Computer Hardware"
   },
   "2418.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2419.TW": {
     "sector": "Technology",
@@ -5216,12 +5216,12 @@
     "industry": "Semiconductor Equipment & Materials"
   },
   "2446.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2448.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "2450.TW": {
     "sector": "Technology",
@@ -5232,8 +5232,8 @@
     "industry": "Information Technology Services"
   },
   "2456.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2457.TW": {
     "sector": "Industrials",
@@ -5248,24 +5248,24 @@
     "industry": "Electronic Components"
   },
   "2469.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2472.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "2473.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2474.TW": {
     "sector": "Industrials",
     "industry": "Metal Fabrication"
   },
   "2475.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2476.TW": {
     "sector": "Industrials",
@@ -5305,11 +5305,11 @@
   },
   "2498.TW": {
     "sector": "Technology",
-    "industry": "Consumer Electronics"
+    "industry": "Communication Equipment"
   },
   "2499.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "2501.TW": {
     "sector": "Real Estate",
@@ -5344,8 +5344,8 @@
     "industry": "Real Estate - Development"
   },
   "2526.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Real Estate",
+    "industry": "Real Estate"
   },
   "2534.TW": {
     "sector": "Real Estate",
@@ -5464,24 +5464,24 @@
     "industry": "Lodging"
   },
   "2807.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2809.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2822.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2823.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2833.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2834.TW": {
     "sector": "Financial Services",
@@ -5492,16 +5492,16 @@
     "industry": "Banks - Regional"
   },
   "2847.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2854.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2888.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "2889.TW": {
     "sector": "Financial Services",
@@ -5532,12 +5532,12 @@
     "industry": "Computer Hardware"
   },
   "3007.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3009.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3010.TW": {
     "sector": "Technology",
@@ -5548,8 +5548,8 @@
     "industry": "Electronic Components"
   },
   "3012.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3013.TW": {
     "sector": "Technology",
@@ -5624,104 +5624,104 @@
     "industry": "Electronic Components"
   },
   "3061.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3062.TW": {
     "sector": "Technology",
     "industry": "Communication Equipment"
   },
   "3063.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3078.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3081.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3094.TW": {
     "sector": "Technology",
     "industry": "Semiconductors"
   },
   "3105.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3131.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3141.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3147.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3149.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "3152.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3163.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3169.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3211.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3214.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3217.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3218.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3227.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3228.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3234.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3260.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3264.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3289.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3293.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3305.TW": {
     "sector": "Technology",
@@ -5736,16 +5736,16 @@
     "industry": "Electronics & Computer Distribution"
   },
   "3317.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3323.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3324.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3338.TW": {
     "sector": "Technology",
@@ -5756,84 +5756,84 @@
     "industry": "Semiconductors"
   },
   "3362.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3363.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3367.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3373.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3374.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3379.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3380.TW": {
     "sector": "Technology",
     "industry": "Communication Equipment"
   },
   "3383.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3413.TW": {
     "sector": "Technology",
     "industry": "Semiconductor Equipment & Materials"
   },
   "3428.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3441.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3454.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3455.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3474.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3479.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3483.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3491.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3504.TW": {
     "sector": "Industrials",
     "industry": "Electrical Equipment & Parts"
   },
   "3508.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3514.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3515.TW": {
     "sector": "Technology",
@@ -5844,80 +5844,80 @@
     "industry": "Specialty Industrial Machinery"
   },
   "3519.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3526.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3527.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3529.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3530.TW": {
     "sector": "Technology",
     "industry": "Semiconductors"
   },
   "3534.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3540.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3545.TW": {
     "sector": "Technology",
     "industry": "Semiconductors"
   },
   "3548.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3552.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3558.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3561.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3563.TW": {
     "sector": "Technology",
     "industry": "Semiconductor Equipment & Materials"
   },
   "3573.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3576.TW": {
     "sector": "Technology",
     "industry": "Solar"
   },
   "3579.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3580.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3583.TW": {
     "sector": "Technology",
     "industry": "Electronics & Computer Distribution"
   },
   "3584.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3588.TW": {
     "sector": "Technology",
@@ -5936,8 +5936,8 @@
     "industry": "Communication Equipment"
   },
   "3598.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "3607.TW": {
     "sector": "Consumer Cyclical",
@@ -5948,76 +5948,76 @@
     "industry": "Electronic Components"
   },
   "3624.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3630.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3638.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3645.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "3658.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3662.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3663.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3669.TW": {
     "sector": "Technology",
     "industry": "Consumer Electronics"
   },
   "3675.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3680.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3682.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3686.TW": {
     "sector": "Technology",
     "industry": "Solar"
   },
   "3687.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3691.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3693.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3697.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3698.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "3707.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "3708.TW": {
     "sector": "Basic Materials",
@@ -6032,8 +6032,8 @@
     "industry": "Medical Distribution"
   },
   "4105.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4106.TW": {
     "sector": "Healthcare",
@@ -6044,24 +6044,24 @@
     "industry": "Drug Manufacturers - Specialty & Generic"
   },
   "4114.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4119.TW": {
     "sector": "Healthcare",
     "industry": "Drug Manufacturers - Specialty & Generic"
   },
   "4123.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4128.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4130.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4133.TW": {
     "sector": "Healthcare",
@@ -6076,48 +6076,48 @@
     "industry": "Biotechnology"
   },
   "4147.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4162.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4164.TW": {
     "sector": "Healthcare",
     "industry": "Medical Distribution"
   },
   "4171.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4174.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4190.TW": {
     "sector": "Consumer Defensive",
     "industry": "Household & Personal Products"
   },
   "4303.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4426.TW": {
     "sector": "Consumer Cyclical",
     "industry": "Textile Manufacturing"
   },
   "4510.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4532.TW": {
     "sector": "Industrials",
     "industry": "Specialty Industrial Machinery"
   },
   "4541.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4562.TW": {
     "sector": "Industrials",
@@ -6136,16 +6136,16 @@
     "industry": "Specialty Industrial Machinery"
   },
   "4721.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4725.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
   },
   "4733.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
   },
   "4736.TW": {
     "sector": "Healthcare",
@@ -6156,16 +6156,16 @@
     "industry": "Specialty Chemicals"
   },
   "4743.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4746.TW": {
     "sector": "Healthcare",
     "industry": "Drug Manufacturers - Specialty & Generic"
   },
   "4749.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4755.TW": {
     "sector": "Basic Materials",
@@ -6176,28 +6176,28 @@
     "industry": "Specialty Chemicals"
   },
   "4772.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "4906.TW": {
     "sector": "Technology",
     "industry": "Communication Equipment"
   },
   "4908.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4909.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4930.TW": {
     "sector": "Consumer Cyclical",
     "industry": "Furnishings, Fixtures & Appliances"
   },
   "4931.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4934.TW": {
     "sector": "Technology",
@@ -6212,40 +6212,40 @@
     "industry": "Electronic Components"
   },
   "4947.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4953.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4966.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4968.TW": {
     "sector": "Technology",
     "industry": "Semiconductors"
   },
   "4971.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4976.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "4979.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "4991.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "5009.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "5203.TW": {
     "sector": "Technology",
@@ -6264,16 +6264,16 @@
     "industry": "Business Equipment & Supplies"
   },
   "5264.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "5274.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "5280.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "5284.TW": {
     "sector": "Technology",
@@ -6288,72 +6288,72 @@
     "industry": "Conglomerates"
   },
   "5289.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "5299.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "5309.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5314.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5317.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5347.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5349.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5351.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5371.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5388.TW": {
     "sector": "Technology",
     "industry": "Communication Equipment"
   },
   "5425.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5439.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5443.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5457.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5471.TW": {
     "sector": "Technology",
     "industry": "Semiconductors"
   },
   "5474.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5483.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "5522.TW": {
     "sector": "Real Estate",
@@ -6368,8 +6368,8 @@
     "industry": "Real Estate - Development"
   },
   "5536.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Real Estate",
+    "industry": "Real Estate"
   },
   "5607.TW": {
     "sector": "Industrials",
@@ -6380,32 +6380,32 @@
     "industry": "Marine Shipping"
   },
   "5609.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "5706.TW": {
     "sector": "Consumer Cyclical",
     "industry": "Travel Services"
   },
   "5854.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
   },
   "5876.TW": {
     "sector": "Financial Services",
     "industry": "Banks - Regional"
   },
   "6004.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
   },
   "6005.TW": {
     "sector": "Financial Services",
     "industry": "Capital Markets"
   },
   "6104.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6108.TW": {
     "sector": "Technology",
@@ -6420,44 +6420,44 @@
     "industry": "Computer Hardware"
   },
   "6118.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6120.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "6121.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6125.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6138.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6142.TW": {
     "sector": "Technology",
     "industry": "Communication Equipment"
   },
   "6145.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6147.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6148.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6150.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6153.TW": {
     "sector": "Technology",
@@ -6468,28 +6468,28 @@
     "industry": "Computer Hardware"
   },
   "6173.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6175.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6180.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6182.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6187.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6188.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6191.TW": {
     "sector": "Technology",
@@ -6520,76 +6520,76 @@
     "industry": "Specialty Industrial Machinery"
   },
   "6217.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6220.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6223.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6230.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   },
   "6231.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6235.TW": {
     "sector": "Industrials",
     "industry": "Metal Fabrication"
   },
   "6237.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6238.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6244.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6245.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6274.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6279.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6282.TW": {
     "sector": "Industrials",
     "industry": "Electrical Equipment & Parts"
   },
   "6286.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6289.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6290.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "6409.TW": {
     "sector": "Industrials",
     "industry": "Electrical Equipment & Parts"
   },
   "6411.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6414.TW": {
     "sector": "Technology",
@@ -6604,8 +6604,8 @@
     "industry": "Communication Equipment"
   },
   "6435.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6443.TW": {
     "sector": "Technology",
@@ -6620,12 +6620,12 @@
     "industry": "Semiconductors"
   },
   "6452.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "6462.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6472.TW": {
     "sector": "Healthcare",
@@ -6636,32 +6636,32 @@
     "industry": "Solar"
   },
   "6485.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6488.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6504.TW": {
     "sector": "Consumer Defensive",
     "industry": "Household & Personal Products"
   },
   "6509.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6510.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6538.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6547.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
   },
   "6550.TW": {
     "sector": "Healthcare",
@@ -6680,16 +6680,16 @@
     "industry": "Biotechnology"
   },
   "6640.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "6643.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "6683.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "6695.TW": {
     "sector": "Technology",
@@ -6700,252 +6700,252 @@
     "industry": "Specialty Industrial Machinery"
   },
   "6712.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6732.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6757.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Airlines"
   },
   "6781.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
   },
   "6789.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "6806.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
   },
   "6869.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Utilities",
+    "industry": "Utilities - Renewable"
   },
   "7610.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Basic Materials",
+    "industry": "Other Industrial Metals & Mining"
   },
   "8008.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8011.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "8016.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8043.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8044.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8050.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8054.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8064.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8069.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8076.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8078.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8081.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8086.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8096.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8101.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Communication Equipment"
   },
   "8105.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8110.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
   },
   "8111.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8112.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8114.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Business Equipment & Supplies"
   },
   "8155.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8163.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Computer Hardware"
   },
   "8213.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8215.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8222.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
   },
   "8249.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
   },
   "8255.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8261.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8271.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Semiconductors"
   },
   "8299.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Technology",
+    "industry": "Electronic Components"
   },
   "8341.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Waste Management"
   },
   "8358.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "8374.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Industrial Distribution"
   },
   "8422.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Waste Management"
   },
   "8429.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel Manufacturing"
   },
   "8436.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
   },
   "8440.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
   },
   "8454.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Internet Retail"
   },
   "8464.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Furnishings, Fixtures & Appliances"
   },
   "8478.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Recreational Vehicles"
   },
   "8936.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Conglomerates"
   },
   "9802.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Footwear & Accessories"
   },
   "9904.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Footwear & Accessories"
   },
   "9907.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Packaging & Containers"
   },
   "9910.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Footwear & Accessories"
   },
   "9911.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Furnishings, Fixtures & Appliances"
   },
   "9914.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Leisure"
   },
   "9919.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Defensive",
+    "industry": "Household & Personal Products"
   },
   "9921.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Leisure"
   },
   "9933.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
   },
   "9938.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Textile Manufacturing"
   },
   "9939.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Consumer Cyclical",
+    "industry": "Packaging & Containers"
   },
   "9945.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
   },
   "9958.TW": {
-    "sector": null,
-    "industry": null
+    "sector": "Industrials",
+    "industry": "Metal Fabrication"
   },
   "APP": {
     "sector": "Communication Services",
@@ -7047,63 +7047,807 @@
     "sector": "Technology",
     "industry": "Software - Infrastructure"
   },
-  "BRCM": [
-    "Technology",
-    "Semiconductors"
-  ],
-  "LLTC": [
-    "Technology",
-    "Semiconductors"
-  ],
-  "NVLS": [
-    "Technology",
-    "Semiconductor Equipment & Materials"
-  ],
-  "CELG": [
-    "Healthcare",
-    "Biotechnology"
-  ],
-  "AGN": [
-    "Healthcare",
-    "Drug Manufacturers"
-  ],
-  "GMCR": [
-    "Consumer Defensive",
-    "Packaged Foods"
-  ],
-  "RTN": [
-    "Industrials",
-    "Aerospace & Defense"
-  ],
-  "LLL": [
-    "Industrials",
-    "Aerospace & Defense"
-  ],
-  "CAM": [
-    "Energy",
-    "Oil & Gas Equipment & Services"
-  ],
-  "DO": [
-    "Energy",
-    "Oil & Gas Drilling"
-  ],
-  "ESV": [
-    "Energy",
-    "Oil & Gas Drilling"
-  ],
-  "APC": [
-    "Energy",
-    "Oil & Gas E&P"
-  ],
-  "TSO": [
-    "Energy",
-    "Oil & Gas Refining & Marketing"
-  ],
+  "BRCM": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "LLTC": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "NVLS": {
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "CELG": {
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
+  },
+  "AGN": {
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
+  },
+  "GMCR": {
+    "sector": "Consumer Defensive",
+    "industry": "Packaged Foods"
+  },
+  "RTN": {
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
+  },
+  "LLL": {
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
+  },
+  "CAM": {
+    "sector": "Energy",
+    "industry": "Oil & Gas Equipment & Services"
+  },
+  "DO": {
+    "sector": "Energy",
+    "industry": "Oil & Gas Drilling"
+  },
+  "ESV": {
+    "sector": "Energy",
+    "industry": "Oil & Gas Drilling"
+  },
+  "APC": {
+    "sector": "Energy",
+    "industry": "Oil & Gas E&P"
+  },
+  "TSO": {
+    "sector": "Energy",
+    "industry": "Oil & Gas Refining & Marketing"
+  },
   "7856.TW": {
     "sector": "Technology",
     "industry": "Semiconductors"
   },
   "8042.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6525.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "6541.TW": {
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
+  },
+  "6582.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "6592.TW": {
+    "sector": "Financial Services",
+    "industry": "Credit Services"
+  },
+  "6598.TW": {
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
+  },
+  "1313.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "1218.TW": {
+    "sector": "Consumer Defensive",
+    "industry": "Packaged Foods"
+  },
+  "1103.TW": {
+    "sector": "Basic Materials",
+    "industry": "Building Materials"
+  },
+  "1229.TW": {
+    "sector": "Industrials",
+    "industry": "Conglomerates"
+  },
+  "1234.TW": {
+    "sector": "Consumer Defensive",
+    "industry": "Beverages - Non-Alcoholic"
+  },
+  "1305.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "1217.TW": {
+    "sector": "Consumer Defensive",
+    "industry": "Packaged Foods"
+  },
+  "1316.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate Services"
+  },
+  "1339.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "1434.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Textile Manufacturing"
+  },
+  "1437.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate Services"
+  },
+  "1416.TW": {
+    "sector": "Technology",
+    "industry": "Information Technology Services"
+  },
+  "1451.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Textile Manufacturing"
+  },
+  "1447.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Textile Manufacturing"
+  },
+  "1457.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Textile Manufacturing"
+  },
+  "1516.TW": {
+    "sector": "Energy",
+    "industry": "Thermal Coal"
+  },
+  "1529.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "1538.TW": {
+    "sector": "Industrials",
+    "industry": "Tools & Accessories"
+  },
+  "1539.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "1522.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "1526.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Leisure"
+  },
+  "1540.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "1582.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "1608.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "1612.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "1568.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "1616.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "1618.TW": {
+    "sector": "Technology",
+    "industry": "Electronics & Computer Distribution"
+  },
+  "1721.TW": {
+    "sector": "Basic Materials",
+    "industry": "Chemicals"
+  },
+  "1752.TW": {
+    "sector": "Healthcare",
+    "industry": "Medical Instruments & Supplies"
+  },
+  "1733.TW": {
+    "sector": "Healthcare",
+    "industry": "Medical Devices"
+  },
+  "1809.TW": {
+    "sector": "Industrials",
+    "industry": "Building Products & Equipment"
+  },
+  "1773.TW": {
+    "sector": "Basic Materials",
+    "industry": "Chemicals"
+  },
+  "1810.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Furnishings, Fixtures & Appliances"
+  },
+  "1904.TW": {
+    "sector": "Basic Materials",
+    "industry": "Paper & Paper Products"
+  },
+  "1786.TW": {
+    "sector": "Healthcare",
+    "industry": "Medical Instruments & Supplies"
+  },
+  "2007.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2008.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2010.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2013.TW": {
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
+  },
+  "2025.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2029.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2069.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2028.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "2102.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "2227.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Manufacturers"
+  },
+  "2233.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "2239.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "2305.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "2348.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate Services"
+  },
+  "2364.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "2427.TW": {
+    "sector": "Industrials",
+    "industry": "Business Equipment & Supplies"
+  },
+  "2425.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "2428.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "2429.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "2431.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "2442.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate - Development"
+  },
+  "2444.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "2434.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "2420.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "2460.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "2462.TW": {
+    "sector": "Technology",
+    "industry": "Consumer Electronics"
+  },
+  "2471.TW": {
+    "sector": "Technology",
+    "industry": "Information Technology Services"
+  },
+  "2495.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "2496.TW": {
+    "sector": "Consumer Defensive",
+    "industry": "Education & Training Services"
+  },
+  "2535.TW": {
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
+  },
+  "2630.TW": {
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
+  },
+  "2608.TW": {
+    "sector": "Industrials",
+    "industry": "Trucking"
+  },
+  "2642.TW": {
+    "sector": "Industrials",
+    "industry": "Integrated Freight & Logistics"
+  },
+  "2753.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Restaurants"
+  },
+  "2812.TW": {
+    "sector": "Financial Services",
+    "industry": "Banks - Regional"
+  },
+  "2820.TW": {
+    "sector": "Financial Services",
+    "industry": "Capital Markets"
+  },
+  "2838.TW": {
+    "sector": "Financial Services",
+    "industry": "Banks - Regional"
+  },
+  "2852.TW": {
+    "sector": "Financial Services",
+    "industry": "Insurance - Property & Casualty"
+  },
+  "2855.TW": {
+    "sector": "Financial Services",
+    "industry": "Capital Markets"
+  },
+  "2906.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
+  },
+  "2911.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel Retail"
+  },
+  "2908.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Home Improvement Retail"
+  },
+  "3004.TW": {
+    "sector": "Industrials",
+    "industry": "Tools & Accessories"
+  },
+  "3003.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "3025.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "3031.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "3032.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "3028.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "3033.TW": {
+    "sector": "Technology",
+    "industry": "Electronics & Computer Distribution"
+  },
+  "3055.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "3164.TW": {
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
+  },
+  "3138.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "3356.TW": {
+    "sector": "Industrials",
+    "industry": "Security & Protection Services"
+  },
+  "3257.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "3437.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "3447.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "3494.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "3528.TW": {
+    "sector": "Technology",
+    "industry": "Electronics & Computer Distribution"
+  },
+  "3535.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "3557.TW": {
+    "sector": "Consumer Defensive",
+    "industry": "Household & Personal Products"
+  },
+  "3617.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "3705.TW": {
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers - Specialty & Generic"
+  },
+  "3704.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "3703.TW": {
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
+  },
+  "3694.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "4414.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel Manufacturing"
+  },
+  "4536.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Leisure"
+  },
+  "4540.TW": {
+    "sector": "Industrials",
+    "industry": "Tools & Accessories"
+  },
+  "4552.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "4564.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Furnishings, Fixtures & Appliances"
+  },
+  "4572.TW": {
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
+  },
+  "4551.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "4571.TW": {
+    "sector": "Industrials",
+    "industry": "Tools & Accessories"
+  },
+  "4766.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "4912.TW": {
+    "sector": "Industrials",
+    "industry": "Metal Fabrication"
+  },
+  "4770.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "4722.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "4949.TW": {
+    "sector": "Technology",
+    "industry": "Solar"
+  },
+  "4942.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "4952.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "4989.TW": {
+    "sector": "Basic Materials",
+    "industry": "Copper"
+  },
+  "4956.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "5215.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "4994.TW": {
+    "sector": "Communication Services",
+    "industry": "Electronic Gaming & Multimedia"
+  },
+  "5234.TW": {
+    "sector": "Basic Materials",
+    "industry": "Specialty Chemicals"
+  },
+  "6115.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "6133.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "6141.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6112.TW": {
+    "sector": "Technology",
+    "industry": "Information Technology Services"
+  },
+  "6189.TW": {
+    "sector": "Technology",
+    "industry": "Electronics & Computer Distribution"
+  },
+  "6168.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "6205.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6224.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6243.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "6277.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "6283.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6412.TW": {
+    "sector": "Industrials",
+    "industry": "Electrical Equipment & Parts"
+  },
+  "6438.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "6491.TW": {
+    "sector": "Healthcare",
+    "industry": "Medical Instruments & Supplies"
+  },
+  "6605.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Parts"
+  },
+  "6658.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "6625.TW": {
+    "sector": "Communication Services",
+    "industry": "Entertainment"
+  },
+  "6670.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Leisure"
+  },
+  "6753.TW": {
+    "sector": "Industrials",
+    "industry": "Aerospace & Defense"
+  },
+  "6689.TW": {
+    "sector": "Technology",
+    "industry": "Software - Infrastructure"
+  },
+  "6691.TW": {
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
+  },
+  "6782.TW": {
+    "sector": "Healthcare",
+    "industry": "Medical Instruments & Supplies"
+  },
+  "6799.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "6834.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6944.TW": {
+    "sector": "Industrials",
+    "industry": "Pollution & Treatment Controls"
+  },
+  "6890.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Footwear & Accessories"
+  },
+  "6830.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "6937.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductor Equipment & Materials"
+  },
+  "6962.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "8070.TW": {
+    "sector": "Technology",
+    "industry": "Electronics & Computer Distribution"
+  },
+  "8072.TW": {
+    "sector": "Technology",
+    "industry": "Electronics & Computer Distribution"
+  },
+  "8104.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "8131.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "8404.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Footwear & Accessories"
+  },
+  "8926.TW": {
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
+  },
+  "9906.TW": {
+    "sector": "Industrials",
+    "industry": "Engineering & Construction"
+  },
+  "9937.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Specialty Retail"
+  },
+  "9924.TW": {
+    "sector": "Industrials",
+    "industry": "Building Products & Equipment"
+  },
+  "9927.TW": {
+    "sector": "Basic Materials",
+    "industry": "Other Industrial Metals & Mining"
+  },
+  "DINO": {
+    "sector": "Energy",
+    "industry": "Oil & Gas Refining & Marketing"
+  },
+  "9941.TW": {
+    "sector": "Financial Services",
+    "industry": "Credit Services"
+  },
+  "GAP": {
+    "sector": "Consumer Cyclical",
+    "industry": "Apparel Retail"
+  },
+  "FBIN": {
+    "sector": "Industrials",
+    "industry": "Building Products & Equipment"
+  },
+  "1507.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "1592.TW": {
+    "sector": "Industrials",
+    "industry": "Specialty Industrial Machinery"
+  },
+  "1716.TW": {
+    "sector": "Healthcare",
+    "industry": "Drug Manufacturers"
+  },
+  "1902.TW": {
+    "sector": "Basic Materials",
+    "industry": "Paper & Paper Products"
+  },
+  "2422.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "2523.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate"
+  },
+  "2808.TW": {
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
+  },
+  "2841.TW": {
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
+  },
+  "2867.TW": {
+    "sector": "Financial Services",
+    "industry": "Banks & Financials"
+  },
+  "3271.TW": {
+    "sector": "Technology",
+    "industry": "Computer Hardware"
+  },
+  "4144.TW": {
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
+  },
+  "4984.TW": {
+    "sector": "Technology",
+    "industry": "Communication Equipment"
+  },
+  "5305.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6251.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6255.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6280.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  },
+  "6288.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
   }

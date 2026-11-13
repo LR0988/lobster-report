@@ -534,6 +534,22 @@ def main():
         "3189.TW": ("Technology", "Electronic Components"), "2308.TW": ("Technology", "Electronic Components"),
         "3008.TW": ("Technology", "Electronic Components"), "2345.TW": ("Technology", "Communication Equipment"),
         "2498.TW": ("Technology", "Communication Equipment"),
+        "6504.TW": ("Consumer Defensive", "Household & Personal Products"),
+        "6505.TW": ("Energy", "Oil & Gas Refining & Marketing"),
+        "6510.TW": ("Technology", "Semiconductors"),
+        "6515.TW": ("Technology", "Semiconductor Equipment & Materials"),
+        "6525.TW": ("Technology", "Semiconductors"),
+        "6526.TW": ("Technology", "Semiconductors"),
+        "6533.TW": ("Technology", "Semiconductors"),
+        "6541.TW": ("Healthcare", "Biotechnology"),
+        "6547.TW": ("Healthcare", "Biotechnology"),
+        "6550.TW": ("Healthcare", "Biotechnology"),
+        "6552.TW": ("Technology", "Semiconductors"),
+        "6558.TW": ("Industrials", "Electrical Equipment & Parts"),
+        "6582.TW": ("Basic Materials", "Specialty Chemicals"),
+        "6589.TW": ("Healthcare", "Biotechnology"),
+        "6592.TW": ("Financial Services", "Credit Services"),
+        "6598.TW": ("Healthcare", "Biotechnology"),
     }
     _TW_PREFIX_MAP = {
         "11": ("Basic Materials", "Building Materials"), "12": ("Consumer Defensive", "Packaged Foods"),
@@ -554,7 +570,7 @@ def main():
         "54": ("Technology", "Electronic Components"), "55": ("Real Estate", "Real Estate"),
         "58": ("Financial Services", "Banks & Financials"), "61": ("Technology", "Electronic Components"),
         "62": ("Technology", "Electronic Components"), "64": ("Technology", "Semiconductors"),
-        "65": ("Energy", "Oil & Gas Refining & Marketing"), "66": ("Technology", "Computer Hardware"),
+        "65": ("Technology", "Semiconductors"), "66": ("Technology", "Computer Hardware"),
         "67": ("Technology", "Semiconductors"), "80": ("Technology", "Semiconductors"),
         "81": ("Technology", "Electronic Components"), "82": ("Technology", "Electronic Components"),
         "84": ("Consumer Cyclical", "Specialty Retail"), "99": ("Consumer Cyclical", "Travel & Leisure"),
@@ -680,9 +696,9 @@ def main():
     spy_dvol20 = (np.sqrt((spy_ret.clip(upper=0.0) ** 2).rolling(20, min_periods=10).mean()) * np.sqrt(252.0)).fillna(0.15).values
     daily_top5_io20 = np.zeros(N_DATES, dtype=np.float32)
     pure_oil_gas_mask = np.array([g in {"G_OIL_REFINING", "G_OIL_UPSTREAM"} for g in _group_list], dtype=bool)
-    rev_yoy_ff = pd.DataFrame(rev_yoy_mat).ffill().values.astype(np.float32)
-    mgn_exp_ff = pd.DataFrame(mgn_exp_mat).ffill().values.astype(np.float32)
-    surp_ff = pd.DataFrame(surp_mat).ffill().values.astype(np.float32)
+    rev_yoy_ff = pd.DataFrame(rev_yoy_mat).ffill(limit=105).values.astype(np.float32)
+    mgn_exp_ff = pd.DataFrame(mgn_exp_mat).ffill(limit=105).values.astype(np.float32)
+    surp_ff = pd.DataFrame(surp_mat).ffill(limit=105).values.astype(np.float32)
     pit_defect_ff = (
         ((~np.isnan(surp_ff)) & (surp_ff < -0.01))
         | ((~np.isnan(rev_yoy_ff)) & (rev_yoy_ff < -0.15))
@@ -830,6 +846,35 @@ def main():
     def _is_overhead_supply_trap(t_pos_idx: int, ci: int) -> bool:
         return bool(float(prox_52w_arr[t_pos_idx, ci]) < 0.82 and float(io20_arr[t_pos_idx, ci]) <= 0.005)
 
+    stk_vol_arr = stk_vol.values
+    us_col_mask = np.array([not c.endswith(".TW") for c in cols], dtype=bool)
+    tw_col_mask = ~us_col_mask
+    us_mkt_open = (stk_vol_arr[:, us_col_mask] > 0).sum(axis=1) > 50
+    tw_mkt_open = (stk_vol_arr[:, tw_col_mask] > 0).sum(axis=1) > 30
+    both_open_dates = dates_idx[us_mkt_open & tw_mkt_open]
+    last_valid_pos_arr = np.array([
+        int(np.where((stk_vol_arr[:, ci] > 0) & (~np.isnan(px_adj_arr[:, ci])))[0][-1])
+        if np.any((stk_vol_arr[:, ci] > 0) & (~np.isnan(px_adj_arr[:, ci]))) else -1
+        for ci in range(len(cols))
+    ], dtype=np.int32)
+
+    def _can_trade_today(pos_i: int, ci: int) -> bool:
+        return bool(
+            0 <= pos_i < N_DATES
+            and stk_vol_arr[pos_i, ci] > 0
+            and not np.isnan(px_open_arr[pos_i, ci])
+            and px_open_arr[pos_i, ci] > 0
+        )
+
+    def _first_tradable_pos(start_i: int, ci: int) -> int:
+        lv = int(last_valid_pos_arr[ci])
+        if lv >= 0 and start_i > lv:
+            return lv
+        for k in range(max(0, start_i), N_DATES):
+            if _can_trade_today(k, ci):
+                return k
+        return min(max(0, start_i), N_DATES - 1)
+
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
         ym_groups = pd.Series(dates_idx, index=dates_idx).groupby([dates_idx.year, dates_idx.month])
         last_ym = (dates_idx[-1].year, dates_idx[-1].month)
@@ -846,18 +891,18 @@ def main():
         periods = []
         for i in range(len(rebal_dates) - 1):
             t_date = rebal_dates[i]
-            fut = dates_idx[dates_idx > t_date]
+            fut = both_open_dates[both_open_dates > t_date]
             if len(fut) == 0: break
             t_in = fut[0]
             next_rebal = rebal_dates[i + 1]
-            fut_next = dates_idx[dates_idx > next_rebal]
+            fut_next = both_open_dates[both_open_dates > next_rebal]
             if len(fut_next) == 0: break
             t_out = fut_next[0]
             periods.append((t_date, t_in, t_out, False))
         eq_cutoff = periods[-1][2]
         if len(rebal_dates) > 0:
             t_last = rebal_dates[-1]
-            fut_last = dates_idx[dates_idx > t_last]
+            fut_last = both_open_dates[both_open_dates > t_last]
             if len(fut_last) > 0:
                 periods.append((t_last, fut_last[0], dates_idx[-1], True))
 
@@ -867,6 +912,7 @@ def main():
         holdings = {}
         holding_tenure = {}
         pending_orders = []
+        deferred_sells = set()
         exited_this_period = set()
         p_idx = 0
         num_p = len(periods)
@@ -876,8 +922,29 @@ def main():
 
         for current_dt in all_sim_dates:
             cur_pos = dt_to_pos[current_dt]
-            if cash > 0:
-                cash *= 1.0 + float(safe_cash_ret.iloc[cur_pos])
+
+            # 先執行前一交易日因個股停牌/單邊假日而遞延的賣單 (當今日開盤恢復交易且有成交量立即成交)
+            if deferred_sells:
+                for c_ds in list(deferred_sells):
+                    if c_ds not in holdings:
+                        deferred_sells.discard(c_ds)
+                        continue
+                    if _can_trade_today(cur_pos, c_ds):
+                        op_ds = float(px_open_arr[cur_pos, c_ds])
+                        cash += holdings[c_ds]["shares"] * op_ds * (1.0 - fee_sell_arr[c_ds])
+                        del holdings[c_ds]
+                        holding_tenure.pop(c_ds, None)
+                        deferred_sells.discard(c_ds)
+                        exited_this_period.add(c_ds)
+                        if all_tranche_records and all_tranche_records[-1]["tranche"] == tranche_name:
+                            sym_ds = cols[c_ds]
+                            for pk in all_tranche_records[-1]["picks"]:
+                                if pk["ticker"] == sym_ds and pk.get("is_active", False):
+                                    pk["exit_price"] = round(op_ds, 2)
+                                    pk["period_ret"] = round((op_ds / pk["entry_price"] - 1.0) * 100.0, 2) if pk["entry_price"] > 0 else 0.0
+                                    pk["exit_date"] = str(current_dt)[:10]
+                                    pk["is_active"] = False
+                                    pk["action"] = f"⏳ {str(current_dt)[5:10].replace('-', '/')} 遞延賣出成交"
 
             if p_idx < num_p and current_dt == periods[p_idx][1]:
                 for od in pending_orders:
@@ -912,10 +979,13 @@ def main():
 
                 if exposure <= 0 or len(sorted_indices) == 0:
                     for c_i, hinfo in list(holdings.items()):
-                        out_px = px_open_arr[in_pos, c_i]
-                        cash += hinfo["shares"] * out_px * (1.0 - fee_sell_arr[c_i])
-                    holdings.clear()
-                    holding_tenure = {}
+                        if _can_trade_today(in_pos, c_i):
+                            out_px = px_open_arr[in_pos, c_i]
+                            cash += hinfo["shares"] * out_px * (1.0 - fee_sell_arr[c_i])
+                            del holdings[c_i]
+                            holding_tenure.pop(c_i, None)
+                        else:
+                            deferred_sells.add(c_i)
                     all_tranche_records.append({
                         "year": int(t_date.year),
                         "rebal_date": str(t_date)[:10],
@@ -936,6 +1006,9 @@ def main():
                     # 1. 預設最長任期 4 期；若短線爆發過熱 (3M>150% & 1M>35%) 縮短為 2 期；若黃金加速主升段 (12M 100~280% & 3M 40~110% & 1M<=32%) 延長為 5 期
                     # 2. 前4名無條件連任，第5名要求主力日內淨吸籌 (IO20>0) 且未破月線加速出貨，且分數 >= 0.28
                     for c_i in list(holdings.keys()):
+                        deferred_sells.discard(c_i)
+                        if 0 <= last_valid_pos_arr[c_i] < N_DATES - 1 and in_pos >= last_valid_pos_arr[c_i]:
+                            continue
                         if veto_s1_arr[t_pos, c_i]:
                             continue
                         if float(sc_row[c_i]) < min_score_thr:
@@ -973,6 +1046,8 @@ def main():
                     for c_i in top5_cands:
                         if len(selected_stks) >= 3: break
                         c_i = int(c_i)
+                        if (c_i not in old_holdings_set) and (not _can_trade_today(in_pos, c_i)):
+                            continue
                         tenure = holding_tenure.get(c_i, 0)
                         if c_i not in selected_stks and tenure < 4:
                             if c_i == int(sorted_indices[0]):
@@ -997,6 +1072,8 @@ def main():
                     for c_i in sorted_indices:
                         if len(selected_stks) >= 3: break
                         c_i = int(c_i)
+                        if (c_i not in old_holdings_set) and (not _can_trade_today(in_pos, c_i)):
+                            continue
                         tenure = holding_tenure.get(c_i, 0)
                         if c_i not in selected_stks and tenure < 4:
                             selected_stks.append(c_i)
@@ -1004,6 +1081,8 @@ def main():
                     for c_i in sorted_indices:
                         if len(selected_stks) >= 3: break
                         c_i = int(c_i)
+                        if (c_i not in old_holdings_set) and (not _can_trade_today(in_pos, c_i)):
+                            continue
                         if c_i not in selected_stks:
                             selected_stks.append(c_i)
 
@@ -1108,12 +1187,17 @@ def main():
                     period_picks_info = []
                     for idx_s, c_i in enumerate(selected_stks):
                         sym = cols[c_i]
-                        p_in = float(px_open_arr[in_pos, c_i])
+                        eff_out_pos = None
+                        eff_in_pos = in_pos if _can_trade_today(in_pos, c_i) else _first_tradable_pos(in_pos, c_i)
+                        p_in = float(px_open_arr[eff_in_pos, c_i])
                         # 若為當前進行中調倉，出場價格取最新收盤價
                         if is_active_tranche:
                             p_out = float(px_adj_arr[out_pos, c_i])
                         else:
-                            p_out = float(px_open_arr[out_pos, c_i])
+                            eff_out_pos = out_pos if _can_trade_today(out_pos, c_i) else _first_tradable_pos(out_pos, c_i)
+                            p_out = float(px_open_arr[eff_out_pos, c_i])
+                            if np.isnan(p_out) or p_out <= 0:
+                                p_out = float(px_adj_arr[eff_out_pos, c_i])
                         p_ret = ((p_out / p_in) - 1.0) * 100.0 if (p_in > 0 and p_out > 0 and not np.isnan(p_in) and not np.isnan(p_out)) else 0.0
 
                         disp_in = p_in
@@ -1149,7 +1233,7 @@ def main():
                         else:
                             action_label = "🟢 買入建倉 (過熱降權)" if is_tilted_down else "🟢 買入建倉"
 
-                        period_picks_info.append({
+                        pk_item = {
                             "rank": idx_s + 1,
                             "ticker": sym,
                             "name": get_stock_name(sym),
@@ -1161,7 +1245,12 @@ def main():
                             "is_active": is_active_tranche,
                             "action": action_label,
                             "tenure_months": holding_tenure.get(c_i, 1)
-                        })
+                        }
+                        if eff_in_pos != in_pos:
+                            pk_item["entry_date"] = str(dates_idx[eff_in_pos])[:10]
+                        if (not is_active_tranche) and (eff_out_pos is not None) and eff_out_pos != out_pos:
+                            pk_item["exit_date"] = str(dates_idx[eff_out_pos])[:10]
+                        period_picks_info.append(pk_item)
 
                     next_sched_str = "預計下次月初換倉" if day_target == 1 else "預計下次月下旬換倉"
                     if is_active_tranche:
@@ -1187,14 +1276,21 @@ def main():
 
                     for c_i in list(holdings.keys()):
                         if c_i not in target_alloc:
-                            out_px = px_open_arr[in_pos, c_i]
-                            cash += holdings[c_i]["shares"] * out_px * (1.0 - fee_sell_arr[c_i])
-                            del holdings[c_i]
+                            if _can_trade_today(in_pos, c_i):
+                                out_px = px_open_arr[in_pos, c_i]
+                                cash += holdings[c_i]["shares"] * out_px * (1.0 - fee_sell_arr[c_i])
+                                del holdings[c_i]
+                            else:
+                                deferred_sells.add(c_i)
 
-                    cur_val = cash + sum(holdings[c_i]["shares"] * px_open_arr[in_pos, c_i] for c_i in holdings)
+                    cur_val = cash + sum(
+                        holdings[c_i]["shares"] * float(px_open_arr[in_pos, c_i] if _can_trade_today(in_pos, c_i) else px_adj_arr[in_pos, c_i])
+                        for c_i in holdings
+                        if not np.isnan(px_open_arr[in_pos, c_i] if _can_trade_today(in_pos, c_i) else px_adj_arr[in_pos, c_i])
+                    )
                     for idx_s, c_i in enumerate(selected_stks):
                         tgt_w = target_alloc[c_i]
-                        if c_i in holdings:
+                        if c_i in holdings and _can_trade_today(in_pos, c_i):
                             op = float(px_open_arr[in_pos, c_i])
                             cur_sh = holdings[c_i]["shares"]
                             cur_w = (cur_sh * op) / cur_val if cur_val > 0 else 0.0
@@ -1205,6 +1301,8 @@ def main():
                                 holdings[c_i]["shares"] -= sell_sh
 
                     for c_i, tgt_w in target_alloc.items():
+                        if not _can_trade_today(in_pos, c_i):
+                            continue
                         op = float(px_open_arr[in_pos, c_i])
                         c_t = float(px_adj_arr[t_pos, c_i])
                         cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
@@ -1257,6 +1355,9 @@ def main():
                     freed_cash = 0.0
                     exited_syms_info = []
                     for c_i in to_exit:
+                        if not _can_trade_today(in_pos, c_i):
+                            deferred_sells.add(c_i)
+                            continue
                         op_out = float(px_open_arr[in_pos, c_i])
                         if not np.isnan(op_out) and op_out > 0:
                             sym_ex = cols[c_i]
@@ -1278,6 +1379,7 @@ def main():
                                                 disp_ex_out = op_out * (rc_v / ac_v)
                                         pk["exit_price"] = round(disp_ex_out, 2)
                                         pk["period_ret"] = round((disp_ex_out / pk["entry_price"] - 1.0) * 100.0, 2) if pk["entry_price"] > 0 else 0.0
+                                        pk["exit_date"] = str(current_dt)[:10]
                                         pk["is_active"] = False
                                         pk["action"] = f"⚡ {str(current_dt)[5:10].replace('-', '/')} P1油氣S3破線換馬出場"
                             del holdings[c_i]
@@ -1295,6 +1397,7 @@ def main():
                                 cand_i not in holdings
                                 and cand_i not in exited_this_period
                                 and cand_i not in cands_picked
+                                and _can_trade_today(in_pos, cand_i)
                                 and not pit_defect_ff[t_pos, cand_i]
                                 and not _is_crowded_outflow(t_pos, cand_i)
                                 and not _is_overhead_supply_trap(t_pos, cand_i)
@@ -1372,6 +1475,8 @@ def main():
                             if len(selected_stks) >= 3: break
                             c_i = int(c_i)
                             if c_i not in selected_stks:
+                                if not _can_trade_today(in_pos, c_i):
+                                    continue
                                 # 🌟 [R14 P1: CIE-1] 盤中回補乾淨進場衛生鎖：過濾當期財報瑕疵、族群高潮派發、52W上方套牢與機構出貨股
                                 if (
                                     pit_defect_ff[t_pos, c_i]
@@ -1405,6 +1510,8 @@ def main():
                             target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
                             did_intraday_ramp = False
                             for c_i, tgt_w in target_alloc.items():
+                                if not _can_trade_today(in_pos, c_i):
+                                    continue
                                 op = float(px_open_arr[in_pos, c_i])
                                 cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
                                 diff_val = (cur_tot_val * tgt_w) - (cur_sh * op)
@@ -1463,7 +1570,8 @@ def main():
                     lim = od["limit_px"]
                     op_today = float(px_open_arr[cur_pos, c_i])
                     low_today = float(px_low_arr[cur_pos, c_i])
-                    if not np.isnan(low_today) and low_today <= lim:
+                    tradable_now = _can_trade_today(cur_pos, c_i)
+                    if tradable_now and (not np.isnan(low_today)) and low_today <= lim:
                         fill_px = min(op_today, lim) if (not np.isnan(op_today) and op_today > 0) else lim
                         sh = (r_cash * (1.0 - fee_buy_arr[c_i])) / fill_px
                         if c_i in holdings:
@@ -1472,7 +1580,7 @@ def main():
                             holdings[c_i] = {"shares": sh, "entry_px": fill_px, "peak_px": fill_px}
                     elif cur_pos >= od["expire_pos"]:
                         c_td = float(px_adj_arr[cur_pos, c_i])
-                        if not np.isnan(c_td) and c_td > float(ma20_arr[cur_pos, c_i]) and float(io20_arr[cur_pos, c_i]) > 0.01:
+                        if tradable_now and (not np.isnan(c_td)) and c_td > float(ma20_arr[cur_pos, c_i]) and float(io20_arr[cur_pos, c_i]) > 0.01:
                             sh = (r_cash * (1.0 - fee_buy_arr[c_i])) / c_td
                             if c_i in holdings:
                                 holdings[c_i]["shares"] += sh
@@ -1484,6 +1592,46 @@ def main():
                         od["reserved_cash"] *= 1.0 + float(safe_cash_ret.iloc[cur_pos])
                         still_p.append(od)
                 pending_orders = still_p
+
+            # 下市 / 併購終止交易強制結算鎖：若持倉標的到達資料庫最後一個真實交易日且非全市場最新日，當日收盤強制結算為現金 (禁留殭屍持倉)
+            for c_dl in list(holdings.keys()):
+                lv_pos = int(last_valid_pos_arr[c_dl])
+                if 0 <= lv_pos < N_DATES - 1 and cur_pos >= lv_pos:
+                    dl_px = float(px_adj_arr[lv_pos, c_dl])
+                    if not np.isnan(dl_px) and dl_px > 0:
+                        cash += holdings[c_dl]["shares"] * dl_px * (1.0 - fee_sell_arr[c_dl])
+                    del holdings[c_dl]
+                    holding_tenure.pop(c_dl, None)
+                    deferred_sells.discard(c_dl)
+                    exited_this_period.add(c_dl)
+                    if all_tranche_records and all_tranche_records[-1]["tranche"] == tranche_name:
+                        sym_dl = cols[c_dl]
+                        dl_dt_str = str(dates_idx[lv_pos])[:10]
+                        for pk in all_tranche_records[-1]["picks"]:
+                            if pk["ticker"] == sym_dl and ("P1" not in pk.get("action", "")) and ("終止上市" not in pk.get("action", "")):
+                                if not np.isnan(dl_px) and dl_px > 0:
+                                    disp_dl = dl_px
+                                    raw_us_df = env.get("raw_px_us", None)
+                                    raw_tw_df = env.get("raw_px_tw", None)
+                                    if sym_dl.endswith(".TW") and raw_tw_df is not None and sym_dl in raw_tw_df.columns:
+                                        rc_v = float(raw_tw_df.iloc[lv_pos][sym_dl])
+                                        ac_v = float(px_adj_arr[lv_pos, c_dl])
+                                        if rc_v > 0 and ac_v > 0 and not np.isnan(rc_v) and not np.isnan(ac_v):
+                                            disp_dl = dl_px * (rc_v / ac_v)
+                                    elif not sym_dl.endswith(".TW") and raw_us_df is not None and sym_dl in raw_us_df.columns:
+                                        rc_v = float(raw_us_df.iloc[lv_pos][sym_dl])
+                                        ac_v = float(px_adj_arr[lv_pos, c_dl])
+                                        if rc_v > 0 and ac_v > 0 and not np.isnan(rc_v) and not np.isnan(ac_v):
+                                            disp_dl = dl_px * (rc_v / ac_v)
+                                    pk["exit_price"] = round(disp_dl, 2)
+                                    pk["period_ret"] = round((disp_dl / pk["entry_price"] - 1.0) * 100.0, 2) if pk["entry_price"] > 0 else 0.0
+                                pk["exit_date"] = dl_dt_str
+                                pk["is_active"] = False
+                                pk["action"] = f"🔚 {dl_dt_str[5:10].replace('-', '/')} 終止上市/併購結算"
+
+            # 收盤後對真正留存隔夜之未投資現金結算每日 1x 避險資產報酬 (徹底消除盤前/買入當日雙重計息)
+            if cash > 0:
+                cash *= 1.0 + float(safe_cash_ret.iloc[cur_pos])
 
             reserved_total = sum(od["reserved_cash"] for od in pending_orders)
             val = cash + reserved_total
@@ -1748,7 +1896,8 @@ def main():
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
         "strategy_version": "G12-PIT Sovereign R14 (7大黃金濾網 + R14四大正交因果升級[PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化] + R13三大進出場微結構[P1油氣S3盤中換馬/P2恐慌修復進場/P4高乖離分批低接] + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭 · 2005-2026)",
-        "universe_desc": f"{len(us_tickers) + tw_zero['adj_close'].shape[1]:,} 檔真實無生存者偏誤池 ({len(us_tickers)} 檔 S&P 500 官方入選日 PIT [現任 503/503 檔 100% 覆蓋] + {tw_zero['adj_close'].shape[1]} 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
+        "universe_total_count": int(len(us_tickers) + tw_zero["adj_close"].shape[1]),
+        "universe_desc": f"{len(us_tickers) + tw_zero['adj_close'].shape[1]:,} 檔真實無生存者偏誤池 ({len(us_tickers)} 檔 S&P 500 官方入選日 PIT [現任 503/503 檔 100% 覆蓋] + {tw_zero['adj_close'].shape[1]} 檔台股 0050∪0051 純上市 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
         "monthly_mdd": round(_monthly_mdd * 100.0, 2),

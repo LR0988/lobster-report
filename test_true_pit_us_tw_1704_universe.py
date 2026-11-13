@@ -79,11 +79,10 @@ def build_1704_pit_engine():
     dataset_end_dt = common_dates[-1]
     for s, lvd in us_pit["last_valid_date"].items():
         if lvd is not None and s in us_active.columns:
-            # 僅針對全歷史中真正已下市/被併購的股票 (最後有效日早於數據庫結束日前 10 天者)
-            # 在其下市/停止交易前 20 天即禁止新買入，且下市後永遠 active=False
+            # 嚴格因果鐵律 (消除墓碑 #65 lvd-20d 提前預知下市未來函數)：
+            # 僅於最後有效交易日 lvd 之後標記為 active=False；在 lvd 當日及之前保持可真實反映與清算。
             if lvd < dataset_end_dt - pd.Timedelta(days=10):
-                cutoff_dt = lvd - pd.Timedelta(days=20)
-                us_active.loc[common_dates >= cutoff_dt, s] = False
+                us_active.loc[common_dates > lvd, s] = False
 
     # 排除 Qlib 內因「代碼重用 (Ticker Reuse) 或未還權反向分割 (如 CBE +3049900%, TIE +592900%)」造成的單日異常斷層股
     us_ret1d = us_adj.pct_change(fill_method=None)
@@ -235,6 +234,7 @@ def build_1704_pit_engine():
         "s_g5_open": s_g5_1704,
         "us_in_sp500": us_in_sp500,
         "us_pit_elig_base": us_pit_elig_base,
+        "us_last_valid_date": us_pit["last_valid_date"],
         "us_rk_pit": us_rk_pit.astype(np.float32),
         "tw_rk_t": env_tw["tw_rk_t"].astype(np.float32),
         "pe_mat": pe_1704,
@@ -244,6 +244,12 @@ def build_1704_pit_engine():
         "raw_px_tw": env_tw["raw_px_tw"].astype(np.float32),
         "avg_order_ntd": env_tw["avg_order_ntd"].astype(np.float32),
         "avg_order_rk": env_tw["avg_order_rk"].astype(np.float32),
+        "g9_meta": {
+            "schema_version": env_tw.get("schema_version"),
+            "pure_twse_0050_0051_v2": env_tw.get("pure_twse_0050_0051_v2"),
+            "db_max_date_tw": env_tw.get("db_max_date_tw"),
+            "db_max_date_spy": env_tw.get("db_max_date_spy"),
+        },
     }
 
     # 強制執行回測前 PIT 與無拆股斷層硬斷言守門員 (失敗將直接 raise PITIntegrityViolationError 停機)

@@ -28,15 +28,18 @@ def prepare_clean_1725_pit_env():
     env = t1704.build_1704_pit_engine()
     us_tickers = env["us_tickers"]
 
-    # 1. 移除 Qlib 因歷史代碼重用 (Ticker Reuse) 產生 $3,000~$1,300,000 異常未還權價之 11 檔偽代碼及重複之 FB (已併入 META)
-    impostors = {"BMC", "EMC", "GAS", "HAR", "HOT", "PCL", "POM", "PTV", "SDS", "TEG", "TIE", "FB", "GOOG"}
+    # 1. 移除 Qlib 因歷史代碼重用 (Ticker Reuse) 產生 $3,000~$1,300,000 異常未還權價之 11 檔偽代碼、同股兩類別重複碼 GOOG 及點號重複股 BRK.B/BF.B (FB 已轉移至 META，禁止列入)
+    impostors = {"BMC", "EMC", "GAS", "HAR", "HOT", "PCL", "POM", "PTV", "SDS", "TEG", "TIE", "GOOG", "BRK.B", "BF.B"}
     for imp in impostors:
         if imp in env["us_pit_elig_base"].columns:
             env["us_pit_elig_base"][imp] = False
 
-    # 重新計算乾淨 S&P 500 PIT 當日成交額排名 us_rk_pit
-    import pickle
-    with open("/tmp/us_pit_full_history.pkl", "rb") as f:
+    # 重新計算乾淨 S&P 500 PIT 當日成交額排名 us_rk_pit (優先讀取專案 pit_cache/ 永久路徑)
+    import os, pickle
+    _us_pit_p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pit_cache", "us_pit_full_history.pkl")
+    if not os.path.exists(_us_pit_p):
+        _us_pit_p = "/tmp/us_pit_full_history.pkl"
+    with open(_us_pit_p, "rb") as f:
         us_pit = pickle.load(f)
     common_dates = env["stk_adj"].index
     us_raw = us_pit["raw_close"][us_tickers].reindex(common_dates).ffill()

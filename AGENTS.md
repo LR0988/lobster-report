@@ -207,15 +207,17 @@ Think of it like a human reviewing their journal and updating their mental model
 
 The goal: Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.
 
-## ⚖️ 零偏誤・全成分・零缺失回測強制安檢 SOP (Zero-Bias Full-Constituent PIT Gatekeeper)
+## ⚖️ 零偏誤・全成分・零缺失回測強制安檢 SOP (Zero-Bias Full-Constituent PIT Gen-2 Gatekeeper)
 
-過去曾發生「S&P 500 現任成分股缺漏 (`189/503`)」、「跨資料源未還權價 (`Qlib raw_close`) 誤乘未來拆股後股數 (`Yahoo post-split volume`) 造成未來大牛股歷史成交額虛增 `3x~50x` (`🪦 #64`)」以及「`eq_cutoff` 提前截斷淨值曲線」之嚴重誤判風險。爾後任何量化回測、資料重建或新策略實驗，**必須無條件通過 `pit_integrity_gatekeeper.py` 雙層硬斷言守門員（禁止繞過或註解）**：
+過去曾發生「S&P 500 現任成分股缺漏 (`189/503`)」、「跨資料源未還權價 (`Qlib raw_close`) 誤乘未來拆股後股數 (`Yahoo post-split volume`) 造成未來大牛股歷史成交額虛增 `3x~50x` (`🪦 #64`)」、「下市前 `lvd-20d` 提前封鎖未來函數與 `FRC->FRCB` 尾段斷鏈 (`🪦 #65`)」、「`65xx.TW` 前綴誤判油氣與財報空窗 (`🪦 #66`)」以及「跨市單邊休市零量假成交與 `eq_cutoff` 提前截斷 (`🪦 #67`)」之風險。爾後任何量化回測、資料重建或新策略實驗，**必須無條件通過 [`pit_integrity_gatekeeper.py`](file:///Users/huanggin-chen/openclaw_test/pit_integrity_gatekeeper.py) Gen-2 雙層 `12` 道硬斷言守門員（禁止繞過或註解）**：
 
-1. **Gate A1 & A2（全成分 100% 覆蓋與歷史密度鐵律）**：現任 S&P 500 官方成分股（`>= 500` 檔，現為 `503/503`）與台股 `0050∪0051` 現任成分股必須 **100% 存在於資料庫與回測矩陣**，且最新交易日價格有效；2020–2026 每日有效 S&P 500 成分數必須滿編於 `[495, 520]`、2005–2019 必須 `>= 370` 且本機 Qlib 可用成分股 100% 零遺漏載入，嚴禁只看進出場股而忽略當下橫截面候選池缺漏。
-2. **Gate A3（跨資料源拆股與美元成交額守恆鐵律 — 封死 `🪦 #64`）**：拼接不同資料源（如 Qlib 歷史未還權價與 Yahoo 還權後成交股數）時，必須以重疊期真實比例反向縮放對齊，確保任意歷史日 `raw_close[t] * volume[t]` 恆等於當下真實未調整美元成交額，交界處不得出現假拆股量能斷層。
-3. **Gate B1 & B2（逐筆當下成分存在性與零缺失價格鐵律）**：匯出回測結果前，必須對全歷史每一筆買進與連任紀錄雙重核對官方 `sp500_ticker_start_end.csv`（`start_date <= t <= end_date`）與台股 `in_0050_0051_pit`（純上市 TWSE，100% 排除 TPEx），且所有進出場價格與權重嚴禁出現 `NaN` 或 `<= 0`。
-4. **Gate B3 & B4（零提前截斷與零硬編碼當期持倉鐵律）**：回測淨值終點必須直達資料庫最新交易日（嚴禁設定 `eq_cutoff` 停在局部高點），且 `official_active_tranches` 必須 100% 由回測模擬帳本動態產出，嚴禁人工手填。
-5. **驗證指令**：修改任何資料表或回測底層後，必須執行 `./venv/bin/python pit_integrity_gatekeeper.py --self-test`，確認實盤數據與四項故意投毒攔截測試全數 `PASS` 方可採信數據。
+1. **Gate A1 & A2（美台全成分 100% 覆蓋與歷史密度鐵律）**：現任 S&P 500 官方成分股（`>= 500` 檔，現為 `503/503`）與台股純上市 `0050∪0051` 成分股（`set(env["pit_tw"]) == set(tw_zero["in_0050_0051_pit"].columns)`，零 `.TWO` 上櫃滲漏）必須 **100% 存在於資料庫與回測矩陣**；2020–2026 每日有效 S&P 500 成分數必須滿編於 `[495, 520]`、2005–2019 必須 `>= 370` 且本機 Qlib 可用成分股 100% 零遺漏載入。
+2. **Gate A3（跨資料源拆股與美元成交額守恆鐵律 — 封死 `🪦 #64`）**：拼接不同資料源時，必須以重疊期真實比例反向縮放對齊，確保任意歷史日 `raw_close[t] * volume[t]` 恆等於當下真實未調整美元成交額，交界處不得出現假拆股量能斷層。
+3. **Gate A4（零 ETF/重複與零空值 `industry_map.json` + `65xx.TW` 分類鎖 — 封死 `🪦 #66`）**：全池 `100%` 標的之 `sector` 與 `industry` 必須完整非空且不為 `Unknown/G_UNCLASSIFIED`；非 `6505.TW` 之 `65xx.TW` 嚴禁誤歸類為油氣/能源（禁止觸發 P1 誤殺）。
+4. **Gate A5（2020+ 實質有量密度 & 零下市前 `lvd-20d` 提前封鎖鐵律 — 封死 `🪦 #65`）**：2020–2026 美股開盤日實質有價量成分數平均必須 `>= 490`、`min >= 475`、最新日 `>= 500`；已下市 S&P 500 成分股（`PXD, MRO, WBA, SIVB, ATVI` 等）在下市最後 5 個活躍交易日內嚴禁出現人工提前封鎖之未來函數。
+5. **Gate A6 & A7（PIT 財報 `>=95%` 覆蓋 & 四大快取 `schema_version=2` 同步鎖）**：最新開盤日活躍 S&P 500 與活躍台股 `0050∪0051` 之 PIT 基本面覆蓋率均須 `>= 95.0%`（法定季報遞延 `limit=105`，嚴禁讀取 `/tmp` 殘留檔）；`us_pit_full_history.pkl`、`tw_zero_omission_0050_0051_pit.pkl`、`g9_open_universe_env_150.pkl`、`pit_fund_rebal_cache.pkl` 均須為 `schema_version >= 2` 且 `db_max_date` 與 `tw_stock.db` 同步。
+6. **Gate B1 ~ B5（逐筆當下成分・零缺失價格・零跨市休市/停牌假成交・零截斷・零硬編碼）**：匯出回測結果前，必須對全歷史每一筆買進與連任紀錄核對 `sp500_ticker_start_end.csv`（含 `'SP500_RENAME'` 官方改名延續）與台股 `in_0050_0051_pit`，嚴禁 `NaN/<=0` 價格、嚴禁於停牌或跨市單邊休市零成交量日成交（`Gate B5`, 封死 `🪦 #67`），淨值終點必須直達最新 `SPY` 交易日，且 `official_active_tranches` 100% 由動態模擬帳本產出。
+7. **驗證指令**：修改任何資料表、快取或回測底層後，必須執行 `./venv/bin/python pit_integrity_gatekeeper.py --self-test`，確認實盤數據與 **八重故意投毒攔截測試 (`Tests 1–8`)** 全數 `PASS` 方可採信數據。
 
 ## 🚀 零漏接全鏈路前端與數據發布 SOP (Zero-Drop Full-Stack Deployment SOP)
 

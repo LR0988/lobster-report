@@ -992,8 +992,34 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 # G12-PIT Sovereign (配置七) 乘數合流：G12防雷 × RD黃金護城河 × exp_262正交壓縮突破
                 m_g12_sovereign = m_high_dist_b2 * m_vol_veto_d * m_cond_b60 * m_rd_synergy * m_exp262
 
+                # 🌟 3-in-1 + 極值力竭 + 假突破追高五重動能微結構濾網 (與 export_g11_pit_detailed_history.py 100% 同步)
+                down_vol20_val = (np.sqrt(sum((min(0.0, r) ** 2) for r in daily_rets[:20]) / max(1, min(20, len(daily_rets)))) * np.sqrt(252.0)) if len(daily_rets) >= 10 else 0.30
+                vol_surge_val = ((sum(vols[:20]) / 20.0) / (v60_avg + 1.0)) if len(vols) >= 60 else 1.0
+                vol_ratio_20d_val = min(5.0, max(0.2, mean_up_v / (mean_dn_v + 1.0)))
+                n_clv5 = min(5, len(closes), len(highs), len(lows))
+                clv5_val = (sum((closes[k] - lows[k]) / max(1e-9, highs[k] - lows[k]) if highs[k] > lows[k] else 0.5 for k in range(n_clv5)) / max(1, n_clv5)) if n_clv5 >= 2 else 0.5
+                is_dead_cat = (mom12m < 40.0) and ((mom1m or 0.0) > 25.0)
+                is_vol_blowoff = (vol_surge_val > 1.60) and (io_5_val < 0.0)
+                is_high_wr_bonus = (vol_ratio_20d_val >= 1.15) and (down_vol20_val <= 0.28) and (io_20_val > 0.01)
+                is_climax_exhaust = (clv5_val > 0.80) and (mom5d > 10.0) and (bias_ma60_pct > 25.0)
+                is_fake_breakout = False
+                if (mom5d >= 6.0) and (io_20_val <= -0.01):
+                    try:
+                        from pit_fundamental_service import evaluate_live_ticker_pit_fundamentals
+                        _f_res = evaluate_live_ticker_pit_fundamentals(t_code, io_20_val)
+                        is_fake_breakout = float(_f_res.get("f_score", 0.0) or 0.0) <= 0.0
+                    except Exception:
+                        is_fake_breakout = True
+                mult_3in1 = (
+                    (0.75 if is_dead_cat else 1.0)
+                    * (0.75 if is_vol_blowoff else 1.0)
+                    * (1.05 if is_high_wr_bonus else 1.0)
+                    * (0.85 if is_climax_exhaust else 1.0)
+                    * (0.90 if is_fake_breakout else 1.0)
+                )
+
                 if open_pool_quality_ok:
-                    score_val = round(base_score_val * m_io20 * m_fip126 * m_pp40 * m_l2_veto * m_l6_coiled * m_g12_sovereign, 4)
+                    score_val = round(base_score_val * m_io20 * m_fip126 * m_pp40 * m_l2_veto * m_l6_coiled * m_g12_sovereign * mult_3in1, 4)
                 else:
                     score_val = -999.0
 
@@ -1220,7 +1246,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 dynamic_admitted_map[ticker]["whale_1000_pct"] = st.get("whale_1000_pct")
                 dynamic_admitted_map[ticker]["whale_scissors_pct"] = st.get("whale_scissors_pct")
 
-            if st["price"] > st["ma60"] and st["price"] > st["ma200"] and st["churn_safe"] and pit_elig_ok and st.get("open_pool_quality_ok", True) and (st["score"] or 0) > 0:
+            if st["price"] > st["ma60"] and st["price"] > st["ma200"] and st["churn_safe"] and pit_elig_ok and st.get("open_pool_quality_ok", True) and (st["score"] or 0) > 0.28:
                 if ticker == "ASX" or ticker == "3711.TW":
                     ind_grp = "SEMI_ASE"
                 elif ticker == "TSM" or ticker == "2330.TW":
@@ -1434,7 +1460,27 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         f"-> 收斂至 {td_exp}% {'空手避險' if td_exp == 0 else '試單防禦'})"
                     )
 
-                # 🌟 R14-P3 (CSH-DM1): 黃金破位無條件流動性清算保護鎖 (GLD < MA40 & 21D < 0 ➔ 100% 轉停泊 BIL 美元短債)
+                # 🌟 Moreira & Muir (2017 JF) 大盤 20D 下行半波動率連續縮放 + Top-5 >= 4 檔破月線減震 (與回測 100% 同步)
+                if int(ms.get("exposure_pct", 0)) > 0 and q_b_ma20:
+                    try:
+                        def _idx_dvol20(tk_idx):
+                            c.execute("SELECT adj_close FROM global_sovereign_daily WHERE ticker = ? AND adj_close IS NOT NULL ORDER BY date DESC LIMIT 25", (tk_idx,))
+                            arr = [float(r[0]) for r in c.fetchall() if r[0] is not None]
+                            if len(arr) >= 12:
+                                rets = [(arr[i] / arr[i + 1] - 1.0) for i in range(min(20, len(arr) - 1)) if arr[i + 1] > 0]
+                                if len(rets) >= 10:
+                                    return float(np.sqrt(sum((min(0.0, rx) ** 2) for rx in rets) / len(rets)) * np.sqrt(252.0))
+                            return 0.15
+                        mdv = max(_idx_dvol20("QQQ"), _idx_dvol20("SPY"))
+                        if mdv > 0.20:
+                            ms["exposure_pct"] = int(round(int(ms["exposure_pct"]) * max(0.35, 0.20 / mdv)))
+                    except Exception:
+                        pass
+                    n_below_ma20 = sum(1 for x in top5_pre if float(x.get("price") or 0) < float(x.get("ma20") or 0))
+                    if n_below_ma20 >= 4:
+                        ms["exposure_pct"] = min(int(ms["exposure_pct"]), 45)
+
+                # 🌟 R14-P3 (CSH-DM1): 黃金破位無條件流動性清算保護鎖 ((GLD<MA40 & 21D<-2%) or 21D<-5% ➔ 100% 轉停泊 BIL 美元短債)
                 gld_bd_active = False
                 try:
                     c.execute(
@@ -1446,7 +1492,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         gld_ma40 = sum(gld_rows[:40]) / 40.0
                         gld_p21 = gld_rows[min(21, len(gld_rows) - 1)]
                         gld_ret21 = (gld_now / gld_p21 - 1.0) if gld_p21 > 0 else 0.0
-                        gld_bd_active = bool((gld_now < gld_ma40) and (gld_ret21 < 0.0))
+                        gld_bd_active = bool(((gld_now < gld_ma40) and (gld_ret21 < -0.02)) or (gld_ret21 < -0.05))
                         ms["gld_price"] = round(gld_now, 2)
                         ms["gld_ma40"] = round(gld_ma40, 2)
                         ms["gld_ret21_pct"] = round(gld_ret21 * 100.0, 2)
@@ -1839,8 +1885,14 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R14 (1,738檔 503/503 全覆蓋零偷看 PIT 終極版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R14・1,738檔全成分零偷看 PIT [S&P 500 現任503/503 100%覆蓋] + 7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構[P1/P2/P4]・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R14 (全成分零偷看 PIT 終極版)
+        _u_total = int(_G.get("universe_total_count") or 1744)
+        scheme_a_yearly = {int(r["year"]): float(r["return_pct"]) for r in _hist if r.get("year") is not None}
+        _y2008 = scheme_a_yearly.get(2008, 0.0)
+        _y2018 = scheme_a_yearly.get(2018, 0.0)
+        _y2020 = scheme_a_yearly.get(2020, 0.0)
+        _y2022 = scheme_a_yearly.get(2022, 0.0)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R14・{_u_total:,}檔全成分零偷看 PIT [S&P 500 現任503/503 100%覆蓋] + 7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構[P1/P2/P4]・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1863,15 +1915,14 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
                 "【G12-PIT Sovereign R14・7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位短債保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構】"
-                "美股 S&P 500 PIT 官方成分股 Top 100 (含 182 檔下市/併購股產業映射) + 台股 0050∪0051 純上市前 150 大 PIT + "
-                "PF-TD高檔未破月線宏觀頂背離預警護盾(40%<Exposure<=65%且QQQ>=20MA收斂至16%/0%) + CSH-DM1黃金破位流動性清算保護鎖(GLD<MA40&21D<0轉100%BIL短債) + "
+                "美股 S&P 500 PIT 官方成分股 Top 100 (含下市/併購股產業映射) + 台股 0050∪0051 純上市全歷史 PIT + "
+                "PF-TD高檔未破月線宏觀頂背離預警護盾(40%<Exposure<=65%且QQQ>=20MA收斂至16%/0%) + CSH-DM1黃金破位流動性清算保護鎖((GLD<MA40&21D<-2%)或21D<-5%轉100%BIL短債) + "
                 "CIE-1盤中回補乾淨進場衛生鎖 + SEC-VOL1二階狙擊下行半波動純化(Rank#2~#5) + R13[P1油氣S3盤中換馬/P2恐慌修復進場/P4極端高乖離分批低接] + "
                 "M1主帥降級扶正 + M5真龍頭4%解鎖 + 23跨市場族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52W套牢過濾 + 良性半方差點火(+5%, Segal 2015 JFE)"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
         # 同步更新歷年報酬率為 G12-PIT Sovereign (2005~2026)
-        scheme_a_yearly = {int(r["year"]): float(r["return_pct"]) for r in _hist if r.get("year") is not None}
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
             data["yearly_performance"] = [row for row in data["yearly_performance"] if int(row.get("year", 0)) >= 2005]
             for row in data["yearly_performance"]:
@@ -1881,7 +1932,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R14 (1,738檔全成分零偷看 PIT・PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位保護鎖 + CIE-1盤中乾淨進場 + SEC-VOL1二階半波動純化 + R13三大進出場微結構)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R14 ({_u_total:,}檔全成分零偷看 PIT・PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位保護鎖 + CIE-1盤中乾淨進場 + SEC-VOL1二階半波動純化 + R13三大進出場微結構)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1894,10 +1945,10 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             "sharpe": _sh,
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
-                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與根除跨資料源拆股成交額未來函數 ({_G.get('universe_desc', 'True PIT 1,738 檔母池')})。",
-                "② [R14 PF-TD + CSH-DM1] 高檔未跌頂背離預警護盾 & 黃金破位短債保護鎖：宏觀警報壓抑曝險 (40%<Exp<=65%) 但 QQQ 仍站 20MA 尚未宣洩時收斂至 16%/0% 防範補跌；GLD 跌破 40MA 且月報酬轉負時 100% 轉停泊 BIL 美元短債避開 2008/2020 流動性拋售。",
+                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與根除跨資料源拆股成交額未來函數 ({_G.get('universe_desc', f'True PIT {_u_total:,} 檔母池')})。",
+                "② [R14 PF-TD + CSH-DM1] 高檔未跌頂背離預警護盾 & 黃金破位短債保護鎖：宏觀警報壓抑曝險 (40%<Exp<=65%) 但 QQQ 仍站 20MA 尚未宣洩時收斂至 16%/0% 防範補跌；(GLD<40MA且21D<-2%)或21D<-5%時 100% 轉停泊 BIL 美元短債避開 2008/2020 流動性拋售。",
                 "③ [R14 CIE-1 + SEC-VOL1] 盤中回補乾淨進場衛生鎖 & 二階下行半波動純化：盤中 V 轉回補嚴格排除財報瑕疵/套牢/過熱股；Rank #2~#5 拔擢低半波動機構吸籌股 (×1.05)、降權高下行波動無吸籌股 (×0.92)。",
-                f"④ R13[P1/P2/P4] × R12[M1主帥扶正/M5真龍頭4%解鎖/23族群輪動]：2008海嘯逆勢 +6.50%、2018貿易戰 +62.12%、2020熔斷 +67.56%、2022升息熊市 +4.71%，22 年勝年 {_wy}、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                f"④ R13[P1/P2/P4] × R12[M1主帥扶正/M5真龍頭4%解鎖/23族群輪動]：2008海嘯 {_y2008:+.2f}%、2018貿易戰 {_y2018:+.2f}%、2020熔斷 {_y2020:+.2f}%、2022升息熊市 {_y2022:+.2f}%，22 年勝年 {_wy}、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 

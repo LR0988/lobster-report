@@ -23,8 +23,11 @@ for G12-PIT Sovereign (Twin Momentum: Price Momentum × Fundamental Momentum).
 """
 import os
 import time
+import hashlib
 import pickle
 import sqlite3
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import numpy as np
 import pandas as pd
@@ -206,49 +209,347 @@ def compute_us_pit_metrics_at_date(fund_entry: dict, t_date: pd.Timestamp) -> di
     return res
 
 
+def _cols_hash(cols: list) -> str:
+    return hashlib.md5(",".join(str(c) for c in cols).encode("utf-8")).hexdigest()[:12]
+
+
+def _get_tw_db_max_date() -> str:
+    if not os.path.exists(TW_DB_PATH):
+        return ""
+    try:
+        conn = sqlite3.connect(TW_DB_PATH)
+        r = conn.execute("SELECT MAX(date) FROM global_stock_daily WHERE ticker = 'SPY'").fetchone()
+        conn.close()
+        return str(r[0]) if r and r[0] else ""
+    except Exception:
+        return ""
+
+
 def load_or_build_pit_fund_matrices(dates_idx: pd.DatetimeIndex, cols: list) -> dict:
     """
     Loads precomputed PIT Fundamental matrices `(N_DATES, N_COLS)` from
-    `pit_cache/pit_fund_rebal_cache.pkl` (or `/tmp/pit_fund_rebal_cache.pkl`),
-    aligning `(dates_idx, cols)` shape safely if new trading days or tickers are appended
-    instead of silently dropping to all-NaN matrices (`R14 D0 Hygiene Fix`).
+    `pit_cache/pit_fund_rebal_cache.pkl` (never `/tmp/`), validating
+    `schema_version >= 2`, `cols_hash`, and `db_max_date`, and safely
+    aligning `(dates_idx, cols)` with bounded `ffill(limit=65)`.
     """
     n_d, n_c = len(dates_idx), len(cols)
     mat_keys = ("rev_yoy_mat", "rev_acc_mat", "eps_yoy_mat", "mgn_exp_mat", "surp_mat", "f_score_mat")
-    for p in (REBAL_FUND_PKL_PATH, "/tmp/pit_fund_rebal_cache.pkl"):
-        if os.path.exists(p):
-            try:
-                with open(p, "rb") as f:
-                    d = pickle.load(f)
-                sh = d["rev_yoy_mat"].shape
-                if sh == (n_d, n_c):
-                    return d
-                c_dates = d.get("dates_idx", d.get("dates"))
-                c_cols = d.get("cols")
-                if c_dates is not None and c_cols is not None:
-                    out_d = {}
-                    for k in mat_keys:
-                        if k in d:
-                            df_k = pd.DataFrame(d[k], index=pd.DatetimeIndex(c_dates), columns=list(c_cols))
-                            out_d[k] = df_k.reindex(index=dates_idx, method="ffill").reindex(columns=cols).values.astype(np.float32)
-                    if len(out_d) == len(mat_keys):
-                        return out_d
-                elif sh[1] == n_c and sh[0] > 0:
-                    out_d = {}
-                    for k in mat_keys:
-                        if k in d:
-                            arr_k = d[k]
-                            if sh[0] < n_d:
-                                pad = np.repeat(arr_k[-1:, :], n_d - sh[0], axis=0)
-                                out_d[k] = np.vstack([arr_k, pad]).astype(np.float32)
-                            else:
-                                out_d[k] = arr_k[-n_d:, :].astype(np.float32)
-                    if len(out_d) == len(mat_keys):
-                        return out_d
-            except Exception:
-                pass
-    # Fallback empty matrices if cache not found
+    if os.path.exists(REBAL_FUND_PKL_PATH):
+        try:
+            with open(REBAL_FUND_PKL_PATH, "rb") as f:
+                d = pickle.load(f)
+            if int(d.get("schema_version", 1)) >= 2 and d.get("cols_hash") == _cols_hash(cols):
+                if d["rev_yoy_mat"].shape == (n_d, n_c) and list(d.get("cols", [])) == list(cols):
+                    if pd.DatetimeIndex(d["dates_idx"]).equals(dates_idx):
+                        return d
+            c_dates = d.get("dates_idx", d.get("dates"))
+            c_cols = d.get("cols")
+            if c_dates is not None and c_cols is not None:
+                out_d = {}
+                for k in mat_keys:
+                    if k in d:
+                        df_k = pd.DataFrame(d[k], index=pd.DatetimeIndex(c_dates), columns=list(c_cols))
+                        out_d[k] = df_k.reindex(index=dates_idx, method="ffill", limit=105).reindex(columns=cols).values.astype(np.float32)
+                if len(out_d) == len(mat_keys):
+                    return out_d
+        except Exception:
+            pass
+    # Fallback empty matrices if cache not built yet
     return {k: np.full((n_d, n_c), np.nan, dtype=np.float32) for k in mat_keys}
+
+
+def rebuild_full_pit_fund_caches(dates_idx: pd.DatetimeIndex, cols: list, force_sec: bool = False) -> dict:
+    """
+    Rebuilds full-pool SEC EDGAR XBRL cache (`pit_cache/sec_edgar_pit_fundamentals.pkl`)
+    for all active & historical US tickers and computes exact Point-In-Time fundamental
+    matrices across all `dates_idx` × `cols` (US SEC EDGAR + TW `tw_stock.db` in-memory
+    batch queries), applying bounded `ffill(limit=65)` and saving `schema_version=2`
+    to `pit_cache/pit_fund_rebal_cache.pkl`.
+    """
+    from build_us_pit_delisted_db import SP500_VERIFIED_RENAME_PAIRS
+    os.makedirs(PIT_CACHE_DIR, exist_ok=True)
+    dates_idx = pd.DatetimeIndex(dates_idx)
+    n_d, n_c = len(dates_idx), len(cols)
+    us_cols = [c for c in cols if not str(c).endswith(".TW")]
+    tw_cols = [c for c in cols if str(c).endswith(".TW")]
+
+    # 1. Load existing SEC EDGAR dictionary
+    us_dict = {}
+    if os.path.exists(SEC_PKL_PATH):
+        try:
+            with open(SEC_PKL_PATH, "rb") as f:
+                us_dict = pickle.load(f)
+        except Exception:
+            us_dict = {}
+
+    # 2. Fetch official SEC CIK mappings (tickers + exchange)
+    sec_map = {}
+    for url in (
+        "https://www.sec.gov/files/company_tickers.json",
+        "https://www.sec.gov/files/company_tickers_exchange.json",
+    ):
+        try:
+            r = requests.get(url, headers=SEC_HEADERS, timeout=15)
+            if r.status_code == 200:
+                js = r.json()
+                if isinstance(js, dict) and "data" in js and "fields" in js:
+                    t_idx = js["fields"].index("ticker")
+                    c_idx = js["fields"].index("cik")
+                    for row in js["data"]:
+                        tk = str(row[t_idx]).upper().strip()
+                        cik_s = str(row[c_idx]).zfill(10)
+                        sec_map[tk] = cik_s
+                        sec_map[tk.replace("-", ".")] = cik_s
+                        sec_map[tk.replace(".", "-")] = cik_s
+                elif isinstance(js, dict):
+                    for v in js.values():
+                        tk = str(v["ticker"]).upper().strip()
+                        cik_s = str(v["cik_str"]).zfill(10)
+                        sec_map[tk] = cik_s
+                        sec_map[tk.replace("-", ".")] = cik_s
+                        sec_map[tk.replace(".", "-")] = cik_s
+        except Exception:
+            pass
+
+    rename_fwd = {o: n for o, n in SP500_VERIFIED_RENAME_PAIRS}
+    today_str = pd.Timestamp.now().strftime("%Y-%m-%d")
+    # Determine US tickers needing SEC EDGAR XBRL fetch
+    todo_us = []
+    for sym in us_cols:
+        cik = sec_map.get(sym) or sec_map.get(sym.replace(".", "-")) or sec_map.get(rename_fwd.get(sym, ""))
+        if not cik:
+            continue
+        ent = us_dict.get(sym)
+        if force_sec or ent is None:
+            todo_us.append((sym, cik))
+            continue
+        if ent.get("last_checked") == today_str:
+            continue
+        rev_df = ent.get("rev", pd.DataFrame())
+        if rev_df is None or rev_df.empty:
+            todo_us.append((sym, cik))
+        else:
+            max_f = pd.to_datetime(rev_df["filed"]).max()
+            if pd.isna(max_f) or max_f < pd.Timestamp("2026-06-01"):
+                todo_us.append((sym, cik))
+
+    print(f"📡 [SEC EDGAR Full Backfill] CIK matched={sum(1 for s in us_cols if s in sec_map or s.replace('.','-') in sec_map)}/{len(us_cols)} | Cached={len(us_dict)} | Fetch/Refresh={len(todo_us)}")
+    if todo_us:
+        rate_lock = threading.Lock()
+        last_req = [0.0]
+
+        def _fetch_sec_one(sym_cik):
+            sym_k, cik_k = sym_cik
+            with rate_lock:
+                wait_s = 0.14 - (time.time() - last_req[0])
+                if wait_s > 0:
+                    time.sleep(wait_s)
+                last_req[0] = time.time()
+            try:
+                url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik_k}.json"
+                resp = requests.get(url, headers=SEC_HEADERS, timeout=15)
+                if resp.status_code != 200:
+                    return sym_k, None, resp.status_code
+                ug = resp.json().get("facts", {}).get("us-gaap", {})
+                if not ug:
+                    return sym_k, None, 204
+                rev_tags = [k for k in ug.keys() if "Revenue" in k or "Sales" in k]
+                out = {
+                    "rev": extract_sec_quarterly_series(ug, [
+                        "RevenueFromContractWithCustomerExcludingAssessedTax",
+                        "RevenueFromContractWithCustomerIncludingAssessedTax",
+                        "Revenues", "SalesRevenueNet", "SalesRevenueGoodsNet",
+                        "InterestAndDividendIncomeOperating", "InterestIncomeOperating",
+                        "PremiumsEarnedNet", "TotalRevenuesAndOtherIncome",
+                    ] + rev_tags[:4]),
+                    "opinc": extract_sec_quarterly_series(ug, [
+                        "OperatingIncomeLoss",
+                        "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+                    ]),
+                    "gp": extract_sec_quarterly_series(ug, ["GrossProfit"]),
+                    "netinc": extract_sec_quarterly_series(ug, ["NetIncomeLoss", "ProfitLoss"]),
+                    "eps": extract_sec_quarterly_series(ug, ["EarningsPerShareDiluted", "EarningsPerShareBasic"]),
+                    "surprise": us_dict.get(sym_k, {}).get("surprise", pd.DataFrame()),
+                    "last_checked": pd.Timestamp.now().strftime("%Y-%m-%d"),
+                }
+                return sym_k, out, 200
+            except Exception:
+                return sym_k, None, -1
+
+        ok_cnt = 0
+        fail_429 = 0
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            futs = [ex.submit(_fetch_sec_one, pair) for pair in todo_us]
+            for idx_f, fut in enumerate(as_completed(futs), start=1):
+                sym_r, ent_r, code_r = fut.result()
+                if ent_r is not None and not ent_r["rev"].empty:
+                    us_dict[sym_r] = ent_r
+                    ok_cnt += 1
+                elif code_r in (403, 429):
+                    fail_429 += 1
+                if idx_f % 80 == 0:
+                    with open(SEC_PKL_PATH, "wb") as f:
+                        pickle.dump(us_dict, f)
+                    print(f"  - SEC EDGAR progress {idx_f}/{len(todo_us)} (updated={ok_cnt}, rate_err={fail_429})")
+
+        # Propagate renamed successor filings to predecessor ticker keys if missing
+        for old_t, new_t in SP500_VERIFIED_RENAME_PAIRS:
+            if old_t in us_cols and new_t in us_dict and old_t not in us_dict:
+                us_dict[old_t] = us_dict[new_t]
+
+        with open(SEC_PKL_PATH, "wb") as f:
+            pickle.dump(us_dict, f)
+        print(f"  ✅ SEC EDGAR backfill done: updated={ok_cnt}, total cached US={len(us_dict)}, err403/429={fail_429}")
+
+    # 3. Build exact PIT fundamental matrices across all dates_idx × cols
+    rev_yoy_mat = np.full((n_d, n_c), np.nan, dtype=np.float32)
+    rev_acc_mat = np.full((n_d, n_c), np.nan, dtype=np.float32)
+    eps_yoy_mat = np.full((n_d, n_c), np.nan, dtype=np.float32)
+    mgn_exp_mat = np.full((n_d, n_c), np.nan, dtype=np.float32)
+    surp_mat = np.full((n_d, n_c), np.nan, dtype=np.float32)
+    f_score_mat = np.full((n_d, n_c), np.nan, dtype=np.float32)
+
+    col_to_idx = {c: i for i, c in enumerate(cols)}
+    dt_min, dt_max = dates_idx[0], dates_idx[-1]
+
+    # Precompute US matrices via unique filing/expiry milestones (100% day-exact, ~3s total)
+    for sym in us_cols:
+        ent = us_dict.get(sym)
+        if not ent:
+            continue
+        ci = col_to_idx[sym]
+        ms_dates = {dt_max}
+        for key, dcol in (("rev", "filed"), ("opinc", "filed"), ("eps", "filed"), ("surprise", "ann_dt")):
+            df_k = ent.get(key)
+            if df_k is not None and not df_k.empty and dcol in df_k.columns:
+                dts = pd.to_datetime(df_k[dcol], errors="coerce").dropna()
+                for x in dts:
+                    if dt_min <= x <= dt_max:
+                        ms_dates.add(x)
+                if "end" in df_k.columns:
+                    ends = pd.to_datetime(df_k["end"], errors="coerce").dropna()
+                    for e in ends:
+                        exp_d = e + pd.Timedelta(days=191)
+                        if dt_min <= exp_d <= dt_max:
+                            ms_dates.add(exp_d)
+        sorted_ms = sorted(ms_dates)
+        if not sorted_ms:
+            continue
+        # Evaluate at each milestone and fill forward to next milestone (bounded by <= 65 trading days safety)
+        for m_i, m_dt in enumerate(sorted_ms):
+            res = compute_us_pit_metrics_at_date(ent, m_dt)
+            if not res["has_data"] and np.isnan(res["margin_expand"]):
+                continue
+            p_start = int(dates_idx.searchsorted(m_dt, side="left"))
+            if m_i + 1 < len(sorted_ms):
+                p_end = int(dates_idx.searchsorted(sorted_ms[m_i + 1], side="left"))
+            else:
+                p_end = n_d
+            p_end = min(p_end, p_start + 106, n_d)
+            if p_start >= p_end:
+                continue
+            ry, ra, ey, me, su = res["rev_yoy"], res["rev_accel"], res["eps_yoy"], res["margin_expand"], res["eps_surprise"]
+            rev_yoy_mat[p_start:p_end, ci] = ry
+            rev_acc_mat[p_start:p_end, ci] = ra
+            eps_yoy_mat[p_start:p_end, ci] = ey
+            mgn_exp_mat[p_start:p_end, ci] = me
+            surp_mat[p_start:p_end, ci] = su
+            ry_c = np.clip(ry, -0.50, 1.50) if not np.isnan(ry) else 0.0
+            ra_c = np.clip(ra, -0.50, 0.80) if not np.isnan(ra) else 0.0
+            ey_c = np.clip(ey, -0.80, 2.00) if not np.isnan(ey) else 0.0
+            me_c = np.clip(me, -0.15, 0.20) if not np.isnan(me) else 0.0
+            su_c = np.clip(su, -0.25, 0.50) if not np.isnan(su) else 0.0
+            f_score_mat[p_start:p_end, ci] = float(0.35 * ry_c + 0.25 * ra_c + 0.20 * ey_c + 0.50 * me_c + 0.25 * su_c)
+
+    # Batch-load TW monthly_revenue and quarterly_margins in memory once
+    if tw_cols and os.path.exists(TW_DB_PATH):
+        conn = sqlite3.connect(TW_DB_PATH)
+        df_m_all = pd.read_sql_query("SELECT stock_id, revenue_date, yoy FROM monthly_revenue WHERE yoy IS NOT NULL", conn)
+        df_q_all = pd.read_sql_query("SELECT stock_id, year, season, rev_q, om_q FROM quarterly_margins ORDER BY stock_id, year, season", conn)
+        conn.close()
+
+        df_m_all["ann_dt"] = pd.to_datetime(df_m_all["revenue_date"].map(_roc_to_ann_str), errors="coerce")
+        df_m_all = df_m_all.dropna(subset=["ann_dt"]).sort_values(["stock_id", "ann_dt"])
+        m_groups = {k: g for k, g in df_m_all.groupby("stock_id")}
+
+        df_q_all["filed"] = [_tw_yq_to_filing_date(int(y), int(s)) for y, s in zip(df_q_all["year"], df_q_all["season"])]
+        df_q_all = df_q_all.sort_values(["stock_id", "filed"])
+        q_groups = {k: g for k, g in df_q_all.groupby("stock_id")}
+
+        for sym in tw_cols:
+            sid = sym.split(".")[0]
+            ci = col_to_idx[sym]
+            gm = m_groups.get(sid)
+            gq = q_groups.get(sid)
+
+            # Monthly YoY & 3M YoY acceleration series (ann_dt -> dates_idx, bounded ffill 65)
+            if gm is not None and not gm.empty:
+                gm_d = gm.drop_duplicates(subset=["ann_dt"], keep="last").set_index("ann_dt").sort_index()
+                yoy_s = (gm_d["yoy"].astype(float) / 100.0)
+                acc_s = yoy_s - yoy_s.shift(3)
+                # Shift onto dates_idx cleanly with limit=65
+                pos_m = dates_idx.searchsorted(yoy_s.index, side="left")
+                for idx_m, p0 in enumerate(pos_m):
+                    if p0 >= n_d:
+                        continue
+                    p1 = pos_m[idx_m + 1] if (idx_m + 1 < len(pos_m)) else n_d
+                    p1 = min(p1, p0 + 106, n_d)
+                    if p0 < p1:
+                        rev_yoy_mat[p0:p1, ci] = float(yoy_s.iloc[idx_m])
+                        if not pd.isna(acc_s.iloc[idx_m]):
+                            rev_acc_mat[p0:p1, ci] = float(acc_s.iloc[idx_m])
+
+            if gq is not None and len(gq) >= 5:
+                gq = gq.reset_index(drop=True)
+                rq = gq["rev_q"].astype(float).values
+                om = gq["om_q"].astype(float).values
+                f_dts = pd.DatetimeIndex(gq["filed"].values)
+                pos_q = dates_idx.searchsorted(f_dts, side="left")
+                for iq in range(4, len(gq)):
+                    p0 = pos_q[iq]
+                    if p0 >= n_d:
+                        continue
+                    p1 = pos_q[iq + 1] if (iq + 1 < len(pos_q)) else n_d
+                    p1 = min(p1, p0 + 106, n_d)
+                    if p0 >= p1:
+                        continue
+                    r0, r4 = rq[iq], rq[iq - 4]
+                    om0, om4 = om[iq], om[iq - 4]
+                    if np.isnan(rev_yoy_mat[p0, ci]) and r4 > 0 and not np.isnan(r0):
+                        rev_yoy_mat[p0:p1, ci] = (r0 - r4) / r4
+                    if not (np.isnan(om0) or np.isnan(om4)):
+                        mgn_exp_mat[p0:p1, ci] = (om0 - om4) / 100.0
+                    if not (np.isnan(r0) or np.isnan(r4) or np.isnan(om0) or np.isnan(om4)):
+                        op0, op4 = r0 * om0, r4 * om4
+                        if abs(op4) > 10:
+                            eps_yoy_mat[p0:p1, ci] = (op0 - op4) / abs(op4)
+
+            # Compute composite f_score across populated TW positions
+            valid_tw = (~np.isnan(rev_yoy_mat[:, ci])) | (~np.isnan(mgn_exp_mat[:, ci])) | (~np.isnan(eps_yoy_mat[:, ci]))
+            if np.any(valid_tw):
+                ry_v = np.where(np.isnan(rev_yoy_mat[:, ci]), 0.0, np.clip(rev_yoy_mat[:, ci], -0.50, 1.50))
+                ra_v = np.where(np.isnan(rev_acc_mat[:, ci]), 0.0, np.clip(rev_acc_mat[:, ci], -0.50, 0.80))
+                ey_v = np.where(np.isnan(eps_yoy_mat[:, ci]), 0.0, np.clip(eps_yoy_mat[:, ci], -0.80, 2.00))
+                me_v = np.where(np.isnan(mgn_exp_mat[:, ci]), 0.0, np.clip(mgn_exp_mat[:, ci], -0.15, 0.20))
+                f_score_mat[valid_tw, ci] = (0.35 * ry_v + 0.25 * ra_v + 0.20 * ey_v + 0.50 * me_v)[valid_tw]
+
+    res_bundle = {
+        "schema_version": 2,
+        "cols_hash": _cols_hash(cols),
+        "db_max_date": _get_tw_db_max_date(),
+        "dates_idx": dates_idx,
+        "cols": list(cols),
+        "rev_yoy_mat": rev_yoy_mat,
+        "rev_acc_mat": rev_acc_mat,
+        "eps_yoy_mat": eps_yoy_mat,
+        "mgn_exp_mat": mgn_exp_mat,
+        "surp_mat": surp_mat,
+        "f_score_mat": f_score_mat,
+    }
+    with open(REBAL_FUND_PKL_PATH, "wb") as f:
+        pickle.dump(res_bundle, f)
+    print(f"💾 已重建 PIT 財報矩陣快取 (schema_version=2): {REBAL_FUND_PKL_PATH} | shape=({n_d}, {n_c})")
+    return res_bundle
 
 
 def auto_refresh_live_candidates_sec_edgar(tickers: list, force: bool = False) -> dict:
@@ -398,23 +699,21 @@ def evaluate_live_ticker_pit_fundamentals(sym: str, io20_val: float = 0.0, as_of
             except Exception:
                 pass
     else:
-        for p in (SEC_PKL_PATH, "/tmp/sec_edgar_pit_fundamentals.pkl"):
-            if os.path.exists(p):
-                try:
-                    with open(p, "rb") as f:
-                        us_dict = pickle.load(f)
-                    if sym in us_dict:
-                        m = compute_us_pit_metrics_at_date(us_dict[sym], as_of_date)
-                        metrics.update({
-                            "rev_yoy": m["rev_yoy"],
-                            "rev_accel": m["rev_accel"],
-                            "eps_yoy": m["eps_yoy"],
-                            "margin_expand": m["margin_expand"],
-                            "eps_surprise": m["eps_surprise"],
-                        })
-                        break
-                except Exception:
-                    pass
+        if os.path.exists(SEC_PKL_PATH):
+            try:
+                with open(SEC_PKL_PATH, "rb") as f:
+                    us_dict = pickle.load(f)
+                if sym in us_dict:
+                    m = compute_us_pit_metrics_at_date(us_dict[sym], as_of_date)
+                    metrics.update({
+                        "rev_yoy": m["rev_yoy"],
+                        "rev_accel": m["rev_accel"],
+                        "eps_yoy": m["eps_yoy"],
+                        "margin_expand": m["margin_expand"],
+                        "eps_surprise": m["eps_surprise"],
+                    })
+            except Exception:
+                pass
 
     ry = metrics["rev_yoy"]
     ra = metrics["rev_accel"]

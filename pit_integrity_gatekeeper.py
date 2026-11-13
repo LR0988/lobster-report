@@ -14,7 +14,9 @@ pit_integrity_gatekeeper.py
 
 import os
 import json
+import pickle
 import sqlite3
+import tempfile
 import numpy as np
 import pandas as pd
 
@@ -63,7 +65,7 @@ def load_sp500_intervals(sp500_csv_path: str = None, include_db_historical: bool
             conn = sqlite3.connect(resolved_db)
             try:
                 rows = conn.execute(
-                    "SELECT ticker, start_date, end_date FROM us_pit_constituents WHERE source IN ('SP500_FJA', 'SP500_QLIB')"
+                    "SELECT ticker, start_date, end_date FROM us_pit_constituents WHERE source IN ('SP500_FJA', 'SP500_QLIB', 'SP500_RENAME')"
                 ).fetchall()
                 for tk_r, s_r, e_r in rows:
                     tk = str(tk_r or "").strip().upper().replace(".", "-")
@@ -86,14 +88,33 @@ def assert_pre_backtest_env_integrity(
     us_pit: dict = None,
     sp500_csv_path: str = None,
     industry_map_path: str = None,
+    tw_zero_override: dict = None,
+    fund_cache_override: dict = None,
+    db_path: str = None,
     verbose: bool = True,
 ) -> dict:
     """
-    【回測前強制安檢 Gate A1 ~ A4】
+    【回測前強制安檢 Gen-2 Gate A1 ~ A7】
     於 `build_1704_pit_engine()` 回傳前自動執行，失敗直接 raise `PITIntegrityViolationError`。
     """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    cache_dir = os.path.join(base_dir, "pit_cache")
+    resolved_db = db_path or os.path.join(base_dir, "tw_stock.db")
+
+    def _load_cache_pkl(filename: str) -> dict:
+        p = os.path.join(cache_dir, filename)
+        if not os.path.exists(p):
+            raise PITIntegrityViolationError(f"[Gate A7 失敗] 缺少必要 PIT 快取檔: {p}")
+        with open(p, "rb") as f_p:
+            return pickle.load(f_p)
+
+    tw_zero = tw_zero_override if tw_zero_override is not None else _load_cache_pkl("tw_zero_omission_0050_0051_pit.pkl")
+    us_pit_obj = us_pit if us_pit is not None else _load_cache_pkl("us_pit_full_history.pkl")
+    fund_cache = fund_cache_override if fund_cache_override is not None else _load_cache_pkl("pit_fund_rebal_cache.pkl")
+
     us_tickers = list(env["us_tickers"])
     us_set = set(us_tickers)
+    pit_tw_list = list(env.get("pit_tw", []))
     stk_adj = env["stk_adj"]
     stk_vol = env["stk_vol"]
     us_in_sp500 = env["us_in_sp500"]
@@ -101,7 +122,7 @@ def assert_pre_backtest_env_integrity(
     latest_dt = common_dates[-1]
 
     # -------------------------------------------------------------------------
-    # Gate A1: 現任 S&P 500 成分股 100.00% 零遺漏覆蓋斷言 (503/503)
+    # Gate A1: 現任 S&P 500 (503/503) & 台股 0050∪0051 純上市 100% 零遺漏與零上櫃滲漏斷言
     # -------------------------------------------------------------------------
     intervals = load_sp500_intervals(sp500_csv_path)
     active_sp500_now = sorted([
@@ -131,6 +152,20 @@ def assert_pre_backtest_env_integrity(
     if false_pit_active:
         raise PITIntegrityViolationError(
             f"[Gate A1 失敗] 現任 S&P 500 於 {latest_dt.date()} 有 {len(false_pit_active)} 檔 us_in_sp500=False: {false_pit_active[:15]}"
+        )
+
+    tpex_leaked = [tk for tk in pit_tw_list if tk.endswith(".TWO")]
+    if tpex_leaked:
+        raise PITIntegrityViolationError(
+            f"[Gate A1 失敗] 台股候選池混入上櫃 (TPEx .TWO) 標的: {tpex_leaked[:15]}"
+        )
+    tw_pit_cols = set(tw_zero["in_0050_0051_pit"].columns)
+    if len(pit_tw_list) < 750 or set(pit_tw_list) != tw_pit_cols:
+        extra_tw = sorted(list(set(pit_tw_list) - tw_pit_cols))
+        miss_tw = sorted(list(tw_pit_cols - set(pit_tw_list)))
+        raise PITIntegrityViolationError(
+            f"[Gate A1 失敗] 台股 pit_tw ({len(pit_tw_list)}) 與純上市 0050∪0051 PIT 池 ({len(tw_pit_cols)}) 不一致！"
+            f"extra={extra_tw[:10]}, missing={miss_tw[:10]}"
         )
 
     # -------------------------------------------------------------------------
@@ -173,8 +208,8 @@ def assert_pre_backtest_env_integrity(
     # -------------------------------------------------------------------------
     # Gate A3: 跨資料源拼接 (2020-11-10) 拆股成交額連續性斷言 (封死墓碑 #64)
     # -------------------------------------------------------------------------
-    if us_pit is not None and "raw_close" in us_pit:
-        us_raw = us_pit["raw_close"][us_tickers].reindex(common_dates).ffill()
+    if us_pit_obj is not None and "raw_close" in us_pit_obj:
+        us_raw = us_pit_obj["raw_close"][us_tickers].reindex(common_dates).ffill()
         stitch_dt = pd.Timestamp("2020-11-10")
         pre_mask = (common_dates >= pd.Timestamp("2020-10-15")) & (common_dates <= pd.Timestamp("2020-11-09"))
         post_mask = (common_dates >= pd.Timestamp("2020-11-12")) & (common_dates <= pd.Timestamp("2020-12-08"))
@@ -213,27 +248,182 @@ def assert_pre_backtest_env_integrity(
                 f"[Gate A4 失敗] FB 與 META 在 us_in_sp500 重疊 {overlap_fb_meta} 天，造成雙重計算！"
             )
 
-    imap_file = industry_map_path or os.path.join(os.path.dirname(os.path.abspath(__file__)), "industry_map.json")
-    if os.path.exists(imap_file):
-        with open(imap_file, "r", encoding="utf-8") as f_im:
-            imap = json.load(f_im)
-        unmapped = [tk for tk in env["all_open_tickers"] if tk not in imap or imap[tk] == "G_UNCLASSIFIED"]
-        if unmapped:
+    imap_file = industry_map_path or os.path.join(base_dir, "industry_map.json")
+    if not os.path.exists(imap_file):
+        raise PITIntegrityViolationError(f"[Gate A4 失敗] 找不到 industry_map.json: {imap_file}")
+    with open(imap_file, "r", encoding="utf-8") as f_im:
+        imap = json.load(f_im)
+
+    _BAD_CATS = {"", "UNKNOWN", "G_UNCLASSIFIED", "NONE", "NULL", "NAN"}
+    unmapped = []
+    bad_65xx_energy = []
+    for tk in env["all_open_tickers"]:
+        entry = imap.get(tk)
+        if not isinstance(entry, dict):
+            unmapped.append(tk)
+            continue
+        sec_s = str(entry.get("sector") or "").strip()
+        ind_s = str(entry.get("industry") or "").strip()
+        if sec_s.upper() in _BAD_CATS or ind_s.upper() in _BAD_CATS:
+            unmapped.append(tk)
+            continue
+        if tk.endswith(".TW") and tk.startswith("65") and tk != "6505.TW":
+            low_sec, low_ind = sec_s.lower(), ind_s.lower()
+            if ("energy" in low_sec) or ("oil" in low_ind) or ("refin" in low_ind):
+                bad_65xx_energy.append((tk, sec_s, ind_s))
+
+    if unmapped:
+        raise PITIntegrityViolationError(
+            f"[Gate A4 失敗] industry_map.json 存在 {len(unmapped)} 檔缺失/未分類 sector 或 industry: {unmapped[:15]}"
+        )
+    if bad_65xx_energy:
+        raise PITIntegrityViolationError(
+            f"[Gate A4 失敗・觸犯墓碑 #66] 偵測到非 6505.TW 之 65xx.TW 誤分類為油氣能源: {bad_65xx_energy[:10]}"
+        )
+
+    # -------------------------------------------------------------------------
+    # Gate A5: 2020–2026 美股開盤日實際有價量成分密度 + 零下市前 lvd-20d 提前封鎖未來函數 (墓碑 #65)
+    # -------------------------------------------------------------------------
+    us_open_mask = (common_dates >= pd.Timestamp("2020-01-02")) & ((stk_vol[us_tickers] > 0).sum(axis=1) >= 400)
+    if int(us_open_mask.sum()) < 500:
+        raise PITIntegrityViolationError("[Gate A5 失敗] 2020-2026 美股開盤日數量異常過少！")
+    act_sp_cnt = (
+        us_in_sp500.loc[us_open_mask, us_tickers]
+        & stk_adj.loc[us_open_mask, us_tickers].notna()
+        & (stk_vol.loc[us_open_mask, us_tickers] > 0)
+    ).sum(axis=1)
+    act_sp_mean = float(act_sp_cnt.mean())
+    act_sp_min = int(act_sp_cnt.min())
+    act_sp_last = int(act_sp_cnt.iloc[-1])
+    if act_sp_mean < 490.0 or act_sp_min < 475 or act_sp_last < 500:
+        bad_a5_dt = act_sp_cnt.idxmin()
+        raise PITIntegrityViolationError(
+            f"[Gate A5 失敗] 2020-2026 美股開盤日實質可交易 S&P 500 密度不足: "
+            f"mean={act_sp_mean:.1f} (<490), min={act_sp_min} (<475 @ {bad_a5_dt.date()}), last={act_sp_last} (<500)"
+        )
+
+    if "us_pit_elig_base" in env and "us_last_valid_date" in env:
+        us_elig_base = env["us_pit_elig_base"]
+        us_lvd_map = env["us_last_valid_date"]
+        premature_lockouts = []
+        for tk in ("FRC", "SIVB", "ATVI", "WBA", "PXD", "MRO"):
+            if tk not in us_elig_base.columns or tk not in us_lvd_map:
+                continue
+            lvd_raw = us_lvd_map.get(tk)
+            if not lvd_raw:
+                continue
+            lvd_ts = pd.Timestamp(lvd_raw)
+            if lvd_ts < latest_dt - pd.Timedelta(days=30) and lvd_ts in common_dates:
+                if bool(us_in_sp500.loc[lvd_ts, tk]) and float(stk_vol.loc[lvd_ts, tk]) > 0:
+                    win_dts = common_dates[(common_dates <= lvd_ts) & (stk_vol[tk] > 0) & us_in_sp500[tk]][-5:]
+                    if len(win_dts) > 0 and not bool(us_elig_base.loc[win_dts, tk].any()):
+                        premature_lockouts.append((tk, str(lvd_ts.date())))
+        if premature_lockouts:
             raise PITIntegrityViolationError(
-                f"[Gate A4 失敗] industry_map.json 存在 {len(unmapped)} 檔未分類標的: {unmapped[:15]}"
+                f"[Gate A5 失敗・觸犯墓碑 #65] 偵測到下市前 lvd-20d 提前封鎖未來函數: {premature_lockouts}"
             )
+
+    # -------------------------------------------------------------------------
+    # Gate A6: 現行美台 PIT 基本面覆蓋率 >= 95.0% 斷言 (封死 /tmp 殘留與空窗斷層)
+    # -------------------------------------------------------------------------
+    fc_cols = list(fund_cache.get("cols", []))
+    fc_dates = pd.DatetimeIndex(fund_cache.get("dates_idx", []))
+    if not fc_cols or len(fc_dates) == 0:
+        raise PITIntegrityViolationError("[Gate A6 失敗] pit_fund_rebal_cache.pkl 缺少 cols 或 dates_idx！")
+    fc_map = {c: i for i, c in enumerate(fc_cols)}
+
+    us_open_all = common_dates[(stk_vol[us_tickers] > 0).sum(axis=1) >= 400]
+    us_last_dt = us_open_all[-1] if len(us_open_all) > 0 else latest_dt
+    tw_open_all = common_dates[(stk_vol[pit_tw_list] > 0).sum(axis=1) >= 400]
+    tw_last_dt = tw_open_all[-1] if len(tw_open_all) > 0 else latest_dt
+
+    us_fc_pos = int(fc_dates.get_indexer([us_last_dt], method="pad")[0])
+    tw_fc_pos = int(fc_dates.get_indexer([tw_last_dt], method="pad")[0])
+    if us_fc_pos < 0 or tw_fc_pos < 0:
+        raise PITIntegrityViolationError("[Gate A6 失敗] pit_fund_rebal_cache dates_idx 無法對齊最新美台開盤日！")
+
+    def _row_has_fund(pos_i: int):
+        return (
+            (~np.isnan(fund_cache["rev_yoy_mat"][pos_i]))
+            | (~np.isnan(fund_cache["mgn_exp_mat"][pos_i]))
+            | (~np.isnan(fund_cache["f_score_mat"][pos_i]))
+        )
+
+    us_has_f = _row_has_fund(us_fc_pos)
+    us_cov = float(np.mean([bool(us_has_f[fc_map[tk]]) if tk in fc_map else False for tk in active_sp500_now]))
+
+    tw_in_aligned = tw_zero["in_0050_0051_pit"].reindex(common_dates).ffill().fillna(False)
+    active_tw_now = [
+        tk for tk in pit_tw_list
+        if tk in tw_in_aligned.columns and bool(tw_in_aligned.loc[tw_last_dt, tk]) and float(stk_vol.loc[tw_last_dt, tk]) > 0
+    ]
+    if len(active_tw_now) < 50:
+        raise PITIntegrityViolationError(f"[Gate A6 失敗] 最新台股開盤日 ({tw_last_dt.date()}) 活躍 0050∪0051 僅 {len(active_tw_now)} 檔！")
+    tw_has_f = _row_has_fund(tw_fc_pos)
+    tw_cov = float(np.mean([bool(tw_has_f[fc_map[tk]]) if tk in fc_map else False for tk in active_tw_now]))
+
+    if us_cov < 0.95 or tw_cov < 0.95:
+        raise PITIntegrityViolationError(
+            f"[Gate A6 失敗・觸犯墓碑 #66] PIT 基本面覆蓋率未達 95.0%: "
+            f"US SP500={us_cov * 100:.1f}% ({len(active_sp500_now)}), TW 0050∪0051={tw_cov * 100:.1f}% ({len(active_tw_now)})"
+        )
+
+    # -------------------------------------------------------------------------
+    # Gate A7: 四大核心 PIT 快取 schema_version >= 2 且 db_max_date 與 tw_stock.db 同步鎖
+    # -------------------------------------------------------------------------
+    def _norm_dt(val) -> str:
+        return str(val or "").strip().replace("-", "")[:8]
+
+    if not os.path.exists(resolved_db):
+        raise PITIntegrityViolationError(f"[Gate A7 失敗] 找不到資料庫: {resolved_db}")
+    conn_a7 = sqlite3.connect(resolved_db)
+    try:
+        r_spy = conn_a7.execute("SELECT MAX(date) FROM global_stock_daily WHERE ticker = 'SPY'").fetchone()
+        r_tw = conn_a7.execute("SELECT MAX(date) FROM daily_stock WHERE stock_id = '2330'").fetchone()
+    finally:
+        conn_a7.close()
+    spy_db_max = _norm_dt(r_spy[0] if r_spy else "")
+    tw_db_max = _norm_dt(r_tw[0] if r_tw else "")
+    if not spy_db_max or not tw_db_max:
+        raise PITIntegrityViolationError(f"[Gate A7 失敗] 資料庫缺少 SPY ({spy_db_max}) 或 2330 ({tw_db_max}) 最新交易日！")
+
+    g9_pkl_path = os.path.join(cache_dir, "g9_open_universe_env_150.pkl")
+    if not os.path.exists(g9_pkl_path):
+        raise PITIntegrityViolationError(f"[Gate A7 失敗] 找不到 G9 快取: {g9_pkl_path}")
+    g9_meta = env.get("g9_meta") or {}
+
+    stale_msgs = []
+    if int(us_pit_obj.get("schema_version") or 0) < 2 or _norm_dt(us_pit_obj.get("db_max_date")) < spy_db_max:
+        stale_msgs.append(f"us_pit(v={us_pit_obj.get('schema_version')}, dt={us_pit_obj.get('db_max_date')}<{spy_db_max})")
+    if int(tw_zero.get("schema_version") or 0) < 2 or _norm_dt(tw_zero.get("db_max_date")) < tw_db_max:
+        stale_msgs.append(f"tw_zero(v={tw_zero.get('schema_version')}, dt={tw_zero.get('db_max_date')}<{tw_db_max})")
+    if (
+        int(g9_meta.get("schema_version") or 0) < 2
+        or g9_meta.get("pure_twse_0050_0051_v2") is not True
+        or _norm_dt(g9_meta.get("db_max_date_tw")) < tw_db_max
+        or _norm_dt(g9_meta.get("db_max_date_spy")) < spy_db_max
+    ):
+        stale_msgs.append(f"g9_env({g9_meta}, expected tw>={tw_db_max}/spy>={spy_db_max})")
+    if int(fund_cache.get("schema_version") or 0) < 2 or _norm_dt(fund_cache.get("db_max_date")) < tw_db_max:
+        stale_msgs.append(f"fund_cache(v={fund_cache.get('schema_version')}, dt={fund_cache.get('db_max_date')}<{tw_db_max})")
+    if stale_msgs:
+        raise PITIntegrityViolationError(f"[Gate A7 失敗] PIT 快取版本過舊或落後資料庫最新交易日: {stale_msgs}")
 
     summary = {
         "active_sp500_verified": f"{len(active_sp500_now)}/{len(active_sp500_now)} (100.0%)",
         "daily_sp500_range_2005_2026": f"05-19:[{min_all},{max_all}] / 20-26:[{min_mod},{max_mod}]",
+        "act_sp500_2020plus_mean_min": f"{act_sp_mean:.1f} / min {act_sp_min}",
+        "us_fund_cov_pct": round(us_cov * 100.0, 1),
+        "tw_fund_cov_pct": round(tw_cov * 100.0, 1),
+        "schema_version": 2,
         "latest_env_date": str(latest_dt.date()),
         "total_universe": len(env["all_open_tickers"]),
     }
     if verbose:
         print(
-            f"🛡️ [PIT Pre-Flight Gate PASS] 現任 S&P 500 {summary['active_sp500_verified']} 零遺漏 ｜ "
-            f"2005-2026 每日成分數 {summary['daily_sp500_range_2005_2026']} ｜ "
-            f"2020 拼接處零拆股成交額斷層 ｜ 全池 {summary['total_universe']} 檔 100% 產業映射！"
+            f"🛡️ [PIT Pre-Flight Gate Gen-2 PASS (A1~A7)] S&P500 {summary['active_sp500_verified']} & 純上市TW {len(pit_tw_list)} 零遺漏 ｜ "
+            f"20-26實質有量均 {summary['act_sp500_2020plus_mean_min']} ｜ 基本面 US={summary['us_fund_cov_pct']}% TW={summary['tw_fund_cov_pct']}% ｜ "
+            f"四大快取 v2 同步 ({summary['latest_env_date']}) ｜ 全池 {summary['total_universe']} 檔 100% 乾淨映射！"
         )
     return summary
 
@@ -249,9 +439,9 @@ def assert_post_backtest_trade_and_equity_integrity(
     verbose: bool = True,
 ) -> dict:
     """
-    【回測後匯出前強制安檢 Gate B1 ~ B4】
+    【回測後匯出前強制安檢 Gen-2 Gate B1 ~ B5】
     於 `export_g11_pit_detailed_history.py` 寫入 JSON 前自動執行，
-    確保每一筆選股當下真實存在、零缺失價格、零提前截斷淨值、零硬編碼當期持倉！
+    確保每一筆選股當下真實存在、零缺失價格、零停牌/跨市休市假成交、零提前截斷淨值、零硬編碼當期持倉！
     """
     if not all_tranche_records:
         raise PITIntegrityViolationError("[Gate B1 失敗] all_tranche_records 為空！")
@@ -260,11 +450,15 @@ def assert_post_backtest_trade_and_equity_integrity(
 
     sp500_intervals = load_sp500_intervals(sp500_csv_path, include_db_historical=True, db_path=db_path)
     us_in_mat = env["us_in_sp500"]
+    stk_vol = env["stk_vol"]
+    stk_open = env["stk_open"]
+    stk_adj = env["stk_adj"]
     tw_pit_aligned = in_0050_0051_pit.reindex(us_in_mat.index).ffill().fillna(False)
 
     total_picks = 0
     bad_prices = []
     pit_violations = []
+    halt_trade_violations = []
 
     for lg in all_tranche_records:
         rb_dt = pd.Timestamp(lg["rebal_date"])
@@ -290,7 +484,7 @@ def assert_post_backtest_trade_and_equity_integrity(
                 bad_prices.append((lg["rebal_date"], tk, ep, xp, wt, pr))
                 continue
 
-            # 盤中戰術換馬股以其自身實際進場日檢核 PIT；一般調倉股以調倉訊號日檢核 PIT
+            # 盤中戰術換馬/遞延進場以其自身實際進場日檢核 PIT；一般調倉股以調倉訊號日檢核 PIT
             chk_dt_str = str(p.get("entry_date") or lg["rebal_date"])[:10]
             chk_dt = pd.Timestamp(chk_dt_str)
             chk_pos = us_in_mat.index.get_indexer([chk_dt], method="pad")[0]
@@ -312,6 +506,29 @@ def assert_post_backtest_trade_and_equity_integrity(
                 if (not in_mat_ok) or (not in_csv_ok):
                     pit_violations.append((lg["rebal_date"], tk, f"US_PIT_VIOLATION(mat={in_mat_ok}, csv={in_csv_ok}, intervals={ivs})"))
 
+            # Gate B5: 進出場日嚴禁於個股停牌 / 單邊休市 / 零成交量日成交 (封死墓碑 #67)
+            in_dt_str = str(p.get("entry_date") or lg.get("entry_date") or "")[:10]
+            if len(in_dt_str) == 10:
+                in_dt = pd.Timestamp(in_dt_str)
+                if (
+                    in_dt not in stk_vol.index
+                    or tk not in stk_vol.columns
+                    or not (float(stk_vol.loc[in_dt, tk]) > 0 and float(stk_open.loc[in_dt, tk]) > 0)
+                ):
+                    halt_trade_violations.append((lg["rebal_date"], tk, "ENTRY_ZERO_VOL_OR_HALT", in_dt_str))
+
+            out_dt_raw = str(p.get("exit_date") or lg.get("exit_date") or "").strip()
+            if len(out_dt_raw) >= 10 and out_dt_raw[:4].isdigit() and out_dt_raw[4] == "-":
+                out_dt = pd.Timestamp(out_dt_raw[:10])
+                out_px_ok = (
+                    out_dt in stk_vol.index
+                    and tk in stk_vol.columns
+                    and float(stk_vol.loc[out_dt, tk]) > 0
+                    and (float(stk_open.loc[out_dt, tk]) > 0 or float(stk_adj.loc[out_dt, tk]) > 0)
+                )
+                if not out_px_ok:
+                    halt_trade_violations.append((lg["rebal_date"], tk, "EXIT_ZERO_VOL_OR_HALT", out_dt_raw[:10]))
+
     if bad_prices:
         raise PITIntegrityViolationError(
             f"[Gate B1 失敗] 發現 {len(bad_prices)} 筆缺失或異常進出場價格: {bad_prices[:10]}"
@@ -319,6 +536,10 @@ def assert_post_backtest_trade_and_equity_integrity(
     if pit_violations:
         raise PITIntegrityViolationError(
             f"[Gate B2 失敗] 發現 {len(pit_violations)} 筆違反當下成分股 Point-in-Time 交易: {pit_violations[:10]}"
+        )
+    if halt_trade_violations:
+        raise PITIntegrityViolationError(
+            f"[Gate B5 失敗・觸犯墓碑 #67] 發現 {len(halt_trade_violations)} 筆於停牌/跨市休市/零成交量日成交之虛假交易: {halt_trade_violations[:10]}"
         )
 
     # -------------------------------------------------------------------------
@@ -367,31 +588,35 @@ def assert_post_backtest_trade_and_equity_integrity(
         "total_picks_checked": total_picks,
         "bad_prices": 0,
         "pit_violations": 0,
+        "halt_trade_violations": 0,
         "equity_end_date": str(pd.Timestamp(eq_d.index[-1]).date()),
     }
     if verbose:
         print(
-            f"🛡️ [PIT Post-Flight Gate PASS] 已逐筆驗算 {report['rebalance_periods_checked']} 期調倉 / "
-            f"{report['total_picks_checked']} 筆選股：缺失價 0 筆 ｜ PIT 違規 0 筆 ｜ "
+            f"🛡️ [PIT Post-Flight Gate Gen-2 PASS (B1~B5)] 已逐筆驗算 {report['rebalance_periods_checked']} 期調倉 / "
+            f"{report['total_picks_checked']} 筆選股：缺失價 0 筆 ｜ PIT 違規 0 筆 ｜ 休市/停牌假成交 0 筆 ｜ "
             f"淨值直達 {report['equity_end_date']} 零截斷 ｜ A/B 當期持倉 100% 動態一致！"
         )
     return report
 
 
 def _run_adversarial_self_test():
-    """執行實盤通過驗證 + 4 項故意投毒攔截測試，證明守門員 100% 會抓出錯誤！"""
+    """執行實盤通過驗證 + 8 項故意投毒攔截測試，證明 Gen-2 守門員 100% 會抓出錯誤！"""
     import copy
     import build_us_pit_delisted_db as us_db
     import test_true_pit_us_tw_1704_universe as pit1704
     from build_and_test_zero_omission_0050_0051 import build_zero_omission_tw_0050_0051_pit
 
     print("=" * 95)
-    print("🧪 啟動 PIT Integrity Gatekeeper 實盤驗證與四重故意投毒攔截測試 (Adversarial Self-Test)...")
+    print("🧪 啟動 Gen-2 PIT Integrity Gatekeeper 實盤驗證與八重故意投毒攔截測試 (Adversarial Self-Test)...")
     print("=" * 95)
 
     us_pit = us_db.build_us_pit_database(force_rebuild=False)
     env = pit1704.build_1704_pit_engine()
     tw_zero = build_zero_omission_tw_0050_0051_pit()
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(base_dir, "pit_cache", "pit_fund_rebal_cache.pkl"), "rb") as f_fc:
+        fund_cache = pickle.load(f_fc)
 
     with open("frontend/src/data/g11_pit_yearly_history.json", "r", encoding="utf-8") as f:
         hist_json = json.load(f)
@@ -416,7 +641,9 @@ def _run_adversarial_self_test():
     env_missing = dict(env)
     env_missing["us_tickers"] = [t for t in env["us_tickers"] if t != "ADI"]
     try:
-        assert_pre_backtest_env_integrity(env_missing, us_pit=us_pit, verbose=False)
+        assert_pre_backtest_env_integrity(
+            env_missing, us_pit=us_pit, tw_zero_override=tw_zero, fund_cache_override=fund_cache, verbose=False
+        )
         raise AssertionError("Test 1 失敗：未攔截缺漏成分股 ADI！")
     except PITIntegrityViolationError as e:
         print(f"  ✅ [投毒攔截測試 1 通過] 成功攔截缺漏 S&P 500 成分股 -> {e}")
@@ -427,7 +654,9 @@ def _run_adversarial_self_test():
     bad_vol.loc[bad_vol.index <= pd.Timestamp("2020-11-09"), "NVDA"] *= 40.0
     env_split_bug["stk_vol"] = bad_vol
     try:
-        assert_pre_backtest_env_integrity(env_split_bug, us_pit=us_pit, verbose=False)
+        assert_pre_backtest_env_integrity(
+            env_split_bug, us_pit=us_pit, tw_zero_override=tw_zero, fund_cache_override=fund_cache, verbose=False
+        )
         raise AssertionError("Test 2 失敗：未攔截墓碑 #64 跨源拆股成交額斷層！")
     except PITIntegrityViolationError as e:
         print(f"  ✅ [投毒攔截測試 2 通過] 成功攔截墓碑 #64 拆股成交額未來函數 -> {e}")
@@ -436,9 +665,12 @@ def _run_adversarial_self_test():
     bad_rebal = copy.deepcopy(all_rebal[:5])
     bad_rebal[0] = copy.deepcopy(bad_rebal[0])
     bad_rebal[0]["rebal_date"] = "2023-06-01"
+    bad_rebal[0]["entry_date"] = "2023-06-02"
+    bad_rebal[0]["exit_date"] = "2023-06-22"
     bad_rebal[0]["picks"] = [{
         "ticker": "PLTR",
         "entry_date": "2023-06-02",
+        "exit_date": "2023-06-22",
         "entry_price": 14.5,
         "exit_price": 16.0,
         "weight": 50.0,
@@ -470,8 +702,101 @@ def _run_adversarial_self_test():
     except PITIntegrityViolationError as e:
         print(f"  ✅ [投毒攔截測試 4 通過] 成功攔截淨值曲線提前截斷 -> {e}")
 
+    # 測試 5: 故意將下市股 (PXD) 於最後 15 個交易日提前設為 us_pit_elig_base=False (模擬墓碑 #65 lvd-20d 未來函數) -> Gate A5
+    env_lvd_lock = dict(env)
+    bad_elig = env["us_pit_elig_base"].copy()
+    lvd_pxd = pd.Timestamp(env["us_last_valid_date"]["PXD"])
+    pxd_tail_dts = env["stk_adj"].index[(env["stk_adj"].index <= lvd_pxd) & (env["stk_vol"]["PXD"] > 0)][-15:]
+    bad_elig.loc[pxd_tail_dts, "PXD"] = False
+    env_lvd_lock["us_pit_elig_base"] = bad_elig
+    try:
+        assert_pre_backtest_env_integrity(
+            env_lvd_lock, us_pit=us_pit, tw_zero_override=tw_zero, fund_cache_override=fund_cache, verbose=False
+        )
+        raise AssertionError("Test 5 失敗：未攔截 PXD 下市前 lvd-15d 提前封鎖！")
+    except PITIntegrityViolationError as e:
+        print(f"  ✅ [投毒攔截測試 5 通過] 成功攔截墓碑 #65 下市前 lvd-15d 提前封鎖 -> {e}")
+
+    # 測試 6: (a) 台股池混入上櫃 8069.TW -> Gate A1；(b) 6515.TW 誤分類為 Energy -> Gate A4
+    env_tpex = dict(env)
+    env_tpex["pit_tw"] = list(env["pit_tw"]) + ["8069.TW"]
+    try:
+        assert_pre_backtest_env_integrity(
+            env_tpex, us_pit=us_pit, tw_zero_override=tw_zero, fund_cache_override=fund_cache, verbose=False
+        )
+        raise AssertionError("Test 6a 失敗：未攔截上櫃 8069.TW 滲漏！")
+    except PITIntegrityViolationError as e:
+        print(f"  ✅ [投毒攔截測試 6a 通過] 成功攔截上櫃 8069.TW 滲漏 -> {e}")
+
+    with open(os.path.join(base_dir, "industry_map.json"), "r", encoding="utf-8") as f_im0:
+        bad_imap = json.load(f_im0)
+    bad_imap["6515.TW"] = {"sector": "Energy", "industry": "Oil & Gas Refining & Marketing"}
+    fd_tmp, tmp_imap_path = tempfile.mkstemp(prefix="poison_imap_", suffix=".json")
+    try:
+        with os.fdopen(fd_tmp, "w", encoding="utf-8") as f_tmp:
+            json.dump(bad_imap, f_tmp)
+        assert_pre_backtest_env_integrity(
+            env, us_pit=us_pit, industry_map_path=tmp_imap_path, tw_zero_override=tw_zero, fund_cache_override=fund_cache, verbose=False
+        )
+        raise AssertionError("Test 6b 失敗：未攔截 6515.TW 誤分類為 Energy！")
+    except PITIntegrityViolationError as e:
+        print(f"  ✅ [投毒攔截測試 6b 通過] 成功攔截墓碑 #66 6515.TW 油氣誤分類 -> {e}")
+    finally:
+        if os.path.exists(tmp_imap_path):
+            os.unlink(tmp_imap_path)
+
+    # 測試 7: (a) 清空最新日 PIT 基本面 -> Gate A6；(b) us_pit db_max_date 落後 -> Gate A7
+    bad_fc = dict(fund_cache)
+    for k_mat in ("rev_yoy_mat", "mgn_exp_mat", "f_score_mat"):
+        m_copy = fund_cache[k_mat].copy()
+        m_copy[-1, :] = np.nan
+        bad_fc[k_mat] = m_copy
+    try:
+        assert_pre_backtest_env_integrity(
+            env, us_pit=us_pit, tw_zero_override=tw_zero, fund_cache_override=bad_fc, verbose=False
+        )
+        raise AssertionError("Test 7a 失敗：未攔截基本面覆蓋率暴跌！")
+    except PITIntegrityViolationError as e:
+        print(f"  ✅ [投毒攔截測試 7a 通過] 成功攔截 PIT 基本面斷層 (<95%) -> {e}")
+
+    stale_us_pit = dict(us_pit)
+    stale_us_pit["db_max_date"] = "2025-01-01"
+    try:
+        assert_pre_backtest_env_integrity(
+            env, us_pit=stale_us_pit, tw_zero_override=tw_zero, fund_cache_override=fund_cache, verbose=False
+        )
+        raise AssertionError("Test 7b 失敗：未攔截過期快取 db_max_date！")
+    except PITIntegrityViolationError as e:
+        print(f"  ✅ [投毒攔截測試 7b 通過] 成功攔截過期快取同步鎖 -> {e}")
+
+    # 測試 8: 故意於台灣清明連假 (2023-04-04 美股開盤/台股休市零成交量) 成交 2330.TW -> Gate B5
+    bad_rebal8 = copy.deepcopy(all_rebal[:2])
+    bad_rebal8[0]["rebal_date"] = "2023-04-03"
+    bad_rebal8[0]["entry_date"] = "2023-04-04"
+    bad_rebal8[0]["exit_date"] = "2023-04-24"
+    bad_rebal8[0]["picks"] = [{
+        "ticker": "2330.TW",
+        "entry_date": "2023-04-04",
+        "exit_date": "2023-04-24",
+        "entry_price": 530.0,
+        "exit_price": 510.0,
+        "weight": 50.0,
+        "period_ret": -3.77,
+    }]
+    try:
+        assert_post_backtest_trade_and_equity_integrity(
+            all_tranche_records=bad_rebal8,
+            eq_d=dummy_eq,
+            env=env,
+            in_0050_0051_pit=tw_zero["in_0050_0051_pit"],
+            verbose=False,
+        )
+        raise AssertionError("Test 8 失敗：未攔截 2023-04-04 清明節台股休市假成交！")
+    except PITIntegrityViolationError as e:
+        print(f"  ✅ [投毒攔截測試 8 通過] 成功攔截墓碑 #67 跨市場單邊休市假成交 -> {e}")
+
     print("=" * 95)
-    print("🏆 全數通過！未來任何回測只要觸犯缺股、拆股偷看、非當下成分或截斷淨值，將 100% 自動停機攔截！")
+    print("🏆 全數 8 大投毒測試通過！Gen-2 守門員 (Gates A1~A7 / B1~B5) 已 100% 封死所有已知偏差！")
     print("=" * 95)
 
 
