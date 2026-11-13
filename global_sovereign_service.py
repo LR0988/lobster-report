@@ -1417,9 +1417,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     crack_blowoff_veto_active = (crk_now < crk_ma20) and (crk_dd20 <= -0.20)
 
                     if upstream_oil_veto_active:
-                        oil_tag = f"🚨 S3 雙層排雷啟動 (WTI ${wti_now:.2f}<月線${wti_ma20:.2f} 且 3-2-1裂解 ${crk_now:.2f} 回落 {crk_dd20*100:.1f}% ➔ 剔除純煉油與上游原油股)"
+                        oil_tag = f"🚨 S3+P1 雙層排雷與盤中換馬啟動 (WTI ${wti_now:.2f}<月線${wti_ma20:.2f} 且 3-2-1裂解 ${crk_now:.2f} 回落 {crk_dd20*100:.1f}% ➔ 剔除純煉油與上游原油股，持倉油氣股 T+1 開盤即時換馬)"
                     elif refiner_veto_active:
-                        oil_tag = f"⚠️ S1 煉油排雷啟動 (3-2-1裂解 ${crk_now:.2f}<月線${crk_ma20:.2f} 回落 {crk_dd20*100:.1f}% ➔ 剔除純煉油股)"
+                        oil_tag = f"⚠️ S1+P1 煉油排雷與盤中換馬啟動 (3-2-1裂解 ${crk_now:.2f}<月線${crk_ma20:.2f} 回落 {crk_dd20*100:.1f}% ➔ 剔除純煉油股，持倉煉油股 T+1 開盤即時換馬)"
                     else:
                         oil_tag = f"🟢 能源裂解正常 (WTI ${wti_now:.2f} / 3-2-1裂解 ${crk_now:.2f})"
 
@@ -1436,6 +1436,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         data["macro_status"]["crack_spread_ret20_pct"] = round(crk_ret20 * 100.0, 1)
                         data["macro_status"]["s1_refiner_veto_active"] = bool(refiner_veto_active)
                         data["macro_status"]["s3_upstream_oil_veto_active"] = bool(upstream_oil_veto_active)
+                        data["macro_status"]["p1_oil_gas_intra_rot_active"] = bool(upstream_oil_veto_active or refiner_veto_active)
                         data["macro_status"]["oil_crack_regime_tag"] = oil_tag
             except Exception as e_oil:
                 print("讀取 macro_indicators 原油裂解指標警告:", e_oil)
@@ -1533,17 +1534,24 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     is_sw = bool((io20_v >= 0.025) and (not is_def) and (sw_fund_ok or sw_tech_ok))
                     is_good_vol_star = bool(gb_ratio >= 1.55 and prox_v >= 0.94 and io20_v >= 0.02)
                     is_overhead_trap = bool(prox_v < 0.82 and io20_v <= 0.005)
+                    b60_v = float(p.get("bias_ma60") or 0.0)
+                    is_p4_staged = bool((b60_v > 45.0) and (not is_sw))
                     p["pit_f_score"] = fm["f_score"]
                     p["pit_is_star"] = fm["is_star"]
                     p["pit_is_defect"] = is_def
                     p["is_super_winner"] = is_sw
                     p["is_good_vol_star"] = is_good_vol_star
                     p["is_overhead_trap"] = is_overhead_trap
+                    p["is_p4_staged_entry"] = is_p4_staged
+                    if is_p4_staged and float(p.get("price") or 0.0) > 0:
+                        p["p4_limit_buy_price"] = round(float(p["price"]) * 0.98, 2)
                     tag_prefix = []
                     if is_sw:
-                        tag_prefix.append("🚀 R12超級大牛點火")
+                        tag_prefix.append("🚀 R13超級大牛點火")
                     if is_good_vol_star:
                         tag_prefix.append(f"⚡ 良性半方差({gb_ratio:.2f}x)")
+                    if is_p4_staged:
+                        tag_prefix.append("🛡️ P4極端乖離(新倉50%開盤+50%掛-2%低接3日)")
                     if is_overhead_trap:
                         tag_prefix.append("⚠️ 52W上方套牢警戒")
                     p["pit_fund_tag"] = (" × ".join(tag_prefix) + " × " + fm["fund_tag"]) if tag_prefix else fm["fund_tag"]
@@ -1552,22 +1560,29 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         p["score"] = round(float(p.get("score") or 0.0) * 0.90, 4)
                         p["sniper_score"] = round(float(p.get("sniper_score") or 0.0) * 0.90, 4)
 
-                # R12 候選池條件式換馬 (Top-5 財報瑕疵 / 散戶假突破 / George & Hwang 52W 套牢籌碼排雷) + M1 主帥退化降級扶正
+                # R13 候選池條件式換馬 (Top-5 財報瑕疵 / 散戶假突破 / 52W套牢籌碼排雷 / P4 Bias60>45% 極端高乖離禮讓) + M1 主帥退化降級扶正
                 if len(top10_picks) >= 5:
                     top5_live = top10_picks[:5]
                     rest_live = top10_picks[5:]
                     has_star_45 = any(bool(x.get("pit_is_star")) for x in top5_live[3:5])
                     has_sw_45 = any(bool(x.get("is_super_winner")) for x in top5_live[3:5])
-                    chosen_top3 = [top5_live[0]]
+                    chosen_top3 = []
                     deferred = []
+                    s0_first = top5_live[0]
+                    if (float(s0_first.get("bias_ma60") or 0.0) > 45.0) and (float(s0_first.get("io_20") or 0.0) <= 0.005) and (has_star_45 or has_sw_45):
+                        deferred.append(s0_first)
+                    else:
+                        chosen_top3.append(s0_first)
                     for cand in top5_live[1:]:
                         io_v = float(cand.get("io_20") or 0.0)
                         m5_v = float(cand.get("mom_5d") or 0.0)
+                        b60_c = float(cand.get("bias_ma60") or 0.0)
                         io_ok = io_v >= -0.025
                         fund_ok = not (has_star_45 and bool(cand.get("pit_is_defect")))
                         chasing_veto = has_sw_45 and (m5_v >= 6.0) and (io_v < 0.0) and (not bool(cand.get("is_super_winner")))
                         overhead_veto = (has_sw_45 or has_star_45) and bool(cand.get("is_overhead_trap"))
-                        if len(chosen_top3) < 3 and io_ok and fund_ok and (not chasing_veto) and (not overhead_veto):
+                        p4_para_veto = (has_sw_45 or has_star_45) and (b60_c > 45.0) and (io_v <= 0.01)
+                        if len(chosen_top3) < 3 and io_ok and fund_ok and (not chasing_veto) and (not overhead_veto) and (not p4_para_veto):
                             chosen_top3.append(cand)
                         else:
                             deferred.append(cand)
@@ -1728,8 +1743,8 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R12 (月轉折機構共振全火力版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R12・7大黃金濾網 + M1主帥降級扶正 + M5真龍頭4%調倉解鎖 + 23族群輪動抗跌真龍頭 + 52W套牢過濾 + 良性半方差加碼・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R13 (終極進出場微結構全火力版)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R13・7大黃金濾網 + P1油氣S3盤中崩跌換馬 + P2恐慌修復進場閘門 + P4極端高乖離分批低接 + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭 + 52W套牢過濾 + 良性半方差加碼・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1751,8 +1766,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign R12・7大黃金濾網 + M1主帥退化降級扶正 + M5真龍頭4%死區解鎖 + 23族群輪動抗跌真龍頭 + 52W套牢過濾 + Segal良性半方差加碼核心架構】"
+                "【G12-PIT Sovereign R13・7大黃金濾網 + P1油氣S3盤中崩跌換馬 + P2恐慌修復進場閘門 + P4極端高乖離分批低接 + M1主帥退化降級扶正 + M5真龍頭4%死區解鎖核心架構】"
                 "美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
+                "P1純油氣族群盤中S3崩跌戰術換馬 + P2恐慌修復盤中進場閘門(Exposure<=60%修復至>=85%雙站月線即時進場) + P4極端高乖離(Bias60>45%)新倉50/50分批-2%低接(3日) + "
                 "M1主帥席位退化降級與真龍頭扶正 + M5超級大牛/抗跌真龍頭4%漂移解鎖 + 23跨市場族群輪動抗跌真龍頭(Ehsani 2022 JF) + "
                 "52週高點套牢過濾(George & Hwang 2004: Prox<0.82) + 良性半方差不對稱點火(+5%, Segal 2015 JFE) + 三冠王動態上限65% + 弱勢第3席次折減(×0.60)"
             )
@@ -1769,7 +1785,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R12 (M1主帥降級扶正 + M5真龍頭4%解鎖 + 族群輪動抗跌真龍頭 + 52W套牢過濾 + 良性半方差加碼)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R13 (P1油氣S3盤中崩跌換馬 + P2恐慌修復進場閘門 + P4極端高乖離分批低接 + M1主帥降級扶正 + M5真龍頭4%解鎖)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1783,9 +1799,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
                 "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
-                "② M1 主帥席位退化降級與真龍頭扶正 + M5 真龍頭 4% 調倉死區解鎖：當第 1 席重倉老股出現財報瑕疵、族群高潮派發或 52W 套牢時自動退居次席並扶正真龍頭；對超級大牛與抗跌真龍頭將加碼門檻由 12% 解鎖至 4%。",
-                "③ 23 跨市場族群輪動抗跌真龍頭 (Ehsani & Linnainmaa 2022 JF) × 52 週高點套牢過濾 (George & Hwang 2004 JF)：逆勢吸籌抗跌真龍頭享 +9% 信念加碼；過熱高潮派發族群與距 52W 高點 <82% 無吸籌套牢股自動讓位。",
-                f"④ 良性半方差不對稱點火 (+5%, Segal 2015 JFE) × 三冠王上限 65% × 弱勢第 3 席折減 (×0.60)：22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                "② [R13 P1] 純油氣族群盤中 S3 實體商品崩跌戰術換馬：當 WTI 與 3-2-1 裂解價差盤中雙破月線時，持倉油氣股於 T+1 開盤即時撤出並換入 Top-8 乾淨真龍頭 (+0.60%/年，100% 零誤傷科技股)。",
+                "③ [R13 P2+P4] 恐慌修復盤中進場閘門 & 極端高乖離 (Bias60>45%) 新倉分批低接：非高估高利環境下前次減倉 <=60% 後若 QQQ/SPY 雙站月線且寬幅 >=55% 即時回補閒置現金；新倉 Bias60>45% 採 50% 開盤 + 50% 掛 C_T×0.98 等候 3 日低接。",
+                f"④ M1主帥降級扶正 × M5真龍頭4%解鎖 × 23族群輪動抗跌真龍頭 × 52W套牢過濾 × 良性半方差加碼：15/15 參數高原驗證通過，22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 
@@ -1898,15 +1914,20 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         if "持有中" in str(rb.get("exit_date", "")):
                             w_ret = 0.0
                             for p_rb in rb.get("picks", []):
-                                tk_r = p_rb.get("ticker", "")
-                                st_r = live_prices.get(tk_r) or (live_prices.get(tk_r.split(".")[0]) if "." in tk_r else None)
-                                if st_r and st_r.get("price"):
-                                    cur_pr = round(float(st_r["price"]), 2)
-                                    p_rb["exit_price"] = cur_pr
-                                    ent_pr = float(p_rb.get("entry_price") or cur_pr)
-                                    if ent_pr > 0:
-                                        p_rb["ret_pct"] = round(((cur_pr / ent_pr) - 1.0) * 100.0, 2)
-                                w_ret += (float(p_rb.get("weight_pct") or 0.0) / 100.0) * float(p_rb.get("ret_pct") or 0.0)
+                                if p_rb.get("is_active", True):
+                                    tk_r = p_rb.get("ticker", "")
+                                    st_r = live_prices.get(tk_r) or (live_prices.get(tk_r.split(".")[0]) if "." in tk_r else None)
+                                    if st_r and st_r.get("price"):
+                                        cur_pr = round(float(st_r["price"]), 2)
+                                        p_rb["exit_price"] = cur_pr
+                                        ent_pr = float(p_rb.get("entry_price") or cur_pr)
+                                        if ent_pr > 0:
+                                            r_val = round(((cur_pr / ent_pr) - 1.0) * 100.0, 2)
+                                            p_rb["ret_pct"] = r_val
+                                            p_rb["period_ret"] = r_val
+                                w_val = float(p_rb.get("weight_pct") or p_rb.get("weight") or 0.0)
+                                p_ret_val = float(p_rb.get("ret_pct") if p_rb.get("ret_pct") is not None else (p_rb.get("period_ret") or 0.0))
+                                w_ret += (w_val / 100.0) * p_ret_val
                             rb["tranche_period_ret_pct"] = round(w_ret, 2)
                     data["recent_2026_rebalances"] = rebal_list
     except Exception as e:

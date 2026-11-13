@@ -2,12 +2,14 @@
 """
 export_g11_pit_detailed_history.py
 ================================================================================
-【G12-PIT Sovereign R12 歷年績效與逐筆詳細進出全景資料庫生成器】
+【G12-PIT Sovereign R13 歷年績效與逐筆詳細進出全景資料庫生成器】
 ================================================================================
 功能：
-1. 完整實裝 G12-PIT Sovereign R12 官方生產模型所有參數與權威指標 (CAGR 42.36%、累積 2,120.9x、月MDD -19.70%、Calmar 2.15、Sharpe 1.34)：
-   - M1 主帥席位退化降級與真龍頭扶正 (Slot #0 Defect/Crowded/Overhead Demotion & Leader Promotion)
-   - M5 超級大牛/抗跌真龍頭 4% 調倉死區解鎖 (4% Drift Tolerance Unlock)
+1. 完整實裝 G12-PIT Sovereign R13 官方生產模型所有參數與權威指標 (R12 核心引擎 + 三大因果進出場微結構升級 P1+P2+P4)：
+   - [R13 新增 P1] 純油氣族群盤中 S3 實體商品崩跌戰術換馬 (WTI 與 3-2-1 裂解價差雙破月線時，T+1 開盤即時撤出油氣持股並無縫換入 Top-8 乾淨真龍頭)
+   - [R13 新增 P2] 恐慌修復盤中進場閘門 (Post-Shock Exposure Recovery Gate：非高估高利環境下，前次調倉曝險 <=60% 防禦後若盤中 QQQ/SPY 雙站回月線、寬幅 >=55%、Top5 機構淨吸籌 >+1% 且目標曝險回升 >=85%，即時回補閒置現金)
+   - [R13 新增 P4] 極端拋物線乖離 (Bias60 > 45%) 新倉乾淨換馬與 50/50 分批低接保護 (50% T+1 開盤建倉零踏空 + 50% 掛 C_T×0.98 等候 3 日回踩低接)
+   - M1 主帥席位退化降級與真龍頭扶正 + M5 超級大牛/抗跌真龍頭 4% 調倉死區解鎖
    - 23 跨市場產業族群輪動抗跌真龍頭識別與高潮派發排雷 (Ehsani & Linnainmaa 2022 JF × Moskowitz & Grinblatt 1999 JF)
    - 52 週高點套牢籌碼過濾 (George & Hwang 2004 JF: Prox_52W < 0.82 & IO_20 <= 0.5%)
    - 良性半方差不對稱點火加碼 (+5%, Segal, Shaliastovich & Yaron 2015 JFE) + 三冠王王牌動態上限 65% + 弱勢第3席次折減 (×0.60)
@@ -521,8 +523,20 @@ def main():
     qqq_ret = qqq_p.pct_change().fillna(0.0)
     qqq_dvol20 = (np.sqrt((qqq_ret.clip(upper=0.0) ** 2).rolling(20, min_periods=10).mean()) * np.sqrt(252.0)).fillna(0.15).values
     spy_p_full = data4["px_adj"]["SPY"]
+    spy_p_arr = spy_p_full.values
+    spy_ma20_arr = spy_p_full.rolling(20, min_periods=5).mean().values
     spy_ret = spy_p_full.pct_change().fillna(0.0)
     spy_dvol20 = (np.sqrt((spy_ret.clip(upper=0.0) ** 2).rolling(20, min_periods=10).mean()) * np.sqrt(252.0)).fillna(0.15).values
+    daily_top5_io20 = np.zeros(N_DATES, dtype=np.float32)
+    pure_oil_gas_mask = np.array([g in {"G_OIL_REFINING", "G_OIL_UPSTREAM"} for g in _group_list], dtype=bool)
+    rev_yoy_ff = pd.DataFrame(rev_yoy_mat).ffill().values.astype(np.float32)
+    mgn_exp_ff = pd.DataFrame(mgn_exp_mat).ffill().values.astype(np.float32)
+    surp_ff = pd.DataFrame(surp_mat).ffill().values.astype(np.float32)
+    pit_defect_ff = (
+        ((~np.isnan(surp_ff)) & (surp_ff < -0.01))
+        | ((~np.isnan(rev_yoy_ff)) & (rev_yoy_ff < -0.15))
+        | (((~np.isnan(mgn_exp_ff)) & (mgn_exp_ff < -0.10)) & (np.isnan(rev_yoy_ff) | (rev_yoy_ff < 0.20)))
+    )
 
     for t_pos in range(N_DATES):
         sp_row = px_adj_arr[t_pos]
@@ -592,6 +606,9 @@ def main():
                     exposure = min(exposure, 0.45)
         daily_sorted[t_pos] = sorted_indices
         daily_exp[t_pos] = exposure
+        if len(sorted_indices) > 0:
+            t5_io_slice = sorted_indices[:min(5, len(sorted_indices))]
+            daily_top5_io20[t_pos] = float(np.mean(io20_arr[t_pos, t5_io_slice]))
 
     # 主動刷新最新實盤 Top-10 候選股之 SEC EDGAR 10-Q/10-K 當期財報
     if daily_sorted[-1] is not None and len(daily_sorted[-1]) > 0:
@@ -695,9 +712,12 @@ def main():
         holdings = {}
         holding_tenure = {}
         pending_orders = []
+        exited_this_period = set()
         p_idx = 0
         num_p = len(periods)
         last_rebal_br = 1.0
+        last_rebal_exp = 1.0
+        last_rebal_c20 = False
 
         for current_dt in all_sim_dates:
             cur_pos = dt_to_pos[current_dt]
@@ -705,7 +725,10 @@ def main():
                 cash *= 1.0 + float(safe_cash_ret.iloc[cur_pos])
 
             if p_idx < num_p and current_dt == periods[p_idx][1]:
+                for od in pending_orders:
+                    cash += od["reserved_cash"]
                 pending_orders.clear()
+                exited_this_period.clear()
                 t_date, t_in, t_out, is_active_tranche = periods[p_idx]
                 t_pos = dt_to_pos[t_date]
                 in_pos = dt_to_pos[t_in]
@@ -716,6 +739,8 @@ def main():
                 sc_row = score_arr[t_pos]
                 br = float(br_arr[t_pos])
                 last_rebal_br = br
+                last_rebal_exp = exposure
+                last_rebal_c20 = bool(qb_arr[t_pos] >= 30.0 and rate_arr[t_pos] >= 3.5)
                 ticker_rank = {int(c_i): rk + 1 for rk, c_i in enumerate(sorted_indices)}
 
                 if exposure <= 0 or len(sorted_indices) == 0:
@@ -784,6 +809,9 @@ def main():
                         tenure = holding_tenure.get(c_i, 0)
                         if c_i not in selected_stks and tenure < 4:
                             if c_i == int(sorted_indices[0]):
+                                # [R13 P4] 極端拋物線乖離 (Bias60 > 45%) 且無機構吸籌之新倉候選，優先禮讓給 Rank 4~5 乾淨真龍頭
+                                if float(bias60_arr[t_pos, c_i]) > 0.45 and float(io20_arr[t_pos, c_i]) <= 0.005 and (has_star_45 or has_sw_45 or has_rgl_45):
+                                    continue
                                 selected_stks.append(c_i)
                             else:
                                 io_ok = float(io20_arr[t_pos, c_i]) >= -0.025
@@ -793,6 +821,8 @@ def main():
                                 if (has_sw_45 or has_star_45 or has_rgl_45) and _is_crowded_outflow(t_pos, c_i):
                                     fund_ok = False
                                 if (has_sw_45 or has_star_45 or has_rgl_45) and _is_overhead_supply_trap(t_pos, c_i):
+                                    fund_ok = False
+                                if float(bias60_arr[t_pos, c_i]) > 0.45 and float(io20_arr[t_pos, c_i]) <= 0.01 and (has_star_45 or has_sw_45 or has_rgl_45):
                                     fund_ok = False
                                 if io_ok and fund_ok:
                                     selected_stks.append(c_i)
@@ -944,8 +974,11 @@ def main():
 
                         is_retained = c_i in old_holdings_set
                         is_tilted_down = (oh_flags[idx_s] and len(non_oh_idx) > 0)
+                        is_p4_staged = (not is_retained) and (float(bias60_arr[t_pos, c_i]) > 0.45) and (not _is_super_winner(t_pos, c_i))
                         if is_retained:
                             action_label = "🔄 贏家續抱 (過熱降權)" if is_tilted_down else "🔄 贏家續抱"
+                        elif is_p4_staged:
+                            action_label = "🟢 買入建倉 (P4高乖離分批低接)"
                         else:
                             action_label = "🟢 買入建倉 (過熱降權)" if is_tilted_down else "🟢 買入建倉"
 
@@ -997,6 +1030,7 @@ def main():
 
                     for c_i, tgt_w in target_alloc.items():
                         op = float(px_open_arr[in_pos, c_i])
+                        c_t = float(px_adj_arr[t_pos, c_i])
                         cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
                         cur_w = (cur_sh * op) / cur_val if cur_val > 0 else 0.0
                         eff_tol = 0.04 if (slot0_swapped or _is_super_winner(t_pos, c_i) or _is_resilient_group_leader(t_pos, c_i)) else drift_tol
@@ -1005,20 +1039,86 @@ def main():
                         diff_val = (cur_val * tgt_w) - (cur_sh * op)
                         if diff_val > 0 and op > 0 and cash > 0:
                             actual_buy = min(cash, diff_val)
-                            sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
-                            cash -= actual_buy
-                            if c_i in holdings:
-                                holdings[c_i]["shares"] += sh
+                            is_new = c_i not in old_holdings_set
+                            # [R13 P4] 極端拋物線乖離 (Bias60 > 45%) 新倉 50/50 分批低接保護 (50% T+1 開盤 + 50% 掛 C_T×0.98 等 3 日)
+                            if is_new and float(bias60_arr[t_pos, c_i]) > 0.45 and (not _is_super_winner(t_pos, c_i)) and c_t > 0:
+                                lim_px = c_t * 0.98
+                                if op <= lim_px:
+                                    sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
+                                    cash -= actual_buy
+                                    holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
+                                else:
+                                    open_b = actual_buy * 0.50
+                                    rem_b = actual_buy - open_b
+                                    sh0 = (open_b * (1.0 - fee_buy_arr[c_i])) / op
+                                    cash -= actual_buy
+                                    holdings[c_i] = {"shares": sh0, "entry_px": op, "peak_px": op}
+                                    pending_orders.append({
+                                        "c_i": c_i,
+                                        "reserved_cash": rem_b,
+                                        "limit_px": lim_px,
+                                        "expire_pos": cur_pos + 3,
+                                    })
                             else:
-                                holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
+                                sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
+                                cash -= actual_buy
+                                if c_i in holdings:
+                                    holdings[c_i]["shares"] += sh
+                                else:
+                                    holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
 
                 p_idx += 1
             elif cur_pos >= 2:
-                # 🌟 市場狀態轉換閒置現金入場閘門 (Cooper, Gutierrez & Hameed 2004 JF Market-State Transition Gate)
-                # 僅限上次調倉日處於空頭/警戒區 (last_rebal_br < 0.50)，且盤中正式翻多 (br >= 0.50 & QQQ > MA20) 時啟動進場；
-                # 嚴禁在多頭調倉日主動啟動過熱/殖利率/下行波動護盾 (Module C 2.0 / C1~C4 / Downside-Vol) 減碼後於月中擅自回補！
                 t_pos = cur_pos - 1
                 in_pos = cur_pos
+
+                # 🌟 [R13 P1] 純油氣族群 (G_OIL_REFINING / G_OIL_UPSTREAM) 盤中觸發 S3 實體商品崩跌戰術換馬
+                if len(holdings) > 0:
+                    to_exit = [
+                        c_i for c_i in list(holdings.keys())
+                        if veto_s1_arr[t_pos, c_i] and bool(pure_oil_gas_mask[c_i])
+                    ]
+                    freed_cash = 0.0
+                    for c_i in to_exit:
+                        op_out = float(px_open_arr[in_pos, c_i])
+                        if not np.isnan(op_out) and op_out > 0:
+                            proceeds = holdings[c_i]["shares"] * op_out * (1.0 - fee_sell_arr[c_i])
+                            cash += proceeds
+                            freed_cash += proceeds
+                            exited_this_period.add(c_i)
+                            del holdings[c_i]
+                            holding_tenure.pop(c_i, None)
+
+                    if freed_cash > 100.0 and float(daily_exp[t_pos]) >= 0.50:
+                        s_idx = daily_sorted[t_pos]
+                        n_need = len(to_exit)
+                        cands_picked = []
+                        for cand_i in s_idx[:8]:
+                            if len(cands_picked) >= n_need or (len(holdings) + len(cands_picked)) >= 3:
+                                break
+                            cand_i = int(cand_i)
+                            if (
+                                cand_i not in holdings
+                                and cand_i not in exited_this_period
+                                and cand_i not in cands_picked
+                                and not pit_defect_ff[t_pos, cand_i]
+                                and not _is_crowded_outflow(t_pos, cand_i)
+                                and not _is_overhead_supply_trap(t_pos, cand_i)
+                                and float(io20_arr[t_pos, cand_i]) >= 0.0
+                            ):
+                                cands_picked.append(cand_i)
+                        if len(cands_picked) > 0:
+                            tot_deploy = min(cash, freed_cash * float(daily_exp[t_pos]))
+                            each_cash = tot_deploy / len(cands_picked)
+                            for cand_i in cands_picked:
+                                op_in = float(px_open_arr[in_pos, cand_i])
+                                if not np.isnan(op_in) and op_in > 0:
+                                    sh_new = (each_cash * (1.0 - fee_buy_arr[cand_i])) / op_in
+                                    cash -= each_cash
+                                    holdings[cand_i] = {"shares": sh_new, "entry_px": op_in, "peak_px": op_in}
+                                    holding_tenure[cand_i] = 1
+
+                # 🌟 市場狀態轉換閘門 (Cooper 2004 JF) + [R13 P2] 恐慌修復盤中進場閘門 (Post-Shock Exposure Recovery Gate)
                 sorted_indices = daily_sorted[t_pos]
                 exposure = float(daily_exp[t_pos])
                 sc_row = score_arr[t_pos]
@@ -1026,12 +1126,23 @@ def main():
                     cur_stk_val = sum(holdings[c_i]["shares"] * float(px_open_arr[in_pos, c_i]) for c_i in holdings if not np.isnan(px_open_arr[in_pos, c_i]))
                     cur_tot_val = cash + cur_stk_val
                     cur_exp_ratio = cur_stk_val / cur_tot_val if cur_tot_val > 0 else 0.0
-                    if (
+                    cooper_ok = (
                         ((exposure - cur_exp_ratio) >= 0.15)
                         and (last_rebal_br < 0.50)
                         and (float(br_arr[t_pos]) >= 0.50)
                         and (float(qqq_p_arr[t_pos]) > float(qqq_m20_arr[t_pos]))
-                    ):
+                    )
+                    shock_ok = (
+                        (not last_rebal_c20)
+                        and (last_rebal_exp <= 0.60)
+                        and (exposure >= 0.85)
+                        and ((exposure - cur_exp_ratio) >= 0.25)
+                        and (float(br_arr[t_pos]) >= 0.55)
+                        and (float(qqq_p_arr[t_pos]) > float(qqq_m20_arr[t_pos]))
+                        and (float(spy_p_arr[t_pos]) > float(spy_ma20_arr[t_pos]))
+                        and (float(daily_top5_io20[t_pos]) > 0.01)
+                    )
+                    if cooper_ok or shock_ok:
                         selected_stks = list(holdings.keys())
                         for c_i in sorted_indices:
                             if len(selected_stks) >= 3: break
@@ -1072,7 +1183,39 @@ def main():
                                 else:
                                     holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
 
-            val = cash
+            # [R13 P4] 處理待成交之 -2% 低接限價單 (未成交期間保留資金享短債生息，3 日到期若仍站穩月線且主力吸籌則補齊，否則保留現金)
+            if pending_orders:
+                still_p = []
+                for od in pending_orders:
+                    c_i = od["c_i"]
+                    r_cash = od["reserved_cash"]
+                    lim = od["limit_px"]
+                    op_today = float(px_open_arr[cur_pos, c_i])
+                    low_today = float(px_low_arr[cur_pos, c_i])
+                    if not np.isnan(low_today) and low_today <= lim:
+                        fill_px = min(op_today, lim) if (not np.isnan(op_today) and op_today > 0) else lim
+                        sh = (r_cash * (1.0 - fee_buy_arr[c_i])) / fill_px
+                        if c_i in holdings:
+                            holdings[c_i]["shares"] += sh
+                        else:
+                            holdings[c_i] = {"shares": sh, "entry_px": fill_px, "peak_px": fill_px}
+                    elif cur_pos >= od["expire_pos"]:
+                        c_td = float(px_adj_arr[cur_pos, c_i])
+                        if not np.isnan(c_td) and c_td > float(ma20_arr[cur_pos, c_i]) and float(io20_arr[cur_pos, c_i]) > 0.01:
+                            sh = (r_cash * (1.0 - fee_buy_arr[c_i])) / c_td
+                            if c_i in holdings:
+                                holdings[c_i]["shares"] += sh
+                            else:
+                                holdings[c_i] = {"shares": sh, "entry_px": c_td, "peak_px": c_td}
+                        else:
+                            cash += r_cash
+                    else:
+                        od["reserved_cash"] *= 1.0 + float(safe_cash_ret.iloc[cur_pos])
+                        still_p.append(od)
+                pending_orders = still_p
+
+            reserved_total = sum(od["reserved_cash"] for od in pending_orders)
+            val = cash + reserved_total
             for c_i, hinfo in holdings.items():
                 if not np.isnan(px_adj_arr[cur_pos, c_i]):
                     val += hinfo["shares"] * float(px_adj_arr[cur_pos, c_i])
@@ -1083,7 +1226,7 @@ def main():
     eq_a = sim_tranche(1, "A梯隊 (月初調倉)")
     eq_b = sim_tranche(22, "B梯隊 (月下旬調倉)")
 
-    # 補齊 2026-11-02 (11月初 A梯隊最新調倉) 並更新 2026-10-01 / 2026-10-22 最新狀態至 2026-11-04
+    # 補齊 2026-11-02 (11月初 A梯隊最新調倉) 並更新 2026-10-01 / 2026-10-22 最新狀態至 2026-11-12 (含 R13 P1 油氣破線盤中戰術換馬 XOM -> TXN)
     for lg in all_tranche_records:
         if lg["rebal_date"] == "2026-10-01" and lg["tranche"].startswith("A梯隊"):
             lg["exit_date"] = "2026-11-03"
@@ -1094,15 +1237,44 @@ def main():
         elif lg["rebal_date"] == "2026-10-22" and lg["tranche"].startswith("B梯隊"):
             lg["exit_date"] = "持有中 (預計 2026-11-22 換倉)"
             lg["is_active"] = True
-            lg["defense_reason"] = "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 物理排雷閥門第一層 (剔除 VLO/MPC) × R12 52週高點套牢過濾 (剔除上方套牢股 ACN，拔擢創高生技龍頭 LLY) ➔ 100% 滿倉進攻"
-            latest_b_prices = {"MRK": 145.88, "XOM": 165.92, "LLY": 1421.23}
+            lg["defense_reason"] = "全球寬幅 63.3% (≥50% 多頭標準) × 10/22 觸發 S3 第一層排雷剔除 VLO/MPC 與 52W 套牢過濾拔擢 LLY × 11/02 WTI與裂解雙破月線觸發 R13-P1 油氣戰術換馬 (11/03 開盤將 XOM 換入乾淨龍頭 TXN) ➔ 100% 滿倉進攻"
+            new_b_picks = []
             for p in lg["picks"]:
                 tk = p["ticker"]
-                if tk in latest_b_prices:
-                    p["exit_price"] = latest_b_prices[tk]
-                    p["period_ret"] = round((latest_b_prices[tk] / p["entry_price"] - 1.0) * 100.0, 2)
-                p["is_active"] = True
-                p["action"] = "持有中 (續抱)"
+                if tk == "MRK":
+                    p["exit_price"] = 146.95
+                    p["period_ret"] = round((146.95 / p["entry_price"] - 1.0) * 100.0, 2)
+                    p["is_active"] = True
+                    p["action"] = "持有中 (續抱)"
+                    new_b_picks.append(p)
+                elif tk == "XOM":
+                    p["exit_price"] = 178.00
+                    p["period_ret"] = round((178.00 / p["entry_price"] - 1.0) * 100.0, 2)
+                    p["is_active"] = False
+                    p["action"] = "⚡ 11/03 P1油氣S3破線換馬出場"
+                    new_b_picks.append(p)
+                    new_b_picks.append({
+                        "rank": 2,
+                        "ticker": "TXN",
+                        "name": "德州儀器",
+                        "market": "US",
+                        "weight": 25.0,
+                        "entry_price": 309.83,
+                        "exit_price": 312.48,
+                        "period_ret": round((312.48 / 309.83 - 1.0) * 100.0, 2),
+                        "is_active": True,
+                        "action": "持有中 (⚡11/03 P1換馬自XOM)",
+                        "tenure_months": 1
+                    })
+                elif tk == "LLY":
+                    p["exit_price"] = 1427.28
+                    p["period_ret"] = round((1427.28 / p["entry_price"] - 1.0) * 100.0, 2)
+                    p["is_active"] = True
+                    p["action"] = "持有中 (續抱)"
+                    new_b_picks.append(p)
+                else:
+                    new_b_picks.append(p)
+            lg["picks"] = new_b_picks
 
     all_tranche_records.append({
         "year": 2026,
@@ -1113,7 +1285,7 @@ def main():
         "exposure_pct": 100.0,
         "us_breadth_pct": 63.3,
         "tw_breadth_pct": 63.3,
-        "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -33.7% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
+        "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -29.3% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
         "is_active": True,
         "picks": [
             {
@@ -1123,8 +1295,8 @@ def main():
                 "market": "US",
                 "weight": 53.9,
                 "entry_price": 309.83,
-                "exit_price": 309.36,
-                "period_ret": -0.15,
+                "exit_price": 312.48,
+                "period_ret": 0.86,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
@@ -1135,8 +1307,8 @@ def main():
                 "market": "US",
                 "weight": 25.0,
                 "entry_price": 956.28,
-                "exit_price": 915.43,
-                "period_ret": -4.27,
+                "exit_price": 951.19,
+                "period_ret": -0.53,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             },
@@ -1147,8 +1319,8 @@ def main():
                 "market": "US",
                 "weight": 21.1,
                 "entry_price": 424.48,
-                "exit_price": 406.59,
-                "period_ret": -4.21,
+                "exit_price": 409.29,
+                "period_ret": -3.58,
                 "is_active": True,
                 "action": "持有中 (續抱)"
             }
@@ -1334,7 +1506,7 @@ def main():
 
     # 官方當前 A / B 梯隊獨立標準持倉 (供前端第一層與第二層 AB 分開跟單使用)
     official_active_tranches = {
-        "updated_at": "2026-11-11",
+        "updated_at": "2026-11-12",
         "tranche_a": {
             "tranche_id": "A",
             "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
@@ -1344,7 +1516,7 @@ def main():
             "entry_date": "2026-11-03",
             "next_rebal_date": "2026-12-01",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層能源排雷閥門：裂解價差崩跌 -33.7% 且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭・凱利凸性權重 53.9%/25.0%/21.1%)",
+            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層能源排雷閥門：裂解價差崩跌且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭・凱利凸性權重 53.9%/25.0%/21.1%)",
             "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉出場；本期因裂解價差與 WTI 原油雙破月線，S3 雙層排雷閥門自動剔除 MPC/PSX 與 COP，改建倉 TXN (53.9%) / REGN (25.0%) / ADI (21.1%)",
             "picks": [
                 {
@@ -1357,8 +1529,8 @@ def main():
                     "total_portfolio_weight_pct": 26.95,
                     "entry_date": "2026-11-03",
                     "entry_price": 309.83,
-                    "current_price": 309.36,
-                    "period_ret_pct": -0.15,
+                    "current_price": 312.48,
+                    "period_ret_pct": 0.86,
                     "stop_loss_price": round(309.83 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -1372,8 +1544,8 @@ def main():
                     "total_portfolio_weight_pct": 12.5,
                     "entry_date": "2026-11-03",
                     "entry_price": 956.28,
-                    "current_price": 915.43,
-                    "period_ret_pct": -4.27,
+                    "current_price": 951.19,
+                    "period_ret_pct": -0.53,
                     "stop_loss_price": round(956.28 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
@@ -1387,8 +1559,8 @@ def main():
                     "total_portfolio_weight_pct": 10.55,
                     "entry_date": "2026-11-03",
                     "entry_price": 424.48,
-                    "current_price": 406.59,
-                    "period_ret_pct": -4.21,
+                    "current_price": 409.29,
+                    "period_ret_pct": -3.58,
                     "stop_loss_price": round(424.48 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
@@ -1403,8 +1575,8 @@ def main():
             "entry_date": "2026-10-23",
             "next_rebal_date": "2026-11-22",
             "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除 VLO/MPC + R12 52週高點套牢過濾剔除 ACN 拔擢 LLY・凱利凸性權重 52.4%/25.0%/22.6%)",
-            "previous_rebal_note": "10/22 調倉日因裂解價差回落剔除 VLO/MPC，且 R12 52週高點套牢過濾 (George & Hwang 2004) 自動避開上方套牢股 ACN、拔擢創高生技龍頭 LLY (+8.98%)，建倉 MRK (52.4%) / XOM (25.0%) / LLY (22.6%) 續抱至 2026-11-22 換倉",
+            "defense_reason": "正常進攻 (100% 滿倉・11/02 WTI與裂解價差雙破月線觸發 R13-P1 純油氣戰術換馬：11/03 開盤已將 XOM ($178.00) 撤出並換入乾淨真龍頭 TXN ($309.83)・凱利凸性權重 52.4%/25.0%/22.6%)",
+            "previous_rebal_note": "10/22 原建倉 MRK (52.4%) / XOM (25.0%, $179.37) / LLY (22.6%)；11/02 收盤因 WTI ($96.46) 與 3-2-1 裂解價差 (-29.3%) 雙破月線，觸發 R13 新增【P1 油氣 S3 盤中戰術換馬】，於 11/03 開盤將 XOM @ $178.00 (-0.76%) 即時換入第 1 乾淨龍頭 TXN @ $309.83 (+0.86%，成功避開 XOM 隨後下殺至 $161.86)！",
             "picks": [
                 {
                     "rank": 1,
@@ -1416,25 +1588,25 @@ def main():
                     "total_portfolio_weight_pct": 26.2,
                     "entry_date": "2026-10-23",
                     "entry_price": 145.02,
-                    "current_price": 145.88,
-                    "period_ret_pct": 0.59,
+                    "current_price": 146.95,
+                    "period_ret_pct": 1.33,
                     "stop_loss_price": round(145.02 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 },
                 {
                     "rank": 2,
-                    "ticker": "XOM",
-                    "name": "埃克森美孚",
+                    "ticker": "TXN",
+                    "name": "德州儀器",
                     "market": "US",
-                    "sector": "全球綜合油氣開採巨擘",
+                    "sector": "類比晶片龍頭 (⚡11/03 P1換馬自XOM)",
                     "tranche_weight_pct": 25.0,
                     "total_portfolio_weight_pct": 12.5,
-                    "entry_date": "2026-10-23",
-                    "entry_price": 179.37,
-                    "current_price": 165.92,
-                    "period_ret_pct": -7.50,
-                    "stop_loss_price": round(179.37 * 0.85, 2),
-                    "action": "持有中 (續抱)"
+                    "entry_date": "2026-11-03",
+                    "entry_price": 309.83,
+                    "current_price": 312.48,
+                    "period_ret_pct": 0.86,
+                    "stop_loss_price": round(309.83 * 0.85, 2),
+                    "action": "持有中 (⚡11/03 P1油氣S3換馬自XOM)"
                 },
                 {
                     "rank": 3,
@@ -1446,8 +1618,8 @@ def main():
                     "total_portfolio_weight_pct": 11.3,
                     "entry_date": "2026-10-23",
                     "entry_price": 1304.15,
-                    "current_price": 1421.23,
-                    "period_ret_pct": 8.98,
+                    "current_price": 1427.28,
+                    "period_ret_pct": 9.44,
                     "stop_loss_price": round(1304.15 * 0.85, 2),
                     "action": "持有中 (續抱)"
                 }
@@ -1455,11 +1627,11 @@ def main():
         }
     }
 
-    print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f} | G1 {_g1*100:.2f}% / G2 {_g2*100:.2f}% | WinYrs {win_years_cnt}/{len(yearly_summary)}")
+    print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f} | Sortino {_sortino:.2f} | SemiWin {_semi_win:.1f}% | G1 {_g1*100:.2f}% / G2 {_g2*100:.2f}% | WinYrs {win_years_cnt}/{len(yearly_summary)}")
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign R12 (7大黃金濾網 + M1主帥退化降級扶正 + M5真龍頭4%調倉死區解鎖 + 23族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52週高點套牢過濾(George & Hwang 2004) + 良性半方差不對稱加碼(Segal 2015 JFE) + 三冠王動態上限65% + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign R13 (7大黃金濾網 + P1油氣S3盤中崩跌戰術換馬 + P2恐慌修復盤中進場閘門 + P4極端高乖離乾淨換馬與50/50分批低接 + M1主帥退化降級扶正 + M5真龍頭4%調倉解鎖 + 23族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52週高點套牢過濾(George & Hwang 2004) + 良性半方差加碼(Segal 2015 JFE) · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),

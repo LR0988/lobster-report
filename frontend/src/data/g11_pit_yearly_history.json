@@ -1,32 +1,32 @@
 {
-  "strategy_version": "G12-PIT Sovereign R12 (7大黃金濾網 + M1主帥退化降級扶正 + M5真龍頭4%調倉死區解鎖 + 23族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52週高點套牢過濾(George & Hwang 2004) + 良性半方差不對稱加碼(Segal 2015 JFE) + 三冠王動態上限65% + 市場狀態轉換閘門(Cooper 2004 JF) + 下行半波動率連續縮放(Moreira & Muir 2017) · 2005-2026)",
+  "strategy_version": "G12-PIT Sovereign R13 (7大黃金濾網 + P1油氣S3盤中崩跌戰術換馬 + P2恐慌修復盤中進場閘門 + P4極端高乖離乾淨換馬與50/50分批低接 + M1主帥退化降級扶正 + M5真龍頭4%調倉解鎖 + 23族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52週高點套牢過濾(George & Hwang 2004) + 良性半方差加碼(Segal 2015 JFE) · 2005-2026)",
   "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
-  "cagr": 42.36,
-  "mult": 2120.9,
-  "monthly_mdd": -19.7,
-  "daily_mdd": -28.62,
-  "calmar": 2.15,
-  "sharpe": 1.34,
-  "total_ret_pct": 211985.4,
-  "sortino": 2.04,
-  "daily_calmar": 1.48,
-  "recent_8y_cagr": 55.63,
-  "semi_monthly_win_rate": 63.0,
+  "cagr": 43.58,
+  "mult": 2552.8,
+  "monthly_mdd": -19.73,
+  "daily_mdd": -28.89,
+  "calmar": 2.21,
+  "sharpe": 1.36,
+  "total_ret_pct": 255178.2,
+  "sortino": 2.08,
+  "daily_calmar": 1.51,
+  "recent_8y_cagr": 58.2,
+  "semi_monthly_win_rate": 63.1,
   "big_loss_rate": 8.4,
-  "g1_cagr": 28.56,
-  "g2_cagr": 58.26,
-  "tranche_a_cagr": 44.54,
-  "tranche_b_cagr": 38.96,
+  "g1_cagr": 28.93,
+  "g2_cagr": 60.56,
+  "tranche_a_cagr": 46.21,
+  "tranche_b_cagr": 39.02,
   "winning_years": "21/22 (95.5%)",
   "yearly_history": [
     {
       "year": 2005,
-      "return_pct": 42.88,
+      "return_pct": 41.09,
       "spy_ret_pct": 8.71,
-      "alpha_pct": 34.17,
-      "cum_mult": 1.43,
-      "capital_twd": 1428830.0,
-      "yearly_mdd_pct": -23.2,
+      "alpha_pct": 32.37,
+      "cum_mult": 1.41,
+      "capital_twd": 1410869.0,
+      "yearly_mdd_pct": -21.07,
       "avg_exposure_pct": 96.0,
       "total_rebal_slots": 72,
       "us_slots": 71,
@@ -883,10 +883,23 @@
           "picks": [
             {
               "rank": 1,
+              "ticker": "UNH",
+              "name": "UNH",
+              "market": "US",
+              "weight": 45.0,
+              "entry_price": 48.88,
+              "exit_price": 51.5,
+              "period_ret": 5.37,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 2,
               "ticker": "AAPL",
               "name": "蘋果",
               "market": "US",
-              "weight": 62.0,
+              "weight": 32.0,
               "entry_price": 39.45,
               "exit_price": 38.83,
               "period_ret": -1.57,
@@ -895,27 +908,14 @@
               "tenure_months": 1
             },
             {
-              "rank": 2,
+              "rank": 3,
               "ticker": "KBH",
               "name": "KBH",
               "market": "US",
-              "weight": 22.7,
+              "weight": 23.0,
               "entry_price": 64.7,
               "exit_price": 74.02,
               "period_ret": 14.4,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 3,
-              "ticker": "M",
-              "name": "M",
-              "market": "US",
-              "weight": 15.3,
-              "entry_price": 34.58,
-              "exit_price": 36.64,
-              "period_ret": 5.99,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -1061,7 +1061,7 @@
               "period_ret": -14.96,
               "is_active": false,
               "action": "🔄 贏家續抱 (過熱降權)",
-              "tenure_months": 3
+              "tenure_months": 2
             },
             {
               "rank": 3,
@@ -1164,8 +1164,8 @@
               "exit_price": 36.29,
               "period_ret": 16.66,
               "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
             },
             {
               "rank": 3,
@@ -1394,11 +1394,11 @@
     },
     {
       "year": 2006,
-      "return_pct": 45.9,
+      "return_pct": 43.84,
       "spy_ret_pct": 15.85,
-      "alpha_pct": 30.06,
-      "cum_mult": 2.08,
-      "capital_twd": 2084729.0,
+      "alpha_pct": 27.99,
+      "cum_mult": 2.03,
+      "capital_twd": 2029366.0,
       "yearly_mdd_pct": -27.29,
       "avg_exposure_pct": 89.4,
       "total_rebal_slots": 69,
@@ -2571,19 +2571,6 @@
             },
             {
               "rank": 2,
-              "ticker": "GLW",
-              "name": "康寧",
-              "market": "US",
-              "weight": 21.4,
-              "entry_price": 24.77,
-              "exit_price": 27.3,
-              "period_ret": 10.21,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 3,
               "ticker": "2393.TW",
               "name": "億光",
               "market": "TW",
@@ -2591,6 +2578,19 @@
               "entry_price": 78.0,
               "exit_price": 88.5,
               "period_ret": 13.46,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 3,
+              "ticker": "GLW",
+              "name": "康寧",
+              "market": "US",
+              "weight": 21.4,
+              "entry_price": 24.77,
+              "exit_price": 27.3,
+              "period_ret": 10.21,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -2757,11 +2757,11 @@
     },
     {
       "year": 2007,
-      "return_pct": 62.12,
+      "return_pct": 62.33,
       "spy_ret_pct": 5.15,
-      "alpha_pct": 56.97,
-      "cum_mult": 3.38,
-      "capital_twd": 3379765.0,
+      "alpha_pct": 57.19,
+      "cum_mult": 3.29,
+      "capital_twd": 3294331.0,
       "yearly_mdd_pct": -17.27,
       "avg_exposure_pct": 92.2,
       "total_rebal_slots": 72,
@@ -3722,7 +3722,7 @@
               "exit_price": 68.25,
               "period_ret": 10.65,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             },
             {
@@ -4160,12 +4160,12 @@
     },
     {
       "year": 2008,
-      "return_pct": -1.98,
+      "return_pct": -2.27,
       "spy_ret_pct": -36.79,
-      "alpha_pct": 34.82,
-      "cum_mult": 3.31,
-      "capital_twd": 3312918.0,
-      "yearly_mdd_pct": -14.37,
+      "alpha_pct": 34.52,
+      "cum_mult": 3.22,
+      "capital_twd": 3219496.0,
+      "yearly_mdd_pct": -14.8,
       "avg_exposure_pct": 22.3,
       "total_rebal_slots": 18,
       "us_slots": 12,
@@ -4819,12 +4819,12 @@
     },
     {
       "year": 2009,
-      "return_pct": 27.58,
+      "return_pct": 28.07,
       "spy_ret_pct": 26.35,
-      "alpha_pct": 1.23,
-      "cum_mult": 4.23,
-      "capital_twd": 4226757.0,
-      "yearly_mdd_pct": -14.69,
+      "alpha_pct": 1.72,
+      "cum_mult": 4.12,
+      "capital_twd": 4123318.0,
+      "yearly_mdd_pct": -14.48,
       "avg_exposure_pct": 64.6,
       "total_rebal_slots": 41,
       "us_slots": 31,
@@ -5615,7 +5615,7 @@
               "exit_price": 5.83,
               "period_ret": -5.51,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             },
             {
@@ -5811,12 +5811,12 @@
     },
     {
       "year": 2010,
-      "return_pct": 21.95,
+      "return_pct": 21.57,
       "spy_ret_pct": 15.06,
-      "alpha_pct": 6.89,
-      "cum_mult": 5.15,
-      "capital_twd": 5154484.0,
-      "yearly_mdd_pct": -23.65,
+      "alpha_pct": 6.51,
+      "cum_mult": 5.01,
+      "capital_twd": 5012642.0,
+      "yearly_mdd_pct": -23.66,
       "avg_exposure_pct": 68.2,
       "total_rebal_slots": 60,
       "us_slots": 54,
@@ -7036,12 +7036,12 @@
     },
     {
       "year": 2011,
-      "return_pct": 1.61,
+      "return_pct": 6.85,
       "spy_ret_pct": 1.9,
-      "alpha_pct": -0.28,
-      "cum_mult": 5.24,
-      "capital_twd": 5237675.0,
-      "yearly_mdd_pct": -23.73,
+      "alpha_pct": 4.95,
+      "cum_mult": 5.36,
+      "capital_twd": 5355839.0,
+      "yearly_mdd_pct": -23.31,
       "avg_exposure_pct": 67.8,
       "total_rebal_slots": 53,
       "us_slots": 37,
@@ -8061,7 +8061,7 @@
               "exit_price": 21.62,
               "period_ret": -11.14,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             }
           ]
@@ -8100,7 +8100,7 @@
               "exit_price": 23.21,
               "period_ret": -5.73,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             },
             {
@@ -8174,12 +8174,12 @@
     },
     {
       "year": 2012,
-      "return_pct": 4.1,
+      "return_pct": 4.38,
       "spy_ret_pct": 15.99,
-      "alpha_pct": -11.89,
-      "cum_mult": 5.45,
-      "capital_twd": 5452534.0,
-      "yearly_mdd_pct": -19.99,
+      "alpha_pct": -11.61,
+      "cum_mult": 5.59,
+      "capital_twd": 5590404.0,
+      "yearly_mdd_pct": -19.93,
       "avg_exposure_pct": 86.3,
       "total_rebal_slots": 63,
       "us_slots": 54,
@@ -9451,12 +9451,12 @@
     },
     {
       "year": 2013,
-      "return_pct": 101.0,
+      "return_pct": 102.33,
       "spy_ret_pct": 32.31,
-      "alpha_pct": 68.69,
-      "cum_mult": 10.96,
-      "capital_twd": 10959587.0,
-      "yearly_mdd_pct": -8.82,
+      "alpha_pct": 70.02,
+      "cum_mult": 11.31,
+      "capital_twd": 11311178.0,
+      "yearly_mdd_pct": -9.18,
       "avg_exposure_pct": 91.5,
       "total_rebal_slots": 72,
       "us_slots": 67,
@@ -10490,7 +10490,7 @@
               "ticker": "NFLX",
               "name": "網飛",
               "market": "US",
-              "weight": 47.4,
+              "weight": 55.2,
               "entry_price": 26.27,
               "exit_price": 30.46,
               "period_ret": 15.95,
@@ -10500,26 +10500,26 @@
             },
             {
               "rank": 2,
-              "ticker": "BIIB",
-              "name": "百健",
-              "market": "US",
-              "weight": 30.8,
-              "entry_price": 194.94,
-              "exit_price": 214.68,
-              "period_ret": 10.13,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 3,
               "ticker": "WBA",
               "name": "WBA",
               "market": "US",
-              "weight": 21.7,
+              "weight": 18.5,
               "entry_price": 47.52,
               "exit_price": 48.91,
               "period_ret": 2.93,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 3,
+              "ticker": "BIIB",
+              "name": "百健",
+              "market": "US",
+              "weight": 26.3,
+              "entry_price": 194.94,
+              "exit_price": 214.68,
+              "period_ret": 10.13,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -10625,7 +10625,7 @@
               "exit_price": 26.27,
               "period_ret": -2.53,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             }
           ]
@@ -10664,7 +10664,7 @@
               "exit_price": 26.06,
               "period_ret": 0.8,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             },
             {
@@ -10842,18 +10842,18 @@
     },
     {
       "year": 2014,
-      "return_pct": 38.14,
+      "return_pct": 38.65,
       "spy_ret_pct": 13.46,
-      "alpha_pct": 24.68,
-      "cum_mult": 15.14,
-      "capital_twd": 15139627.0,
-      "yearly_mdd_pct": -11.91,
+      "alpha_pct": 25.19,
+      "cum_mult": 15.68,
+      "capital_twd": 15683493.0,
+      "yearly_mdd_pct": -11.99,
       "avg_exposure_pct": 90.6,
       "total_rebal_slots": 72,
-      "us_slots": 66,
-      "tw_slots": 6,
-      "us_share_pct": 91.7,
-      "tw_share_pct": 8.3,
+      "us_slots": 65,
+      "tw_slots": 7,
+      "us_share_pct": 90.3,
+      "tw_share_pct": 9.7,
       "cash_defense_periods": 0,
       "unique_stocks_count": 23,
       "unique_us_count": 20,
@@ -10891,7 +10891,7 @@
           "ticker": "3008.TW",
           "name": "大立光",
           "market": "TW",
-          "count": 4,
+          "count": 5,
           "cum_period_ret": 17.2
         },
         {
@@ -10909,11 +10909,11 @@
           "cum_period_ret": 23.8
         },
         {
-          "ticker": "NFLX",
-          "name": "網飛",
+          "ticker": "BIIB",
+          "name": "百健",
           "market": "US",
-          "count": 3,
-          "cum_period_ret": -12.8
+          "count": 2,
+          "cum_period_ret": 27.7
         }
       ],
       "us_stocks": [
@@ -10958,7 +10958,7 @@
         {
           "ticker": "3008.TW",
           "name": "大立光",
-          "count": 4,
+          "count": 5,
           "cum_period_ret": 17.2
         },
         {
@@ -11464,8 +11464,8 @@
               "exit_price": 2486.04,
               "period_ret": 6.01,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
             },
             {
               "rank": 2,
@@ -11576,7 +11576,7 @@
               "ticker": "MU",
               "name": "美光科技",
               "market": "US",
-              "weight": 22.2,
+              "weight": 19.6,
               "entry_price": 34.0,
               "exit_price": 31.21,
               "period_ret": -8.21,
@@ -11586,16 +11586,16 @@
             },
             {
               "rank": 3,
-              "ticker": "NFLX",
-              "name": "網飛",
-              "market": "US",
-              "weight": 20.3,
-              "entry_price": 67.64,
-              "exit_price": 61.03,
-              "period_ret": -9.77,
+              "ticker": "3008.TW",
+              "name": "大立光",
+              "market": "TW",
+              "weight": 22.9,
+              "entry_price": 2345.0,
+              "exit_price": 2345.0,
+              "period_ret": 0.0,
               "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
             }
           ]
         },
@@ -11680,7 +11680,7 @@
               "ticker": "MU",
               "name": "美光科技",
               "market": "US",
-              "weight": 22.6,
+              "weight": 22.4,
               "entry_price": 28.56,
               "exit_price": 34.0,
               "period_ret": 19.05,
@@ -11690,16 +11690,16 @@
             },
             {
               "rank": 3,
-              "ticker": "NFLX",
-              "name": "網飛",
+              "ticker": "AAPL",
+              "name": "蘋果",
               "market": "US",
-              "weight": 12.4,
-              "entry_price": 60.0,
-              "exit_price": 67.64,
-              "period_ret": 12.74,
+              "weight": 12.6,
+              "entry_price": 628.46,
+              "exit_price": 657.09,
+              "period_ret": 4.56,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
             }
           ]
         },
@@ -12227,12 +12227,12 @@
     },
     {
       "year": 2015,
-      "return_pct": 2.96,
+      "return_pct": 2.6,
       "spy_ret_pct": 1.23,
-      "alpha_pct": 1.73,
-      "cum_mult": 15.59,
-      "capital_twd": 15588004.0,
-      "yearly_mdd_pct": -22.46,
+      "alpha_pct": 1.36,
+      "cum_mult": 16.09,
+      "capital_twd": 16090616.0,
+      "yearly_mdd_pct": -23.0,
       "avg_exposure_pct": 77.8,
       "total_rebal_slots": 57,
       "us_slots": 54,
@@ -13406,12 +13406,12 @@
     },
     {
       "year": 2016,
-      "return_pct": 104.34,
+      "return_pct": 103.27,
       "spy_ret_pct": 12.0,
-      "alpha_pct": 92.35,
-      "cum_mult": 31.85,
-      "capital_twd": 31853164.0,
-      "yearly_mdd_pct": -7.31,
+      "alpha_pct": 91.28,
+      "cum_mult": 32.71,
+      "capital_twd": 32708067.0,
+      "yearly_mdd_pct": -7.37,
       "avg_exposure_pct": 76.5,
       "total_rebal_slots": 50,
       "us_slots": 50,
@@ -14481,12 +14481,12 @@
     },
     {
       "year": 2017,
-      "return_pct": 3.96,
+      "return_pct": 7.81,
       "spy_ret_pct": 21.71,
-      "alpha_pct": -17.75,
-      "cum_mult": 33.11,
-      "capital_twd": 33114484.0,
-      "yearly_mdd_pct": -20.46,
+      "alpha_pct": -13.9,
+      "cum_mult": 35.26,
+      "capital_twd": 35262010.0,
+      "yearly_mdd_pct": -18.01,
       "avg_exposure_pct": 98.3,
       "total_rebal_slots": 72,
       "us_slots": 70,
@@ -14494,8 +14494,8 @@
       "us_share_pct": 97.2,
       "tw_share_pct": 2.8,
       "cash_defense_periods": 0,
-      "unique_stocks_count": 19,
-      "unique_us_count": 17,
+      "unique_stocks_count": 20,
+      "unique_us_count": 18,
       "unique_tw_count": 2,
       "top_stocks": [
         {
@@ -14503,7 +14503,7 @@
           "name": "美光科技",
           "market": "US",
           "count": 15,
-          "cum_period_ret": 91.0
+          "cum_period_ret": 88.4
         },
         {
           "ticker": "NVDA",
@@ -14513,18 +14513,18 @@
           "cum_period_ret": 65.9
         },
         {
+          "ticker": "CSX",
+          "name": "CSX",
+          "market": "US",
+          "count": 9,
+          "cum_period_ret": 1.1
+        },
+        {
           "ticker": "BA",
           "name": "BA",
           "market": "US",
           "count": 8,
           "cum_period_ret": 41.6
-        },
-        {
-          "ticker": "CSX",
-          "name": "CSX",
-          "market": "US",
-          "count": 8,
-          "cum_period_ret": -1.5
         },
         {
           "ticker": "LRCX",
@@ -14534,18 +14534,18 @@
           "cum_period_ret": 1.8
         },
         {
-          "ticker": "AMD",
-          "name": "超微半導體",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": -46.0
-        },
-        {
           "ticker": "BAC",
           "name": "BAC",
           "market": "US",
           "count": 3,
           "cum_period_ret": -17.9
+        },
+        {
+          "ticker": "AMD",
+          "name": "超微半導體",
+          "market": "US",
+          "count": 3,
+          "cum_period_ret": -30.0
         },
         {
           "ticker": "AMAT",
@@ -14560,7 +14560,7 @@
           "ticker": "MU",
           "name": "美光科技",
           "count": 15,
-          "cum_period_ret": 91.0
+          "cum_period_ret": 88.4
         },
         {
           "ticker": "NVDA",
@@ -14569,16 +14569,16 @@
           "cum_period_ret": 65.9
         },
         {
+          "ticker": "CSX",
+          "name": "CSX",
+          "count": 9,
+          "cum_period_ret": 1.1
+        },
+        {
           "ticker": "BA",
           "name": "BA",
           "count": 8,
           "cum_period_ret": 41.6
-        },
-        {
-          "ticker": "CSX",
-          "name": "CSX",
-          "count": 8,
-          "cum_period_ret": -1.5
         },
         {
           "ticker": "LRCX",
@@ -14587,10 +14587,10 @@
           "cum_period_ret": 1.8
         },
         {
-          "ticker": "AMD",
-          "name": "超微半導體",
-          "count": 4,
-          "cum_period_ret": -46.0
+          "ticker": "BAC",
+          "name": "BAC",
+          "count": 3,
+          "cum_period_ret": -17.9
         }
       ],
       "tw_stocks": [
@@ -15157,7 +15157,7 @@
               "ticker": "NFLX",
               "name": "網飛",
               "market": "US",
-              "weight": 23.1,
+              "weight": 21.5,
               "entry_price": 187.79,
               "exit_price": 168.35,
               "period_ret": -10.35,
@@ -15167,13 +15167,13 @@
             },
             {
               "rank": 3,
-              "ticker": "AMD",
-              "name": "超微半導體",
+              "ticker": "MU",
+              "name": "美光科技",
               "market": "US",
-              "weight": 14.9,
-              "entry_price": 14.29,
-              "exit_price": 12.0,
-              "period_ret": -16.03,
+              "weight": 16.5,
+              "entry_price": 30.8,
+              "exit_price": 29.97,
+              "period_ret": -2.69,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -15245,23 +15245,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "MU",
-              "name": "美光科技",
-              "market": "US",
-              "weight": 45.0,
-              "entry_price": 31.89,
-              "exit_price": 30.8,
-              "period_ret": -3.42,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 4
-            },
-            {
-              "rank": 2,
               "ticker": "NVDA",
               "name": "輝達",
               "market": "US",
-              "weight": 34.9,
+              "weight": 62.0,
               "entry_price": 158.68,
               "exit_price": 165.22,
               "period_ret": 4.12,
@@ -15270,14 +15257,27 @@
               "tenure_months": 2
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "CSX",
               "name": "CSX",
               "market": "US",
-              "weight": 20.1,
+              "weight": 25.0,
               "entry_price": 52.54,
               "exit_price": 50.98,
               "period_ret": -2.97,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 3,
+              "ticker": "REGN",
+              "name": "再生元製藥",
+              "market": "US",
+              "weight": 13.0,
+              "entry_price": 511.79,
+              "exit_price": 523.97,
+              "period_ret": 2.38,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -15349,23 +15349,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "MU",
-              "name": "美光科技",
-              "market": "US",
-              "weight": 58.8,
-              "entry_price": 28.08,
-              "exit_price": 31.89,
-              "period_ret": 13.57,
-              "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 3
-            },
-            {
-              "rank": 2,
               "ticker": "LRCX",
               "name": "科林研發",
               "market": "US",
-              "weight": 17.4,
+              "weight": 47.3,
               "entry_price": 153.33,
               "exit_price": 150.24,
               "period_ret": -2.02,
@@ -15374,14 +15361,27 @@
               "tenure_months": 2
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "NVDA",
               "name": "輝達",
               "market": "US",
-              "weight": 23.8,
+              "weight": 35.7,
               "entry_price": 139.7,
               "exit_price": 158.68,
               "period_ret": 13.59,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "CSX",
+              "name": "CSX",
+              "market": "US",
+              "weight": 17.0,
+              "entry_price": 51.42,
+              "exit_price": 52.74,
+              "period_ret": 2.56,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -15475,7 +15475,7 @@
               "period_ret": 5.13,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "tenure_months": 4
             },
             {
               "rank": 3,
@@ -15540,7 +15540,7 @@
               "period_ret": 11.09,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 3
+              "tenure_months": 4
             }
           ]
         },
@@ -15591,8 +15591,8 @@
               "exit_price": 26.71,
               "period_ret": 1.33,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 3
             }
           ]
         },
@@ -15618,7 +15618,7 @@
               "period_ret": -5.3,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "tenure_months": 3
             },
             {
               "rank": 2,
@@ -15674,26 +15674,26 @@
             },
             {
               "rank": 2,
-              "ticker": "BAC",
-              "name": "BAC",
+              "ticker": "MU",
+              "name": "美光科技",
               "market": "US",
-              "weight": 18.9,
-              "entry_price": 24.79,
-              "exit_price": 23.11,
-              "period_ret": -6.78,
+              "weight": 17.3,
+              "entry_price": 23.92,
+              "exit_price": 26.36,
+              "period_ret": 10.2,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
             },
             {
               "rank": 3,
-              "ticker": "CHTR",
-              "name": "CHTR",
+              "ticker": "BAC",
+              "name": "BAC",
               "market": "US",
-              "weight": 16.1,
-              "entry_price": 326.09,
-              "exit_price": 320.5,
-              "period_ret": -1.71,
+              "weight": 17.7,
+              "entry_price": 24.79,
+              "exit_price": 23.11,
+              "period_ret": -6.78,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -15713,26 +15713,26 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "NVDA",
-              "name": "輝達",
-              "market": "US",
-              "weight": 65.0,
-              "entry_price": 113.3,
-              "exit_price": 102.4,
-              "period_ret": -9.62,
-              "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
-            },
-            {
-              "rank": 2,
               "ticker": "CSX",
               "name": "CSX",
               "market": "US",
-              "weight": 17.3,
+              "weight": 48.0,
               "entry_price": 46.69,
               "exit_price": 49.4,
               "period_ret": 5.79,
+              "is_active": false,
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
+            },
+            {
+              "rank": 2,
+              "ticker": "NVDA",
+              "name": "輝達",
+              "market": "US",
+              "weight": 36.0,
+              "entry_price": 113.3,
+              "exit_price": 102.4,
+              "period_ret": -9.62,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -15742,7 +15742,7 @@
               "ticker": "MU",
               "name": "美光科技",
               "market": "US",
-              "weight": 17.7,
+              "weight": 15.9,
               "entry_price": 24.53,
               "exit_price": 24.88,
               "period_ret": 1.43,
@@ -15860,12 +15860,12 @@
     },
     {
       "year": 2018,
-      "return_pct": 70.55,
+      "return_pct": 64.56,
       "spy_ret_pct": -4.57,
-      "alpha_pct": 75.12,
-      "cum_mult": 56.48,
-      "capital_twd": 56477536.0,
-      "yearly_mdd_pct": -18.22,
+      "alpha_pct": 69.12,
+      "cum_mult": 58.03,
+      "capital_twd": 58025721.0,
+      "yearly_mdd_pct": -21.55,
       "avg_exposure_pct": 65.0,
       "total_rebal_slots": 59,
       "us_slots": 53,
@@ -16433,8 +16433,8 @@
               "exit_price": 31.58,
               "period_ret": -30.38,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
             }
           ]
         },
@@ -16589,7 +16589,7 @@
               "exit_price": 213.0,
               "period_ret": -11.62,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             }
           ]
@@ -17066,12 +17066,12 @@
     },
     {
       "year": 2019,
-      "return_pct": 9.42,
+      "return_pct": 8.18,
       "spy_ret_pct": 31.22,
-      "alpha_pct": -21.81,
-      "cum_mult": 61.8,
-      "capital_twd": 61795862.0,
-      "yearly_mdd_pct": -17.57,
+      "alpha_pct": -23.04,
+      "cum_mult": 62.77,
+      "capital_twd": 62774668.0,
+      "yearly_mdd_pct": -19.05,
       "avg_exposure_pct": 90.7,
       "total_rebal_slots": 64,
       "us_slots": 50,
@@ -18357,12 +18357,12 @@
     },
     {
       "year": 2020,
-      "return_pct": 63.09,
+      "return_pct": 60.69,
       "spy_ret_pct": 18.33,
-      "alpha_pct": 44.76,
-      "cum_mult": 100.78,
-      "capital_twd": 100783985.0,
-      "yearly_mdd_pct": -27.61,
+      "alpha_pct": 42.36,
+      "cum_mult": 100.87,
+      "capital_twd": 100871708.0,
+      "yearly_mdd_pct": -26.77,
       "avg_exposure_pct": 76.8,
       "total_rebal_slots": 59,
       "us_slots": 56,
@@ -19563,18 +19563,18 @@
     },
     {
       "year": 2021,
-      "return_pct": 6.19,
+      "return_pct": 16.21,
       "spy_ret_pct": 28.73,
-      "alpha_pct": -22.54,
-      "cum_mult": 107.03,
-      "capital_twd": 107025625.0,
-      "yearly_mdd_pct": -28.62,
+      "alpha_pct": -12.52,
+      "cum_mult": 117.23,
+      "capital_twd": 117225233.0,
+      "yearly_mdd_pct": -28.89,
       "avg_exposure_pct": 89.8,
       "total_rebal_slots": 72,
-      "us_slots": 64,
-      "tw_slots": 8,
-      "us_share_pct": 88.9,
-      "tw_share_pct": 11.1,
+      "us_slots": 65,
+      "tw_slots": 7,
+      "us_share_pct": 90.3,
+      "tw_share_pct": 9.7,
       "cash_defense_periods": 0,
       "unique_stocks_count": 30,
       "unique_us_count": 25,
@@ -19602,6 +19602,13 @@
           "cum_period_ret": 9.6
         },
         {
+          "ticker": "NVDA",
+          "name": "輝達",
+          "market": "US",
+          "count": 5,
+          "cum_period_ret": 12.2
+        },
+        {
           "ticker": "MRNA",
           "name": "莫德納",
           "market": "US",
@@ -19614,13 +19621,6 @@
           "market": "US",
           "count": 4,
           "cum_period_ret": -5.8
-        },
-        {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "market": "US",
-          "count": 4,
-          "cum_period_ret": -8.6
         },
         {
           "ticker": "COF",
@@ -19657,6 +19657,12 @@
           "cum_period_ret": 9.6
         },
         {
+          "ticker": "NVDA",
+          "name": "輝達",
+          "count": 5,
+          "cum_period_ret": 12.2
+        },
+        {
           "ticker": "MRNA",
           "name": "莫德納",
           "count": 5,
@@ -19667,21 +19673,9 @@
           "name": "ENPH",
           "count": 4,
           "cum_period_ret": -5.8
-        },
-        {
-          "ticker": "NVDA",
-          "name": "輝達",
-          "count": 4,
-          "cum_period_ret": -8.6
         }
       ],
       "tw_stocks": [
-        {
-          "ticker": "6531.TW",
-          "name": "愛普*",
-          "count": 2,
-          "cum_period_ret": 14.6
-        },
         {
           "ticker": "2308.TW",
           "name": "台達電",
@@ -19693,6 +19687,12 @@
           "name": "景碩",
           "count": 2,
           "cum_period_ret": -20.9
+        },
+        {
+          "ticker": "6531.TW",
+          "name": "愛普*",
+          "count": 1,
+          "cum_period_ret": 29.0
         },
         {
           "ticker": "8046.TW",
@@ -19794,8 +19794,8 @@
               "exit_price": 30.15,
               "period_ret": -3.0,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
             },
             {
               "rank": 3,
@@ -19846,8 +19846,8 @@
               "exit_price": 29.63,
               "period_ret": -5.63,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱 (過熱降權)",
+              "tenure_months": 2
             },
             {
               "rank": 3,
@@ -19877,23 +19877,10 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "6531.TW",
-              "name": "愛普*",
-              "market": "TW",
-              "weight": 37.2,
-              "entry_price": 603.0,
-              "exit_price": 516.0,
-              "period_ret": -14.43,
-              "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
-              "tenure_months": 1
-            },
-            {
-              "rank": 2,
               "ticker": "TSLA",
               "name": "特斯拉",
               "market": "US",
-              "weight": 18.4,
+              "weight": 42.3,
               "entry_price": 386.45,
               "exit_price": 366.35,
               "period_ret": -5.2,
@@ -19902,14 +19889,27 @@
               "tenure_months": 1
             },
             {
-              "rank": 3,
+              "rank": 2,
               "ticker": "3189.TW",
               "name": "景碩",
               "market": "TW",
-              "weight": 44.3,
+              "weight": 30.7,
               "entry_price": 243.0,
               "exit_price": 227.0,
               "period_ret": -6.58,
+              "is_active": false,
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
+            },
+            {
+              "rank": 3,
+              "ticker": "NVDA",
+              "name": "輝達",
+              "market": "US",
+              "weight": 27.0,
+              "entry_price": 25.71,
+              "exit_price": 31.08,
+              "period_ret": 20.9,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -20960,11 +20960,11 @@
     },
     {
       "year": 2022,
-      "return_pct": 5.13,
+      "return_pct": 6.31,
       "spy_ret_pct": -18.18,
-      "alpha_pct": 23.3,
-      "cum_mult": 112.52,
-      "capital_twd": 112515341.0,
+      "alpha_pct": 24.48,
+      "cum_mult": 124.62,
+      "capital_twd": 124621425.0,
       "yearly_mdd_pct": -11.92,
       "avg_exposure_pct": 25.4,
       "total_rebal_slots": 27,
@@ -21693,7 +21693,7 @@
               "period_ret": -14.81,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "tenure_months": 3
             },
             {
               "rank": 2,
@@ -21727,12 +21727,12 @@
     },
     {
       "year": 2023,
-      "return_pct": 57.78,
+      "return_pct": 68.18,
       "spy_ret_pct": 26.18,
-      "alpha_pct": 31.61,
-      "cum_mult": 177.53,
-      "capital_twd": 177532135.0,
-      "yearly_mdd_pct": -13.69,
+      "alpha_pct": 42.01,
+      "cum_mult": 209.59,
+      "capital_twd": 209594043.0,
+      "yearly_mdd_pct": -15.09,
       "avg_exposure_pct": 82.1,
       "total_rebal_slots": 68,
       "us_slots": 50,
@@ -22392,7 +22392,7 @@
               "exit_price": 356.0,
               "period_ret": 2.59,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             },
             {
@@ -22405,7 +22405,7 @@
               "exit_price": 1725.0,
               "period_ret": -18.82,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             }
           ]
@@ -22848,7 +22848,7 @@
               "period_ret": -11.02,
               "is_active": false,
               "action": "🔄 贏家續抱 (過熱降權)",
-              "tenure_months": 2
+              "tenure_months": 3
             },
             {
               "rank": 2,
@@ -22878,10 +22878,23 @@
           "picks": [
             {
               "rank": 1,
+              "ticker": "3443.TW",
+              "name": "創意",
+              "market": "TW",
+              "weight": 54.7,
+              "entry_price": 1050.0,
+              "exit_price": 1160.0,
+              "period_ret": 10.48,
+              "is_active": false,
+              "action": "🔄 贏家續抱 (過熱降權)",
+              "tenure_months": 2
+            },
+            {
+              "rank": 2,
               "ticker": "3454.TW",
               "name": "晶睿",
               "market": "TW",
-              "weight": 56.9,
+              "weight": 34.3,
               "entry_price": 231.5,
               "exit_price": 269.5,
               "period_ret": 16.41,
@@ -22890,24 +22903,11 @@
               "tenure_months": 1
             },
             {
-              "rank": 2,
-              "ticker": "3443.TW",
-              "name": "創意",
-              "market": "TW",
-              "weight": 32.3,
-              "entry_price": 1050.0,
-              "exit_price": 1160.0,
-              "period_ret": 10.48,
-              "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
-              "tenure_months": 1
-            },
-            {
               "rank": 3,
               "ticker": "3034.TW",
               "name": "聯詠",
               "market": "TW",
-              "weight": 10.9,
+              "weight": 11.0,
               "entry_price": 410.5,
               "exit_price": 434.5,
               "period_ret": 5.85,
@@ -22938,8 +22938,8 @@
               "exit_price": 1180.0,
               "period_ret": 47.87,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱",
+              "tenure_months": 2
             },
             {
               "rank": 2,
@@ -23077,12 +23077,12 @@
     },
     {
       "year": 2024,
-      "return_pct": 113.03,
+      "return_pct": 110.94,
       "spy_ret_pct": 24.89,
-      "alpha_pct": 88.14,
-      "cum_mult": 378.19,
-      "capital_twd": 378194602.0,
-      "yearly_mdd_pct": -13.19,
+      "alpha_pct": 86.05,
+      "cum_mult": 442.11,
+      "capital_twd": 442113543.0,
+      "yearly_mdd_pct": -13.26,
       "avg_exposure_pct": 64.2,
       "total_rebal_slots": 72,
       "us_slots": 65,
@@ -24462,12 +24462,12 @@
     },
     {
       "year": 2025,
-      "return_pct": 53.53,
+      "return_pct": 66.59,
       "spy_ret_pct": 17.72,
-      "alpha_pct": 35.81,
-      "cum_mult": 580.65,
-      "capital_twd": 580652426.0,
-      "yearly_mdd_pct": -16.02,
+      "alpha_pct": 48.87,
+      "cum_mult": 736.5,
+      "capital_twd": 736497042.0,
+      "yearly_mdd_pct": -16.92,
       "avg_exposure_pct": 80.6,
       "total_rebal_slots": 66,
       "us_slots": 54,
@@ -25773,15 +25773,15 @@
     },
     {
       "year": 2026,
-      "return_pct": 265.25,
+      "return_pct": 246.61,
       "spy_ret_pct": 13.75,
-      "alpha_pct": 251.51,
-      "cum_mult": 2120.85,
-      "capital_twd": 2120853533.0,
-      "yearly_mdd_pct": -22.77,
+      "alpha_pct": 232.87,
+      "cum_mult": 2552.78,
+      "capital_twd": 2552781653.0,
+      "yearly_mdd_pct": -22.12,
       "avg_exposure_pct": 83.3,
-      "total_rebal_slots": 63,
-      "us_slots": 63,
+      "total_rebal_slots": 64,
+      "us_slots": 64,
       "tw_slots": 0,
       "us_share_pct": 100.0,
       "tw_share_pct": 0.0,
@@ -25795,7 +25795,7 @@
           "name": "SanDisk",
           "market": "US",
           "count": 10,
-          "cum_period_ret": 233.8
+          "cum_period_ret": 189.9
         },
         {
           "ticker": "WDC",
@@ -25852,7 +25852,7 @@
           "ticker": "SNDK",
           "name": "SanDisk",
           "count": 10,
-          "cum_period_ret": 233.8
+          "cum_period_ret": 189.9
         },
         {
           "ticker": "WDC",
@@ -25896,7 +25896,7 @@
           "exposure_pct": 100.0,
           "us_breadth_pct": 63.3,
           "tw_breadth_pct": 63.3,
-          "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -33.7% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
+          "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -29.3% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
           "is_active": true,
           "picks": [
             {
@@ -25906,8 +25906,8 @@
               "market": "US",
               "weight": 53.9,
               "entry_price": 309.83,
-              "exit_price": 309.36,
-              "period_ret": -0.15,
+              "exit_price": 312.48,
+              "period_ret": 0.86,
               "is_active": true,
               "action": "持有中 (續抱)"
             },
@@ -25918,8 +25918,8 @@
               "market": "US",
               "weight": 25.0,
               "entry_price": 956.28,
-              "exit_price": 915.43,
-              "period_ret": -4.27,
+              "exit_price": 951.19,
+              "period_ret": -0.53,
               "is_active": true,
               "action": "持有中 (續抱)"
             },
@@ -25930,8 +25930,8 @@
               "market": "US",
               "weight": 21.1,
               "entry_price": 424.48,
-              "exit_price": 406.59,
-              "period_ret": -4.21,
+              "exit_price": 409.29,
+              "period_ret": -3.58,
               "is_active": true,
               "action": "持有中 (續抱)"
             }
@@ -25945,7 +25945,7 @@
           "tranche": "B梯隊 (月下旬調倉)",
           "exposure_pct": 100.0,
           "breadth": 0.57,
-          "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 物理排雷閥門第一層 (剔除 VLO/MPC) × R12 52週高點套牢過濾 (剔除上方套牢股 ACN，拔擢創高生技龍頭 LLY) ➔ 100% 滿倉進攻",
+          "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 10/22 觸發 S3 第一層排雷剔除 VLO/MPC 與 52W 套牢過濾拔擢 LLY × 11/02 WTI與裂解雙破月線觸發 R13-P1 油氣戰術換馬 (11/03 開盤將 XOM 換入乾淨龍頭 TXN) ➔ 100% 滿倉進攻",
           "is_active": true,
           "picks": [
             {
@@ -25955,8 +25955,8 @@
               "market": "US",
               "weight": 52.4,
               "entry_price": 145.02,
-              "exit_price": 145.88,
-              "period_ret": 0.59,
+              "exit_price": 146.95,
+              "period_ret": 1.33,
               "is_active": true,
               "action": "持有中 (續抱)",
               "tenure_months": 1
@@ -25968,10 +25968,23 @@
               "market": "US",
               "weight": 25.0,
               "entry_price": 179.37,
-              "exit_price": 165.92,
-              "period_ret": -7.5,
+              "exit_price": 178.0,
+              "period_ret": -0.76,
+              "is_active": false,
+              "action": "⚡ 11/03 P1油氣S3破線換馬出場",
+              "tenure_months": 1
+            },
+            {
+              "rank": 2,
+              "ticker": "TXN",
+              "name": "德州儀器",
+              "market": "US",
+              "weight": 25.0,
+              "entry_price": 309.83,
+              "exit_price": 312.48,
+              "period_ret": 0.86,
               "is_active": true,
-              "action": "持有中 (續抱)",
+              "action": "持有中 (⚡11/03 P1換馬自XOM)",
               "tenure_months": 1
             },
             {
@@ -25981,8 +25994,8 @@
               "market": "US",
               "weight": 22.6,
               "entry_price": 1304.15,
-              "exit_price": 1421.23,
-              "period_ret": 8.98,
+              "exit_price": 1427.28,
+              "period_ret": 9.44,
               "is_active": true,
               "action": "持有中 (續抱)",
               "tenure_months": 1
@@ -26314,23 +26327,23 @@
           "picks": [
             {
               "rank": 1,
-              "ticker": "DELL",
-              "name": "戴爾科技",
+              "ticker": "SNDK",
+              "name": "SanDisk",
               "market": "US",
-              "weight": 29.5,
-              "entry_price": 414.82,
-              "exit_price": 448.66,
-              "period_ret": 8.16,
+              "weight": 20.2,
+              "entry_price": 2043.8,
+              "exit_price": 1358.21,
+              "period_ret": -33.54,
               "is_active": false,
-              "action": "🟢 買入建倉",
-              "tenure_months": 1
+              "action": "🔄 贏家續抱 (過熱降權)",
+              "tenure_months": 4
             },
             {
               "rank": 2,
               "ticker": "WDC",
               "name": "威騰電子",
               "market": "US",
-              "weight": 10.1,
+              "weight": 13.7,
               "entry_price": 595.31,
               "exit_price": 554.83,
               "period_ret": -6.8,
@@ -26340,13 +26353,13 @@
             },
             {
               "rank": 3,
-              "ticker": "INTC",
-              "name": "英特爾",
+              "ticker": "DELL",
+              "name": "戴爾科技",
               "market": "US",
-              "weight": 10.4,
-              "entry_price": 128.92,
-              "exit_price": 95.24,
-              "period_ret": -26.12,
+              "weight": 16.1,
+              "entry_price": 414.82,
+              "exit_price": 448.66,
+              "period_ret": 8.16,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
@@ -26387,7 +26400,7 @@
               "exit_price": 975.13,
               "period_ret": -9.7,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             },
             {
@@ -26400,7 +26413,7 @@
               "exit_price": 904.28,
               "period_ret": -7.99,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             }
           ]
@@ -26427,7 +26440,7 @@
               "period_ret": 16.78,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 4
+              "tenure_months": 3
             },
             {
               "rank": 2,
@@ -26531,7 +26544,7 @@
               "period_ret": 43.19,
               "is_active": false,
               "action": "🔄 贏家續抱",
-              "tenure_months": 3
+              "tenure_months": 2
             },
             {
               "rank": 2,
@@ -26634,8 +26647,8 @@
               "exit_price": 1222.18,
               "period_ret": 90.34,
               "is_active": false,
-              "action": "🔄 贏家續抱",
-              "tenure_months": 2
+              "action": "🟢 買入建倉",
+              "tenure_months": 1
             },
             {
               "rank": 2,
@@ -26733,7 +26746,7 @@
               "ticker": "WDC",
               "name": "威騰電子",
               "market": "US",
-              "weight": 49.5,
+              "weight": 62.8,
               "entry_price": 254.3,
               "exit_price": 278.01,
               "period_ret": 9.32,
@@ -26743,28 +26756,28 @@
             },
             {
               "rank": 2,
-              "ticker": "SNDK",
-              "name": "SanDisk",
+              "ticker": "MU",
+              "name": "美光科技",
               "market": "US",
-              "weight": 30.1,
-              "entry_price": 581.64,
-              "exit_price": 642.09,
-              "period_ret": 10.39,
+              "weight": 25.1,
+              "entry_price": 386.33,
+              "exit_price": 341.29,
+              "period_ret": -11.66,
               "is_active": false,
               "action": "🟢 買入建倉",
               "tenure_months": 1
             },
             {
               "rank": 3,
-              "ticker": "MU",
-              "name": "美光科技",
+              "ticker": "GLW",
+              "name": "康寧",
               "market": "US",
-              "weight": 20.4,
-              "entry_price": 386.33,
-              "exit_price": 341.29,
-              "period_ret": -11.66,
+              "weight": 12.0,
+              "entry_price": 151.23,
+              "exit_price": 135.93,
+              "period_ret": -10.12,
               "is_active": false,
-              "action": "🟢 買入建倉",
+              "action": "🟢 買入建倉 (過熱降權)",
               "tenure_months": 1
             }
           ]
@@ -26816,7 +26829,7 @@
               "exit_price": 693.69,
               "period_ret": 1.64,
               "is_active": false,
-              "action": "🟢 買入建倉 (過熱降權)",
+              "action": "🟢 買入建倉 (P4高乖離分批低接)",
               "tenure_months": 1
             }
           ]
@@ -26990,7 +27003,7 @@
       "exposure_pct": 100.0,
       "us_breadth_pct": 63.3,
       "tw_breadth_pct": 63.3,
-      "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -33.7% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
+      "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -29.3% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
       "is_active": true,
       "picks": [
         {
@@ -27000,8 +27013,8 @@
           "market": "US",
           "weight": 53.9,
           "entry_price": 309.83,
-          "exit_price": 309.36,
-          "period_ret": -0.15,
+          "exit_price": 312.48,
+          "period_ret": 0.86,
           "is_active": true,
           "action": "持有中 (續抱)"
         },
@@ -27012,8 +27025,8 @@
           "market": "US",
           "weight": 25.0,
           "entry_price": 956.28,
-          "exit_price": 915.43,
-          "period_ret": -4.27,
+          "exit_price": 951.19,
+          "period_ret": -0.53,
           "is_active": true,
           "action": "持有中 (續抱)"
         },
@@ -27024,8 +27037,8 @@
           "market": "US",
           "weight": 21.1,
           "entry_price": 424.48,
-          "exit_price": 406.59,
-          "period_ret": -4.21,
+          "exit_price": 409.29,
+          "period_ret": -3.58,
           "is_active": true,
           "action": "持有中 (續抱)"
         }
@@ -27039,7 +27052,7 @@
       "tranche": "B梯隊 (月下旬調倉)",
       "exposure_pct": 100.0,
       "breadth": 0.57,
-      "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 物理排雷閥門第一層 (剔除 VLO/MPC) × R12 52週高點套牢過濾 (剔除上方套牢股 ACN，拔擢創高生技龍頭 LLY) ➔ 100% 滿倉進攻",
+      "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 10/22 觸發 S3 第一層排雷剔除 VLO/MPC 與 52W 套牢過濾拔擢 LLY × 11/02 WTI與裂解雙破月線觸發 R13-P1 油氣戰術換馬 (11/03 開盤將 XOM 換入乾淨龍頭 TXN) ➔ 100% 滿倉進攻",
       "is_active": true,
       "picks": [
         {
@@ -27049,8 +27062,8 @@
           "market": "US",
           "weight": 52.4,
           "entry_price": 145.02,
-          "exit_price": 145.88,
-          "period_ret": 0.59,
+          "exit_price": 146.95,
+          "period_ret": 1.33,
           "is_active": true,
           "action": "持有中 (續抱)",
           "tenure_months": 1
@@ -27062,10 +27075,23 @@
           "market": "US",
           "weight": 25.0,
           "entry_price": 179.37,
-          "exit_price": 165.92,
-          "period_ret": -7.5,
+          "exit_price": 178.0,
+          "period_ret": -0.76,
+          "is_active": false,
+          "action": "⚡ 11/03 P1油氣S3破線換馬出場",
+          "tenure_months": 1
+        },
+        {
+          "rank": 2,
+          "ticker": "TXN",
+          "name": "德州儀器",
+          "market": "US",
+          "weight": 25.0,
+          "entry_price": 309.83,
+          "exit_price": 312.48,
+          "period_ret": 0.86,
           "is_active": true,
-          "action": "持有中 (續抱)",
+          "action": "持有中 (⚡11/03 P1換馬自XOM)",
           "tenure_months": 1
         },
         {
@@ -27075,8 +27101,8 @@
           "market": "US",
           "weight": 22.6,
           "entry_price": 1304.15,
-          "exit_price": 1421.23,
-          "period_ret": 8.98,
+          "exit_price": 1427.28,
+          "period_ret": 9.44,
           "is_active": true,
           "action": "持有中 (續抱)",
           "tenure_months": 1
@@ -27408,23 +27434,23 @@
       "picks": [
         {
           "rank": 1,
-          "ticker": "DELL",
-          "name": "戴爾科技",
+          "ticker": "SNDK",
+          "name": "SanDisk",
           "market": "US",
-          "weight": 29.5,
-          "entry_price": 414.82,
-          "exit_price": 448.66,
-          "period_ret": 8.16,
+          "weight": 20.2,
+          "entry_price": 2043.8,
+          "exit_price": 1358.21,
+          "period_ret": -33.54,
           "is_active": false,
-          "action": "🟢 買入建倉",
-          "tenure_months": 1
+          "action": "🔄 贏家續抱 (過熱降權)",
+          "tenure_months": 4
         },
         {
           "rank": 2,
           "ticker": "WDC",
           "name": "威騰電子",
           "market": "US",
-          "weight": 10.1,
+          "weight": 13.7,
           "entry_price": 595.31,
           "exit_price": 554.83,
           "period_ret": -6.8,
@@ -27434,13 +27460,13 @@
         },
         {
           "rank": 3,
-          "ticker": "INTC",
-          "name": "英特爾",
+          "ticker": "DELL",
+          "name": "戴爾科技",
           "market": "US",
-          "weight": 10.4,
-          "entry_price": 128.92,
-          "exit_price": 95.24,
-          "period_ret": -26.12,
+          "weight": 16.1,
+          "entry_price": 414.82,
+          "exit_price": 448.66,
+          "period_ret": 8.16,
           "is_active": false,
           "action": "🟢 買入建倉",
           "tenure_months": 1
@@ -27481,7 +27507,7 @@
           "exit_price": 975.13,
           "period_ret": -9.7,
           "is_active": false,
-          "action": "🟢 買入建倉",
+          "action": "🟢 買入建倉 (P4高乖離分批低接)",
           "tenure_months": 1
         },
         {
@@ -27494,7 +27520,7 @@
           "exit_price": 904.28,
           "period_ret": -7.99,
           "is_active": false,
-          "action": "🟢 買入建倉",
+          "action": "🟢 買入建倉 (P4高乖離分批低接)",
           "tenure_months": 1
         }
       ]
@@ -27521,7 +27547,7 @@
           "period_ret": 16.78,
           "is_active": false,
           "action": "🔄 贏家續抱",
-          "tenure_months": 4
+          "tenure_months": 3
         },
         {
           "rank": 2,
@@ -27625,7 +27651,7 @@
           "period_ret": 43.19,
           "is_active": false,
           "action": "🔄 贏家續抱",
-          "tenure_months": 3
+          "tenure_months": 2
         },
         {
           "rank": 2,
@@ -27728,8 +27754,8 @@
           "exit_price": 1222.18,
           "period_ret": 90.34,
           "is_active": false,
-          "action": "🔄 贏家續抱",
-          "tenure_months": 2
+          "action": "🟢 買入建倉",
+          "tenure_months": 1
         },
         {
           "rank": 2,
@@ -27827,7 +27853,7 @@
           "ticker": "WDC",
           "name": "威騰電子",
           "market": "US",
-          "weight": 49.5,
+          "weight": 62.8,
           "entry_price": 254.3,
           "exit_price": 278.01,
           "period_ret": 9.32,
@@ -27837,28 +27863,28 @@
         },
         {
           "rank": 2,
-          "ticker": "SNDK",
-          "name": "SanDisk",
+          "ticker": "MU",
+          "name": "美光科技",
           "market": "US",
-          "weight": 30.1,
-          "entry_price": 581.64,
-          "exit_price": 642.09,
-          "period_ret": 10.39,
+          "weight": 25.1,
+          "entry_price": 386.33,
+          "exit_price": 341.29,
+          "period_ret": -11.66,
           "is_active": false,
           "action": "🟢 買入建倉",
           "tenure_months": 1
         },
         {
           "rank": 3,
-          "ticker": "MU",
-          "name": "美光科技",
+          "ticker": "GLW",
+          "name": "康寧",
           "market": "US",
-          "weight": 20.4,
-          "entry_price": 386.33,
-          "exit_price": 341.29,
-          "period_ret": -11.66,
+          "weight": 12.0,
+          "entry_price": 151.23,
+          "exit_price": 135.93,
+          "period_ret": -10.12,
           "is_active": false,
-          "action": "🟢 買入建倉",
+          "action": "🟢 買入建倉 (過熱降權)",
           "tenure_months": 1
         }
       ]
@@ -27910,7 +27936,7 @@
           "exit_price": 693.69,
           "period_ret": 1.64,
           "is_active": false,
-          "action": "🟢 買入建倉 (過熱降權)",
+          "action": "🟢 買入建倉 (P4高乖離分批低接)",
           "tenure_months": 1
         }
       ]
@@ -28073,7 +28099,7 @@
     }
   ],
   "official_active_tranches": {
-    "updated_at": "2026-11-11",
+    "updated_at": "2026-11-12",
     "tranche_a": {
       "tranche_id": "A",
       "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
@@ -28083,7 +28109,7 @@
       "entry_date": "2026-11-03",
       "next_rebal_date": "2026-12-01",
       "exposure_pct": 100.0,
-      "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層能源排雷閥門：裂解價差崩跌 -33.7% 且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭・凱利凸性權重 53.9%/25.0%/21.1%)",
+      "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層能源排雷閥門：裂解價差崩跌且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭・凱利凸性權重 53.9%/25.0%/21.1%)",
       "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉出場；本期因裂解價差與 WTI 原油雙破月線，S3 雙層排雷閥門自動剔除 MPC/PSX 與 COP，改建倉 TXN (53.9%) / REGN (25.0%) / ADI (21.1%)",
       "picks": [
         {
@@ -28096,8 +28122,8 @@
           "total_portfolio_weight_pct": 26.95,
           "entry_date": "2026-11-03",
           "entry_price": 309.83,
-          "current_price": 309.36,
-          "period_ret_pct": -0.15,
+          "current_price": 312.48,
+          "period_ret_pct": 0.86,
           "stop_loss_price": 263.36,
           "action": "持有中 (續抱)"
         },
@@ -28111,8 +28137,8 @@
           "total_portfolio_weight_pct": 12.5,
           "entry_date": "2026-11-03",
           "entry_price": 956.28,
-          "current_price": 915.43,
-          "period_ret_pct": -4.27,
+          "current_price": 951.19,
+          "period_ret_pct": -0.53,
           "stop_loss_price": 812.84,
           "action": "持有中 (續抱)"
         },
@@ -28126,8 +28152,8 @@
           "total_portfolio_weight_pct": 10.55,
           "entry_date": "2026-11-03",
           "entry_price": 424.48,
-          "current_price": 406.59,
-          "period_ret_pct": -4.21,
+          "current_price": 409.29,
+          "period_ret_pct": -3.58,
           "stop_loss_price": 360.81,
           "action": "持有中 (續抱)"
         }
@@ -28142,8 +28168,8 @@
       "entry_date": "2026-10-23",
       "next_rebal_date": "2026-11-22",
       "exposure_pct": 100.0,
-      "defense_reason": "正常進攻 (100% 滿倉・10/22 觸發 S3 第一層排雷剔除 VLO/MPC + R12 52週高點套牢過濾剔除 ACN 拔擢 LLY・凱利凸性權重 52.4%/25.0%/22.6%)",
-      "previous_rebal_note": "10/22 調倉日因裂解價差回落剔除 VLO/MPC，且 R12 52週高點套牢過濾 (George & Hwang 2004) 自動避開上方套牢股 ACN、拔擢創高生技龍頭 LLY (+8.98%)，建倉 MRK (52.4%) / XOM (25.0%) / LLY (22.6%) 續抱至 2026-11-22 換倉",
+      "defense_reason": "正常進攻 (100% 滿倉・11/02 WTI與裂解價差雙破月線觸發 R13-P1 純油氣戰術換馬：11/03 開盤已將 XOM ($178.00) 撤出並換入乾淨真龍頭 TXN ($309.83)・凱利凸性權重 52.4%/25.0%/22.6%)",
+      "previous_rebal_note": "10/22 原建倉 MRK (52.4%) / XOM (25.0%, $179.37) / LLY (22.6%)；11/02 收盤因 WTI ($96.46) 與 3-2-1 裂解價差 (-29.3%) 雙破月線，觸發 R13 新增【P1 油氣 S3 盤中戰術換馬】，於 11/03 開盤將 XOM @ $178.00 (-0.76%) 即時換入第 1 乾淨龍頭 TXN @ $309.83 (+0.86%，成功避開 XOM 隨後下殺至 $161.86)！",
       "picks": [
         {
           "rank": 1,
@@ -28155,25 +28181,25 @@
           "total_portfolio_weight_pct": 26.2,
           "entry_date": "2026-10-23",
           "entry_price": 145.02,
-          "current_price": 145.88,
-          "period_ret_pct": 0.59,
+          "current_price": 146.95,
+          "period_ret_pct": 1.33,
           "stop_loss_price": 123.27,
           "action": "持有中 (續抱)"
         },
         {
           "rank": 2,
-          "ticker": "XOM",
-          "name": "埃克森美孚",
+          "ticker": "TXN",
+          "name": "德州儀器",
           "market": "US",
-          "sector": "全球綜合油氣開採巨擘",
+          "sector": "類比晶片龍頭 (⚡11/03 P1換馬自XOM)",
           "tranche_weight_pct": 25.0,
           "total_portfolio_weight_pct": 12.5,
-          "entry_date": "2026-10-23",
-          "entry_price": 179.37,
-          "current_price": 165.92,
-          "period_ret_pct": -7.5,
-          "stop_loss_price": 152.46,
-          "action": "持有中 (續抱)"
+          "entry_date": "2026-11-03",
+          "entry_price": 309.83,
+          "current_price": 312.48,
+          "period_ret_pct": 0.86,
+          "stop_loss_price": 263.36,
+          "action": "持有中 (⚡11/03 P1油氣S3換馬自XOM)"
         },
         {
           "rank": 3,
@@ -28185,8 +28211,8 @@
           "total_portfolio_weight_pct": 11.3,
           "entry_date": "2026-10-23",
           "entry_price": 1304.15,
-          "current_price": 1421.23,
-          "period_ret_pct": 8.98,
+          "current_price": 1427.28,
+          "period_ret_pct": 9.44,
           "stop_loss_price": 1108.53,
           "action": "持有中 (續抱)"
         }
@@ -28383,7 +28409,7 @@
         "ticker": "AAPL",
         "name": "蘋果",
         "market": "US",
-        "weight_pct": 62.0,
+        "weight_pct": 32.0,
         "entry_price": 39.45,
         "exit_price": 38.83,
         "period_ret_pct": -1.57,
@@ -28661,6 +28687,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2014-06-02",
+        "entry_date": "2014-06-03",
+        "exit_date": "2014-07-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "AAPL",
+        "name": "蘋果",
+        "market": "US",
+        "weight_pct": 12.6,
+        "entry_price": 628.46,
+        "exit_price": 657.09,
+        "period_ret_pct": 4.56,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
+      },
+      {
         "date": "2014-05-22",
         "entry_date": "2014-05-23",
         "exit_date": "2014-06-24",
@@ -28837,7 +28878,7 @@
         "ticker": "BIIB",
         "name": "百健",
         "market": "US",
-        "weight_pct": 30.8,
+        "weight_pct": 26.3,
         "entry_price": 194.94,
         "exit_price": 214.68,
         "period_ret_pct": 10.13,
@@ -28919,7 +28960,7 @@
         "exit_price": 36.29,
         "period_ret_pct": 16.66,
         "is_active": false,
-        "action": "🔄 贏家續抱"
+        "action": "🟢 買入建倉"
       },
       {
         "date": "2005-04-01",
@@ -29308,7 +29349,7 @@
         "ticker": "KBH",
         "name": "KBH",
         "market": "US",
-        "weight_pct": 22.7,
+        "weight_pct": 23.0,
         "entry_price": 64.7,
         "exit_price": 74.02,
         "period_ret_pct": 14.4,
@@ -30030,7 +30071,7 @@
         "exit_price": 21.62,
         "period_ret_pct": -11.14,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2011-01-24",
@@ -30045,7 +30086,7 @@
         "exit_price": 23.21,
         "period_ret_pct": -5.73,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2015-11-02",
@@ -30370,7 +30411,7 @@
         "ticker": "NVDA",
         "name": "輝達",
         "market": "US",
-        "weight_pct": 65.0,
+        "weight_pct": 36.0,
         "entry_price": 113.3,
         "exit_price": 102.4,
         "period_ret_pct": -9.62,
@@ -30475,7 +30516,7 @@
         "ticker": "NVDA",
         "name": "輝達",
         "market": "US",
-        "weight_pct": 23.8,
+        "weight_pct": 35.7,
         "entry_price": 139.7,
         "exit_price": 158.68,
         "period_ret_pct": 13.59,
@@ -30490,7 +30531,7 @@
         "ticker": "NVDA",
         "name": "輝達",
         "market": "US",
-        "weight_pct": 34.9,
+        "weight_pct": 62.0,
         "entry_price": 158.68,
         "exit_price": 165.22,
         "period_ret_pct": 4.12,
@@ -30753,6 +30794,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2021-11-01",
+        "entry_date": "2021-11-02",
+        "exit_date": "2021-12-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "NVDA",
+        "name": "輝達",
+        "market": "US",
+        "weight_pct": 27.0,
+        "entry_price": 25.71,
+        "exit_price": 31.08,
+        "period_ret_pct": 20.9,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
         "date": "2021-12-01",
         "entry_date": "2021-12-02",
         "exit_date": "2022-01-04",
@@ -30765,7 +30821,7 @@
         "exit_price": 30.15,
         "period_ret_pct": -3.0,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2021-06-22",
@@ -30795,7 +30851,7 @@
         "exit_price": 29.63,
         "period_ret_pct": -5.63,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🔄 贏家續抱 (過熱降權)"
       },
       {
         "date": "2022-01-03",
@@ -31357,51 +31413,51 @@
         "action": "🟢 買入建倉"
       }
     ],
-    "M": [
+    "UNH": [
       {
         "date": "2005-05-23",
         "entry_date": "2005-05-24",
         "exit_date": "2005-06-23",
         "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "M",
-        "name": "M",
+        "ticker": "UNH",
+        "name": "UNH",
         "market": "US",
-        "weight_pct": 15.3,
-        "entry_price": 34.58,
-        "exit_price": 36.64,
-        "period_ret_pct": 5.99,
+        "weight_pct": 45.0,
+        "entry_price": 48.88,
+        "exit_price": 51.5,
+        "period_ret_pct": 5.37,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
+      },
+      {
+        "date": "2015-01-22",
+        "entry_date": "2015-01-23",
+        "exit_date": "2015-02-24",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "UNH",
+        "name": "UNH",
+        "market": "US",
+        "weight_pct": 17.5,
+        "entry_price": 113.64,
+        "exit_price": 116.26,
+        "period_ret_pct": 2.31,
         "is_active": false,
         "action": "🟢 買入建倉"
       },
       {
-        "date": "2012-01-23",
-        "entry_date": "2012-01-24",
-        "exit_date": "2012-02-23",
+        "date": "2015-02-23",
+        "entry_date": "2015-02-24",
+        "exit_date": "2015-03-24",
         "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "M",
-        "name": "M",
+        "ticker": "UNH",
+        "name": "UNH",
         "market": "US",
-        "weight_pct": 18.1,
-        "entry_price": 34.86,
-        "exit_price": 37.15,
-        "period_ret_pct": 6.57,
+        "weight_pct": 15.5,
+        "entry_price": 116.26,
+        "exit_price": 119.3,
+        "period_ret_pct": 2.61,
         "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2012-03-22",
-        "entry_date": "2012-03-23",
-        "exit_date": "2012-04-24",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "M",
-        "name": "M",
-        "market": "US",
-        "weight_pct": 23.9,
-        "entry_price": 40.0,
-        "exit_price": 38.8,
-        "period_ret_pct": -3.0,
-        "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       }
     ],
     "3008": [
@@ -31481,6 +31537,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2014-07-01",
+        "entry_date": "2014-07-02",
+        "exit_date": "2014-08-04",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "3008.TW",
+        "name": "大立光",
+        "market": "TW",
+        "weight_pct": 22.9,
+        "entry_price": 2345.0,
+        "exit_price": 2345.0,
+        "period_ret_pct": 0.0,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
         "date": "2014-08-01",
         "entry_date": "2014-08-04",
         "exit_date": "2014-09-03",
@@ -31493,7 +31564,7 @@
         "exit_price": 2486.04,
         "period_ret_pct": 6.01,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2014-04-22",
@@ -31932,7 +32003,7 @@
         "exit_price": 88.5,
         "period_ret_pct": 13.46,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2007-03-01",
@@ -32055,21 +32126,6 @@
         "entry_price": 13.96,
         "exit_price": 13.24,
         "period_ret_pct": -5.16,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2017-07-24",
-        "entry_date": "2017-07-25",
-        "exit_date": "2017-08-23",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "AMD",
-        "name": "超微半導體",
-        "market": "US",
-        "weight_pct": 14.9,
-        "entry_price": 14.29,
-        "exit_price": 12.0,
-        "period_ret_pct": -16.03,
         "is_active": false,
         "action": "🟢 買入建倉"
       },
@@ -32539,6 +32595,21 @@
         "period_ret_pct": 10.21,
         "is_active": false,
         "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2026-03-02",
+        "entry_date": "2026-03-03",
+        "exit_date": "2026-04-02",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "GLW",
+        "name": "康寧",
+        "market": "US",
+        "weight_pct": 12.0,
+        "entry_price": 151.23,
+        "exit_price": 135.93,
+        "period_ret_pct": -10.12,
+        "is_active": false,
+        "action": "🟢 買入建倉 (過熱降權)"
       }
     ],
     "2474": [
@@ -32854,7 +32925,7 @@
         "ticker": "3189.TW",
         "name": "景碩",
         "market": "TW",
-        "weight_pct": 44.3,
+        "weight_pct": 30.7,
         "entry_price": 243.0,
         "exit_price": 227.0,
         "period_ret_pct": -6.58,
@@ -33177,8 +33248,8 @@
         "market": "US",
         "weight_pct": 52.4,
         "entry_price": 145.02,
-        "exit_price": 145.88,
-        "period_ret_pct": 0.59,
+        "exit_price": 146.95,
+        "period_ret_pct": 1.33,
         "is_active": true,
         "action": "持有中 (續抱)"
       }
@@ -34016,7 +34087,7 @@
         "exit_price": 68.25,
         "period_ret_pct": 10.65,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2007-06-01",
@@ -35237,12 +35308,12 @@
         "ticker": "CSX",
         "name": "CSX",
         "market": "US",
-        "weight_pct": 17.3,
+        "weight_pct": 48.0,
         "entry_price": 46.69,
         "exit_price": 49.4,
         "period_ret_pct": 5.79,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2017-03-01",
@@ -35335,6 +35406,21 @@
         "action": "🔄 贏家續抱"
       },
       {
+        "date": "2017-05-22",
+        "entry_date": "2017-05-23",
+        "exit_date": "2017-06-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "CSX",
+        "name": "CSX",
+        "market": "US",
+        "weight_pct": 17.0,
+        "entry_price": 51.42,
+        "exit_price": 52.74,
+        "period_ret_pct": 2.56,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
         "date": "2017-06-22",
         "entry_date": "2017-06-23",
         "exit_date": "2017-07-25",
@@ -35342,12 +35428,12 @@
         "ticker": "CSX",
         "name": "CSX",
         "market": "US",
-        "weight_pct": 20.1,
+        "weight_pct": 25.0,
         "entry_price": 52.54,
         "exit_price": 50.98,
         "period_ret_pct": -2.97,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       }
     ],
     "CNX": [
@@ -35413,7 +35499,7 @@
         "exit_price": 5.83,
         "period_ret_pct": -5.51,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2009-07-01",
@@ -36752,7 +36838,7 @@
         "ticker": "3034.TW",
         "name": "聯詠",
         "market": "TW",
-        "weight_pct": 10.9,
+        "weight_pct": 11.0,
         "entry_price": 410.5,
         "exit_price": 434.5,
         "period_ret_pct": 5.85,
@@ -37283,7 +37369,7 @@
         "ticker": "BAC",
         "name": "BAC",
         "market": "US",
-        "weight_pct": 18.9,
+        "weight_pct": 17.7,
         "entry_price": 24.79,
         "exit_price": 23.11,
         "period_ret_pct": -6.78,
@@ -38052,7 +38138,7 @@
         "exit_price": 26.27,
         "period_ret_pct": -2.53,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2013-04-01",
@@ -38062,7 +38148,7 @@
         "ticker": "NFLX",
         "name": "網飛",
         "market": "US",
-        "weight_pct": 47.4,
+        "weight_pct": 55.2,
         "entry_price": 26.27,
         "exit_price": 30.46,
         "period_ret_pct": 15.95,
@@ -38172,7 +38258,7 @@
         "exit_price": 26.06,
         "period_ret_pct": 0.8,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2013-03-22",
@@ -38291,36 +38377,6 @@
         "entry_price": 54.39,
         "exit_price": 55.34,
         "period_ret_pct": 1.74,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
-        "date": "2014-06-02",
-        "entry_date": "2014-06-03",
-        "exit_date": "2014-07-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "NFLX",
-        "name": "網飛",
-        "market": "US",
-        "weight_pct": 12.4,
-        "entry_price": 60.0,
-        "exit_price": 67.64,
-        "period_ret_pct": 12.74,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2014-07-01",
-        "entry_date": "2014-07-02",
-        "exit_date": "2014-08-04",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "NFLX",
-        "name": "網飛",
-        "market": "US",
-        "weight_pct": 20.3,
-        "entry_price": 67.64,
-        "exit_price": 61.03,
-        "period_ret_pct": -9.77,
         "is_active": false,
         "action": "🔄 贏家續抱"
       },
@@ -38482,7 +38538,7 @@
         "ticker": "NFLX",
         "name": "網飛",
         "market": "US",
-        "weight_pct": 23.1,
+        "weight_pct": 21.5,
         "entry_price": 187.79,
         "exit_price": 168.35,
         "period_ret_pct": -10.35,
@@ -39932,7 +39988,7 @@
         "exit_price": 904.28,
         "period_ret_pct": -7.99,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2026-07-22",
@@ -40549,6 +40605,38 @@
         "action": "🟢 買入建倉"
       }
     ],
+    "M": [
+      {
+        "date": "2012-01-23",
+        "entry_date": "2012-01-24",
+        "exit_date": "2012-02-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "M",
+        "name": "M",
+        "market": "US",
+        "weight_pct": 18.1,
+        "entry_price": 34.86,
+        "exit_price": 37.15,
+        "period_ret_pct": 6.57,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
+        "date": "2012-03-22",
+        "entry_date": "2012-03-23",
+        "exit_date": "2012-04-24",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "M",
+        "name": "M",
+        "market": "US",
+        "weight_pct": 23.9,
+        "entry_price": 40.0,
+        "exit_price": 38.8,
+        "period_ret_pct": -3.0,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      }
+    ],
     "V": [
       {
         "date": "2012-02-22",
@@ -40639,12 +40727,12 @@
         "ticker": "WBA",
         "name": "WBA",
         "market": "US",
-        "weight_pct": 21.7,
+        "weight_pct": 18.5,
         "entry_price": 47.52,
         "exit_price": 48.91,
         "period_ret_pct": 2.93,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2013-03-22",
@@ -41050,7 +41138,7 @@
         "ticker": "MU",
         "name": "美光科技",
         "market": "US",
-        "weight_pct": 22.6,
+        "weight_pct": 22.4,
         "entry_price": 28.56,
         "exit_price": 34.0,
         "period_ret_pct": 19.05,
@@ -41065,7 +41153,7 @@
         "ticker": "MU",
         "name": "美光科技",
         "market": "US",
-        "weight_pct": 22.2,
+        "weight_pct": 19.6,
         "entry_price": 34.0,
         "exit_price": 31.21,
         "period_ret_pct": -8.21,
@@ -41185,7 +41273,7 @@
         "ticker": "MU",
         "name": "美光科技",
         "market": "US",
-        "weight_pct": 17.7,
+        "weight_pct": 15.9,
         "entry_price": 24.53,
         "exit_price": 24.88,
         "period_ret_pct": 1.43,
@@ -41283,6 +41371,21 @@
         "action": "🔄 贏家續抱"
       },
       {
+        "date": "2017-02-22",
+        "entry_date": "2017-02-23",
+        "exit_date": "2017-03-23",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "MU",
+        "name": "美光科技",
+        "market": "US",
+        "weight_pct": 17.3,
+        "entry_price": 23.92,
+        "exit_price": 26.36,
+        "period_ret_pct": 10.2,
+        "is_active": false,
+        "action": "🔄 贏家續抱"
+      },
+      {
         "date": "2017-03-22",
         "entry_date": "2017-03-23",
         "exit_date": "2017-04-25",
@@ -41295,7 +41398,7 @@
         "exit_price": 26.71,
         "period_ret_pct": 1.33,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2017-04-24",
@@ -41313,34 +41416,19 @@
         "action": "🔄 贏家續抱"
       },
       {
-        "date": "2017-05-22",
-        "entry_date": "2017-05-23",
-        "exit_date": "2017-06-23",
+        "date": "2017-07-24",
+        "entry_date": "2017-07-25",
+        "exit_date": "2017-08-23",
         "tranche": "B梯隊 (月下旬調倉)",
         "ticker": "MU",
         "name": "美光科技",
         "market": "US",
-        "weight_pct": 58.8,
-        "entry_price": 28.08,
-        "exit_price": 31.89,
-        "period_ret_pct": 13.57,
+        "weight_pct": 16.5,
+        "entry_price": 30.8,
+        "exit_price": 29.97,
+        "period_ret_pct": -2.69,
         "is_active": false,
-        "action": "🔄 贏家續抱"
-      },
-      {
-        "date": "2017-06-22",
-        "entry_date": "2017-06-23",
-        "exit_date": "2017-07-25",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "MU",
-        "name": "美光科技",
-        "market": "US",
-        "weight_pct": 45.0,
-        "entry_price": 31.89,
-        "exit_price": 30.8,
-        "period_ret_pct": -3.42,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
+        "action": "🟢 買入建倉"
       },
       {
         "date": "2017-09-22",
@@ -41455,7 +41543,7 @@
         "ticker": "MU",
         "name": "美光科技",
         "market": "US",
-        "weight_pct": 20.4,
+        "weight_pct": 25.1,
         "entry_price": 386.33,
         "exit_price": 341.29,
         "period_ret_pct": -11.66,
@@ -41490,7 +41578,7 @@
         "exit_price": 975.13,
         "period_ret_pct": -9.7,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2026-07-22",
@@ -41955,21 +42043,6 @@
         "entry_price": 34.71,
         "exit_price": 32.72,
         "period_ret_pct": -5.73,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2026-07-01",
-        "entry_date": "2026-07-02",
-        "exit_date": "2026-08-04",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "INTC",
-        "name": "英特爾",
-        "market": "US",
-        "weight_pct": 10.4,
-        "entry_price": 128.92,
-        "exit_price": 95.24,
-        "period_ret_pct": -26.12,
         "is_active": false,
         "action": "🟢 買入建倉"
       }
@@ -42828,6 +42901,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2017-06-22",
+        "entry_date": "2017-06-23",
+        "exit_date": "2017-07-25",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "REGN",
+        "name": "再生元製藥",
+        "market": "US",
+        "weight_pct": 13.0,
+        "entry_price": 511.79,
+        "exit_price": 523.97,
+        "period_ret_pct": 2.38,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      },
+      {
         "date": "2020-06-01",
         "entry_date": "2020-06-02",
         "exit_date": "2020-07-02",
@@ -42852,8 +42940,8 @@
         "market": "US",
         "weight_pct": 25.0,
         "entry_price": 956.28,
-        "exit_price": 915.43,
-        "period_ret_pct": -4.27,
+        "exit_price": 951.19,
+        "period_ret_pct": -0.53,
         "is_active": true,
         "action": "持有中 (續抱)"
       }
@@ -43111,42 +43199,10 @@
         "market": "US",
         "weight_pct": 22.6,
         "entry_price": 1304.15,
-        "exit_price": 1421.23,
-        "period_ret_pct": 8.98,
+        "exit_price": 1427.28,
+        "period_ret_pct": 9.44,
         "is_active": true,
         "action": "持有中 (續抱)"
-      }
-    ],
-    "UNH": [
-      {
-        "date": "2015-01-22",
-        "entry_date": "2015-01-23",
-        "exit_date": "2015-02-24",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "UNH",
-        "name": "UNH",
-        "market": "US",
-        "weight_pct": 17.5,
-        "entry_price": 113.64,
-        "exit_price": 116.26,
-        "period_ret_pct": 2.31,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2015-02-23",
-        "entry_date": "2015-02-24",
-        "exit_date": "2015-03-24",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "UNH",
-        "name": "UNH",
-        "market": "US",
-        "weight_pct": 15.5,
-        "entry_price": 116.26,
-        "exit_price": 119.3,
-        "period_ret_pct": 2.61,
-        "is_active": false,
-        "action": "🔄 贏家續抱"
       }
     ],
     "PM": [
@@ -43504,6 +43560,21 @@
         "action": "🟢 買入建倉"
       },
       {
+        "date": "2026-10-22",
+        "entry_date": "2026-10-23",
+        "exit_date": "持有中 (預計 2026-11-22 換倉)",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "TXN",
+        "name": "德州儀器",
+        "market": "US",
+        "weight_pct": 25.0,
+        "entry_price": 309.83,
+        "exit_price": 312.48,
+        "period_ret_pct": 0.86,
+        "is_active": true,
+        "action": "持有中 (⚡11/03 P1換馬自XOM)"
+      },
+      {
         "date": "2026-11-02",
         "entry_date": "2026-11-03",
         "exit_date": "持有中 (預計 2026-12-01 換倉)",
@@ -43513,8 +43584,8 @@
         "market": "US",
         "weight_pct": 53.9,
         "entry_price": 309.83,
-        "exit_price": 309.36,
-        "period_ret_pct": -0.15,
+        "exit_price": 312.48,
+        "period_ret_pct": 0.86,
         "is_active": true,
         "action": "持有中 (續抱)"
       }
@@ -43532,21 +43603,6 @@
         "entry_price": 275.65,
         "exit_price": 259.99,
         "period_ret_pct": -5.68,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
-        "date": "2017-02-22",
-        "entry_date": "2017-02-23",
-        "exit_date": "2017-03-23",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "CHTR",
-        "name": "CHTR",
-        "market": "US",
-        "weight_pct": 16.1,
-        "entry_price": 326.09,
-        "exit_price": 320.5,
-        "period_ret_pct": -1.71,
         "is_active": false,
         "action": "🟢 買入建倉"
       },
@@ -43701,7 +43757,7 @@
         "ticker": "LRCX",
         "name": "科林研發",
         "market": "US",
-        "weight_pct": 17.4,
+        "weight_pct": 47.3,
         "entry_price": 153.33,
         "exit_price": 150.24,
         "period_ret_pct": -2.02,
@@ -43873,7 +43929,7 @@
         "exit_price": 1180.0,
         "period_ret_pct": 47.87,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2023-03-01",
@@ -43898,12 +43954,12 @@
         "ticker": "3443.TW",
         "name": "創意",
         "market": "TW",
-        "weight_pct": 32.3,
+        "weight_pct": 54.7,
         "entry_price": 1050.0,
         "exit_price": 1160.0,
         "period_ret_pct": 10.48,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🔄 贏家續抱 (過熱降權)"
       }
     ],
     "WDC": [
@@ -44020,7 +44076,7 @@
         "ticker": "WDC",
         "name": "威騰電子",
         "market": "US",
-        "weight_pct": 49.5,
+        "weight_pct": 62.8,
         "entry_price": 254.3,
         "exit_price": 278.01,
         "period_ret_pct": 9.32,
@@ -44050,7 +44106,7 @@
         "ticker": "WDC",
         "name": "威騰電子",
         "market": "US",
-        "weight_pct": 10.1,
+        "weight_pct": 13.7,
         "entry_price": 595.31,
         "exit_price": 554.83,
         "period_ret_pct": -6.8,
@@ -44363,7 +44419,7 @@
         "exit_price": 31.58,
         "period_ret_pct": -30.38,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🔄 贏家續抱"
       },
       {
         "date": "2018-06-22",
@@ -44487,7 +44543,7 @@
         "exit_price": 213.0,
         "period_ret_pct": -11.62,
         "is_active": false,
-        "action": "🟢 買入建倉"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       }
     ],
     "ABMD": [
@@ -44833,7 +44889,7 @@
         "exit_price": 1725.0,
         "period_ret_pct": -18.82,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       }
     ],
     "2379": [
@@ -45576,7 +45632,7 @@
         "ticker": "TSLA",
         "name": "特斯拉",
         "market": "US",
-        "weight_pct": 18.4,
+        "weight_pct": 42.3,
         "entry_price": 386.45,
         "exit_price": 366.35,
         "period_ret_pct": -5.2,
@@ -46037,38 +46093,6 @@
         "action": "🟢 買入建倉 (過熱降權)"
       }
     ],
-    "6531": [
-      {
-        "date": "2021-11-01",
-        "entry_date": "2021-11-02",
-        "exit_date": "2021-12-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "6531.TW",
-        "name": "愛普*",
-        "market": "TW",
-        "weight_pct": 37.2,
-        "entry_price": 603.0,
-        "exit_price": 516.0,
-        "period_ret_pct": -14.43,
-        "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
-      },
-      {
-        "date": "2021-09-22",
-        "entry_date": "2021-09-23",
-        "exit_date": "2021-10-25",
-        "tranche": "B梯隊 (月下旬調倉)",
-        "ticker": "6531.TW",
-        "name": "愛普*",
-        "market": "TW",
-        "weight_pct": 19.1,
-        "entry_price": 753.0,
-        "exit_price": 971.52,
-        "period_ret_pct": 29.02,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      }
-    ],
     "ILMN": [
       {
         "date": "2021-02-22",
@@ -46116,6 +46140,23 @@
         "entry_price": 29.33,
         "exit_price": 30.42,
         "period_ret_pct": 3.72,
+        "is_active": false,
+        "action": "🟢 買入建倉"
+      }
+    ],
+    "6531": [
+      {
+        "date": "2021-09-22",
+        "entry_date": "2021-09-23",
+        "exit_date": "2021-10-25",
+        "tranche": "B梯隊 (月下旬調倉)",
+        "ticker": "6531.TW",
+        "name": "愛普*",
+        "market": "TW",
+        "weight_pct": 19.1,
+        "entry_price": 753.0,
+        "exit_price": 971.52,
+        "period_ret_pct": 29.02,
         "is_active": false,
         "action": "🟢 買入建倉"
       }
@@ -46193,10 +46234,10 @@
         "market": "US",
         "weight_pct": 25.0,
         "entry_price": 179.37,
-        "exit_price": 165.92,
-        "period_ret_pct": -7.5,
-        "is_active": true,
-        "action": "持有中 (續抱)"
+        "exit_price": 178.0,
+        "period_ret_pct": -0.76,
+        "is_active": false,
+        "action": "⚡ 11/03 P1油氣S3破線換馬出場"
       }
     ],
     "ON": [
@@ -46686,7 +46727,7 @@
         "exit_price": 356.0,
         "period_ret_pct": 2.59,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2024-02-01",
@@ -46865,7 +46906,7 @@
         "ticker": "3454.TW",
         "name": "晶睿",
         "market": "TW",
-        "weight_pct": 56.9,
+        "weight_pct": 34.3,
         "entry_price": 231.5,
         "exit_price": 269.5,
         "period_ret_pct": 16.41,
@@ -47974,21 +48015,6 @@
     ],
     "SNDK": [
       {
-        "date": "2026-03-02",
-        "entry_date": "2026-03-03",
-        "exit_date": "2026-04-02",
-        "tranche": "A梯隊 (月初調倉)",
-        "ticker": "SNDK",
-        "name": "SanDisk",
-        "market": "US",
-        "weight_pct": 30.1,
-        "entry_price": 581.64,
-        "exit_price": 642.09,
-        "period_ret_pct": 10.39,
-        "is_active": false,
-        "action": "🟢 買入建倉"
-      },
-      {
         "date": "2026-04-01",
         "entry_date": "2026-04-02",
         "exit_date": "2026-05-04",
@@ -48001,7 +48027,7 @@
         "exit_price": 1222.18,
         "period_ret_pct": 90.34,
         "is_active": false,
-        "action": "🔄 贏家續抱"
+        "action": "🟢 買入建倉"
       },
       {
         "date": "2026-05-01",
@@ -48034,6 +48060,21 @@
         "action": "🔄 贏家續抱"
       },
       {
+        "date": "2026-07-01",
+        "entry_date": "2026-07-02",
+        "exit_date": "2026-08-04",
+        "tranche": "A梯隊 (月初調倉)",
+        "ticker": "SNDK",
+        "name": "SanDisk",
+        "market": "US",
+        "weight_pct": 20.2,
+        "entry_price": 2043.8,
+        "exit_price": 1358.21,
+        "period_ret_pct": -33.54,
+        "is_active": false,
+        "action": "🔄 贏家續抱 (過熱降權)"
+      },
+      {
         "date": "2026-10-01",
         "entry_date": "2026-10-02",
         "exit_date": "2026-11-03",
@@ -48061,7 +48102,7 @@
         "exit_price": 693.69,
         "period_ret_pct": 1.64,
         "is_active": false,
-        "action": "🟢 買入建倉 (過熱降權)"
+        "action": "🟢 買入建倉 (P4高乖離分批低接)"
       },
       {
         "date": "2026-03-23",
@@ -48302,7 +48343,7 @@
         "ticker": "DELL",
         "name": "戴爾科技",
         "market": "US",
-        "weight_pct": 29.5,
+        "weight_pct": 16.1,
         "entry_price": 414.82,
         "exit_price": 448.66,
         "period_ret_pct": 8.16,
@@ -48417,8 +48458,8 @@
         "market": "US",
         "weight_pct": 21.1,
         "entry_price": 424.48,
-        "exit_price": 406.59,
-        "period_ret_pct": -4.21,
+        "exit_price": 409.29,
+        "period_ret_pct": -3.58,
         "is_active": true,
         "action": "持有中 (續抱)"
       }
