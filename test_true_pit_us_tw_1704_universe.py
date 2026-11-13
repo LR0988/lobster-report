@@ -70,6 +70,8 @@ def build_1704_pit_engine():
         us_in_sp500 = us_pit["in_sp500_pit"][us_tickers].reindex(common_dates).ffill().fillna(False)
     else:
         us_in_sp500 = us_in_idx
+    if "FB" in us_in_sp500.columns and "META" in us_in_sp500.columns:
+        us_in_sp500.loc[us_in_sp500["META"], "FB"] = False
 
     # 計算美股當下 60D 美元成交額與活躍狀態
     us_dvol60 = (us_raw * us_vol).rolling(60, min_periods=20).mean()
@@ -244,7 +246,11 @@ def build_1704_pit_engine():
         "avg_order_rk": env_tw["avg_order_rk"].astype(np.float32),
     }
 
-    print(f"✅ 1,704 檔美台全市場 PIT 引擎建構完成！耗時 {time.time()-t0:.1f}s")
+    # 強制執行回測前 PIT 與無拆股斷層硬斷言守門員 (失敗將直接 raise PITIntegrityViolationError 停機)
+    from pit_integrity_gatekeeper import assert_pre_backtest_env_integrity
+    assert_pre_backtest_env_integrity(env_1704, us_pit=us_pit, verbose=True)
+
+    print(f"✅ 1,738 檔美台全市場 PIT 引擎建構完成！耗時 {time.time()-t0:.1f}s")
     return env_1704
 
 

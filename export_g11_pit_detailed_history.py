@@ -1732,6 +1732,17 @@ def main():
         "tranche_b": _build_official_tranche_obj(act_b_list[-1], prev_b_list[-1] if prev_b_list else None, "B") if act_b_list else {},
     }
 
+    # 強制執行匯出前逐筆交易 PIT、零缺失價格、零提前截斷與零硬編碼守門員 (任一違規直接 raise 拒絕匯出 JSON)
+    from pit_integrity_gatekeeper import assert_post_backtest_trade_and_equity_integrity
+    assert_post_backtest_trade_and_equity_integrity(
+        all_tranche_records=all_tranche_records,
+        eq_d=eq_d,
+        env=env,
+        in_0050_0051_pit=tw_zero["in_0050_0051_pit"],
+        official_active_tranches=official_active_tranches,
+        verbose=True,
+    )
+
     print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f} | Sortino {_sortino:.2f} | SemiWin {_semi_win:.1f}% | G1 {_g1*100:.2f}% / G2 {_g2*100:.2f}% | WinYrs {win_years_cnt}/{len(yearly_summary)}")
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"

@@ -7098,5 +7098,13 @@
   "TSO": [
     "Energy",
     "Oil & Gas Refining & Marketing"
-  ]
+  ],
+  "7856.TW": {
+    "sector": "Technology",
+    "industry": "Semiconductors"
+  },
+  "8042.TW": {
+    "sector": "Technology",
+    "industry": "Electronic Components"
+  }
 }
