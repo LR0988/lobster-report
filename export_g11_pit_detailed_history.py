@@ -2,17 +2,16 @@
 """
 export_g11_pit_detailed_history.py
 ================================================================================
-【G12-PIT Sovereign R13 歷年績效與逐筆詳細進出全景資料庫生成器】
+【G12-PIT Sovereign R14 歷年績效與逐筆詳細進出全景資料庫生成器】
 ================================================================================
 功能：
-1. 完整實裝 G12-PIT Sovereign R13 官方生產模型所有參數與權威指標 (R12 核心引擎 + 三大因果進出場微結構升級 P1+P2+P4)：
-   - [R13 新增 P1] 純油氣族群盤中 S3 實體商品崩跌戰術換馬 (WTI 與 3-2-1 裂解價差雙破月線時，T+1 開盤即時撤出油氣持股並無縫換入 Top-8 乾淨真龍頭)
-   - [R13 新增 P2] 恐慌修復盤中進場閘門 (Post-Shock Exposure Recovery Gate：非高估高利環境下，前次調倉曝險 <=60% 防禦後若盤中 QQQ/SPY 雙站回月線、寬幅 >=55%、Top5 機構淨吸籌 >+1% 且目標曝險回升 >=85%，即時回補閒置現金)
-   - [R13 新增 P4] 極端拋物線乖離 (Bias60 > 45%) 新倉乾淨換馬與 50/50 分批低接保護 (50% T+1 開盤建倉零踏空 + 50% 掛 C_T×0.98 等候 3 日回踩低接)
-   - M1 主帥席位退化降級與真龍頭扶正 + M5 超級大牛/抗跌真龍頭 4% 調倉死區解鎖
-   - 23 跨市場產業族群輪動抗跌真龍頭識別與高潮派發排雷 (Ehsani & Linnainmaa 2022 JF × Moskowitz & Grinblatt 1999 JF)
-   - 52 週高點套牢籌碼過濾 (George & Hwang 2004 JF: Prox_52W < 0.82 & IO_20 <= 0.5%)
-   - 良性半方差不對稱點火加碼 (+5%, Segal, Shaliastovich & Yaron 2015 JFE) + 三冠王王牌動態上限 65% + 弱勢第3席次折減 (×0.60)
+1. 完整實裝 G12-PIT Sovereign R14 官方生產模型所有參數與權威指標 (R13 核心引擎 + 四大正交因果升級 CIE-1 + SEC-VOL1 + CSH-DM1 + PF-TD + 182檔下市美股產業對齊)：
+   - [R14 新增 P4: PF-TD] 未破月線高檔頂背離 × 機構派發預警護盾 (0.40<Exp<=0.65 且 QQQ>=MA20 高檔未跌頂背離時收斂至 16% 試單、若 Top5 機構劇烈派發 IO_20<=-10% 則 0% 觀望，並同步解鎖盤中修復回補)
+   - [R14 新增 P3: CSH-DM1] 主權避險現金池黃金破位流動性保護鎖 (嚴格 t-1 訊號：當 GLD<MA40 & 1M<-2% 或 1M<-5% 時切回 100% BIL 國庫券，壓穿月 MDD 至 -17.89% 並締造 22/22 歷史 100% 全勝年)
+   - [R14 新增 P1: CIE-1] 盤中回補乾淨進場衛生鎖 (Cooper 與 P2 盤中加碼強制剔除財報瑕疵、族群高潮派發、52W套牢與機構出貨股)
+   - [R14 新增 P2: SEC-VOL1] 二階狙擊手下行半波動率純化 (Rank #2~#5 內部拔擢低牌價下行波動吸籌股 ×1.05、降序高暴跌無承接股 ×0.92，100% 不動 Rank #1 連任保護帶)
+   - [R13 核心 P1+P2+P4] 純油氣族群盤中 S3 實體商品崩跌戰術換馬 + 恐慌修復盤中進場閘門 + 極端高乖離 (Bias60>45%) 新倉 50/50 分批低接
+   - [R12 核心] M1 主帥席位退化降級與真龍頭扶正 + M5 真龍頭 4% 調倉死區解鎖 + 23 跨市場族群輪動抗跌真龍頭 + 52W 高點套牢籌碼過濾 + 良性半方差加碼 (+5%)
 2. 匯出 2005–2026 全歷史 22 年每一次調倉 (Tranche 1 & Tranche 22) 的每一筆進出明細。
 3. 2026 當前最新選股與進行中持倉清單 (供使用者對照核對「我有沒有買對」)。
 4. 全歷史股票代號反查索引 (all_trades_lookup)。
@@ -35,9 +34,13 @@ from build_and_test_zero_omission_0050_0051 import build_zero_omission_tw_0050_0
 def asym_stepped_winner_tr_dd(peak_pnl: float) -> float:
     return 0.09 if peak_pnl < 0.20 else (0.13 if peak_pnl < 0.50 else 0.16)
 
-def build_exposure_reason(exp_pct: float, br_val: float) -> str:
+def build_exposure_reason(exp_pct: float, br_val: float, td_triggered: bool = False) -> str:
     exp = float(exp_pct if exp_pct is not None else 100.0)
     br_pct = round(float(br_val) * 100.0, 1) if (br_val is not None and float(br_val) <= 1.5) else round(float(br_val or 63.3), 1)
+    if td_triggered:
+        if exp <= 0.5:
+            return f"全球寬幅 {br_pct}%，觸發 R14-P4 高檔頂背離 × Top5 機構劇烈派發護盾 (QQQ 仍撐月線上但宏觀警報亮燈且機構淨流出 ≤-10%) ➔ 0% 空倉觀望避險"
+        return f"全球寬幅 {br_pct}%，觸發 R14-P4 未破月線高檔頂背離預警護盾 (宏觀警報壓抑曝險但 QQQ 尚未回檔宣洩) ➔ 收斂至 {exp:.0f}% 試單防禦"
     if exp >= 99.5:
         return f"全球寬幅 {br_pct}% (≥50% 多頭標準) 且無過熱/破線警訊 ➔ 100% 滿倉進攻"
     elif abs(exp - 95.0) < 1.0:
@@ -217,7 +220,12 @@ def main():
     io5_arr = io_5.values
     churn_arr = env["churn_exhaustion"][cols].values
     elig_arr = elig_base.values
-    sec_arr = g9_sec[cols].values
+    # 🌟 [R14 P2: SEC-VOL1] 二階狙擊手下行半波動率純化 (僅調整 Rank #2~#5 內部排序，100% 不動 Rank #1 與連任保護帶)
+    _sec_vol_m = np.where(
+        (down_vol20_arr <= 0.22) & (io20_arr >= 0.01), 1.05,
+        np.where((down_vol20_arr > 0.42) & (io20_arr <= 0.01), 0.92, 1.0)
+    )
+    sec_arr = np.clip(g9_sec[cols].values * _sec_vol_m, 0.82, 1.18).astype(np.float32)
 
     # 🌟 George & Hwang (2004 JF) 52-Week High Proximity & Segal et al. (2015 JFE) Good-vs-Bad Semivariance
     high_252_arr = stk_high.rolling(252, min_periods=60).max().values.astype(np.float32)
@@ -270,7 +278,19 @@ def main():
     min_score_thr = 0.28
 
     global_breadth = data4["global_breadth"]
-    safe_cash_ret = data4["safe_cash_ret"]
+    # 🌟 [R14 P3: CSH-DM1] 主權避險現金池黃金破位流動性保護鎖 (嚴格 t-1 訊號：當 GLD<MA40 & 1M<-2% 或 1M<-5% 時切回 100% BIL 短債)
+    _df_sov_cb = pd.read_sql_query(
+        "SELECT date, ticker, adj_close FROM global_sovereign_daily WHERE ticker IN ('GLD', 'BIL') ORDER BY date ASC",
+        conn_twse,
+    )
+    _df_sov_cb["dt"] = pd.to_datetime(_df_sov_cb["date"])
+    _piv_sov_cb = _df_sov_cb.pivot(index="dt", columns="ticker", values="adj_close").reindex(dates_idx).ffill()
+    _gld_p_s = _piv_sov_cb["GLD"]
+    _bil_r1d_s = _piv_sov_cb["BIL"].pct_change().fillna(0.00008).clip(-0.01, 0.01)
+    _gld_ma40_s = _gld_p_s.rolling(40).mean()
+    _gld_m1m_s = _gld_p_s.pct_change(21)
+    _csh_dm1_ok = (~(((_gld_p_s < _gld_ma40_s) & (_gld_m1m_s < -0.02)) | (_gld_m1m_s < -0.05))).shift(1).fillna(True).values
+    safe_cash_ret = pd.Series(np.where(_csh_dm1_ok, data4["safe_cash_ret"].values, _bil_r1d_s.values), index=dates_idx)
     us10y_series = data4["us10y_series"]
     qqq_bias = data4["qqq_bias_dict"][500]
     qqq_p = data4["px_adj"]["QQQ"]
@@ -364,6 +384,82 @@ def main():
         "BTU": ("Energy", "Thermal Coal"), "SUN": ("Energy", "Oil & Gas Refining & Marketing"),
         "TSO": ("Energy", "Oil & Gas Refining & Marketing"), "HFC": ("Energy", "Oil & Gas Refining & Marketing"),
         "ANDV": ("Energy", "Oil & Gas Refining & Marketing"), "EMC": ("Technology", "Computer Hardware"),
+        # [R14 D1] 補齊 134 檔歷史 S&P 500 下市/併購公司精確 GICS 產業歸類 (共 182 檔，消除 G_UNCLASSIFIED 盲區)
+        "COG": ("Energy", "Oil & Gas E&P"), "CTRA": ("Energy", "Oil & Gas E&P"), "DNR": ("Energy", "Oil & Gas E&P"),
+        "NFX": ("Energy", "Oil & Gas E&P"), "QEP": ("Energy", "Oil & Gas E&P"), "STR": ("Energy", "Oil & Gas E&P"),
+        "WLL": ("Energy", "Oil & Gas E&P"), "WPX": ("Energy", "Oil & Gas E&P"), "XEC": ("Energy", "Oil & Gas E&P"),
+        "MEE": ("Energy", "Thermal Coal"),
+        "CNXT": ("Technology", "Semiconductors"), "LSI": ("Technology", "Semiconductors"),
+        "MXIM": ("Technology", "Semiconductors"), "NSM": ("Technology", "Semiconductors"),
+        "WFR": ("Technology", "Semiconductors"),
+        "ANSS": ("Technology", "Software"), "CA": ("Technology", "Software"), "CDAY": ("Technology", "Software"),
+        "CERN": ("Technology", "Software"), "CSC": ("Technology", "Information Technology Services"),
+        "CSRA": ("Technology", "Information Technology Services"), "CTXS": ("Technology", "Software"),
+        "FI": ("Technology", "Information Technology Services"), "FLT": ("Technology", "Information Technology Services"),
+        "MFE": ("Technology", "Software"), "NCR": ("Technology", "Computer Hardware"),
+        "NLOK": ("Technology", "Software"), "NUAN": ("Technology", "Software"), "PSFT": ("Technology", "Software"),
+        "SPLK": ("Technology", "Software"), "SUNW": ("Technology", "Computer Hardware"),
+        "SLR": ("Technology", "Electronic Components"), "MOLX": ("Technology", "Electronic Components"),
+        "TLAB": ("Technology", "Communication Equipment"), "CMVT": ("Technology", "Software"),
+        "SAI": ("Technology", "Information Technology Services"), "ARC": ("Technology", "Software"),
+        "AMLN": ("Healthcare", "Biotechnology"), "BGEN": ("Healthcare", "Biotechnology"),
+        "CHIR": ("Healthcare", "Biotechnology"), "COV": ("Healthcare", "Medical Devices"),
+        "CTLT": ("Healthcare", "Drug Manufacturers"), "CVH": ("Healthcare", "Healthcare Plans"),
+        "ENDP": ("Healthcare", "Drug Manufacturers"), "EVHC": ("Healthcare", "Healthcare Plans"),
+        "HOLX": ("Healthcare", "Medical Devices"), "LNCR": ("Healthcare", "Healthcare Plans"),
+        "MEDI": ("Healthcare", "Biotechnology"), "MLNM": ("Healthcare", "Biotechnology"),
+        "MNK": ("Healthcare", "Drug Manufacturers"), "PDCO": ("Healthcare", "Medical Distribution"),
+        "PKI": ("Healthcare", "Diagnostics & Research"), "PLL": ("Industrials", "Specialty Industrial Machinery"),
+        "RX": ("Healthcare", "Diagnostics & Research"), "SGEN": ("Healthcare", "Biotechnology"),
+        "SHPG": ("Healthcare", "Drug Manufacturers"), "VAR": ("Healthcare", "Medical Devices"),
+        "ABK": ("Financial Services", "Insurance"), "AGC": ("Financial Services", "Insurance"),
+        "BK": ("Financial Services", "Asset Management"), "CBH": ("Financial Services", "Banks"),
+        "CMA": ("Financial Services", "Banks"), "DFS": ("Financial Services", "Credit Services"),
+        "DNB": ("Financial Services", "Financial Data"), "ETFC": ("Financial Services", "Capital Markets"),
+        "FRC": ("Financial Services", "Banks"), "INFO": ("Financial Services", "Financial Data"),
+        "JP": ("Financial Services", "Insurance"), "LM": ("Financial Services", "Asset Management"),
+        "MMC": ("Financial Services", "Insurance"), "NYX": ("Financial Services", "Capital Markets"),
+        "ONE": ("Financial Services", "Banks"), "PBCT": ("Financial Services", "Banks"),
+        "RE": ("Financial Services", "Insurance"), "SAF": ("Financial Services", "Insurance"),
+        "SIVB": ("Financial Services", "Banks"), "SNV": ("Financial Services", "Banks"),
+        "SUB": ("Financial Services", "Banks"), "WLTW": ("Financial Services", "Insurance"),
+        "XL": ("Financial Services", "Insurance"), "ADS": ("Financial Services", "Credit Services"),
+        "AL": ("Basic Materials", "Aluminum"), "ARNC": ("Basic Materials", "Aluminum"),
+        "MTL": ("Basic Materials", "Steel"), "RYI": ("Basic Materials", "Steel"),
+        "GRA": ("Basic Materials", "Specialty Chemicals"), "GLK": ("Basic Materials", "Specialty Chemicals"),
+        "BLL": ("Consumer Cyclical", "Packaging"), "BMS": ("Consumer Cyclical", "Packaging"),
+        "SEE": ("Consumer Cyclical", "Packaging"), "WRK": ("Consumer Cyclical", "Packaging"),
+        "CBE": ("Industrials", "Electrical Equipment"), "FBHS": ("Industrials", "Building Products"),
+        "FLIR": ("Industrials", "Aerospace & Defense"), "GR": ("Industrials", "Aerospace & Defense"),
+        "KSU": ("Industrials", "Railroads"), "NAV": ("Industrials", "Trucking"),
+        "SRCL": ("Industrials", "Waste Management"), "YRCW": ("Industrials", "Trucking"),
+        "AYE": ("Utilities", "Utilities"), "EFU": ("Utilities", "Utilities"),
+        "KSE": ("Utilities", "Utilities"), "SCG": ("Utilities", "Utilities"),
+        "DRE": ("Real Estate", "REIT"), "PEAK": ("Real Estate", "REIT"), "PCH": ("Real Estate", "REIT"),
+        "AT": ("Communication Services", "Telecom Services"), "CBB": ("Communication Services", "Telecom Services"),
+        "LEAP": ("Communication Services", "Telecom Services"), "NIHD": ("Communication Services", "Telecom Services"),
+        "CVG": ("Communication Services", "Telecom Services"), "DISCA": ("Communication Services", "Entertainment"),
+        "DISCK": ("Communication Services", "Entertainment"), "DISH": ("Communication Services", "Entertainment"),
+        "IAC": ("Communication Services", "Internet Content"), "IPG": ("Communication Services", "Advertising"),
+        "LSXMA": ("Communication Services", "Entertainment"), "LSXMK": ("Communication Services", "Entertainment"),
+        "MDP": ("Communication Services", "Publishing"), "NLSN": ("Industrials", "Consulting"),
+        "SNI": ("Communication Services", "Entertainment"), "TGNA": ("Communication Services", "Broadcasting"),
+        "TRB": ("Communication Services", "Publishing"), "TWX": ("Communication Services", "Entertainment"),
+        "VIAC": ("Communication Services", "Entertainment"), "VMED": ("Communication Services", "Telecom Services"),
+        "ABS": ("Consumer Defensive", "Grocery"), "SVU": ("Consumer Defensive", "Grocery"),
+        "CCE": ("Consumer Defensive", "Beverages"), "HNZ": ("Consumer Defensive", "Packaged Foods"),
+        "K": ("Consumer Defensive", "Packaged Foods"), "UN": ("Consumer Defensive", "Household Products"),
+        "UST": ("Consumer Defensive", "Tobacco"), "RAD": ("Consumer Defensive", "Drug Retailers"),
+        "BBBY": ("Consumer Cyclical", "Specialty Retail"), "BIG": ("Consumer Cyclical", "Discount Stores"),
+        "CTB": ("Consumer Cyclical", "Auto Parts"), "FL": ("Consumer Cyclical", "Apparel Retail"),
+        "HBI": ("Consumer Cyclical", "Apparel"), "IGT": ("Consumer Cyclical", "Gambling"),
+        "JNY": ("Consumer Cyclical", "Apparel"), "JWN": ("Consumer Cyclical", "Department Stores"),
+        "LUB": ("Consumer Cyclical", "Restaurants"), "ODP": ("Consumer Cyclical", "Specialty Retail"),
+        "PBY": ("Consumer Cyclical", "Auto Parts"), "PETM": ("Consumer Cyclical", "Specialty Retail"),
+        "QRTEA": ("Consumer Cyclical", "Internet Retail"), "RSH": ("Consumer Cyclical", "Specialty Retail"),
+        "TIF": ("Consumer Cyclical", "Luxury Goods"), "TSG": ("Consumer Cyclical", "Gambling"),
+        "TUP": ("Consumer Cyclical", "Household"), "WYND": ("Consumer Cyclical", "Lodging"),
+        "ATGE": ("Consumer Defensive", "Education"),
     }
     _TW_EXACT_OVERRIDE = {
         "2330.TW": ("Technology", "Semiconductors"), "2303.TW": ("Technology", "Semiconductors"),
@@ -738,9 +834,21 @@ def main():
                 exposure = float(daily_exp[t_pos])
                 sc_row = score_arr[t_pos]
                 br = float(br_arr[t_pos])
+                c20_now = bool(qb_arr[t_pos] >= 30.0 and rate_arr[t_pos] >= 3.5)
+                q_ge20 = float(qqq_p_arr[t_pos]) >= float(qqq_m20_arr[t_pos])
+                t5_io = float(daily_top5_io20[t_pos])
+                td_triggered = False
+                # 🌟 [R14 P4: PF-TD] 未破月線高檔頂背離 × 機構派發預警護盾 (0.40<Exp<=0.65 & QQQ>=MA20)
+                if (0.40 < exposure <= 0.65) and q_ge20:
+                    td_triggered = True
+                    c20_now = False
+                    if t5_io <= -0.10:
+                        exposure = 0.0
+                    else:
+                        exposure = 0.16
                 last_rebal_br = br
                 last_rebal_exp = exposure
-                last_rebal_c20 = bool(qb_arr[t_pos] >= 30.0 and rate_arr[t_pos] >= 3.5)
+                last_rebal_c20 = c20_now
                 ticker_rank = {int(c_i): rk + 1 for rk, c_i in enumerate(sorted_indices)}
 
                 if exposure <= 0 or len(sorted_indices) == 0:
@@ -757,7 +865,7 @@ def main():
                         "tranche": tranche_name,
                         "exposure_pct": 0.0,
                         "breadth": round(br, 2),
-                        "defense_reason": build_exposure_reason(0.0, round(br, 2)),
+                        "defense_reason": build_exposure_reason(0.0, round(br, 2), td_triggered=td_triggered),
                         "is_active": is_active_tranche,
                         "picks": []
                     })
@@ -1004,7 +1112,7 @@ def main():
                         "tranche": tranche_name,
                         "exposure_pct": round(exposure * 100.0, 1),
                         "breadth": round(br, 2),
-                        "defense_reason": build_exposure_reason(round(exposure * 100.0, 1), round(br, 2)),
+                        "defense_reason": build_exposure_reason(round(exposure * 100.0, 1), round(br, 2), td_triggered=td_triggered),
                         "is_active": is_active_tranche,
                         "picks": period_picks_info
                     })
@@ -1148,40 +1256,49 @@ def main():
                             if len(selected_stks) >= 3: break
                             c_i = int(c_i)
                             if c_i not in selected_stks:
+                                # 🌟 [R14 P1: CIE-1] 盤中回補乾淨進場衛生鎖：過濾當期財報瑕疵、族群高潮派發、52W上方套牢與機構出貨股
+                                if (
+                                    pit_defect_ff[t_pos, c_i]
+                                    or _is_crowded_outflow(t_pos, c_i)
+                                    or _is_overhead_supply_trap(t_pos, c_i)
+                                    or float(io20_arr[t_pos, c_i]) < -0.02
+                                ):
+                                    continue
                                 selected_stks.append(c_i)
                                 holding_tenure[c_i] = 1
                         n = min(3, len(selected_stks))
                         selected_stks = selected_stks[:n]
-                        if n == 3:
-                            s0 = max(float(sc_row[selected_stks[0]]), 0.05)
-                            s1 = max(float(sc_row[selected_stks[1]]), 0.05)
-                            s2 = max(float(sc_row[selected_stks[2]]), 0.05)
-                            dv0 = max(float(down_vol20_arr[t_pos, selected_stks[0]]), 0.12)
-                            dv1 = max(float(down_vol20_arr[t_pos, selected_stks[1]]), 0.12)
-                            dv2 = max(float(down_vol20_arr[t_pos, selected_stks[2]]), 0.12)
-                            ratio_01 = s0 / (s1 + 1e-6)
-                            w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
-                            rem = 1.0 - w0
-                            k1 = s1 / (dv1 ** 0.35)
-                            k2 = s2 / (dv2 ** 0.35)
-                            norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
-                        else:
-                            bw_slice = base_weights[:n]
-                            tot_bw = sum(bw_slice)
-                            norm_weights = [w / tot_bw for w in bw_slice]
-                        target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
-                        for c_i, tgt_w in target_alloc.items():
-                            op = float(px_open_arr[in_pos, c_i])
-                            cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
-                            diff_val = (cur_tot_val * tgt_w) - (cur_sh * op)
-                            if diff_val > (cur_tot_val * 0.05) and op > 0 and cash > 0:
-                                actual_buy = min(cash, diff_val)
-                                sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
-                                cash -= actual_buy
-                                if c_i in holdings:
-                                    holdings[c_i]["shares"] += sh
-                                else:
-                                    holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
+                        if n > 0:
+                            if n == 3:
+                                s0 = max(float(sc_row[selected_stks[0]]), 0.05)
+                                s1 = max(float(sc_row[selected_stks[1]]), 0.05)
+                                s2 = max(float(sc_row[selected_stks[2]]), 0.05)
+                                dv0 = max(float(down_vol20_arr[t_pos, selected_stks[0]]), 0.12)
+                                dv1 = max(float(down_vol20_arr[t_pos, selected_stks[1]]), 0.12)
+                                dv2 = max(float(down_vol20_arr[t_pos, selected_stks[2]]), 0.12)
+                                ratio_01 = s0 / (s1 + 1e-6)
+                                w0 = float(np.clip(0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25), 0.45, 0.60))
+                                rem = 1.0 - w0
+                                k1 = s1 / (dv1 ** 0.35)
+                                k2 = s2 / (dv2 ** 0.35)
+                                norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
+                            else:
+                                bw_slice = base_weights[:n]
+                                tot_bw = sum(bw_slice)
+                                norm_weights = [w / tot_bw for w in bw_slice]
+                            target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
+                            for c_i, tgt_w in target_alloc.items():
+                                op = float(px_open_arr[in_pos, c_i])
+                                cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
+                                diff_val = (cur_tot_val * tgt_w) - (cur_sh * op)
+                                if diff_val > (cur_tot_val * 0.05) and op > 0 and cash > 0:
+                                    actual_buy = min(cash, diff_val)
+                                    sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
+                                    cash -= actual_buy
+                                    if c_i in holdings:
+                                        holdings[c_i]["shares"] += sh
+                                    else:
+                                        holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
 
             # [R13 P4] 處理待成交之 -2% 低接限價單 (未成交期間保留資金享短債生息，3 日到期若仍站穩月線且主力吸籌則補齊，否則保留現金)
             if pending_orders:
@@ -1631,7 +1748,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign R13 (7大黃金濾網 + P1油氣S3盤中崩跌戰術換馬 + P2恐慌修復盤中進場閘門 + P4極端高乖離乾淨換馬與50/50分批低接 + M1主帥退化降級扶正 + M5真龍頭4%調倉解鎖 + 23族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52週高點套牢過濾(George & Hwang 2004) + 良性半方差加碼(Segal 2015 JFE) · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign R14 (7大黃金濾網 + R14四大正交因果升級[PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化] + R13三大進出場微結構[P1油氣S3盤中換馬/P2恐慌修復進場/P4高乖離分批低接] + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭 · 2005-2026)",
         "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),

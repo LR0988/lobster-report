@@ -210,27 +210,45 @@ def load_or_build_pit_fund_matrices(dates_idx: pd.DatetimeIndex, cols: list) -> 
     """
     Loads precomputed PIT Fundamental matrices `(N_DATES, N_COLS)` from
     `pit_cache/pit_fund_rebal_cache.pkl` (or `/tmp/pit_fund_rebal_cache.pkl`),
-    aligning shape if needed.
+    aligning `(dates_idx, cols)` shape safely if new trading days or tickers are appended
+    instead of silently dropping to all-NaN matrices (`R14 D0 Hygiene Fix`).
     """
+    n_d, n_c = len(dates_idx), len(cols)
+    mat_keys = ("rev_yoy_mat", "rev_acc_mat", "eps_yoy_mat", "mgn_exp_mat", "surp_mat", "f_score_mat")
     for p in (REBAL_FUND_PKL_PATH, "/tmp/pit_fund_rebal_cache.pkl"):
         if os.path.exists(p):
             try:
                 with open(p, "rb") as f:
                     d = pickle.load(f)
-                if d["rev_yoy_mat"].shape == (len(dates_idx), len(cols)):
+                sh = d["rev_yoy_mat"].shape
+                if sh == (n_d, n_c):
                     return d
+                c_dates = d.get("dates_idx", d.get("dates"))
+                c_cols = d.get("cols")
+                if c_dates is not None and c_cols is not None:
+                    out_d = {}
+                    for k in mat_keys:
+                        if k in d:
+                            df_k = pd.DataFrame(d[k], index=pd.DatetimeIndex(c_dates), columns=list(c_cols))
+                            out_d[k] = df_k.reindex(index=dates_idx, method="ffill").reindex(columns=cols).values.astype(np.float32)
+                    if len(out_d) == len(mat_keys):
+                        return out_d
+                elif sh[1] == n_c and sh[0] > 0:
+                    out_d = {}
+                    for k in mat_keys:
+                        if k in d:
+                            arr_k = d[k]
+                            if sh[0] < n_d:
+                                pad = np.repeat(arr_k[-1:, :], n_d - sh[0], axis=0)
+                                out_d[k] = np.vstack([arr_k, pad]).astype(np.float32)
+                            else:
+                                out_d[k] = arr_k[-n_d:, :].astype(np.float32)
+                    if len(out_d) == len(mat_keys):
+                        return out_d
             except Exception:
                 pass
     # Fallback empty matrices if cache not found
-    n_d, n_c = len(dates_idx), len(cols)
-    return {
-        "rev_yoy_mat": np.full((n_d, n_c), np.nan, dtype=np.float32),
-        "rev_acc_mat": np.full((n_d, n_c), np.nan, dtype=np.float32),
-        "eps_yoy_mat": np.full((n_d, n_c), np.nan, dtype=np.float32),
-        "mgn_exp_mat": np.full((n_d, n_c), np.nan, dtype=np.float32),
-        "surp_mat": np.full((n_d, n_c), np.nan, dtype=np.float32),
-        "f_score_mat": np.full((n_d, n_c), np.nan, dtype=np.float32),
-    }
+    return {k: np.full((n_d, n_c), np.nan, dtype=np.float32) for k in mat_keys}
 
 
 def auto_refresh_live_candidates_sec_edgar(tickers: list, force: bool = False) -> dict:

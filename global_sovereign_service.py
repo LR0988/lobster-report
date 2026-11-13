@@ -1354,8 +1354,8 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 ms["g11_c6_dual_breakdown_shield_active"] = c6_active
                 ms["g9_deep_bear_v_thrust_active"] = v_thrust_active
                 ms["active_defense_module"] = (
-                    "G12-PIT 外科五重護盾 (C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
-                    "exp_264 贏家主升段護航與敗部定檢 + L3-Opt 莊家賣權地板 (95%回補) + 深熊 V 轉先遣點火 (82%)"
+                    "G12-PIT R14 外科六重護盾 (PF-TD高檔頂背離預警16%/0% / C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
+                    "CSH-DM1 黃金破位短債保護鎖 + CIE-1 盤中乾淨進場衛生鎖 + L3-Opt 莊家賣權地板 (95%回補) + 深熊 V 轉先遣點火 (82%)"
                 )
 
                 cur_exp = int(ms.get("exposure_pct", 100))
@@ -1378,7 +1378,44 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     ms["exposure_pct"] = 82
                     ms["regime"] = f"🚀 G12-PIT 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
                 elif c_br >= 0.50 and cur_exp == 100:
-                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT A/B雙梯隊 52~56% 霸主進攻)"
+                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT R14 A/B雙梯隊霸主進攻)"
+
+                # 🌟 R14-P4 (PF-TD): 未破月線之高檔宏觀頂背離預警護盾 (40% < Exposure <= 65% 且 QQQ >= 20MA 尚未宣洩)
+                post_shield_exp = int(ms.get("exposure_pct", 100))
+                r14_td_active = (40 < post_shield_exp <= 65) and (not q_b_ma20)
+                ms["r14_top_divergence_shield_active"] = bool(r14_td_active)
+                if r14_td_active:
+                    td_exp = 0 if top5_avg_io20 <= -0.10 else 16
+                    ms["exposure_pct"] = td_exp
+                    ms["regime"] = (
+                        f"🛡️ G12-PIT R14-P4 高檔未跌頂背離預警護盾啟動 (宏觀警報壓抑原曝險 {post_shield_exp}% 但 QQQ 仍站 20MA 尚未回檔宣洩、Top5 IO_20={top5_avg_io20:+.3f} "
+                        f"-> 收斂至 {td_exp}% {'空手避險' if td_exp == 0 else '試單防禦'})"
+                    )
+
+                # 🌟 R14-P3 (CSH-DM1): 黃金破位無條件流動性清算保護鎖 (GLD < MA40 & 21D < 0 ➔ 100% 轉停泊 BIL 美元短債)
+                gld_bd_active = False
+                try:
+                    c.execute(
+                        "SELECT close FROM global_sovereign_daily WHERE ticker = 'GLD' AND close IS NOT NULL ORDER BY date DESC LIMIT 45"
+                    )
+                    gld_rows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
+                    if len(gld_rows) >= 40:
+                        gld_now = gld_rows[0]
+                        gld_ma40 = sum(gld_rows[:40]) / 40.0
+                        gld_p21 = gld_rows[min(21, len(gld_rows) - 1)]
+                        gld_ret21 = (gld_now / gld_p21 - 1.0) if gld_p21 > 0 else 0.0
+                        gld_bd_active = bool((gld_now < gld_ma40) and (gld_ret21 < 0.0))
+                        ms["gld_price"] = round(gld_now, 2)
+                        ms["gld_ma40"] = round(gld_ma40, 2)
+                        ms["gld_ret21_pct"] = round(gld_ret21 * 100.0, 2)
+                except Exception:
+                    gld_bd_active = False
+                ms["r14_gold_breakdown_guard_active"] = gld_bd_active
+                ms["safe_cash_parking_mode"] = (
+                    "🛡️ CSH-DM1 黃金破位保護啟動 (100% 停泊 BIL 美元短債鎖息)"
+                    if gld_bd_active
+                    else "🟢 GLD/BIL 黃金與短債動態防禦停泊"
+                )
 
             # 🌟 方案 S3 (選項 A)：雙層完整物理排雷閥門 (純煉油裂解崩跌 S1 + 上游原油雙破月線/高檔衰竭 S2，Zero Look-Ahead Bias)
             # 直接從 tw_stock.db -> macro_indicators 讀取自動同步之 WTI 原油 (oil_wti)、RBOB 汽油 (gasoline)、熱燃油 (heating_oil) 與 3-2-1 裂解價差 (crack_spread_321)
@@ -1464,10 +1501,37 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     overflow_ind_picks.append(p_cand)
             valid_picks = diversified_picks + overflow_ind_picks
 
+            # 預先計算 20D 上/下行半波動率，供 R14-P2 (SEC-VOL1) 二階狙擊純化排序與良性半方差點火使用
+            for p_all in valid_picks:
+                r20_list = p_all.get("_daily_rets_20") or p_all.get("daily_rets_20") or []
+                if len(r20_list) >= 10:
+                    up_sq20 = sum((max(0.0, float(rx)) ** 2) for rx in r20_list) / float(len(r20_list))
+                    dn_sq20 = sum((min(0.0, float(rx)) ** 2) for rx in r20_list) / float(len(r20_list))
+                    up_v20 = float(np.sqrt(up_sq20) * np.sqrt(252.0))
+                    dn_v20 = float(np.sqrt(dn_sq20) * np.sqrt(252.0))
+                    p_all["down_vol_20d"] = round(dn_v20, 4)
+                    p_all["good_bad_vol_ratio_20d"] = round(up_v20 / (dn_v20 + 0.05), 3)
+                else:
+                    p_all["down_vol_20d"] = round(float(p_all.get("vol_60d") or 0.25) * 0.75, 4)
+                    p_all["good_bad_vol_ratio_20d"] = 1.0
+
             if len(valid_picks) > 2:
                 top1_item = [valid_picks[0]]
                 pool_2_to_5 = valid_picks[1:5]
                 rest_items = valid_picks[5:]
+                # 🌟 R14-P2 (SEC-VOL1): Rank #2~#5 二階狙擊下行半波動純化 (保護 Rank #1 與連任帶不動)
+                for p_s in pool_2_to_5:
+                    dn_s = float(p_s.get("down_vol_20d") or 0.25)
+                    io20_s = float(p_s.get("io_20") or 0.0)
+                    base_ss = float(p_s.get("sniper_score") or p_s.get("score") or 0.0)
+                    if dn_s <= 0.22 and io20_s >= 0.01:
+                        p_s["sniper_score"] = round(base_ss * 1.05, 4)
+                        tag_sv = f"💎R14低半波動吸籌(DnVol={dn_s*100:.1f}%/×1.05)"
+                        p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {tag_sv}" if p_s.get("sniper_tag") else tag_sv
+                    elif dn_s > 0.42 and io20_s <= 0.01:
+                        p_s["sniper_score"] = round(base_ss * 0.92, 4)
+                        tag_sv = f"⚠️R14高下行波動無吸籌(DnVol={dn_s*100:.1f}%/×0.92)"
+                        p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {tag_sv}" if p_s.get("sniper_tag") else tag_sv
                 pool_2_to_5.sort(key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0), reverse=True)
                 valid_picks = top1_item + pool_2_to_5 + rest_items
 
@@ -1494,17 +1558,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 print("計算 PC1 擁擠度監控指標警告:", e_pc1)
 
             for idx_all, p_all in enumerate(valid_picks, start=1):
-                r20_list = p_all.pop("_daily_rets_20", None) or p_all.get("daily_rets_20") or []
-                if len(r20_list) >= 10:
-                    up_sq20 = sum((max(0.0, float(rx)) ** 2) for rx in r20_list) / float(len(r20_list))
-                    dn_sq20 = sum((min(0.0, float(rx)) ** 2) for rx in r20_list) / float(len(r20_list))
-                    up_v20 = float(np.sqrt(up_sq20) * np.sqrt(252.0))
-                    dn_v20 = float(np.sqrt(dn_sq20) * np.sqrt(252.0))
-                    p_all["down_vol_20d"] = round(dn_v20, 4)
-                    p_all["good_bad_vol_ratio_20d"] = round(up_v20 / (dn_v20 + 0.05), 3)
-                else:
-                    p_all["down_vol_20d"] = round(float(p_all.get("vol_60d") or 0.25) * 0.75, 4)
-                    p_all["good_bad_vol_ratio_20d"] = 1.0
+                p_all.pop("_daily_rets_20", None)
                 if p_all["ticker"] in dynamic_admitted_map:
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
 
@@ -1547,7 +1601,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         p["p4_limit_buy_price"] = round(float(p["price"]) * 0.98, 2)
                     tag_prefix = []
                     if is_sw:
-                        tag_prefix.append("🚀 R13超級大牛點火")
+                        tag_prefix.append("🚀 R14超級大牛點火")
                     if is_good_vol_star:
                         tag_prefix.append(f"⚡ 良性半方差({gb_ratio:.2f}x)")
                     if is_p4_staged:
@@ -1560,7 +1614,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         p["score"] = round(float(p.get("score") or 0.0) * 0.90, 4)
                         p["sniper_score"] = round(float(p.get("sniper_score") or 0.0) * 0.90, 4)
 
-                # R13 候選池條件式換馬 (Top-5 財報瑕疵 / 散戶假突破 / 52W套牢籌碼排雷 / P4 Bias60>45% 極端高乖離禮讓) + M1 主帥退化降級扶正
+                # R14 候選池條件式換馬 (Top-5 財報瑕疵 / 散戶假突破 / 52W套牢籌碼排雷 / P4 Bias60>45% 極端高乖離禮讓) + M1 主帥退化降級扶正
                 if len(top10_picks) >= 5:
                     top5_live = top10_picks[:5]
                     rest_live = top10_picks[5:]
@@ -1743,8 +1797,8 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R13 (終極進出場微結構全火力版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R13・7大黃金濾網 + P1油氣S3盤中崩跌換馬 + P2恐慌修復進場閘門 + P4極端高乖離分批低接 + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭 + 52W套牢過濾 + 良性半方差加碼・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy_n})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R14 (四大正交因果升級 × 22/22 全勝年聖杯版)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R14・7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構[P1/P2/P4] + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・全勝年 {_wy_n})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1766,11 +1820,11 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign R13・7大黃金濾網 + P1油氣S3盤中崩跌換馬 + P2恐慌修復進場閘門 + P4極端高乖離分批低接 + M1主帥退化降級扶正 + M5真龍頭4%死區解鎖核心架構】"
-                "美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市前 150 大 PIT + "
-                "P1純油氣族群盤中S3崩跌戰術換馬 + P2恐慌修復盤中進場閘門(Exposure<=60%修復至>=85%雙站月線即時進場) + P4極端高乖離(Bias60>45%)新倉50/50分批-2%低接(3日) + "
-                "M1主帥席位退化降級與真龍頭扶正 + M5超級大牛/抗跌真龍頭4%漂移解鎖 + 23跨市場族群輪動抗跌真龍頭(Ehsani 2022 JF) + "
-                "52週高點套牢過濾(George & Hwang 2004: Prox<0.82) + 良性半方差不對稱點火(+5%, Segal 2015 JFE) + 三冠王動態上限65% + 弱勢第3席次折減(×0.60)"
+                "【G12-PIT Sovereign R14・7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位短債保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構】"
+                "美股 S&P 500 PIT 官方成分股 Top 100 (含 182 檔下市/併購股產業映射) + 台股 0050∪0051 純上市前 150 大 PIT + "
+                "PF-TD高檔未破月線宏觀頂背離預警護盾(40%<Exposure<=65%且QQQ>=20MA收斂至16%/0%) + CSH-DM1黃金破位流動性清算保護鎖(GLD<MA40&21D<0轉100%BIL短債) + "
+                "CIE-1盤中回補乾淨進場衛生鎖 + SEC-VOL1二階狙擊下行半波動純化(Rank#2~#5) + R13[P1油氣S3盤中換馬/P2恐慌修復進場/P4極端高乖離分批低接] + "
+                "M1主帥降級扶正 + M5真龍頭4%解鎖 + 23跨市場族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52W套牢過濾 + 良性半方差點火(+5%, Segal 2015 JFE)"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
@@ -1785,7 +1839,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R13 (P1油氣S3盤中崩跌換馬 + P2恐慌修復進場閘門 + P4極端高乖離分批低接 + M1主帥降級扶正 + M5真龍頭4%解鎖)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R14 (PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位保護鎖 + CIE-1盤中乾淨進場 + SEC-VOL1二階半波動純化 + R13三大進出場微結構)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・全勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1798,10 +1852,10 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             "sharpe": _sh,
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
-                "① 100% 根除生存者偏誤與對齊 2005-2026 資料起點 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
-                "② [R13 P1] 純油氣族群盤中 S3 實體商品崩跌戰術換馬：當 WTI 與 3-2-1 裂解價差盤中雙破月線時，持倉油氣股於 T+1 開盤即時撤出並換入 Top-8 乾淨真龍頭 (+0.60%/年，100% 零誤傷科技股)。",
-                "③ [R13 P2+P4] 恐慌修復盤中進場閘門 & 極端高乖離 (Bias60>45%) 新倉分批低接：非高估高利環境下前次減倉 <=60% 後若 QQQ/SPY 雙站月線且寬幅 >=55% 即時回補閒置現金；新倉 Bias60>45% 採 50% 開盤 + 50% 掛 C_T×0.98 等候 3 日低接。",
-                f"④ M1主帥降級扶正 × M5真龍頭4%解鎖 × 23族群輪動抗跌真龍頭 × 52W套牢過濾 × 良性半方差加碼：15/15 參數高原驗證通過，22 年 {_wy} 勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                "① 100% 根除生存者偏誤與 182 檔下市/併購股完整產業映射 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
+                "② [R14 PF-TD + CSH-DM1] 高檔未跌頂背離預警護盾 & 黃金破位短債保護鎖：宏觀警報壓抑曝險 (40%<Exp<=65%) 但 QQQ 仍站 20MA 尚未宣洩時收斂至 16%/0% 防範補跌；GLD 跌破 40MA 且月報酬轉負時 100% 轉停泊 BIL 美元短債避開 2008/2020 流動性拋售。",
+                "③ [R14 CIE-1 + SEC-VOL1] 盤中回補乾淨進場衛生鎖 & 二階下行半波動純化：盤中 V 轉回補嚴格排除財報瑕疵/套牢/過熱股；Rank #2~#5 拔擢低半波動機構吸籌股 (×1.05)、降權高下行波動無吸籌股 (×0.92)。",
+                f"④ R13[P1/P2/P4] × R12[M1主帥扶正/M5真龍頭4%解鎖/23族群輪動]：81/81 四維參數高原滿格通過、2008海嘯逆勢 +4.78%，22 年 {_wy} 100% 全勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 
