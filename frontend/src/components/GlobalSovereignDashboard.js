@@ -75,7 +75,32 @@ export const GLOBAL_TITAN_NAME_MAP = {
   'MSFT': '微軟 (Microsoft)',
   'AMZN': '亞馬遜 (Amazon)',
   'GOOGL': '谷歌 (Alphabet)',
-  'META': 'Meta (臉書)'
+  'META': 'Meta (臉書)',
+  'ADI': '亞德諾半導體 (Analog Devices 類比晶片巨頭)',
+  'XOM': '埃克森美孚 (ExxonMobil 全球能源霸主)',
+  'REGN': '再生元製藥 (Regeneron 單株抗體霸主)',
+  'AMGN': '安進 (Amgen 生物製藥龍頭)',
+  'DELL': '戴爾科技 (Dell AI伺服器巨頭)',
+  'CIEN': 'Ciena (AI高速光通訊龍頭)',
+  'PLTR': 'Palantir (AI決策與國防軟體霸主)',
+  'GEV': 'GE Vernova (AI電力電網渦輪霸主)',
+  'VST': 'Vistra (北美核電與獨立發電龍頭)',
+  'HOOD': 'Robinhood (新世代金融科技券商龍頭)',
+  'APP': 'AppLovin (AI廣告變現引擎霸主)',
+  'COIN': 'Coinbase (北美合規加密交易所龍頭)',
+  'BE': 'Bloom Energy (AI資料中心燃料電池霸主)',
+  'RDDT': 'Reddit (全球社群論壇與AI語料庫)',
+  'EXE': 'Expand Energy (北美最大天然氣生產商)',
+  'TKO': 'TKO集團 (UFC與WWE體育娛樂霸主)',
+  'XYZ': 'Block (Square與Cash App金融科技巨頭)',
+  'OKTA': 'Okta (企業雲端身分資安龍頭)',
+  'TWLO': 'Twilio (雲端通訊API平台龍頭)',
+  'P': 'Everpure (全快閃企業儲存龍頭)',
+  'Q': 'Qnity電子 (半導體先進材料龍頭)',
+  'HONA': '霍尼韋爾航太 (航電設備霸主)',
+  'FDXF': '聯邦快遞貨運 (北美零擔貨運王)',
+  'DDOG': 'Datadog (雲端AI可觀測性龍頭)',
+  'DASH': 'DoorDash (北美外送平台龍頭)'
 };
 
 export const formatStockDisplayName = (ticker, originalName) => {
@@ -2274,7 +2299,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               borderRadius: '5px',
               fontWeight: 'bold'
             }}>
-              1,734檔無偏誤 PIT (S&amp;P 500含182檔下市股映射 + 台灣0050∪0051純上市 + R14四大正交因果升級[PF-TD高檔頂背離預警/CSH-DM1黃金破位保護鎖/CIE-1盤中乾淨進場/SEC-VOL1二階半波動純化] + R13[P1/P2/P4] + M1主帥扶正 + 23族群抗跌真龍頭) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>3,769.4倍 (CAGR 46.19%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>-17.89%</strong> (日MDD -29.35%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>2.58</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>1.45</strong> ｜ Sortino <strong style={{ color: '#67E8F9' }}>2.25</strong> ｜ G1(05-15) <strong style={{ color: '#34D399' }}>30.18%</strong> / G2(16-26) <strong style={{ color: '#34D399' }}>64.88%</strong> ｜ 全勝年 <strong style={{ color: '#FCD34D' }}>22/22 (100.0%)</strong>
+              1,738檔零偷看真實 PIT (959檔 S&amp;P 500官方入選日PIT[現任503/503 100%覆蓋・根除拆股成交額未來函數] + 779檔台灣0050∪0051純上市 + R14四大正交因果升級 + R13[P1/P2/P4] + M1主帥扶正 + 23族群輪動) 2005–2026 (22年零遺漏) 回測 <strong style={{ color: '#FDE047' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.mult || 1020.2).toLocaleString()}倍 (CAGR {(data?.g11_pit_history || g11PitHistoryData)?.cagr || 37.41}%)</strong> ｜ 月MDD <strong style={{ color: '#34D399' }}>{(data?.g11_pit_history || g11PitHistoryData)?.monthly_mdd || -23.42}%</strong> (日MDD {(data?.g11_pit_history || g11PitHistoryData)?.daily_mdd || -29.08}%) ｜ Calmar <strong style={{ color: '#38BDF8' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.calmar || 1.6).toFixed(2)}</strong> ｜ Sharpe <strong style={{ color: '#67E8F9' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.sharpe || 1.23).toFixed(2)}</strong> ｜ Sortino <strong style={{ color: '#67E8F9' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.sortino || 1.85).toFixed(2)}</strong> ｜ G1(05-15) <strong style={{ color: '#34D399' }}>{(data?.g11_pit_history || g11PitHistoryData)?.g1_cagr || 24.02}%</strong> / G2(16-26) <strong style={{ color: '#34D399' }}>{(data?.g11_pit_history || g11PitHistoryData)?.g2_cagr || 52.70}%</strong> ｜ 勝年 <strong style={{ color: '#FCD34D' }}>{(data?.g11_pit_history || g11PitHistoryData)?.winning_years || '20/22 (90.9%)'}</strong>
             </span>
             <button
               type="button"
@@ -2591,16 +2616,16 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
           border: '1px solid rgba(255, 255, 255, 0.06)'
         }}>
           <div>
-            <strong style={{ color: '#38BDF8' }}>① 三冠王信念權重 + M5 真龍頭 4% 解鎖</strong>：依王牌領先度、良性半方差 (+5%) 與三冠王條件動態配賦 <strong style={{ color: '#FDE047' }}>45%~65% 王牌權重</strong>（當前 A隊 53.9%/25.0%/21.1%、B隊 52.4%/25.0%/22.6%），一般股設 12% 漂移帶、真龍頭解鎖至 4%。
+            <strong style={{ color: '#38BDF8' }}>① 三冠王信念權重 + M5 真龍頭 4% 解鎖</strong>：依王牌領先度、良性半方差 (+5%) 與三冠王條件動態配賦 <strong style={{ color: '#FDE047' }}>45%~65% 王牌權重</strong>（當前 A隊 57.7%/18.7%/16.7% [93%曝險]、B隊 52.4%/22.6%/25.0% [100%曝險]），一般股設 12% 漂移帶、真龍頭解鎖至 4%。
           </div>
           <div>
-            <strong style={{ color: '#A78BFA' }}>② 真實 S&P 500 PIT × 台灣 0050∪0051 純上市 PIT</strong>：美股當下必須位列 <strong>S&P 500 官方成分股 Top 100</strong>；台股嚴格鎖定 <strong>0050 ∪ 0051 純上市 778 檔歷史無遺漏池 (100% 排除上櫃股)</strong>。
+            <strong style={{ color: '#A78BFA' }}>② 真實 S&amp;P 500 PIT (現任 503/503 100%覆蓋) × 台灣 0050∪0051 純上市 PIT</strong>：美股當下必須位列 <strong>S&amp;P 500 官方成分股且未調整歷史成交額 Top 100 (959檔零拆股偷看)</strong>；台股嚴格鎖定 <strong>0050 ∪ 0051 純上市 779 檔歷史無遺漏池 (100% 排除上櫃股)</strong>。
           </div>
           <div>
             <strong style={{ color: '#34D399' }}>③ R14 二階下行半波動純化 (SEC-VOL1) × 主帥扶正 (M1) × 23 族群輪動抗跌真龍頭 (Ehsani 2022) × 52W 套牢過濾</strong>：Rank #2~#5 拔擢低半波動吸籌股 (×1.05)、降權高下行波動無吸籌股 (×0.92)，結合 <strong>超級大牛點火 (+9%) 與良性半方差點火 (+5%, Segal 2015)</strong>。
           </div>
           <div>
-            <strong style={{ color: '#FBBF24' }}>④ R14 四大正交因果升級 (PF-TD高檔未跌頂背離護盾 × CSH-DM1黃金破位短債保護鎖 × CIE-1盤中乾淨進場 × R13[P1/P2/P4])</strong>：高檔未跌頂背離收斂至 16%/0%、黃金破位轉 100% BIL 短債，81/81 四維參數高原滿格通過，22 年 <strong style={{ color: '#34D399' }}>CAGR 46.19% (3,769.4倍)・月 MDD -17.89%・日 MDD -29.35%・Calmar 2.58・Sharpe 1.45・Sortino 2.25・全勝年 22/22 (100.0%)</strong>！
+            <strong style={{ color: '#FBBF24' }}>④ R14 四大正交因果升級 (PF-TD高檔未跌頂背離護盾 × CSH-DM1黃金破位短債保護鎖 × CIE-1盤中乾淨進場 × R13[P1/P2/P4])</strong>：高檔未跌頂背離收斂至 16%/0%、黃金破位轉 100% BIL 短債，1,738 檔全成分零偷看 22 年實證 <strong style={{ color: '#34D399' }}>CAGR {(data?.g11_pit_history || g11PitHistoryData)?.cagr || 37.41}% ({Number((data?.g11_pit_history || g11PitHistoryData)?.mult || 1020.2).toLocaleString()}倍)・月 MDD {(data?.g11_pit_history || g11PitHistoryData)?.monthly_mdd || -23.42}%・日 MDD {(data?.g11_pit_history || g11PitHistoryData)?.daily_mdd || -29.08}%・Calmar {Number((data?.g11_pit_history || g11PitHistoryData)?.calmar || 1.6).toFixed(2)}・Sharpe {Number((data?.g11_pit_history || g11PitHistoryData)?.sharpe || 1.23).toFixed(2)}・Sortino {Number((data?.g11_pit_history || g11PitHistoryData)?.sortino || 1.85).toFixed(2)}・勝年 {(data?.g11_pit_history || g11PitHistoryData)?.winning_years || '20/22 (90.9%)'}</strong>！
           </div>
         </div>
       </div>
@@ -3811,7 +3836,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
             </div>
           )}
 
-          {/* 📅 2.8 G11-PIT 歷年績效與歷年購買股票種類全景明細 (2005–2026・1,734 檔真實無生存者偏誤 S&P 500 PIT + 台灣 0050∪0051 純上市 PIT) */}
+          {/* 📅 2.8 G11-PIT 歷年績效與歷年購買股票種類全景明細 (2005–2026・1,738 檔真實無生存者偏誤 S&P 500 [503/503全覆蓋] PIT + 台灣 0050∪0051 純上市 PIT) */}
           {(() => {
             const pitHistoryObj = data?.g11_pit_history || g11PitHistoryData || {};
             const allYears = [...(Array.isArray(pitHistoryObj.yearly_history) ? pitHistoryObj.yearly_history : [])]
@@ -3876,7 +3901,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                         borderRadius: '4px',
                         fontWeight: 'bold'
                       }}>
-                        CAGR +46.19% ｜ 3,769.4倍 ｜ Calmar 2.58 ｜ Sharpe 1.45 ｜ Sortino 2.25 ｜ 全勝年 22/22 (100.0%) ｜ 無生存者偏誤回測 (R14 四大正交升級 PF-TD+CSH-DM1+CIE-1+SEC-VOL1 × R13[P1/P2/P4] × 23族群輪動)
+                        CAGR +{pitHistoryObj.cagr || 37.41}% ｜ {Number(pitHistoryObj.mult || 1020.2).toLocaleString()}倍 ｜ Calmar {Number(pitHistoryObj.calmar || 1.6).toFixed(2)} ｜ Sharpe {Number(pitHistoryObj.sharpe || 1.23).toFixed(2)} ｜ Sortino {Number(pitHistoryObj.sortino || 1.85).toFixed(2)} ｜ 勝年 {pitHistoryObj.winning_years || '20/22 (90.9%)'} ｜ 1,738檔零偷看真實回測 (現任503/503 S&amp;P 500 100%覆蓋・根除拆股未來函數)
                       </span>
                     </h4>
                     <p style={{ margin: '0.22rem 0 0 0', color: '#CBD5E1', fontSize: '0.76rem' }}>
@@ -3918,21 +3943,21 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #FBBF24' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🏆 年化報酬 (CAGR)</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#FDE047', fontFamily: 'monospace' }}>
-                      +{pitHistoryObj.cagr || 46.19}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 3769.4).toLocaleString()}倍)</span>
+                      +{pitHistoryObj.cagr || 37.41}% <span style={{ fontSize: '0.74rem', color: '#34D399' }}>({Number(pitHistoryObj.mult || 1020.2).toLocaleString()}倍)</span>
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #10B981' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 (MDD)</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#34D399', fontFamily: 'monospace' }}>
-                      {pitHistoryObj.monthly_mdd || -17.89}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {pitHistoryObj.calmar || 2.58})</span>
+                      {pitHistoryObj.monthly_mdd || -23.42}% <span style={{ fontSize: '0.73rem', color: '#67E8F9' }}>(Calmar {Number(pitHistoryObj.calmar || 1.6).toFixed(2)})</span>
                     </div>
                   </div>
 
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #38BDF8' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>⚖️ 雙世代年化報酬</div>
                     <div style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#38BDF8', fontFamily: 'monospace' }}>
-                      05-15: +{pitHistoryObj.g1_cagr || 30.18}% ｜ 16-26: +{pitHistoryObj.g2_cagr || 64.88}%
+                      05-15: +{pitHistoryObj.g1_cagr || 24.02}% ｜ 16-26: +{pitHistoryObj.g2_cagr || 52.70}%
                     </div>
                   </div>
 
@@ -3946,7 +3971,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                   <div style={{ background: 'rgba(0,0,0,0.35)', padding: '0.55rem 0.75rem', borderRadius: '6px', borderLeft: '3px solid #A855F7' }}>
                     <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>🔥 股災年表現</div>
                     <div style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#E9D5FF', fontFamily: 'monospace' }}>
-                      08年+52%・18年+40%・22年+4%
+                      08年+6.5%・18年+62%・22年+4.7%
                     </div>
                   </div>
                 </div>
@@ -4662,7 +4687,7 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
             )}
           </div>
 
-          {/* 📐 全球泰坦 2.0・G12-PIT Sovereign 配置七總冠軍版 (1,734檔 S&P 500 PIT + 台灣 0050∪0051 純上市 PIT) 完整策略白皮書與實證專區 */}
+          {/* 📐 全球泰坦 2.0・G12-PIT Sovereign 配置七總冠軍版 (1,738檔 S&P 500 [503/503全覆蓋] PIT + 台灣 0050∪0051 純上市 PIT) 完整策略白皮書與實證專區 */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.82), rgba(15, 23, 42, 0.92))',
             border: '1px solid rgba(167, 139, 250, 0.45)',
@@ -4675,15 +4700,15 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 <span style={{ fontSize: '1.25rem' }}>👑</span>
                 <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: '#FDE047', letterSpacing: '0.3px' }}>
-                  全球主權泰坦 2.0・G12-PIT Sovereign R14（7大黃金濾網 × PF-TD高檔未跌頂背離預警護盾 × CSH-DM1黃金破位短債保護鎖 × CIE-1盤中乾淨進場 × SEC-VOL1二階半波動純化 × R13[P1/P2/P4] × M1主帥扶正 × 23族群抗跌真龍頭）完整架構說明
+                  全球主權泰坦 2.0・G12-PIT Sovereign R14（1,738檔零偷看真實PIT[現任503/503 S&amp;P 500 100%覆蓋] × 7大黃金濾網 × PF-TD高檔頂背離預警護盾 × CSH-DM1黃金破位短債保護鎖 × CIE-1盤中乾淨進場 × SEC-VOL1二階半波動純化 × R13[P1/P2/P4] × 23族群輪動）完整架構說明
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.73rem', color: '#34D399', background: 'rgba(52, 211, 153, 0.16)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  CAGR +46.19% ｜ 3,769.4倍 ｜ 月MDD -17.89% (日 -29.35%) ｜ Calmar 2.58 ｜ Sharpe 1.45 ｜ Sortino 2.25
+                  CAGR +{(data?.g11_pit_history || g11PitHistoryData)?.cagr || 37.41}% ｜ {Number((data?.g11_pit_history || g11PitHistoryData)?.mult || 1020.2).toLocaleString()}倍 ｜ 月MDD {(data?.g11_pit_history || g11PitHistoryData)?.monthly_mdd || -23.42}% (日 {(data?.g11_pit_history || g11PitHistoryData)?.daily_mdd || -29.08}%) ｜ Calmar {Number((data?.g11_pit_history || g11PitHistoryData)?.calmar || 1.6).toFixed(2)} ｜ Sharpe {Number((data?.g11_pit_history || g11PitHistoryData)?.sharpe || 1.23).toFixed(2)} ｜ Sortino {Number((data?.g11_pit_history || g11PitHistoryData)?.sortino || 1.85).toFixed(2)}
                 </span>
                 <span style={{ fontSize: '0.73rem', color: '#FCD34D', background: 'rgba(245, 158, 11, 0.18)', padding: '3px 9px', borderRadius: '4px', fontWeight: 'bold', fontFamily: 'monospace' }}>
-                  22年全勝年 22/22 (100.0%) ｜ 81/81 四維參數高原零斷崖 ｜ 2008海嘯逆勢 +4.78%
+                  22年勝年 {(data?.g11_pit_history || g11PitHistoryData)?.winning_years || '20/22 (90.9%)'} ｜ 503/503 S&amp;P 500 零遺漏・零拆股偷看 ｜ 2008海嘯逆勢 +6.50%
                 </span>
               </div>
             </div>
@@ -4962,15 +4987,15 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>21/22 (95.5%)</td>
                     </tr>
                     <tr style={{ background: 'rgba(245, 158, 11, 0.22)', borderLeft: '3px solid #F59E0B' }}>
-                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12-R14 (G12-PIT Sovereign R14 大滿貫 22/22 全勝年終極版・2005–2026 S&amp;P 500含182檔下市股映射 + 台灣 0050∪0051 純上市 PIT) - R13核心引擎 + PF-TD高檔未跌頂背離預警護盾(40%&lt;Exp&le;65%且QQQ&ge;20MA收斂至16%/0%, +1.48%) + CSH-DM1黃金破位短債保護鎖(2008海嘯翻正+4.78%) + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化・81/81 四維參數高原滿格通過</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>46.19%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>3,769.4x</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>-17.89%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>-29.35%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>2.58</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>1.45</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>63.3%</td>
-                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>22/22 (100.0%)</td>
+                      <td><strong style={{ color: '#FDE047' }}>🏆 Gen 12-R14 Clean-PIT (G12-PIT Sovereign R14 全成分零偷看終極審計版・2005–2026 1,738檔：959檔 S&amp;P 500官方入選日PIT[現任503/503 100%覆蓋 + 根除跨源拆股成交額未來函數] + 779檔台灣 0050∪0051 純上市 PIT) - R14四大正交升級[PF-TD高檔頂背離護盾 + CSH-DM1黃金破位短債鎖(2008海嘯翻正+6.50%) + CIE-1 + SEC-VOL1] + R13[P1/P2/P4] + 23族群輪動</strong></td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>{(data?.g11_pit_history || g11PitHistoryData)?.cagr || 37.41}%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.mult || 1020.2).toLocaleString()}x</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold', fontSize: '0.84rem' }}>{(data?.g11_pit_history || g11PitHistoryData)?.monthly_mdd || -23.42}%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>{(data?.g11_pit_history || g11PitHistoryData)?.daily_mdd || -29.08}%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.84rem' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.calmar || 1.6).toFixed(2)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#67E8F9', fontWeight: 'bold', fontSize: '0.84rem' }}>{Number((data?.g11_pit_history || g11PitHistoryData)?.sharpe || 1.23).toFixed(2)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399', fontWeight: 'bold' }}>{(data?.g11_pit_history || g11PitHistoryData)?.semi_monthly_win_rate || 60.6}%</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'monospace', color: '#FDE047', fontWeight: 'bold', fontSize: '0.84rem' }}>{(data?.g11_pit_history || g11PitHistoryData)?.winning_years || '20/22 (90.9%)'}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -5110,9 +5135,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
               padding: '0.85rem 1rem'
             }}>
               <div style={{ fontSize: '0.84rem', fontWeight: 'bold', color: '#34D399', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span>📅 2005–2026（22年零遺漏）G12-PIT Sovereign R14 (S&amp;P 500 + 台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（2008海嘯逆勢正報酬 +4.78% [較SPY超額+41.57%]、2011歐債 +9.55%、2018貿易戰 +74.53%、2020熔斷 +67.39%、2022升息熊市 +5.50% [較SPY超額+23.67%] 強韌防禦；2005–2026 連續 22 年全數正報酬，達成 22/22 [100.0%] 大滿貫全勝年！）</span>
+                <span>📅 2005–2026（22年零遺漏・1,738檔全成分零偷看審計版）G12-PIT Sovereign R14 (959檔 S&amp;P 500[現任503/503全覆蓋] + 779檔台灣0050∪0051純上市 PIT) 逐年績效與主力持股速覽（2008海嘯逆勢正報酬 +6.50% [較SPY超額+43.30%]、2018貿易戰 +62.12% [超額+66.69%]、2020熔斷 +67.56%、2022升息熊市 +4.71% [超額+22.89%] 強韌防禦；2013–2026 連續 14 年正報酬，全歷史勝年 20/22 [90.9%]！）</span>
                 <span style={{ fontSize: '0.72rem', color: '#FDE047', fontFamily: 'monospace' }}>
-                  CAGR +46.19% ｜ 3,769.4倍 ｜ 月MDD -17.89% ｜ 日MDD -29.35% ｜ Calmar 2.58 ｜ Sharpe 1.45 ｜ Sortino 2.25
+                  CAGR +{(data?.g11_pit_history || g11PitHistoryData)?.cagr || 37.41}% ｜ {Number((data?.g11_pit_history || g11PitHistoryData)?.mult || 1020.2).toLocaleString()}倍 ｜ 月MDD {(data?.g11_pit_history || g11PitHistoryData)?.monthly_mdd || -23.42}% ｜ 日MDD {(data?.g11_pit_history || g11PitHistoryData)?.daily_mdd || -29.08}% ｜ Calmar {Number((data?.g11_pit_history || g11PitHistoryData)?.calmar || 1.6).toFixed(2)} ｜ Sharpe {Number((data?.g11_pit_history || g11PitHistoryData)?.sharpe || 1.23).toFixed(2)} ｜ Sortino {Number((data?.g11_pit_history || g11PitHistoryData)?.sortino || 1.85).toFixed(2)}
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))', gap: '0.4rem', fontSize: '0.73rem', fontFamily: 'monospace' }}>

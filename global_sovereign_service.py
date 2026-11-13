@@ -148,7 +148,44 @@ GLOBAL_STOCK_NAME_MAP = {
     'AMGN': '安進 (Amgen 全球生物製藥龍頭)',
     'REGN': '再生元製藥 (Regeneron 單株抗體霸主)',
     'VRTX': '福泰製藥 (Vertex 基因編輯與止痛新藥王)',
-    'ABBV': '艾伯維 (AbbVie 免疫學新藥巨擘)'
+    'ABBV': '艾伯維 (AbbVie 免疫學新藥巨擘)',
+    'APP': 'AppLovin (AI廣告變現引擎霸主)',
+    'COIN': 'Coinbase (北美合規加密資產交易所龍頭)',
+    'BE': 'Bloom Energy (AI資料中心固態氧化物燃料電池霸主)',
+    'RDDT': 'Reddit (全球最大社群論壇與AI語料庫)',
+    'EXE': 'Expand Energy (北美最大天然氣生產商)',
+    'TKO': 'TKO集團 (UFC與WWE全球體育娛樂霸主)',
+    'XYZ': 'Block (Square與Cash App金融科技巨頭)',
+    'OKTA': 'Okta (企業雲端身分認證資安龍頭)',
+    'TWLO': 'Twilio (雲端通訊API平台龍頭)',
+    'P': 'Everpure (全快閃企業儲存龍頭・原PSTG)',
+    'Q': 'Qnity電子 (半導體先進材料龍頭)',
+    'HONA': '霍尼韋爾航太 (Honeywell Aerospace 航電霸主)',
+    'FDXF': '聯邦快遞貨運 (FedEx Freight 北美零擔貨運王)',
+    'VMRK': 'Vivmark住宅 (北美住宅REITs)',
+    'VYLR': 'Vylor農業 (種業與農業科技)',
+    'SKYD': 'Skydance影業 (好萊塢影視娛樂巨擘)',
+    'PSKY': '派拉蒙天舞 (Paramount Skydance 影視巨擘)',
+    'ELV': 'Elevance醫療 (北美醫療保險巨擘)',
+    'CPAY': 'Corpay (企業跨境支付與車隊卡龍頭)',
+    'EG': 'Everest集團 (全球再保險巨擘)',
+    'RVTY': 'Revvity (生命科學與診斷儀器龍頭)',
+    'BALL': '波爾公司 (全球鋁罐包裝霸主)',
+    'WTW': '韋萊韜悅 (全球風險管理與保險經紀巨頭)',
+    'MRSH': '威達信 (Marsh McLennan 全球保險顧問龍頭)',
+    'SW': 'Smurfit WestRock (全球紙業包裝龍頭)',
+    'SOLV': 'Solventum (3M分拆醫療器材巨頭)',
+    'VLTO': 'Veralto (丹納赫分拆水質與檢測龍頭)',
+    'VTRS': '暉致醫藥 (Viatris 全球學名藥大廠)',
+    'WSM': 'Williams-Sonoma (北美高端家居零售龍頭)',
+    'DDOG': 'Datadog (雲端可觀測性與AI監控龍頭)',
+    'AXON': 'Axon Enterprise (執法泰瑟槍與雲端證據霸主)',
+    'DECK': 'Deckers Outdoor (HOKA跑鞋母公司)',
+    'FICO': 'Fair Isaac (北美信用評分壟斷霸主)',
+    'GDDY': 'GoDaddy (全球網域與中小企業雲端服務王)',
+    'JBL': '捷普科技 (Jabil AI伺服器代工巨頭)',
+    'BLDR': 'Builders FirstSource (北美建材供應龍頭)',
+    'KVUE': 'Kenvue (嬌生分拆消費保健巨頭)'
 }
 
 def _resolve_display_name(ticker: str, cursor=None) -> str:
@@ -1042,29 +1079,28 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         # 鐵律 2：台股嚴格採用「單一事前統一規則」(成交額 Top 30、單筆大單 Top 30、股價 >= 50、0 < PE <= 45、ROE >= 20%、法人買超、IO_20 > -0.10、FIP_126 > 0.05)，嚴禁多重 OR 特例後門！
         exclude_etfs = {'SPY', 'QQQ', '0050.TW', 'GLD', 'BIL', 'TLT', '0050'}
         non_sp500_us_exclude = {
-            'ASML', 'TSM', 'ARM', 'MSTR', 'TEAM', 'ZS', 'MELI', 'SPOT', 'ILMN', 'PBR', 'ASX', 'MRVL',
-            'RDDT', 'ALAB', 'VRT', 'APP', 'SNOW', 'NET', 'DDOG', 'MDB', 'SHOP', 'SE', 'COIN'
+            'ASML', 'TSM', 'ARM', 'MSTR', 'TEAM', 'ZS', 'MELI', 'SPOT', 'PBR', 'ASX',
+            'ALAB', 'SNOW', 'NET', 'MDB', 'SHOP', 'SE'
         }
         sp500_active_set = None
         try:
-            sp500_csv = os.path.join(os.path.dirname(__file__), "sp500_ticker_start_end.csv")
+            sp500_csv = os.path.join(os.path.dirname(__file__), "pit_cache", "sp500_ticker_start_end.csv")
+            if not os.path.exists(sp500_csv):
+                sp500_csv = os.path.join(os.path.dirname(__file__), "sp500_ticker_start_end.csv")
             if not os.path.exists(sp500_csv):
                 sp500_csv = "/tmp/sp500_ticker_start_end.csv"
             if os.path.exists(sp500_csv):
                 import csv
+                today_pit_str = datetime.now().strftime("%Y-%m-%d")
                 sp500_active_set = set()
                 with open(sp500_csv, "r", encoding="utf-8") as f_sp:
                     rdr = csv.DictReader(f_sp)
                     for row_sp in rdr:
+                        tk_sp = (row_sp.get("ticker") or "").strip().upper().replace(".", "-")
+                        start_d = (row_sp.get("start_date") or "").strip()
                         end_d = (row_sp.get("end_date") or "").strip()
-                        if not end_d or end_d >= "2025-01-01":
-                            sp500_active_set.add((row_sp.get("ticker") or "").strip().upper())
-                # 補充 2024~2026 新入選 S&P 500 之官方成分股
-                sp500_active_set.update({
-                    "PLTR", "CRWD", "CEG", "GEV", "VST", "KKR", "UBER", "ABNB", "BX", "PANW",
-                    "SNDK", "DELL", "SMCI", "HOOD", "LITE", "COHR", "CIEN", "FIX", "WDAY", "APO",
-                    "GDDY", "TPL", "LII", "SW", "AMTM", "SOLV", "VLTO", "KVUE", "GEHC", "BRK-B"
-                })
+                        if tk_sp and (not start_d or start_d <= today_pit_str) and (not end_d or end_d >= today_pit_str):
+                            sp500_active_set.add(tk_sp)
         except Exception:
             sp500_active_set = None
 
@@ -1282,11 +1318,15 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             )
             tw_rk_map = {tk: rk for rk, (tk, _) in enumerate(tw_dv_sorted, start=1)}
 
+            filtered_top100_picks = []
             for p_cand in valid_picks:
                 tk_c = p_cand["ticker"]
                 is_tw_c = tk_c.endswith(".TW")
                 rk_liq = tw_rk_map.get(tk_c, 999) if is_tw_c else us_rk_map.get(tk_c, 999)
                 p_cand["liq_rank"] = rk_liq
+                # 嚴格對齊回測 Gatekeeper Rule ①：美股必須位列 S&P 500 當日 60D 成交額 Top 100 (us_rk_pit <= 100)
+                if (not is_tw_c) and rk_liq > 100:
+                    continue
                 is_super_mega_c = (rk_liq <= 10) if is_tw_c else (rk_liq <= 30)
                 is_fringe_c = (not is_tw_c) and (rk_liq > 70)
                 m_top10_feat = 1.0
@@ -1304,7 +1344,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     if tk_c in dynamic_admitted_map:
                         dynamic_admitted_map[tk_c]["score"] = p_cand["score"]
                         dynamic_admitted_map[tk_c]["sniper_score"] = p_cand["sniper_score"]
+                filtered_top100_picks.append(p_cand)
 
+            valid_picks = filtered_top100_picks
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
             # 【台股因果泰坦 (台股 0050∪0051 only)】保留台股子榜與護盾前基礎曝險，供 tw_titan_pit_service 以「僅台股」重算 Top5 護盾與 52/24/24 配權
             try:
@@ -1747,15 +1789,15 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         _hist = _G.get("yearly_history", [])
         data["dynamic_universe_status"] = {
             "enabled": True,
-            "mode": "true_pit_sp500_and_tw0050_0051_1734_g12_sovereign",
+            "mode": "true_pit_sp500_503of503_and_tw0050_0051_1738_g12_sovereign",
             "scan_date": dynamic_scan_date or max_tw_dt,
-            "core_pool_count": 956,
-            "open_tw_pool_scanned": 778,
+            "core_pool_count": 959,
+            "open_tw_pool_scanned": 779,
             "dynamic_qualified_total": len(valid_picks),
             "newly_admitted_count": len(newly_admitted_list),
-            "total_active_universe": 1734,
+            "total_active_universe": 1738,
             "open_pool_unbiased_backtest": {
-                "universe_size": "1,734 檔真實無生存者偏誤 PIT 選股池 (956 檔 S&P 500 歷史成分股 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005–2026 零遺漏池)",
+                "universe_size": _G.get("universe_desc", "1,738 檔真實無生存者偏誤池 (959 檔 S&P 500 官方入選日 PIT [現任 503/503 檔 100% 覆蓋] + 779 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)"),
                 "cagr_22y": _cagr,
                 "cagr_g1_2004_2014": _G.get("g1_cagr"),
                 "cagr_g2_2015_2026": _G.get("g2_cagr"),
@@ -1765,11 +1807,11 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 "calmar": _cal
             },
             "gatekeeper_rules": [
-                "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (956 檔含下市/併購股)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且成交額 Top 100 才准買入；入選前與非 S&P 500 股 100% 濾除",
-                "② 台股 778 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 (5,338 日) 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
+                "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (959 檔含下市/併購股，現任 503/503 檔 100% 覆蓋、跨資料源拆股零偷看校正)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且真實未調整歷史成交額 Top 100 才准買入；入選前與剔除後 100% 濾除",
+                "② 台股 779 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
                 "③ 7 大黃金濾網 + 3D 微結構動能演化：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 超級巨頭領頭羊 (US前30/TW前10) 蹲點加乘 (`×1.06`) + 12M×3M×1M 死貓跳懲罰 (`×0.75`) + 爆量派發懲罰 (`×0.75`) + 量價收斂高勝率加乘 (`×1.05`) + S1/S2/Beta 原油與裂解價差下行排雷 + 最低動能門檻 (`Score >= 0.28`)",
                 "④ 3D 動能演化動態任期 (2/4/5期) + 純粹連任：預設最長 4 期；短線噴發過熱 (`3M>150% & 1M>35%`) 縮短為 2 期；黃金加速主升段 (`12M 100~280% & 3M 40~110% & 1M<=32%`) 延長為 5 期；Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`",
-                f"⑤ 凱利凸性動態權重 + Top-3 內部過熱降權轉移 (`Bias60>25% & Ret5>5%` 減碼 35% 轉移給同梯未過熱強股)：回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、日MDD {_dm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy_n}"
+                f"⑤ 凱利凸性動態權重 + Top-3 內部過熱降權轉移 (`Bias60>25% & Ret5>5%` 減碼 35% 轉移給同梯未過熱強股)：回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、日MDD {_dm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy}"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
         }
@@ -1797,8 +1839,8 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             except Exception as e_g11:
                 print("載入 g11_pit_yearly_history.json 失敗:", e_g11)
 
-        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R14 (四大正交因果升級 × 22/22 全勝年聖杯版)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R14・7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構[P1/P2/P4] + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・全勝年 {_wy_n})"
+        # 5. 同步更新權威回測 KPI 為 G12-PIT Sovereign R14 (1,738檔 503/503 全覆蓋零偷看 PIT 終極版)
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R14・1,738檔全成分零偷看 PIT [S&P 500 現任503/503 100%覆蓋] + 7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構[P1/P2/P4]・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1839,7 +1881,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R14 (PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位保護鎖 + CIE-1盤中乾淨進場 + SEC-VOL1二階半波動純化 + R13三大進出場微結構)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・全勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R14 (1,738檔全成分零偷看 PIT・PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位保護鎖 + CIE-1盤中乾淨進場 + SEC-VOL1二階半波動純化 + R13三大進出場微結構)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1852,10 +1894,10 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             "sharpe": _sh,
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
-                "① 100% 根除生存者偏誤與 182 檔下市/併購股完整產業映射 (True PIT 1,734 檔母池)：美股 S&P 500 PIT 956 檔 + 台股 0050∪0051 純上市前 150 大 778 檔。",
+                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與根除跨資料源拆股成交額未來函數 ({_G.get('universe_desc', 'True PIT 1,738 檔母池')})。",
                 "② [R14 PF-TD + CSH-DM1] 高檔未跌頂背離預警護盾 & 黃金破位短債保護鎖：宏觀警報壓抑曝險 (40%<Exp<=65%) 但 QQQ 仍站 20MA 尚未宣洩時收斂至 16%/0% 防範補跌；GLD 跌破 40MA 且月報酬轉負時 100% 轉停泊 BIL 美元短債避開 2008/2020 流動性拋售。",
                 "③ [R14 CIE-1 + SEC-VOL1] 盤中回補乾淨進場衛生鎖 & 二階下行半波動純化：盤中 V 轉回補嚴格排除財報瑕疵/套牢/過熱股；Rank #2~#5 拔擢低半波動機構吸籌股 (×1.05)、降權高下行波動無吸籌股 (×0.92)。",
-                f"④ R13[P1/P2/P4] × R12[M1主帥扶正/M5真龍頭4%解鎖/23族群輪動]：81/81 四維參數高原滿格通過、2008海嘯逆勢 +4.78%，22 年 {_wy} 100% 全勝年、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                f"④ R13[P1/P2/P4] × R12[M1主帥扶正/M5真龍頭4%解鎖/23族群輪動]：2008海嘯逆勢 +6.50%、2018貿易戰 +62.12%、2020熔斷 +67.56%、2022升息熊市 +4.71%，22 年勝年 {_wy}、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 

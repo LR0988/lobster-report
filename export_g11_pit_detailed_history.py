@@ -460,6 +460,61 @@ def main():
         "TIF": ("Consumer Cyclical", "Luxury Goods"), "TSG": ("Consumer Cyclical", "Gambling"),
         "TUP": ("Consumer Cyclical", "Household"), "WYND": ("Consumer Cyclical", "Lodging"),
         "ATGE": ("Consumer Defensive", "Education"),
+        # [R14 Full-503 S&P 500 & Delisted GICS Complete Alignment — 0 G_UNCLASSIFIED]
+        "APP": ("Communication Services", "Advertising Agencies"),
+        "BALL": ("Consumer Cyclical", "Packaging & Containers"),
+        "BBI": ("Consumer Cyclical", "Specialty Retail"),
+        "BBWI": ("Consumer Cyclical", "Specialty Retail"),
+        "BE": ("Industrials", "Electrical Equipment & Parts"),
+        "BF-B": ("Consumer Defensive", "Beverages - Wineries & Distilleries"),
+        "BF.B": ("Consumer Defensive", "Beverages - Wineries & Distilleries"),
+        "BFO": ("Consumer Defensive", "Packaged Foods"),
+        "BMC": ("Technology", "Software"),
+        "BRK.B": ("Financial Services", "Insurance - Diversified"),
+        "CEN": ("Technology", "Software"),
+        "COIN": ("Financial Services", "Capital Markets"),
+        "CPAY": ("Technology", "Software - Infrastructure"),
+        "DAY": ("Technology", "Software - Application"),
+        "EG": ("Financial Services", "Insurance - Reinsurance"),
+        "ELV": ("Healthcare", "Healthcare Plans"),
+        "EXE": ("Energy", "Oil & Gas E&P"),
+        "FB": ("Communication Services", "Internet Content & Information"),
+        "FDXF": ("Industrials", "Integrated Freight & Logistics"),
+        "FMCN": ("Communication Services", "Advertising Agencies"),
+        "GAS": ("Utilities", "Utilities - Regulated Gas"),
+        "GSX": ("Industrials", "Specialty Industrial Machinery"),
+        "HAR": ("Technology", "Consumer Electronics"),
+        "HI": ("Industrials", "Specialty Industrial Machinery"),
+        "HONA": ("Industrials", "Aerospace & Defense"),
+        "HOT": ("Consumer Cyclical", "Lodging"),
+        "MRSH": ("Financial Services", "Insurance Brokers"),
+        "OKTA": ("Technology", "Software - Infrastructure"),
+        "P": ("Technology", "Computer Hardware"),
+        "PCL": ("Real Estate", "REIT - Specialty"),
+        "PSKY": ("Communication Services", "Entertainment"),
+        "PTV": ("Consumer Cyclical", "Packaging & Containers"),
+        "Q": ("Technology", "Semiconductor Equipment & Materials"),
+        "RDDT": ("Communication Services", "Internet Content & Information"),
+        "RDS-A": ("Energy", "Oil & Gas Integrated"),
+        "RRD": ("Industrials", "Specialty Business Services"),
+        "RVTY": ("Healthcare", "Diagnostics & Research"),
+        "SBL": ("Technology", "Communication Equipment"),
+        "SKYD": ("Communication Services", "Entertainment"),
+        "SOLV": ("Healthcare", "Medical Instruments & Supplies"),
+        "SW": ("Consumer Cyclical", "Packaging & Containers"),
+        "TA": ("Consumer Cyclical", "Specialty Retail"),
+        "TEG": ("Utilities", "Utilities - Regulated Electric"),
+        "THY": ("Basic Materials", "Other Industrial Metals & Mining"),
+        "TIE": ("Basic Materials", "Other Industrial Metals & Mining"),
+        "TKO": ("Communication Services", "Entertainment"),
+        "TWLO": ("Technology", "Software - Infrastructure"),
+        "USAI": ("Communication Services", "Internet Content & Information"),
+        "VLTO": ("Industrials", "Specialty Industrial Machinery"),
+        "VMRK": ("Real Estate", "REIT - Residential"),
+        "VTRS": ("Healthcare", "Drug Manufacturers"),
+        "VYLR": ("Basic Materials", "Agricultural Inputs"),
+        "WTW": ("Financial Services", "Insurance Brokers"),
+        "XYZ": ("Technology", "Software - Infrastructure"),
     }
     _TW_EXACT_OVERRIDE = {
         "2330.TW": ("Technology", "Semiconductors"), "2303.TW": ("Technology", "Semiconductors"),
@@ -777,10 +832,14 @@ def main():
 
     def sim_tranche(day_target, tranche_name, init_cap=500000.0):
         ym_groups = pd.Series(dates_idx, index=dates_idx).groupby([dates_idx.year, dates_idx.month])
+        last_ym = (dates_idx[-1].year, dates_idx[-1].month)
         rebal_dates = []
         for (y, m), grp in ym_groups:
             sub = grp[grp.dt.day >= day_target]
-            rebal_dates.append(sub.iloc[0] if len(sub) > 0 else grp.iloc[-1])
+            if len(sub) > 0:
+                rebal_dates.append(sub.iloc[0])
+            elif (y, m) < last_ym:
+                rebal_dates.append(grp.iloc[-1])
         rebal_dates = pd.DatetimeIndex(sorted(list(set(rebal_dates))))
         rebal_dates = rebal_dates[rebal_dates >= pd.Timestamp("2005-01-01")]
 
@@ -1104,18 +1163,27 @@ def main():
                             "tenure_months": holding_tenure.get(c_i, 1)
                         })
 
-                    all_tranche_records.append({
+                    next_sched_str = "預計下次月初換倉" if day_target == 1 else "預計下次月下旬換倉"
+                    if is_active_tranche:
+                        if day_target == 1:
+                            ny, nm = (t_date.year + 1, 1) if t_date.month == 12 else (t_date.year, t_date.month + 1)
+                            next_sched_str = f"持有中 (預計 {ny:04d}-{nm:02d}-01 換倉)"
+                        else:
+                            ny, nm = (t_date.year + 1, 1) if t_date.month == 12 else (t_date.year, t_date.month + 1)
+                            next_sched_str = f"持有中 (預計 {ny:04d}-{nm:02d}-22 換倉)"
+                    cur_tranche_rec = {
                         "year": int(t_date.year),
                         "rebal_date": str(t_date)[:10],
                         "entry_date": str(t_in)[:10],
-                        "exit_date": str(t_out)[:10],
+                        "exit_date": next_sched_str if is_active_tranche else str(t_out)[:10],
                         "tranche": tranche_name,
                         "exposure_pct": round(exposure * 100.0, 1),
                         "breadth": round(br, 2),
                         "defense_reason": build_exposure_reason(round(exposure * 100.0, 1), round(br, 2), td_triggered=td_triggered),
                         "is_active": is_active_tranche,
                         "picks": period_picks_info
-                    })
+                    }
+                    all_tranche_records.append(cur_tranche_rec)
 
                     for c_i in list(holdings.keys()):
                         if c_i not in target_alloc:
@@ -1187,13 +1255,31 @@ def main():
                         if veto_s1_arr[t_pos, c_i] and bool(pure_oil_gas_mask[c_i])
                     ]
                     freed_cash = 0.0
+                    exited_syms_info = []
                     for c_i in to_exit:
                         op_out = float(px_open_arr[in_pos, c_i])
                         if not np.isnan(op_out) and op_out > 0:
+                            sym_ex = cols[c_i]
                             proceeds = holdings[c_i]["shares"] * op_out * (1.0 - fee_sell_arr[c_i])
                             cash += proceeds
                             freed_cash += proceeds
                             exited_this_period.add(c_i)
+                            exited_syms_info.append((sym_ex, op_out))
+                            # 同步動態更新當前梯隊紀錄中之出場價與狀態
+                            if all_tranche_records and all_tranche_records[-1]["tranche"] == tranche_name:
+                                for pk in all_tranche_records[-1]["picks"]:
+                                    if pk["ticker"] == sym_ex and pk.get("action", "").find("P1") < 0:
+                                        disp_ex_out = op_out
+                                        raw_us_df = env.get("raw_px_us", None)
+                                        if not sym_ex.endswith(".TW") and raw_us_df is not None and sym_ex in raw_us_df.columns:
+                                            rc_v = float(raw_us_df.iloc[in_pos][sym_ex])
+                                            ac_v = float(px_adj_arr[in_pos, c_i])
+                                            if rc_v > 0 and ac_v > 0 and not np.isnan(rc_v) and not np.isnan(ac_v):
+                                                disp_ex_out = op_out * (rc_v / ac_v)
+                                        pk["exit_price"] = round(disp_ex_out, 2)
+                                        pk["period_ret"] = round((disp_ex_out / pk["entry_price"] - 1.0) * 100.0, 2) if pk["entry_price"] > 0 else 0.0
+                                        pk["is_active"] = False
+                                        pk["action"] = f"⚡ {str(current_dt)[5:10].replace('-', '/')} P1油氣S3破線換馬出場"
                             del holdings[c_i]
                             holding_tenure.pop(c_i, None)
 
@@ -1225,6 +1311,36 @@ def main():
                                     cash -= each_cash
                                     holdings[cand_i] = {"shares": sh_new, "entry_px": op_in, "peak_px": op_in}
                                     holding_tenure[cand_i] = 1
+                                    # 同步動態寫入當前梯隊紀錄之新換入標的
+                                    if all_tranche_records and all_tranche_records[-1]["tranche"] == tranche_name:
+                                        rec_last = all_tranche_records[-1]
+                                        sym_new = cols[cand_i]
+                                        end_p_pos = len(dates_idx) - 1 if rec_last["is_active"] else dt_to_pos.get(pd.Timestamp(rec_last["exit_date"]), in_pos)
+                                        p_end_v = float(px_adj_arr[end_p_pos, cand_i]) if rec_last["is_active"] else float(px_open_arr[end_p_pos, cand_i])
+                                        p_ret_sw = ((p_end_v / op_in) - 1.0) * 100.0 if (op_in > 0 and p_end_v > 0 and not np.isnan(p_end_v)) else 0.0
+                                        disp_sw_in = op_in
+                                        raw_us_df = env.get("raw_px_us", None)
+                                        if not sym_new.endswith(".TW") and raw_us_df is not None and sym_new in raw_us_df.columns:
+                                            rc_v = float(raw_us_df.iloc[in_pos][sym_new])
+                                            ac_v = float(px_adj_arr[in_pos, cand_i])
+                                            if rc_v > 0 and ac_v > 0 and not np.isnan(rc_v) and not np.isnan(ac_v):
+                                                disp_sw_in = op_in * (rc_v / ac_v)
+                                        disp_sw_out = disp_sw_in * (1.0 + p_ret_sw / 100.0)
+                                        ex_from = exited_syms_info[0][0] if exited_syms_info else "油氣股"
+                                        rec_last["picks"].append({
+                                            "rank": len(rec_last["picks"]) + 1,
+                                            "ticker": sym_new,
+                                            "name": get_stock_name(sym_new),
+                                            "market": "TW" if sym_new.endswith(".TW") else "US",
+                                            "weight": round(25.0 / len(cands_picked), 1),
+                                            "entry_date": str(current_dt)[:10],
+                                            "entry_price": round(disp_sw_in, 2),
+                                            "exit_price": round(disp_sw_out, 2),
+                                            "period_ret": round(p_ret_sw, 2),
+                                            "is_active": bool(rec_last["is_active"]),
+                                            "action": f"持有中 (⚡{str(current_dt)[5:10].replace('-', '/')} P1換馬自{ex_from})" if rec_last["is_active"] else f"⚡{str(current_dt)[5:10].replace('-', '/')} P1盤中換馬建倉",
+                                            "tenure_months": 1
+                                        })
 
                 # 🌟 市場狀態轉換閘門 (Cooper 2004 JF) + [R13 P2] 恐慌修復盤中進場閘門 (Post-Shock Exposure Recovery Gate)
                 sorted_indices = daily_sorted[t_pos]
@@ -1287,6 +1403,7 @@ def main():
                                 tot_bw = sum(bw_slice)
                                 norm_weights = [w / tot_bw for w in bw_slice]
                             target_alloc = {selected_stks[idx_s]: norm_weights[idx_s] * exposure for idx_s in range(n)}
+                            did_intraday_ramp = False
                             for c_i, tgt_w in target_alloc.items():
                                 op = float(px_open_arr[in_pos, c_i])
                                 cur_sh = holdings[c_i]["shares"] if c_i in holdings else 0.0
@@ -1295,10 +1412,47 @@ def main():
                                     actual_buy = min(cash, diff_val)
                                     sh = (actual_buy * (1.0 - fee_buy_arr[c_i])) / op
                                     cash -= actual_buy
+                                    did_intraday_ramp = True
                                     if c_i in holdings:
                                         holdings[c_i]["shares"] += sh
                                     else:
                                         holdings[c_i] = {"shares": sh, "entry_px": op, "peak_px": op}
+                                        # 若盤中加碼新增了原本未在調倉首日名單內的標的，同步補入明細確保 100% 透明可核對
+                                        if all_tranche_records and all_tranche_records[-1]["tranche"] == tranche_name:
+                                            rec_last = all_tranche_records[-1]
+                                            sym_r = cols[c_i]
+                                            if not any(pk["ticker"] == sym_r for pk in rec_last["picks"]):
+                                                end_p_pos = len(dates_idx) - 1 if rec_last["is_active"] else dt_to_pos.get(pd.Timestamp(rec_last["exit_date"]), in_pos)
+                                                p_end_v = float(px_adj_arr[end_p_pos, c_i]) if rec_last["is_active"] else float(px_open_arr[end_p_pos, c_i])
+                                                p_ret_r = ((p_end_v / op) - 1.0) * 100.0 if (op > 0 and p_end_v > 0 and not np.isnan(p_end_v)) else 0.0
+                                                disp_r_in = op
+                                                raw_us_df = env.get("raw_px_us", None)
+                                                if not sym_r.endswith(".TW") and raw_us_df is not None and sym_r in raw_us_df.columns:
+                                                    rc_v = float(raw_us_df.iloc[in_pos][sym_r])
+                                                    ac_v = float(px_adj_arr[in_pos, c_i])
+                                                    if rc_v > 0 and ac_v > 0 and not np.isnan(rc_v) and not np.isnan(ac_v):
+                                                        disp_r_in = op * (rc_v / ac_v)
+                                                disp_r_out = disp_r_in * (1.0 + p_ret_r / 100.0)
+                                                rec_last["picks"].append({
+                                                    "rank": len(rec_last["picks"]) + 1,
+                                                    "ticker": sym_r,
+                                                    "name": get_stock_name(sym_r),
+                                                    "market": "TW" if sym_r.endswith(".TW") else "US",
+                                                    "weight": round(tgt_w * 100.0, 1),
+                                                    "entry_date": str(current_dt)[:10],
+                                                    "entry_price": round(disp_r_in, 2),
+                                                    "exit_price": round(disp_r_out, 2),
+                                                    "period_ret": round(p_ret_r, 2),
+                                                    "is_active": bool(rec_last["is_active"]),
+                                                    "action": f"持有中 (⚡{str(current_dt)[5:10].replace('-', '/')} P2盤中修復加碼)" if rec_last["is_active"] else f"⚡{str(current_dt)[5:10].replace('-', '/')} P2盤中修復加碼",
+                                                    "tenure_months": 1
+                                                })
+                            if did_intraday_ramp and all_tranche_records and all_tranche_records[-1]["tranche"] == tranche_name:
+                                rec_last = all_tranche_records[-1]
+                                gate_lbl = "P2恐慌修復閘門" if shock_ok else "Cooper狀態轉換閘門"
+                                tag_str = f"；⚡ {str(current_dt)[5:10].replace('-', '/')} 觸發 {gate_lbl} 動態回補至 {exposure*100:.0f}%"
+                                if tag_str not in rec_last["defense_reason"]:
+                                    rec_last["defense_reason"] += tag_str
 
             # [R13 P4] 處理待成交之 -2% 低接限價單 (未成交期間保留資金享短債生息，3 日到期若仍站穩月線且主力吸籌則補齊，否則保留現金)
             if pending_orders:
@@ -1338,111 +1492,10 @@ def main():
                     val += hinfo["shares"] * float(px_adj_arr[cur_pos, c_i])
             daily_equity.loc[current_dt] = val
 
-        return daily_equity.loc[daily_equity.index <= eq_cutoff]
+        return daily_equity
 
     eq_a = sim_tranche(1, "A梯隊 (月初調倉)")
     eq_b = sim_tranche(22, "B梯隊 (月下旬調倉)")
-
-    # 補齊 2026-11-02 (11月初 A梯隊最新調倉) 並更新 2026-10-01 / 2026-10-22 最新狀態至 2026-11-12 (含 R13 P1 油氣破線盤中戰術換馬 XOM -> TXN)
-    for lg in all_tranche_records:
-        if lg["rebal_date"] == "2026-10-01" and lg["tranche"].startswith("A梯隊"):
-            lg["exit_date"] = "2026-11-03"
-            lg["is_active"] = False
-            for p in lg["picks"]:
-                p["is_active"] = False
-                p["action"] = "已獲利出場" if p["period_ret"] > 0 else "已換倉出場"
-        elif lg["rebal_date"] == "2026-10-22" and lg["tranche"].startswith("B梯隊"):
-            lg["exit_date"] = "持有中 (預計 2026-11-22 換倉)"
-            lg["is_active"] = True
-            lg["defense_reason"] = "全球寬幅 63.3% (≥50% 多頭標準) × 10/22 觸發 S3 第一層排雷剔除 VLO/MPC 與 52W 套牢過濾拔擢 LLY × 11/02 WTI與裂解雙破月線觸發 R13-P1 油氣戰術換馬 (11/03 開盤將 XOM 換入乾淨龍頭 TXN) ➔ 100% 滿倉進攻"
-            new_b_picks = []
-            for p in lg["picks"]:
-                tk = p["ticker"]
-                if tk == "MRK":
-                    p["exit_price"] = 146.95
-                    p["period_ret"] = round((146.95 / p["entry_price"] - 1.0) * 100.0, 2)
-                    p["is_active"] = True
-                    p["action"] = "持有中 (續抱)"
-                    new_b_picks.append(p)
-                elif tk == "XOM":
-                    p["exit_price"] = 178.00
-                    p["period_ret"] = round((178.00 / p["entry_price"] - 1.0) * 100.0, 2)
-                    p["is_active"] = False
-                    p["action"] = "⚡ 11/03 P1油氣S3破線換馬出場"
-                    new_b_picks.append(p)
-                    new_b_picks.append({
-                        "rank": 2,
-                        "ticker": "TXN",
-                        "name": "德州儀器",
-                        "market": "US",
-                        "weight": 25.0,
-                        "entry_price": 309.83,
-                        "exit_price": 312.48,
-                        "period_ret": round((312.48 / 309.83 - 1.0) * 100.0, 2),
-                        "is_active": True,
-                        "action": "持有中 (⚡11/03 P1換馬自XOM)",
-                        "tenure_months": 1
-                    })
-                elif tk == "LLY":
-                    p["exit_price"] = 1427.28
-                    p["period_ret"] = round((1427.28 / p["entry_price"] - 1.0) * 100.0, 2)
-                    p["is_active"] = True
-                    p["action"] = "持有中 (續抱)"
-                    new_b_picks.append(p)
-                else:
-                    new_b_picks.append(p)
-            lg["picks"] = new_b_picks
-
-    all_tranche_records.append({
-        "year": 2026,
-        "rebal_date": "2026-11-02",
-        "entry_date": "2026-11-03",
-        "exit_date": "持有中 (預計 2026-12-01 換倉)",
-        "tranche": "A梯隊 (月初調倉)",
-        "exposure_pct": 100.0,
-        "us_breadth_pct": 63.3,
-        "tw_breadth_pct": 63.3,
-        "defense_reason": "全球寬幅 63.3% (≥50% 多頭標準) × 觸發 S3 雙層完整排雷閥門 (裂解價差崩跌 -29.3% 且 WTI 油價跌破月線 ➔ 一併剔除純煉油股 MPC/PSX 與上游原油股 COP) × 凱利凸性動態權重 ➔ 100% 滿倉進攻",
-        "is_active": True,
-        "picks": [
-            {
-                "rank": 1,
-                "ticker": "TXN",
-                "name": "德州儀器",
-                "market": "US",
-                "weight": 53.9,
-                "entry_price": 309.83,
-                "exit_price": 312.48,
-                "period_ret": 0.86,
-                "is_active": True,
-                "action": "持有中 (續抱)"
-            },
-            {
-                "rank": 2,
-                "ticker": "REGN",
-                "name": "再生元製藥",
-                "market": "US",
-                "weight": 25.0,
-                "entry_price": 956.28,
-                "exit_price": 951.19,
-                "period_ret": -0.53,
-                "is_active": True,
-                "action": "持有中 (續抱)"
-            },
-            {
-                "rank": 3,
-                "ticker": "ADI",
-                "name": "亞德諾半導體",
-                "market": "US",
-                "weight": 21.1,
-                "entry_price": 424.48,
-                "exit_price": 409.29,
-                "period_ret": -3.58,
-                "is_active": True,
-                "action": "持有中 (續抱)"
-            }
-        ]
-    })
 
     common_idx = eq_a.dropna().index.intersection(eq_b.dropna().index)
     common_idx = common_idx[common_idx >= pd.Timestamp("2005-01-03")]
@@ -1621,127 +1674,62 @@ def main():
     recent_2026_rebalances = [lg for lg in all_tranche_records if lg["year"] == 2026]
     recent_2026_rebalances.sort(key=lambda x: (x["rebal_date"], x["tranche"]), reverse=True)
 
-    # 官方當前 A / B 梯隊獨立標準持倉 (供前端第一層與第二層 AB 分開跟單使用)
-    official_active_tranches = {
-        "updated_at": "2026-11-12",
-        "tranche_a": {
-            "tranche_id": "A",
-            "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)",
-            "rebal_schedule": "每月 1 號 (遇假日順延)",
+    # 官方當前 A / B 梯隊獨立標準持倉：100% 由全成分 PIT 矩陣動態模擬結果自動組裝，絕無人工硬編碼！
+    act_a_list = [lg for lg in all_tranche_records if lg.get("is_active") and lg["tranche"].startswith("A梯隊")]
+    act_b_list = [lg for lg in all_tranche_records if lg.get("is_active") and lg["tranche"].startswith("B梯隊")]
+    prev_a_list = [lg for lg in all_tranche_records if (not lg.get("is_active")) and lg["tranche"].startswith("A梯隊")]
+    prev_b_list = [lg for lg in all_tranche_records if (not lg.get("is_active")) and lg["tranche"].startswith("B梯隊")]
+
+    def _build_official_tranche_obj(act_lg, prev_lg, tid: str):
+        is_a = (tid == "A")
+        active_picks = [p for p in act_lg.get("picks", []) if p.get("is_active", True)]
+        exited_mid_picks = [p for p in act_lg.get("picks", []) if not p.get("is_active", True)]
+        out_picks = []
+        for idx_p, p in enumerate(active_picks, 1):
+            ep = float(p["entry_price"])
+            cp = float(p["exit_price"])
+            w_tr = float(p["weight"])
+            out_picks.append({
+                "rank": idx_p,
+                "ticker": p["ticker"],
+                "name": p["name"],
+                "market": p["market"],
+                "sector": "🇹🇼 台股 0050∪0051 領頭羊" if p["market"] == "TW" else "🇺🇸 S&P 500 領頭羊",
+                "tranche_weight_pct": round(w_tr, 1),
+                "total_portfolio_weight_pct": round(w_tr * 0.5, 2),
+                "entry_date": p.get("entry_date", act_lg["entry_date"]),
+                "entry_price": ep,
+                "current_price": cp,
+                "period_ret_pct": round(float(p["period_ret"]), 2),
+                "stop_loss_price": round(ep * 0.85, 2),
+                "action": p.get("action", "持有中 (續抱)")
+            })
+        prev_syms = " / ".join([x["ticker"] for x in prev_lg.get("picks", [])]) if prev_lg else "無"
+        cur_syms = " / ".join([f"{x['ticker']} ({x['tranche_weight_pct']}%)" for x in out_picks]) if out_picks else "100% 避險現金池 (GLD/BIL)"
+        if exited_mid_picks:
+            ex_str = "、".join([f"{x['ticker']} ({x['action']})" for x in exited_mid_picks])
+            prev_note = f"本期 ({act_lg['rebal_date']}) 動態模擬持倉，盤中已執行戰術換馬：{ex_str} ➔ 現持有 {cur_syms}"
+        else:
+            prev_note = f"上一期 ({prev_lg['rebal_date'] if prev_lg else ''}) 持倉 {prev_syms} 已於 {act_lg['entry_date']} 開盤期滿換倉；本期全成分 PIT 動態建倉 {cur_syms}"
+        nxt_d = act_lg["exit_date"].replace("持有中 (預計 ", "").replace(" 換倉)", "")
+        return {
+            "tranche_id": tid,
+            "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)" if is_a else "🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)",
+            "rebal_schedule": "每月 1 號 (遇假日順延)" if is_a else "每月 22 號 (遇假日順延)",
             "capital_share_pct": 50.0,
-            "rebal_date": "2026-11-02",
-            "entry_date": "2026-11-03",
-            "next_rebal_date": "2026-12-01",
-            "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・已觸發 S3 雙層能源排雷閥門：裂解價差崩跌且 WTI 油價跌破月線，一併剔除 MPC/PSX 與 COP，全數轉向類比晶片與生技防禦龍頭・凱利凸性權重 53.9%/25.0%/21.1%)",
-            "previous_rebal_note": "上一期 (2026-10-01) 持倉 LITE / SNDK / MU 已於 2026-11-03 開盤期滿換倉出場；本期因裂解價差與 WTI 原油雙破月線，S3 雙層排雷閥門自動剔除 MPC/PSX 與 COP，改建倉 TXN (53.9%) / REGN (25.0%) / ADI (21.1%)",
-            "picks": [
-                {
-                    "rank": 1,
-                    "ticker": "TXN",
-                    "name": "德州儀器",
-                    "market": "US",
-                    "sector": "類比晶片龍頭 (高息防禦)",
-                    "tranche_weight_pct": 53.9,
-                    "total_portfolio_weight_pct": 26.95,
-                    "entry_date": "2026-11-03",
-                    "entry_price": 309.83,
-                    "current_price": 312.48,
-                    "period_ret_pct": 0.86,
-                    "stop_loss_price": round(309.83 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 2,
-                    "ticker": "REGN",
-                    "name": "再生元製藥",
-                    "market": "US",
-                    "sector": "生物製藥巨擘 (剛性醫療防禦)",
-                    "tranche_weight_pct": 25.0,
-                    "total_portfolio_weight_pct": 12.5,
-                    "entry_date": "2026-11-03",
-                    "entry_price": 956.28,
-                    "current_price": 951.19,
-                    "period_ret_pct": -0.53,
-                    "stop_loss_price": round(956.28 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 3,
-                    "ticker": "ADI",
-                    "name": "亞德諾半導體",
-                    "market": "US",
-                    "sector": "高階類比與混合訊號晶片",
-                    "tranche_weight_pct": 21.1,
-                    "total_portfolio_weight_pct": 10.55,
-                    "entry_date": "2026-11-03",
-                    "entry_price": 424.48,
-                    "current_price": 409.29,
-                    "period_ret_pct": -3.58,
-                    "stop_loss_price": round(424.48 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                }
-            ]
-        },
-        "tranche_b": {
-            "tranche_id": "B",
-            "tranche_name": "🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)",
-            "rebal_schedule": "每月 22 號 (遇假日順延)",
-            "capital_share_pct": 50.0,
-            "rebal_date": "2026-10-22",
-            "entry_date": "2026-10-23",
-            "next_rebal_date": "2026-11-22",
-            "exposure_pct": 100.0,
-            "defense_reason": "正常進攻 (100% 滿倉・11/02 WTI與裂解價差雙破月線觸發 R13-P1 純油氣戰術換馬：11/03 開盤已將 XOM ($178.00) 撤出並換入乾淨真龍頭 TXN ($309.83)・凱利凸性權重 52.4%/25.0%/22.6%)",
-            "previous_rebal_note": "10/22 原建倉 MRK (52.4%) / XOM (25.0%, $179.37) / LLY (22.6%)；11/02 收盤因 WTI ($96.46) 與 3-2-1 裂解價差 (-29.3%) 雙破月線，觸發 R13 新增【P1 油氣 S3 盤中戰術換馬】，於 11/03 開盤將 XOM @ $178.00 (-0.76%) 即時換入第 1 乾淨龍頭 TXN @ $309.83 (+0.86%，成功避開 XOM 隨後下殺至 $161.86)！",
-            "picks": [
-                {
-                    "rank": 1,
-                    "ticker": "MRK",
-                    "name": "默沙東",
-                    "market": "US",
-                    "sector": "大型製藥 (剛性醫療防禦)",
-                    "tranche_weight_pct": 52.4,
-                    "total_portfolio_weight_pct": 26.2,
-                    "entry_date": "2026-10-23",
-                    "entry_price": 145.02,
-                    "current_price": 146.95,
-                    "period_ret_pct": 1.33,
-                    "stop_loss_price": round(145.02 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                },
-                {
-                    "rank": 2,
-                    "ticker": "TXN",
-                    "name": "德州儀器",
-                    "market": "US",
-                    "sector": "類比晶片龍頭 (⚡11/03 P1換馬自XOM)",
-                    "tranche_weight_pct": 25.0,
-                    "total_portfolio_weight_pct": 12.5,
-                    "entry_date": "2026-11-03",
-                    "entry_price": 309.83,
-                    "current_price": 312.48,
-                    "period_ret_pct": 0.86,
-                    "stop_loss_price": round(309.83 * 0.85, 2),
-                    "action": "持有中 (⚡11/03 P1油氣S3換馬自XOM)"
-                },
-                {
-                    "rank": 3,
-                    "ticker": "LLY",
-                    "name": "禮來",
-                    "market": "US",
-                    "sector": "全球減重與創新製藥領頭羊",
-                    "tranche_weight_pct": 22.6,
-                    "total_portfolio_weight_pct": 11.3,
-                    "entry_date": "2026-10-23",
-                    "entry_price": 1304.15,
-                    "current_price": 1427.28,
-                    "period_ret_pct": 9.44,
-                    "stop_loss_price": round(1304.15 * 0.85, 2),
-                    "action": "持有中 (續抱)"
-                }
-            ]
+            "rebal_date": act_lg["rebal_date"],
+            "entry_date": act_lg["entry_date"],
+            "next_rebal_date": nxt_d,
+            "exposure_pct": act_lg["exposure_pct"],
+            "defense_reason": act_lg["defense_reason"],
+            "previous_rebal_note": prev_note,
+            "picks": out_picks,
         }
+
+    official_active_tranches = {
+        "updated_at": str(eq_d.index[-1])[:10],
+        "tranche_a": _build_official_tranche_obj(act_a_list[-1], prev_a_list[-1] if prev_a_list else None, "A") if act_a_list else {},
+        "tranche_b": _build_official_tranche_obj(act_b_list[-1], prev_b_list[-1] if prev_b_list else None, "B") if act_b_list else {},
     }
 
     print(f"\n[HEADLINE] CAGR {_cagr*100:.2f}% | mult {float(eq_d.iloc[-1]):.1f} | monthlyMDD {_monthly_mdd*100:.2f}% | dailyMDD {_daily_mdd*100:.2f}% | Calmar {_cagr/abs(_monthly_mdd):.2f} | Sharpe {_sharpe:.2f} | Sortino {_sortino:.2f} | SemiWin {_semi_win:.1f}% | G1 {_g1*100:.2f}% / G2 {_g2*100:.2f}% | WinYrs {win_years_cnt}/{len(yearly_summary)}")
@@ -1749,7 +1737,7 @@ def main():
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
         "strategy_version": "G12-PIT Sovereign R14 (7大黃金濾網 + R14四大正交因果升級[PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化] + R13三大進出場微結構[P1油氣S3盤中換馬/P2恐慌修復進場/P4高乖離分批低接] + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭 · 2005-2026)",
-        "universe_desc": "1,734 檔真實無生存者偏誤池 (956 檔 S&P 500 官方入選日 PIT + 778 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
+        "universe_desc": f"{len(us_tickers) + tw_zero['adj_close'].shape[1]:,} 檔真實無生存者偏誤池 ({len(us_tickers)} 檔 S&P 500 官方入選日 PIT [現任 503/503 檔 100% 覆蓋] + {tw_zero['adj_close'].shape[1]} 檔台股 0050∪0051 純上市前 150 大 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),
         "mult": round(float(eq_d.iloc[-1]), 1),
         "monthly_mdd": round(_monthly_mdd * 100.0, 2),

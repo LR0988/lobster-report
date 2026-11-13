@@ -51,24 +51,18 @@ def build_1704_pit_engine():
     data4 = env_tw["data4"]
     common_dates = env_tw["stk_adj"].index
     pit_tw = env_tw["pit_tw"]
-    us_orig = env_tw["us_orig"]
-    us_all_tickers = us_pit["us_tickers"]
+    us_all_tickers = list(us_pit["us_tickers"])
+    us_orig = [c for c in env_tw["us_orig"] if c in set(us_all_tickers)]
     us_extra_tickers = [c for c in us_all_tickers if c not in set(us_orig)]
     us_tickers = us_orig + us_extra_tickers
 
-    # 對齊美股 956 檔至 common_dates (使用 ffill 確保已下市股在最後交易日後之換倉日仍可按最後收盤價清算，不會產生 NaN Cash)
-    # 同時對 126 檔 us_orig 直接沿用 env_tw 精確對齊之價格序列，確保基準 100% 一致
-    us_adj_extra = us_pit["adj_close"][us_extra_tickers].reindex(common_dates).ffill()
-    us_open_extra = us_pit["adj_open"][us_extra_tickers].reindex(common_dates).ffill().fillna(us_adj_extra)
-    us_high_extra = us_pit["adj_high"][us_extra_tickers].reindex(common_dates).ffill().fillna(us_adj_extra)
-    us_low_extra = us_pit["adj_low"][us_extra_tickers].reindex(common_dates).ffill().fillna(us_adj_extra)
-    us_vol_extra = us_pit["volume"][us_extra_tickers].reindex(common_dates).fillna(0.0)
-
-    us_adj = pd.concat([env_tw["stk_adj"][us_orig], us_adj_extra], axis=1)
-    us_open = pd.concat([env_tw["stk_open"][us_orig], us_open_extra], axis=1)
-    us_high = pd.concat([env_tw["stk_high"][us_orig], us_high_extra], axis=1)
-    us_low = pd.concat([env_tw["stk_low"][us_orig], us_low_extra], axis=1)
-    us_vol = pd.concat([env_tw["stk_vol"][us_orig], us_vol_extra], axis=1)
+    # 統一對齊全部美股至 common_dates：100% 採用 us_pit 經 Qlib+Yahoo 等比無斷層縫合之價格與成交量序列
+    # 嚴格確保 raw_close * volume 滿足歷史真實美元成交額守恆 (消除跨資料源未對齊股票分割倍率造成的未來函數)
+    us_adj = us_pit["adj_close"][us_tickers].reindex(common_dates).ffill()
+    us_open = us_pit["adj_open"][us_tickers].reindex(common_dates).ffill().fillna(us_adj)
+    us_high = us_pit["adj_high"][us_tickers].reindex(common_dates).ffill().fillna(us_adj)
+    us_low = us_pit["adj_low"][us_tickers].reindex(common_dates).ffill().fillna(us_adj)
+    us_vol = us_pit["volume"][us_tickers].reindex(common_dates).fillna(0.0)
 
     us_raw = us_pit["raw_close"][us_tickers].reindex(common_dates).ffill()
     us_in_idx = us_pit["in_index_pit"][us_tickers].reindex(common_dates).ffill().fillna(False)
@@ -201,8 +195,7 @@ def build_1704_pit_engine():
     dipped_15d = below_ma20.shift(1).rolling(14, min_periods=1).max() > 0
     ma20_shakeout_reclaim = (dipped_15d & (stk_adj > ma20) & ((1.0 + io_5.clip(-0.05, 0.15)) > 0)).astype(float)
 
-    # 對 874 檔 (us_orig + pit_tw) 直接沿用 env_tw["s_g5_open"]，確保基準零誤差
-    s_g5_1704[us_orig] = env_tw["s_g5_open"][us_orig].astype(np.float32)
+    # 美股全數採用統一無斷層 s_g5_1704 矩陣公式；台股 pit_tw 沿用 env_tw["s_g5_open"] 確保台股漲跌停還權基準一致
     s_g5_1704[pit_tw] = env_tw["s_g5_open"][pit_tw].astype(np.float32)
 
     pe_1704 = pd.DataFrame(np.nan, index=common_dates, columns=all_1704_tickers, dtype=np.float32)

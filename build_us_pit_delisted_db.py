@@ -33,7 +33,7 @@ os.makedirs(PIT_CACHE_DIR, exist_ok=True)
 
 DB_PATH = os.path.join(ROOT_DIR, "tw_stock.db")
 QLIB_ZIP_PATH = "/tmp/qlib_data_us_1d_latest.zip" if os.path.exists("/tmp/qlib_data_us_1d_latest.zip") else os.path.join(PIT_CACHE_DIR, "qlib_data_us_1d_latest.zip")
-SP500_CSV_PATH = "/tmp/sp500_ticker_start_end.csv" if os.path.exists("/tmp/sp500_ticker_start_end.csv") else os.path.join(PIT_CACHE_DIR, "sp500_ticker_start_end.csv")
+SP500_CSV_PATH = os.path.join(PIT_CACHE_DIR, "sp500_ticker_start_end.csv") if os.path.exists(os.path.join(PIT_CACHE_DIR, "sp500_ticker_start_end.csv")) else "/tmp/sp500_ticker_start_end.csv"
 JW_PARQUET_URL = "https://huggingface.co/datasets/jwigginton/timeseries-daily-sp500/resolve/main/data/train-00000-of-00001.parquet"
 JW_CACHE_PATH = "/tmp/jw_sp500_daily.parquet" if os.path.exists("/tmp/jw_sp500_daily.parquet") else os.path.join(PIT_CACHE_DIR, "jw_sp500_daily.parquet")
 US_PIT_CACHE_PATH = "/tmp/us_pit_full_history.pkl"
@@ -87,7 +87,7 @@ def build_us_pit_database(force_rebuild: bool = False):
     if os.path.exists(SP500_CSV_PATH):
         df_sp_csv = pd.read_csv(SP500_CSV_PATH)
         for _, r in df_sp_csv.iterrows():
-            tk = str(r["ticker"]).strip().upper()
+            tk = str(r["ticker"]).strip().upper().replace(".", "-")
             s_dt = str(r["start_date"]).strip() if pd.notna(r["start_date"]) else "1996-01-01"
             e_dt = str(r["end_date"]).strip() if pd.notna(r["end_date"]) and str(r["end_date"]).strip() != "" else "2099-12-31"
             pit_intervals.append((tk, "SP500_FJA", s_dt, e_dt))
@@ -122,17 +122,28 @@ def build_us_pit_database(force_rebuild: bool = False):
     conn = sqlite3.connect(DB_PATH)
     df_pit.to_sql("us_pit_constituents", conn, if_exists="replace", index=False)
 
-    # 讀取既有 global_stock_daily 美股數據
+    # 讀取既有 global_stock_daily 美股數據 (排除亞洲/歐洲跨時區標的)
     df_existing_us = pd.read_sql_query(
-        "SELECT ticker, date, open, high, low, close, adj_close, volume FROM global_stock_daily WHERE ticker NOT LIKE '%.TW' ORDER BY date ASC",
+        "SELECT ticker, date, open, high, low, close, adj_close, volume FROM global_stock_daily "
+        "WHERE ticker NOT LIKE '%.TW' AND ticker NOT LIKE '%.KS' AND ticker NOT LIKE '%.T' "
+        "AND ticker NOT LIKE '%.DE' AND ticker NOT LIKE '%.SA' ORDER BY date ASC",
         conn,
     )
+    df_sov_dates = pd.read_sql_query("SELECT DISTINCT date FROM global_sovereign_daily WHERE ticker='SPY' ORDER BY date ASC", conn)
     conn.close()
     df_existing_us["date"] = pd.to_datetime(df_existing_us["date"])
     existing_us_tickers = sorted(df_existing_us["ticker"].unique().tolist())
+    max_spy_date = pd.to_datetime(df_sov_dates["date"]).max() if not df_sov_dates.empty else pd.Timestamp("2026-11-12")
 
-    # 目標美股池 = pit_in_qlib (725 檔歷史指數股，含下市/破產/被併購股) ∪ existing_us_tickers (126 檔)
-    target_us_tickers = sorted(list(set(pit_in_qlib) | set(existing_us_tickers)))
+    # 目標美股池 = pit_index_tickers (全部歷史與現任指數成分股) ∪ pit_in_qlib ∪ existing_us_tickers (排除 ETF 與點號重複碼)
+    etf_and_dup_exclude = {
+        "SPY", "QQQ", "GLD", "BIL", "TLT", "ECH", "GRN", "PHB", "SDS", "UCC", "VO",
+        "BRK.B", "BF.B",
+    }
+    target_us_tickers = sorted(
+        t for t in (set(pit_index_tickers) | set(pit_in_qlib) | set(existing_us_tickers))
+        if t not in etf_and_dup_exclude
+    )
     print(f"  - 合計納入回測之歷史+下市+現役美股總數: {len(target_us_tickers)} 檔 (原僅 126 檔，擴增 {len(target_us_tickers)/126:.1f} 倍！)")
 
     print("=" * 110)
@@ -248,10 +259,10 @@ def build_us_pit_database(force_rebuild: bool = False):
     print("🔗 [Step 5/5] 執行無斷層比例縫合 (Qlib 2000~2020 + JW/Existing/yfinance 2020~2026) 與除牌/下市日標記...")
     print("=" * 110)
 
-    # 建立統一交易日軸 (2003-01-02 ~ 2026-10-29)
+    # 建立統一交易日軸 (2003-01-02 ~ 最新 SPY 交易日)
     existing_dates = pd.DatetimeIndex(sorted(df_existing_us["date"].unique()))
     all_dates = cal_dates.union(existing_dates)
-    all_dates = all_dates[(all_dates >= "2003-01-01") & (all_dates <= "2026-10-29")]
+    all_dates = all_dates[(all_dates >= "2003-01-01") & (all_dates <= max_spy_date)]
     all_dates = all_dates[all_dates.dayofweek < 5]
 
     # 先將 existing_us 轉成 dict of DataFrames
@@ -286,7 +297,7 @@ def build_us_pit_database(force_rebuild: bool = False):
             al = (g["low"] * ratio).astype(np.float32)
             vv = g["volume"].fillna(0.0).astype(np.float32)
             if sym in qlib_adj_close:
-                # 補齊 2003~first_dt 之前若 existing 缺漏的部分
+                # 補齊 2003~first_dt 之前若 existing 缺漏的部分 (同步維持 raw_close * volume 真實成交額守恆與 volume 無分割斷層)
                 q_ac = qlib_adj_close[sym].reindex(all_dates)
                 overlap = ac.dropna().index.intersection(q_ac.dropna().index)
                 if len(overlap) > 0:
@@ -298,13 +309,13 @@ def build_us_pit_database(force_rebuild: bool = False):
                         ao.loc[m_pre] = qlib_adj_open[sym].reindex(all_dates).loc[m_pre] * s_r
                         ah.loc[m_pre] = qlib_adj_high[sym].reindex(all_dates).loc[m_pre] * s_r
                         al.loc[m_pre] = qlib_adj_low[sym].reindex(all_dates).loc[m_pre] * s_r
-                        rc.loc[m_pre] = qlib_raw_close[sym].reindex(all_dates).loc[m_pre]
-                        vv.loc[m_pre] = qlib_raw_vol[sym].reindex(all_dates).loc[m_pre].fillna(0.0)
-                if sym in qlib_raw_close:
-                    q_rc = qlib_raw_close[sym].reindex(all_dates)
-                    m_q = q_rc.notna()
-                    rc.loc[m_q] = q_rc.loc[m_q]
-                    vv.loc[m_q] = qlib_raw_vol[sym].reindex(all_dates).loc[m_q].fillna(0.0)
+                        q_rc_s = qlib_raw_close[sym].reindex(all_dates)
+                        q_vv_s = qlib_raw_vol[sym].reindex(all_dates).fillna(0.0)
+                        rc_ov = float(rc.loc[ov_dt]) if pd.notna(rc.loc[ov_dt]) and rc.loc[ov_dt] > 0 else 0.0
+                        qrc_ov = float(q_rc_s.loc[ov_dt]) if pd.notna(q_rc_s.loc[ov_dt]) and q_rc_s.loc[ov_dt] > 0 else 0.0
+                        rc_scale = (rc_ov / qrc_ov) if (rc_ov > 0 and qrc_ov > 0) else 1.0
+                        rc.loc[m_pre] = q_rc_s.loc[m_pre] * rc_scale
+                        vv.loc[m_pre] = q_vv_s.loc[m_pre] / rc_scale
             adj_close_dict[sym] = ac
             adj_open_dict[sym] = ao
             adj_high_dict[sym] = ah
@@ -314,8 +325,32 @@ def build_us_pit_database(force_rebuild: bool = False):
             last_valid_date_map[sym] = ac.last_valid_index()
             continue
 
-        # 2. 從 Qlib 基底出發
+        # 2. 若不在 Qlib 但在 yf_data 或 jw_map (例如 2020 後 IPO 入選後又被併購剔除之 KVUE 等)
         if sym not in qlib_adj_close:
+            if sym in yf_data:
+                sub = yf_data[sym].reindex(all_dates)
+                p_ac = sub["Adj Close"].astype(np.float32)
+                p_rc = sub["Close"].replace(0, np.nan).astype(np.float32)
+                p_rat = (p_ac / p_rc).fillna(1.0)
+                adj_close_dict[sym] = p_ac
+                adj_open_dict[sym] = (sub["Open"] * p_rat).astype(np.float32)
+                adj_high_dict[sym] = (sub["High"] * p_rat).astype(np.float32)
+                adj_low_dict[sym] = (sub["Low"] * p_rat).astype(np.float32)
+                raw_close_dict[sym] = p_rc
+                vol_dict[sym] = sub["Volume"].fillna(0.0).astype(np.float32)
+                last_valid_date_map[sym] = p_ac.last_valid_index()
+            elif sym in jw_map:
+                sub = jw_map[sym].reindex(all_dates)
+                p_ac = sub["adj_close"].astype(np.float32)
+                p_rc = sub["close"].replace(0, np.nan).astype(np.float32)
+                p_rat = (p_ac / p_rc).fillna(1.0)
+                adj_close_dict[sym] = p_ac
+                adj_open_dict[sym] = (sub["open"] * p_rat).astype(np.float32)
+                adj_high_dict[sym] = (sub["high"] * p_rat).astype(np.float32)
+                adj_low_dict[sym] = (sub["low"] * p_rat).astype(np.float32)
+                raw_close_dict[sym] = p_rc
+                vol_dict[sym] = sub["volume"].fillna(0.0).astype(np.float32)
+                last_valid_date_map[sym] = p_ac.last_valid_index()
             continue
         q_ac = qlib_adj_close[sym].reindex(all_dates)
         q_ao = qlib_adj_open[sym].reindex(all_dates)
@@ -357,6 +392,12 @@ def build_us_pit_database(force_rebuild: bool = False):
                     q_ao = q_ao * s_r
                     q_ah = q_ah * s_r
                     q_al = q_al * s_r
+                prc_ov = float(p_rc.loc[ov_dt]) if pd.notna(p_rc.loc[ov_dt]) and p_rc.loc[ov_dt] > 0 else 0.0
+                qrc_ov = float(q_rc.loc[ov_dt]) if pd.notna(q_rc.loc[ov_dt]) and q_rc.loc[ov_dt] > 0 else 0.0
+                if prc_ov > 0 and qrc_ov > 0:
+                    rc_scale = prc_ov / qrc_ov
+                    q_rc = q_rc * rc_scale
+                    q_vv = q_vv / rc_scale
                 m_post = all_dates > ov_dt
                 q_ac.loc[m_post] = p_ac.loc[m_post]
                 q_ao.loc[m_post] = p_ao.loc[m_post]
