@@ -2,26 +2,33 @@
 """
 export_g11_pit_detailed_history.py
 ================================================================================
-【G12-PIT Sovereign R14 歷年績效與逐筆詳細進出全景資料庫生成器】
+【G12-PIT Sovereign Strict Pruned GOLD_6 歷年績效與逐筆詳細進出全景資料庫生成器】
 ================================================================================
 功能：
-1. 完整實裝 G12-PIT Sovereign R14 官方生產模型所有參數與權威指標 (R13 核心引擎 + 四大正交因果升級 CIE-1 + SEC-VOL1 + CSH-DM1 + PF-TD + 182檔下市美股產業對齊)：
-   - [R14 新增 P4: PF-TD] 未破月線高檔頂背離 × 機構派發預警護盾 (0.40<Exp<=0.65 且 QQQ>=MA20 高檔未跌頂背離時收斂至 16% 試單、若 Top5 機構劇烈派發 IO_20<=-10% 則 0% 觀望，並同步解鎖盤中修復回補)
-   - [R14 新增 P3: CSH-DM1] 主權避險現金池黃金破位流動性保護鎖 (嚴格 t-1 訊號：當 GLD<MA40 & 1M<-2% 或 1M<-5% 時切回 100% BIL 國庫券，壓穿月 MDD 至 -17.89% 並締造 22/22 歷史 100% 全勝年)
-   - [R14 新增 P1: CIE-1] 盤中回補乾淨進場衛生鎖 (Cooper 與 P2 盤中加碼強制剔除財報瑕疵、族群高潮派發、52W套牢與機構出貨股)
-   - [R14 新增 P2: SEC-VOL1] 二階狙擊手下行半波動率純化 (Rank #2~#5 內部拔擢低牌價下行波動吸籌股 ×1.05、降序高暴跌無承接股 ×0.92，100% 不動 Rank #1 連任保護帶)
-   - [R13 核心 P1+P2+P4] 純油氣族群盤中 S3 實體商品崩跌戰術換馬 + 恐慌修復盤中進場閘門 + 極端高乖離 (Bias60>45%) 新倉 50/50 分批低接
-   - [R12 核心] M1 主帥席位退化降級與真龍頭扶正 + M5 真龍頭 4% 調倉死區解鎖 + 23 跨市場族群輪動抗跌真龍頭 + 52W 高點套牢籌碼過濾 + 良性半方差加碼 (+5%)
+1. 完整實裝 G12-PIT Sovereign Strict Pruned GOLD_6 官方生產模型所有參數與權威指標
+   (Gate 8 脫護盾裸測認證 6 大純金因子 × 拔除 3 項負貢獻舊包袱 + R14 四大正交防護 + R13[P1/P2/P4] + 182檔下市美股產業對齊)：
+   - [GOLD_6 #1: R21_VF_DN] CBOE VIX 恐慌脆弱度排雷 (Rank #2~#5 高波動條件脆弱×0.90)
+   - [GOLD_6 #2: R20_NMT_DN] Bilevel-NMT 非線性多尺度背離阻尼 (全尺度未吸籌且波動均等化資金流出×0.928)
+   - [GOLD_6 #3: R17_EA_ME_B] 財報 EPS 加速 × 營益率擴張雙重基本面點火 (Rank #2~#5 ×1.045)
+   - [GOLD_6 #4: TW_MRG_VETO] 台股散戶融資追高且機構未買超入場否決
+   - [GOLD_6 #5: TW_US_PEER_VETO] 美股同族群領跌傳導台股因果否決
+   - [GOLD_6 #6: SOV3_CASH] 四象限主權避險現金池 (GLD / IEF / TBF / BIL t-1訊號➔T開盤5bps執行)
+   - [Strict Pruned -3] 拔除 L03B 尾端追高降權、L04B 死貓跳懲罰、L11 3D 動態任期截斷 (回歸純粹 4 期上限)
+   - [R14 + R13 + R12] PF-TD / CSH-DM1 / CIE-1 / SEC-VOL1 + P1/P2/P4 + M1主帥扶正 + M5真龍頭4%解鎖 + 23族群輪動
 2. 匯出 2005–2026 全歷史 22 年每一次調倉 (Tranche 1 & Tranche 22) 的每一筆進出明細。
 3. 2026 當前最新選股與進行中持倉清單 (供使用者對照核對「我有沒有買對」)。
 4. 全歷史股票代號反查索引 (all_trades_lookup)。
 """
 
+import io
 import os
 import json
+import pickle
 import sqlite3
+import urllib.request
 import numpy as np
 import pandas as pd
+import yfinance as yf
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -77,6 +84,253 @@ def _roc_to_ann_str(ym) -> str:
         return "2099-01-10"
     y, m = int(ym_s[:3]) + 1911, int(ym_s[3:5])
     return f"{y + 1:04d}-01-10" if m == 12 else f"{y:04d}-{m + 1:02d}-10"
+
+def _causal_align_series(raw_s: pd.Series, dates_idx: pd.DatetimeIndex, fill_val: float = 0.0) -> pd.Series:
+    """Strictly causal forward-fill alignment (ZERO .bfill() allowed)."""
+    s_clean = pd.to_numeric(raw_s, errors="coerce").dropna().sort_index()
+    s_clean = s_clean[~s_clean.index.duplicated(keep="last")]
+    if len(s_clean) == 0:
+        return pd.Series(fill_val, index=dates_idx, dtype=np.float64)
+    union_idx = s_clean.index.union(dates_idx).sort_values()
+    aligned = s_clean.reindex(union_idx).ffill().reindex(dates_idx)
+    if np.isnan(fill_val):
+        return aligned.astype(np.float64)
+    return aligned.fillna(fill_val).astype(np.float64)
+
+def _load_or_build_sov3_ohlc(dates_idx: pd.DatetimeIndex, conn_twse: sqlite3.Connection) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load or build PIT-aligned Open/Close DataFrames for SOV3_CASH ETFs (IEF, TBF, GLD_DB)."""
+    cache_path = os.path.join("pit_cache", "sov3_etf_ohlc.pkl")
+    req_max = dates_idx[-1]
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, "rb") as fp:
+                cached = pickle.load(fp)
+            c_df = cached.get("close")
+            o_df = cached.get("open")
+            if (
+                isinstance(c_df, pd.DataFrame)
+                and isinstance(o_df, pd.DataFrame)
+                and {"IEF", "TBF", "GLD_DB"}.issubset(c_df.columns)
+                and {"IEF", "TBF", "GLD_DB"}.issubset(o_df.columns)
+                and c_df.index.max() >= req_max
+            ):
+                return c_df.reindex(dates_idx).ffill(), o_df.reindex(dates_idx).ffill()
+        except Exception:
+            pass
+
+    etf_close = pd.DataFrame(index=dates_idx)
+    etf_open = pd.DataFrame(index=dates_idx)
+    end_str = (req_max + pd.Timedelta(days=3)).strftime("%Y-%m-%d")
+    for tk in ["IEF", "TBF"]:
+        d = yf.download(tk, start="2004-01-01", end=end_str, progress=False, auto_adjust=True)
+        if isinstance(d.columns, pd.MultiIndex):
+            d.columns = d.columns.get_level_values(0)
+        if d.empty:
+            raise RuntimeError(f"yfinance failed to download {tk} for SOV3_CASH.")
+        etf_close[tk] = d["Close"].dropna().reindex(dates_idx).ffill()
+        etf_open[tk] = d["Open"].dropna().reindex(dates_idx).ffill()
+
+    df_gld_db = pd.read_sql_query(
+        "SELECT date, open, close, adj_close FROM global_sovereign_daily WHERE ticker='GLD' ORDER BY date ASC",
+        conn_twse,
+    )
+    df_gld_db["dt"] = pd.to_datetime(df_gld_db["date"])
+    df_gld_db = df_gld_db.drop_duplicates("dt", keep="last").set_index("dt")
+    ratio_adj = (df_gld_db["adj_close"] / df_gld_db["close"].replace(0, np.nan)).fillna(1.0)
+    etf_close["GLD_DB"] = df_gld_db["adj_close"].reindex(dates_idx).ffill()
+    etf_open["GLD_DB"] = (df_gld_db["open"] * ratio_adj).reindex(dates_idx).ffill()
+
+    os.makedirs("pit_cache", exist_ok=True)
+    with open(cache_path, "wb") as fp:
+        pickle.dump({"close": etf_close, "open": etf_open}, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    return etf_close, etf_open
+
+def _build_sov3_cash_series(
+    dates_idx: pd.DatetimeIndex,
+    gp_s: pd.Series,
+    bil_s: pd.Series,
+    u10_chg20_s: pd.Series,
+    u10_s: pd.Series,
+    br_s: pd.Series,
+    qqq_p_s: pd.Series,
+    etf_close: pd.DataFrame,
+    etf_open: pd.DataFrame,
+    s_sov: float = 1.0,
+) -> tuple[pd.Series, np.ndarray, np.ndarray, np.ndarray, int]:
+    """Simulate SOV3_CASH four-quadrant sovereign reserve with t-1 signals -> Open[t] + 5bps execution."""
+    n_dates = len(dates_idx)
+    bil_r1d = bil_s.values.astype(np.float64)
+    g_r1d = gp_s.pct_change().fillna(0.0)
+    g_v20 = g_r1d.rolling(20).std() * np.sqrt(252.0)
+    g_b60 = (gp_s / (gp_s.rolling(60).mean() + 1e-9)) - 1.0
+    g_ma40 = gp_s.rolling(40).mean()
+    g_ma60 = gp_s.rolling(60).mean()
+    g_ma200 = gp_s.rolling(200).mean()
+    g_m1m, g_m3m = gp_s.pct_change(21), gp_s.pct_change(63)
+    g_dm1 = ~(((gp_s < g_ma40) & (g_m1m < -0.02)) | (g_m1m < -0.05))
+    g_ok = (
+        (gp_s > g_ma60) & (gp_s > g_ma200) & (g_m3m > 0.02) & (g_r1d.abs() < 0.08)
+        & g_dm1 & (g_v20 <= 0.18) & (g_b60 <= 0.08) & (u10_chg20_s < 0.20)
+    ).shift(1).fillna(False).to_numpy(dtype=np.float64)
+
+    ief_p = etf_close["IEF"]
+    ief_vol20 = ief_p.pct_change().rolling(20).std() * np.sqrt(252.0)
+    ief_bias60 = (ief_p / ief_p.rolling(60).mean()) - 1.0
+    ief_m1m, ief_m3m = ief_p.pct_change(21), ief_p.pct_change(63)
+    ief_dm1 = ~(((ief_p < ief_p.rolling(40).mean()) & (ief_m1m < -0.01)) | (ief_m1m < -0.02))
+    i_ok = (
+        (ief_p > ief_p.rolling(60).mean()) & (ief_p > ief_p.rolling(200).mean()) & (ief_m3m > 0.01)
+        & ief_dm1 & (ief_vol20 <= 0.072 * s_sov) & (ief_bias60 <= 0.028 * s_sov) & (u10_chg20_s <= 0.04 * s_sov)
+    ).shift(1).fillna(False).to_numpy(dtype=np.float64)
+
+    tbf_p = etf_close["TBF"]
+    tbf_vol20 = tbf_p.pct_change().rolling(20).std() * np.sqrt(252.0)
+    tbf_bias60 = (tbf_p / tbf_p.rolling(60).mean()) - 1.0
+    tbf_m1m, tbf_m3m = tbf_p.pct_change(21), tbf_p.pct_change(63)
+    tbf_dm1 = ~(((tbf_p < tbf_p.rolling(40).mean()) & (tbf_m1m < -0.02)) | (tbf_m1m < -0.04))
+    qqq_b60 = qqq_p_s < qqq_p_s.rolling(60).mean()
+    t_ok = (
+        ((br_s < 0.65) | qqq_b60)
+        & (tbf_p > tbf_p.rolling(60).mean()) & (tbf_p > tbf_p.rolling(200).mean()) & (tbf_m3m > 0.02)
+        & tbf_dm1 & (tbf_vol20 <= 0.20 * s_sov) & (tbf_bias60 <= 0.10 * s_sov) & (u10_s > u10_s.rolling(60).mean())
+    ).shift(1).fillna(False).to_numpy(dtype=np.float64)
+
+    w_dict = {
+        "GLD_DB": g_ok * 0.50,
+        "IEF": i_ok * (1.0 - g_ok) * (1.0 - t_ok) * 0.50,
+        "TBF": t_ok * (1.0 - g_ok) * (1.0 - i_ok) * 0.50,
+    }
+    fee = 0.0005
+    tot = np.zeros(n_dates, dtype=np.float64)
+    prev_w = {k: 0.0 for k in w_dict}
+    c_m = {k: etf_close[k].values.astype(np.float64) for k in w_dict}
+    o_m = {k: etf_open[k].values.astype(np.float64) for k in w_dict}
+    v_m = {}
+    for k in w_dict:
+        va = np.isfinite(c_m[k]) & (c_m[k] > 0) & np.isfinite(o_m[k]) & (o_m[k] > 0)
+        va[0] = False
+        va[1:] &= np.isfinite(c_m[k][:-1]) & (c_m[k][:-1] > 0)
+        v_m[k] = va
+
+    for t in range(n_dates):
+        dr, u_on, u_id = 0.0, 0.0, 0.0
+        for k, wa in w_dict.items():
+            wt = float(wa[t]) if v_m[k][t] else 0.0
+            wp = prev_w[k]
+            if wp == 0.0 and wt == 0.0:
+                continue
+            ct, ot, cp = c_m[k][t], o_m[k][t], (c_m[k][t - 1] if t > 0 else o_m[k][t])
+            wc, wb, ws = min(wp, wt), max(0.0, wt - wp), max(0.0, wp - wt)
+            dr += wc * (ct / cp - 1.0) + ws * (ot / cp - 1.0) + wb * (ct / ot - 1.0) - (wb + ws) * fee
+            u_on += wc + ws
+            u_id += wc + wb
+            prev_w[k] = wt
+        dr += 0.5 * (max(0.0, 1.0 - u_on) + max(0.0, 1.0 - u_id)) * bil_r1d[t]
+        tot[t] = dr
+
+    non_gld_days = int(((w_dict["IEF"] > 0) | ((w_dict["TBF"] > 0) & v_m["TBF"])).sum())
+    return pd.Series(tot, index=dates_idx), g_ok, i_ok, t_ok * v_m["TBF"], non_gld_days
+
+def _build_r20_nmt_features(
+    stk_adj_df: pd.DataFrame,
+    stk_open_df: pd.DataFrame,
+    io5_mat: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Causal Bilevel Volatility-Equalized Tokenization & Nonlinear Multi-Scale Convergence (R20)."""
+    ret1 = stk_adj_df.pct_change(fill_method=None)
+    io_raw_1d = (stk_adj_df / stk_open_df.where(stk_open_df > 0)) - 1.0
+    io_1d = io_raw_1d.fillna(0.0)
+    io8_s = io_1d.rolling(8, min_periods=4).sum().values
+    io14_s = io_1d.rolling(14, min_periods=7).sum().values
+    io22_s = io_1d.rolling(22, min_periods=11).sum().values
+    io34_s = io_1d.rolling(34, min_periods=17).sum().values
+    io63_s = io_1d.rolling(63, min_periods=25).sum().values
+    rv_d2 = (ret1 ** 2).fillna(0.0)
+    rv8 = np.sqrt(rv_d2.rolling(8, min_periods=5).sum()).values
+    rv14 = np.sqrt(rv_d2.rolling(14, min_periods=8).sum()).values
+    rv22 = np.sqrt(rv_d2.rolling(22, min_periods=12).sum()).values
+    rv34 = np.sqrt(rv_d2.rolling(34, min_periods=18).sum()).values
+    tau_star = 0.095
+    stack_d = np.stack(
+        [np.abs(rv8 - tau_star), np.abs(rv14 - tau_star), np.abs(rv22 - tau_star), np.abs(rv34 - tau_star)],
+        axis=0,
+    )
+    stack_io_eq = np.stack(
+        [io8_s * (20.0 / 8.0), io14_s * (20.0 / 14.0), io22_s * (20.0 / 22.0), io34_s * (20.0 / 34.0)],
+        axis=0,
+    )
+    best_k = np.argmin(np.nan_to_num(stack_d, nan=999.0), axis=0)
+    bilevel_io_eq = np.take_along_axis(stack_io_eq, best_k[None, :, :], axis=0)[0].astype(np.float32)
+    nmt_scales_pos = (
+        (io5_mat > 0.002).astype(np.float32)
+        + (io14_s > 0.008).astype(np.float32)
+        + (io34_s > 0.020).astype(np.float32)
+        + (io63_s > 0.035).astype(np.float32)
+    ) / 4.0
+    return bilevel_io_eq, nmt_scales_pos
+
+def _load_or_build_vix_close_series(dates_idx: pd.DatetimeIndex) -> pd.Series:
+    """Load cached CBOE VIX close series or refresh from official CBOE CSV (zero lookahead)."""
+    cache_path = os.path.join("pit_cache", "r21_exogenous_published_cache.pkl")
+    req_end = str(dates_idx[-1].date())
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, "rb") as fp:
+                cached = pickle.load(fp)
+            if (
+                cached.get("cache_version") == 1
+                and cached.get("max_date") == req_end
+                and len(cached.get("vix_df", [])) == len(dates_idx)
+            ):
+                return cached["vix_df"]["CLOSE"]
+        except Exception:
+            pass
+
+    req = urllib.request.Request(
+        "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
+        headers={"User-Agent": "Mozilla/5.0"},
+    )
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        vix_raw = pd.read_csv(io.BytesIO(resp.read()))
+    vix_raw["dt"] = pd.to_datetime(vix_raw["DATE"], format="mixed")
+    vix_dedup = vix_raw.drop_duplicates("dt", keep="last").set_index("dt")["CLOSE"].sort_index()
+    return _causal_align_series(vix_dedup, dates_idx, fill_val=15.0)
+
+def _build_r21_vf_z60(
+    stk_adj_df: pd.DataFrame,
+    elig_arr_in: np.ndarray,
+    vix_c_s: pd.Series,
+    dates_idx: pd.DatetimeIndex,
+    cols: list[str],
+    us_col_mask: np.ndarray,
+) -> np.ndarray:
+    """Causal Option-Fear Beta (vf_z60): vol-standardized 60D excess return sensitivity on VIX spike days (R21)."""
+    n_dates, n_cols = len(dates_idx), len(cols)
+    vix_c = vix_c_s.ffill().fillna(15.0)
+    el_df = pd.DataFrame(elig_arr_in, index=dates_idx, columns=cols)
+    ret_1d = stk_adj_df.pct_change(fill_method=None).clip(-0.25, 0.25).fillna(0.0)
+    us_mkt_ret = ret_1d.loc[:, us_col_mask].where(el_df.loc[:, us_col_mask]).mean(axis=1).fillna(0.0)
+    tw_mkt_ret = ret_1d.loc[:, ~us_col_mask].where(el_df.loc[:, ~us_col_mask]).mean(axis=1).fillna(0.0)
+    ex_ret = ret_1d.copy()
+    ex_ret.loc[:, us_col_mask] = ret_1d.loc[:, us_col_mask].sub(us_mkt_ret, axis=0)
+    ex_ret.loc[:, ~us_col_mask] = ret_1d.loc[:, ~us_col_mask].sub(tw_mkt_ret, axis=0)
+    stk_sd60 = ex_ret.rolling(60, min_periods=20).std().fillna(0.02).clip(lower=0.008).values.astype(np.float32)
+
+    vix_d1 = vix_c.diff(1).fillna(0.0)
+    vix_sd60 = vix_d1.rolling(60, min_periods=20).std().fillna(1.2).clip(lower=0.6)
+    v_us = (vix_d1 >= 0.75 * vix_sd60).astype(float)
+    v_tw = v_us.shift(1).fillna(0.0)
+
+    m = np.zeros((n_dates, n_cols), dtype=np.float32)
+    m[:, us_col_mask] = v_us.values.astype(np.float32)[:, None]
+    m[:, ~us_col_mask] = v_tw.values.astype(np.float32)[:, None]
+    m_df = pd.DataFrame(m, index=dates_idx, columns=cols)
+    in_s = (ex_ret * m_df).rolling(60, min_periods=15).sum()
+    in_n = m_df.rolling(60, min_periods=15).sum()
+    ot_s = (ex_ret * (1.0 - m_df)).rolling(60, min_periods=15).sum()
+    ot_n = (1.0 - m_df).rolling(60, min_periods=15).sum()
+    vf_exr60 = np.where(in_n >= 3, in_s / (in_n + 1.0) - ot_s / (ot_n + 1.0), 0.0).astype(np.float32)
+    return (vf_exr60 / stk_sd60).astype(np.float32)
 
 def main():
     print("=" * 80)
@@ -183,21 +437,16 @@ def main():
     coiled_spring_g11 = np.where(coiled_mask, 1.12, 1.0)
     score_g11 = (env["s_g5_open"][cols] * dist_veto_g10 * coiled_spring_g11).astype(np.float32)
 
-    # [去蕪存菁 + 動能前十強雙特徵]
+    # [Strict Pruned: 拔除負貢獻 L03B_FRINGE_PEN 尾端追高降權]
     # 1. VCP 波動收斂加分 (×1.04)
     # 2. 超級巨頭領頭羊 (US Rank<=30 / TW Rank<=10) 潛龍回檔蹲點加乘 (×1.06, t=+3.74 / -5.03)
-    # 3. 尾端排名 (US Rank>70) 創高追價且無機構吸籌降權 (×0.90)
     is_super_mega = pd.DataFrame(False, index=idx, columns=cols)
     is_super_mega[us_tickers] = (env["us_rk_pit"] <= 30).fillna(False)
     is_super_mega[pit_tw] = (twse_rk_pit <= 10).fillna(False)
 
-    is_fringe_rk = pd.DataFrame(False, index=idx, columns=cols)
-    is_fringe_rk[us_tickers] = (env["us_rk_pit"] > 70).fillna(False)
-
     exp262_base_mult = np.where(vcp_condition, 1.04, 1.0).astype(np.float32)
-    m_fringe_pen = np.where(is_fringe_rk.values & (dd20.values > -0.02) & (io_20.values < 0.005), 0.90, 1.0).astype(np.float32)
     m_coiled_plus_mega = np.where(coiled_mask.values & is_super_mega.values, 1.06, 1.0).astype(np.float32)
-    champ_score_arr = ((score_g11 * exp262_base_mult).values * m_fringe_pen * m_coiled_plus_mega).astype(np.float32)
+    champ_score_arr = ((score_g11 * exp262_base_mult).values * m_coiled_plus_mega).astype(np.float32)
 
     data4 = env["data4"]
     dates_idx = stk_adj.index
@@ -257,7 +506,7 @@ def main():
     surp_mat = _fcache["surp_mat"]
     f_score_mat = _fcache["f_score_mat"]
 
-    dead_cat_mask = (mom12m_arr < 0.40) & (mom1m_arr > 0.25)
+    # [Strict Pruned: 拔除負貢獻 L04B_DEAD_CAT 死貓跳懲罰] 保留爆量派發 × 量價收斂 × 極值力竭 × 假突破攔截
     vol_blowoff_mask = (vol_surge_arr > 1.60) & (io5_arr < 0.0)
     high_wr_bonus_mask = (vol_ratio_20d_arr >= 1.15) & (down_vol20_arr <= 0.28) & (io20_arr > 0.01)
     # 🌟 5日極值收高力竭阻尼 (Bogousslavsky 2021 JFE × Jegadeesh 1990 JF: CLV_5D > 0.80 & Ret_5D > 10% & Bias60 > 25% ➔ ×0.85)
@@ -268,8 +517,7 @@ def main():
     # 🌟 假突破散戶追高攔截 (Lehmann 1990 QJE × Lou 2019 JFE: Ret_5D >= 6% & IO_20 <= -1% & 無財報支撐 ➔ ×0.90)
     fake_breakout_mask = (rmom5_arr >= 0.06) & (io20_arr <= -0.01) & (np.nan_to_num(f_score_mat, nan=0.0) <= 0.0)
     mult_3in1 = (
-        np.where(dead_cat_mask, 0.75, 1.0)
-        * np.where(vol_blowoff_mask, 0.75, 1.0)
+        np.where(vol_blowoff_mask, 0.75, 1.0)
         * np.where(high_wr_bonus_mask, 1.05, 1.0)
         * np.where(climax_exhaust_mask, 0.85, 1.0)
         * np.where(fake_breakout_mask, 0.90, 1.0)
@@ -663,6 +911,82 @@ def main():
 
     rel_io20_mat = (io20_arr - grp_io20_mat).astype(np.float32)
 
+    # 🌟 [GOLD_6 實戰引擎 (Gate 8 脫護盾裸測認證 6 大純金正交因子)]
+    # 1. R17_EA_ME_B: PIT 財報 EPS YoY 63D 加速度 >= +10% & 營益率擴張 >= +1.5% & IO20 >= +1% ➔ ×1.045
+    eps_df_clean = pd.DataFrame(_fcache["eps_yoy_mat"]).ffill(limit=105)
+    eps_acc_ff_clean = (eps_df_clean - eps_df_clean.shift(63)).values.astype(np.float32)
+    mgn_ff_clean = pd.DataFrame(mgn_exp_mat).ffill(limit=105).values.astype(np.float32)
+
+    # 2. TW_MRG_VETO: 台股散戶融資餘額 20D 暴增 > 15% 且機構未買超 (IO20 <= 0.5%) 否決入場
+    col_to_j = {c: i for i, c in enumerate(cols)}
+    tw_j_list = [col_to_j[c] for c in pit_tw]
+    us_col_mask = np.array([not c.endswith(".TW") for c in cols], dtype=bool)
+    _n_dates_g6, _n_cols_g6 = len(dates_idx), len(cols)
+
+    df_ms = pd.read_sql_query(
+        f"SELECT date, stock_id, margin_balance FROM stock_margin_daily WHERE stock_id IN ({ph_all})",
+        conn_twse,
+        params=pit_tw_ids,
+    )
+    df_ms["dt"] = pd.to_datetime(df_ms["date"], format="%Y%m%d", errors="coerce")
+    df_ms = df_ms.dropna(subset=["dt"]).drop_duplicates(subset=["dt", "stock_id"], keep="last")
+    df_ms["ticker"] = df_ms["stock_id"] + ".TW"
+    piv_mrg = df_ms.pivot(index="dt", columns="ticker", values="margin_balance").reindex(index=idx, columns=pit_tw).ffill()
+    mrg_chg20_tw_clean = (piv_mrg / (piv_mrg.shift(20) + 10.0) - 1.0).fillna(0.0)
+
+    # 3. TW_US_PEER_VETO: 基於原始 US eligible 成分計算美股同族群 20D 平均漲幅與 IO20，同族群領跌時跨海否決台股
+    ug_r20 = np.zeros((_n_dates_g6, _n_cols_g6), dtype=np.float32)
+    ug_io20 = np.zeros((_n_dates_g6, _n_cols_g6), dtype=np.float32)
+    for _g_sym in _unique_groups:
+        _g_all_idx = [i for i, gg in enumerate(_group_list) if gg == _g_sym]
+        _g_us_idx = [i for i in _g_all_idx if us_col_mask[i]]
+        if not _g_us_idx:
+            continue
+        _el_us = elig_arr[:, _g_us_idx] & np.isfinite(rmom20_arr[:, _g_us_idx])
+        _cnt_us = _el_us.sum(axis=1)
+        _den_us = np.maximum(_cnt_us, 1)
+        _r20_u = np.where(_cnt_us >= 2, np.sum(np.where(_el_us, rmom20_arr[:, _g_us_idx], 0.0), axis=1) / _den_us, 0.0)
+        _io20_u = np.where(_cnt_us >= 2, np.sum(np.where(_el_us, io20_arr[:, _g_us_idx], 0.0), axis=1) / _den_us, 0.0)
+        for _ci in _g_all_idx:
+            ug_r20[:, _ci] = _r20_u
+            ug_io20[:, _ci] = _io20_u
+
+    us_r20_tw = pd.DataFrame(ug_r20[:, tw_j_list], index=idx, columns=pit_tw)
+    us_io20_tw = pd.DataFrame(ug_io20[:, tw_j_list], index=idx, columns=pit_tw)
+
+    # 更新台股資格矩陣並覆蓋 elig_arr (必須先更新 elig_arr，再計算依賴 post-2-veto elig_arr 的 R21 vf_z60)
+    io20_tw_df = pd.DataFrame(io20_arr[:, tw_j_list], index=idx, columns=pit_tw)
+    tw_el_2veto = (
+        tw_base_0050_0051
+        & (~((mrg_chg20_tw_clean > 0.15) & (io20_tw_df <= 0.005)))
+        & (~((us_r20_tw <= -0.030) & (us_io20_tw <= 0.0)))
+    )
+    el_2veto_df = elig_base.copy()
+    el_2veto_df[pit_tw] = tw_el_2veto
+    elig_arr = el_2veto_df.values.copy()
+
+    # 4. SOV3_CASH: 四象限主權避險現金池 (GLD / IEF / TBF / BIL，t-1 訊號 ➔ Open[t] + 5bps 執行)
+    etf_close_sov3, etf_open_sov3 = _load_or_build_sov3_ohlc(dates_idx, conn_twse)
+    _u10_chg20_s = data4["us10y_chg20"].reindex(dates_idx).fillna(0.0)
+    _u10_s = us10y_series.reindex(dates_idx).ffill()
+    _br_s = global_breadth.reindex(dates_idx).fillna(0.5)
+    _qqq_p_s = qqq_p.reindex(dates_idx).ffill()
+    safe_cash_ret, _, _, _, _ = _build_sov3_cash_series(
+        dates_idx, _gld_p_s, _bil_r1d_s, _u10_chg20_s, _u10_s, _br_s, _qqq_p_s, etf_close_sov3, etf_open_sov3, 1.0
+    )
+
+    # 5 & 6. R20_NMT_DN (雙層波動均等化與非線性多尺度背離 ×0.928) × R21_VF_DN (VIX 恐慌脆弱度排雷 ×0.90)
+    bilevel_io_eq, nmt_scales_pos = _build_r20_nmt_features(stk_adj, stk_open, io5_arr)
+    vix_c_clean = _load_or_build_vix_close_series(dates_idx)
+    vf_z60 = _build_r21_vf_z60(stk_adj, elig_arr, vix_c_clean, dates_idx, cols, us_col_mask)
+
+    gold_sec_mult = (
+        np.where((vf_z60 >= 0.35) & (io20_arr <= 0.015), 0.90, 1.0)
+        * np.where((nmt_scales_pos == 0.0) & (bilevel_io_eq <= -0.010), 0.928, 1.0)
+        * np.where((eps_acc_ff_clean >= 0.10) & (mgn_ff_clean >= 0.015) & (io20_arr >= 0.01), 1.045, 1.0)
+    ).astype(np.float32)
+    sec_arr = (sec_arr * gold_sec_mult).astype(np.float32)
+
     def get_stock_name(tk):
         base = tk.split(".")[0]
         if base in gss.GLOBAL_STOCK_NAME_MAP:
@@ -1017,14 +1341,8 @@ def main():
                         rk = ticker_rank.get(c_i, None)
                         cur_c = float(px_adj_arr[t_pos, c_i])
                         m20_c = float(ma20_arr[t_pos, c_i])
+                        # [Strict Pruned: 拔除負貢獻 L11_DYN_TENURE_3D 動態任期截斷，維持純粹 4 期上限]
                         max_t = 4
-                        m12_v = float(mom12m_arr[t_pos, c_i])
-                        m3_v = float(mom3m_arr[t_pos, c_i])
-                        m1_v = float(mom1m_arr[t_pos, c_i])
-                        if m3_v > 1.50 and m1_v > 0.35:
-                            max_t = 2
-                        elif 1.00 <= m12_v <= 2.80 and 0.40 <= m3_v <= 1.10 and m1_v <= 0.32:
-                            max_t = 5
                         if rk is not None and tenure < max_t:
                             if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
                                 selected_stks.append(c_i)
@@ -1853,7 +2171,7 @@ def main():
                 "action": p.get("action", "持有中 (續抱)")
             })
         prev_syms = " / ".join([x["ticker"] for x in prev_lg.get("picks", [])]) if prev_lg else "無"
-        cur_syms = " / ".join([f"{x['ticker']} ({x['tranche_weight_pct']}%)" for x in out_picks]) if out_picks else "100% 避險現金池 (GLD/BIL)"
+        cur_syms = " / ".join([f"{x['ticker']} ({x['tranche_weight_pct']}%)" for x in out_picks]) if out_picks else "100% 主權避險現金池 (GLD/IEF/TBF/BIL)"
         if exited_mid_picks:
             ex_str = "、".join([f"{x['ticker']} ({x['action']})" for x in exited_mid_picks])
             prev_note = f"本期 ({act_lg['rebal_date']}) 動態模擬持倉，盤中已執行戰術換馬：{ex_str} ➔ 現持有 {cur_syms}"
@@ -1895,7 +2213,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign R14 (7大黃金濾網 + R14四大正交因果升級[PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化] + R13三大進出場微結構[P1油氣S3盤中換馬/P2恐慌修復進場/P4高乖離分批低接] + M1主帥降級扶正 + M5真龍頭4%解鎖 + 23族群輪動抗跌真龍頭 · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign Strict Pruned GOLD_6 (Gate 8 脫護盾裸測認證 6 大純金因子[R21_VF_DN選擇權恐慌脆弱度×0.90 + R20_NMT_DN非線性多尺度背離×0.928 + R17_EA_ME_B財報雙加速×1.045 + TW_MRG_VETO台股散戶融資追高排雷 + TW_US_PEER_VETO美股同族群領跌傳導排雷 + SOV3_CASH四象限主權避險現金池] × 拔除 3 項負貢獻舊包袱[L03B/L04B/L11_3D任期] + R14四大正交防護[PF-TD/CSH-DM1/CIE-1/SEC-VOL1] + R13[P1/P2/P4] · 2005-2026)",
         "universe_total_count": int(len(us_tickers) + tw_zero["adj_close"].shape[1]),
         "universe_desc": f"{len(us_tickers) + tw_zero['adj_close'].shape[1]:,} 檔真實無生存者偏誤池 ({len(us_tickers)} 檔 S&P 500 官方入選日 PIT [現任 503/503 檔 100% 覆蓋] + {tw_zero['adj_close'].shape[1]} 檔台股 0050∪0051 純上市 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),

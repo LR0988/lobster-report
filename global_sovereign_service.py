@@ -6,8 +6,10 @@ Global Sovereign Service (Scheme A Upgrade - Direct SQLite Database Connection)
 
 import os
 import json
+import pickle
 import sqlite3
 import numpy as np
+import pandas as pd
 from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "tw_stock.db")
@@ -203,6 +205,92 @@ def _resolve_display_name(ticker: str, cursor=None) -> str:
         except Exception:
             pass
     return ticker
+
+def _normalize_group_23(sec, ind):
+    """Map sector/industry into 23 cross-market functional peer groups (mirrors export_g11_pit_detailed_history)."""
+    if ind is None:
+        ind = ""
+    if sec is None:
+        sec = "Unclassified"
+    ind_l = ind.lower()
+    if "semiconductor" in ind_l or "solar" in ind_l: return "G_SEMI"
+    if "hardware" in ind_l or "consumer electronics" in ind_l or "data storage" in ind_l: return "G_HARDWARE_STORAGE"
+    if "electronic component" in ind_l or "scientific & technical" in ind_l or "opto" in ind_l: return "G_ELEC_COMP"
+    if "communication equipment" in ind_l: return "G_COMM_EQUIP"
+    if "software" in ind_l or "information technology" in ind_l: return "G_SOFTWARE_IT"
+    if "internet" in ind_l or "gaming" in ind_l or "entertainment" in ind_l or "advertising" in ind_l or "media" in ind_l: return "G_INTERNET_MEDIA"
+    if "telecom" in ind_l: return "G_TELECOM"
+    if "biotech" in ind_l: return "G_BIOTECH"
+    if "drug" in ind_l or "pharma" in ind_l: return "G_PHARMA"
+    if "medical" in ind_l or "diagnostics" in ind_l or "healthcare" in ind_l: return "G_MEDTECH_HC"
+    if "refining" in ind_l: return "G_OIL_REFINING"
+    if "oil & gas" in ind_l or "coal" in ind_l or sec == "Energy": return "G_OIL_UPSTREAM"
+    if "aerospace" in ind_l or "defense" in ind_l: return "G_AERO_DEFENSE"
+    if "shipping" in ind_l or "marine" in ind_l or "airline" in ind_l or "rail" in ind_l or "freight" in ind_l or "trucking" in ind_l: return "G_TRANSPORT_SHIPPING"
+    if "electrical equipment" in ind_l or "industrial machinery" in ind_l or "building products" in ind_l or "engineering" in ind_l or sec == "Industrials": return "G_INDUSTRIAL_POWER"
+    if "steel" in ind_l or "copper" in ind_l or "aluminum" in ind_l or "metal" in ind_l or "gold" in ind_l or "mining" in ind_l: return "G_METALS_MINING"
+    if "chemical" in ind_l or "agricultural" in ind_l or sec == "Basic Materials": return "G_CHEMICALS_MAT"
+    if "auto" in ind_l: return "G_AUTO"
+    if "home" in ind_l or "residential" in ind_l or sec == "Real Estate": return "G_HOUSING_REIT"
+    if "retail" in ind_l or "apparel" in ind_l or "department" in ind_l or "restaurant" in ind_l or "travel" in ind_l or "lodging" in ind_l or "leisure" in ind_l or sec == "Consumer Cyclical": return "G_CONSUMER_CYC"
+    if sec == "Consumer Defensive" or "food" in ind_l or "beverage" in ind_l or "household" in ind_l or "tobacco" in ind_l: return "G_CONSUMER_DEF"
+    if "bank" in ind_l or "insurance" in ind_l or "capital" in ind_l or "asset" in ind_l or "credit" in ind_l or "financial" in ind_l or sec == "Financial Services": return "G_FINANCIALS"
+    if sec == "Utilities" or "utilities" in ind_l or "power" in ind_l: return "G_UTILITIES_POWER"
+    return f"G_{sec.upper()}"
+
+_TW_EXACT_OVERRIDE_23 = {
+    "2330.TW": ("Technology", "Semiconductors"), "2303.TW": ("Technology", "Semiconductors"),
+    "2454.TW": ("Technology", "Semiconductors"), "3034.TW": ("Technology", "Semiconductors"),
+    "2379.TW": ("Technology", "Semiconductors"), "3443.TW": ("Technology", "Semiconductors"),
+    "3661.TW": ("Technology", "Semiconductors"), "2408.TW": ("Technology", "Semiconductors"),
+    "2344.TW": ("Technology", "Semiconductors"), "3711.TW": ("Technology", "Semiconductors"),
+    "3035.TW": ("Technology", "Semiconductors"), "6531.TW": ("Technology", "Semiconductors"),
+    "2448.TW": ("Technology", "Electronic Components"), "2317.TW": ("Technology", "Computer Hardware"),
+    "2382.TW": ("Technology", "Computer Hardware"), "3231.TW": ("Technology", "Computer Hardware"),
+    "2357.TW": ("Technology", "Computer Hardware"), "2353.TW": ("Technology", "Computer Hardware"),
+    "2376.TW": ("Technology", "Computer Hardware"), "2377.TW": ("Technology", "Computer Hardware"),
+    "2395.TW": ("Technology", "Computer Hardware"), "6669.TW": ("Technology", "Computer Hardware"),
+    "2301.TW": ("Technology", "Computer Hardware"), "3017.TW": ("Technology", "Computer Hardware"),
+    "2327.TW": ("Technology", "Electronic Components"), "2492.TW": ("Technology", "Electronic Components"),
+    "3037.TW": ("Technology", "Electronic Components"), "8046.TW": ("Technology", "Electronic Components"),
+    "3189.TW": ("Technology", "Electronic Components"), "2308.TW": ("Technology", "Electronic Components"),
+    "3008.TW": ("Technology", "Electronic Components"), "2345.TW": ("Technology", "Communication Equipment"),
+    "2498.TW": ("Technology", "Communication Equipment"),
+    "6504.TW": ("Consumer Defensive", "Household & Personal Products"),
+    "6505.TW": ("Energy", "Oil & Gas Refining & Marketing"),
+    "6510.TW": ("Technology", "Semiconductors"), "6515.TW": ("Technology", "Semiconductor Equipment & Materials"),
+    "6525.TW": ("Technology", "Semiconductors"), "6526.TW": ("Technology", "Semiconductors"),
+    "6533.TW": ("Technology", "Semiconductors"), "6541.TW": ("Healthcare", "Biotechnology"),
+    "6547.TW": ("Healthcare", "Biotechnology"), "6550.TW": ("Healthcare", "Biotechnology"),
+    "6552.TW": ("Technology", "Semiconductors"), "6558.TW": ("Industrials", "Electrical Equipment & Parts"),
+    "6582.TW": ("Basic Materials", "Specialty Chemicals"), "6589.TW": ("Healthcare", "Biotechnology"),
+    "6592.TW": ("Financial Services", "Credit Services"), "6598.TW": ("Healthcare", "Biotechnology"),
+}
+
+_TW_PREFIX_MAP_23 = {
+    "11": ("Basic Materials", "Building Materials"), "12": ("Consumer Defensive", "Packaged Foods"),
+    "13": ("Basic Materials", "Specialty Chemicals"), "14": ("Consumer Cyclical", "Apparel & Textiles"),
+    "15": ("Industrials", "Specialty Industrial Machinery"), "16": ("Industrials", "Electrical Equipment & Parts"),
+    "17": ("Healthcare", "Drug Manufacturers"), "18": ("Basic Materials", "Building Materials"),
+    "19": ("Basic Materials", "Paper & Paper Products"), "20": ("Basic Materials", "Steel"),
+    "21": ("Consumer Cyclical", "Auto Parts"), "22": ("Consumer Cyclical", "Auto Manufacturers"),
+    "23": ("Technology", "Electronic Components"), "24": ("Technology", "Semiconductors"),
+    "25": ("Real Estate", "Real Estate"), "26": ("Industrials", "Marine Shipping & Airlines"),
+    "27": ("Consumer Cyclical", "Travel & Leisure"), "28": ("Financial Services", "Banks & Financials"),
+    "29": ("Consumer Cyclical", "Specialty Retail"), "30": ("Technology", "Electronic Components"),
+    "31": ("Technology", "Electronic Components"), "32": ("Technology", "Computer Hardware"),
+    "33": ("Technology", "Electronic Components"), "34": ("Technology", "Electronic Components"),
+    "35": ("Technology", "Semiconductors"), "36": ("Technology", "Electronic Components"),
+    "37": ("Technology", "Computer Hardware"), "49": ("Technology", "Communication Equipment"),
+    "52": ("Technology", "Semiconductors"), "53": ("Technology", "Electronic Components"),
+    "54": ("Technology", "Electronic Components"), "55": ("Real Estate", "Real Estate"),
+    "58": ("Financial Services", "Banks & Financials"), "61": ("Technology", "Electronic Components"),
+    "62": ("Technology", "Electronic Components"), "64": ("Technology", "Semiconductors"),
+    "65": ("Technology", "Semiconductors"), "66": ("Technology", "Computer Hardware"),
+    "67": ("Technology", "Semiconductors"), "80": ("Technology", "Semiconductors"),
+    "81": ("Technology", "Electronic Components"), "82": ("Technology", "Electronic Components"),
+    "84": ("Consumer Cyclical", "Specialty Retail"), "99": ("Consumer Cyclical", "Travel & Leisure"),
+}
 
 def get_global_sovereign_dashboard_data(force_refresh: bool = False):
     """
@@ -992,13 +1080,12 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 # G12-PIT Sovereign (配置七) 乘數合流：G12防雷 × RD黃金護城河 × exp_262正交壓縮突破
                 m_g12_sovereign = m_high_dist_b2 * m_vol_veto_d * m_cond_b60 * m_rd_synergy * m_exp262
 
-                # 🌟 3-in-1 + 極值力竭 + 假突破追高五重動能微結構濾網 (與 export_g11_pit_detailed_history.py 100% 同步)
+                # 🌟 Strict Pruned: 拔除 L04B 死貓跳懲罰，保留爆量派發 × 量價收斂 × 極值力竭 × 假突破追高 (與 export_g11_pit_detailed_history.py 100% 同步)
                 down_vol20_val = (np.sqrt(sum((min(0.0, r) ** 2) for r in daily_rets[:20]) / max(1, min(20, len(daily_rets)))) * np.sqrt(252.0)) if len(daily_rets) >= 10 else 0.30
                 vol_surge_val = ((sum(vols[:20]) / 20.0) / (v60_avg + 1.0)) if len(vols) >= 60 else 1.0
                 vol_ratio_20d_val = min(5.0, max(0.2, mean_up_v / (mean_dn_v + 1.0)))
                 n_clv5 = min(5, len(closes), len(highs), len(lows))
                 clv5_val = (sum((closes[k] - lows[k]) / max(1e-9, highs[k] - lows[k]) if highs[k] > lows[k] else 0.5 for k in range(n_clv5)) / max(1, n_clv5)) if n_clv5 >= 2 else 0.5
-                is_dead_cat = (mom12m < 40.0) and ((mom1m or 0.0) > 25.0)
                 is_vol_blowoff = (vol_surge_val > 1.60) and (io_5_val < 0.0)
                 is_high_wr_bonus = (vol_ratio_20d_val >= 1.15) and (down_vol20_val <= 0.28) and (io_20_val > 0.01)
                 is_climax_exhaust = (clv5_val > 0.80) and (mom5d > 10.0) and (bias_ma60_pct > 25.0)
@@ -1011,8 +1098,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     except Exception:
                         is_fake_breakout = True
                 mult_3in1 = (
-                    (0.75 if is_dead_cat else 1.0)
-                    * (0.75 if is_vol_blowoff else 1.0)
+                    (0.75 if is_vol_blowoff else 1.0)
                     * (1.05 if is_high_wr_bonus else 1.0)
                     * (0.85 if is_climax_exhaust else 1.0)
                     * (0.90 if is_fake_breakout else 1.0)
@@ -1031,6 +1117,40 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 ret10 = (closes[0] / closes[10] - 1.0) if closes[10] > 0 else 0.0
                 if v60 > 0 and (v5 > 2.0 * v60) and (ret10 < 0.02):
                     churn_safe = False
+
+            # R20 Bilevel-NMT 多尺度背離檢測與近 65 日報酬字典 (供 R21_VF_DN VIX 恐慌脆弱度使用)
+            r20_nmt_dn_active = False
+            if len(closes) >= 65 and len(opens) >= 65:
+                try:
+                    n_b = min(70, len(closes), len(opens))
+                    c_asc = np.array(closes[:n_b][::-1], dtype=np.float64)
+                    o_asc = np.array(opens[:n_b][::-1], dtype=np.float64)
+                    io_1d_arr = np.where(o_asc > 0, (c_asc / np.where(o_asc > 0, o_asc, np.nan)) - 1.0, 0.0)
+                    io_1d_arr = np.nan_to_num(io_1d_arr, nan=0.0)
+                    r1_arr = np.zeros_like(c_asc)
+                    r1_arr[1:] = np.where(c_asc[:-1] > 0, (c_asc[1:] / np.where(c_asc[:-1] > 0, c_asc[:-1], 1.0)) - 1.0, 0.0)
+                    r1_arr = np.nan_to_num(r1_arr, nan=0.0)
+                    tau_star = 0.095
+                    best_dist, bilevel_io_eq = 999.0, 0.0
+                    for _k in (8, 14, 22, 34):
+                        _rv = float(np.sqrt(np.sum(r1_arr[-_k:] ** 2)))
+                        _dist = abs(_rv - tau_star)
+                        if _dist < best_dist:
+                            best_dist = _dist
+                            bilevel_io_eq = float(np.sum(io_1d_arr[-_k:])) * (20.0 / float(_k))
+                    nmt_scales_pos = (
+                        (1.0 if io_5_val > 0.002 else 0.0)
+                        + (1.0 if float(np.sum(io_1d_arr[-14:])) > 0.008 else 0.0)
+                        + (1.0 if float(np.sum(io_1d_arr[-34:])) > 0.020 else 0.0)
+                        + (1.0 if float(np.sum(io_1d_arr[-63:])) > 0.035 else 0.0)
+                    ) / 4.0
+                    r20_nmt_dn_active = bool(nmt_scales_pos == 0.0 and bilevel_io_eq <= -0.010)
+                except Exception:
+                    r20_nmt_dn_active = False
+
+            rets_by_dt = {}
+            for _i_r in range(min(65, len(daily_rets), len(dates))):
+                rets_by_dt[str(dates[_i_r])[:10]] = float(max(-0.25, min(0.25, daily_rets[_i_r])))
 
             return {
                 "ticker": t_code,
@@ -1097,7 +1217,10 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 "avg_dv60": avg_dv60,
                 "dd20": round(float(dd20_val), 4),
                 "coiled_spring_active": coiled_spring_active,
-                "daily_rets_20": daily_rets[:20]
+                "daily_rets_20": daily_rets[:20],
+                "_r20_nmt_dn_active": r20_nmt_dn_active,
+                "_rets_by_dt": rets_by_dt,
+                "_ret20": round(float((closes[0] / closes[20] - 1.0)), 6) if len(closes) > 20 and closes[20] > 0 else 0.0,
             }
 
         # 全域掃描【G11-PIT 無生存者偏誤選股池 (1,725 檔 S&P 500 PIT 歷史成分股 + 748 檔台股 PIT 單一規則開放池)】
@@ -1184,6 +1307,25 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
 
         all_db_tickers = list(base_db_tickers) + [tk for tk in open_tw_tickers if tk not in base_ticker_set]
 
+        _imap_live = {}
+        try:
+            _imap_path = os.path.join(os.path.dirname(__file__), "industry_map.json")
+            if os.path.exists(_imap_path):
+                with open(_imap_path, "r", encoding="utf-8") as _f_im_live:
+                    _imap_live = json.load(_f_im_live)
+        except Exception:
+            _imap_live = {}
+
+        def _get_live_23group(tk_sym: str) -> str:
+            if tk_sym in _TW_EXACT_OVERRIDE_23:
+                _s, _i = _TW_EXACT_OVERRIDE_23[tk_sym]
+            else:
+                _inf = _imap_live.get(tk_sym, {})
+                _s, _i = _inf.get("sector"), _inf.get("industry")
+                if (_s is None or _i is None) and tk_sym.endswith(".TW") and tk_sym[:2] in _TW_PREFIX_MAP_23:
+                    _s, _i = _TW_PREFIX_MAP_23[tk_sym[:2]]
+            return _normalize_group_23(_s, _i)
+
         valid_picks = []
         for ticker in all_db_tickers:
             st = _query_ticker_stats(ticker)
@@ -1263,12 +1405,16 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     "pool_source": "🇹🇼 台灣 0050∪0051 純上市 PIT" if is_tw else "🇺🇸 S&P 500 PIT 官方成分股",
                     "is_dynamic_new": is_dyn_new,
                     "industry_group": ind_grp,
+                    "peer_group_23": _get_live_23group(ticker),
                     "price": st["price"],
                     "price_date": st["price_date"],
                     "ma20": st["ma20"],
                     "ma60": st["ma60"],
                     "ma200": st["ma200"],
                     "_daily_rets_20": st.get("daily_rets_20", []),
+                    "_r20_nmt_dn_active": bool(st.get("_r20_nmt_dn_active", False)),
+                    "_rets_by_dt": st.get("_rets_by_dt", {}),
+                    "_ret20": float(st.get("_ret20", 0.0)),
                     "mom_2w": st.get("mom_2w", 0.0),
                     "mom_3m": st.get("mom_3m", 0.0),
                     "mom_6m": st.get("mom_6m", 0.0),
@@ -1344,7 +1490,26 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             )
             tw_rk_map = {tk: rk for rk, (tk, _) in enumerate(tw_dv_sorted, start=1)}
 
+            # [GOLD_6 #4 & #5] 計算符合 S&P 500 Top-100 資格美股的 23 同族群 20D 平均漲幅與 IO20，供 TW_US_PEER_VETO 跨市場排雷
+            us_peer_accum = {}
+            for _p_u in valid_picks:
+                _tk_u = _p_u["ticker"]
+                if (not _tk_u.endswith(".TW")) and us_rk_map.get(_tk_u, 999) <= 100:
+                    _pg_u = _p_u.get("peer_group_23", "G_UNCLASSIFIED")
+                    if _pg_u != "G_UNCLASSIFIED":
+                        _rec = us_peer_accum.setdefault(_pg_u, [0, 0.0, 0.0])
+                        _rec[0] += 1
+                        _rec[1] += float(_p_u.get("_ret20") or 0.0)
+                        _rec[2] += float(_p_u.get("io_20") or 0.0)
+            us_peer_stats = {
+                _pg: (_cnt, _sr / _cnt, _sio / _cnt)
+                for _pg, (_cnt, _sr, _sio) in us_peer_accum.items()
+                if _cnt >= 2
+            }
+
             filtered_top100_picks = []
+            gold6_vetoed_tw = []
+            gold6_vetoed_tw_set = set()
             for p_cand in valid_picks:
                 tk_c = p_cand["ticker"]
                 is_tw_c = tk_c.endswith(".TW")
@@ -1353,17 +1518,38 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 # 嚴格對齊回測 Gatekeeper Rule ①：美股必須位列 S&P 500 當日 60D 成交額 Top 100 (us_rk_pit <= 100)
                 if (not is_tw_c) and rk_liq > 100:
                     continue
+                if is_tw_c:
+                    # [GOLD_6 #4 TW_MRG_VETO] 台股散戶融資餘額 20D 暴增 > 15% 且機構未買超 (IO20 <= 0.5%) 否決入場
+                    try:
+                        c.execute(
+                            "SELECT margin_balance FROM stock_margin_daily WHERE stock_id = ? AND margin_balance IS NOT NULL ORDER BY date DESC LIMIT 25",
+                            (tk_c.split(".")[0],)
+                        )
+                        _mrows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
+                        if len(_mrows) >= 21:
+                            _mrg_chg20 = (_mrows[0] / (_mrows[20] + 10.0)) - 1.0
+                            if _mrg_chg20 > 0.15 and float(p_cand.get("io_20") or 0.0) <= 0.005:
+                                gold6_vetoed_tw.append(f"{tk_c}(TW_MRG_VETO:{_mrg_chg20*100:+.1f}%)")
+                                gold6_vetoed_tw_set.add(tk_c)
+                                continue
+                    except Exception:
+                        pass
+                    # [GOLD_6 #5 TW_US_PEER_VETO] 美股同族群合格股領跌 (20D均跌幅<=-3% 且 IO20<=0) 跨海否決台股
+                    _pg_tw = p_cand.get("peer_group_23", "G_UNCLASSIFIED")
+                    if _pg_tw in us_peer_stats:
+                        _, _u_r20, _u_io20 = us_peer_stats[_pg_tw]
+                        if _u_r20 <= -0.030 and _u_io20 <= 0.0:
+                            gold6_vetoed_tw.append(f"{tk_c}(TW_US_PEER_VETO:{_pg_tw})")
+                            gold6_vetoed_tw_set.add(tk_c)
+                            continue
+
                 is_super_mega_c = (rk_liq <= 10) if is_tw_c else (rk_liq <= 30)
-                is_fringe_c = (not is_tw_c) and (rk_liq > 70)
+                # [Strict Pruned: 拔除負貢獻 L03B_FRINGE_PEN 尾端追高降權]
                 m_top10_feat = 1.0
                 if p_cand.get("coiled_spring_active") and is_super_mega_c:
                     m_top10_feat *= 1.06
                     tag_m = f"👑巨頭領頭羊回檔蹲點(Rank#{rk_liq}/×1.06)"
                     p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {tag_m}" if p_cand.get("sniper_tag") else tag_m
-                if is_fringe_c and float(p_cand.get("dd20") or 0.0) > -0.02 and float(p_cand.get("io_20") or 0.0) < 0.005:
-                    m_top10_feat *= 0.90
-                    tag_f = f"⚠️尾端追高無吸籌(Rank#{rk_liq}/×0.90)"
-                    p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {tag_f}" if p_cand.get("sniper_tag") else tag_f
                 if m_top10_feat != 1.0:
                     p_cand["score"] = round(float(p_cand.get("score") or 0.0) * m_top10_feat, 4)
                     p_cand["sniper_score"] = round(float(p_cand.get("sniper_score") or 0.0) * m_top10_feat, 4)
@@ -1371,6 +1557,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                         dynamic_admitted_map[tk_c]["score"] = p_cand["score"]
                         dynamic_admitted_map[tk_c]["sniper_score"] = p_cand["sniper_score"]
                 filtered_top100_picks.append(p_cand)
+
+            if isinstance(data.get("macro_status"), dict):
+                data["macro_status"]["gold6_vetoed_tw"] = gold6_vetoed_tw
 
             valid_picks = filtered_top100_picks
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
@@ -1422,31 +1611,32 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 ms["g11_c6_dual_breakdown_shield_active"] = c6_active
                 ms["g9_deep_bear_v_thrust_active"] = v_thrust_active
                 ms["active_defense_module"] = (
-                    "G12-PIT R14 外科六重護盾 (PF-TD高檔頂背離預警16%/0% / C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
-                    "CSH-DM1 黃金破位短債保護鎖 + CIE-1 盤中乾淨進場衛生鎖 + L3-Opt 莊家賣權地板 (95%回補) + 深熊 V 轉先遣點火 (82%)"
+                    "G12-PIT Sovereign Strict Pruned GOLD_6 外科六重護盾 (PF-TD高檔頂背離預警16%/0% / C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
+                    "GOLD_6 [SOV3_CASH四象限主權避險池(GLD/IEF/TBF/BIL) + R21 VIX恐慌脆弱度 + R20多尺度背離 + R17盈餘營益雙加速 + 台股融資/美股同族跨海雙否決] + "
+                    "CSH-DM1 黃金破位短債保護鎖 + CIE-1 盤中乾淨進場衛生鎖 + SEC-VOL1 內生下行波動雙盾"
                 )
 
                 cur_exp = int(ms.get("exposure_pct", 100))
                 if c6_active and cur_exp > 20:
                     ms["exposure_pct"] = 20
-                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C6 觸發雙指數破線共振減震 (寬幅警戒區且 QQQ<60MA、SPY<20MA、科技落後 {rs_q_s*100:+.1f}% -> 曝險降至 20% 極度防守)"
+                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C6 觸發雙指數破線共振減震 (寬幅警戒區且 QQQ<60MA、SPY<20MA、科技落後 {rs_q_s*100:+.1f}% -> 曝險降至 20% 極度防守)"
                 elif c4_active and cur_exp > 45:
                     ms["exposure_pct"] = 45
-                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C4 觸發利率急升×科技轉弱護盾 (US10Y 20D+{u10_c20:.2f}%、殖利率 {u10_now}%、QQQ年線乖離 {q_b500}% -> 曝險降至 45% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C4 觸發利率急升×科技轉弱護盾 (US10Y 20D+{u10_c20:.2f}%、殖利率 {u10_now}%、QQQ年線乖離 {q_b500}% -> 曝險降至 45% 防守)"
                 elif c3_active and cur_exp > 60:
                     ms["exposure_pct"] = 60
-                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C3 觸發領頭羊全面倒貨減震 (Top5 負IO_20={top5_neg_io20}/5、負IO_5={top5_neg_io5}/5、均值 {top5_avg_io20:+.3f}<=-0.08 -> 曝險降至 60% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C3 觸發領頭羊全面倒貨減震 (Top5 負IO_20={top5_neg_io20}/5、負IO_5={top5_neg_io5}/5、均值 {top5_avg_io20:+.3f}<=-0.08 -> 曝險降至 60% 防守)"
                 elif c2_active and cur_exp > 65:
                     ms["exposure_pct"] = 65
-                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C2 觸發科技破線落後減震 (QQQ<60MA 且落後 SPY {rs_q_s*100:+.1f}%、Top5 IO_20={top5_avg_io20:+.3f} -> 曝險降至 65% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C2 觸發科技破線落後減震 (QQQ<60MA 且落後 SPY {rs_q_s*100:+.1f}%、Top5 IO_20={top5_avg_io20:+.3f} -> 曝險降至 65% 防守)"
                 elif c1_active and cur_exp > 72:
                     ms["exposure_pct"] = 72
-                    ms["regime"] = f"🛡️ G12-PIT 外科護盾 C1 觸發美債急升×期權莊家退場減震 (US10Y 20D+{u10_c20:.2f}%、Put/Call OI Z={p_z60:+.2f} -> 曝險降至 72% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C1 觸發美債急升×期權莊家退場減震 (US10Y 20D+{u10_c20:.2f}%、Put/Call OI Z={p_z60:+.2f} -> 曝險降至 72% 防守)"
                 elif v_thrust_active:
                     ms["exposure_pct"] = 82
-                    ms["regime"] = f"🚀 G12-PIT 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
+                    ms["regime"] = f"🚀 G12-PIT Strict Pruned GOLD_6 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
                 elif c_br >= 0.50 and cur_exp == 100:
-                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT R14 A/B雙梯隊霸主進攻)"
+                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT Sovereign Strict Pruned GOLD_6 A/B雙梯隊霸主進攻)"
 
                 # 🌟 R14-P4 (PF-TD): 未破月線之高檔宏觀頂背離預警護盾 (40% < Exposure <= 65% 且 QQQ >= 20MA 尚未宣洩)
                 post_shield_exp = int(ms.get("exposure_pct", 100))
@@ -1480,29 +1670,113 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     if n_below_ma20 >= 4:
                         ms["exposure_pct"] = min(int(ms["exposure_pct"]), 45)
 
-                # 🌟 R14-P3 (CSH-DM1): 黃金破位無條件流動性清算保護鎖 ((GLD<MA40 & 21D<-2%) or 21D<-5% ➔ 100% 轉停泊 BIL 美元短債)
+                # 🌟 [GOLD_6 #6 SOV3_CASH] 四象限主權避險現金池 (GLD / IEF / TBF / BIL) + CSH-DM1 黃金破位保護鎖
                 gld_bd_active = False
+                g_ok, i_ok, t_ok = False, False, False
                 try:
                     c.execute(
-                        "SELECT close FROM global_sovereign_daily WHERE ticker = 'GLD' AND close IS NOT NULL ORDER BY date DESC LIMIT 45"
+                        "SELECT COALESCE(adj_close, close) FROM global_sovereign_daily WHERE ticker = 'GLD' AND close IS NOT NULL ORDER BY date DESC LIMIT 220"
                     )
                     gld_rows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
-                    if len(gld_rows) >= 40:
-                        gld_now = gld_rows[0]
-                        gld_ma40 = sum(gld_rows[:40]) / 40.0
-                        gld_p21 = gld_rows[min(21, len(gld_rows) - 1)]
-                        gld_ret21 = (gld_now / gld_p21 - 1.0) if gld_p21 > 0 else 0.0
-                        gld_bd_active = bool(((gld_now < gld_ma40) and (gld_ret21 < -0.02)) or (gld_ret21 < -0.05))
-                        ms["gld_price"] = round(gld_now, 2)
-                        ms["gld_ma40"] = round(gld_ma40, 2)
-                        ms["gld_ret21_pct"] = round(gld_ret21 * 100.0, 2)
+                    sov3_c_df = None
+                    sov3_pkl = os.path.join(os.path.dirname(__file__), "pit_cache", "sov3_etf_ohlc.pkl")
+                    if os.path.exists(sov3_pkl):
+                        with open(sov3_pkl, "rb") as _fp_s3:
+                            sov3_c_df = (pickle.load(_fp_s3) or {}).get("close")
+                    if len(gld_rows) < 200 and sov3_c_df is not None and "GLD_DB" in sov3_c_df.columns:
+                        gp_s = pd.to_numeric(sov3_c_df["GLD_DB"], errors="coerce").dropna()
+                    else:
+                        gp_s = pd.Series(list(reversed(gld_rows)), dtype=np.float64)
+
+                    if len(gp_s) >= 200:
+                        g_now = float(gp_s.iloc[-1])
+                        g_r1d = gp_s.pct_change().fillna(0.0)
+                        g_v20 = float((g_r1d.rolling(20).std() * np.sqrt(252.0)).iloc[-1])
+                        g_ma40 = float(gp_s.rolling(40).mean().iloc[-1])
+                        g_ma60 = float(gp_s.rolling(60).mean().iloc[-1])
+                        g_ma200 = float(gp_s.rolling(200).mean().iloc[-1])
+                        g_b60 = (g_now / (g_ma60 + 1e-9)) - 1.0
+                        g_m1m = float(gp_s.pct_change(21).iloc[-1])
+                        g_m3m = float(gp_s.pct_change(63).iloc[-1])
+                        gld_bd_active = bool(((g_now < g_ma40) and (g_m1m < -0.02)) or (g_m1m < -0.05))
+                        g_ok = bool(
+                            (g_now > g_ma60) and (g_now > g_ma200) and (g_m3m > 0.02)
+                            and (abs(float(g_r1d.iloc[-1])) < 0.08) and (not gld_bd_active)
+                            and (g_v20 <= 0.18) and (g_b60 <= 0.08) and (u10_c20 < 0.20)
+                        )
+                        ms["gld_price"] = round(g_now, 2)
+                        ms["gld_ma40"] = round(g_ma40, 2)
+                        ms["gld_ret21_pct"] = round(g_m1m * 100.0, 2)
+                    elif len(gp_s) >= 40:
+                        g_now = float(gp_s.iloc[-1])
+                        g_ma40 = float(gp_s.rolling(40).mean().iloc[-1])
+                        g_m1m = float(gp_s.pct_change(21).iloc[-1])
+                        gld_bd_active = bool(((g_now < g_ma40) and (g_m1m < -0.02)) or (g_m1m < -0.05))
+                        ms["gld_price"] = round(g_now, 2)
+                        ms["gld_ma40"] = round(g_ma40, 2)
+                        ms["gld_ret21_pct"] = round(g_m1m * 100.0, 2)
+
+                    c.execute("SELECT us10y FROM macro_indicators WHERE us10y IS NOT NULL ORDER BY date DESC LIMIT 65")
+                    u10_60_rows = [float(r[0]) for r in c.fetchall() if r[0] is not None]
+                    u10_ma60 = (sum(u10_60_rows[:60]) / float(len(u10_60_rows[:60]))) if u10_60_rows else u10_now
+
+                    if sov3_c_df is not None:
+                        if "IEF" in sov3_c_df.columns:
+                            ief_p = pd.to_numeric(sov3_c_df["IEF"], errors="coerce").dropna()
+                            if len(ief_p) >= 200:
+                                ief_vol20 = float((ief_p.pct_change().rolling(20).std() * np.sqrt(252.0)).iloc[-1])
+                                ief_ma40 = float(ief_p.rolling(40).mean().iloc[-1])
+                                ief_ma60 = float(ief_p.rolling(60).mean().iloc[-1])
+                                ief_ma200 = float(ief_p.rolling(200).mean().iloc[-1])
+                                ief_bias60 = (float(ief_p.iloc[-1]) / ief_ma60) - 1.0
+                                ief_m1m = float(ief_p.pct_change(21).iloc[-1])
+                                ief_m3m = float(ief_p.pct_change(63).iloc[-1])
+                                ief_dm1 = not (((float(ief_p.iloc[-1]) < ief_ma40) and (ief_m1m < -0.01)) or (ief_m1m < -0.02))
+                                i_ok = bool(
+                                    (float(ief_p.iloc[-1]) > ief_ma60) and (float(ief_p.iloc[-1]) > ief_ma200)
+                                    and (ief_m3m > 0.01) and ief_dm1
+                                    and (ief_vol20 <= 0.072) and (ief_bias60 <= 0.028) and (u10_c20 <= 0.04)
+                                )
+                        if "TBF" in sov3_c_df.columns:
+                            tbf_p = pd.to_numeric(sov3_c_df["TBF"], errors="coerce").dropna()
+                            if len(tbf_p) >= 200:
+                                tbf_vol20 = float((tbf_p.pct_change().rolling(20).std() * np.sqrt(252.0)).iloc[-1])
+                                tbf_ma40 = float(tbf_p.rolling(40).mean().iloc[-1])
+                                tbf_ma60 = float(tbf_p.rolling(60).mean().iloc[-1])
+                                tbf_ma200 = float(tbf_p.rolling(200).mean().iloc[-1])
+                                tbf_bias60 = (float(tbf_p.iloc[-1]) / tbf_ma60) - 1.0
+                                tbf_m1m = float(tbf_p.pct_change(21).iloc[-1])
+                                tbf_m3m = float(tbf_p.pct_change(63).iloc[-1])
+                                tbf_dm1 = not (((float(tbf_p.iloc[-1]) < tbf_ma40) and (tbf_m1m < -0.02)) or (tbf_m1m < -0.04))
+                                t_ok = bool(
+                                    ((c_br < 0.65) or q_b_ma60)
+                                    and (float(tbf_p.iloc[-1]) > tbf_ma60) and (float(tbf_p.iloc[-1]) > tbf_ma200)
+                                    and (tbf_m3m > 0.02) and tbf_dm1
+                                    and (tbf_vol20 <= 0.20) and (tbf_bias60 <= 0.10) and (u10_now > u10_ma60)
+                                )
                 except Exception:
                     gld_bd_active = False
+                w_gld = 0.50 if g_ok else 0.0
+                w_ief = 0.50 if (i_ok and (not g_ok) and (not t_ok)) else 0.0
+                w_tbf = 0.50 if (t_ok and (not g_ok) and (not i_ok)) else 0.0
+                w_bil = round(max(0.0, 1.0 - w_gld - w_ief - w_tbf), 2)
+                _sov3_parts = []
+                if w_gld > 0:
+                    _sov3_parts.append("50% GLD")
+                if w_ief > 0:
+                    _sov3_parts.append("50% IEF")
+                if w_tbf > 0:
+                    _sov3_parts.append("50% TBF")
+                if w_bil > 0:
+                    _sov3_parts.append(f"{int(round(w_bil * 100))}% BIL")
+                sov3_leg_str = " + ".join(_sov3_parts) if _sov3_parts else "100% BIL"
+                ms["sov3_gates"] = {"gld": bool(g_ok), "ief": bool(i_ok), "tbf": bool(t_ok)}
+                ms["sov3_active_leg"] = sov3_leg_str
                 ms["r14_gold_breakdown_guard_active"] = gld_bd_active
                 ms["safe_cash_parking_mode"] = (
-                    "🛡️ CSH-DM1 黃金破位保護啟動 (100% 停泊 BIL 美元短債鎖息)"
+                    f"🛡️ CSH-DM1 黃金破位保護啟動 (SOV3_CASH ➔ {sov3_leg_str})"
                     if gld_bd_active
-                    else "🟢 GLD/BIL 黃金與短債動態防禦停泊"
+                    else f"🏦 SOV3_CASH 四象限主權避險池 ({sov3_leg_str})"
                 )
 
             # 🌟 方案 S3 (選項 A)：雙層完整物理排雷閥門 (純煉油裂解崩跌 S1 + 上游原油雙破月線/高檔衰竭 S2，Zero Look-Ahead Bias)
@@ -1607,19 +1881,116 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 top1_item = [valid_picks[0]]
                 pool_2_to_5 = valid_picks[1:5]
                 rest_items = valid_picks[5:]
-                # 🌟 R14-P2 (SEC-VOL1): Rank #2~#5 二階狙擊下行半波動純化 (保護 Rank #1 與連任帶不動)
+
+                # 🌟 GOLD_6 二階輔助資料準備 (R21_VF_DN + R17_EA_ME_B)
+                _v_us_map, _v_tw_map = {}, {}
+                _us_mkt_ret, _tw_mkt_ret = {}, {}
+                try:
+                    _r21_pkl = os.path.join(os.path.dirname(__file__), "pit_cache", "r21_exogenous_published_cache.pkl")
+                    if os.path.exists(_r21_pkl):
+                        with open(_r21_pkl, "rb") as _fp_r21:
+                            _r21_obj = pickle.load(_fp_r21) or {}
+                        _vdf = _r21_obj.get("vix_df")
+                        if _vdf is not None and "CLOSE" in _vdf.columns:
+                            _vix_c = pd.to_numeric(_vdf["CLOSE"], errors="coerce").dropna().sort_index()
+                            _vix_d1 = _vix_c.diff(1).fillna(0.0)
+                            _vix_sd60 = _vix_d1.rolling(60, min_periods=20).std().fillna(1.2).clip(lower=0.6)
+                            _v_us_s = (_vix_d1 >= 0.75 * _vix_sd60).astype(float)
+                            _v_tw_s = _v_us_s.shift(1).fillna(0.0)
+                            _v_us_map = {_dt.strftime("%Y-%m-%d"): float(_vv) for _dt, _vv in _v_us_s.iloc[-120:].items()}
+                            _v_tw_map = {_dt.strftime("%Y-%m-%d"): float(_vv) for _dt, _vv in _v_tw_s.iloc[-120:].items()}
+                    _us_sum, _us_cnt = {}, {}
+                    _tw_sum, _tw_cnt = {}, {}
+                    for _tk_lp, _st_lp in live_prices.items():
+                        if _st_lp.get("ticker") != _tk_lp:
+                            continue
+                        _rbd = _st_lp.get("_rets_by_dt")
+                        if not _rbd:
+                            continue
+                        if (not _tk_lp.endswith(".TW")) and us_rk_map.get(_tk_lp, 999) <= 100:
+                            for _dt_k, _rv in _rbd.items():
+                                _us_sum[_dt_k] = _us_sum.get(_dt_k, 0.0) + float(_rv)
+                                _us_cnt[_dt_k] = _us_cnt.get(_dt_k, 0) + 1
+                        elif _tk_lp.endswith(".TW") and (not open_tw_150_set or _tk_lp in open_tw_150_set) and (_tk_lp not in gold6_vetoed_tw_set):
+                            for _dt_k, _rv in _rbd.items():
+                                _tw_sum[_dt_k] = _tw_sum.get(_dt_k, 0.0) + float(_rv)
+                                _tw_cnt[_dt_k] = _tw_cnt.get(_dt_k, 0) + 1
+                    _us_mkt_ret = {_dt_k: _us_sum[_dt_k] / _us_cnt[_dt_k] for _dt_k in _us_sum if _us_cnt[_dt_k] > 0}
+                    _tw_mkt_ret = {_dt_k: _tw_sum[_dt_k] / _tw_cnt[_dt_k] for _dt_k in _tw_sum if _tw_cnt[_dt_k] > 0}
+                except Exception as _e_vf:
+                    print("GOLD_6 R21_VF_DN 計算警告:", _e_vf)
+
+                _fc_col_idx, _fc_eps_mat, _fc_mgn_mat = {}, None, None
+                try:
+                    _fc_pkl = os.path.join(os.path.dirname(__file__), "pit_cache", "pit_fund_rebal_cache.pkl")
+                    if os.path.exists(_fc_pkl):
+                        with open(_fc_pkl, "rb") as _fp_fc:
+                            _fc_obj = pickle.load(_fp_fc) or {}
+                        _fc_cols = _fc_obj.get("cols") or []
+                        _fc_col_idx = {_ck: _ci for _ci, _ck in enumerate(_fc_cols)}
+                        _fc_eps_mat = _fc_obj.get("eps_yoy_mat")
+                        _fc_mgn_mat = _fc_obj.get("mgn_exp_mat")
+                except Exception as _e_fc:
+                    print("GOLD_6 R17_EA_ME_B 快取讀取警告:", _e_fc)
+
+                # 🌟 R14-P2 (SEC-VOL1) × GOLD_6 [R21_VF_DN / R20_NMT_DN / R17_EA_ME_B]: Rank #2~#5 二階狙擊純化
                 for p_s in pool_2_to_5:
+                    tk_s = p_s["ticker"]
                     dn_s = float(p_s.get("down_vol_20d") or 0.25)
                     io20_s = float(p_s.get("io_20") or 0.0)
                     base_ss = float(p_s.get("sniper_score") or p_s.get("score") or 0.0)
                     if dn_s <= 0.22 and io20_s >= 0.01:
-                        p_s["sniper_score"] = round(base_ss * 1.05, 4)
+                        base_ss = round(base_ss * 1.05, 4)
+                        p_s["sniper_score"] = base_ss
                         tag_sv = f"💎R14低半波動吸籌(DnVol={dn_s*100:.1f}%/×1.05)"
                         p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {tag_sv}" if p_s.get("sniper_tag") else tag_sv
                     elif dn_s > 0.42 and io20_s <= 0.01:
-                        p_s["sniper_score"] = round(base_ss * 0.92, 4)
+                        base_ss = round(base_ss * 0.92, 4)
+                        p_s["sniper_score"] = base_ss
                         tag_sv = f"⚠️R14高下行波動無吸籌(DnVol={dn_s*100:.1f}%/×0.92)"
                         p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {tag_sv}" if p_s.get("sniper_tag") else tag_sv
+
+                    # [GOLD_6 #1 R21_VF_DN] VIX 恐慌飆升日條件超額報酬脆弱度 (vf_z60 >= 0.35 & io20 <= 0.015 ➔ ×0.90)
+                    _rbd_s = p_s.get("_rets_by_dt") or {}
+                    _is_tw_s = tk_s.endswith(".TW")
+                    _v_map_s = _v_tw_map if _is_tw_s else _v_us_map
+                    _mkt_s = _tw_mkt_ret if _is_tw_s else _us_mkt_ret
+                    _dts_s = sorted([_d for _d in _rbd_s.keys() if _d in _v_map_s and _d in _mkt_s])[-60:]
+                    if len(_dts_s) >= 20:
+                        _ex_s = [float(_rbd_s[_d]) - float(_mkt_s[_d]) for _d in _dts_s]
+                        _sd60 = max(0.008, float(np.std(_ex_s, ddof=1)))
+                        _in_ex = [_ex_s[_i] for _i, _d in enumerate(_dts_s) if _v_map_s[_d] > 0.5]
+                        _ot_ex = [_ex_s[_i] for _i, _d in enumerate(_dts_s) if _v_map_s[_d] <= 0.5]
+                        if len(_in_ex) >= 3:
+                            _vf_exr = (sum(_in_ex) / (len(_in_ex) + 1.0)) - (sum(_ot_ex) / (len(_ot_ex) + 1.0))
+                            _vf_z60 = _vf_exr / _sd60
+                            if _vf_z60 >= 0.35 and io20_s <= 0.015:
+                                base_ss = round(base_ss * 0.90, 4)
+                                p_s["sniper_score"] = base_ss
+                                _tag_vf = f"⚠️R21 VIX恐慌脆弱度(vf_z={_vf_z60:+.2f}/×0.90)"
+                                p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {_tag_vf}" if p_s.get("sniper_tag") else _tag_vf
+
+                    # [GOLD_6 #2 R20_NMT_DN] 多尺度全負 × 波動均等化資金流出背離 (×0.928)
+                    if p_s.get("_r20_nmt_dn_active"):
+                        base_ss = round(base_ss * 0.928, 4)
+                        p_s["sniper_score"] = base_ss
+                        _tag_nmt = "⚠️R20多尺度背離(×0.928)"
+                        p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {_tag_nmt}" if p_s.get("sniper_tag") else _tag_nmt
+
+                    # [GOLD_6 #3 R17_EA_ME_B] PIT EPS 63D 加速度 >= +10% & 營益率擴張 >= +1.5% & IO20 >= +1% (×1.045)
+                    if tk_s in _fc_col_idx and _fc_eps_mat is not None and _fc_mgn_mat is not None:
+                        _jf = _fc_col_idx[tk_s]
+                        _s_eps = pd.Series(_fc_eps_mat[:, _jf]).ffill(limit=105)
+                        _s_mgn = pd.Series(_fc_mgn_mat[:, _jf]).ffill(limit=105)
+                        if len(_s_eps) >= 64:
+                            _eps_acc = float(_s_eps.iloc[-1] - _s_eps.iloc[-64])
+                            _mgn_v = float(_s_mgn.iloc[-1])
+                            if np.isfinite(_eps_acc) and np.isfinite(_mgn_v) and _eps_acc >= 0.10 and _mgn_v >= 0.015 and io20_s >= 0.01:
+                                base_ss = round(base_ss * 1.045, 4)
+                                p_s["sniper_score"] = base_ss
+                                _tag_ea = f"🚀R17盈餘營益雙加速(+{_eps_acc*100:.0f}%/Mgn+{_mgn_v*100:.1f}%/×1.045)"
+                                p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {_tag_ea}" if p_s.get("sniper_tag") else _tag_ea
+
                 pool_2_to_5.sort(key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0), reverse=True)
                 valid_picks = top1_item + pool_2_to_5 + rest_items
 
@@ -1646,9 +2017,13 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 print("計算 PC1 擁擠度監控指標警告:", e_pc1)
 
             for idx_all, p_all in enumerate(valid_picks, start=1):
-                p_all.pop("_daily_rets_20", None)
+                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20"):
+                    p_all.pop(_tmp_k, None)
                 if p_all["ticker"] in dynamic_admitted_map:
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
+            for _tw_p in (data.get("tw_only_ranked") or []):
+                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20"):
+                    _tw_p.pop(_tmp_k, None)
 
             top10_picks = valid_picks[:10]
             # 🌟 主動執行當期已公布 PIT 財報雙動能檢核 + R12 超級大牛/抗跌真龍頭點火 + 52週高點套牢過濾 + M1 主帥退化降級扶正 + Segal 良性半方差不對稱加碼
@@ -1854,9 +2229,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             },
             "gatekeeper_rules": [
                 "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (959 檔含下市/併購股，現任 503/503 檔 100% 覆蓋、跨資料源拆股零偷看校正)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且真實未調整歷史成交額 Top 100 才准買入；入選前與剔除後 100% 濾除",
-                "② 台股 779 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股",
-                "③ 7 大黃金濾網 + 3D 微結構動能演化：年線長牛回測月線蓄勢 (`Coiled Spring ×1.12`) + 超級巨頭領頭羊 (US前30/TW前10) 蹲點加乘 (`×1.06`) + 12M×3M×1M 死貓跳懲罰 (`×0.75`) + 爆量派發懲罰 (`×0.75`) + 量價收斂高勝率加乘 (`×1.05`) + S1/S2/Beta 原油與裂解價差下行排雷 + 最低動能門檻 (`Score >= 0.28`)",
-                "④ 3D 動能演化動態任期 (2/4/5期) + 純粹連任：預設最長 4 期；短線噴發過熱 (`3M>150% & 1M>35%`) 縮短為 2 期；黃金加速主升段 (`12M 100~280% & 3M 40~110% & 1M<=32%`) 延長為 5 期；Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`",
+                "② 台股 779 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股 + GOLD_6 雙否決 (TW_MRG_VETO 融資暴增無吸籌 / TW_US_PEER_VETO 美股同族領跌)",
+                "③ Strict Pruned GOLD_6 精純濾網：拔除 3 項負貢獻舊包袱 (`dead_cat ×0.75` / `fringe_pen ×0.90` / `3D動態任期`)，保留真棟樑 (`Coiled Spring ×1.12` + 巨頭蹲點 `×1.06` + 爆量派發 `×0.75` + 量價收斂 + S1/S2/Beta + 最低動能 `>= 0.28`) × Gate 8 二階三雄 (`R21_VF_DN ×0.90` + `R20_NMT_DN ×0.928` + `R17_EA_ME_B ×1.045`)",
+                "④ 純 4 期最長任期上限 + 純粹連任保護帶 + SOV3_CASH 四象限主權避險現金池 (GLD / IEF / TBF / BIL)：Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`；轉入現金時動態配置 GLD / IEF / TBF / BIL",
                 f"⑤ 凱利凸性動態權重 + Top-3 內部過熱降權轉移 (`Bias60>25% & Ret5>5%` 減碼 35% 轉移給同梯未過熱強股)：回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、日MDD {_dm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy}"
             ],
             "newly_admitted_stocks": newly_admitted_list[:25]
@@ -1892,7 +2267,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         _y2018 = scheme_a_yearly.get(2018, 0.0)
         _y2020 = scheme_a_yearly.get(2020, 0.0)
         _y2022 = scheme_a_yearly.get(2022, 0.0)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R14・{_u_total:,}檔全成分零偷看 PIT [S&P 500 現任503/503 100%覆蓋] + 7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位流動性保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構[P1/P2/P4]・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign Strict Pruned GOLD_6・{_u_total:,}檔全成分零偷看 PIT [S&P 500 現任503/503] + Gate 8 認證 GOLD_6 [R21_VF_DN/R20_NMT_DN/R17_EA_ME_B/TW雙否決/SOV3主權現金池] + 拔除3負包袱 + R14正交防護・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -1914,15 +2289,14 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign R14・7大黃金濾網 + PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位短債保護鎖 + CIE-1盤中乾淨進場衛生鎖 + SEC-VOL1二階下行半波動純化 + R13三大進出場微結構】"
-                "美股 S&P 500 PIT 官方成分股 Top 100 (含下市/併購股產業映射) + 台股 0050∪0051 純上市全歷史 PIT + "
-                "PF-TD高檔未破月線宏觀頂背離預警護盾(40%<Exposure<=65%且QQQ>=20MA收斂至16%/0%) + CSH-DM1黃金破位流動性清算保護鎖((GLD<MA40&21D<-2%)或21D<-5%轉100%BIL短債) + "
-                "CIE-1盤中回補乾淨進場衛生鎖 + SEC-VOL1二階狙擊下行半波動純化(Rank#2~#5) + R13[P1油氣S3盤中換馬/P2恐慌修復進場/P4極端高乖離分批低接] + "
-                "M1主帥降級扶正 + M5真龍頭4%解鎖 + 23跨市場族群輪動抗跌真龍頭(Ehsani 2022 JF) + 52W套牢過濾 + 良性半方差點火(+5%, Segal 2015 JFE)"
+                "【G12-PIT Sovereign Strict Pruned GOLD_6・Gate 8 脫護盾認證 6 大純金因子 + 拔除 3 項負包袱 + R14 正交防護】"
+                "美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市 PIT (TW_MRG_VETO 融資過熱排雷 + TW_US_PEER_VETO 美股同族領跌否決) + "
+                "Rank #2~#5 二階狙擊 (R21_VF_DN VIX恐慌脆弱度×0.90 + R20_NMT_DN 多尺度背離×0.928 + R17_EA_ME_B 財報雙加速×1.045 + SEC-VOL1 內生下行波動) + "
+                "SOV3_CASH 四象限主權避險池 (GLD/IEF/TBF/BIL) + R14[PF-TD頂背離 / CSH-DM1 / CIE-1] + R13[P1/P2/P4] + 純4期上限"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
-        # 同步更新歷年報酬率為 G12-PIT Sovereign (2005~2026)
+        # 同步更新歷年報酬率為 G12-PIT Sovereign Strict Pruned GOLD_6 (2005~2026)
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
             data["yearly_performance"] = [row for row in data["yearly_performance"] if int(row.get("year", 0)) >= 2005]
             for row in data["yearly_performance"]:
@@ -1932,7 +2306,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R14 ({_u_total:,}檔全成分零偷看 PIT・PF-TD高檔未跌頂背離預警護盾 + CSH-DM1黃金破位保護鎖 + CIE-1盤中乾淨進場 + SEC-VOL1二階半波動純化 + R13三大進出場微結構)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign Strict Pruned GOLD_6 ({_u_total:,}檔全成分 PIT・Gate 8 認證 6 大純金因子 × 拔除 3 負包袱)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -1945,12 +2319,17 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             "sharpe": _sh,
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
-                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與根除跨資料源拆股成交額未來函數 ({_G.get('universe_desc', f'True PIT {_u_total:,} 檔母池')})。",
-                "② [R14 PF-TD + CSH-DM1] 高檔未跌頂背離預警護盾 & 黃金破位短債保護鎖：宏觀警報壓抑曝險 (40%<Exp<=65%) 但 QQQ 仍站 20MA 尚未宣洩時收斂至 16%/0% 防範補跌；(GLD<40MA且21D<-2%)或21D<-5%時 100% 轉停泊 BIL 美元短債避開 2008/2020 流動性拋售。",
-                "③ [R14 CIE-1 + SEC-VOL1] 盤中回補乾淨進場衛生鎖 & 二階下行半波動純化：盤中 V 轉回補嚴格排除財報瑕疵/套牢/過熱股；Rank #2~#5 拔擢低半波動機構吸籌股 (×1.05)、降權高下行波動無吸籌股 (×0.92)。",
-                f"④ R13[P1/P2/P4] × R12[M1主帥扶正/M5真龍頭4%解鎖/23族群輪動]：2008海嘯 {_y2008:+.2f}%、2018貿易戰 {_y2018:+.2f}%、2020熔斷 {_y2020:+.2f}%、2022升息熊市 {_y2022:+.2f}%，22 年勝年 {_wy}、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
+                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與跨資料源拆股量能校正 ({_G.get('universe_desc', f'True PIT {_u_total:,} 檔母池')})；台股加掛 TW_MRG_VETO (融資暴增+機構未買否決) 與 TW_US_PEER_VETO (美股同族群領跌跨海否決)。",
+                "② [GOLD_6 二階狙擊三雄 + SEC-VOL1] Rank #2~#5 疊加 VIX 恐慌條件脆弱度排雷 (R21_VF_DN ×0.90)、Bilevel-NMT 多尺度背離阻尼 (R20_NMT_DN ×0.928)、PIT EPS 加速×營益擴張點火 (R17_EA_ME_B ×1.045) 與內生下行波動純化 (SEC-VOL1)。",
+                "③ [拔除 3 項負包袱 + SOV3_CASH 四象限現金池] 拔除負貢獻 L04B 死貓跳懲罰、L03B 尾段降權與 L11 3D動態任期(回歸純4期上限)；防守端以 SOV3_CASH (GLD / IEF / TBF / BIL t-1訊號➔T開盤5bps) 搭配 R14 [PF-TD / CSH-DM1 / CIE-1]。",
+                f"④ 全時期危機逆勢表現：2008海嘯 {_y2008:+.2f}%、2018貿易戰 {_y2018:+.2f}%、2020熔斷 {_y2020:+.2f}%、2022升息熊市 {_y2022:+.2f}%，22 年勝年 {_wy}、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
+
+        for _lp_v in live_prices.values():
+            if isinstance(_lp_v, dict):
+                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20", "daily_rets_20"):
+                    _lp_v.pop(_tmp_k, None)
 
         data["latest_data_date"] = max_dt or "2026-10-16"
         data["latest_tw_date"] = max_tw_dt or max_dt or "2026-10-16"
