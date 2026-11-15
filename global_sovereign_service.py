@@ -238,6 +238,29 @@ def _normalize_group_23(sec, ind):
     if sec == "Utilities" or "utilities" in ind_l or "power" in ind_l: return "G_UTILITIES_POWER"
     return f"G_{sec.upper()}"
 
+
+def _clean_group_23(raw_g: str) -> str:
+    """R26-GOLD 23-族群別名收斂（與 export_g11_pit_detailed_history.py 100% 同步）。"""
+    if raw_g == "G_TECHNOLOGY":
+        return "G_HARDWARE_STORAGE"
+    if raw_g == "G_COMMUNICATION SERVICES":
+        return "G_INTERNET_MEDIA"
+    if raw_g == "G_HEALTHCARE":
+        return "G_MEDTECH_HC"
+    return raw_g
+
+
+_R26_A1_SET = {
+    "G_SEMI", "G_HARDWARE_STORAGE", "G_ELEC_COMP", "G_COMM_EQUIP",
+    "G_SOFTWARE_IT", "G_INTERNET_MEDIA", "G_INDUSTRIAL_POWER", "G_AERO_DEFENSE",
+}
+_R26_A2_ALL_SET = {
+    "G_PHARMA", "G_BIOTECH", "G_MEDTECH_HC",
+    "G_CONSUMER_DEF", "G_UTILITIES_POWER", "G_TELECOM",
+}
+_R26_A2_NPT_SET = {"G_MEDTECH_HC", "G_UTILITIES_POWER", "G_BIOTECH", "G_CONSUMER_DEF"}
+_R26_FINCC_SET = {"G_FINANCIALS", "G_CONSUMER_CYC"}
+
 _TW_EXACT_OVERRIDE_23 = {
     "2330.TW": ("Technology", "Semiconductors"), "2303.TW": ("Technology", "Semiconductors"),
     "2454.TW": ("Technology", "Semiconductors"), "3034.TW": ("Technology", "Semiconductors"),
@@ -628,6 +651,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             bias_ma60_pct = round(float((cur_px / max(1e-6, ma60) - 1.0) * 100.0), 1) if ma60 > 0 else 0.0
             high252 = max(closes[:min(252, len(closes))]) if closes else cur_px
             prox_52w_pct = round(float((cur_px / max(1e-6, high252)) * 100.0), 1) if high252 > 0 else 100.0
+            _prox_52w_high = round(float(cur_px / (max(highs[:min(252, len(highs))]) + 1e-9)), 6) if len(highs) >= 60 else 0.0
             mom1d = round(float((closes[0] / closes[1] - 1.0) * 100.0), 2) if len(closes) > 1 and closes[1] > 0 else 0.0
             mom5d = round(float((closes[0] / closes[min(5, len(closes)-1)] - 1.0) * 100.0), 1) if len(closes) > 5 and closes[min(5, len(closes)-1)] > 0 else 0.0
 
@@ -1045,6 +1069,8 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
 
             score_val = None
             base_score_val = None
+            vol_surge_val = ((sum(vols[:20]) / 20.0) / (v60_avg + 1.0)) if len(vols) >= 60 else 1.0
+            gb_vol_ratio_val = 1.0
             if mom12m is not None and mom3m is not None:
                 raw_mom = (0.45 * mom12m + 0.35 * mom3m + 0.20 * mom1m) / 100.0
                 res_mom = raw_mom
@@ -1082,6 +1108,8 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
 
                 # 🌟 Strict Pruned: 拔除 L04B 死貓跳懲罰，保留爆量派發 × 量價收斂 × 極值力竭 × 假突破追高 (與 export_g11_pit_detailed_history.py 100% 同步)
                 down_vol20_val = (np.sqrt(sum((min(0.0, r) ** 2) for r in daily_rets[:20]) / max(1, min(20, len(daily_rets)))) * np.sqrt(252.0)) if len(daily_rets) >= 10 else 0.30
+                up_vol20_val = (np.sqrt(sum((max(0.0, r) ** 2) for r in daily_rets[:20]) / max(1, min(20, len(daily_rets)))) * np.sqrt(252.0)) if len(daily_rets) >= 10 else 0.30
+                gb_vol_ratio_val = up_vol20_val / (down_vol20_val + 0.05)
                 vol_surge_val = ((sum(vols[:20]) / 20.0) / (v60_avg + 1.0)) if len(vols) >= 60 else 1.0
                 vol_ratio_20d_val = min(5.0, max(0.2, mean_up_v / (mean_dn_v + 1.0)))
                 n_clv5 = min(5, len(closes), len(highs), len(lows))
@@ -1221,6 +1249,10 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 "_r20_nmt_dn_active": r20_nmt_dn_active,
                 "_rets_by_dt": rets_by_dt,
                 "_ret20": round(float((closes[0] / closes[20] - 1.0)), 6) if len(closes) > 20 and closes[20] > 0 else 0.0,
+                "_vol_surge": round(float(vol_surge_val), 6),
+                "_gb_vol_ratio": round(float(gb_vol_ratio_val), 6),
+                "_prox_52w_high": float(_prox_52w_high),
+                "_io_20_raw": round(float(io_20_val), 6),
             }
 
         # 全域掃描【G11-PIT 無生存者偏誤選股池 (1,725 檔 S&P 500 PIT 歷史成分股 + 748 檔台股 PIT 單一規則開放池)】
@@ -1415,6 +1447,10 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     "_r20_nmt_dn_active": bool(st.get("_r20_nmt_dn_active", False)),
                     "_rets_by_dt": st.get("_rets_by_dt", {}),
                     "_ret20": float(st.get("_ret20", 0.0)),
+                    "_vol_surge": float(st.get("_vol_surge", 1.0)),
+                    "_gb_vol_ratio": float(st.get("_gb_vol_ratio", 1.0)),
+                    "_prox_52w_high": float(st.get("_prox_52w_high", 0.0)),
+                    "_io_20_raw": float(st.get("_io_20_raw", 0.0)),
                     "mom_2w": st.get("mom_2w", 0.0),
                     "mom_3m": st.get("mom_3m", 0.0),
                     "mom_6m": st.get("mom_6m", 0.0),
@@ -1507,9 +1543,44 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 if _cnt >= 2
             }
 
+            _fc_col_idx, _fc_eps_mat, _fc_mgn_mat = {}, None, None
+            try:
+                _fc_pkl = os.path.join(os.path.dirname(__file__), "pit_cache", "pit_fund_rebal_cache.pkl")
+                if os.path.exists(_fc_pkl):
+                    with open(_fc_pkl, "rb") as _fp_fc:
+                        _fc_obj = pickle.load(_fp_fc) or {}
+                    _fc_cols = _fc_obj.get("cols") or []
+                    _fc_col_idx = {_ck: _ci for _ci, _ck in enumerate(_fc_cols)}
+                    _fc_eps_mat = _fc_obj.get("eps_yoy_mat")
+                    _fc_mgn_mat = _fc_obj.get("mgn_exp_mat")
+            except Exception as _e_fc:
+                print("R26-GOLD PIT 財報矩陣快取讀取警告:", _e_fc)
+
+            def _get_live_mgn_expand_r26(tk_sym: str, io20_val_f: float) -> float:
+                if tk_sym in _fc_col_idx and _fc_mgn_mat is not None:
+                    try:
+                        _jf_m = _fc_col_idx[tk_sym]
+                        _s_mgn_v = pd.Series(_fc_mgn_mat[:, _jf_m]).ffill(limit=105)
+                        if len(_s_mgn_v) >= 1:
+                            _mv = float(_s_mgn_v.iloc[-1])
+                            if np.isfinite(_mv):
+                                return _mv
+                    except Exception:
+                        pass
+                try:
+                    from pit_fundamental_service import evaluate_live_ticker_pit_fundamentals
+                    _f_live = evaluate_live_ticker_pit_fundamentals(tk_sym, io20_val=io20_val_f)
+                    _mv_live = float(_f_live.get("margin_expand"))
+                    if np.isfinite(_mv_live):
+                        return _mv_live
+                except Exception:
+                    pass
+                return np.nan
+
             filtered_top100_picks = []
             gold6_vetoed_tw = []
             gold6_vetoed_tw_set = set()
+            r26_vetoed_fincc = []
             for p_cand in valid_picks:
                 tk_c = p_cand["ticker"]
                 is_tw_c = tk_c.endswith(".TW")
@@ -1543,6 +1614,17 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                             gold6_vetoed_tw_set.add(tk_c)
                             continue
 
+                _pg_cand = _clean_group_23(p_cand.get("peer_group_23", "G_UNCLASSIFIED"))
+                _prox_cand = float(p_cand.get("_prox_52w_high") or (float(p_cand.get("prox_52w") or 100.0) / 100.0))
+                _rm20_cand = float(p_cand.get("_ret20") or 0.0)
+                _gbv_cand = float(p_cand.get("_gb_vol_ratio") or 1.0)
+                _io20_cand = float(p_cand.get("_io_20_raw") if p_cand.get("_io_20_raw") is not None else (p_cand.get("io_20") or 0.0))
+
+                # [R26-GOLD #2 F2c_FINCC_P52_VETO] 金融/景氣消費創 52 週新高前夕否決入場 (與 export_g11_pit_detailed_history.py 100% 同步)
+                if (_pg_cand in _R26_FINCC_SET) and (_prox_cand >= 0.980):
+                    r26_vetoed_fincc.append(f"{tk_c}(F2c_FINCC_P52:{_pg_cand}/{_prox_cand*100:.1f}%)")
+                    continue
+
                 is_super_mega_c = (rk_liq <= 10) if is_tw_c else (rk_liq <= 30)
                 # [Strict Pruned: 拔除負貢獻 L03B_FRINGE_PEN 尾端追高降權]
                 m_top10_feat = 1.0
@@ -1550,6 +1632,27 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     m_top10_feat *= 1.06
                     tag_m = f"👑巨頭領頭羊回檔蹲點(Rank#{rk_liq}/×1.06)"
                     p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {tag_m}" if p_cand.get("sniper_tag") else tag_m
+
+                # [R26-GOLD #1 F1d_A2ALL_PMGN_PEN] 防禦避風港群營益率峰值擴張過熱均值回歸 (×0.80)
+                if _pg_cand in _R26_A2_ALL_SET:
+                    _mgn_f1d = _get_live_mgn_expand_r26(tk_c, _io20_cand)
+                    if np.isfinite(_mgn_f1d) and _mgn_f1d >= 0.015:
+                        m_top10_feat *= 0.80
+                        _tag_f1d = f"⚠️R26-F1d防禦高營益回歸({_pg_cand}/Mgn+{_mgn_f1d*100:.1f}%/×0.80)"
+                        p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {_tag_f1d}" if p_cand.get("sniper_tag") else _tag_f1d
+
+                # [R26-GOLD #3 R25_P1_A2NPT_RM20_PEN] 非製藥電信之防禦股 20D 急漲均值回歸 (×0.80)
+                if (_pg_cand in _R26_A2_NPT_SET) and (_rm20_cand >= 0.080):
+                    m_top10_feat *= 0.80
+                    _tag_r25p1 = f"⚠️R26-P1防禦急漲回歸(20D+{_rm20_cand*100:.1f}%/×0.80)"
+                    p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {_tag_r25p1}" if p_cand.get("sniper_tag") else _tag_r25p1
+
+                # [R26-GOLD #4 R25_P2_A1_GBV14_IO20_SCORE] 科技工業複利股上下行好量凸性 × 機構吸籌加權 (×1.06)
+                if (_pg_cand in _R26_A1_SET) and (_gbv_cand >= 1.40) and (_io20_cand >= 0.020):
+                    m_top10_feat *= 1.06
+                    _tag_r25p2 = f"💎R26-P2複利好量買盤(GBV={_gbv_cand:.2f}/IO20={_io20_cand:+.3f}/×1.06)"
+                    p_cand["sniper_tag"] = f"{p_cand['sniper_tag']} × {_tag_r25p2}" if p_cand.get("sniper_tag") else _tag_r25p2
+
                 if m_top10_feat != 1.0:
                     p_cand["score"] = round(float(p_cand.get("score") or 0.0) * m_top10_feat, 4)
                     p_cand["sniper_score"] = round(float(p_cand.get("sniper_score") or 0.0) * m_top10_feat, 4)
@@ -1560,6 +1663,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
 
             if isinstance(data.get("macro_status"), dict):
                 data["macro_status"]["gold6_vetoed_tw"] = gold6_vetoed_tw
+                data["macro_status"]["r26_vetoed_fincc"] = r26_vetoed_fincc
 
             valid_picks = filtered_top100_picks
             valid_picks.sort(key=lambda x: float(x.get("score") or 0.0), reverse=True)
@@ -1611,7 +1715,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 ms["g11_c6_dual_breakdown_shield_active"] = c6_active
                 ms["g9_deep_bear_v_thrust_active"] = v_thrust_active
                 ms["active_defense_module"] = (
-                    "G12-PIT Sovereign Strict Pruned GOLD_6 外科六重護盾 (PF-TD高檔頂背離預警16%/0% / C4利率估值雙殺45% / C6雙指數破線20% / C1債期雙殺72% / C2科技破線65% / C3領頭羊倒貨60%) + "
+                    "G12-PIT Sovereign R26-GOLD (8/8 全閘門認證 5 大族群正交支柱 + Strict Pruned GOLD_6 + 外科六重護盾 PF-TD/C4/C6/C1/C2/C3) + "
                     "GOLD_6 [SOV3_CASH四象限主權避險池(GLD/IEF/TBF/BIL) + R21 VIX恐慌脆弱度 + R20多尺度背離 + R17盈餘營益雙加速 + 台股融資/美股同族跨海雙否決] + "
                     "CSH-DM1 黃金破位短債保護鎖 + CIE-1 盤中乾淨進場衛生鎖 + SEC-VOL1 內生下行波動雙盾"
                 )
@@ -1619,24 +1723,24 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 cur_exp = int(ms.get("exposure_pct", 100))
                 if c6_active and cur_exp > 20:
                     ms["exposure_pct"] = 20
-                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C6 觸發雙指數破線共振減震 (寬幅警戒區且 QQQ<60MA、SPY<20MA、科技落後 {rs_q_s*100:+.1f}% -> 曝險降至 20% 極度防守)"
+                    ms["regime"] = f"🛡️ G12-PIT R26-GOLD 外科護盾 C6 觸發雙指數破線共振減震 (寬幅警戒區且 QQQ<60MA、SPY<20MA、科技落後 {rs_q_s*100:+.1f}% -> 曝險降至 20% 極度防守)"
                 elif c4_active and cur_exp > 45:
                     ms["exposure_pct"] = 45
-                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C4 觸發利率急升×科技轉弱護盾 (US10Y 20D+{u10_c20:.2f}%、殖利率 {u10_now}%、QQQ年線乖離 {q_b500}% -> 曝險降至 45% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT R26-GOLD 外科護盾 C4 觸發利率急升×科技轉弱護盾 (US10Y 20D+{u10_c20:.2f}%、殖利率 {u10_now}%、QQQ年線乖離 {q_b500}% -> 曝險降至 45% 防守)"
                 elif c3_active and cur_exp > 60:
                     ms["exposure_pct"] = 60
-                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C3 觸發領頭羊全面倒貨減震 (Top5 負IO_20={top5_neg_io20}/5、負IO_5={top5_neg_io5}/5、均值 {top5_avg_io20:+.3f}<=-0.08 -> 曝險降至 60% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT R26-GOLD 外科護盾 C3 觸發領頭羊全面倒貨減震 (Top5 負IO_20={top5_neg_io20}/5、負IO_5={top5_neg_io5}/5、均值 {top5_avg_io20:+.3f}<=-0.08 -> 曝險降至 60% 防守)"
                 elif c2_active and cur_exp > 65:
                     ms["exposure_pct"] = 65
-                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C2 觸發科技破線落後減震 (QQQ<60MA 且落後 SPY {rs_q_s*100:+.1f}%、Top5 IO_20={top5_avg_io20:+.3f} -> 曝險降至 65% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT R26-GOLD 外科護盾 C2 觸發科技破線落後減震 (QQQ<60MA 且落後 SPY {rs_q_s*100:+.1f}%、Top5 IO_20={top5_avg_io20:+.3f} -> 曝險降至 65% 防守)"
                 elif c1_active and cur_exp > 72:
                     ms["exposure_pct"] = 72
-                    ms["regime"] = f"🛡️ G12-PIT Strict Pruned GOLD_6 外科護盾 C1 觸發美債急升×期權莊家退場減震 (US10Y 20D+{u10_c20:.2f}%、Put/Call OI Z={p_z60:+.2f} -> 曝險降至 72% 防守)"
+                    ms["regime"] = f"🛡️ G12-PIT R26-GOLD 外科護盾 C1 觸發美債急升×期權莊家退場減震 (US10Y 20D+{u10_c20:.2f}%、Put/Call OI Z={p_z60:+.2f} -> 曝險降至 72% 防守)"
                 elif v_thrust_active:
                     ms["exposure_pct"] = 82
-                    ms["regime"] = f"🚀 G12-PIT Strict Pruned GOLD_6 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
+                    ms["regime"] = f"🚀 G12-PIT R26-GOLD 深熊極底部 V 轉先遣部隊點火 (寬幅 {c_br*100:.1f}%<30% 但 10D 寬幅強彈 +{br_d10*100:.1f}%、QQQ 站上 20MA 且 Top5 吸籌 {top5_avg_io20:+.3f} -> 先遣 82% 倉位精準抄底)"
                 elif c_br >= 0.50 and cur_exp == 100:
-                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT Sovereign Strict Pruned GOLD_6 A/B雙梯隊霸主進攻)"
+                    ms["regime"] = f"全球共振多頭 (美台寬幅 {c_br*100:.1f}% >= 50%，QQQ 2年線乖離 {q_b500}% < 30% 估值健康 | {ms.get('options_regime_tag', '')} -> G12-PIT Sovereign R26-GOLD A/B雙梯隊霸主進攻)"
 
                 # 🌟 R14-P4 (PF-TD): 未破月線之高檔宏觀頂背離預警護盾 (40% < Exposure <= 65% 且 QQQ >= 20MA 尚未宣洩)
                 post_shield_exp = int(ms.get("exposure_pct", 100))
@@ -1920,18 +2024,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 except Exception as _e_vf:
                     print("GOLD_6 R21_VF_DN 計算警告:", _e_vf)
 
-                _fc_col_idx, _fc_eps_mat, _fc_mgn_mat = {}, None, None
-                try:
-                    _fc_pkl = os.path.join(os.path.dirname(__file__), "pit_cache", "pit_fund_rebal_cache.pkl")
-                    if os.path.exists(_fc_pkl):
-                        with open(_fc_pkl, "rb") as _fp_fc:
-                            _fc_obj = pickle.load(_fp_fc) or {}
-                        _fc_cols = _fc_obj.get("cols") or []
-                        _fc_col_idx = {_ck: _ci for _ci, _ck in enumerate(_fc_cols)}
-                        _fc_eps_mat = _fc_obj.get("eps_yoy_mat")
-                        _fc_mgn_mat = _fc_obj.get("mgn_exp_mat")
-                except Exception as _e_fc:
-                    print("GOLD_6 R17_EA_ME_B 快取讀取警告:", _e_fc)
+                # (_fc_col_idx, _fc_eps_mat, _fc_mgn_mat 已於 filtered_top100_picks 前載入共用)
 
                 # 🌟 R14-P2 (SEC-VOL1) × GOLD_6 [R21_VF_DN / R20_NMT_DN / R17_EA_ME_B]: Rank #2~#5 二階狙擊純化
                 for p_s in pool_2_to_5:
@@ -1991,6 +2084,15 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                                 _tag_ea = f"🚀R17盈餘營益雙加速(+{_eps_acc*100:.0f}%/Mgn+{_mgn_v*100:.1f}%/×1.045)"
                                 p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {_tag_ea}" if p_s.get("sniper_tag") else _tag_ea
 
+                    # [R26-GOLD #5 R26_P1_VS128_IO15_SEC82] Rank #2~#5 爆量滯漲二階降級 (vol_surge >= 1.28 & io20 <= 0.015 ➔ ×0.82)
+                    _vs_s = float(p_s.get("_vol_surge") or 1.0)
+                    _io20_raw_s = float(p_s.get("_io_20_raw") if p_s.get("_io_20_raw") is not None else io20_s)
+                    if (_vs_s >= 1.28) and (_io20_raw_s <= 0.015):
+                        base_ss = round(base_ss * 0.82, 4)
+                        p_s["sniper_score"] = base_ss
+                        _tag_r26_p1 = f"⚠️R26爆量滯漲二階降級(VS={_vs_s:.2f}/IO20={_io20_raw_s:+.3f}/×0.82)"
+                        p_s["sniper_tag"] = f"{p_s['sniper_tag']} × {_tag_r26_p1}" if p_s.get("sniper_tag") else _tag_r26_p1
+
                 pool_2_to_5.sort(key=lambda x: float(x.get("sniper_score") or x.get("score") or 0.0), reverse=True)
                 valid_picks = top1_item + pool_2_to_5 + rest_items
 
@@ -2017,12 +2119,12 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 print("計算 PC1 擁擠度監控指標警告:", e_pc1)
 
             for idx_all, p_all in enumerate(valid_picks, start=1):
-                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20"):
+                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20", "_vol_surge", "_gb_vol_ratio", "_prox_52w_high", "_io_20_raw"):
                     p_all.pop(_tmp_k, None)
                 if p_all["ticker"] in dynamic_admitted_map:
                     dynamic_admitted_map[p_all["ticker"]]["overall_rank"] = idx_all
             for _tw_p in (data.get("tw_only_ranked") or []):
-                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20"):
+                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20", "_vol_surge", "_gb_vol_ratio", "_prox_52w_high", "_io_20_raw"):
                     _tw_p.pop(_tmp_k, None)
 
             top10_picks = valid_picks[:10]
@@ -2228,9 +2330,9 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                 "calmar": _cal
             },
             "gatekeeper_rules": [
-                "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (959 檔含下市/併購股，現任 503/503 檔 100% 覆蓋、跨資料源拆股零偷看校正)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且真實未調整歷史成交額 Top 100 才准買入；入選前與剔除後 100% 濾除",
+                "① 美股 S&P 500 歷史成分股精確 PIT 閘門 (965 檔含下市/併購股，現任 503/503 檔 100% 覆蓋、跨資料源拆股零偷看校正)：當下必須位於 S&P 500 官方成分股內 (`in_sp500_pit == True`) 且真實未調整歷史成交額 Top 100 才准買入；入選前與剔除後 100% 濾除",
                 "② 台股 779 檔 0050∪0051 (台灣 50 + 中型 100 純上市前 150 大) 2005–2026 逐日零遺漏 PIT：嚴格限定當日為 TWSE 正式上市 (`market_type IN ('上市', 'TWSE')`)，100% 排除上櫃 (TPEx) 與小型股 + GOLD_6 雙否決 (TW_MRG_VETO 融資暴增無吸籌 / TW_US_PEER_VETO 美股同族領跌)",
-                "③ Strict Pruned GOLD_6 精純濾網：拔除 3 項負貢獻舊包袱 (`dead_cat ×0.75` / `fringe_pen ×0.90` / `3D動態任期`)，保留真棟樑 (`Coiled Spring ×1.12` + 巨頭蹲點 `×1.06` + 爆量派發 `×0.75` + 量價收斂 + S1/S2/Beta + 最低動能 `>= 0.28`) × Gate 8 二階三雄 (`R21_VF_DN ×0.90` + `R20_NMT_DN ×0.928` + `R17_EA_ME_B ×1.045`)",
+                "③ R26-GOLD 5 大族群微結構正交支柱 × GOLD_6 精純濾網：防禦高營益回歸 (`F1d ×0.80`) + 金融消費 52W 高點否決 (`F2c >=98% Veto`) + 防禦急漲回歸 (`R25_P1 ×0.80`) + 複利好量買盤 (`R25_P2 ×1.06`) + Rank #2~#5 爆量滯漲二階降級 (`R26_P1 ×0.82`)，結合 GOLD_6 棟樑與二階三雄 (`R21_VF_DN ×0.90` + `R20_NMT_DN ×0.928` + `R17_EA_ME_B ×1.045`)",
                 "④ 純 4 期最長任期上限 + 純粹連任保護帶 + SOV3_CASH 四象限主權避險現金池 (GLD / IEF / TBF / BIL)：Rank 1~4 無條件連任，Rank 5 看 `IO_20 > 0`；轉入現金時動態配置 GLD / IEF / TBF / BIL",
                 f"⑤ 凱利凸性動態權重 + Top-3 內部過熱降權轉移 (`Bias60>25% & Ret5>5%` 減碼 35% 轉移給同梯未過熱強股)：回測 2005–2026 CAGR {_cagr:.2f}%、{_mult:,.1f}倍、月MDD {_mm:.2f}%、日MDD {_dm:.2f}%、Calmar {_cal:.2f}、勝年 {_wy}"
             ],
@@ -2267,7 +2369,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         _y2018 = scheme_a_yearly.get(2018, 0.0)
         _y2020 = scheme_a_yearly.get(2020, 0.0)
         _y2022 = scheme_a_yearly.get(2022, 0.0)
-        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign Strict Pruned GOLD_6・{_u_total:,}檔全成分零偷看 PIT [S&P 500 現任503/503] + Gate 8 認證 GOLD_6 [R21_VF_DN/R20_NMT_DN/R17_EA_ME_B/TW雙否決/SOV3主權現金池] + 拔除3負包袱 + R14正交防護・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
+        data["strategy_name"] = f"👑 全球高流動性主權泰坦 2.0 (G12-PIT Sovereign R26-GOLD・{_u_total:,}檔全成分零偷看 PIT [S&P 500 現任503/503] + 8/8全閘門5大族群微結構正交支柱 [F1d/F2c/R25_P1/R25_P2/R26_P1] × GOLD_6 + R14正交防護・CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy})"
         if "kpi" not in data:
             data["kpi"] = {}
         data["kpi"]["scheme_a"] = {
@@ -2289,14 +2391,15 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
         }
         if "doe_config" in data:
             data["doe_config"]["intra_month_risk_shield"] = (
-                "【G12-PIT Sovereign Strict Pruned GOLD_6・Gate 8 脫護盾認證 6 大純金因子 + 拔除 3 項負包袱 + R14 正交防護】"
+                "【G12-PIT Sovereign R26-GOLD・8/8 全閘門脫護盾認證 5 大族群微結構正交支柱 × Strict Pruned GOLD_6 + R14 正交防護】"
+                "族群正交支柱 (F1d防禦高營益回歸×0.80 / F2c金融消費52W高點否決 / R25_P1防禦急漲回歸×0.80 / R25_P2複利好量買盤×1.06 / R26_P1爆量滯漲二階降級×0.82) + "
                 "美股 S&P 500 PIT 官方成分股 Top 100 + 台股 0050∪0051 純上市 PIT (TW_MRG_VETO 融資過熱排雷 + TW_US_PEER_VETO 美股同族領跌否決) + "
                 "Rank #2~#5 二階狙擊 (R21_VF_DN VIX恐慌脆弱度×0.90 + R20_NMT_DN 多尺度背離×0.928 + R17_EA_ME_B 財報雙加速×1.045 + SEC-VOL1 內生下行波動) + "
                 "SOV3_CASH 四象限主權避險池 (GLD/IEF/TBF/BIL) + R14[PF-TD頂背離 / CSH-DM1 / CIE-1] + R13[P1/P2/P4] + 純4期上限"
             )
             data["doe_config"]["winning_years_pct"] = round(float(_wy_n.split("/")[0]) / max(1.0, float(_wy_n.split("/")[1])) * 100.0, 1) if "/" in _wy_n else 0
 
-        # 同步更新歷年報酬率為 G12-PIT Sovereign Strict Pruned GOLD_6 (2005~2026)
+        # 同步更新歷年報酬率為 G12-PIT Sovereign R26-GOLD (2005~2026)
         if "yearly_performance" in data and isinstance(data["yearly_performance"], list):
             data["yearly_performance"] = [row for row in data["yearly_performance"] if int(row.get("year", 0)) >= 2005]
             for row in data["yearly_performance"]:
@@ -2306,7 +2409,7 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     row["titan_return"] = scheme_a_yearly[yr]
 
         data["smart_entry_summary"] = {
-            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign Strict Pruned GOLD_6 ({_u_total:,}檔全成分 PIT・Gate 8 認證 6 大純金因子 × 拔除 3 負包袱)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
+            "title": f"🏆 全球泰坦 2.0・G12-PIT Sovereign R26-GOLD ({_u_total:,}檔全成分 PIT・8/8 全閘門認證 5 大族群正交支柱 × GOLD_6)：CAGR {_cagr:.2f}%・{_mult:,.1f}倍・月MDD {_mm:.2f}%・Calmar {_cal:.2f}・勝年 {_wy}",
             "baseline_cagr": None,
             "smart_cagr": _cagr,
             "cagr_boost": None,
@@ -2319,16 +2422,16 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             "sharpe": _sh,
             "recent_8y_cagr": _G.get("recent_8y_cagr"),
             "rules": [
-                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與跨資料源拆股量能校正 ({_G.get('universe_desc', f'True PIT {_u_total:,} 檔母池')})；台股加掛 TW_MRG_VETO (融資暴增+機構未買否決) 與 TW_US_PEER_VETO (美股同族群領跌跨海否決)。",
-                "② [GOLD_6 二階狙擊三雄 + SEC-VOL1] Rank #2~#5 疊加 VIX 恐慌條件脆弱度排雷 (R21_VF_DN ×0.90)、Bilevel-NMT 多尺度背離阻尼 (R20_NMT_DN ×0.928)、PIT EPS 加速×營益擴張點火 (R17_EA_ME_B ×1.045) 與內生下行波動純化 (SEC-VOL1)。",
-                "③ [拔除 3 項負包袱 + SOV3_CASH 四象限現金池] 拔除負貢獻 L04B 死貓跳懲罰、L03B 尾段降權與 L11 3D動態任期(回歸純4期上限)；防守端以 SOV3_CASH (GLD / IEF / TBF / BIL t-1訊號➔T開盤5bps) 搭配 R14 [PF-TD / CSH-DM1 / CIE-1]。",
+                f"① 100% 根除生存者偏誤、補齊 503/503 現任 S&P 500 成分股與跨資料源拆股量能校正 ({_G.get('universe_desc', f'True PIT {_u_total:,} 檔母池')})；台股加掛 TW_MRG_VETO 與 TW_US_PEER_VETO。",
+                "② [R26-GOLD 5 大族群微結構正交支柱] F1d 防禦高營益均值回歸 (×0.80) + F2c 金融消費 52W 新高否決 (>=98% Veto) + R25_P1 非製藥電信防禦急漲回歸 (×0.80) + R25_P2 科技工業好量凸性買盤 (×1.06) + R26_P1 Rank #2~#5 爆量滯漲二階降級 (×0.82)。",
+                "③ [GOLD_6 二階狙擊三雄 + SOV3_CASH 四象限現金池] Rank #2~#5 疊加 R21_VF_DN (×0.90)、R20_NMT_DN (×0.928)、R17_EA_ME_B (×1.045) 與 SEC-VOL1；防守端以 SOV3_CASH (GLD / IEF / TBF / BIL) 搭配 R14 [PF-TD / CSH-DM1 / CIE-1]。",
                 f"④ 全時期危機逆勢表現：2008海嘯 {_y2008:+.2f}%、2018貿易戰 {_y2018:+.2f}%、2020熔斷 {_y2020:+.2f}%、2022升息熊市 {_y2022:+.2f}%，22 年勝年 {_wy}、CAGR {_cagr:.2f}%、累積 {_mult:,.1f} 倍。"
             ]
         }
 
         for _lp_v in live_prices.values():
             if isinstance(_lp_v, dict):
-                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20", "daily_rets_20"):
+                for _tmp_k in ("_daily_rets_20", "_r20_nmt_dn_active", "_rets_by_dt", "_ret20", "_vol_surge", "_gb_vol_ratio", "_prox_52w_high", "_io_20_raw", "daily_rets_20"):
                     _lp_v.pop(_tmp_k, None)
 
         data["latest_data_date"] = max_dt or "2026-10-16"

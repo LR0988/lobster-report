@@ -2,17 +2,17 @@
 """
 export_g11_pit_detailed_history.py
 ================================================================================
-【G12-PIT Sovereign Strict Pruned GOLD_6 歷年績效與逐筆詳細進出全景資料庫生成器】
+【G12-PIT Sovereign R26-GOLD 歷年績效與逐筆詳細進出全景資料庫生成器】
 ================================================================================
 功能：
-1. 完整實裝 G12-PIT Sovereign Strict Pruned GOLD_6 官方生產模型所有參數與權威指標
-   (Gate 8 脫護盾裸測認證 6 大純金因子 × 拔除 3 項負貢獻舊包袱 + R14 四大正交防護 + R13[P1/P2/P4] + 182檔下市美股產業對齊)：
-   - [GOLD_6 #1: R21_VF_DN] CBOE VIX 恐慌脆弱度排雷 (Rank #2~#5 高波動條件脆弱×0.90)
-   - [GOLD_6 #2: R20_NMT_DN] Bilevel-NMT 非線性多尺度背離阻尼 (全尺度未吸籌且波動均等化資金流出×0.928)
-   - [GOLD_6 #3: R17_EA_ME_B] 財報 EPS 加速 × 營益率擴張雙重基本面點火 (Rank #2~#5 ×1.045)
-   - [GOLD_6 #4: TW_MRG_VETO] 台股散戶融資追高且機構未買超入場否決
-   - [GOLD_6 #5: TW_US_PEER_VETO] 美股同族群領跌傳導台股因果否決
-   - [GOLD_6 #6: SOV3_CASH] 四象限主權避險現金池 (GLD / IEF / TBF / BIL t-1訊號➔T開盤5bps執行)
+1. 完整實裝 G12-PIT Sovereign R26-GOLD 官方生產模型所有參數與權威指標
+   (8/8 全閘門脫護盾裸測認證 5 大族群微結構正交支柱 × Strict Pruned GOLD_6 6 大純金因子 + R14 四大正交防護 + R13[P1/P2/P4] + 182檔下市美股產業對齊)：
+   - [R26 Pillar #1: F1d_A2ALL_PMGN_PEN] A2 醫療防禦族群 PIT 營益率擴張 >= +1.5% 峰值回歸懲罰 (score ×0.80)
+   - [R26 Pillar #2: F2c_FINCC_P52_VETO] 金融/週期消費 52W 高點接近度 >= 0.980 突破力竭否決 (elig = False)
+   - [R26 Pillar #3: R25_P1_A2NPT_RM20_PEN] 非藥非電信防禦避風港 20D 急漲 >= +8% 均值回歸懲罰 (score ×0.80)
+   - [R26 Pillar #4: R25_P2_A1_GBV14_IO20_SCORE] A1 科技工業複利成長股 良性半方差 >= 1.40 × IO20 >= +2% 加乘 (score ×1.06)
+   - [R26 Pillar #5: R26_P1_VS128_IO15_SEC82] Rank #2~#5 爆量滯漲無機構吸籌 (VolSurge >= 1.28 × IO20 <= +1.5%) 二階降級 (sec ×0.82)
+   - [GOLD_6 #1~#6] R21_VF_DN(×0.90) + R20_NMT_DN(×0.928) + R17_EA_ME_B(×1.045) + TW_MRG_VETO + TW_US_PEER_VETO + SOV3_CASH 四象限主權避險現金池
    - [Strict Pruned -3] 拔除 L03B 尾端追高降權、L04B 死貓跳懲罰、L11 3D 動態任期截斷 (回歸純粹 4 期上限)
    - [R14 + R13 + R12] PF-TD / CSH-DM1 / CIE-1 / SEC-VOL1 + P1/P2/P4 + M1主帥扶正 + M5真龍頭4%解鎖 + 23族群輪動
 2. 匯出 2005–2026 全歷史 22 年每一次調倉 (Tranche 1 & Tranche 22) 的每一筆進出明細。
@@ -986,6 +986,53 @@ def main():
         * np.where((eps_acc_ff_clean >= 0.10) & (mgn_ff_clean >= 0.015) & (io20_arr >= 0.01), 1.045, 1.0)
     ).astype(np.float32)
     sec_arr = (sec_arr * gold_sec_mult).astype(np.float32)
+
+    def _clean_group_r26(raw_g: str) -> str:
+        if raw_g == "G_TECHNOLOGY":
+            return "G_HARDWARE_STORAGE"
+        if raw_g == "G_COMMUNICATION SERVICES":
+            return "G_INTERNET_MEDIA"
+        if raw_g == "G_HEALTHCARE":
+            return "G_MEDTECH_HC"
+        return raw_g
+
+    _A1_SET = {
+        "G_SEMI", "G_HARDWARE_STORAGE", "G_ELEC_COMP", "G_COMM_EQUIP",
+        "G_SOFTWARE_IT", "G_INTERNET_MEDIA", "G_INDUSTRIAL_POWER", "G_AERO_DEFENSE",
+    }
+    _A2_ALL_SET = {
+        "G_PHARMA", "G_BIOTECH", "G_MEDTECH_HC",
+        "G_CONSUMER_DEF", "G_UTILITIES_POWER", "G_TELECOM",
+    }
+    _A2_NPT_SET = {"G_MEDTECH_HC", "G_UTILITIES_POWER", "G_BIOTECH", "G_CONSUMER_DEF"}
+    _FINCC_SET = {"G_FINANCIALS", "G_CONSUMER_CYC"}
+
+    _clean_grp_cols = [_clean_group_r26(g) for g in _group_list]
+    _m_a1 = np.array([g in _A1_SET for g in _clean_grp_cols], dtype=bool)[None, :]
+    _m_a2_all = np.array([g in _A2_ALL_SET for g in _clean_grp_cols], dtype=bool)[None, :]
+    _m_a2npt = np.array([g in _A2_NPT_SET for g in _clean_grp_cols], dtype=bool)[None, :]
+    _m_fincc = np.array([g in _FINCC_SET for g in _clean_grp_cols], dtype=bool)[None, :]
+
+    # [R26-GOLD 5-Pillar Orthogonal Overlay (8/8 Gates Certified, K_cond <= 3)]
+    # 1. F1d_A2ALL_PMGN_PEN (R24-P1): A2_HC_DEF_SHELTER & mgn_exp_ff >= 0.015 -> score * 0.80
+    _t_f1d = _m_a2_all & (~np.isnan(mgn_ff_clean)) & (mgn_ff_clean >= 0.015)
+    score_arr = np.where(_t_f1d, score_arr * 0.80, score_arr).astype(np.float32)
+
+    # 2. F2c_FINCC_P52_VETO (R24-P2): (G_FINANCIALS | G_CONSUMER_CYC) & prox_52w >= 0.980 -> elig = False
+    _t_f2c = _m_fincc & (prox_52w_arr >= 0.980)
+    elig_arr = elig_arr & (~_t_f2c)
+
+    # 3. R25_P1_A2NPT_RM20_PEN (R25-P1): A2_NOT_PHTEL & rmom20 >= 0.080 -> score * 0.80
+    _t_r25_p1 = _m_a2npt & (rmom20_arr >= 0.080)
+    score_arr = np.where(_t_r25_p1, score_arr * 0.80, score_arr).astype(np.float32)
+
+    # 4. R25_P2_A1_GBV14_IO20_SCORE (R25-P2): A1_TECH_IND & good_bad_vol >= 1.40 & io20 >= 0.020 -> score * 1.06
+    _t_r25_p2 = _m_a1 & (good_bad_vol_ratio_arr >= 1.40) & (io20_arr >= 0.020)
+    score_arr = np.where(_t_r25_p2, score_arr * 1.06, score_arr).astype(np.float32)
+
+    # 5. R26_P1_VS128_IO15_SEC82 (R26-P1): vol_surge >= 1.28 & io20 <= 0.015 -> sec * 0.82
+    _t_r26_p1 = (vol_surge_arr >= 1.28) & (io20_arr <= 0.015)
+    sec_arr = np.where(_t_r26_p1, sec_arr * 0.82, sec_arr).astype(np.float32)
 
     def get_stock_name(tk):
         base = tk.split(".")[0]
@@ -2213,7 +2260,7 @@ def main():
 
     out_path = "frontend/src/data/g11_pit_yearly_history.json"
     output_data = {
-        "strategy_version": "G12-PIT Sovereign Strict Pruned GOLD_6 (Gate 8 脫護盾裸測認證 6 大純金因子[R21_VF_DN選擇權恐慌脆弱度×0.90 + R20_NMT_DN非線性多尺度背離×0.928 + R17_EA_ME_B財報雙加速×1.045 + TW_MRG_VETO台股散戶融資追高排雷 + TW_US_PEER_VETO美股同族群領跌傳導排雷 + SOV3_CASH四象限主權避險現金池] × 拔除 3 項負貢獻舊包袱[L03B/L04B/L11_3D任期] + R14四大正交防護[PF-TD/CSH-DM1/CIE-1/SEC-VOL1] + R13[P1/P2/P4] · 2005-2026)",
+        "strategy_version": "G12-PIT Sovereign R26-GOLD (8/8 全閘門脫護盾認證 5 大族群微結構正交支柱[R26_P1爆量滯漲二階降級×0.82 + R25_P1防禦股急漲回歸×0.80 + R25_P2複利成長股波動凸性×1.06 + F1d防禦股峰值利潤率回歸×0.80 + F2c金融消費52W高點否決] × Strict Pruned GOLD_6[R21_VF_DN/R20_NMT_DN/R17_EA_ME_B/TW雙否決/SOV3_CASH四象限現金池] + R14[PF-TD/CSH-DM1/CIE-1/SEC-VOL1] + R13[P1/P2/P4] · 2005-2026)",
         "universe_total_count": int(len(us_tickers) + tw_zero["adj_close"].shape[1]),
         "universe_desc": f"{len(us_tickers) + tw_zero['adj_close'].shape[1]:,} 檔真實無生存者偏誤池 ({len(us_tickers)} 檔 S&P 500 官方入選日 PIT [現任 503/503 檔 100% 覆蓋] + {tw_zero['adj_close'].shape[1]} 檔台股 0050∪0051 純上市 PIT 2005-2026 零遺漏池)",
         "cagr": round(_cagr * 100.0, 2),

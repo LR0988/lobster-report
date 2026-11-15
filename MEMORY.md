@@ -4,7 +4,9 @@
 
 ---
 
-## 👑 一、 現行旗艦策略基準：全球高流動性主權泰坦 2.0 (G7+ 正交金礦終極版)
+> **🚀 現行線上生產實盤冠軍 (2026-11-15 上線)：`G12-PIT Sovereign R26-GOLD`**（`CAGR 44.60%` / `3,099.7x` / `Ex26 39.90%` / `Harsh_Ex26 37.23%` / `mMDD -21.96%` / `dMDD -28.30%` / `Calmar 2.03` / `Sharpe 1.39` / `Sortino 2.15` / `半月勝率 63.9%` / `個股勝率 60.12%` / `主帥勝率 64.52%` / `勝年 20/22` / `BeatSPY 18/22` / **`8/8 Gates PASS`**，詳見**第十一節**；以下第一至九節為歷史演進檔案）。
+
+## 👑 一、 歷史策略檔案：全球高流動性主權泰坦 2.0 (G7+ 正交金礦版，已由第十一節 `R26-GOLD` 取代)
 - **回測驗證跨度**：2004-01 ~ 2026-10（22.8 年、547 個半月調倉期，無生存者偏誤、含真實台股手續費/0.3%證交稅與美股滑價）
 - **核心權威績效**：
   - **年化報酬率 (CAGR)**：**`67.76%`**（23 年累積總倍數 **`125,545.5 倍`**，較 G7 基準再增 `+5,298 倍`）
@@ -256,5 +258,22 @@
    - **🟡 可再砍 `5` 項被 `GOLD_6` 吸收之繁瑣補丁**（`L09b dvol20+Top5破月線` `-0.00%`、`L12 Top-5 換馬迷宮` `-0.06%`、`L14c P4 50/50限價單` `-0.08%`、`L04d fake_breakout` `-0.13%`、`L05 churn` `-0.21%`；合砍 `8/21 = 38%` 舊規則）➔ **`Streamlined GOLD_6`**：**`22Y = 39.92%`（`+2.22%` vs `R14`）｜ `Ex26 = 35.16%` ｜ `mMDD = -23.98%` ｜ `HarshEx26 = 31.94%` ｜ `21/22` WY**。
    - **🛡️ 不可誤砍真棟樑**：`SEC-VOL1`（拔除跌 `-0.93%`, `mMDD -27.11%`，與 `R21_VF_DN` 正交互補）、`coiled_spring` (`-2.51%`)、`M1 換帥` (`-1.94%`)、`PF-TD` (`-1.55%`)、`dist_veto` (`-1.46%`)、`Energy S3+P1` (`-1.25%`) 等 `13` 項。
 4. **Tombstones `🪦 #99 ~ #101`**：嚴禁複合 `w0` 限倉補丁群（合體裸奔 `-0.75% / -0.78%`、`MRNA 5-cond` 改善 `0.00%`、日線 `Crumble` 代理 `-1.50%`）、台股 6 條後門解鎖（滿倉熊市 `-0.87%`）、大樣本路徑寄生規則（`IdioAC/RT_Z/k1-k2/FIP_NEW/NMT_UP`）與 `R1~R14` 死貓跳懲罰等負貢獻包袱。
-5. **正式上線實盤 (`2026-11-14`)**：依 Frank 指令已將 **`Strict Pruned GOLD_6`**（`39.98% CAGR / 1,527.7x / -23.78% mMDD / -28.90% dMDD / Calmar 1.68 / Sharpe 1.28 / Sortino 1.96 / 半月勝率 61.8% / 勝年 21/22`）升級至全鏈路生產環境（[`export_g11_pit_detailed_history.py`](file:///Users/huanggin-chen/openclaw_test/export_g11_pit_detailed_history.py) + [`global_sovereign_service.py`](file:///Users/huanggin-chen/openclaw_test/global_sovereign_service.py) + [`GlobalSovereignDashboard.js`](file:///Users/huanggin-chen/openclaw_test/frontend/src/components/GlobalSovereignDashboard.js) + Supabase `stock_ml_cache` + `https://lobster-report.vercel.app`）。`2026-11-12` 實盤持倉：**A 梯隊** (`93.0%`：`LLY 57.7% / TXN 18.7% / ADI 16.6%`)、**B 梯隊** (`100.0%`：`MRK 55.9% / ACN 18.5% / LLY 25.0%`，`11/03` `P1` 換馬自 `XOM`)。
+5. **歷史線上實盤 (`2026-11-14`，已由第十一節 `R26-GOLD` 升級取代)**：曾將 `Strict Pruned GOLD_6`（`39.98% CAGR / 1,527.7x / -23.78% mMDD`）部署上線。
+
+---
+
+## 🏆 十一、 2026-11-15 `G12-PIT Sovereign R26-GOLD` 五大族群微結構正交支柱上線實盤與 `R27` 帕累托邊界 (`🪦 #102`)
+
+1. **現行最高權威線上實盤基準 (`G12-PIT Sovereign R26-GOLD`，`1,744` 檔全成分零偏誤 PIT `2005-01-03 ~ 2026-11-12`，`8/8 Gates PASS`)**：
+   - **總體績效**：**`CAGR 44.60%`**（vs `GOLD_6 39.98%` **`+4.62%/年`**）、**累積 `3,099.7x`**、**`Ex26 39.90%`**、**`Harsh_Ex26 37.23%`**、**`G1(05–15) 29.47%`** / **`G2(16–25) 52.70%`** / **`G2_incl26 62.03%`**。
+   - **風險控制**：月 MDD **`-21.96%`** / 日 MDD **`-28.30%`** / **Calmar `2.03`** / **Sharpe `1.39`** / **Sortino `2.15`**。
+   - **勝率與年代韌性**：半月勝率 **`63.9%`**、個股勝率 **`60.12%`**、主帥 (`Slot #0`) 勝率 **`64.52%`**；勝年 **`20/22 (90.9%)`**、戰勝 SPY **`18/22`**；危機年 **`2008 +11.77%`**, **`2018 +100.89%`**, **`2020 +79.01%`**, **`2022 +7.49%`**。
+2. **五大族群異質微結構正交支柱（疊加於 `Strict Pruned GOLD_6` 之上，皆過 `8/8 Gates`）**：
+   - `F1d_A2ALL_PMGN_PEN` (`A2` 防禦避風港 & `mgn_exp_ff >= 0.015` ➔ `score × 0.80`)
+   - `F2c_FINCC_P52_VETO` (`G_FINANCIALS | G_CONSUMER_CYC` & `prox_52w >= 0.980` ➔ `elig = False` 否決)
+   - `R25_P1_A2NPT_RM20_PEN` (`A2_NOT_PHTEL` & `rmom20 >= 0.080` ➔ `score × 0.80`)
+   - `R25_P2_A1_GBV14_IO20_SCORE` (`A1_TECH_IND` & `good_bad_vol >= 1.40` & `io20 >= 0.020` ➔ `score × 1.06`)
+   - `R26_P1_VS128_IO15_SEC82` (`Rank #2~#5` & `vol_surge >= 1.28` & `io20 <= 0.015` ➔ `sec × 0.82`)
+3. **`R27` 帕累托邊界教訓（Tombstone `🪦 #102`）**：實證 `Slot #0` 單期 15D 原始勝率上限約 `65.1%~66.9%`（合理實戰區間 `60%~65%`；多期連抱勝率可達 `78.5%`，平均報酬 `+5.79%`，賺賠比 `2.12x`），強推至 `70%` 會錯殺右尾突破股導致 CAGR 大幅失血或過不了 `Gate 8`。
+4. **上線同步與 `2026-11-12` 實盤持倉**：已完整通過 [`pit_integrity_gatekeeper.py`](file:///Users/huanggin-chen/openclaw_test/pit_integrity_gatekeeper.py) Gen-2 `12` 道實盤與 8 重投毒檢驗，並同步更新 [`export_g11_pit_detailed_history.py`](file:///Users/huanggin-chen/openclaw_test/export_g11_pit_detailed_history.py)、[`global_sovereign_service.py`](file:///Users/huanggin-chen/openclaw_test/global_sovereign_service.py)、[`GlobalSovereignDashboard.js`](file:///Users/huanggin-chen/openclaw_test/frontend/src/components/GlobalSovereignDashboard.js)、Supabase `stock_ml_cache` 與 `https://lobster-report.vercel.app`。當前官方動態模擬持倉：**A 梯隊** (`93.0%` 曝險：`LLY 57.7% / TXN 18.7% / ADI 16.6%`)、**B 梯隊** (`100.0%` 曝險：`MRK 52.4% / LLY 22.6% / TXN 25.0%`，`11/03` `P1` 換馬自 `XOM`)。
 
