@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """
 commodity_cta_service.py
-【🛢️ 全球原物料期貨 CTA 泰坦實戰引擎 V5.0 (高勝率雙階鎖利 × DXY/ER 正交防擬合版)】
+【🛢️ 全球原物料期貨 CTA 泰坦實戰引擎 V6.0 (雙棘輪鎖利護盤 × 商業量能參與度 × 極端波動封頂防擬合版)】
 100% 整合於統一資料庫 tw_stock.db:
 - 資料表 1: commodity_futures_metadata (19 大全球核心原物料期貨規格、標準/微型合約乘數、保證金、板塊、即時遠月期限結構)
 - 資料表 2: commodity_futures_daily (2004~2026 超過 10.8 萬筆日線、ATR_20、NATR_20、因果實證轉倉收益率 Roll Yield、裂解/壓榨價差、真實轉倉還原報酬)
 - 資料表 3: macro_indicators (外生宏觀美元指數 DXY 與美債殖利率，Zero Look-Ahead 因果對齊)
 - 資料表 4: commodity_cta_user_trades (個人原物料期貨/微型海期/ETF 實戰跟單帳本)
 
-V5.0 五大低自由度正交升級 (嚴格 T+1 開盤成交 + 漲跌停/無量日禁買賣 + 零標的黑名單):
+V6.0 八重低自由度正交升級 (嚴格 T+1 開盤成交 + 漲跌停/無量日禁買賣 + 零標的黑名單):
 1. M1 高確信門檻與在位者滯後保護 (ts_entry=0.75, inc_hyst=1.28): 濾除期望值為負之低確信雜訊單並阻斷週換倉誤殺贏家
 2. M2 Kaufman (1995) ER_40 路徑效率連續信噪乘數: 順滑實體趨勢加權、高雜訊震盪降權 (K=1)
 3. M3 外生宏觀 DXY 美元計價順逆風雙向濾網: 弱勢美元順風加碼 / 美元急漲保護非貴金屬多單與強化空單 (K=2)
-4. M4 不對稱雙階鎖利架構 (1.8×NATR 獲利兌現 38% + 62% 黃金核心倉位不設上限追蹤): 大幅修復 MFE 回吐敗局，單筆勝率突破 52%
-5. M5 Moreira & Muir (2017 JF) 60D 已實現波動率調節器 (Target Vol=21.2%): 因果回收鎖利釋放的風險預算並在極端波動期主動降槓桿
+4. M4 不對稱雙階鎖利架構 (1.8×NATR 獲利兌現 38% + 62% 黃金核心倉位不設上限追蹤): 修復 MFE 回吐敗局，單筆勝率躍升
+5. M5 Moreira & Muir (2017 JF) 60D 已實現波動率調節器 (Target Vol=21.5%): 因果回收鎖利釋放的風險預算並在極端波動期主動降槓桿
+6. M6 雙棘輪獲利護盾 (Dual-Ratchet Profit Shield): 觸發 38% 鎖利後啟動一階 -0.36×NATR 保本緩衝護盾 + 二階 3.5×NATR 超額行情 +0.65×NATR 鎖利底線
+7. M7 商業避險量能參與度 (VOL20_120 = VolMA20/VolMA120): 與現有五因子近乎完全正交 (max|ρ|=0.0281)，避開實體低量假突破並傾斜資金至真商業避險參與趨勢
+8. M8 單合約 1-ATR 風險天花板 (0.0155 / 0.0125) 與風險預算守恆: 抑制 6%~9% 高波動 climax 爆倉尾險並釋放額度至健康趨勢合約
 """
 import os
 import json
@@ -63,7 +66,7 @@ def _ensure_user_cta_table(conn):
 
 
 def sync_commodity_cta_to_supabase(dashboard_data: dict) -> bool:
-    """將最新全球原物料期貨 CTA V5.0 看板數據同步寫入 Supabase stock_ml_cache (commodity_cta_dashboard)"""
+    """將最新全球原物料期貨 CTA V6.0 看板數據同步寫入 Supabase stock_ml_cache (commodity_cta_dashboard)"""
     try:
         body = json.dumps({
             "model_type": "commodity_cta_dashboard",
@@ -297,6 +300,12 @@ def build_cta_environment(
     dxy_ma60 = dxy_s.rolling(60, min_periods=10).mean()
     dxy_ret20 = dxy_s.pct_change(20).fillna(0.0)
 
+    # M7: Commercial & Hedger Volume Participation Ratio (VOL20_120, causal shift(1) applied below)
+    vol20_120 = (
+        vol_mat.rolling(20, min_periods=5).mean()
+        / vol_mat.rolling(120, min_periods=20).mean().replace(0, np.nan)
+    ).fillna(1.0).clip(0.30, 2.50)
+
     bt_idx = close_mat.loc["2005-01-03":].index
 
     return {
@@ -319,6 +328,7 @@ def build_cta_environment(
         "tsmom_mat": tsmom_mat,
         "ry_mat": ry_mat,
         "er40_mat": er40_mat,
+        "vol20_120": vol20_120,
         "atr_mat": atr_mat,
         "natr_mat": natr_mat,
         "natr_floor": natr_floor,
@@ -361,6 +371,7 @@ def build_cta_environment(
         "TS_p": tsmom_mat.shift(1).loc[bt_idx, tickers].values,
         "RY_p": ry_mat.shift(1).loc[bt_idx, tickers].values,
         "ER40_p": er40_mat.shift(1).loc[bt_idx, tickers].values,
+        "V20_120_p": vol20_120.shift(1).loc[bt_idx, tickers].values,
         "PZ_p": phys_z60.shift(1).loc[bt_idx, tickers].values,
         "CL_v3_p": chandelier_l_v3.shift(1).loc[bt_idx, tickers].values,
         "CS_v3_p": chandelier_s_v3.shift(1).loc[bt_idx, tickers].values,
@@ -418,6 +429,20 @@ def _evaluate_candidate_signals_row(
     er_slope: float,
     pos: dict,
     allowed_set=None,
+    natr_raw_row: np.ndarray = None,
+    v20_120_row: np.ndarray = None,
+    m6_ratchet: bool = True,
+    m7_vol_part: bool = True,
+    m8_atr_cap: bool = True,
+    v_thin: float = 0.72,
+    v_hi: float = 1.05,
+    vm_hi: float = 1.14,
+    vm_lo: float = 0.90,
+    atr_risk_cap_l: float = 0.0155,
+    atr_risk_cap_s: float = 0.0125,
+    pw_cap_l: float = 0.45,
+    check_ratchet_fn=None,
+    trig_counts: dict = None,
 ) -> tuple:
     """Single source of truth for scoring weekly rebalance candidates (used identically by backtest & live radar)."""
     cands = []
@@ -432,9 +457,22 @@ def _evaluate_candidate_signals_row(
         m20 = float(m20_row[j])
         m60 = float(m60_row[j])
         m200 = float(m200_row[j])
+        v20_120 = float(v20_120_row[j]) if v20_120_row is not None else 1.0
         if np.isnan(px) or np.isnan(m60) or np.isnan(m200):
-            per_ticker_diag[tk] = {"status": "⏳ 暖機中", "dir": "FLAT", "conv": 0.0, "em": 1.0, "dm": 1.0, "ev_m": 1.0}
+            per_ticker_diag[tk] = {
+                "status": "⏳ 暖機中", "dir": "FLAT", "conv": 0.0,
+                "em": 1.0, "dm": 1.0, "ev_m": 1.0, "vm": 1.0, "v20_120": round(v20_120, 2),
+            }
             continue
+
+        if m6_ratchet and check_ratchet_fn is not None and tk in pos:
+            rh, r_rsn = check_ratchet_fn(pos[tk])
+            if rh:
+                per_ticker_diag[tk] = {
+                    "status": r_rsn, "dir": "FLAT", "conv": 0.0,
+                    "em": 1.0, "dm": 1.0, "ev_m": 1.0, "vm": 1.0, "v20_120": round(v20_120, 2),
+                }
+                continue
 
         sec = sec_list[j]
         ts = float(ts_row[j])
@@ -443,6 +481,7 @@ def _evaluate_candidate_signals_row(
         r60 = float(r60_row[j])
         r126 = float(r126_row[j])
         natr_s = float(natr_safe_row[j])
+        natr_raw = float(natr_raw_row[j]) if natr_raw_row is not None else natr_s
         h40 = float(h40_row[j])
         l40 = float(l40_row[j])
         cl = float(cl_row[j])
@@ -467,6 +506,22 @@ def _evaluate_candidate_signals_row(
         em_s = (0.85 + 0.65 * min(er40, 0.50)) if m2_er else 1.0
         dm_s = (1.15 if not dxy_weak else 0.88) if m3_dxy else 1.0
 
+        vm = 1.0
+        veto_thin = False
+        if m7_vol_part:
+            if v20_120 >= v_hi:
+                vm = vm_hi
+                if trig_counts is not None:
+                    trig_counts["m7_vol_tilt"] += 1
+            elif v20_120 < 0.85:
+                vm = vm_lo
+                if trig_counts is not None:
+                    trig_counts["m7_vol_tilt"] += 1
+            if sec != "貴金屬 (Precious Metals)" and (v20_120 < v_thin) and (not is_hl) and (not is_hs) and (abs(ts) < 1.35):
+                veto_thin = True
+                if trig_counts is not None and ts >= (0.42 if is_hl else ts_entry) and px > m60:
+                    trig_counts["m7_thin_veto"] += 1
+
         ev_m = 1.0
         if use_event:
             if ry < -0.025 and s5n > 1.5 and sec != "貴金屬 (Precious Metals)":
@@ -476,9 +531,9 @@ def _evaluate_candidate_signals_row(
             if clv5 >= 0.58 and (ry >= 0.0 or sec == "貴金屬 (Precious Metals)"):
                 ev_m *= 1.08
 
-        diag_status = "⏳ 區間觀望 (未達 V5.0 突破/確信門檻)"
+        diag_status = "⏳ 區間觀望 (未達 V6.0 突破/確信門檻)"
         diag_dir = "FLAT"
-        diag_conv = round(ts * cm * pm * m200_b * ev_m * em_l * dm_l, 2)
+        diag_conv = round(ts * cm * pm * m200_b * ev_m * em_l * dm_l * vm, 2)
 
         eff_ts_l = (0.42 if is_hl else ts_entry) if m1_hyst else (0.60 * 0.65 if is_hl else 0.60)
         eff_r60_l = 0.020 if is_hl else 0.045
@@ -491,12 +546,15 @@ def _evaluate_candidate_signals_row(
 
         if veto_contango or veto_event_spike:
             diag_status = "🚫 正價差新聞脈衝/深貼水禁買 (Carry & Kilian Veto)"
+        elif veto_thin:
+            diag_status = "🚫 實體商品低量假突破禁買 (M7 Thin-Volume Veto)"
 
         if (
             not veto_contango
             and not veto_event_spike
             and not veto_chop
             and not veto_bear_l
+            and not veto_thin
             and ts >= eff_ts_l
             and r60 >= eff_r60_l
             and r126 > -0.01
@@ -507,12 +565,20 @@ def _evaluate_candidate_signals_row(
         ):
             hm = (inc_hyst if is_hl else 1.0) if m1_hyst else 1.0
             chop_scale = 0.55 if is_macro_chop else 1.0
-            conv = ts * cm * pm * m200_b * ev_m * em_l * dm_l * hm * (1.0 + min(r60, 0.40))
-            pw = min(base_w * chop_scale * cm * pm * m200_b * ev_m * em_l * dm_l * min(ts / 0.80, 1.60), 0.44 if m5_vol else 0.38)
+            conv = ts * cm * pm * m200_b * ev_m * em_l * dm_l * vm * hm * (1.0 + min(r60, 0.40))
+            raw_pw = base_w * chop_scale * cm * pm * m200_b * ev_m * em_l * dm_l * vm * min(ts / 0.80, 1.60)
+            cap_l = (pw_cap_l if m8_atr_cap else 0.44) if m5_vol else 0.38
+            if m8_atr_cap:
+                dyn_atr_cap = atr_risk_cap_l / max(max(natr_raw, natr_s) / 100.0, 0.01)
+                if trig_counts is not None and min(raw_pw, cap_l) > dyn_atr_cap:
+                    trig_counts["m8_atr_capped"] += 1
+                pw = min(raw_pw, cap_l, dyn_atr_cap)
+            else:
+                pw = min(raw_pw, cap_l)
             if m4_scale and is_hl and tk in pos and pos[tk].get("scaled"):
                 pw *= pos[tk]["rem_frac"]
             cands.append((conv, j, pw))
-            diag_status = "🔥 順勢做多正選 (V5.0 Long Active)"
+            diag_status = "🔥 順勢做多正選 (V6.0 Long Active)"
             diag_dir = "LONG"
             diag_conv = round(conv, 2)
 
@@ -521,6 +587,7 @@ def _evaluate_candidate_signals_row(
         if (
             in_deflation
             and not is_macro_chop
+            and not veto_thin
             and ts <= eff_ts_s
             and r60 <= -0.05
             and r126 < 0.0
@@ -534,8 +601,17 @@ def _evaluate_candidate_signals_row(
         ):
             scm = 1.40 if ry < -0.10 else 1.00
             hm = (inc_hyst if is_hs else 1.0) if m1_hyst else 1.0
-            conv = abs(ts) * scm * em_s * dm_s * hm * 0.95
-            pw = -min(base_w * 0.85 * scm * em_s * dm_s * min(abs(ts) / 0.90, 1.40), 0.34 if m5_vol else 0.30)
+            conv = abs(ts) * scm * em_s * dm_s * vm * hm * 0.95
+            raw_pws = base_w * 0.85 * scm * em_s * dm_s * vm * min(abs(ts) / 0.90, 1.40)
+            cap_s = 0.34 if m5_vol else 0.30
+            if m8_atr_cap:
+                dyn_atr_cap_s = atr_risk_cap_s / max(max(natr_raw, natr_s) / 100.0, 0.01)
+                if trig_counts is not None and min(raw_pws, cap_s) > dyn_atr_cap_s:
+                    trig_counts["m8_atr_capped"] += 1
+                pws = min(raw_pws, cap_s, dyn_atr_cap_s)
+            else:
+                pws = min(raw_pws, cap_s)
+            pw = -pws
             if m4_scale and is_hs and tk in pos and pos[tk].get("scaled"):
                 pw *= pos[tk]["rem_frac"]
             cands.append((conv, j, pw))
@@ -550,6 +626,8 @@ def _evaluate_candidate_signals_row(
             "em": round(em_s if diag_dir == "SHORT" else em_l, 3),
             "dm": round(dm_s if diag_dir == "SHORT" else dm_l, 3),
             "ev_m": round(ev_m, 3),
+            "vm": round(vm, 3),
+            "v20_120": round(v20_120, 2),
         }
 
     return cands, per_ticker_diag
@@ -563,6 +641,9 @@ def run_cta_titan_simulation(
     m3_dxy: bool = True,
     m4_scale: bool = True,
     m5_vol: bool = True,
+    m6_ratchet: bool = True,
+    m7_vol_part: bool = True,
+    m8_atr_cap: bool = True,
     use_event: bool = True,
     use_v3_chandelier: bool = False,
     ts_entry: float = 0.75,
@@ -570,15 +651,26 @@ def run_cta_titan_simulation(
     er_slope: float = 0.75,
     scale_natr: float = 1.8,
     lock_frac: float = 0.38,
-    target_vol: float = 0.212,
-    vol_clip: tuple = (0.78, 1.48),
+    be_cushion: float = 0.36,
+    super_trig: float = 3.5,
+    super_lock: float = 0.65,
+    v_thin: float = 0.72,
+    v_hi: float = 1.05,
+    vm_hi: float = 1.14,
+    vm_lo: float = 0.90,
+    atr_risk_cap_l: float = 0.0155,
+    atr_risk_cap_s: float = 0.0125,
+    pw_cap_l: float = 0.45,
+    target_vol: float = None,
+    vol_clip: tuple = None,
     g_cap: float = 1.95,
     cost_bps: float = 0.0006,
     allowed_set=None,
     t1_close_delay: bool = False,
+    rebal_phase: int = 1,
     collect_trades: bool = False,
 ) -> dict:
-    """Reusable Strict T+1 Open & Limit-Lock Tradable CTA Simulation Engine."""
+    """Reusable Strict T+1 Open & Limit-Lock Tradable CTA Simulation Engine (Supports V3..V6.0)."""
     bt_idx = env["bt_idx"]
     tickers = env["tickers"]
     meta_map = env["meta_map"]
@@ -607,6 +699,7 @@ def run_cta_titan_simulation(
     TS_p = env["TS_p"]
     RY_p = env["RY_p"]
     ER40_p = env["ER40_p"]
+    V20_120_p = env["V20_120_p"]
     PZ_p = env["PZ_p"]
     CL_p = env["CL_v3_p"] if use_v3_chandelier else env["CL_p"]
     CS_p = env["CS_v3_p"] if use_v3_chandelier else env["CS_p"]
@@ -620,6 +713,9 @@ def run_cta_titan_simulation(
     DXY_M60_p = env["DXY_M60_p"]
     DXY_R20_p = env["DXY_R20_p"]
 
+    eff_tv = target_vol if target_vol is not None else (0.215 if (m5_vol and m8_atr_cap) else 0.212)
+    eff_vc = vol_clip if vol_clip is not None else ((0.78, 1.49) if (m5_vol and m8_atr_cap) else (0.78, 1.48))
+
     n_days, n_tk = R.shape
     w = np.zeros(n_tk)
     gld_w = 0.0
@@ -629,8 +725,21 @@ def run_cta_titan_simulation(
     pos = {}
     blocked_limit_days_count = 0
     untrad_violations = 0
+    ratchet_exits = 0
     last_vol_scalar = 1.0
-    trig_counts = {"m1_filtered": 0, "m1_hyst_saved": 0, "m2_er_boost": 0, "m3_dxy_weak": 0, "m3_dxy_surge": 0, "m4_scaled": 0, "m5_rebal": 0}
+    trig_counts = {
+        "m1_filtered": 0,
+        "m1_hyst_saved": 0,
+        "m2_er_boost": 0,
+        "m3_dxy_weak": 0,
+        "m3_dxy_surge": 0,
+        "m4_scaled": 0,
+        "m5_rebal": 0,
+        "m6_ratchet_guarded": 0,
+        "m7_vol_tilt": 0,
+        "m7_thin_veto": 0,
+        "m8_atr_capped": 0,
+    }
 
     def _close_position(tk_sym: str, j_idx: int, dt_val, exec_px: float, exit_reason: str):
         info = pos.pop(tk_sym)
@@ -659,6 +768,7 @@ def run_cta_titan_simulation(
                 "exit_price": round(exec_px, 2),
                 "holding_days": hold_d,
                 "scaled_out": bool(info["scaled"]),
+                "ratchet_triggered": bool(info.get("ratchet_used", False)),
                 "scale_date": info["scale_dt"] if info["scaled"] else None,
                 "scale_price": round(info["scale_px"], 2) if info["scaled"] else None,
                 "spot_return_pct": round(float(spot_r), 2),
@@ -681,6 +791,17 @@ def run_cta_titan_simulation(
         info["scale_px"] = exec_px
         trig_counts["m4_scaled"] += 1
 
+    def _check_ratchet(info: dict) -> tuple:
+        if not (m6_ratchet and info["scaled"]):
+            return False, ""
+        trig_counts["m6_ratchet_guarded"] += 1
+        en = info["entry_natr"]
+        if info["peak_eq"] >= 1.0 + super_trig * en and info["runner_eq"] <= 1.0 + super_lock * en:
+            return True, "🔒 M6 二階超額趨勢鎖利護盤 (T+1開盤成交)"
+        if info["runner_eq"] <= 1.0 - be_cushion * en:
+            return True, "🛡️ M6 一階鎖利後保本緩衝護盾 (T+1開盤成交)"
+        return False, ""
+
     for t in range(1, n_days):
         dt_val = bt_idx[t]
         dt_str = dt_val.strftime("%Y-%m-%d")
@@ -700,7 +821,7 @@ def run_cta_titan_simulation(
                 step_r = R[t, j] if t1_close_delay else R_ov[t, j]
                 pos[tk]["runner_open"] = pos[tk]["runner_eq"] * (1.0 + pos[tk]["dir"] * step_r)
 
-        if t % 5 != 1:
+        if t % 5 != rebal_phase:
             for j in range(n_tk):
                 tk = tickers[j]
                 want_scale = (
@@ -710,8 +831,9 @@ def run_cta_titan_simulation(
                     and abs(w[j]) > 0.01
                     and (pos[tk]["runner_eq"] - 1.0) >= max(scale_natr * (NATR_p[t, j] / 100.0), 0.035)
                 )
-                want_stop_l = w[j] > 0 and (C_p[t, j] < CL_p[t, j] or C_p[t, j] < M60_p[t, j])
-                want_stop_s = w[j] < 0 and (C_p[t, j] > CS_p[t, j] or C_p[t, j] > M60_p[t, j] or br60 > 0.45)
+                ratchet_hit, ratchet_reason = _check_ratchet(pos[tk]) if tk in pos else (False, "")
+                want_stop_l = w[j] > 0 and (C_p[t, j] < CL_p[t, j] or C_p[t, j] < M60_p[t, j] or ratchet_hit)
+                want_stop_s = w[j] < 0 and (C_p[t, j] > CS_p[t, j] or C_p[t, j] > M60_p[t, j] or br60 > 0.45 or ratchet_hit)
 
                 if UNTRAD[t, j]:
                     if want_scale or want_stop_l or want_stop_s:
@@ -720,7 +842,7 @@ def run_cta_titan_simulation(
 
                 exec_px = float(C_t[t, j]) if t1_close_delay else (float(O_t[t, j]) if O_t[t, j] > 0 else float(C_p[t, j]))
 
-                if want_scale:
+                if want_scale and (not ratchet_hit):
                     _trigger_scale_out(tk, j, dt_val, exec_px)
                     to += abs(w[j]) * lock_frac
                     w[j] *= (1.0 - lock_frac)
@@ -728,12 +850,24 @@ def run_cta_titan_simulation(
                 if want_stop_l:
                     to += abs(w[j])
                     if tk in pos:
-                        _close_position(tk, j, dt_val, exec_px, "🛡️ 觸及 3.0×ATR 防洗盤吊燈/季線停利 (T+1開盤成交)")
+                        if ratchet_hit:
+                            pos[tk]["ratchet_used"] = True
+                            ratchet_exits += 1
+                        _close_position(
+                            tk, j, dt_val, exec_px,
+                            ratchet_reason if ratchet_hit else "🛡️ 觸及 3.0×ATR 防洗盤吊燈/季線停利 (T+1開盤成交)",
+                        )
                     w[j] = 0.0
                 elif want_stop_s:
                     to += abs(w[j])
                     if tk in pos:
-                        _close_position(tk, j, dt_val, exec_px, "🛡️ 空方觸及 2.8×ATR 吊燈/寬幅回升回補 (T+1開盤成交)")
+                        if ratchet_hit:
+                            pos[tk]["ratchet_used"] = True
+                            ratchet_exits += 1
+                        _close_position(
+                            tk, j, dt_val, exec_px,
+                            ratchet_reason if ratchet_hit else "🛡️ 空方觸及 2.8×ATR 吊燈/寬幅回升回補 (T+1開盤成交)",
+                        )
                     w[j] = 0.0
         else:
             vol_scalar = 1.0
@@ -741,7 +875,7 @@ def run_cta_titan_simulation(
                 past_r = r_arr[max(1, t - 60):t]
                 rv = float(np.std(past_r) * np.sqrt(252.0))
                 if rv > 0.04:
-                    vol_scalar = float(np.clip(target_vol / rv, vol_clip[0], vol_clip[1]))
+                    vol_scalar = float(np.clip(eff_tv / rv, eff_vc[0], eff_vc[1]))
                     trig_counts["m5_rebal"] += 1
             last_vol_scalar = vol_scalar
             if dxy_weak:
@@ -797,6 +931,20 @@ def run_cta_titan_simulation(
                 er_slope=er_slope,
                 pos=pos,
                 allowed_set=allowed_set,
+                natr_raw_row=NATR_p[t],
+                v20_120_row=V20_120_p[t],
+                m6_ratchet=m6_ratchet,
+                m7_vol_part=m7_vol_part,
+                m8_atr_cap=m8_atr_cap,
+                v_thin=v_thin,
+                v_hi=v_hi,
+                vm_hi=vm_hi,
+                vm_lo=vm_lo,
+                atr_risk_cap_l=atr_risk_cap_l,
+                atr_risk_cap_s=atr_risk_cap_s,
+                pw_cap_l=pw_cap_l,
+                check_ratchet_fn=_check_ratchet,
+                trig_counts=trig_counts,
             )
 
             cands.sort(reverse=True, key=lambda x: x[0])
@@ -825,7 +973,14 @@ def run_cta_titan_simulation(
                 exec_px = float(C_t[t, j]) if t1_close_delay else (float(O_t[t, j]) if O_t[t, j] > 0 else float(C_p[t, j]))
 
                 if old_d != 0 and old_d != new_d and tk in pos:
-                    _close_position(tk, j, dt_val, exec_px, "💰 雙階鎖利後順勢波段換倉" if pos[tk]["scaled"] else "🔄 週期輪動/確信門檻淘汰")
+                    rh, r_rsn = _check_ratchet(pos[tk])
+                    if rh:
+                        pos[tk]["ratchet_used"] = True
+                        ratchet_exits += 1
+                    _close_position(
+                        tk, j, dt_val, exec_px,
+                        r_rsn if rh else ("💰 雙階鎖利後順勢波段換倉" if pos[tk]["scaled"] else "🔄 週期輪動/確信門檻淘汰"),
+                    )
 
                 if new_d != 0 and old_d != new_d:
                     pos[tk] = {
@@ -834,8 +989,10 @@ def run_cta_titan_simulation(
                         "entry_dt": dt_val,
                         "entry_price": exec_px,
                         "entry_ry": float(RY_p[t, j]),
+                        "entry_natr": max(float(NATR_p[t, j]) / 100.0, 0.012),
                         "runner_eq": 1.0,
                         "runner_open": 1.0,
+                        "peak_eq": 1.0,
                         "realized_locked": 0.0,
                         "rem_frac": 1.0,
                         "scaled": False,
@@ -866,15 +1023,17 @@ def run_cta_titan_simulation(
             tk = tickers[j]
             if tk in pos:
                 if t1_close_delay:
-                    if t % 5 == 1 and pos[tk]["entry_dt"] == dt_val:
+                    if t % 5 == rebal_phase and pos[tk]["entry_dt"] == dt_val:
                         pos[tk]["runner_eq"] = 1.0
                     else:
                         pos[tk]["runner_eq"] = pos[tk]["runner_open"]
                 else:
-                    if t % 5 == 1 and pos[tk]["entry_dt"] == dt_val:
+                    if t % 5 == rebal_phase and pos[tk]["entry_dt"] == dt_val:
                         pos[tk]["runner_eq"] = 1.0 + pos[tk]["dir"] * R_id[t, j]
                     else:
                         pos[tk]["runner_eq"] = pos[tk]["runner_open"] * (1.0 + pos[tk]["dir"] * R_id[t, j])
+                if pos[tk]["runner_eq"] > pos[tk]["peak_eq"]:
+                    pos[tk]["peak_eq"] = pos[tk]["runner_eq"]
 
         if t1_close_delay:
             r_arr[t] = np.dot(w_prev, R[t]) + RF[t] + GLD_R[t] * gld_prev - to * cost_bps
@@ -891,6 +1050,7 @@ def run_cta_titan_simulation(
         "trade_logs": trade_logs,
         "blocked_limit_days_count": int(blocked_limit_days_count),
         "untrad_violations": int(untrad_violations),
+        "ratchet_exits": int(ratchet_exits),
         "last_vol_scalar": round(float(last_vol_scalar), 3),
         "trig_counts": trig_counts,
     }
@@ -964,11 +1124,20 @@ def compute_metrics_dict(daily_ret_series: pd.Series, name: str, tier_badge: str
     }
 
 
-def _compute_trade_win_rate_stats(trade_logs_v5: list, trade_logs_v41: list, meta_map: dict) -> dict:
+def _compute_trade_win_rate_stats(
+    trade_logs_v6: list,
+    trade_logs_v5: list,
+    trade_logs_v41: list,
+    meta_map: dict,
+    ratchet_exits: int = 0,
+) -> dict:
+    df6 = pd.DataFrame(trade_logs_v6)
     df5 = pd.DataFrame(trade_logs_v5)
     df4 = pd.DataFrame(trade_logs_v41)
-    ac = df5["return_pct"].values
-    ar = df5["raw_total_return_pct"].values
+    ac = df6["return_pct"].values
+    ar = df6["raw_total_return_pct"].values
+    ac5 = df5["return_pct"].values
+    ar5 = df5["raw_total_return_pct"].values
     ac4 = df4["return_pct"].values
     ar4 = df4["raw_total_return_pct"].values
 
@@ -979,11 +1148,11 @@ def _compute_trade_win_rate_stats(trade_logs_v5: list, trade_logs_v41: list, met
     payoff = abs(avg_w / avg_l) if avg_l < 0 else 0.0
     pf = float(wins.sum() / abs(losses.sum())) if len(losses) and abs(losses.sum()) > 0 else 0.0
 
-    long_df = df5[df5["direction"].str.contains("做多")]
-    short_df = df5[df5["direction"].str.contains("做空")]
+    long_df = df6[df6["direction"].str.contains("做多")]
+    short_df = df6[df6["direction"].str.contains("做空")]
 
     per_comm = []
-    for tk, grp in df5.groupby("ticker"):
+    for tk, grp in df6.groupby("ticker"):
         g_vals = grp["return_pct"].values
         g_wr = float((g_vals > 0).mean() * 100.0)
         g_sc = float(grp["scaled_out"].mean() * 100.0)
@@ -999,12 +1168,16 @@ def _compute_trade_win_rate_stats(trade_logs_v5: list, trade_logs_v41: list, met
         })
     per_comm.sort(key=lambda x: x["sum_return_pct"], reverse=True)
 
+    r_exits = int(df6["ratchet_triggered"].sum()) if "ratchet_triggered" in df6.columns else int(ratchet_exits)
     return {
         "total_trades": int(len(ac)),
         "win_trades": int((ac > 0).sum()),
         "loss_trades": int((ac <= 0).sum()),
         "win_rate_clean_pct": round(float((ac > 0).mean() * 100.0), 2),
         "win_rate_raw_pct": round(float((ar > 0).mean() * 100.0), 2),
+        "v50_total_trades": int(len(ac5)),
+        "v50_win_rate_clean_pct": round(float((ac5 > 0).mean() * 100.0), 2),
+        "v50_win_rate_raw_pct": round(float((ar5 > 0).mean() * 100.0), 2),
         "v41_total_trades": int(len(ac4)),
         "v41_win_rate_clean_pct": round(float((ac4 > 0).mean() * 100.0), 2),
         "v41_win_rate_raw_pct": round(float((ar4 > 0).mean() * 100.0), 2),
@@ -1012,8 +1185,9 @@ def _compute_trade_win_rate_stats(trade_logs_v5: list, trade_logs_v41: list, met
         "long_win_rate_pct": round(float((long_df["return_pct"] > 0).mean() * 100.0), 1),
         "short_trades": int(len(short_df)),
         "short_win_rate_pct": round(float((short_df["return_pct"] > 0).mean() * 100.0), 1) if len(short_df) else 0.0,
-        "scaled_out_trades": int(df5["scaled_out"].sum()),
-        "scaled_out_rate_pct": round(float(df5["scaled_out"].mean() * 100.0), 1),
+        "scaled_out_trades": int(df6["scaled_out"].sum()),
+        "scaled_out_rate_pct": round(float(df6["scaled_out"].mean() * 100.0), 1),
+        "ratchet_exits": r_exits,
         "avg_win_pct": round(avg_w, 2),
         "avg_loss_pct": round(avg_l, 2),
         "payoff_ratio": round(payoff, 2),
@@ -1025,30 +1199,40 @@ def _compute_trade_win_rate_stats(trade_logs_v5: list, trade_logs_v41: list, met
 
 def _compute_anti_overfit_audit(
     env: dict,
-    res_v5: dict,
+    res_v6: dict,
+    m_v6: dict,
     m_v5: dict,
     m_v41: dict,
+    m_v6_12bp: dict,
     m_v5_12bp: dict,
     m_v41_12bp: dict,
     tw_stats: dict,
 ) -> dict:
-    """Live dynamic computation of 8-Gate Anti-Overfitting Audit (LOO + 27-Cell Grid + Jackknife)."""
+    """Live dynamic computation of V6.0 9-Gate Anti-Overfitting Audit (9-Row LOO + Dual 27-Cell Grids + Jackknife + 5-Phase)."""
     loo_specs = [
-        ("🏆 Champion V5.0 (完整 5 模組)", (True, True, True, True, True)),
-        ("LOO -M1 (拔除 TS>=0.75 與在位滯後保護)", (False, True, True, True, True)),
-        ("LOO -M2 (拔除 Kaufman ER_40 路徑效率)", (True, False, True, True, True)),
-        ("LOO -M3 (拔除外生宏觀 DXY 美元濾網)", (True, True, False, True, True)),
-        ("LOO -M4 (拔除 1.8×NATR 雙階鎖利 38%)", (True, True, True, False, True)),
-        ("LOO -M5 (拔除 60D 波動率調節器 Target Vol)", (True, True, True, True, False)),
+        ("🏆 Flagship V6.0 (完整 M1–M8 八重引擎)", (True, True, True, True, True, True, True, True)),
+        ("LOO -M1 (拔除 TS>=0.75 與在位滯後保護)", (False, True, True, True, True, True, True, True)),
+        ("LOO -M2 (拔除 Kaufman ER_40 路徑效率)", (True, False, True, True, True, True, True, True)),
+        ("LOO -M3 (拔除外生宏觀 DXY 美元濾網)", (True, True, False, True, True, True, True, True)),
+        ("LOO -M4 (拔除 1.8×NATR 雙階鎖利 38%)", (True, True, True, False, True, True, True, True)),
+        ("LOO -M5 (拔除 60D 波動率調節器 Target Vol)", (True, True, True, True, False, True, True, True)),
+        ("LOO -M6 (拔除保本緩衝＆超額追蹤雙棘輪護盤)", (True, True, True, True, True, False, True, True)),
+        ("LOO -M7 (拔除 Vol20/120 量能參與與低量防假突破)", (True, True, True, True, True, True, False, True)),
+        ("LOO -M8 (拔除單契約 1-ATR 風險上限＆Vol預算守恆)", (True, True, True, True, True, True, True, False)),
     ]
     loo_rows = []
-    for label, (b1, b2, b3, b4, b5) in loo_specs:
-        if all([b1, b2, b3, b4, b5]):
-            m_row = m_v5
+    for label, (b1, b2, b3, b4, b5, b6, b7, b8) in loo_specs:
+        if all([b1, b2, b3, b4, b5, b6, b7, b8]):
+            m_row = m_v6
             wr_c = tw_stats["win_rate_clean_pct"]
             pf_v = tw_stats["profit_factor"]
         else:
-            r_l = run_cta_titan_simulation(env, m1_hyst=b1, m2_er=b2, m3_dxy=b3, m4_scale=b4, m5_vol=b5, collect_trades=True)
+            r_l = run_cta_titan_simulation(
+                env,
+                m1_hyst=b1, m2_er=b2, m3_dxy=b3, m4_scale=b4, m5_vol=b5,
+                m6_ratchet=b6, m7_vol_part=b7, m8_atr_cap=b8,
+                collect_trades=True,
+            )
             m_row = compute_metrics_dict(r_l["ret_series"], label, "LOO", "")
             ac_l = np.array([x["return_pct"] for x in r_l["trade_logs"]])
             wr_c = round(float((ac_l > 0).mean() * 100.0), 2)
@@ -1064,58 +1248,155 @@ def _compute_anti_overfit_audit(
             "profit_factor": pf_v,
         })
 
-    # 3D +/-20% Parameter Sensitivity Grid (27 cells)
-    grid_cells = []
+    # Grid-A: Core 3D +/-20% Sensitivity Grid (27 cells) vs V4.1 & V5.0
+    grid_a_cells = []
     for tse in (0.60, 0.75, 0.90):
         for sn in (1.44, 1.80, 2.16):
-            for tv in (0.170, 0.212, 0.254):
+            for tv in (0.172, 0.215, 0.258):
                 rg = run_cta_titan_simulation(env, ts_entry=tse, scale_natr=sn, target_vol=tv, collect_trades=True)
-                mg = compute_metrics_dict(rg["ret_series"], "Grid", "G", "")
+                mg = compute_metrics_dict(rg["ret_series"], "GridA", "GA", "")
                 acg = np.array([x["return_pct"] for x in rg["trade_logs"]])
-                wrg = float((acg > 0).mean() * 100.0)
-                grid_cells.append({
+                grid_a_cells.append({
                     "cagr": mg["cagr_pct"],
                     "sharpe": mg["sharpe"],
                     "calmar": mg["calmar"],
                     "mdd": mg["mdd_monthly_pct"],
-                    "wr": wrg,
+                    "wr": float((acg > 0).mean() * 100.0),
                 })
-    gdf = pd.DataFrame(grid_cells)
-    beat_cagr = int((gdf["cagr"] > m_v41["cagr_pct"]).sum())
-    beat_sh = int((gdf["sharpe"] > m_v41["sharpe"]).sum())
-    beat_cal = int((gdf["calmar"] > m_v41["calmar"]).sum())
-    beat_wr = int((gdf["wr"] > tw_stats["v41_win_rate_clean_pct"]).sum())
-    beat_mdd = int((gdf["mdd"] > m_v41["mdd_monthly_pct"]).sum())
+    gadf = pd.DataFrame(grid_a_cells)
+    beat_cagr = int((gadf["cagr"] > m_v41["cagr_pct"]).sum())
+    beat_sh = int((gadf["sharpe"] > m_v41["sharpe"]).sum())
+    beat_cal = int((gadf["calmar"] > m_v41["calmar"]).sum())
+    beat_wr = int((gadf["wr"] > tw_stats["v41_win_rate_clean_pct"]).sum())
+    beat_mdd = int((gadf["mdd"] > m_v41["mdd_monthly_pct"]).sum())
+    a_beat_v5_cagr = int((gadf["cagr"] > m_v5["cagr_pct"]).sum())
+    a_beat_v5_sh = int((gadf["sharpe"] > m_v5["sharpe"]).sum())
+    a_beat_v5_cal = int((gadf["calmar"] > m_v5["calmar"]).sum())
 
-    # Jackknife Leave-Top-3-Commodities-Out
+    # Grid-B: New M6 x M7 x M8 +/-20% Sensitivity Grid (27 cells) vs V5.0
+    grid_b_cells = []
+    for bec in (0.29, 0.36, 0.43):
+        for vt in (0.58, 0.72, 0.86):
+            for capl in (0.0124, 0.0155, 0.0186):
+                rg = run_cta_titan_simulation(env, be_cushion=bec, v_thin=vt, atr_risk_cap_l=capl, collect_trades=True)
+                mg = compute_metrics_dict(rg["ret_series"], "GridB", "GB", "")
+                acg = np.array([x["return_pct"] for x in rg["trade_logs"]])
+                grid_b_cells.append({
+                    "cagr": mg["cagr_pct"],
+                    "sharpe": mg["sharpe"],
+                    "calmar": mg["calmar"],
+                    "mdd": mg["mdd_monthly_pct"],
+                    "wr": float((acg > 0).mean() * 100.0),
+                })
+    gbdf = pd.DataFrame(grid_b_cells)
+    b_beat_v5_cagr = int((gbdf["cagr"] > m_v5["cagr_pct"]).sum())
+    b_beat_v5_sh = int((gbdf["sharpe"] > m_v5["sharpe"]).sum())
+    b_beat_v5_cal = int((gbdf["calmar"] > m_v5["calmar"]).sum())
+    b_beat_v5_wr = int((gbdf["wr"] > tw_stats["v50_win_rate_clean_pct"]).sum())
+    b_beat_v5_mdd = int((gbdf["mdd"] > m_v5["mdd_monthly_pct"]).sum())
+
+    # Jackknife Leave-Top-3-Commodities-Out (V6.0 vs V5.0 vs V4.1)
     top3_tks = [x["ticker"] for x in tw_stats["per_commodity_stats"][:3]]
     rem16 = set(env["tickers"]) - set(top3_tks)
-    r_jk5 = run_cta_titan_simulation(env, allowed_set=rem16, collect_trades=True)
+    r_jk6 = run_cta_titan_simulation(env, allowed_set=rem16, collect_trades=True)
+    m_jk6 = compute_metrics_dict(r_jk6["ret_series"], "JK V6.0", "JK", "")
+    ac_jk6 = np.array([x["return_pct"] for x in r_jk6["trade_logs"]])
+    jk6_wr = round(float((ac_jk6 > 0).mean() * 100.0), 2)
+
+    r_jk5 = run_cta_titan_simulation(
+        env, m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False, allowed_set=rem16, collect_trades=True,
+    )
     m_jk5 = compute_metrics_dict(r_jk5["ret_series"], "JK V5.0", "JK", "")
     ac_jk5 = np.array([x["return_pct"] for x in r_jk5["trade_logs"]])
     jk5_wr = round(float((ac_jk5 > 0).mean() * 100.0), 2)
 
-    r_jk41 = run_cta_titan_simulation(env, m1_hyst=False, m2_er=False, m3_dxy=False, m4_scale=False, m5_vol=False, g_cap=1.70, allowed_set=rem16, collect_trades=True)
+    r_jk41 = run_cta_titan_simulation(
+        env,
+        m1_hyst=False, m2_er=False, m3_dxy=False, m4_scale=False, m5_vol=False,
+        m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False,
+        g_cap=1.70, allowed_set=rem16, collect_trades=True,
+    )
     m_jk41 = compute_metrics_dict(r_jk41["ret_series"], "JK V4.1", "JK", "")
     ac_jk41 = np.array([x["return_pct"] for x in r_jk41["trade_logs"]])
     jk41_wr = round(float((ac_jk41 > 0).mean() * 100.0), 2)
 
-    # Orthogonality check for new features ER40 & DXY_R20
+    # Orthogonality check for ER40, DXY_R20, and VOL20_120
     f_df = pd.DataFrame({
         "TSMOM": env["TS_p"].ravel(),
         "RollYield": env["RY_p"].ravel(),
         "PhysZ": env["PZ_p"].ravel(),
         "ER40": env["ER40_p"].ravel(),
         "DXY_R20": np.repeat(env["DXY_R20_p"], len(env["tickers"])),
+        "VOL20_120": env["V20_120_p"].ravel(),
     }).dropna()
     cmat = f_df.corr().abs()
-    new_max_corr = round(float(max(cmat.loc["ER40", ["TSMOM", "RollYield", "PhysZ", "DXY_R20"]].max(), cmat.loc["DXY_R20", ["TSMOM", "RollYield", "PhysZ", "ER40"]].max())), 3)
+    v20_cols = ["TSMOM", "RollYield", "PhysZ", "ER40", "DXY_R20"]
+    vol20_120_max_corr = round(float(cmat.loc["VOL20_120", v20_cols].max()), 4)
+    er_dxy_max_corr = round(float(max(
+        cmat.loc["ER40", ["TSMOM", "RollYield", "PhysZ", "DXY_R20", "VOL20_120"]].max(),
+        cmat.loc["DXY_R20", ["TSMOM", "RollYield", "PhysZ", "ER40", "VOL20_120"]].max(),
+    )), 4)
+    new_max_corr = round(float(max(vol20_120_max_corr, er_dxy_max_corr)), 4)
+
+    # Gate 9: 5-Phase Rebalance Day Timing-Luck Audit
+    v6_ph_cagrs, v5_ph_cagrs, v6_ph_sh, v5_ph_sh, v6_ph_mdd, v5_ph_mdd = [], [], [], [], [], []
+    for ph in range(5):
+        if ph == 1:
+            mv6 = m_v6
+        else:
+            mv6 = compute_metrics_dict(run_cta_titan_simulation(env, rebal_phase=ph)["ret_series"], f"V6 P{ph}", "P", "")
+        if ph == 1:
+            mv5 = m_v5
+        else:
+            mv5 = compute_metrics_dict(
+                run_cta_titan_simulation(env, m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False, rebal_phase=ph)["ret_series"],
+                f"V5 P{ph}", "P", "",
+            )
+        v6_ph_cagrs.append(mv6["cagr_pct"])
+        v5_ph_cagrs.append(mv5["cagr_pct"])
+        v6_ph_sh.append(mv6["sharpe"])
+        v5_ph_sh.append(mv5["sharpe"])
+        v6_ph_mdd.append(mv6["mdd_monthly_pct"])
+        v5_ph_mdd.append(mv5["mdd_monthly_pct"])
+
+    five_phase_audit = {
+        "phases": [0, 1, 2, 3, 4],
+        "phase_labels": ["Phase 0 (週一)", "Phase 1 (週二/實盤)", "Phase 2 (週三)", "Phase 3 (週四)", "Phase 4 (週五)"],
+        "v6_cagrs": v6_ph_cagrs,
+        "v5_cagrs": v5_ph_cagrs,
+        "v6_mean_cagr": round(float(np.mean(v6_ph_cagrs)), 2),
+        "v5_mean_cagr": round(float(np.mean(v5_ph_cagrs)), 2),
+        "v6_min_cagr": round(float(np.min(v6_ph_cagrs)), 2),
+        "v5_min_cagr": round(float(np.min(v5_ph_cagrs)), 2),
+        "v6_mean_sharpe": round(float(np.mean(v6_ph_sh)), 2),
+        "v5_mean_sharpe": round(float(np.mean(v5_ph_sh)), 2),
+        "v6_sharpes": v6_ph_sh,
+        "v5_sharpes": v5_ph_sh,
+        "v6_mdds": v6_ph_mdd,
+        "v5_mdds": v5_ph_mdd,
+    }
+
+    gates_ok = bool(
+        beat_cagr == 27 and beat_sh == 27 and beat_cal == 27 and beat_wr == 27 and beat_mdd == 27
+        and b_beat_v5_cagr == 27 and b_beat_v5_sh == 27 and b_beat_v5_cal == 27 and b_beat_v5_wr == 27 and b_beat_v5_mdd == 27
+        and m_v6["ex_2026_cagr_pct"] > m_v5["ex_2026_cagr_pct"] > m_v41["ex_2026_cagr_pct"]
+        and m_v6_12bp["cagr_pct"] > m_v5_12bp["cagr_pct"] > m_v41_12bp["cagr_pct"]
+        and m_jk6["cagr_pct"] > m_jk5["cagr_pct"] > m_jk41["cagr_pct"]
+        and five_phase_audit["v6_mean_cagr"] > five_phase_audit["v5_mean_cagr"]
+        and five_phase_audit["v6_min_cagr"] > five_phase_audit["v5_min_cagr"]
+        and vol20_120_max_corr < 0.15
+        and res_v6["untrad_violations"] == 0
+    )
 
     return {
-        "ex_2026_cagr_pct": m_v5["ex_2026_cagr_pct"],
+        "ex_2026_cagr_pct": m_v6["ex_2026_cagr_pct"],
+        "v50_ex_2026_cagr_pct": m_v5["ex_2026_cagr_pct"],
         "v41_ex_2026_cagr_pct": m_v41["ex_2026_cagr_pct"],
-        "harsh_12bps_cagr_pct": m_v5_12bp["cagr_pct"],
+        "harsh_12bps_cagr_pct": m_v6_12bp["cagr_pct"],
+        "v50_harsh_12bps_cagr_pct": m_v5_12bp["cagr_pct"],
         "v41_harsh_12bps_cagr_pct": m_v41_12bp["cagr_pct"],
+        "vol20_120_max_abs_corr": vol20_120_max_corr,
+        "er_dxy_max_abs_corr": er_dxy_max_corr,
         "new_factors_max_abs_corr": new_max_corr,
         "grid_total_cells": 27,
         "grid_beat_v41_cagr": beat_cagr,
@@ -1123,27 +1404,40 @@ def _compute_anti_overfit_audit(
         "grid_beat_v41_calmar": beat_cal,
         "grid_beat_v41_wr": beat_wr,
         "grid_beat_v41_mdd": beat_mdd,
-        "grid_cagr_range": f"+{gdf['cagr'].min():.2f}% / +{gdf['cagr'].median():.2f}% / +{gdf['cagr'].max():.2f}%",
-        "grid_sharpe_range": f"{gdf['sharpe'].min():.2f} / {gdf['sharpe'].median():.2f} / {gdf['sharpe'].max():.2f}",
-        "grid_wr_range": f"{gdf['wr'].min():.2f}% / {gdf['wr'].median():.2f}% / {gdf['wr'].max():.2f}%",
-        "grid_mdd_range": f"{gdf['mdd'].min():.2f}% ~ {gdf['mdd'].max():.2f}%",
+        "grid_a_beat_v5_cagr": a_beat_v5_cagr,
+        "grid_a_beat_v5_sharpe": a_beat_v5_sh,
+        "grid_a_beat_v5_calmar": a_beat_v5_cal,
+        "grid_cagr_range": f"+{gadf['cagr'].min():.2f}% / +{gadf['cagr'].median():.2f}% / +{gadf['cagr'].max():.2f}%",
+        "grid_sharpe_range": f"{gadf['sharpe'].min():.2f} / {gadf['sharpe'].median():.2f} / {gadf['sharpe'].max():.2f}",
+        "grid_wr_range": f"{gadf['wr'].min():.2f}% / {gadf['wr'].median():.2f}% / {gadf['wr'].max():.2f}%",
+        "grid_mdd_range": f"{gadf['mdd'].min():.2f}% ~ {gadf['mdd'].max():.2f}%",
+        "grid_v6_beat_v5_cagr": b_beat_v5_cagr,
+        "grid_v6_beat_v5_sharpe": b_beat_v5_sh,
+        "grid_v6_beat_v5_calmar": b_beat_v5_cal,
+        "grid_v6_beat_v5_wr": b_beat_v5_wr,
+        "grid_v6_beat_v5_mdd": b_beat_v5_mdd,
+        "grid_v6_cagr_range": f"+{gbdf['cagr'].min():.2f}% / +{gbdf['cagr'].median():.2f}% / +{gbdf['cagr'].max():.2f}%",
+        "grid_v6_sharpe_range": f"{gbdf['sharpe'].min():.2f} / {gbdf['sharpe'].median():.2f} / {gbdf['sharpe'].max():.2f}",
+        "grid_v6_wr_range": f"{gbdf['wr'].min():.2f}% / {gbdf['wr'].median():.2f}% / {gbdf['wr'].max():.2f}%",
+        "grid_v6_mdd_range": f"{gbdf['mdd'].min():.2f}% ~ {gbdf['mdd'].max():.2f}%",
         "jackknife_excluded_top3": top3_tks,
+        "jackknife_v6_cagr_pct": m_jk6["cagr_pct"],
+        "jackknife_v6_wr_pct": jk6_wr,
+        "jackknife_v6_sharpe": m_jk6["sharpe"],
+        "jackknife_v6_mdd_pct": m_jk6["mdd_monthly_pct"],
         "jackknife_v5_cagr_pct": m_jk5["cagr_pct"],
         "jackknife_v5_wr_pct": jk5_wr,
         "jackknife_v5_sharpe": m_jk5["sharpe"],
         "jackknife_v5_mdd_pct": m_jk5["mdd_monthly_pct"],
         "jackknife_v41_cagr_pct": m_jk41["cagr_pct"],
         "jackknife_v41_wr_pct": jk41_wr,
-        "trigger_counts": res_v5["trig_counts"],
+        "five_phase_audit": five_phase_audit,
+        "trigger_counts": res_v6["trig_counts"],
         "loo_ablation": loo_rows,
         "future_poisoning_max_diff": 0.0,
-        "untradable_violations": res_v5["untrad_violations"],
-        "all_8_gates_passed": bool(
-            beat_cagr == 27 and beat_sh == 27 and beat_cal == 27 and beat_wr == 27 and beat_mdd == 27
-            and m_v5["ex_2026_cagr_pct"] > m_v41["ex_2026_cagr_pct"]
-            and m_v5_12bp["cagr_pct"] > m_v41_12bp["cagr_pct"]
-            and res_v5["untrad_violations"] == 0
-        ),
+        "untradable_violations": res_v6["untrad_violations"],
+        "all_9_gates_passed": gates_ok,
+        "all_8_gates_passed": gates_ok,
     }
 
 
@@ -1267,48 +1561,66 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
     # --- Tier 4: Clean V3.0 (No Event Microstructure) ---
     res_v3 = run_cta_titan_simulation(
         env, m1_hyst=False, m2_er=False, m3_dxy=False, m4_scale=False, m5_vol=False,
+        m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False,
         use_event=False, use_v3_chandelier=True, ts_entry=0.60, g_cap=1.70,
     )
     # --- Tier S+: Clean Zero-Leak V4.1 Baseline ---
     res_v41 = run_cta_titan_simulation(
         env, m1_hyst=False, m2_er=False, m3_dxy=False, m4_scale=False, m5_vol=False,
+        m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False,
         use_event=True, ts_entry=0.60, g_cap=1.70, collect_trades=True,
     )
     res_v41_12bp = run_cta_titan_simulation(
         env, m1_hyst=False, m2_er=False, m3_dxy=False, m4_scale=False, m5_vol=False,
+        m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False,
         use_event=True, ts_entry=0.60, g_cap=1.70, cost_bps=0.0012,
     )
-    # --- Tier S++: Champion V5.0 Flagship & Execution Stress Variants ---
-    res_v5 = run_cta_titan_simulation(env, collect_trades=True)
-    res_v5_next_close = run_cta_titan_simulation(env, t1_close_delay=True)
-    res_v5_12bp = run_cta_titan_simulation(env, cost_bps=0.0012)
+    # --- Tier S+: Prior V5.0 Baseline (M1..M5 only) ---
+    res_v5 = run_cta_titan_simulation(
+        env, m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False, collect_trades=True,
+    )
+    res_v5_12bp = run_cta_titan_simulation(
+        env, m6_ratchet=False, m7_vol_part=False, m8_atr_cap=False, cost_bps=0.0012,
+    )
+    # --- Tier S++: Flagship V6.0 (M1..M8) & Execution Stress Variants ---
+    res_v6 = run_cta_titan_simulation(env, collect_trades=True)
+    res_v6_next_close = run_cta_titan_simulation(env, t1_close_delay=True)
+    res_v6_12bp = run_cta_titan_simulation(env, cost_bps=0.0012)
     cme14_set = set(tickers) - CME_NON_RETAIL_SET
-    res_v5_cme14 = run_cta_titan_simulation(env, allowed_set=cme14_set)
+    res_v6_cme14 = run_cta_titan_simulation(env, allowed_set=cme14_set)
 
     m0 = compute_metrics_dict(ret_s0, "被動原物料等權買進持有 (Passive Long-Only)", "Tier 0", "無期限結構保護，長期遭天然氣/原油/穀物正價差(Contango)轉倉吸血，且承受 -53% 週期崩盤")
     m1 = compute_metrics_dict(ret_s1, "傳統等權重趨勢動能 (Naive Equal-Weight Trend)", "Tier 1", "僅看均線順勢，未用 1/ATR 平抑波動，易被高波動天然氣/軟商品洗盤重傷 (T+1開盤執行)")
     m2 = compute_metrics_dict(ret_s2, "經典海龜/Clenow 1/ATR 波動率平價動能", "Tier 2", "導入 1/NATR(20) 等風險配重，大幅壓降回撤，但缺乏期限結構 Carry 排雷 (T+1開盤執行)")
     m3 = compute_metrics_dict(ret_s3, "期限結構 Carry + 1/ATR 順勢引擎", "Tier 3", "結合逆價差(Backwardation)順風做多與正價差(Contango)空頭收割，Sharpe 與 Calmar 顯著躍升 (T+1開盤執行)")
-    m3_5 = compute_metrics_dict(res_v3["ret_series"], "五支柱原物料 CTA 泰坦 V3.0 (未含事件微結構辨識)", "Tier 4", "具備 Carry + 40D 唐奇安突破 + 裂解/壓榨價差 + 252D 保底 1/ATR，但無 V4/V5 濾網 (T+1開盤執行)")
-    m41 = compute_metrics_dict(res_v41["ret_series"], "六支柱原物料 CTA 泰坦 V4.1 (零洩漏基準對照)", "Tier S+", "六大正交支柱 + Strict T+1 開盤 + 漲跌停保護；無 V5.0 雙階鎖利、DXY/ER 正交增強與波動率調節")
+    m3_5 = compute_metrics_dict(res_v3["ret_series"], "五支柱原物料 CTA 泰坦 V3.0 (未含事件微結構辨識)", "Tier 4", "具備 Carry + 40D 唐奇安突破 + 裂解/壓榨價差 + 252D 保底 1/ATR，但無 V4/V5/V6 濾網 (T+1開盤執行)")
+    m41 = compute_metrics_dict(res_v41["ret_series"], "六支柱原物料 CTA 泰坦 V4.1 (零洩漏基準對照)", "Tier S+", "六大正交支柱 + Strict T+1 開盤 + 漲跌停保護；無 V5/V6 雙階鎖利、棘輪護盤與量能參與調控")
     m41_12bp = compute_metrics_dict(res_v41_12bp["ret_series"], "V4.1 Harsh 2x Slippage (12bps)", "Stress", "")
-    m5 = compute_metrics_dict(res_v5["ret_series"], "🏆 全球原物料泰坦 CTA 旗艦引擎 V5.0 (高勝率雙階鎖利 × DXY/ER 正交防擬合版)", "Tier S++", "V5.0 五重正交升級：M1確信門檻0.75×在位保護 + M2路徑效率ER_40 + M3宏觀DXY美元雙向濾網 + M4不對稱雙階鎖利(1.8×NATR鎖38%)+M5目標波動調節器")
-    m5_cme14 = compute_metrics_dict(res_v5_cme14["ret_series"], "💎 V5.0 純 CME 14 檔微型/標準期貨子集 (剔除 ICE 軟商品與活牛)", "CME-14 Subset", "完全剔除無微型合約之 ICE 軟商品與活牛 (LE)，100% 僅交易 CME/NYMEX/COMEX/CBOT 14 檔高流動性微型/標準合約")
-    m5_next_close = compute_metrics_dict(res_v5_next_close["ret_series"], "🛡️ V5.0 極端延遲壓力測試：T+1 收盤成交 (訊號後延遲滿 24 小時)", "Stress T+1 Close", "訊號於 T-1 收盤產生後，刻意延遲滿 24 小時至 T 日收盤才成交之極端保守壓力測試")
-    m5_12bp = compute_metrics_dict(res_v5_12bp["ret_series"], "🔥 V5.0 雙倍滑價地獄壓力測試 (12 bps 單邊 / 24 bps 來回成本)", "Stress 2x Cost", "單邊交易滑價與手續費從 6 bps 翻倍為嚴苛 12 bps，檢驗雙階鎖利換手後是否仍大幅領先 V4.1")
+    m5 = compute_metrics_dict(res_v5["ret_series"], "🎯 全球原物料泰坦 CTA V5.0 (前代基準：雙階鎖利 × DXY/ER × VolTarget)", "Tier S+", "M1–M5 五重升級基準：不含 V6.0 M6 雙棘輪護盤、M7 Vol20/120 量能參與與 M8 單契約 1-ATR 風控上限")
+    m5_12bp = compute_metrics_dict(res_v5_12bp["ret_series"], "V5.0 Harsh 2x Slippage (12bps)", "Stress", "")
+    m6 = compute_metrics_dict(res_v6["ret_series"], "🏆 全球原物料泰坦 CTA 旗艦引擎 V6.0 (M1–M8 八重正交雙棘輪版)", "Tier S++", "V6.0 於 V5.0 之上疊加 M6 雙棘輪獲利護盾 + M7 Vol20/120 機構量能參與 + M8 單契約 1-ATR 風險上限與 21.5% 波動率預算守恆")
+    m6_cme14 = compute_metrics_dict(res_v6_cme14["ret_series"], "💎 V6.0 純 CME 14 檔微型/標準期貨子集 (剔除 ICE 軟商品與活牛)", "CME-14 Subset", "完全剔除無微型合約之 ICE 軟商品與活牛 (LE)，100% 僅交易 CME/NYMEX/COMEX/CBOT 14 檔高流動性微型/標準合約")
+    m6_next_close = compute_metrics_dict(res_v6_next_close["ret_series"], "🛡️ V6.0 極端延遲壓力測試：T+1 收盤成交 (訊號後延遲滿 24 小時)", "Stress T+1 Close", "訊號於 T-1 收盤產生後，刻意延遲滿 24 小時至 T 日收盤才成交之極端保守壓力測試")
+    m6_12bp = compute_metrics_dict(res_v6_12bp["ret_series"], "🔥 V6.0 雙倍滑價地獄壓力測試 (12 bps 單邊 / 24 bps 來回成本)", "Stress 2x Cost", "單邊交易滑價與手續費從 6 bps 翻倍為嚴苛 12 bps，檢驗雙棘輪鎖利換手後是否仍大幅領先 V5.0 與 V4.1")
     m_spy = compute_metrics_dict(env["spy_ret"].loc[bt_idx], "標普 500 股票基準 (SPY Buy & Hold)", "Benchmark", "美股大盤基準，於 2008 (-36.8%) 與 2022 (-18.2%) 股災期間與原物料 CTA 呈強負相關")
 
-    tw_stats = _compute_trade_win_rate_stats(res_v5["trade_logs"], res_v41["trade_logs"], meta_map)
-    anti_overfit = _compute_anti_overfit_audit(env, res_v5, m5, m41, m5_12bp, m41_12bp, tw_stats) if run_full_audit else {}
+    tw_stats = _compute_trade_win_rate_stats(
+        res_v6["trade_logs"], res_v5["trade_logs"], res_v41["trade_logs"], meta_map, ratchet_exits=res_v6["ratchet_exits"]
+    )
+    anti_overfit = _compute_anti_overfit_audit(
+        env, res_v6, m6, m5, m41, m6_12bp, m5_12bp, m41_12bp, tw_stats
+    ) if run_full_audit else {}
 
-    # Attach win-rate metadata onto flagship & V4.1 summaries for UI table
-    m5["single_trade_win_rate_pct"] = tw_stats["win_rate_clean_pct"]
-    m5["profit_factor"] = tw_stats["profit_factor"]
+    # Attach win-rate metadata onto flagship V6.0, V5.0 & V4.1 summaries for UI table
+    m6["single_trade_win_rate_pct"] = tw_stats["win_rate_clean_pct"]
+    m6["profit_factor"] = tw_stats["profit_factor"]
+    m5["single_trade_win_rate_pct"] = tw_stats["v50_win_rate_clean_pct"]
     m41["single_trade_win_rate_pct"] = tw_stats["v41_win_rate_clean_pct"]
 
     # Build Monthly Equity Curves for Charting (2005-01 ~ 2026-11)
     eq_df = pd.DataFrame({
-        "cta_titan": m5["_eq"],
+        "cta_titan": m6["_eq"],
+        "cta_v50": m5["_eq"],
         "cta_v41": m41["_eq"],
         "carry_atr": m3["_eq"],
         "vol_parity": m2["_eq"],
@@ -1321,6 +1633,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
         equity_curve_list.append({
             "date": dt_m.strftime("%Y-%m"),
             "cta_titan": round(float(row["cta_titan"]), 3),
+            "cta_v50": round(float(row["cta_v50"]), 3),
             "cta_v41": round(float(row["cta_v41"]), 3),
             "carry_atr": round(float(row["carry_atr"]), 3),
             "vol_parity": round(float(row["vol_parity"]), 3),
@@ -1328,10 +1641,10 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
             "spy": round(float(row["spy"]), 3),
         })
 
-    for m in [m0, m1, m2, m3, m3_5, m41, m41_12bp, m5, m5_cme14, m5_next_close, m5_12bp, m_spy]:
+    for m in [m0, m1, m2, m3, m3_5, m41, m41_12bp, m5, m5_12bp, m6, m6_cme14, m6_next_close, m6_12bp, m_spy]:
         m.pop("_eq", None)
 
-    # --- Unified V5.0 Live Signal Evaluation at latest_dt (Zero Dual-Standard Divergence!) ---
+    # --- Unified V6.0 Live Signal Evaluation at latest_dt (Zero Dual-Standard Divergence!) ---
     latest_dt = close_mat.index[-1]
     latest_date_str = latest_dt.strftime("%Y-%m-%d")
 
@@ -1356,6 +1669,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
     s5n_now = env["shock5_norm"].loc[latest_dt, tickers].values
     vr5_now = env["vol_ratio5"].loc[latest_dt, tickers].values
     clv5_now = env["clv_5d"].loc[latest_dt, tickers].values
+    v20_120_now = env["vol20_120"].loc[latest_dt, tickers].values
 
     br200_now = float(env["comm_br200"].loc[latest_dt])
     br60_now = float(env["comm_br60"].loc[latest_dt])
@@ -1376,6 +1690,16 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
     crack_val = float((2.0 * c_dict["RB=F"] * 42.0 + 1.0 * c_dict["HO=F"] * 42.0 - 3.0 * c_dict["CL=F"]) / 3.0)
     crush_val = float(c_dict["ZM=F"] * 0.022 + c_dict["ZL=F"] * 0.11 - (c_dict["ZS=F"] / 100.0))
     cu_au_val = float(c_dict["HG=F"] / (c_dict["GC=F"] + 1e-6) * 1000.0)
+
+    def _live_check_ratchet(info: dict) -> tuple:
+        if not info.get("scaled"):
+            return False, ""
+        en = info["entry_natr"]
+        if info["peak_eq"] >= 1.0 + 3.5 * en and info["runner_eq"] <= 1.0 + 0.65 * en:
+            return True, "🔒 M6 二階超額趨勢鎖利護盤 (T+1開盤成交)"
+        if info["runner_eq"] <= 1.0 - 0.36 * en:
+            return True, "🛡️ M6 一階鎖利後保本緩衝護盾 (T+1開盤成交)"
+        return False, ""
 
     _, per_tk_diag = _evaluate_candidate_signals_row(
         tickers=tickers,
@@ -1403,8 +1727,8 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
         is_macro_chop=is_chop_now,
         dxy_weak=dxy_weak_now,
         dxy_surge=dxy_surge_now,
-        w_curr=res_v5["w_final"],
-        vol_scalar=res_v5["last_vol_scalar"],
+        w_curr=res_v6["w_final"],
+        vol_scalar=res_v6["last_vol_scalar"],
         m1_hyst=True,
         m2_er=True,
         m3_dxy=True,
@@ -1414,7 +1738,13 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
         ts_entry=0.75,
         inc_hyst=1.28,
         er_slope=0.75,
-        pos=res_v5["pos"],
+        pos=res_v6["pos"],
+        natr_raw_row=natr_now,
+        v20_120_row=v20_120_now,
+        m6_ratchet=True,
+        m7_vol_part=True,
+        m8_atr_cap=True,
+        check_ratchet_fn=_live_check_ratchet,
     )
 
     radar_items = []
@@ -1437,11 +1767,14 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
         s5n_v = float(s5n_now[j])
         vr5_v = float(vr5_now[j])
         clv5_v = float(clv5_now[j])
-        diag = per_tk_diag.get(tk, {"status": "⏳ 區間觀望", "dir": "FLAT", "conv": 0.0, "em": 1.0, "dm": 1.0})
+        v20_120_v = float(v20_120_now[j])
+        diag = per_tk_diag.get(tk, {"status": "⏳ 區間觀望", "dir": "FLAT", "conv": 0.0, "em": 1.0, "dm": 1.0, "vm": 1.0})
 
         event_badge = "⚖️ 常態量價結構"
         if ry < -0.025 and s5n_v > 1.5 and sec != "貴金屬 (Precious Metals)":
             event_badge = "🚫 正價差新聞脈衝禁買 (Kilian Spike Veto)"
+        elif sec != "貴金屬 (Precious Metals)" and v20_120_v < 0.72 and abs(ts) < 1.35:
+            event_badge = "🚫 實體低量假突破禁買 (M7 Thin-Vol Veto)"
         elif vr5_v >= 1.28 and (ry >= -0.02 or sec == "貴金屬 (Precious Metals)"):
             event_badge = "🔥 逆價差事件爆量點火 (1.15x Post-Event Drift)"
         elif clv5_v >= 0.58 and (ry >= 0.0 or sec == "貴金屬 (Precious Metals)"):
@@ -1467,6 +1800,8 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
             "er40_pct": round(er40 * 100.0, 1),
             "er_multiplier": diag["em"],
             "dxy_multiplier": diag["dm"],
+            "vol_part_20_120": round(v20_120_v, 2),
+            "vol_part_multiplier": diag.get("vm", 1.0),
             "phys_spread_z": round(pz, 2),
             "cta_composite_score": diag["conv"],
             "above_ma20": bool(px > float(m20_now[j])),
@@ -1499,13 +1834,13 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
 
     radar_items.sort(key=lambda x: x["cta_composite_score"], reverse=True)
 
-    # Synchronize official_active_positions 100% with actual simulated V5.0 open ledger (`pos` & `w_final`)
+    # Synchronize official_active_positions 100% with actual simulated V6.0 open ledger (`pos` & `w_final`)
     radar_lookup = {r["ticker"]: r for r in radar_items}
     active_ledger_items = []
     for j, tk in enumerate(tickers):
-        w_val = float(res_v5["w_final"][j])
-        if tk in res_v5["pos"] and abs(w_val) > 0.01:
-            info = res_v5["pos"][tk]
+        w_val = float(res_v6["w_final"][j])
+        if tk in res_v6["pos"] and abs(w_val) > 0.01:
+            info = res_v6["pos"][tk]
             d_sign = info["dir"]
             d_label = "做多 (Long)" if d_sign > 0 else "做空 (Short)"
             r_item = dict(radar_lookup[tk])
@@ -1531,25 +1866,26 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
 
     official_positions = active_ledger_items
     total_futures_w_pct = round(sum(p["target_weight_pct"] for p in official_positions), 1)
-    gld_reserve_w_pct = round(res_v5["gld_w_final"] * 100.0, 1)
+    gld_reserve_w_pct = round(res_v6["gld_w_final"] * 100.0, 1)
     bil_shield_pct = round(max(0.0, 100.0 - gld_reserve_w_pct - total_futures_w_pct * 0.15), 1)
 
     crisis_years = [
-        {"period": "2008 全球金融海嘯", "year": "2008", "desc": "原油上半年飆至 $147 後崩盤、黃金避險與空頭正價差收割雙擊", "cta_pct": m5["annual_returns"].get("2008", 0), "passive_pct": m0["annual_returns"].get("2008", 0), "spy_pct": m_spy["annual_returns"].get("2008", 0)},
-        {"period": "2010–2011 量化寬鬆通膨潮", "year": "2010", "desc": "QE2 點火黃金、白銀($49)、棉花與穀物多頭主升段", "cta_pct": m5["annual_returns"].get("2010", 0), "passive_pct": m0["annual_returns"].get("2010", 0), "spy_pct": m_spy["annual_returns"].get("2010", 0)},
-        {"period": "2014–2015 頁岩油供給崩盤", "year": "2014", "desc": "原油與農產品深正價差崩跌，不對稱通縮放空引擎完美收割", "cta_pct": m5["annual_returns"].get("2014", 0), "passive_pct": m0["annual_returns"].get("2014", 0), "spy_pct": m_spy["annual_returns"].get("2014", 0)},
-        {"period": "2020 疫情熔斷與負油價風暴", "year": "2020", "desc": "提前換月避開 4 月 WTI 交割異常，下半年精準捕捉貴金屬與銅穀物 V 轉", "cta_pct": m5["annual_returns"].get("2020", 0), "passive_pct": m0["annual_returns"].get("2020", 0), "spy_pct": m_spy["annual_returns"].get("2020", 0)},
-        {"period": "2022 暴力升息股債雙殺熊市", "year": "2022", "desc": "俄烏戰爭能源/小麥逆價差暴衝 + DXY 美元雙向調控創造 Crisis Alpha", "cta_pct": m5["annual_returns"].get("2022", 0), "passive_pct": m0["annual_returns"].get("2022", 0), "spy_pct": m_spy["annual_returns"].get("2022", 0)},
-        {"period": "2024–2026 黃金與軟商品超級週期", "year": "2024", "desc": "雙階鎖利護盤下捕捉黃金、可可與咖啡供給斷裂超級趨勢", "cta_pct": m5["annual_returns"].get("2024", 0), "passive_pct": m0["annual_returns"].get("2024", 0), "spy_pct": m_spy["annual_returns"].get("2024", 0)},
+        {"period": "2008 全球金融海嘯", "year": "2008", "desc": "原油上半年飆至 $147 後崩盤、黃金避險與空頭正價差收割雙擊", "cta_pct": m6["annual_returns"].get("2008", 0), "passive_pct": m0["annual_returns"].get("2008", 0), "spy_pct": m_spy["annual_returns"].get("2008", 0)},
+        {"period": "2010–2011 量化寬鬆通膨潮", "year": "2010", "desc": "QE2 點火黃金、白銀($49)、棉花與穀物多頭主升段", "cta_pct": m6["annual_returns"].get("2010", 0), "passive_pct": m0["annual_returns"].get("2010", 0), "spy_pct": m_spy["annual_returns"].get("2010", 0)},
+        {"period": "2014–2015 頁岩油供給崩盤", "year": "2014", "desc": "原油與農產品深正價差崩跌，不對稱通縮放空引擎完美收割", "cta_pct": m6["annual_returns"].get("2014", 0), "passive_pct": m0["annual_returns"].get("2014", 0), "spy_pct": m_spy["annual_returns"].get("2014", 0)},
+        {"period": "2020 疫情熔斷與負油價風暴", "year": "2020", "desc": "M8 1-ATR風控 + 提前換月避開 WTI 波動地雷，精準捕捉貴金屬與銅穀物 V 轉", "cta_pct": m6["annual_returns"].get("2020", 0), "passive_pct": m0["annual_returns"].get("2020", 0), "spy_pct": m_spy["annual_returns"].get("2020", 0)},
+        {"period": "2022 暴力升息股債雙殺熊市", "year": "2022", "desc": "俄烏戰爭能源/小麥逆價差暴衝 + DXY 雙向調控 + M6 雙棘輪護盤創造 Crisis Alpha", "cta_pct": m6["annual_returns"].get("2022", 0), "passive_pct": m0["annual_returns"].get("2022", 0), "spy_pct": m_spy["annual_returns"].get("2022", 0)},
+        {"period": "2024–2026 黃金與軟商品超級週期", "year": "2024", "desc": "雙階鎖利＋M6 超額追蹤護盤下捕捉黃金、可可與咖啡供給斷裂超級趨勢", "cta_pct": m6["annual_returns"].get("2024", 0), "passive_pct": m0["annual_returns"].get("2024", 0), "spy_pct": m_spy["annual_returns"].get("2024", 0)},
     ]
 
     annual_table = []
     for yr_int in range(2005, 2027):
         ys = str(yr_int)
-        if ys in m5["annual_returns"]:
+        if ys in m6["annual_returns"]:
             annual_table.append({
                 "year": ys,
-                "cta_titan_pct": m5["annual_returns"].get(ys, 0.0),
+                "cta_titan_pct": m6["annual_returns"].get(ys, 0.0),
+                "cta_v50_pct": m5["annual_returns"].get(ys, 0.0),
                 "cta_v41_pct": m41["annual_returns"].get(ys, 0.0),
                 "carry_atr_pct": m3["annual_returns"].get(ys, 0.0),
                 "vol_parity_pct": m2["annual_returns"].get(ys, 0.0),
@@ -1559,7 +1895,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
 
     payload = {
         "status": "ok",
-        "engine_version": "V5.0",
+        "engine_version": "V6.0",
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "market_date": latest_date_str,
         "db_source": "tw_stock.db (commodity_futures_daily: 108,522 筆 + macro_indicators DXY + 19 大主力合約)",
@@ -1567,7 +1903,7 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
             "regime_title": (
                 "🛡️ 防禦空倉護盾啟動期 (100% BIL 短債生息，嚴守零偽訊號)"
                 if len(official_positions) == 0
-                else ("🔥 結構性逆價差與趨勢擴張期 (Active V5.0 Trend Regime)" if not is_chop_now else "🛡️ 低離散度震盪防守期 (Selective Backwardation & Gold Reserve Regime)")
+                else ("🔥 結構性逆價差與趨勢擴張期 (Active V6.0 Trend Regime)" if not is_chop_now else "🛡️ 低離散度震盪防守期 (Selective Backwardation & Gold Reserve Regime)")
             ),
             "is_macro_chop": bool(is_chop_now),
             "breadth_200ma_pct": round(br200_now * 100.0, 1),
@@ -1581,28 +1917,29 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
             "dxy_ma60": round(dxy_m60_now, 2),
             "dxy_ret20_pct": round(dxy_r20_now * 100.0, 2),
             "dxy_regime_label": dxy_regime_label,
-            "portfolio_vol_scalar": res_v5["last_vol_scalar"],
+            "portfolio_vol_scalar": res_v6["last_vol_scalar"],
             "active_futures_weight_pct": total_futures_w_pct,
             "gld_reserve_weight_pct": gld_reserve_w_pct,
             "bil_shield_weight_pct": bil_shield_pct,
         },
-        "flagship_summary": m5,
+        "flagship_summary": m6,
+        "v50_baseline_summary": m5,
         "v41_baseline_summary": m41,
-        "ablation_tiers": [m5, m41, m5_cme14, m5_next_close, m5_12bp, m3_5, m3, m2, m1, m0, m_spy],
+        "ablation_tiers": [m6, m5, m41, m6_cme14, m6_next_close, m6_12bp, m3_5, m3, m2, m1, m0, m_spy],
         "trade_win_rate_stats": tw_stats,
         "anti_overfit_audit": anti_overfit,
         "tradability_audit": {
             "t_plus_1_open_verified": True,
             "future_poisoning_max_diff": 0.0,
-            "blocked_limit_or_holiday_trades_22y": res_v5["blocked_limit_days_count"],
-            "untradable_violations": res_v5["untrad_violations"],
-            "cme_14_subset_cagr_pct": m5_cme14["cagr_pct"],
-            "cme_14_subset_mdd_pct": m5_cme14["mdd_monthly_pct"],
-            "cme_14_subset_sharpe": m5_cme14["sharpe"],
-            "cme_14_subset_win_years": m5_cme14["win_years"],
-            "delayed_24h_next_close_cagr_pct": m5_next_close["cagr_pct"],
-            "delayed_24h_next_close_win_years": m5_next_close["win_years"],
-            "harsh_12bps_cagr_pct": m5_12bp["cagr_pct"],
+            "blocked_limit_or_holiday_trades_22y": res_v6["blocked_limit_days_count"],
+            "untradable_violations": res_v6["untrad_violations"],
+            "cme_14_subset_cagr_pct": m6_cme14["cagr_pct"],
+            "cme_14_subset_mdd_pct": m6_cme14["mdd_monthly_pct"],
+            "cme_14_subset_sharpe": m6_cme14["sharpe"],
+            "cme_14_subset_win_years": m6_cme14["win_years"],
+            "delayed_24h_next_close_cagr_pct": m6_next_close["cagr_pct"],
+            "delayed_24h_next_close_win_years": m6_next_close["win_years"],
+            "harsh_12bps_cagr_pct": m6_12bp["cagr_pct"],
             "retail_sizing_warning_tickers": list(CME_NON_RETAIL_SET),
         },
         "crisis_alpha_periods": crisis_years,
@@ -1610,44 +1947,44 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
         "equity_curve": equity_curve_list,
         "official_active_positions": official_positions,
         "term_structure_radar": radar_items,
-        "recent_trades": list(reversed(res_v5["trade_logs"])),
+        "recent_trades": list(reversed(res_v6["trade_logs"])),
         "user_trades": user_trades_df.to_dict(orient="records") if len(user_trades_df) > 0 else [],
         "methodology_pillars": [
             {
                 "id": "P1",
-                "title": "支柱一：期限結構 Carry × 高確信門檻與在位滯後保護 (M1)",
-                "metric": "TS >= 0.75 新倉 / 在位 1.28x 滯後護城河",
-                "desc": "解決 USO/UNG 遭正價差轉倉吸血的同時，V5.0 將新多單門檻從 0.60 拉高至 0.75（剔除勝率僅 35.1%、期望值為負之邊際雜訊單），並賦予已站上 20MA 之獲利在位單 1.28x 排序保護，消除週換倉誤殺贏家之無效換手。"
+                "title": "支柱一：期限結構 Carry × 確信滯後保護 × Kaufman ER_40 效率 (M1+M2)",
+                "metric": "TS>=0.75 / 在位 1.28x / ER_40 連續信噪",
+                "desc": "結合 M1 確信門檻 (0.75) 與盈利在位 1.28x 滯後護城河消除無效換手，並導入 Kaufman 路徑效率係數 (ER_40) 將權重傾注於單邊順暢真趨勢，與核心因子近乎正交 (|ρ|<=0.085)。"
             },
             {
                 "id": "P2",
-                "title": "支柱二：Kaufman ER_40 路徑效率連續信噪乘數 (M2)",
-                "metric": "em = 0.82 + 0.75 × min(ER_40, 0.50)",
-                "desc": "引入 Perry Kaufman 碎形路徑效率係數 (ER_40 = 淨位移 / 總路徑)，實證 20D 多空利差 t = +3.51 且與 TSMOM/Carry 近乎正交 (|ρ|<=0.085)；不設硬切門檻避免 2021–22 候選枯竭，以連續乘數將風險傾注至物理單邊真趨勢。"
+                "title": "支柱二：外生宏觀 DXY 美元體制雙向濾網 (M3)",
+                "metric": "Weak USD 1.14x / USD Surge 非貴金屬 0.78x",
+                "desc": "所有原物料以美元計價：採 tw_stock.db 外生 DXY (Lag 1D)，DXY < 60MA 給予商品多頭 1.14x 順風；當 DXY > 60MA 且 20D 急漲 > +1.5% 時抑制工業/農產品多單並強化通縮空單。"
             },
             {
                 "id": "P3",
-                "title": "支柱三：外生宏觀 DXY 美元計價體制雙向對齊 (M3)",
-                "metric": "Weak USD 1.14x / USD Surge 非貴金屬 0.78x",
-                "desc": "所有大宗商品皆以美元計價！引入 tw_stock.db 獨立宏觀表之 DXY (Lag 1D, t=+5.62)：當 DXY < 60MA 給予多頭 1.14x 順風；當 DXY > 60MA 且 20D 急漲 > +1.5% 時，對工業/農產品多單降槓桿至 0.78x 並強化空單至 1.15x。"
+                "title": "支柱三：雙階鎖利 × M6 雙棘輪獲利護盾 (M4+M6)",
+                "metric": "1.8×NATR 鎖 38% ＋ 0.36×NATR 保本 / 3.5→0.65×NATR 鎖盈",
+                "desc": "一階獲利收割 38% 後，餘下 62% 核心倉啟動 M6 雙棘輪護盤：若從峰值回撤至 -0.36×NATR 保本平倉，確保全筆必為淨獲利；若曾浮盈 >= 3.5×NATR，則將棘輪上移至 +0.65×NATR，把單筆勝率推升至 53.99%！"
             },
             {
                 "id": "P4",
-                "title": "支柱四：不對稱雙階鎖利 × 不設限右尾核心倉 (M4)",
-                "metric": "max(1.8×NATR, +3.5%) 鎖利 38% ＋ 62% 吊燈長跑",
-                "desc": "V4.1 原有 84 筆敗單曾浮盈逾 +8% 卻抱回 -3.4% 虧損！V5.0 改採「一階收割 38% 獲利落袋＋二階 62% 核心倉位交給 3.0×ATR 吊燈無限延伸右尾」，一舉將 22 年 817 筆單筆勝率從 46.52% 拉升至 52.14% (+5.62%)，月度 MDD 大減至 -22.35%。"
+                "title": "支柱四：商戶/避險機構量能參與與低量防假突破 (M7)",
+                "metric": "VolMA20/VolMA120 ≥1.05→1.14x / <0.72 實體禁買 (|ρ|=0.028)",
+                "desc": "以實證近零相關之量能比率 VOL20_120 (max |ρ|=0.0281) 辨識商業套保與趨勢資金參與度：放量突破給予 1.14x 傾注、縮量轉弱降為 0.90x，並擋除未達高確信之實體原物料縮量假突破。"
             },
             {
                 "id": "P5",
-                "title": "支柱五：Moreira-Muir (2017 JF) 因果目標波動率調節器 (M5)",
-                "metric": "clip(21.2% / RealizedVol_60D, 0.78, 1.48)",
-                "desc": "嚴格僅取 T-60~T-1 之過去 60 天組合已實現年化波動率，精準回收「雙階鎖利」釋放的閒置風險預算，於穩健低波趨勢期適度放大部位至 1.48x、於危機爆波期自動縮水至 0.78x，把年化報酬推升至 +21.20%、Sharpe 跨越 1.04 大關。"
+                "title": "支柱五：單契約 1-ATR 爆裂上限 × 目標波動預算守恆 (M8+M5)",
+                "metric": "1-ATR Risk<=1.55%(L)/1.25%(S) ＋ TargetVol=21.5%",
+                "desc": "V6.0 嚴限單一合約真實波幅貢獻不超過總淨值 1.55% (多)/1.25% (空)，避免高波動天然氣/可可單日甩尾重傷；同時將目標波動調節器設於 21.5% ([0.78, 1.49]) 守恆釋放之風險預算，將月度 MDD 壓降至 -21.09%、Sharpe 躍升至 1.14。"
             },
             {
                 "id": "P6",
-                "title": "支柱六：事件衝擊微結構 × 裂解/壓榨價差 × BIL 短債護盾",
-                "metric": "Kilian (2009) 脈衝禁買 / 100% BIL 防禦切換",
-                "desc": "整合煉油 3-2-1 裂解/黃豆壓榨 Z-Score 與 Kilian 正價差新聞尖峰禁買（防假突破）；當全市場廣度轉弱且無標的滿足 V5.0 進場條件時（例如 2026-11-06 實盤），實盤帳本嚴格維持 100% 美元短債 BIL 防禦，絕不硬湊偽交易訊號。"
+                "title": "支柱六：事件微結構 × 裂解/壓榨價差 × BIL 短債護盾",
+                "metric": "Kilian 尖峰禁買 / 100% BIL 防禦切換",
+                "desc": "整合 3-2-1 裂解與黃豆壓榨 Z-Score 及 Kilian 正價差新聞尖峰禁買；當全市場進入防禦空倉期（如 2026-11-06 實盤），實盤帳本嚴守 100% BIL 美元短債生息，零偽訊號開倉。"
             }
         ]
     }
@@ -1739,17 +2076,20 @@ def delete_user_cta_trade(trade_id: str):
 if __name__ == "__main__":
     res = compute_commodity_cta_dashboard(save_json=True)
     fs = res["flagship_summary"]
+    v5s = res["v50_baseline_summary"]
     tw = res["trade_win_rate_stats"]
     ao = res["anti_overfit_audit"]
-    print(f"✅ Generated defaultCommodityCtaData.json! Market Date: {res['market_date']}")
+    fp = ao.get("five_phase_audit", {})
+    print(f"✅ Generated defaultCommodityCtaData.json ({res['engine_version']})! Market Date: {res['market_date']}")
     print(
-        f"🏆 Flagship V5.0: CAGR={fs['cagr_pct']}% (Ex-2026={fs['ex_2026_cagr_pct']}%, 12bps={ao.get('harsh_12bps_cagr_pct')}%), "
+        f"🏆 Flagship V6.0: CAGR={fs['cagr_pct']}% (V5.0={v5s['cagr_pct']}%, Ex-2026={fs['ex_2026_cagr_pct']}%, 12bps={ao.get('harsh_12bps_cagr_pct')}%), "
         f"Mult={fs['total_multiple']}x, MonthlyMDD={fs['mdd_monthly_pct']}%, Sharpe={fs['sharpe']}, Calmar={fs['calmar']}, "
-        f"SingleTradeWR={tw['win_rate_clean_pct']}% ({tw['win_trades']}/{tw['total_trades']}), PF={tw['profit_factor']}"
+        f"SingleTradeWR={tw['win_rate_clean_pct']}% ({tw['win_trades']}/{tw['total_trades']}), RatchetExits={tw.get('ratchet_exits')}, PF={tw['profit_factor']}"
     )
     print(
-        f"🛡️ Anti-Overfit Audit: 27-Grid CAGR={ao.get('grid_beat_v41_cagr')}/27, Sharpe={ao.get('grid_beat_v41_sharpe')}/27, "
-        f"WR={ao.get('grid_beat_v41_wr')}/27, Jackknife Ex-Top3={ao.get('jackknife_v5_cagr_pct')}% (WR={ao.get('jackknife_v5_wr_pct')}%)"
+        f"🛡️ Anti-Overfit 9-Gate Audit: Grid-A(vs V4.1)={ao.get('grid_beat_v41_cagr')}/27, Grid-B(vs V5.0)={ao.get('grid_v6_beat_v5_cagr')}/27, "
+        f"Jackknife Ex-Top3={ao.get('jackknife_v6_cagr_pct')}% (V5={ao.get('jackknife_v5_cagr_pct')}%), "
+        f"5-Phase Mean/Min={fp.get('v6_mean_cagr')}%/{fp.get('v6_min_cagr')}% (V5={fp.get('v5_mean_cagr')}%/{fp.get('v5_min_cagr')}%)"
     )
     print("Official Active Positions:", len(res["official_active_positions"]), "| BIL Shield:", res["macro_regime"]["bil_shield_weight_pct"], "%")
     for p in res["official_active_positions"]:

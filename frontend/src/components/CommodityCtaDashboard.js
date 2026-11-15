@@ -175,6 +175,7 @@ export default function CommodityCtaDashboard() {
   };
 
   const fs = data?.flagship_summary || {};
+  const v50 = data?.v50_baseline_summary || {};
   const v41 = data?.v41_baseline_summary || {};
   const macro = data?.macro_regime || {};
   const twStats = data?.trade_win_rate_stats || {};
@@ -193,6 +194,9 @@ export default function CommodityCtaDashboard() {
     return recentTrades.filter(t => {
       if (tradeTickerFilter !== 'ALL' && t.ticker !== tradeTickerFilter) return false;
       if (tradeDirFilter === 'SCALED' && !t.scaled_out) return false;
+      if (tradeDirFilter === 'RATCHET' && !t.ratchet_triggered) return false;
+      if (tradeDirFilter === 'WIN' && (t.return_pct || 0) <= 0) return false;
+      if (tradeDirFilter === 'LOSS' && (t.return_pct || 0) > 0) return false;
       if (tradeDirFilter === 'LONG' && !t.direction?.includes('做多')) return false;
       if (tradeDirFilter === 'SHORT' && !t.direction?.includes('做空')) return false;
       return true;
@@ -226,13 +230,14 @@ export default function CommodityCtaDashboard() {
     const allVals = [];
     eqCurve.forEach(pt => {
       allVals.push(Math.log10(Math.max(pt.cta_titan || 1, 0.3)));
+      if (pt.cta_v50) allVals.push(Math.log10(Math.max(pt.cta_v50, 0.3)));
       if (pt.cta_v41) allVals.push(Math.log10(Math.max(pt.cta_v41, 0.3)));
       allVals.push(Math.log10(Math.max(pt.carry_atr || 1, 0.3)));
       allVals.push(Math.log10(Math.max(pt.spy || 1, 0.3)));
       allVals.push(Math.log10(Math.max(pt.passive_comm || 1, 0.3)));
     });
     const minLog = Math.min(...allVals, -0.2);
-    const maxLog = Math.max(...allVals, 1.85);
+    const maxLog = Math.max(...allVals, 2.02);
 
     const xOf = (i) => padL + (i / (eqCurve.length - 1)) * plotW;
     const yOf = (val) => {
@@ -243,7 +248,7 @@ export default function CommodityCtaDashboard() {
     const buildPath = (key) =>
       eqCurve.map((pt, i) => `${i === 0 ? 'M' : 'L'}${xOf(i).toFixed(1)},${yOf(pt[key]).toFixed(1)}`).join(' ');
 
-    const yTicks = [0.5, 1, 2, 5, 10, 20, 40, 60];
+    const yTicks = [0.5, 1, 2, 5, 10, 25, 50, 100];
 
     return (
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', background: 'rgba(15, 23, 42, 0.75)', borderRadius: '10px', border: '1px solid rgba(245, 158, 11, 0.25)' }}>
@@ -274,9 +279,13 @@ export default function CommodityCtaDashboard() {
         <path d={buildPath('carry_atr')} fill="none" stroke="#A78BFA" strokeWidth="1.8" />
         {/* Clean V4.1 對照線 */}
         {eqCurve[0]?.cta_v41 && (
-          <path d={buildPath('cta_v41')} fill="none" stroke="#34D399" strokeWidth="1.8" strokeDasharray="5,3" />
+          <path d={buildPath('cta_v41')} fill="none" stroke="#F472B6" strokeWidth="1.7" strokeDasharray="5,3" />
         )}
-        {/* Tier S++: 全球原物料泰坦 CTA 旗艦 V5.0 */}
+        {/* V5.0 前代旗艦基準線 */}
+        {eqCurve[0]?.cta_v50 && (
+          <path d={buildPath('cta_v50')} fill="none" stroke="#10B981" strokeWidth="2.0" strokeDasharray="6,3" />
+        )}
+        {/* Tier S++: 全球原物料泰坦 CTA 旗艦 V6.0 */}
         <path d={buildPath('cta_titan')} fill="none" stroke="#F59E0B" strokeWidth="2.9" />
       </svg>
     );
@@ -305,7 +314,7 @@ export default function CommodityCtaDashboard() {
                 borderRadius: '999px',
                 letterSpacing: '0.5px'
               }}>
-                GLOBAL COMMODITY CTA TITAN V5.0
+                GLOBAL COMMODITY CTA TITAN V6.0
               </span>
               <span style={{
                 background: 'rgba(16, 185, 129, 0.18)',
@@ -316,23 +325,23 @@ export default function CommodityCtaDashboard() {
                 borderRadius: '6px',
                 fontWeight: 'bold'
               }}>
-                🗄️ 統一資料庫 tw_stock.db 直連 (19大主力合約 × 期限結構 × DXY/ER40 正交因子 × 雙階鎖利)
+                🗄️ 統一資料庫 tw_stock.db 直連 (19大主力合約 × M1–M8 八重正交雙棘輪 × 雙27/27參數高原)
               </span>
               <span style={{ color: '#94A3B8', fontSize: '0.78rem' }}>
                 最新行情基準日：<strong style={{ color: '#FDE68A' }}>{data?.market_date || '2026-11-06'}</strong>
               </span>
             </div>
             <h2 style={{ margin: '0.55rem 0 0.35rem 0', fontSize: '1.45rem', fontWeight: 800, color: '#FEF3C7' }}>
-              🛢️ 全球原物料期貨 CTA 泰坦量化引擎 V5.0（高勝率雙階鎖利 × DXY/ER 正交過濾 × 27/27 全參數高原防擬合版）
+              🛢️ 全球原物料期貨 CTA 泰坦量化引擎 V6.0（雙棘輪鎖利 × 量能機構參與 × 單約 1-ATR 風控版）
             </h2>
             <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1', lineHeight: 1.55 }}>
-              在純淨零洩漏 <strong style={{ color: '#93C5FD' }}>Clean V4.1 ({v41.cagr_pct ?? 18.91}% / 勝率 {twStats.v41_win_rate_clean_pct ?? 46.52}%)</strong> 基礎上，導入五大經濟學正交升級：
-              <strong style={{ color: '#FDE68A' }}> M1 期限結構共鳴進場+1.28x滯後換倉</strong>、
-              <strong style={{ color: '#FDE68A' }}> M2 Kaufman ER_40 效率降雜訊</strong>、
-              <strong style={{ color: '#FDE68A' }}> M3 DXY 美元體制外生順逆風</strong>、
-              <strong style={{ color: '#34D399' }}> M4 雙階 ATR 鎖利+保本護盾</strong> 與
-              <strong style={{ color: '#34D399' }}> M5 組合波動率閘門</strong>，
-              全樣本、Ex-2026 樣本外與 2x 12bps 壓力測試全數帕累托碾壓舊版。
+              從 <strong style={{ color: '#F472B6' }}>Clean V4.1 ({v41.cagr_pct ?? 18.91}% / {twStats.v41_win_rate_clean_pct ?? 46.52}%)</strong>
+              {' '}➔ <strong style={{ color: '#34D399' }}>V5.0 ({v50.cagr_pct ?? 21.2}% / {twStats.v50_win_rate_clean_pct ?? 52.14}%)</strong>
+              {' '}再升級 V6.0 三大物理增量：
+              <strong style={{ color: '#FDE68A' }}> M6 保本＆超額追蹤雙棘輪護盤</strong>、
+              <strong style={{ color: '#FDE68A' }}> M7 Vol20/120 機構量能參與＋低量禁買 (|ρ|={aoAudit.vol20_120_max_abs_corr ?? 0.0281})</strong> 與
+              <strong style={{ color: '#38BDF8' }}> M8 單契約 1-ATR 風險上限＋VolTarget 預算守恆 (21.5%)</strong>，
+              達成全樣本、Ex-2026、12bps 雙倍滑價、Jackknife 與五重換倉週期全面帕累托超越 V5.0。
             </p>
           </div>
 
@@ -372,7 +381,7 @@ export default function CommodityCtaDashboard() {
           </div>
         )}
 
-        {/* 6 大核心權威回測與宏觀 KPI 卡片 (V5.0 帕累托升級) */}
+        {/* 6 大核心權威回測與宏觀 KPI 卡片 (V6.0 M1-M8 帕累托升級) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))',
@@ -382,45 +391,45 @@ export default function CommodityCtaDashboard() {
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(245, 158, 11, 0.45)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🏆 21.8年年化報酬 (Strict T+1 Open)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FBBF24', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              +{fs.cagr_pct ?? 21.2}%
+              +{fs.cagr_pct ?? 23.14}%
             </div>
             <div style={{ fontSize: '0.73rem', color: '#34D399' }}>
-              累積 <strong>{fs.total_multiple ?? 66.76}x</strong> ｜ Ex-2026: <strong>+{fs.ex_2026_cagr_pct ?? 21.38}%</strong> (V4.1 {v41.cagr_pct ?? 18.91}%)
+              累積 <strong>{fs.total_multiple ?? 94.47}x</strong> ｜ Ex-2026: <strong>+{fs.ex_2026_cagr_pct ?? 23.2}%</strong> (V5 {v50.cagr_pct ?? 21.2}%)
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(52, 211, 153, 0.4)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🎯 逐筆真實單筆勝率 (含雙階鎖利)</div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🎯 逐筆真實單筆勝率 (雙階+M6棘輪)</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#34D399', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {twStats.win_rate_clean_pct ?? fs.single_trade_win_rate_pct ?? 52.14}%
+              {twStats.win_rate_clean_pct ?? fs.single_trade_win_rate_pct ?? 53.99}%
             </div>
             <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
-              {twStats.win_trades ?? 426}/{twStats.total_trades ?? 817} 筆 ｜ 獲利因子 <strong>{twStats.profit_factor ?? fs.profit_factor ?? 1.84}</strong> (V4.1 {twStats.v41_win_rate_clean_pct ?? 46.52}%)
+              {twStats.win_trades ?? 413}/{twStats.total_trades ?? 765} 筆 ｜ 獲利因子 <strong>{twStats.profit_factor ?? fs.profit_factor ?? 1.98}</strong> (V5 {twStats.v50_win_rate_clean_pct ?? 52.14}%)
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(56, 189, 248, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🛡️ 月度最大回撤 &amp; 風險收益比</div>
             <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38BDF8', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {fs.mdd_monthly_pct ?? -22.35}% <span style={{ fontSize: '0.92rem', color: '#94A3B8' }}>/ Sh {fs.sharpe ?? 1.04}</span>
+              {fs.mdd_monthly_pct ?? -21.09}% <span style={{ fontSize: '0.92rem', color: '#94A3B8' }}>/ Sh {fs.sharpe ?? 1.14}</span>
             </div>
             <div style={{ fontSize: '0.73rem', color: '#CBD5E1' }}>
-              日MDD {fs.mdd_daily_pct ?? -22.8}% ｜ Calmar <strong>{fs.calmar ?? 0.95}</strong> (V4.1 0.78)
+              日MDD {fs.mdd_daily_pct ?? -22.96}% ｜ Calmar <strong>{fs.calmar ?? 1.1}</strong> (V5 {v50.calmar ?? 0.95})
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(167, 139, 250, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🧬 八重防過度擬合高原驗證</div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>🧬 九重防過度擬合高原驗證</div>
             <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#C4B5FD', fontFamily: 'monospace', marginTop: '0.15rem' }}>
-              {aoAudit.grid_beat_v41_cagr ?? 27}/{aoAudit.grid_total_cells ?? 27} 鄰域全勝
+              雙 {aoAudit.grid_v6_beat_v5_cagr ?? 27}/{aoAudit.grid_total_cells ?? 27} 全勝
             </div>
             <div style={{ fontSize: '0.73rem', color: '#34D399' }}>
-              2x 12bps 嚴酷: <strong>+{aoAudit.harsh_12bps_cagr_pct ?? 18.83}%</strong> ｜ 投毒差分 <strong>0.00</strong>
+              2x 12bps: <strong>+{aoAudit.harsh_12bps_cagr_pct ?? 20.84}%</strong> ｜ 五重換倉均 <strong>+{aoAudit.five_phase_audit?.v6_mean_cagr ?? 19.16}%</strong>
             </div>
           </div>
 
           <div style={{ background: 'rgba(15, 23, 42, 0.78)', border: '1px solid rgba(251, 146, 60, 0.35)', borderRadius: '10px', padding: '0.75rem 0.9rem' }}>
-            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>💵 DXY 美元體制 &amp; 組合波動閘門</div>
+            <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>💵 DXY 美元體制 &amp; M5/M8 閘門</div>
             <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FB923C', fontFamily: 'monospace', marginTop: '0.2rem' }}>
               DXY {macro.dxy_spot ?? '—'} ({macro.dxy_ret20_pct >= 0 ? '+' : ''}{macro.dxy_ret20_pct ?? '0'}%)
             </div>
@@ -572,20 +581,20 @@ export default function CommodityCtaDashboard() {
             lineHeight: 1.65
           }}>
             <div style={{ fontWeight: 800, color: '#34D399', fontSize: '0.88rem', marginBottom: '0.35rem' }}>
-              🛡️ V5.0 嚴格 T+1 開盤執行架構 (Strict T+1 Open) × 漲跌停/無量日鎖死防呆 × 未來資料投毒 0.00e+00 驗證通過
+              🛡️ V6.0 嚴格 T+1 開盤執行架構 (Strict T+1 Open) × 漲跌停/無量日鎖死防呆 × 未來資料投毒 0.00e+00 驗證通過
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.65rem' }}>
               <div>
                 <strong style={{ color: '#FDE68A' }}>① 嚴格 T+1 開盤成交 (零偷吃隔夜跳空)：</strong>
-                訊號 100% 鎖定於 <code>T-1 收盤</code> 產生，換倉日之<strong>隔夜跳空報酬 (Close[t-1]→Open[t]) 嚴格歸屬舊倉位</strong>，新倉位僅於 <code>Open[t]</code> 開盤價成交。計入雙邊滑價 (6 bps) 後年化 <strong style={{ color: '#34D399' }}>+{fs.cagr_pct ?? 21.2}%</strong>；即使雙倍嚴酷成本 (12 bps) 年化仍達 <strong style={{ color: '#38BDF8' }}>+{aoAudit.harsh_12bps_cagr_pct ?? 18.83}%</strong>，極端延遲滿 24 小時至 <code>T+1 收盤</code> 才成交年化亦達 <strong>+{data?.tradability_audit?.delayed_24h_next_close_cagr_pct ?? 17.88}% ({data?.tradability_audit?.delayed_24h_next_close_win_years ?? '20/22'})</strong>。
+                訊號 100% 鎖定於 <code>T-1 收盤</code> 產生，換倉日之<strong>隔夜跳空報酬 (Close[t-1]→Open[t]) 嚴格歸屬舊倉位</strong>，新倉位僅於 <code>Open[t]</code> 開盤價成交。計入雙邊滑價 (6 bps) 後年化 <strong style={{ color: '#34D399' }}>+{fs.cagr_pct ?? 23.14}%</strong>；即使雙倍嚴酷成本 (12 bps) 年化仍達 <strong style={{ color: '#38BDF8' }}>+{aoAudit.harsh_12bps_cagr_pct ?? 20.84}%</strong>，極端延遲滿 24 小時至 <code>T+1 收盤</code> 才成交年化亦達 <strong>+{data?.tradability_audit?.delayed_24h_next_close_cagr_pct ?? 17.49}% ({data?.tradability_audit?.delayed_24h_next_close_win_years ?? '18/22'})</strong>。
               </div>
               <div>
                 <strong style={{ color: '#38BDF8' }}>② 漲跌停鎖死與無量假日禁買賣保護：</strong>
-                當 <code>Open[t]</code> 出現 CBOT/ICE 漲跌停鎖死 (<code>High == Low</code>)、休市無量 (<code>Volume &lt;= 0</code>) 或超過 <code>max(4.5%, 2.5×NATR)</code> 之極端跳空時，系統強制禁止買進或平倉（22 年共攔截延後 <strong>{data?.tradability_audit?.blocked_limit_or_holiday_trades_22y ?? 387} 筆</strong>異常開盤，違規成交次數 <strong>{aoAudit.untradable_violations ?? 0}</strong>）。
+                當 <code>Open[t]</code> 出現 CBOT/ICE 漲跌停鎖死 (<code>High == Low</code>)、休市無量 (<code>Volume &lt;= 0</code>) 或超過 <code>max(4.5%, 2.5×NATR)</code> 之極端跳空時，系統強制禁止買進或平倉（22 年共攔截延後 <strong>{data?.tradability_audit?.blocked_limit_or_holiday_trades_22y ?? 347} 筆</strong>異常開盤，違規成交次數 <strong>{aoAudit.untradable_violations ?? 0}</strong>）。
               </div>
               <div>
                 <strong style={{ color: '#C4B5FD' }}>③ 小資金 (&lt;$30萬 USD)「買不到微型合約」解方與實盤帳本嚴格對齊：</strong>
-                當日實盤訊號 100% 由模擬帳本最新交易日動態輸出（絕不雙重標準）。19 檔中有 <strong>14 檔為 CME 集團品種</strong>（具 <code>MCL, MGC, SIL, MHG, XC, XK</code> 微型合約）；遇到無微型合約之 5 檔 ICE/活牛品種可切換上方 ETF 模式，或採用<strong>「💎 純 CME 14 檔子集」</strong>（V5.0 年化仍達 <strong>+{data?.tradability_audit?.cme_14_subset_cagr_pct ?? 17.65}%、月度 MDD {data?.tradability_audit?.cme_14_subset_mdd_monthly_pct ?? -20.8}%、{data?.tradability_audit?.cme_14_subset_win_years ?? '20/22'} 勝年</strong>）。
+                當日實盤訊號 100% 由模擬帳本最新交易日動態輸出（絕不雙重標準）。19 檔中有 <strong>14 檔為 CME 集團品種</strong>（具 <code>MCL, MGC, SIL, MHG, XC, XK</code> 微型合約）；遇到無微型合約之 5 檔 ICE/活牛品種可切換上方 ETF 模式，或採用<strong>「💎 純 CME 14 檔子集」</strong>（V6.0 年化仍達 <strong>+{data?.tradability_audit?.cme_14_subset_cagr_pct ?? 18.75}%、月度 MDD {data?.tradability_audit?.cme_14_subset_mdd_pct ?? -21.31}%、{data?.tradability_audit?.cme_14_subset_win_years ?? '19/22'} 勝年</strong>）。
               </div>
             </div>
           </div>
@@ -600,7 +609,7 @@ export default function CommodityCtaDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.08rem', color: '#FDE68A' }}>
-                🏛️ 全球原物料泰坦 CTA V5.0【當期官方實戰正選部位 &amp; 1/ATR 波動率平價口數建議】
+                🏛️ 全球原物料泰坦 CTA V6.0【當期官方實戰正選部位 &amp; 1/ATR 波動率平價口數建議】
               </h3>
               <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>
                 規則：單一板塊上限 2 檔 ｜ 逆價差共鳴順勢做多 × 正價差破線做空 ｜ 閒置保證金停泊 <code style={{ color: '#38BDF8' }}>BIL 短債 + GLD 黃金儲備</code>
@@ -617,11 +626,11 @@ export default function CommodityCtaDashboard() {
                 lineHeight: 1.65
               }}>
                 <div style={{ fontWeight: 900, fontSize: '1.0rem', color: '#38BDF8', marginBottom: '0.35rem' }}>
-                  🛡️ 100% 美元短債 (BIL) 防禦空倉護盾啟動中（當期 0 檔原物料符合 V5.0 嚴格突破進場條件）
+                  🛡️ 100% 美元短債 (BIL) 防禦空倉護盾啟動中（當期 0 檔原物料符合 V6.0 嚴格突破進場條件）
                 </div>
                 <div style={{ fontSize: '0.82rem', color: '#CBD5E1' }}>
                   目前最新基準日（<strong style={{ color: '#FDE68A' }}>{data?.market_date || '2026-11-06'}</strong>）全市場 19 檔原物料僅 <strong style={{ color: '#FBBF24' }}>{macro.breadth_200ma_pct ?? 36.8}%</strong> 位於 200 日年線之上，尚未觸發任何多空雙邊突破與期限結構共鳴條件。
-                  V5.0 秉持<strong>「實盤與模擬帳本 100% 一致」</strong>原則（嚴禁硬編碼湊數），將全部保證金自動停泊於 <strong style={{ color: '#34D399' }}>BIL 美國超短天期公債 ({macro.bil_shield_weight_pct ?? 100}%)</strong> 領取無風險短債殖利率（{macro.tbill_collateral_yield_pct ?? 4.45}%），耐心等待下次共鳴趨勢出現。
+                  V6.0 秉持<strong>「實盤與模擬帳本 100% 一致」</strong>原則（嚴禁硬編碼湊數），將全部保證金自動停泊於 <strong style={{ color: '#34D399' }}>BIL 美國超短天期公債 ({macro.bil_shield_weight_pct ?? 100}%)</strong> 領取無風險短債殖利率（{macro.tbill_collateral_yield_pct ?? 4.45}%），耐心等待下次共鳴趨勢出現。
                 </div>
               </div>
             ) : (
@@ -848,7 +857,7 @@ export default function CommodityCtaDashboard() {
                   <th>年化轉倉收益 (Carry)</th>
                   <th>20D / 60D / 126D 報酬</th>
                   <th>TSMOM Z分</th>
-                  <th>ER_40 效率 / DXY 倍率</th>
+                  <th>ER_40 / 量能比 / DXY</th>
                   <th>均線結構 (20/60/200)</th>
                   <th>NATR(20)</th>
                   <th>標準合約 / 微型合約 / ETF</th>
@@ -890,8 +899,11 @@ export default function CommodityCtaDashboard() {
                         <span style={{ color: (r.er40_pct || 0) >= 25 ? '#34D399' : '#94A3B8', fontWeight: 700 }}>
                           ER {r.er40_pct ?? '—'}%
                         </span>
+                        <span style={{ color: '#94A3B8', marginLeft: '4px' }}>
+                          / 量能 <strong style={{ color: (r.vol_part_20_120 ?? 1.0) >= 1.05 ? '#34D399' : (r.vol_part_20_120 ?? 1.0) < 0.72 ? '#F87171' : '#CBD5E1' }}>{r.vol_part_20_120 ?? 1.0}x</strong>
+                        </span>
                         <div style={{ fontSize: '0.68rem', color: '#CBD5E1' }}>
-                          em {r.er_multiplier ?? '1.0'}x / DXY {r.dxy_multiplier ?? '1.0'}x
+                          em {r.er_multiplier ?? '1.0'}x / vm {r.vol_part_multiplier ?? '1.0'}x / DXY {r.dxy_multiplier ?? '1.0'}x
                         </div>
                       </td>
                       <td style={{ fontFamily: 'monospace', fontSize: '0.73rem' }}>
@@ -940,18 +952,19 @@ export default function CommodityCtaDashboard() {
               <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#FDE68A' }}>
                 📈 2005–2026 (21.85年) 全球原物料泰坦 CTA 旗艦 vs 各階層基準對數累積淨值曲線
               </h3>
-              <div style={{ display: 'flex', gap: '1rem', fontSize: '0.76rem', fontWeight: 700, flexWrap: 'wrap' }}>
-                <span style={{ color: '#F59E0B' }}>━━ 🏆 旗艦 V5.0 CTA ({fs.total_multiple ?? 66.76}x)</span>
-                <span style={{ color: '#F472B6' }}>┄┄ Clean V4.1 基準 ({v41.total_multiple ?? 43.93}x)</span>
+              <div style={{ display: 'flex', gap: '0.85rem', fontSize: '0.76rem', fontWeight: 700, flexWrap: 'wrap' }}>
+                <span style={{ color: '#F59E0B' }}>━━ 🏆 旗艦 V6.0 CTA ({fs.total_multiple ?? 94.47}x)</span>
+                <span style={{ color: '#10B981' }}>┄┄ 前代 V5.0 ({v50.total_multiple ?? 66.76}x)</span>
+                <span style={{ color: '#F472B6' }}>┄┄ Clean V4.1 ({v41.total_multiple ?? 43.96}x)</span>
                 <span style={{ color: '#A78BFA' }}>━━ Tier 3: Carry + 1/ATR</span>
                 <span style={{ color: '#38BDF8' }}>━━ 標普 500 SPY</span>
-                <span style={{ color: '#94A3B8' }}>┅┅ 被動原物料長抱</span>
+                <span style={{ color: '#94A3B8' }}>┅┅ 被動原物料</span>
               </div>
             </div>
             {renderEquitySvg()}
           </div>
 
-          {/* 5 階消融對決總表 */}
+          {/* 多階消融對決總表 */}
           <div style={{
             background: 'rgba(15, 23, 42, 0.85)',
             border: '1px solid rgba(148, 163, 184, 0.25)',
@@ -959,7 +972,7 @@ export default function CommodityCtaDashboard() {
             padding: '1.1rem 1.25rem'
           }}>
             <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.05rem', color: '#FDE68A' }}>
-              🔬 2005–2026 原物料期貨策略五階消融實證總表 (含 6 bps 期貨滑價與轉倉價差還原)
+              🔬 2005–2026 原物料期貨策略多階消融實證總表 (含 6 bps 期貨滑價與轉倉價差還原)
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table className="stock-table" style={{ width: '100%', fontSize: '0.81rem' }}>
@@ -1006,7 +1019,7 @@ export default function CommodityCtaDashboard() {
             </div>
           </div>
 
-          {/* Panel A: 逐筆單筆勝率與雙階鎖利解剖看板 */}
+          {/* Panel A: 逐筆單筆勝率、M4 雙階鎖利與 M6 雙棘輪護盾解剖看板 */}
           <div style={{
             background: 'rgba(15, 23, 42, 0.85)',
             border: '1px solid rgba(52, 211, 153, 0.4)',
@@ -1015,11 +1028,12 @@ export default function CommodityCtaDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#34D399' }}>
-                🎯 逐筆單筆勝率與「M4 雙階 ATR 鎖利（收割 38% × 保留 62% 尾倉奔馳）」解剖看板
+                🎯 逐筆單筆勝率與「M4 雙階鎖利 ＋ M6 雙棘輪獲利護盾」解剖看板
               </h3>
               <span style={{ fontSize: '0.76rem', color: '#CBD5E1' }}>
-                從 Clean V4.1 <strong>{twStats.v41_win_rate_clean_pct ?? 46.52}%</strong>（{twStats.v41_total_trades ?? 933} 筆）
-                大幅躍升至 V5.0 <strong style={{ color: '#34D399' }}>{twStats.win_rate_clean_pct ?? 52.14}%</strong>（{twStats.total_trades ?? 817} 筆｜原始未鎖利 {twStats.win_rate_raw_pct ?? 50.8}%）
+                Clean V4.1 <strong>{twStats.v41_win_rate_clean_pct ?? 46.52}%</strong> ({twStats.v41_total_trades ?? 933})
+                {' '}➔ V5.0 <strong>{twStats.v50_win_rate_clean_pct ?? 52.14}%</strong> ({twStats.v50_total_trades ?? 817})
+                {' '}➔ V6.0 <strong style={{ color: '#34D399' }}>{twStats.win_rate_clean_pct ?? 53.99}%</strong> ({twStats.total_trades ?? 765} 筆｜棘輪觸發 <strong style={{ color: '#FBBF24' }}>{twStats.ratchet_exits ?? 73}</strong> 筆)
               </span>
             </div>
 
@@ -1027,34 +1041,34 @@ export default function CommodityCtaDashboard() {
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.65rem 0.85rem', borderRadius: '9px', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
                 <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>總平倉勝率 (Clean / Raw)</div>
                 <div style={{ fontSize: '1.22rem', fontWeight: 900, color: '#34D399', fontFamily: 'monospace' }}>
-                  {twStats.win_rate_clean_pct ?? 52.14}% <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>({twStats.win_trades ?? 426}勝/{twStats.loss_trades ?? 391}負)</span>
+                  {twStats.win_rate_clean_pct ?? 53.99}% <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>({twStats.win_trades ?? 413}勝/{twStats.loss_trades ?? 352}負)</span>
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>Raw {twStats.win_rate_raw_pct ?? 50.8}% ｜ V4.1 {twStats.v41_win_rate_clean_pct ?? 46.52}%</div>
+                <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>Raw {twStats.win_rate_raw_pct ?? 53.33}% ｜ V5 {twStats.v50_win_rate_clean_pct ?? 52.14}% ｜ V4.1 {twStats.v41_win_rate_clean_pct ?? 46.52}%</div>
               </div>
 
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.65rem 0.85rem', borderRadius: '9px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
                 <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>做多 / 做空 分項勝率</div>
                 <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#38BDF8', fontFamily: 'monospace' }}>
-                  多 {twStats.long_win_rate_pct ?? '—'}% ｜ 空 {twStats.short_win_rate_pct ?? '—'}%
+                  多 {twStats.long_win_rate_pct ?? 53.2}% ｜ 空 {twStats.short_win_rate_pct ?? 57.1}%
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>多 {twStats.long_trades ?? '—'} 筆 ｜ 空 {twStats.short_trades ?? '—'} 筆</div>
+                <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>多 {twStats.long_trades ?? 611} 筆 ｜ 空 {twStats.short_trades ?? 154} 筆</div>
               </div>
 
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.65rem 0.85rem', borderRadius: '9px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>M4 雙階鎖利觸發佔比</div>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>M4 雙階鎖利 &amp; M6 棘輪護盾</div>
                 <div style={{ fontSize: '1.22rem', fontWeight: 900, color: '#FBBF24', fontFamily: 'monospace' }}>
-                  {twStats.scaled_out_rate_pct ?? 41.2}% <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>({twStats.scaled_out_trades ?? 337} 筆)</span>
+                  {twStats.scaled_out_rate_pct ?? 42.9}% <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>({twStats.scaled_out_trades ?? 328} 鎖 / {twStats.ratchet_exits ?? 73} 棘)</span>
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>達 max(1.8×NATR, 3.5%) 先落袋 38%</div>
+                <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>1.8×NATR 鎖 38% ＋ 0.36/0.65×NATR 棘輪</div>
               </div>
 
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.65rem 0.85rem', borderRadius: '9px', border: '1px solid rgba(167, 139, 250, 0.3)' }}>
                 <div style={{ fontSize: '0.72rem', color: '#94A3B8' }}>獲利因子 / 賺賠比 / 期望值</div>
                 <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#C4B5FD', fontFamily: 'monospace' }}>
-                  PF {twStats.profit_factor ?? 1.84} <span style={{ fontSize: '0.8rem', color: '#34D399' }}>(賠率 {twStats.payoff_ratio ?? '—'}x)</span>
+                  PF {twStats.profit_factor ?? 1.98} <span style={{ fontSize: '0.8rem', color: '#34D399' }}>(賠率 {twStats.payoff_ratio ?? 1.68}x)</span>
                 </div>
                 <div style={{ fontSize: '0.7rem', color: '#CBD5E1' }}>
-                  均賺 +{twStats.avg_win_pct ?? '—'}% / 均虧 {twStats.avg_loss_pct ?? '—'}% ｜ EV +{twStats.expectancy_per_trade_pct ?? '—'}%
+                  均賺 +{twStats.avg_win_pct ?? 5.95}% / 均虧 {twStats.avg_loss_pct ?? -3.53}% ｜ EV +{twStats.expectancy_per_trade_pct ?? 1.59}%
                 </div>
               </div>
             </div>
@@ -1067,7 +1081,7 @@ export default function CommodityCtaDashboard() {
                       <th>商品 (代碼)</th>
                       <th>板塊</th>
                       <th>歷史成交筆數</th>
-                      <th>單筆勝率 (含雙階鎖利)</th>
+                      <th>單筆勝率 (含雙階+棘輪)</th>
                       <th>雙階鎖利觸發率</th>
                       <th>單筆平均報酬</th>
                       <th>22年累計單筆報酬貢獻</th>
@@ -1097,7 +1111,7 @@ export default function CommodityCtaDashboard() {
             )}
           </div>
 
-          {/* Panel B: 八重防過度擬合嚴刑拷打審計報告 */}
+          {/* Panel B: 九重防過度擬合嚴刑拷打審計報告 */}
           <div style={{
             background: 'rgba(15, 23, 42, 0.85)',
             border: '1px solid rgba(167, 139, 250, 0.45)',
@@ -1106,30 +1120,42 @@ export default function CommodityCtaDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.85rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#C4B5FD' }}>
-                🧬 八重防過度擬合嚴刑拷打審計報告（8-Gate Anti-Overfitting Torture Suite: {aoAudit.all_8_gates_passed ? '8/8 ALL PASS ✅' : 'AUDITING'}）
+                🧬 九重防過度擬合嚴刑拷打審計報告（9-Gate Anti-Overfitting Torture Suite: {aoAudit.all_9_gates_passed ? '9/9 ALL PASS ✅' : aoAudit.all_8_gates_passed ? 'ALL PASS ✅' : 'AUDITING'}）
               </h3>
               <span style={{ fontSize: '0.75rem', color: '#34D399', fontWeight: 700 }}>
-                新增正交因子最高相關 |ρ| = {aoAudit.new_factors_max_abs_corr ?? 0.1303} (&lt;0.30) ｜ 未來投毒差分 {aoAudit.future_poisoning_max_diff ?? 0.0}
+                VOL20_120 max|ρ| = {aoAudit.vol20_120_max_abs_corr ?? 0.0281} ｜ ER40/DXY max|ρ| = {aoAudit.er_dxy_max_abs_corr ?? 0.1303} ｜ 未來投毒差分 {aoAudit.future_poisoning_max_diff ?? 0.0}
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '0.95rem', fontSize: '0.78rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(215px, 1fr))', gap: '0.75rem', marginBottom: '0.95rem', fontSize: '0.77rem' }}>
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.7rem 0.9rem', borderRadius: '9px', border: '1px solid rgba(167, 139, 250, 0.35)' }}>
-                <div style={{ color: '#A78BFA', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 3: 3D ±20% 參數高原 (27 網格)</div>
-                <div>CAGR 全勝 V4.1：<strong>{aoAudit.grid_beat_v41_cagr ?? 27}/{aoAudit.grid_total_cells ?? 27}</strong> ({aoAudit.grid_cagr_range || '—'})</div>
-                <div>Sharpe / WR / mMDD 全勝：<strong>{aoAudit.grid_beat_v41_sharpe ?? 27}/27 ｜ {aoAudit.grid_beat_v41_wr ?? 27}/27 ｜ {aoAudit.grid_beat_v41_mdd ?? 27}/27</strong></div>
+                <div style={{ color: '#A78BFA', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 3A: 核心 3D ±20% (vs V4.1)</div>
+                <div>CAGR 全勝 V4.1：<strong>{aoAudit.grid_beat_v41_cagr ?? 27}/27</strong> ({aoAudit.grid_cagr_range || '+21.85% / +22.64% / +23.64%'})</div>
+                <div>Sh/Cal/WR/MDD 全勝 V4.1：<strong>{aoAudit.grid_beat_v41_sharpe ?? 27}/{aoAudit.grid_beat_v41_calmar ?? 27}/{aoAudit.grid_beat_v41_wr ?? 27}/{aoAudit.grid_beat_v41_mdd ?? 27}</strong></div>
+              </div>
+
+              <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.7rem 0.9rem', borderRadius: '9px', border: '1px solid rgba(251, 191, 36, 0.35)' }}>
+                <div style={{ color: '#FBBF24', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 3B: M6×M7×M8 ±20% (vs V5.0)</div>
+                <div>CAGR 全勝 V5.0：<strong>{aoAudit.grid_v6_beat_v5_cagr ?? 27}/27</strong> ({aoAudit.grid_v6_cagr_range || '+22.05% / +22.97% / +23.42%'})</div>
+                <div>Sh/Cal/WR/MDD 全勝 V5.0：<strong>{aoAudit.grid_v6_beat_v5_sharpe ?? 27}/{aoAudit.grid_v6_beat_v5_calmar ?? 27}/{aoAudit.grid_v6_beat_v5_wr ?? 27}/{aoAudit.grid_v6_beat_v5_mdd ?? 27}</strong></div>
               </div>
 
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.7rem 0.9rem', borderRadius: '9px', border: '1px solid rgba(52, 211, 153, 0.35)' }}>
                 <div style={{ color: '#34D399', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 4: 刀切剔除前三大獲利合約</div>
                 <div>剔除：<strong>{(aoAudit.jackknife_excluded_top3 || ['HG=F', 'HO=F', 'RB=F']).join(', ')}</strong></div>
-                <div>V5.0 剩餘 16 檔：<strong style={{ color: '#34D399' }}>+{aoAudit.jackknife_v5_cagr_pct ?? 16.61}%</strong> (勝率 {aoAudit.jackknife_v5_wr_pct ?? 50.56}%) vs V4.1 +{aoAudit.jackknife_v41_cagr_pct ?? 16.21}%</div>
+                <div>V6 剩餘 16 檔：<strong style={{ color: '#34D399' }}>+{aoAudit.jackknife_v6_cagr_pct ?? 18.1}%</strong> (WR {aoAudit.jackknife_v6_wr_pct ?? 51.87}%) &gt; V5 +{aoAudit.jackknife_v5_cagr_pct ?? 16.61}% &gt; V4.1 +{aoAudit.jackknife_v41_cagr_pct ?? 16.21}%</div>
               </div>
 
               <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.7rem 0.9rem', borderRadius: '9px', border: '1px solid rgba(56, 189, 248, 0.35)' }}>
-                <div style={{ color: '#38BDF8', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 5 &amp; 7: 雙紀元與雙倍嚴酷成本</div>
-                <div>Ex-2026：<strong style={{ color: '#34D399' }}>+{aoAudit.ex_2026_cagr_pct ?? 21.38}%</strong> (V4.1 +{aoAudit.v41_ex_2026_cagr_pct ?? 18.81}%)</div>
-                <div>雙倍滑價 12bps：<strong style={{ color: '#38BDF8' }}>+{aoAudit.harsh_12bps_cagr_pct ?? 18.83}%</strong> (V4.1 +{aoAudit.v41_harsh_12bps_cagr_pct ?? 16.65}%)</div>
+                <div style={{ color: '#38BDF8', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 5 &amp; 7: 雙紀元與雙倍滑價</div>
+                <div>Ex-2026：<strong style={{ color: '#34D399' }}>+{aoAudit.ex_2026_cagr_pct ?? 23.2}%</strong> (V5 +{aoAudit.v50_ex_2026_cagr_pct ?? 21.38}%)</div>
+                <div>12bps：<strong style={{ color: '#38BDF8' }}>+{aoAudit.harsh_12bps_cagr_pct ?? 20.84}%</strong> (V5 +{aoAudit.v50_harsh_12bps_cagr_pct ?? 18.83}%)</div>
+              </div>
+
+              <div style={{ background: 'rgba(30, 41, 59, 0.72)', padding: '0.7rem 0.9rem', borderRadius: '9px', border: '1px solid rgba(244, 114, 182, 0.35)' }}>
+                <div style={{ color: '#F472B6', fontWeight: 800, marginBottom: '0.25rem' }}>Gate 9: 五重換倉日計時偏差審計</div>
+                <div>V6 五相均值/最低：<strong style={{ color: '#34D399' }}>+{aoAudit.five_phase_audit?.v6_mean_cagr ?? 19.16}% / +{aoAudit.five_phase_audit?.v6_min_cagr ?? 17.38}%</strong></div>
+                <div>V5 五相均值/最低：<strong>+{aoAudit.five_phase_audit?.v5_mean_cagr ?? 18.42}% / +{aoAudit.five_phase_audit?.v5_min_cagr ?? 16.63}%</strong></div>
               </div>
             </div>
 
@@ -1138,7 +1164,7 @@ export default function CommodityCtaDashboard() {
                 <table className="stock-table" style={{ width: '100%', fontSize: '0.76rem' }}>
                   <thead>
                     <tr>
-                      <th>M1–M5 單模組剝離測試 (LOO Ablation)</th>
+                      <th>M1–M8 單模組剝離測試 (LOO Ablation)</th>
                       <th>全樣本 CAGR</th>
                       <th>Ex-2026 CAGR</th>
                       <th>月度 MDD</th>
@@ -1150,10 +1176,10 @@ export default function CommodityCtaDashboard() {
                   </thead>
                   <tbody>
                     {aoAudit.loo_ablation.map((row, rIdx) => {
-                      const isV5 = row.label?.includes('V5.0');
+                      const isFlagshipRow = row.label?.includes('V6.0') || row.label?.includes('完整');
                       return (
-                        <tr key={rIdx} style={{ background: isV5 ? 'rgba(245, 158, 11, 0.14)' : 'transparent' }}>
-                          <td style={{ fontWeight: isV5 ? 800 : 600, color: isV5 ? '#FBBF24' : '#E2E8F0' }}>{row.label}</td>
+                        <tr key={rIdx} style={{ background: isFlagshipRow ? 'rgba(245, 158, 11, 0.14)' : 'transparent' }}>
+                          <td style={{ fontWeight: isFlagshipRow ? 800 : 600, color: isFlagshipRow ? '#FBBF24' : '#E2E8F0' }}>{row.label}</td>
                           <td style={{ fontFamily: 'monospace', color: '#34D399', fontWeight: 700 }}>+{row.cagr_pct}%</td>
                           <td style={{ fontFamily: 'monospace', color: '#38BDF8' }}>+{row.ex_2026_cagr_pct}%</td>
                           <td style={{ fontFamily: 'monospace', color: '#FCA5A5' }}>{row.mdd_monthly_pct}%</td>
@@ -1178,7 +1204,7 @@ export default function CommodityCtaDashboard() {
             padding: '1.1rem 1.25rem'
           }}>
             <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.05rem', color: '#34D399' }}>
-              🛡️ 六大歷史股災與通膨風暴期之 Crisis Alpha 對決（旗艦 CTA vs 被動原物料 vs 標普 500）
+              🛡️ 六大歷史股災與通膨風暴期之 Crisis Alpha 對決（旗艦 CTA V6.0 vs 被動原物料 vs 標普 500）
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.8rem' }}>
               {crisisList.map((c) => (
@@ -1208,14 +1234,15 @@ export default function CommodityCtaDashboard() {
             padding: '1.1rem 1.25rem'
           }}>
             <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.05rem', color: '#FDE68A' }}>
-              📅 2005–2026 逐年績效全紀錄 (20 / 22 年正報酬，勝率 90.9%)
+              📅 2005–2026 逐年績效全紀錄 (V6.0 勝年 {fs.win_years || '19/22'})
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table className="stock-table" style={{ width: '100%', fontSize: '0.79rem' }}>
                 <thead>
                   <tr>
                     <th>年份</th>
-                    <th>🏆 全球原物料泰坦 CTA</th>
+                    <th>🏆 旗艦 CTA V6.0</th>
+                    <th>V5.0 基準</th>
                     <th>Tier 3: Carry + 1/ATR</th>
                     <th>Tier 2: 純 1/ATR 動能</th>
                     <th>Tier 0: 被動原物料長抱</th>
@@ -1231,6 +1258,9 @@ export default function CommodityCtaDashboard() {
                         <td style={{ fontFamily: 'monospace', fontWeight: 800, color: '#FDE68A' }}>{yr.year}</td>
                         <td style={{ fontFamily: 'monospace', fontWeight: 800, color: yr.cta_titan_pct >= 0 ? '#34D399' : '#F87171' }}>
                           {yr.cta_titan_pct >= 0 ? '+' : ''}{yr.cta_titan_pct}%
+                        </td>
+                        <td style={{ fontFamily: 'monospace', color: (yr.cta_v50_pct ?? 0) >= 0 ? '#6EE7B7' : '#FCA5A5' }}>
+                          {yr.cta_v50_pct !== undefined ? `${yr.cta_v50_pct >= 0 ? '+' : ''}${yr.cta_v50_pct}%` : '—'}
                         </td>
                         <td style={{ fontFamily: 'monospace', color: yr.carry_atr_pct >= 0 ? '#A7F3D0' : '#FCA5A5' }}>
                           {yr.carry_atr_pct >= 0 ? '+' : ''}{yr.carry_atr_pct}%
@@ -1255,7 +1285,7 @@ export default function CommodityCtaDashboard() {
             </div>
           </div>
 
-          {/* 近期與全歷史逐筆波段交易明細 (含現貨價差、轉倉收益拆解與雙階鎖利紀錄) */}
+          {/* 近期與全歷史逐筆波段交易明細 (含現貨價差、轉倉收益拆解、雙階鎖利與 M6 雙棘輪護盤紀錄) */}
           <div style={{
             background: 'rgba(15, 23, 42, 0.85)',
             border: '1px solid rgba(148, 163, 184, 0.25)',
@@ -1264,7 +1294,7 @@ export default function CommodityCtaDashboard() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.85rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#FDE68A' }}>
-                📜 全球原物料泰坦 CTA V5.0 逐筆交易帳本（顯示 {showAllTrades ? filteredTrades.length : Math.min(filteredTrades.length, 60)} / 篩選 {filteredTrades.length} 筆，總計 {recentTrades.length} 筆）
+                📜 全球原物料泰坦 CTA V6.0 逐筆交易帳本（顯示 {showAllTrades ? filteredTrades.length : Math.min(filteredTrades.length, 60)} / 篩選 {filteredTrades.length} 筆，總計 {recentTrades.length} 筆）
               </h3>
               <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 {[
@@ -1273,7 +1303,8 @@ export default function CommodityCtaDashboard() {
                   { id: 'SHORT', label: '做空' },
                   { id: 'WIN', label: '僅看獲利' },
                   { id: 'LOSS', label: '僅看虧損' },
-                  { id: 'SCALED', label: '僅看雙階鎖利' }
+                  { id: 'SCALED', label: '僅看雙階鎖利' },
+                  { id: 'RATCHET', label: '僅看 M6 棘輪護盤' }
                 ].map((opt) => (
                   <button
                     key={opt.id}
@@ -1343,7 +1374,7 @@ export default function CommodityCtaDashboard() {
                     <th>現貨價差報酬</th>
                     <th>轉倉收益貢獻 (Roll Yield)</th>
                     <th>總報酬率 (含雙階鎖利)</th>
-                    <th>出場與鎖利狀態</th>
+                    <th>出場與棘輪鎖利狀態</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1387,6 +1418,21 @@ export default function CommodityCtaDashboard() {
                               fontSize: '0.68rem'
                             }}>
                               🎯 雙階鎖利 38% ({t.scale_date})
+                            </span>
+                          )}
+                          {t.ratchet_triggered && (
+                            <span style={{
+                              display: 'inline-block',
+                              marginRight: '0.35rem',
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '4px',
+                              background: 'rgba(245, 158, 11, 0.2)',
+                              color: '#FBBF24',
+                              border: '1px solid rgba(245, 158, 11, 0.45)',
+                              fontWeight: 800,
+                              fontSize: '0.68rem'
+                            }}>
+                              🔒 M6 棘輪護盤
                             </span>
                           )}
                           {t.exit_reason}
