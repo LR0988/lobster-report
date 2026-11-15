@@ -277,3 +277,28 @@
 3. **`R27` 帕累托邊界教訓（Tombstone `🪦 #102`）**：實證 `Slot #0` 單期 15D 原始勝率上限約 `65.1%~66.9%`（合理實戰區間 `60%~65%`；多期連抱勝率可達 `78.5%`，平均報酬 `+5.79%`，賺賠比 `2.12x`），強推至 `70%` 會錯殺右尾突破股導致 CAGR 大幅失血或過不了 `Gate 8`。
 4. **上線同步與 `2026-11-12` 實盤持倉**：已完整通過 [`pit_integrity_gatekeeper.py`](file:///Users/huanggin-chen/openclaw_test/pit_integrity_gatekeeper.py) Gen-2 `12` 道實盤與 8 重投毒檢驗，並同步更新 [`export_g11_pit_detailed_history.py`](file:///Users/huanggin-chen/openclaw_test/export_g11_pit_detailed_history.py)、[`global_sovereign_service.py`](file:///Users/huanggin-chen/openclaw_test/global_sovereign_service.py)、[`GlobalSovereignDashboard.js`](file:///Users/huanggin-chen/openclaw_test/frontend/src/components/GlobalSovereignDashboard.js)、Supabase `stock_ml_cache` 與 `https://lobster-report.vercel.app`。當前官方動態模擬持倉：**A 梯隊** (`93.0%` 曝險：`LLY 57.7% / TXN 18.7% / ADI 16.6%`)、**B 梯隊** (`100.0%` 曝險：`MRK 52.4% / LLY 22.6% / TXN 25.0%`，`11/03` `P1` 換馬自 `XOM`)。
 
+---
+
+## 🇹🇼 十二、 2026-11-15 台股因果泰坦 `Phoenix-PIT v6.0 Gen-2` 純 GICS 族群分治雙引擎 + 合規升級上線實盤 (`🪦 #103`)
+
+1. **核心機制（方案 2 + 方案 3 同步落地 [`tw_phoenix_turnaround_pit_engine.py`](file:///Users/huanggin-chen/openclaw_test/tw_phoenix_turnaround_pit_engine.py)）**：
+   - **方案 2 — 純 GICS 族群分治雙引擎 (`0.35 / 0.30` 配比，全程 `1.0x` 零槓桿)**：
+     - **Pod 1 科技凹洞突擊艦 (`N=14`)**：限定 `Technology` 週期科技子產業（半導體、電子元件、EMS），`3 年凹洞 <= -35%` + `MOPS PIT 營收雙指標拐點` + `Blitz 60D RS >= +4%` + `Minervini VCP <= 1.10` + `Piotroski 季報毛利/營益拐點` + `機構吸籌 >= 3%`。
+     - **Pod 2 科技/重電 10D PEAD + VCP 主升艦 (`N=17`)**：限定 `Technology` 硬體/軟體儀器 + `Industrials` 重電電機機械航太，於 MOPS 法定營收公告日後 `10` 交易日視窗內追蹤 `YoY >= +20%` & `accel >= 0` & `OM_TTM > 5%`，於 `MA20` 附近 `-1% ~ +7.0%` + `VCP <= 1.00` 進場（需全球寬幅 `>= 40%` 雙護盾放行）。
+     - **傳產/金融/生技/景氣消費永久禁買 (`GICS Veto`)**：基於實證勝率與右尾結構缺陷，徹底排除傳產價值陷阱與大盤高檔假突破虧損源。
+   - **方案 3 — Global Titan Gen-2 合規升級**：
+     - 全宇宙嚴格鎖定 [`pit_cache/tw_zero_omission_0050_0051_pit.pkl`](file:///Users/huanggin-chen/openclaw_test/pit_cache/tw_zero_omission_0050_0051_pit.pkl) (`in_0050_0051_pit`，`100% TWSE / 0% TPEx / 0% .TWO`)；快取移至 `pit_cache/tw_phoenix_gen2_pit_cache.pkl` 與 `pit_cache/tw_phoenix_gen2_audit_cache.pkl` (`schema_version=2`，廢除 `/tmp`)；補齊 `industry_map.json` 10 檔缺漏 TWSE GICS 映射（`1,973` 檔零缺漏）；強制 **Gate B5 (`val > 0`) 禁止零成交停牌假成交**、嚴格因果日期不夾帶未來、`etf_ok_prev` 嚴格前日 T-1 訊號、`comp_br` 零 `.bfill()`。
+     - 溫度計（`tw_br`, `mkt_fr10`, `mkt_mg10`）與選股宇宙嚴格解耦（Tombstone `🪦 #103`）：市場寬度溫度計保留非金建百貨之全市場流動股票 (`>= 2,000 萬/日`) 運算；個股進場宇宙 `100%` 鎖死於官方 `0050 ∪ 0051` TWSE PIT。
+2. **實證績效與 Global Titan Gen-2 8/8 嚴酷驗證 (`2016-01-04 ~ 2026-11-12`, `verify_tw_phoenix_gen2_torture_suite.py`)**：
+   - **總體績效**：**`CAGR +31.53%`** (vs `0050 +22.91%`, `Mult 19.59x`), **`MDD -17.81%`**, **`Sharpe 1.52`**, **`Calmar 1.77`**, 總交易 **`N = 31`** (個股勝率 `64.52%`, 勝年 `9/11`, 贏 `0050` 年數 `8/11`)。
+   - **8/8 Torture Gates 全通關**：
+     - **Gate 1 (Gen-2 PIT & 純 GICS)**：`0% .TWO`、`100%` GICS (`751` 檔矩陣 / 全交易 `100%` 合規)。
+     - **Gate 2 (Gate B5)**：`0` 筆零成交停牌假成交、`100% T+1` 開盤成交。
+     - **Gate 3 (3D `±20%` 高原)**：**`27/27 (100.0%)`** 全贏 `0050` 且 `Sharpe >= 1.35`（`min 30.03% / med 31.31% / max 32.18%`）。
+     - **Gate 4 (真模擬拔矛 Jackknife)**：`Drop-3 = 25.74%`、`Drop-5 = 24.15%` 皆強壓 `0050 (22.91%)`。
+     - **Gate 5 (雙世代 & Ex-2026)**：`Ex26 = 28.69%` (vs `19.61%`)、`Era1(16–20) = 33.39%` (vs `19.23%`)、`Era2(21–26) = 29.76%` (vs `25.82%`)。
+     - **Gate 6 (未來毒化截斷)**：Cutoff `2023-06-30` **`max_abs_diff = 0.00e+00`**。
+     - **Gate 7 (2x 雙倍嚴苛滑價)**：**`28.68%`** (`> 0050+4% = 26.91%`)。
+     - **Gate 8 (LOO 正向邊際協同)**：`MotherShip 21.86% -> Pod2 21.91% / Pod1 31.29% -> Dual 31.53%` (`N=31 >= 30`)。
+   - **最新 `2026-11-12` 實盤狀態**：全球主權寬幅 `65.8%` (`>= 35%`)、台股寬幅不開突擊倉 -> **`0050 母艦 100.0% + 雙引擎突擊艦 0%` 滿載巡航**。
+

@@ -1,8 +1,8 @@
 """
 tw_titan_pit_service.py
-台股因果泰坦 — 大凹洞轉型波段母子艦隊 (0050 全球寬幅保護母艦 + S50/A25 轉機突擊艦) 即時與回測同步服務。
-直接串接 tw_phoenix_turnaround_pit_engine.py (8 重極端嚴格 Point-in-Time 驗證引擎)，
-動態產出 taiwan_causal_titan_data.json 與同步 defaultMarketMlData.json。
+台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊 (Phoenix-PIT v6.0 Gen-2: 0050 保護母艦 + Pod1 科技凹洞35% + Pod2 科技重電PEAD主升30%) 即時與回測同步服務。
+直接串接 tw_phoenix_turnaround_pit_engine.py (Global Titan Gen-2 12道安檢 + 8重 Torture Audit 引擎)，
+動態產出 taiwan_causal_titan_data.json 與同步 defaultMarketMlData.json / market_ml_prediction.json。
 """
 import importlib
 import json

@@ -1455,6 +1455,18 @@ flowchart TD
    - **勝率與年代結構**：`G1(05–15) 29.47%` / `G2(16–25) 52.70%` / `G2_incl26 62.03%`；半月勝率 **`63.9%`**、個股勝率 **`60.12%`**、`Slot #0` 勝率 **`64.52%`**；勝年 **`20/22 (90.9%)`**、戰勝 SPY **`18/22`**；危機年全正報酬：**`2008 +11.77%`**、**`2018 +100.89%`**、**`2020 +79.01%`**、**`2022 +7.49%`**。
 3. **發佈狀態（Live Production，2026-11-15）**：已依 Frank 指令將 **`G12-PIT Sovereign R26-GOLD`** 全鏈路部署上線至 [`export_g11_pit_detailed_history.py`](file:///Users/huanggin-chen/openclaw_test/export_g11_pit_detailed_history.py)、[`global_sovereign_service.py`](file:///Users/huanggin-chen/openclaw_test/global_sovereign_service.py)、[`GlobalSovereignDashboard.js`](file:///Users/huanggin-chen/openclaw_test/frontend/src/components/GlobalSovereignDashboard.js)、Supabase `stock_ml_cache` (`global_sovereign_dashboard`) 與 `https://lobster-report.vercel.app`。`2026-11-12` 官方動態實盤持倉為：**A 梯隊** (`93.0%` 曝險：`LLY 57.7% / TXN 18.7% / ADI 16.6%`)、**B 梯隊** (`100.0%` 曝險：`MRK 52.4% / LLY 22.6% / TXN 25.0%`，`11/03` `P1` 換馬自 `XOM`)。
 
+---
+
+### 7. 2026-11-15 台股因果泰坦 `Phoenix-PIT v6.0 Gen-2` 純 GICS 雙引擎與合規升級（`🪦 #103`）
+
+- **Tombstone `🪦 #103` — 台股全市場溫度計 vs 純上市 `0050∪0051` 選股宇宙誤混耦合教訓**：
+  - 台股策略若同時採用「大盤溫度計 (`tw_br`, `mkt_fr10`, `mkt_mg10`)」與「`0050∪0051` PIT 選股宇宙」，嚴禁將選股宇宙縮窄至 `TWSE-only` 後順手砍掉上櫃/非權值股票在溫度計中的採樣（會令 `CAGR` 自 `31.53%` 錯殺跌至 `27.70%`、`Drop-3` 跌破 `0050` 至 `21.75%`、`Era2` 輸大盤）。
+  - 正確解耦架構（已固化於 [`tw_phoenix_turnaround_pit_engine.py`](file:///Users/huanggin-chen/openclaw_test/tw_phoenix_turnaround_pit_engine.py)）：`_build_or_load_full_matrices()` 在全市場非金建百貨之流動股票 (`>= 2,000 萬/日`) 運算單向因果三維溫度計 `Series` 後，立即將儲存快取矩陣 (`pit_cache/tw_phoenix_gen2_pit_cache.pkl`, `schema_version=2`) 嚴格切片為純上市 [`pit_cache/tw_zero_omission_0050_0051_pit.pkl`](file:///Users/huanggin-chen/openclaw_test/pit_cache/tw_zero_omission_0050_0051_pit.pkl) (`100% TWSE / 0% .TWO / 100% GICS`)；`get_db_fingerprint()` 以 TWSE 最新完整交易日為準避免 TPEx 局部新日期干擾。
+- **方案 2 + 方案 3 全套驗證結果（[`verify_tw_phoenix_gen2_torture_suite.py`](file:///Users/huanggin-chen/openclaw_test/verify_tw_phoenix_gen2_torture_suite.py) + [`pit_integrity_gatekeeper.py`](file:///Users/huanggin-chen/openclaw_test/pit_integrity_gatekeeper.py) 全通過）**：
+  - **`CAGR +31.53%`** (`0050 +22.91%`, `Mult 19.59x`, `MDD -17.81%`, `Sharpe 1.52`, `Calmar 1.77`, `N=31`: Pod1 `14` + Pod2 `17`, 勝率 `64.52%`)。
+  - **8 重嚴酷驗證全通關**：高原 **`27/27 (100%, min 30.03% / med 31.31% / max 32.18%)`**、真 Jackknife **`Drop-3 25.74% / Drop-5 24.15% > 0050`**、雙世代 **`Era1 33.39% vs 19.23%` / `Era2 29.76% vs 25.82%` / `Ex26 28.69% vs 19.61%`**、截斷毒化 **`PoisonDiff = 0.00e+00`**、2x 雙倍滑價 **`28.68% > 26.91%`**、LOO 正協同 **`MotherShip 21.86% -> Pod2 21.91% / Pod1 31.29% -> Dual 31.53%`**、Gate B5 零停牌假成交、`pit_integrity_gatekeeper.py --self-test` 12 道硬斷言 + 8 重投毒測試全綠燈。
+
+
 
 
 

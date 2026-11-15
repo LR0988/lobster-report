@@ -1134,7 +1134,7 @@ export default function TaiwanCausalTitanDashboard() {
 
   // 曲線 SVG 點計算
   const svgCurveData = useMemo(() => {
-    if (!curve || curve.length === 0) return { pathStrat: '', pathTx: '', width: 850, height: 280 };
+    if (!curve || curve.length === 0) return { pathStrat: '', pathTx: '', width: 850, height: 280, yTicks: [] };
     const width = 850;
     const height = 280;
     const padX = 60;
@@ -1143,7 +1143,20 @@ export default function TaiwanCausalTitanDashboard() {
     const drawH = height - padY * 2;
 
     const minLog = 0; // Log10(1) = 0
-    const maxLog = 1.45; // Log10(28) ≈ 1.45 (完美展示 1x ~ 25x 對數走勢)
+    const peakNav = curve.reduce((mx, pt) => Math.max(
+      mx,
+      Number(pt.strategy ?? pt.strategy_nav ?? 1),
+      Number(pt.taiex ?? pt.taiex_nav ?? 1)
+    ), 1);
+    const topCap = Math.max(15, Math.ceil(peakNav * 1.15));
+    const maxLog = Math.max(1.25, Math.log10(topCap));
+    const yFor = (v) => height - padY - ((Math.log10(Math.max(1, v)) - minLog) / (maxLog - minLog)) * drawH;
+    const yTicks = [
+      { label: '1.0x', val: 1, y: yFor(1), color: '#94A3B8', isBase: true },
+      { label: '3.0x', val: 3, y: yFor(3), color: '#94A3B8', isBase: false },
+      { label: '10x', val: 10, y: yFor(10), color: '#94A3B8', isBase: false },
+      { label: `${topCap}x`, val: topCap, y: yFor(topCap), color: '#F59E0B', isBase: false }
+    ].filter(tk => tk.val <= topCap && tk.y >= 12 && tk.y <= height - padY + 2);
 
     const pointsStrat = curve.map((pt, idx) => {
       const x = padX + (idx / Math.max(1, curve.length - 1)) * drawW;
@@ -1163,7 +1176,7 @@ export default function TaiwanCausalTitanDashboard() {
       return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
     }).join(' ');
 
-    return { pathStrat: pointsStrat, pathTx: pointsTx, width, height };
+    return { pathStrat: pointsStrat, pathTx: pointsTx, width, height, yTicks };
   }, [curve]);
 
   return (
@@ -1210,7 +1223,7 @@ export default function TaiwanCausalTitanDashboard() {
                 borderRadius: '6px',
                 fontSize: '0.78rem'
               }}>
-                👑 0050 保護母艦 × S50/A25 大凹洞突擊艦 · 8重嚴格PIT驗證
+                👑 方案 2 純 GICS 族群分治雙引擎 × 0050 母艦 · Phoenix-PIT v6.0 Gen-2
               </span>
               <span
                 onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
@@ -1225,11 +1238,11 @@ export default function TaiwanCausalTitanDashboard() {
                 {liveStatus.msg} · 🔄 重算
               </span>
               <h2 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 'bold', color: '#F8FAFC' }}>
-                👑 台股因果泰坦 — 大凹洞轉型波段母子艦隊
+                👑 台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              0050 全球寬幅保護母艦 (≥35%續抱 / &lt;35%次日開盤撤退) + 均一 50% 倉位大凹洞轉機突擊艦 (月營收T+1拐點 × 法人雙鎖碼 × 🔥鳳凰回馬槍 × 等級二實盤稅費價差) · <strong>通過 8 重極端嚴格 PIT 審計 · 11 年擊敗 0050 共 {kpis.beat_market_years || 9} 年 (9勝2敗) · 連續 11 年正報酬</strong>
+              方案 2 純 GICS 分治雙引擎 (🔥 Pod 1 強週期科技凹洞 35%＋回馬槍 · 🚀 Pod 2 科技/重電 MOPS 10日 PEAD 主升 30% · 🚫 傳產/金融/營建價值陷阱永久禁買 · 🛸 0050 母艦廣盤最多3槽) × 方案 3 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 正報酬 {kpis.winning_years ?? 10}/{kpis.total_years ?? 11} 年</strong>
             </p>
           </div>
 
@@ -1301,10 +1314,62 @@ export default function TaiwanCausalTitanDashboard() {
           <div>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>擊敗 0050 年度勝率</div>
             <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#60A5FA', fontFamily: 'monospace' }}>
-              {kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}% ({kpis.beat_market_years || 9}/{kpis.total_years || 11}勝)
+              {kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}% ({kpis.beat_market_years ?? 9}/{kpis.total_years ?? 11}勝)
             </div>
           </div>
         </div>
+
+        {/* Global Titan Gen-2 8-Gate Torture Audit 面板 */}
+        {data?.torture_audit && (
+          <div style={{
+            marginTop: '1rem',
+            paddingTop: '0.9rem',
+            borderTop: '1px dashed rgba(56, 189, 248, 0.25)',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            gap: '0.65rem'
+          }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.10)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', padding: '0.55rem 0.75rem' }}>
+              <div style={{ fontSize: '0.7rem', color: '#6EE7B7', fontWeight: 'bold' }}>🛡️ Gen-2 PIT 宇宙 + 未來洩漏檢查</div>
+              <div style={{ fontSize: '0.84rem', color: '#F8FAFC', fontFamily: 'monospace', marginTop: '0.18rem' }}>
+                {data.torture_audit.gen2_12gates_passed ? '12-Gate PASS' : 'CHECK'} · LeakDiff: {data.torture_audit.future_poison_max_diff}
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.1rem' }}>
+                0% TPEx · 零停牌成交 ({data.torture_audit.zero_vol_violations}) · 100% GICS
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(56, 189, 248, 0.10)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '8px', padding: '0.55rem 0.75rem' }}>
+              <div style={{ fontSize: '0.7rem', color: '#7DD3FC', fontWeight: 'bold' }}>🌋 3D ±20% 27格參數高原</div>
+              <div style={{ fontSize: '0.84rem', color: '#F8FAFC', fontFamily: 'monospace', marginTop: '0.18rem' }}>
+                {data.torture_audit.plateau_passed}/{data.torture_audit.plateau_total} ({data.torture_audit.plateau_pass_rate}%) PASS
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.1rem' }}>
+                低谷 +{data.torture_audit.plateau_min_cagr}% / 中位 +{data.torture_audit.plateau_med_cagr}% / 高峰 +{data.torture_audit.plateau_max_cagr}%
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(245, 158, 11, 0.10)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '8px', padding: '0.55rem 0.75rem' }}>
+              <div style={{ fontSize: '0.7rem', color: '#FDE68A', fontWeight: 'bold' }}>🔪 真・重跑組合 Jackknife</div>
+              <div style={{ fontSize: '0.84rem', color: '#F8FAFC', fontFamily: 'monospace', marginTop: '0.18rem' }}>
+                拔Top3 +{data.torture_audit.jackknife_drop3_cagr}% · 拔Top5 +{data.torture_audit.jackknife_drop5_cagr}%
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.1rem' }}>
+                均仍打贏 0050 (+{data.torture_audit.bench_0050_cagr}%) · 勝0050筆數 {data.torture_audit.beat_0050_trade_wr}%
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(168, 85, 247, 0.10)', border: '1px solid rgba(168, 85, 247, 0.3)', borderRadius: '8px', padding: '0.55rem 0.75rem' }}>
+              <div style={{ fontSize: '0.7rem', color: '#E9D5FF', fontWeight: 'bold' }}>⚙️ LOO 雙引擎邊際貢獻 (N={data.torture_audit.total_trades})</div>
+              <div style={{ fontSize: '0.84rem', color: '#F8FAFC', fontFamily: 'monospace', marginTop: '0.18rem' }}>
+                母艦 {data.torture_audit.loo_mothership_cagr}% → P1 {data.torture_audit.loo_pod1_only_cagr}% / P2 {data.torture_audit.loo_pod2_only_cagr}%
+              </div>
+              <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.1rem' }}>
+                Ex26 +{data.torture_audit.ex26_cagr}% · 2x摩擦 +{data.torture_audit.harsh_2x_cagr}% · P1={data.torture_audit.pod1_trades} / P2={data.torture_audit.pod2_trades}筆
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ===== 第二行：5 個帳戶資產數據方塊 (100% 由歷史進出 txHistory 即時推導) ===== */}
@@ -1476,27 +1541,27 @@ export default function TaiwanCausalTitanDashboard() {
                   {data?.live_signal?.shield || '母子艦隊雷達監控中'}
                 </span>
                 <span style={{ fontSize: '0.82rem', color: '#CBD5E1' }}>
-                  0050 母艦目標：<strong style={{ color: '#FDE68A' }}>{data?.live_signal?.etf_mother_ship_pct ?? 0}%</strong> ｜ S/A 突擊艦目標：<strong style={{ color: '#38BDF8' }}>{data?.live_signal?.assault_ship_pct ?? 0}%</strong> ｜ 現金護盾：<strong style={{ color: '#34D399' }}>{100 - (data?.live_signal?.exposure_pct ?? 0)}%</strong>
+                  0050 母艦目標：<strong style={{ color: '#FDE68A' }}>{data?.live_signal?.etf_mother_ship_pct ?? 0}%</strong> ｜ 雙引擎突擊艦目標：<strong style={{ color: '#38BDF8' }}>{data?.live_signal?.assault_ship_pct ?? 0}%</strong> ｜ 現金護盾：<strong style={{ color: '#34D399' }}>{100 - (data?.live_signal?.exposure_pct ?? 0)}%</strong>
                 </span>
               </div>
               <div style={{ fontSize: '0.76rem', color: '#94A3B8' }}>
-                全球複合寬幅：<strong>{data?.live_signal?.breadth_pct ?? '-'}%</strong> (門檻 35%) · 台股中線寬幅：<strong>{data?.live_signal?.tw_breadth_pct ?? '-'}%</strong> (常規 35% / ⚡真恐慌≤19%後衝力早開≥29% · 5日衝力 {(data?.live_signal?.tw_br_chg5_pct ?? 0) >= 0 ? '+' : ''}{data?.live_signal?.tw_br_chg5_pct ?? 0}%)
+                全球複合寬幅：<strong>{data?.live_signal?.breadth_pct ?? '-'}%</strong> (母艦35%/Pod2≥40%) · 台股中線寬幅：<strong>{data?.live_signal?.tw_breadth_pct ?? '-'}%</strong> (常規 35% / ≥60%開3槽 · 5日衝力 {(data?.live_signal?.tw_br_chg5_pct ?? 0) >= 0 ? '+' : ''}{data?.live_signal?.tw_br_chg5_pct ?? 0}%)
               </div>
             </div>
             {Array.isArray(data?.live_signal?.ranked) && data.live_signal.ranked.length > 0 && (
               <div style={{ fontSize: '0.76rem', color: '#94A3B8', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.55rem' }}>
-                🔍 <strong>大凹洞營收拐點雷達觀察池 (已滿足 3年深跌≥35% + 月營收拐點 + 法人吸籌，待台股寬幅≥35%與突破60日高點觸發)：</strong>
+                🔍 <strong>雙引擎 0050∪0051 PIT 雷達觀察池 (Pod1 科技凹洞營收拐點 + Pod2 科技/重電高成長 VCP 待機名單)：</strong>
                 <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
                   {data.live_signal.ranked.map(r => (
                     <span key={r.stock_id} style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.12)',
+                      background: String(r.pod_badge || '').includes('Pod2') ? 'rgba(16,185,129,0.12)' : 'rgba(56,189,248,0.10)',
+                      border: `1px solid ${String(r.pod_badge || '').includes('Pod2') ? 'rgba(16,185,129,0.35)' : 'rgba(56,189,248,0.28)'}`,
                       padding: '0.18rem 0.5rem',
                       borderRadius: '4px',
                       color: '#E2E8F0',
                       fontFamily: 'monospace'
                     }}>
-                      {r.stock_id} {r.name} (${r.price}{r.trough_pct ? ` · 凹洞${r.trough_pct}%` : ''}{r.rev_yoy !== undefined ? ` · 營收YoY +${r.rev_yoy}%` : ''})
+                      {r.pod_badge ? `${r.pod_badge} · ` : ''}{r.stock_id} {r.name} (${r.price}{r.trough_pct ? ` · 凹洞${r.trough_pct}%` : ''}{r.rev_yoy !== undefined ? ` · YoY ${r.rev_yoy >= 0 ? '+' : ''}${r.rev_yoy}%` : ''})
                     </span>
                   ))}
                 </div>
@@ -1792,10 +1857,10 @@ export default function TaiwanCausalTitanDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                 <div>
                   <h4 style={{ margin: 0, color: '#C084FC', fontSize: '1.12rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    🛡️ 當前系統計算但被過濾掉的候選股明細表 (六道濾網闖關診斷 · 共 {(data?.filtered_candidates || data?.live_signal?.filtered_candidates).length} 檔)
+                    🛡️ 雙引擎突擊艦候選診斷 & GICS 價值陷阱永久攔截表 (六道濾網闖關 · 共 {(data?.filtered_candidates || data?.live_signal?.filtered_candidates).length} 檔)
                   </h4>
                   <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
-                    列出最新交易日 ({strategy_info.latest_data_date}) 已進入系統大凹洞營收拐點池 / 鳳凰回馬槍池，但因部分濾網尚未通過而被攔截之潛力股與具體卡關原因（點擊 📊 可查看 K 線圖）。
+                    列出最新交易日 ({strategy_info.latest_data_date}) 進入 🔥 Pod 1 科技凹洞 / 🚀 Pod 2 科技重電 PEAD 主升 / 🚫 GICS 傳產金融價值陷阱永久禁買池之診斷與具體攔截原因（點擊 📊 可查看 K 線圖）。
                   </p>
                 </div>
                 <div style={{
@@ -1807,7 +1872,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  六道關卡：①3年凹洞 · ②營收+Piotroski拐點 · ③法人鎖碼+信度≥12 · ④均線四線多頭 · ⑤突破60高+RS60≥4%+VCP≤1.10 · ⑥大盤寬幅放行
+                  雙引擎濾網：Pod1 科技深跌≥35%拐點VCP ｜ Pod2 MOPS10日PEAD+YoY≥20%+Bias20≤7% ｜ 傳產/金融/營建 GICS 永久禁買
                 </div>
               </div>
 
@@ -1856,7 +1921,7 @@ export default function TaiwanCausalTitanDashboard() {
                               />
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#FBBF24', fontFamily: 'monospace' }}>
-                              綜合積分: {fc.score}
+                              綜合積分: {fc.score}{fc.industry ? ` · ${fc.industry}` : ''}
                             </div>
                           </td>
                           <td style={{ padding: '0.55rem 0.45rem' }}>
@@ -1865,9 +1930,21 @@ export default function TaiwanCausalTitanDashboard() {
                               borderRadius: '4px',
                               fontSize: '0.72rem',
                               fontWeight: 'bold',
-                              background: fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.2)' : (!gs.trough ? 'rgba(239, 68, 68, 0.18)' : 'rgba(56, 189, 248, 0.15)'),
-                              color: fc.is_reentry_watch ? '#FDBA74' : (!gs.trough ? '#FCA5A5' : '#7DD3FC'),
-                              border: `1px solid ${fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.45)' : (!gs.trough ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)')}`
+                              background: fc.is_gics_veto
+                                ? 'rgba(239, 68, 68, 0.22)'
+                                : (fc.pod_target === 'POD2'
+                                  ? 'rgba(16, 185, 129, 0.18)'
+                                  : (fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.2)' : (!gs.trough ? 'rgba(239, 68, 68, 0.18)' : 'rgba(56, 189, 248, 0.15)'))),
+                              color: fc.is_gics_veto
+                                ? '#FCA5A5'
+                                : (fc.pod_target === 'POD2'
+                                  ? '#6EE7B7'
+                                  : (fc.is_reentry_watch ? '#FDBA74' : (!gs.trough ? '#FCA5A5' : '#7DD3FC'))),
+                              border: `1px solid ${fc.is_gics_veto
+                                ? 'rgba(239, 68, 68, 0.45)'
+                                : (fc.pod_target === 'POD2'
+                                  ? 'rgba(16, 185, 129, 0.45)'
+                                  : (fc.is_reentry_watch ? 'rgba(249, 115, 22, 0.45)' : (!gs.trough ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)'))) }`
                             }}>
                               {fc.pool_type}
                             </span>
@@ -1904,16 +1981,15 @@ export default function TaiwanCausalTitanDashboard() {
                             )}
                           </td>
                           <td style={{ padding: '0.55rem 0.45rem', textAlign: 'center', minWidth: '185px' }}>
-                            <div style={{ marginBottom: '0.2rem', fontSize: '0.73rem', fontWeight: 'bold', color: fc.gates_passed >= 4 ? '#C084FC' : '#CBD5E1' }}>
-                              通過 {fc.gates_passed} / {fc.total_gates} 關
+                            <div style={{ marginBottom: '0.2rem', fontSize: '0.73rem', fontWeight: 'bold', color: fc.is_gics_veto ? '#F87171' : (fc.gates_passed >= 4 ? '#C084FC' : '#CBD5E1') }}>
+                              {fc.is_gics_veto ? '🚫 GICS 永久禁買' : `通過 ${fc.gates_passed} / ${fc.total_gates} 關`}
                             </div>
                             <div>
-                              <span style={badgeStyle(gs.trough)}>{gs.trough ? '✓' : '✗'}凹洞</span>
-                              <span style={badgeStyle(gs.rev)}>{gs.rev ? '✓' : '✗'}營收</span>
-                              <span style={badgeStyle(gs.inst)}>{gs.inst ? '✓' : '✗'}法人</span>
-                              <span style={badgeStyle(gs.trend)}>{gs.trend ? '✓' : '✗'}均線</span>
-                              <span style={badgeStyle(gs.breakout)}>{gs.breakout ? '✓' : '✗'}突破</span>
-                              <span style={badgeStyle(gs.mkt)}>{gs.mkt ? '✓' : '✗'}寬幅</span>
+                              {(Array.isArray(fc.gate_labels) && fc.gate_labels.length === 6 ? fc.gate_labels : ['凹洞', '營收', '法人', '均線', '突破', '寬幅']).map((lbl, gi) => {
+                                const keys = ['trough', 'rev', 'inst', 'trend', 'breakout', 'mkt'];
+                                const ok = Boolean(gs[keys[gi]]);
+                                return <span key={gi} style={badgeStyle(ok)}>{ok ? '✓' : '✗'}{lbl}</span>;
+                              })}
                             </div>
                           </td>
                           <td style={{ padding: '0.55rem 0.45rem', color: '#FCA5A5', fontSize: '0.76rem', lineHeight: '1.45' }}>
@@ -2342,16 +2418,16 @@ export default function TaiwanCausalTitanDashboard() {
 
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <svg viewBox={`0 0 ${svgCurveData.width} ${svgCurveData.height}`} style={{ width: '100%', maxHeight: '420px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>
-              <line x1="60" y1="20" x2="830" y2="20" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
-              <line x1="60" y1="80" x2="830" y2="80" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
-              <line x1="60" y1="150" x2="830" y2="150" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
-              <line x1="60" y1="220" x2="830" y2="220" stroke="rgba(255,255,255,0.08)" strokeDasharray="4" />
-              <line x1="60" y1="250" x2="830" y2="250" stroke="rgba(255,255,255,0.15)" />
-
-              <text x="15" y="25" fill="#F59E0B" fontSize="10" fontFamily="monospace">25x</text>
-              <text x="15" y="85" fill="#94A3B8" fontSize="10" fontFamily="monospace">10x</text>
-              <text x="15" y="155" fill="#94A3B8" fontSize="10" fontFamily="monospace">3.0x</text>
-              <text x="15" y="250" fill="#94A3B8" fontSize="10" fontFamily="monospace">1.0x</text>
+              {(svgCurveData.yTicks || []).map((tk, i) => (
+                <React.Fragment key={i}>
+                  <line
+                    x1="60" y1={tk.y} x2="830" y2={tk.y}
+                    stroke={tk.isBase ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}
+                    strokeDasharray={tk.isBase ? undefined : '4'}
+                  />
+                  <text x="15" y={tk.y + 4} fill={tk.color} fontSize="10" fontFamily="monospace">{tk.label}</text>
+                </React.Fragment>
+              ))}
 
               <text x="70" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2016</text>
               <text x="240" y="270" fill="#64748B" fontSize="10" fontFamily="monospace">2018</text>
@@ -2608,7 +2684,7 @@ export default function TaiwanCausalTitanDashboard() {
                         />
                       </span>
                     </td>
-                    <td style={{ padding: '0.65rem 0.5rem', color: String(t.role || '').includes('回馬槍') ? '#FDBA74' : '#93C5FD', fontWeight: String(t.role || '').includes('回馬槍') ? 'bold' : 'normal' }}>{t.role}</td>
+                    <td style={{ padding: '0.65rem 0.5rem', color: String(t.role || '').includes('Pod2') ? '#34D399' : (String(t.role || '').includes('回馬槍') ? '#FDBA74' : '#93C5FD'), fontWeight: (String(t.role || '').includes('回馬槍') || String(t.role || '').includes('Pod2')) ? 'bold' : 'normal' }}>{t.role}</td>
                     <td style={{ padding: '0.65rem 0.5rem', fontFamily: 'monospace' }}>
                       {t.entry_date} (${t.entry_price})
                     </td>
@@ -2632,29 +2708,31 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 嚴格 0050∪0051 PIT 大凹洞母子艦隊 · v5.7 熊市出坑斜率修正極致夏普法典 (SOP)
+            📖 台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v6.0 Gen-2 風控法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 嚴格 0050∪0051 PIT 母艦 × 廣盤動態雙槽突擊架構 (零槓桿 1.0x)</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 方案 2：純 GICS 族群分治雙引擎 + 0050 母艦打底 (零槓桿 1.0x)</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>🛸 0050 全球寬幅＋台股瀑布保護母艦：</strong>當全球 15 國主權與美台核心複合寬幅 (Global Breadth) ≥ 35% 且未觸發台股外資大提款瀑布雙殺時，閒置資金 100% 停泊於 0050.TW；一旦寬幅 &lt; 35% 或觸發台股系統性外資提款瀑布，次一交易日開盤 0050 立即撤退為現金避險（來回實扣 0.28% 稅費與五檔價差）。<br />
-                • <strong>👑 嚴格 0050∪0051 PIT 突擊艦 (廣盤 ≥60% 開雙槽 · 窄盤單槽護航)：</strong>每季依 MOPS 季報股本 × 動態面額 × 收盤價重審上市市值前 150 大 (0% 上櫃股)。當台股 60MA 寬幅 ≥ 60% 百花齊放時開放第 2 檔突擊艦槽位；當寬幅 &lt; 60% (如拉積窄盤) 僅開放 1 檔最頂尖大凹洞（50% 留守 0050 母艦）。
+                • <strong>🚫 GICS 價值陷阱永久禁買鎖：</strong>依 <code>industry_map.json</code> 永久排除塑化、鋼鐵、航運、消費、金融、營建、能源、公用事業等凹洞勝率低且單筆重傷族群（0 檔硬編碼）。<br />
+                • <strong>🔥 Pod 1 科技凹洞艦 (35% ＋ 60 日鳳凰回馬槍)：</strong>專打半導體 / 設備材料 / 電子零組件 / 網通 3 年深跌 ≥35% + 月營收拐點 + Piotroski 季報護航 + 法人雙鎖碼 + VCP≤1.10。<br />
+                • <strong>🚀 Pod 2 科技重電 PEAD 主升艦 (30%)：</strong>專治牛市無凹洞踏空！鎖定 Technology + Industrials 重電/機電於 MOPS 法定營收公告後 10 個交易日窗口內，YoY≥20% 且加速 + 三率擴張 + 貼月線 VCP≤1.00，採乾淨 MA60 波段持有。<br />
+                • <strong>🛸 0050 母艦廣盤動態 2/3 槽：</strong>常規上限 2 槽、台股 60MA 寬幅 ≥60% 開 3 槽，其餘現金停泊 0050.TW；全球寬幅 &lt;35% 或觸發台股外資瀑布雙殺時次日撤退避險。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. v5.7 熊市出坑斜率修正 × VCP 波動收斂 × 相對0050汰弱換強</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 方案 3：Global Titan Gen-2 12 道安檢 + 8 重 Torture Audit 認證</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>極致夏普五重精準核心 (夏普 1.60 · 勝率 66.7% · 獲利因子 13.01 · 31.24倍)：</strong>(1) <strong>熊市出坑年線滯後修正 (MA200 斜率 ≥ -2.5%)</strong>：解鎖股價剛站回季/半年/年線突破時年線尚在扣抵崩盤前高價之第一波真龍頭；(2) <strong>VCP 波動收斂壓縮 (20D/60D 波動比 ≤ 1.10)</strong>：剔除波動發散之假突破；(3) <strong>最低綜合信度 ≥ 12</strong>；(4) <strong>Piotroski 毛利營益拐點 + Blitz RS60 ≥ +4%</strong>；(5) <strong>相對 0050 機會成本停損</strong>：進場滿 10 日未拉開 +14% 且落後同期 0050 達 10% 破月線即換回母艦。<br />
-                • <strong>高透明籌碼煞車 × 八段式出場：</strong>高檔外資提款+散戶融資接刀煞車、選擇權莊家 P/C OI &lt;85% 避險煞車；波段漲逾 +35% 見法人倒貨散戶接刀破 10MA 提早鎖利，洗盤結束 60 日內再發動「🔥 鳳凰回馬槍」！
+                • <strong>官方 0050∪0051 PIT 無偏誤宇宙：</strong>100% 掛載 <code>tw_zero_omission_0050_0051_pit.pkl</code> (0% `.TWO` 上櫃滲漏)，並徹底廢除 <code>/tmp</code> 暫存改用 <code>pit_cache/tw_phoenix_gen2_pit_cache.pkl</code> (<code>schema_version=2</code>) 與 Gate B5 (停牌/零量日禁止假成交)。<br />
+                • <strong>8 重機構壓力測試全過關：</strong>27 格 ±20% 三維參數高原 ({data?.torture_audit ? `${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total} (${data.torture_audit.plateau_pass_rate}%)` : '100%'})、真實重跑組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 截斷零偷看 (max diff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #10B981' }}>
               <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. 純台股真實交易曆 × 25,277 筆官方公司行動完整還原</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>機構級資料防偽：</strong>(A) 100% 運行於證交所真實開盤日曆 (2016–2026 共 2,635 交易日，零連假幽靈單)；(B) 串接證交所 TWT49U/TWTAUU/TWTB8U 與櫃買中心共 25,277 筆官方除權息、現金減資、股票分割參考價與股數除權對齊；(C) 月營收遇假日順延 + 1 交易日緩衝；(D) 盤前 08:50 依昨收核定股數 + 賣股 T+1 交割延遲 + 漲跌停鎖死檢驗；(E) 全市場 2,047 檔含 148 檔已下市股檢驗踩雷數 = 0 筆。
+                • <strong>機構級資料防偽與實盤摩擦：</strong>(A) 100% 運行於證交所真實開盤日曆 (2016–2026 零連假幽靈單)；(B) 串接證交所 TWT49U/TWTAUU/TWTB8U 與櫃買中心共 25,277 筆官方除權息、現金減資、股票分割參考價與股數除權對齊；(C) 月營收遇假日順延 + 1 交易日緩衝 (MOPS PEAD 視窗)；(D) 個股來回實扣 0.74%、0050 來回 0.28% + T+1 交割延遲 + 漲跌停與零成交量檢驗 (踩雷 = 0 筆)。
               </p>
             </div>
           </div>

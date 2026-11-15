@@ -7850,5 +7850,45 @@
   "6288.TW": {
     "sector": "Technology",
     "industry": "Electronic Components"
+  },
+  "1808.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate - Development"
+  },
+  "6949.TW": {
+    "sector": "Healthcare",
+    "industry": "Biotechnology"
+  },
+  "9940.TW": {
+    "sector": "Real Estate",
+    "industry": "Real Estate Services"
+  },
+  "2211.TW": {
+    "sector": "Basic Materials",
+    "industry": "Steel"
+  },
+  "7799.TW": {
+    "sector": "Healthcare",
+    "industry": "Medical Devices"
+  },
+  "2373.TW": {
+    "sector": "Industrials",
+    "industry": "Business Equipment & Supplies"
+  },
+  "2646.TW": {
+    "sector": "Industrials",
+    "industry": "Airlines"
+  },
+  "9917.TW": {
+    "sector": "Industrials",
+    "industry": "Security & Protection Services"
+  },
+  "2258.TW": {
+    "sector": "Consumer Cyclical",
+    "industry": "Auto Manufacturers"
+  },
+  "5007.TW": {
+    "sector": "Industrials",
+    "industry": "Tools & Accessories"
   }
 }
