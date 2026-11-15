@@ -33,7 +33,6 @@ for tk, grp in daily_df.groupby("ticker"):
     idx = pd.Index(grp["dt"])
     spec = spec_map[tk]
     base_carry = spec["base_structural_carry_ann"]
-    live_ry = float(meta_df.loc[meta_df["ticker"] == tk, "live_roll_yield_pct"].values[0]) / 100.0
 
     s_open = grp["open"].values.copy()
     s_high = grp["high"].values.copy()
@@ -63,7 +62,7 @@ for tk, grp in daily_df.groupby("ticker"):
         (s_high_ser - prev_c).abs(),
         (s_low_ser - prev_c).abs()
     ], axis=1).max(axis=1)
-    atr20 = tr.rolling(20, min_periods=5).mean().bfill()
+    atr20 = tr.rolling(20, min_periods=5).mean().fillna(tr.expanding().mean())
     natr20 = ((atr20 / (s_close_ser + 1e-8)) * 100.0).clip(0.4, 12.0)
 
     # 3. Strip contract roll-date overnight splice jumps:
@@ -94,8 +93,7 @@ for tk, grp in daily_df.groupby("ticker"):
     ma60 = s_close_ser.rolling(60, min_periods=20).mean()
     scarcity_premium = ((s_close_ser / (ma252 + 1e-8) - 1.0) * 0.22 + (s_close_ser / (ma60 + 1e-8) - 1.0) * 0.18).clip(-0.25, 0.35)
     roll_yield_ann = (base_carry + scarcity_premium).clip(-0.38, 0.35)
-    # Blend recent 45 trading days with live CME/ICE/CBOT Front-vs-Deferred curve
-    roll_yield_ann.iloc[-45:] = 0.45 * roll_yield_ann.iloc[-45:] + 0.55 * live_ry
+    # 100% strictly causal PIT: do NOT overwrite historical tails with static metadata live_roll_yield_pct
 
     # 5. True Roll-Adjusted Daily Futures Return = Clean Futures Price Return + Lagged Daily Roll Yield (Carry / 252)
     daily_carry_accrual = roll_yield_ann.shift(1).fillna(base_carry) / 252.0
