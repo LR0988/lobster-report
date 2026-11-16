@@ -1223,7 +1223,7 @@ export default function TaiwanCausalTitanDashboard() {
                 borderRadius: '6px',
                 fontSize: '0.78rem'
               }}>
-                👑 方案 2 純產品 GICS 族群分治雙引擎 × 0050 母艦 · Phoenix-PIT v8.0 Gen-2
+                👑 方案 2 純產品 GICS 族群分治雙引擎 × P+D/Zweig 0050 母艦 · Phoenix-PIT v9.0 Gen-2
               </span>
               <span
                 onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
@@ -1242,7 +1242,7 @@ export default function TaiwanCausalTitanDashboard() {
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              方案 2 純產品雙軌雙引擎 (🔥 Pod 1 科技凹洞 38%＋回馬槍 · 🚀 Pod 2 純產品 Top-45×GM≥15%×FIP雙軌機構庫 S42%/A35%＋10日快汰 · 🚫 工程入帳/通路/航運/傳產永久禁買 · 🛸 0050 母艦 ≤100% 零槓桿) × 方案 3 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 正報酬 {kpis.winning_years ?? 9}/{kpis.total_years ?? 11} 年</strong>
+              方案 2 純產品雙軌雙引擎 (🔥 Pod 1 科技凹洞 38%＋回馬槍 · 🚀 Pod 2 純產品 Top-45×GM≥15%×FIP雙軌機構庫 S42%/A35%×+8%鎖+4%防滑價 · 🛸 P+D 瀑布鎖存＋Zweig V轉 0050 母艦 ≤100% 零槓桿) × 方案 3 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 正報酬 {kpis.winning_years ?? 9}/{kpis.total_years ?? 11} 年</strong>
             </p>
           </div>
 
@@ -1257,18 +1257,28 @@ export default function TaiwanCausalTitanDashboard() {
               <span style={{ color: '#94A3B8' }}>執行機制：</span>
               <strong style={{ color: '#FDE68A' }}>{strategy_info.rebalance_freq || '每日收盤掃描 · 次日開盤執行'}</strong>
             </div>
-            <div style={{
-              background: 'rgba(0, 0, 0, 0.4)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: '8px',
-              padding: '0.4rem 0.8rem',
-              fontSize: '0.78rem'
-            }}>
-              <span style={{ color: '#94A3B8' }}>全球寬幅護盾：</span>
-              <strong style={{ color: (data?.live_signal?.breadth_pct ?? 50) >= 35 ? '#34D399' : '#F87171' }}>
-                {data?.live_signal?.breadth_pct ?? '-'}% ({(data?.live_signal?.breadth_pct ?? 50) >= 35 ? '≥35% 巡航' : '<35% 母艦撤退'})
-              </strong>
-            </div>
+            {(() => {
+              const motherShipActive = (data?.live_signal?.base_exposure_pct ?? ((data?.live_signal?.breadth_pct ?? 50) >= 35 ? 100 : 0)) > 0;
+              const wfActive = Boolean(data?.live_signal?.wf_active);
+              const vThrustActive = Boolean(data?.live_signal?.v_thrust_active);
+              const badgeStatusText = !motherShipActive
+                ? (wfActive ? 'P+D 瀑布鎖存撤退 (100%現金)' : '<35% 母艦撤退 (100%現金)')
+                : (vThrustActive && (data?.live_signal?.breadth_pct ?? 50) < 35 ? 'Zweig V轉推進巡航' : '≥35% 巡航');
+              return (
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: '8px',
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.78rem'
+                }}>
+                  <span style={{ color: '#94A3B8' }}>母艦/瀑布護盾：</span>
+                  <strong style={{ color: motherShipActive ? '#34D399' : '#F87171' }}>
+                    {data?.live_signal?.breadth_pct ?? '-'}% ({badgeStatusText})
+                  </strong>
+                </div>
+              );
+            })()}
             <div style={{
               background: 'rgba(16, 185, 129, 0.15)',
               border: '1px solid rgba(16, 185, 129, 0.4)',
@@ -1341,21 +1351,26 @@ export default function TaiwanCausalTitanDashboard() {
 
             <div style={{ background: 'rgba(56, 189, 248, 0.10)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '8px', padding: '0.55rem 0.75rem' }}>
               <div style={{ fontSize: '0.7rem', color: '#7DD3FC', fontWeight: 'bold' }}>
-                {data.torture_audit.grid_c_passed
-                  ? '🌋 三重 3D ±20% (81格) 參數高原'
-                  : (data.torture_audit.grid_b_passed ? '🌋 雙重 3D ±20% (54格) 參數高原' : '🌋 3D ±20% 27格參數高原')}
+                {data.torture_audit.grid_d_passed
+                  ? '🌋 四重 3D ±20% (108格) 參數高原'
+                  : (data.torture_audit.grid_c_passed
+                    ? '🌋 三重 3D ±20% (81格) 參數高原'
+                    : (data.torture_audit.grid_b_passed ? '🌋 雙重 3D ±20% (54格) 參數高原' : '🌋 3D ±20% 27格參數高原'))}
               </div>
               <div style={{ fontSize: '0.84rem', color: '#F8FAFC', fontFamily: 'monospace', marginTop: '0.18rem' }}>
                 Grid-A {data.torture_audit.plateau_passed}/{data.torture_audit.plateau_total}
                 {data.torture_audit.grid_b_passed ? ` · B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ` (${data.torture_audit.plateau_pass_rate}%)`}
-                {data.torture_audit.grid_c_passed ? ` · C ${data.torture_audit.grid_c_passed}/${data.torture_audit.grid_c_total}` : ''} PASS
+                {data.torture_audit.grid_c_passed ? ` · C ${data.torture_audit.grid_c_passed}/${data.torture_audit.grid_c_total}` : ''}
+                {data.torture_audit.grid_d_passed ? ` · D ${data.torture_audit.grid_d_passed}/${data.torture_audit.grid_d_total}` : ''} PASS
               </div>
               <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.1rem' }}>
-                {data.torture_audit.grid_c_passed
-                  ? `A +${data.torture_audit.plateau_min_cagr}%~${data.torture_audit.plateau_max_cagr}% · B +${data.torture_audit.grid_b_min_cagr}%~${data.torture_audit.grid_b_max_cagr}% · C +${data.torture_audit.grid_c_min_cagr}%~${data.torture_audit.grid_c_max_cagr}%`
-                  : (data.torture_audit.grid_b_passed
-                    ? `A區間 +${data.torture_audit.plateau_min_cagr}%~+${data.torture_audit.plateau_max_cagr}% · B區間 +${data.torture_audit.grid_b_min_cagr}%~+${data.torture_audit.grid_b_max_cagr}%`
-                    : `低谷 +${data.torture_audit.plateau_min_cagr}% / 中位 +${data.torture_audit.plateau_med_cagr}% / 高峰 +${data.torture_audit.plateau_max_cagr}%`)}
+                {data.torture_audit.grid_d_passed
+                  ? `A +${data.torture_audit.plateau_min_cagr}%~${data.torture_audit.plateau_max_cagr}% · B +${data.torture_audit.grid_b_min_cagr}%~${data.torture_audit.grid_b_max_cagr}% · C +${data.torture_audit.grid_c_min_cagr}%~${data.torture_audit.grid_c_max_cagr}% · D +${data.torture_audit.grid_d_min_cagr}%~${data.torture_audit.grid_d_max_cagr}%`
+                  : (data.torture_audit.grid_c_passed
+                    ? `A +${data.torture_audit.plateau_min_cagr}%~${data.torture_audit.plateau_max_cagr}% · B +${data.torture_audit.grid_b_min_cagr}%~${data.torture_audit.grid_b_max_cagr}% · C +${data.torture_audit.grid_c_min_cagr}%~${data.torture_audit.grid_c_max_cagr}%`
+                    : (data.torture_audit.grid_b_passed
+                      ? `A區間 +${data.torture_audit.plateau_min_cagr}%~+${data.torture_audit.plateau_max_cagr}% · B區間 +${data.torture_audit.grid_b_min_cagr}%~+${data.torture_audit.grid_b_max_cagr}%`
+                      : `低谷 +${data.torture_audit.plateau_min_cagr}% / 中位 +${data.torture_audit.plateau_med_cagr}% / 高峰 +${data.torture_audit.plateau_max_cagr}%`))}
               </div>
             </div>
 
@@ -1530,54 +1545,59 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'portfolio' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          {/* 0. 母子艦隊雙引擎即時雷達與全球寬幅護盾狀態 */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
-            border: `1px solid ${(data?.live_signal?.breadth_pct ?? 50) >= 35 ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.45)'}`,
-            borderRadius: '12px',
-            padding: '1.1rem 1.25rem'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.7rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-                <span style={{
-                  background: (data?.live_signal?.breadth_pct ?? 50) >= 35 ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)',
-                  color: (data?.live_signal?.breadth_pct ?? 50) >= 35 ? '#34D399' : '#F87171',
-                  border: `1px solid ${(data?.live_signal?.breadth_pct ?? 50) >= 35 ? '#10B981' : '#EF4444'}`,
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 'bold'
-                }}>
-                  {data?.live_signal?.shield || '母子艦隊雷達監控中'}
-                </span>
-                <span style={{ fontSize: '0.82rem', color: '#CBD5E1' }}>
-                  0050 母艦目標：<strong style={{ color: '#FDE68A' }}>{data?.live_signal?.etf_mother_ship_pct ?? 0}%</strong> ｜ 雙引擎突擊艦目標：<strong style={{ color: '#38BDF8' }}>{data?.live_signal?.assault_ship_pct ?? 0}%</strong> ｜ 現金護盾：<strong style={{ color: '#34D399' }}>{100 - (data?.live_signal?.exposure_pct ?? 0)}%</strong>
-                </span>
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#94A3B8' }}>
-                全球複合寬幅：<strong>{data?.live_signal?.breadth_pct ?? '-'}%</strong> (母艦35% / Pod2全球≥45%&台股≥40%) · 台股中線寬幅：<strong>{data?.live_signal?.tw_breadth_pct ?? '-'}%</strong> (常規 35% / ≥60%開3槽 · 5日衝力 {(data?.live_signal?.tw_br_chg5_pct ?? 0) >= 0 ? '+' : ''}{data?.live_signal?.tw_br_chg5_pct ?? 0}%)
-              </div>
-            </div>
-            {Array.isArray(data?.live_signal?.ranked) && data.live_signal.ranked.length > 0 && (
-              <div style={{ fontSize: '0.76rem', color: '#94A3B8', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.55rem' }}>
-                🔍 <strong>雙引擎 0050∪0051 PIT 雷達觀察池 (Pod1 科技凹洞營收拐點 + Pod2 Top-45 高毛利GM≥15%×FIP126 待機名單)：</strong>
-                <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
-                  {data.live_signal.ranked.map(r => (
-                    <span key={r.stock_id} style={{
-                      background: String(r.pod_badge || '').includes('Pod2') ? 'rgba(16,185,129,0.12)' : 'rgba(56,189,248,0.10)',
-                      border: `1px solid ${String(r.pod_badge || '').includes('Pod2') ? 'rgba(16,185,129,0.35)' : 'rgba(56,189,248,0.28)'}`,
-                      padding: '0.18rem 0.5rem',
-                      borderRadius: '4px',
-                      color: '#E2E8F0',
-                      fontFamily: 'monospace'
+          {/* 0. 母子艦隊雙引擎即時雷達與全球寬幅/P+D瀑布護盾狀態 */}
+          {(() => {
+            const motherShipActive = (data?.live_signal?.base_exposure_pct ?? ((data?.live_signal?.breadth_pct ?? 50) >= 35 ? 100 : 0)) > 0;
+            return (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)',
+                border: `1px solid ${motherShipActive ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.45)'}`,
+                borderRadius: '12px',
+                padding: '1.1rem 1.25rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '0.7rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                    <span style={{
+                      background: motherShipActive ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)',
+                      color: motherShipActive ? '#34D399' : '#F87171',
+                      border: `1px solid ${motherShipActive ? '#10B981' : '#EF4444'}`,
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '6px',
+                      fontSize: '0.78rem',
+                      fontWeight: 'bold'
                     }}>
-                      {r.pod_badge ? `${r.pod_badge} · ` : ''}{r.stock_id} {r.name} (${r.price}{r.trough_pct ? ` · 凹洞${r.trough_pct}%` : ''}{r.rev_yoy !== undefined ? ` · YoY ${r.rev_yoy >= 0 ? '+' : ''}${r.rev_yoy}%` : ''})
+                      {data?.live_signal?.shield || '母子艦隊雷達監控中'}
                     </span>
-                  ))}
+                    <span style={{ fontSize: '0.82rem', color: '#CBD5E1' }}>
+                      0050 母艦目標：<strong style={{ color: '#FDE68A' }}>{data?.live_signal?.etf_mother_ship_pct ?? 0}%</strong> ｜ 雙引擎突擊艦目標：<strong style={{ color: '#38BDF8' }}>{data?.live_signal?.assault_ship_pct ?? 0}%</strong> ｜ 現金護盾：<strong style={{ color: '#34D399' }}>{100 - (data?.live_signal?.exposure_pct ?? 0)}%</strong>
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#94A3B8' }}>
+                    全球複合寬幅：<strong>{data?.live_signal?.breadth_pct ?? '-'}%</strong> (母艦35% / Zweig V轉例外 / Pod2全球≥45%&台股≥40%) · 台股中線寬幅：<strong>{data?.live_signal?.tw_breadth_pct ?? '-'}%</strong> (常規 35% / ≥60%開3槽 · 5日衝力 {(data?.live_signal?.tw_br_chg5_pct ?? 0) >= 0 ? '+' : ''}{data?.live_signal?.tw_br_chg5_pct ?? 0}%)
+                  </div>
                 </div>
+                {Array.isArray(data?.live_signal?.ranked) && data.live_signal.ranked.length > 0 && (
+                  <div style={{ fontSize: '0.76rem', color: '#94A3B8', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.55rem' }}>
+                    🔍 <strong>雙引擎 0050∪0051 PIT 雷達觀察池 (Pod1 科技凹洞營收拐點 + Pod2 Top-45 高毛利GM≥15%×FIP126 待機名單)：</strong>
+                    <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                      {data.live_signal.ranked.map(r => (
+                        <span key={r.stock_id} style={{
+                          background: String(r.pod_badge || '').includes('Pod2') ? 'rgba(16,185,129,0.12)' : 'rgba(56,189,248,0.10)',
+                          border: `1px solid ${String(r.pod_badge || '').includes('Pod2') ? 'rgba(16,185,129,0.35)' : 'rgba(56,189,248,0.28)'}`,
+                          padding: '0.18rem 0.5rem',
+                          borderRadius: '4px',
+                          color: '#E2E8F0',
+                          fontFamily: 'monospace'
+                        }}>
+                          {r.pod_badge ? `${r.pod_badge} · ` : ''}{r.stock_id} {r.name} (${r.price}{r.trough_pct ? ` · 凹洞${r.trough_pct}%` : ''}{r.rev_yoy !== undefined ? ` · YoY ${r.rev_yoy >= 0 ? '+' : ''}${r.rev_yoy}%` : ''})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
 
           {/* 1. 大凹洞母子艦隊 持股更動建議試算器 */}
           <div className="glass-card" style={{
@@ -1592,7 +1612,7 @@ export default function TaiwanCausalTitanDashboard() {
                   🔄 台股因果泰坦 (大凹洞母子艦隊) · 持股更動建議試算器
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
-                  依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與母子艦隊最新目標權重 ({targetAllocationConfig.length} 檔{targetAllocationConfig.length === 0 ? '，全球寬幅 < 35% 觸發 0050 母艦撤退全數空手避險' : ''}) 即時比對偏差。資料截止：<strong>{strategy_info.latest_data_date}</strong>。
+                  依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與母子艦隊最新目標權重 ({targetAllocationConfig.length} 檔{targetAllocationConfig.length === 0 ? (data?.live_signal?.wf_active ? '，台股外資提款 P+D 瀑布鎖存觸發 0050 母艦撤退 100% 現金避險' : '，全球寬幅 < 35% 觸發 0050 母艦撤退全數空手避險') : ''}) 即時比對偏差。資料截止：<strong>{strategy_info.latest_data_date}</strong>。
                 </p>
               </div>
 
@@ -1882,7 +1902,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  Phoenix-PIT v8.0：Pod1 科技深跌≥35%(38%) ｜ Pod2 純產品龍頭 Top45×GM≥15%×FIP雙軌鎖碼(S42%/A35%) ｜ 工程入帳/通路/航運/傳產 GICS 永久禁買
+                  Phoenix-PIT v9.0：Pod1 科技深跌≥35%(38%) ｜ Pod2 純產品龍頭 Top45×GM≥15%×FIP雙軌鎖碼(S42%/A35%)×+8%鎖+4% ｜ P+D瀑布/Zweig V轉母艦
                 </div>
               </div>
 
@@ -2517,7 +2537,7 @@ export default function TaiwanCausalTitanDashboard() {
                 🏆 2016 - 2026 歷年年度績效 vs 0050.TW 實戰對比 ({yearly_stats.length} 年中 {kpis.beat_market_years || 9} 年擊敗 0050 · 勝率 {kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}% · {kpis.winning_years ?? 9}/{yearly_stats.length} 年正報酬)
               </h4>
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                0050 保護母艦 (全球寬幅≥35%續抱 / &lt;35%或瀑布雙殺次日撤退) + Pod1 科技凹洞 (38%＋回馬槍) + Pod2 純產品高毛利FIP雙軌機構庫 (S42%/A35%) · 三重 81 格 PIT 嚴格驗證
+                0050 P+D/Zweig 保護母艦 (全球寬幅≥35%或V轉推進續抱 / &lt;35%或P+D瀑布鎖存次日撤退) + Pod1 科技凹洞 (38%＋回馬槍) + Pod2 純產品高毛利FIP雙軌機構庫 (S42%/A35%·+8%鎖+4%) · 四重 108 格 PIT 嚴格驗證
               </p>
             </div>
           </div>
@@ -2722,16 +2742,16 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 純產品 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v8.0 Gen-2 風控法典 (SOP)
+            📖 台股因果泰坦 — 純產品 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v9.0 Gen-2 風控法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 方案 2：純產品 GICS 族群分治雙引擎 + 0050 母艦打底 (嚴守 ≤100% 零槓桿)</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. 方案 2：純產品 GICS 族群分治雙引擎 + P+D/Zweig 0050 母艦打底 (嚴守 ≤100% 零槓桿)</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>🚫 GICS 價值陷阱與工程/通路雜訊永久禁買鎖：</strong>依 <code>industry_map.json</code> 永久排除塑化、鋼鐵、航運、空運、陸運、控股、太陽能、消費、金融、營建、能源、公用及工程承攬 (完工百分比失真) 與零 IP 通路商（0 檔硬編碼）。<br />
                 • <strong>🔥 Pod 1 科技凹洞艦 (38% ＋ 60 日鳳凰回馬槍)：</strong>專打半導體 / 設備材料 / 電子零組件 / 網通 3 年深跌 ≥35% + 月營收拐點 + Piotroski 季報護航 + 法人雙鎖碼 + VCP≤1.10。<br />
-                • <strong>🚀 Pod 2 純產品龍頭雙軌 FIP 鎖利艦 (S級 42% / A級 35%)：</strong>鎖定純產品/IP Top-45 × Novy-Marx 定價權毛利護城河 (GM_TTM≥15%) × YoY≥30% × Bias20≤8.5%，結合主軌 (FIP126≥0.08 &amp; IO20≥2% &amp; Inst≥1%) 與不搶席次之 Priority-0 高 FIP 外資/ADR 鎖碼庫 (FIP126≥0.12 &amp; IO20≥1% &amp; Inst≥2%)，搭配 10 日零反彈快汰與防跳空三階棘輪。<br />
-                • <strong>🛸 0050 母艦廣盤動態 2/3 槽：</strong>常規上限 2 槽、台股 60MA 寬幅 ≥60% 開 3 槽，合計嚴格 ≤100% 零槓桿，其餘現金停泊 0050.TW；全球寬幅 &lt;35% 或觸發台股外資瀑布雙殺時次日撤退避險。
+                • <strong>🚀 Pod 2 純產品龍頭雙軌 FIP 鎖利艦 (S級 42% / A級 35%)：</strong>鎖定純產品/IP Top-45 × Novy-Marx 定價權毛利護城河 (GM_TTM≥15%) × YoY≥30% × Bias20≤8.5%，結合主軌 (FIP126≥0.08 &amp; IO20≥2% &amp; Inst≥1%) 與不搶席次之 Priority-0 高 FIP 外資/ADR 鎖碼庫 (FIP126≥0.12 &amp; IO20≥1% &amp; Inst≥2%)，搭配 10 日零反彈快汰與防滑價/防跳空三階棘輪 (+8%鎖+4.0%破MA20)。<br />
+                • <strong>🛸 P+D 瀑布鎖存 × Zweig V 轉推進 0050 母艦：</strong>常規上限 2 槽、台股 60MA 寬幅 ≥60% 開 3 槽，合計嚴格 ≤100% 零槓桿，其餘現金停泊 0050.TW；於原 D 項急殺之上加入 P 項深熊外資大提款飽和鎖 (TW_Br&lt;25% &amp; 外資10D≤-3.5% &amp; 0050&lt;MA20) 杜絕死貓跳誤買，並於台股寬幅自 ≤19% 反彈 ≥25% 且 5 日推升 ≥+8% 時領先恢復 0050 巡航。
               </p>
             </div>
 
@@ -2739,7 +2759,7 @@ export default function TaiwanCausalTitanDashboard() {
               <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 方案 3：Global Titan Gen-2 12 道安檢 + 8 重 Torture Audit 認證</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>官方 0050∪0051 PIT 無偏誤宇宙：</strong>100% 掛載 <code>tw_zero_omission_0050_0051_pit.pkl</code> (0% `.TWO` 上櫃滲漏)，並徹底廢除 <code>/tmp</code> 暫存改用 <code>pit_cache/tw_phoenix_gen2_pit_cache.pkl</code> (<code>schema_version=2</code>) 與 Gate B5 (停牌/零量日禁止假成交)。<br />
-                • <strong>8 重機構壓力測試全過關：</strong>三重 27 格 ±20% 三維參數高原 ({data?.torture_audit ? `A ${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total}${data.torture_audit.grid_b_passed ? ` · B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ''}${data.torture_audit.grid_c_passed ? ` · C ${data.torture_audit.grid_c_passed}/${data.torture_audit.grid_c_total}` : ''}` : '81/81 100%'})、全波段組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 截斷零偷看 (max diff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
+                • <strong>8 重機構壓力測試全過關：</strong>四重 27 格 ±20% 三維參數高原 ({data?.torture_audit ? `A ${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total}${data.torture_audit.grid_b_passed ? ` · B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ''}${data.torture_audit.grid_c_passed ? ` · C ${data.torture_audit.grid_c_passed}/${data.torture_audit.grid_c_total}` : ''}${data.torture_audit.grid_d_passed ? ` · D ${data.torture_audit.grid_d_passed}/${data.torture_audit.grid_d_total}` : ''}` : '108/108 100%'})、全波段組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 截斷零偷看 (max diff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
               </p>
             </div>
 

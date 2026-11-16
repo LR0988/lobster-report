@@ -218,9 +218,19 @@ def _get_tw_db_max_date() -> str:
         return ""
     try:
         conn = sqlite3.connect(TW_DB_PATH)
-        r = conn.execute("SELECT MAX(date) FROM global_stock_daily WHERE ticker = 'SPY'").fetchone()
+        r_spy = conn.execute("SELECT MAX(date) FROM global_stock_daily WHERE ticker = 'SPY'").fetchone()
+        r_tw = conn.execute("SELECT MAX(date) FROM daily_stock WHERE stock_id = '2330'").fetchone()
         conn.close()
-        return str(r[0]) if r and r[0] else ""
+        cands = []
+        for r in (r_spy, r_tw):
+            if r and r[0]:
+                s = str(r[0]).strip().replace("-", "")[:8]
+                if len(s) == 8 and s.isdigit():
+                    cands.append(s)
+        if not cands:
+            return ""
+        mx = max(cands)
+        return f"{mx[:4]}-{mx[4:6]}-{mx[6:8]}"
     except Exception:
         return ""
 

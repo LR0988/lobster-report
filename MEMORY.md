@@ -374,7 +374,7 @@
 
 ---
 
-## 🇹🇼 十七、 2026-11-16 台股因果泰坦 `Phoenix-PIT v8.0 Gen-2`（純產品 GICS × Priority-0 高 FIP 雙軌機構庫 × 10 日快汰 × 確信分層配倉）上線實盤 (`🪦 #77 ~ #79`)
+## 🇹🇼 十七、 2026-11-16 台股因果泰坦 `Phoenix-PIT v8.0 Gen-2`（純產品 GICS × Priority-0 高 FIP 雙軌機構庫 × 10 日快汰 × 確信分層配倉，**已於同日晚間由第十八節 `v9.0 Gen-2` 升級取代**） (`🪦 #77 ~ #79`)
 
 1. **臨床驗屍與四重正交升級（無護盾事件研究 `t=+3.91` + 三重 81 格參數高原全通關）**：
    - **Module M1 (`純產品/IP GICS 潔淨化`)**：從 Pod 2 GICS 白名單永久移除工程承攬（`Engineering & Construction`: 完工百分比入帳失真，無護盾 `40D WR 0.0%, Alp -35.11%`）、零 IP 通路商（`Electronics & Computer Distribution`, `Alp -2.66%`）與辦公設備（`Business Equipment & Supplies`, `WR 0.0%`）；純產品組於平權 `35/35` 即推升 `WR 77.78% -> 80.77%`、`CAGR 41.06% -> 42.09%`。
@@ -390,4 +390,22 @@
      - **全波段 Jackknife**：`Drop-Top3 = 36.01%`、`Drop-Top5 = 32.51%` (`>> 0050 22.91%`)；
      - **雙世代 / Ex-2026 / 2x滑價 / 零偷看**：`Ex26 = 40.42%`、`Era1 = 40.86%`、`Era2 = 49.78%`、`Harsh2x = 40.97%`、Cutoff `2023-06-30` **`max_abs_diff = 0.00e+00`**、`ZeroVol = 0`。
    - **全鏈路發布**：同步靜態 JSON、Supabase `stock_ml_cache` (`causal_titan_dashboard` & `taiex_macro`)、本機 FastAPI、React Production Build、Git 與 `https://lobster-report.vercel.app`。
+
+---
+
+## 🇹🇼 十八、 2026-11-16 台股因果泰坦 `Phoenix-PIT v9.0 Gen-2`（P+D 狀態空間瀑布鎖存 × Zweig V轉推進母艦 × 防滑價三階棘輪）上線實盤 (`🪦 #80 ~ #82`)
+
+1. **實盤異常偵錯與三大第一性原理正交升級（`2016-01-04 ~ 2026-11-16` 含 `11/16` 最新晚間盤後數據）**：
+   - **Module M1a (`P+D 狀態空間瀑布飽和鎖存`, `wf_fr_th = -0.035`)**：捕獲並根除 `2026-11-12 -> 2026-11-16` 實盤 `D-only` 瀑布微分衰減漏洞 (`tw_br=21.4% < 25%` 且外資 10D 賣超 `-5.07%` 時因 5D `+5.3%` 死貓跳誤買 `0050` 致 `v8.0` MDD 跳升至 `-20.75%`)。新增比例飽和鎖 `tw_wf_p = (s50_c < s50_ma20) & (mkt_fr10 <= -0.035) & (tw_br < 0.25)` 與原 `tw_wf_d` 取聯集 (`🪦 #80`)，單項即將 MDD 壓回 **`-17.37%`** (`CAGR 44.64% -> 45.51%`, `Sharpe 1.79`) 並於 `2026-11-16` 實盤嚴守 `100%` 現金護盾。
+   - **Module M1b (`Zweig 1986 投降 V 轉寬幅推進母艦`, `v_thrust_chg5 = 0.08`)**：`v_thrust = (tw_br_min20 <= 0.19) & (tw_br >= 0.25) & (tw_br_chg5 >= 0.08)`，使 `etf_ok_s = ((gb_s >= 0.35) | v_thrust) & (~tw_wf)`（且實盤 `etf_ok_now` 100% 同步）。單看 **`0050` 獨立母艦 (`LOO`)** 即由 `21.11%` 躍升至 **`23.27%`**（以一半 MDD `-16.56%` 戰勝買抱 `0050 +22.37%`）；全系統跳升至 **`47.13%` CAGR** (`Ex26 42.12%`, `Era1 42.09%`)。
+   - **Module M2 (`防滑價/防跳空一階保本緩衝`, `p2_be1_c = 0.040`)**：將 `Pod 2` `+8%` 一階鎖利由 `+2.5%` 提高至 **`+4.0%`**，覆蓋 T+1 開盤跳空與 `0.74%` 來回交易摩擦。
+   - 同步寫入墓碑 **`🪦 #81 ~ #82`**（淘汰 Pod 2 晚段 `brk20` 重追造成 MDD `-24.83%`、次門檻營業槓桿 `YoY 15~29%`、`FIP60>0`、`Top-50` 稀釋 `-5.36% WR`、`min_alloc>=20%` 與 `N=2` `RS60` 小樣本濾網）。
+2. **權威實證績效 (`2016-01-04 ~ 2026-11-16`, `100%` 零槓桿 & `0.74%` 實盤摩擦)**：
+   - **總體績效**：**`CAGR +47.44%`**（vs `v8.0 +44.64%`, `0050 +22.37%`, 累積 **`67.97x` / `+6,697.4%`**）、**`MDD -17.37%`**、**`Sharpe 1.83`**、**`Sortino 2.70`**、**`Calmar 2.73`**、**`Profit Factor 14.96`**、**`N = 56`**（`Pod1+RE=13`, **`Pod2=43`**）、**`總勝率 80.36%`**（**`Pod 2 勝率 79.1%`**）、勝年 `9/11`、擊敗 `0050` 年數 **`9/11`**（`2019–2026` 八連勝）。
+   - **8/8 Torture Audit (`verify_tw_phoenix_gen2_torture_suite.py`) + 12+8 Gen-2 Gatekeeper (`pit_integrity_gatekeeper.py --self-test`) 全數 PASS**：
+     - **四重 27 宮格 (`108/108 = 100.0%`)**：`Grid-A 27/27 (37.00%~47.67%, med 44.12%)` · `Grid-B 27/27 (45.49%~48.05%, med 47.24%, 27/27 > v8.0)` · `Grid-C 27/27 (46.11%~47.90%, med 46.93%, 27/27 > v8.0)` · `Grid-D 27/27 (46.47%~48.01%, med 47.34%, 27/27 > v8.0)`；
+     - **LOO 真實協同**：`MotherShip 23.27% -> Pod1 33.44% | Pod2 38.64% -> Dual 47.44%`；
+     - **全波段 Jackknife**：`Drop-Top3 = 37.78%`、`Drop-Top5 = 34.24%` (`>> 0050 22.37%`)；
+     - **雙世代 / Ex-2026 / 2x 滑價 / 零偷看**：`Ex26 = 42.45%`、`Era1 = 42.17%`、`Era2 = 52.17%`、`Harsh2x = 42.55%`、Cutoff `2023-06-30` **`max_abs_diff = 0.00e+00`**、`ZeroVol = 0`。
+   - **基礎設施修復與全鏈路發布**：修復 [`pit_fundamental_service.py`](file:///Users/huanggin-chen/openclaw_test/pit_fundamental_service.py) `_get_tw_db_max_date()` 同步取 `max(SPY, 2330)` 並重建四大全局 PIT 快取與 Gen-2 Gatekeeper (`12+8` PASS)；完成 [`TaiwanCausalTitanDashboard.js`](file:///Users/huanggin-chen/openclaw_test/frontend/src/components/TaiwanCausalTitanDashboard.js) 108 格高原與 `P+D` 護盾狀態燈修正、Supabase `stock_ml_cache`、`localhost:8000` FastAPI、React Build、Git 與 `https://lobster-report.vercel.app` 上線驗證。
 

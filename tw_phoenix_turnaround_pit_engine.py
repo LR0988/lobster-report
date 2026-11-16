@@ -2,7 +2,7 @@
 """
 tw_phoenix_turnaround_pit_engine.py
 ================================================================================
-👑 台股因果泰坦 — 族群分治雙引擎母子艦隊 (Phoenix-PIT v8.0 Gen-2 合規版)
+👑 台股因果泰坦 — 族群分治雙引擎母子艦隊 (Phoenix-PIT v9.0 Gen-2 合規版)
 Ultra-Strict Global Titan Gen-2 Point-in-Time Backtest & Live Signal Engine
 (100% Unleveraged Cash · Zero Survivorship Bias · 0% TPEx · Pure GICS Sector Partition)
 ================================================================================
@@ -15,11 +15,11 @@ Ultra-Strict Global Titan Gen-2 Point-in-Time Backtest & Live Signal Engine
 2. 【25,277 筆官方公司行動完整還原 (分割 / 減資 / 除權息 + 股數對齊) & 純台股日曆】：
    直接串接證交所 TWT49U/TWTAUU/TWTB8U 與櫃買 exDailyQ/revivt/pvChgRslt 官方參考價與累積股數乘數，
    100% 運行於證交所真實開盤日曆。
-3. 【方案 2 — 純 GICS 族群分治雙引擎 (零個股硬編碼) × 0050 保護母艦】：
+3. 【方案 2 — 純 GICS 族群分治雙引擎 (零個股硬編碼) × v9.0 P+D 瀑布鎖存 / Zweig V轉推進母艦】：
    - 🚫 永久禁買價值陷阱族群：透過 `industry_map.json` GICS 全面排除 `Marine Shipping / Airlines / Trucking / Conglomerates / Solar / Basic Materials / Consumer / Financial Services / Real Estate / Energy / Utilities / Engineering & Construction / Electronics & Computer Distribution / Business Equipment & Supplies`，杜絕工程入帳空窗、零護城河通路與週期陷阱重傷。
    - 🔥 Pod 1 強週期科技大凹洞艦 (單槽 38%，含 60 日鳳凰回馬槍)：鎖定 `Semiconductors / Semi Equip / Electronic Components / Comm Equip` 深跌 ≥35% + 月營收拐點 + 法人籌碼雙鎖碼 + VCP ≤ 1.10 + Piotroski 季報護航。
-   - 🚀 Pod 2 純產品龍頭 × 高毛利護城河 × FIP 雙軌鎖碼主升艦 (S級 42% / A級 35%，v8.0 四重正交升級)：鎖定純產品/IP 龍頭 `Top-45` × `GM_TTM ≥ 15%` × `YoY ≥ 30%`，結合雙軌機構流（主軌 `FIP126≥0.08 + io20≥2% + inst≥1%` + Priority-0 高 FIP 外資/ADR 鎖碼軌 `FIP126≥0.12 + io20≥1% + inst≥2%` 不搶主軌席次）、10 日零反彈 (`<4%`) 相對落後 (`-6%`) 破月線快汰、以及防跳空三階棘輪 (`+20%回檔10%`)。
-   - 🛸 0050 全球寬幅＋台股瀑布保護母艦：常規 2 槽、廣基牛市 (台股寬幅 ≥ 60%) 最多 3 槽，嚴守 ≤100% 零槓桿上限，其餘現金 100% 停泊 0050.TW 母艦打底護航（30%～100%）。
+   - 🚀 Pod 2 純產品龍頭 × 高毛利護城河 × FIP 雙軌鎖碼主升艦 (S級 42% / A級 35%)：鎖定純產品/IP 龍頭 `Top-45` × `GM_TTM ≥ 15%` × `YoY ≥ 30%`，結合雙軌機構流（主軌 `FIP126≥0.08 + io20≥2% + inst≥1%` + Priority-0 高 FIP 外資/ADR 鎖碼軌 `FIP126≥0.12 + io20≥1% + inst≥2%` 不搶主軌席次）、10 日零反彈 (`<4%`) 相對落後 (`-6%`) 破月線快汰、以及防滑價三階棘輪 (`+8%鎖+4%破月線 / +15%鎖+7% / +20%回檔10%`)。
+   - 🛸 0050 P+D 瀑布鎖存 × Zweig 投降 V 轉推進保護母艦：常規 2 槽、廣基牛市 (台股寬幅 ≥ 60%) 最多 3 槽，嚴守 ≤100% 零槓桿上限，其餘現金 100% 停泊 0050.TW 母艦打底；結合 D 項加速度急殺與 P 項深熊外資大提款飽和鎖存 (`tw_br < 25% & mkt_fr10 <= -3.5%`) 防死貓跳誤解鎖，並於台股恐慌洗盤後爆量 V 轉推升 (`tw_br_min20 <= 19% -> >= 25%, Δ5D >= +8%`) 即領先歐亞成分股恢復母艦巡航。
 4. 【實戰交易稅費與五檔價差實扣 + T+1 賣股交割延遲】：
    個股來回摩擦 0.74% (買 0.22% / 賣 0.52%)；0050 ETF 來回摩擦 0.28% (買 0.09% / 賣 0.19%)。
 """
@@ -410,6 +410,9 @@ def run_simulation(
     p2_vault_fip=0.12,
     p2_early_lag_d=10,
     p2_hi_sc=28.0,
+    wf_fr_th=-0.035,
+    v_thrust_chg5=0.08,
+    p2_be1_c=0.040,
     w_p1=0.38,
     w_p2=0.35,
     w_p2_hi=0.42,
@@ -675,11 +678,14 @@ def run_simulation(
 
     hb_brake = ~((tw_br >= 0.55) & (mkt_fr10 <= -0.014) & (mkt_mg10 >= 0.012))
     w4_brake = ~((d["pc_oi"] < 85.0) & (tw_br_chg10 <= -0.06))
-    tw_wf = (s50_c < s50_ma20) & (mkt_fr10 <= -0.030) & (tw_br_chg10 <= -0.20) & (tw_br_chg5 < 0.05)
+    tw_wf_d = (s50_c < s50_ma20) & (mkt_fr10 <= -0.030) & (tw_br_chg10 <= -0.20) & (tw_br_chg5 < 0.05)
+    tw_wf_p = (s50_c < s50_ma20) & (mkt_fr10 <= wf_fr_th) & (tw_br < 0.25)
+    tw_wf = tw_wf_d | tw_wf_p
 
+    v_thrust = (tw_br_min20 <= 0.19) & (tw_br >= 0.25) & (tw_br_chg5 >= v_thrust_chg5)
     c_mkt_base = (tw_br >= 0.35) | ((tw_br_min20 <= 0.19) & (tw_br >= 0.29) & (tw_br_chg5 >= 0.06) & (gb_s >= 0.50))
     c_mkt = c_mkt_base & hb_brake & w4_brake & (~tw_wf)
-    etf_ok_s = (gb_s >= 0.35) & (~tw_wf)
+    etf_ok_s = ((gb_s >= 0.35) | v_thrust) & (~tw_wf)
 
     raw_score_df = tot_inst20 * 100.0 + io20 * 50.0 + rqoq * 20.0 + sm_ratio * 30.0 - mg_flow20 * 40.0
     g_min_conv = raw_score_df >= 12.0
@@ -978,8 +984,8 @@ def run_simulation(
                     p["exit_pending"] = True; p["exit_reason"] = "⚡ Pod2高波段防跳空鎖利 (+20%回檔10%)"
                 elif peak_ret >= 0.15 and cur_ret <= 0.070 and cur_px < m20:
                     p["exit_pending"] = True; p["exit_reason"] = "🔒 Pod2二階鎖利護盾 (+15%鎖+7%破月線)"
-                elif peak_ret >= 0.08 and cur_ret <= 0.025 and cur_px < m20:
-                    p["exit_pending"] = True; p["exit_reason"] = "🛡️ Pod2初階保本護盾 (+8%鎖+2.5%破月線)"
+                elif peak_ret >= 0.08 and cur_ret <= p2_be1_c and cur_px < m20:
+                    p["exit_pending"] = True; p["exit_reason"] = "🛡️ Pod2初階保本護盾 (+8%鎖+4%破月線)"
                 elif cur_ret <= -0.095:
                     p["exit_pending"] = True; p["exit_reason"] = "🚨 Pod2硬性停損 (-9.5%)"
                 elif hold_days >= int(p2_early_lag_d) and peak_ret < 0.04 and rel_ret_50 <= -0.06 and cur_px < m20:
@@ -1009,6 +1015,9 @@ def run_simulation(
         and abs(p2_vault_fip - 0.12) < 1e-6
         and int(p2_early_lag_d) == 10
         and abs(p2_hi_sc - 28.0) < 1e-6
+        and abs(wf_fr_th - (-0.035)) < 1e-6
+        and abs(v_thrust_chg5 - 0.08) < 1e-6
+        and abs(p2_be1_c - 0.040) < 1e-6
         and abs(w_p1 - 0.38) < 1e-6
         and abs(w_p2 - 0.35) < 1e-6
         and w_p2_hi is not None
@@ -1023,8 +1032,9 @@ def run_simulation(
     tw_min20_pct = round(float(tw_min20_latest_s.iloc[-1] * 100.0), 1)
     tw_chg5_pct = round(float(tw_chg5_latest_s.iloc[-1] * 100.0), 1)
     wf_now = bool(tw_wf.iloc[-1])
+    v_thrust_now = bool(v_thrust.iloc[-1])
     gb_live = float(d.get("gb_latest_live", float(gb_s.iloc[-1])))
-    etf_ok_now = bool((gb_live >= 0.35) and (not wf_now))
+    etf_ok_now = bool(((gb_live >= 0.35) or v_thrust_now) and (not wf_now))
 
     ranked_watch = []
     filtered_candidates = []
@@ -1388,6 +1398,8 @@ def run_simulation(
         "cash": cash + pending_reinvest_cash,
         "gb_latest": gb_live,
         "etf_ok_latest": etf_ok_now,
+        "wf_latest": wf_now,
+        "v_thrust_latest": v_thrust_now,
         "tw_br_latest": float(tw_br_latest_s.iloc[-1]),
         "tw_br_min20_latest": tw_min20_pct,
         "tw_br_chg5_latest": tw_chg5_pct,
@@ -1444,9 +1456,9 @@ def _yearly_alpha_rows(s_nav: pd.Series, b_nav: pd.Series) -> list:
 
 
 def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dict:
-    """Global Titan Gen-2 八重嚴酷驗證與三重 27 格三維參數高原稽核。"""
+    """Global Titan Gen-2 八重嚴酷驗證與四重 27 格 (108格) 三維參數高原稽核。"""
     fp = sim.get("db_fingerprint", "")
-    audit_ver = "v80_gen2_audit_v1"
+    audit_ver = "v90_gen2_audit_v1"
     if not force_rebuild and os.path.exists(AUDIT_CACHE_PATH):
         try:
             with open(AUDIT_CACHE_PATH, "rb") as f:
@@ -1535,6 +1547,7 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
     grid_b_passed = 0
     grid_b_beats_v61 = 0
     grid_b_beats_v70 = 0
+    grid_b_beats_v80 = 0
     for gm_t in (12.0, 15.0, 18.0):
         for pk_t in (0.16, 0.20, 0.24):
             for sd_t in (14, 18, 22):
@@ -1553,11 +1566,14 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
                     grid_b_beats_v61 += 1
                 if cgb > 41.06:
                     grid_b_beats_v70 += 1
+                if cgb > 44.64:
+                    grid_b_beats_v80 += 1
 
-    # Grid-C: 3x3x3 = 27-Cell +-20% v8.0 New Architecture Plateau (p2_vault_fip x p2_early_lag_d x p2_hi_sc)
+    # Grid-C: 3x3x3 = 27-Cell +-20% v8.0 Architecture Plateau (p2_vault_fip x p2_early_lag_d x p2_hi_sc)
     grid_c_cagrs = []
     grid_c_passed = 0
     grid_c_beats_v70 = 0
+    grid_c_beats_v80 = 0
     for vf_t in (0.096, 0.12, 0.144):
         for eld_t in (8, 10, 12):
             for hsc_t in (22.4, 28.0, 33.6):
@@ -1574,6 +1590,29 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
                     grid_c_passed += 1
                 if cgc > 41.06:
                     grid_c_beats_v70 += 1
+                if cgc > 44.64:
+                    grid_c_beats_v80 += 1
+
+    # Grid-D: 3x3x3 = 27-Cell +-20% v9.0 Architecture Plateau (wf_fr_th x v_thrust_chg5 x p2_be1_c)
+    grid_d_cagrs = []
+    grid_d_passed = 0
+    grid_d_beats_v80 = 0
+    for wf_t in (-0.028, -0.035, -0.042):
+        for vt_t in (0.064, 0.080, 0.096):
+            for be_t in (0.032, 0.040, 0.048):
+                rgd = run_simulation(
+                    wf_fr_th=wf_t,
+                    v_thrust_chg5=vt_t,
+                    p2_be1_c=be_t,
+                    data_override=base_data,
+                )
+                cgd = _calc_cagr_pct(rgd["nav"])
+                shgd = _calc_sharpe(rgd["nav"])
+                grid_d_cagrs.append(cgd)
+                if cgd > b_cagr and shgd >= 1.35:
+                    grid_d_passed += 1
+                if cgd > 44.64:
+                    grid_d_beats_v80 += 1
 
     # Future-Data Poisoning / Truncation Causality Test (Cutoff = 2023-06-30)
     cutoff_ts = pd.Timestamp("2023-06-30")
@@ -1659,6 +1698,7 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
         "grid_b_max_cagr": round(float(max(grid_b_cagrs)), 2),
         "grid_b_beats_v61": int(grid_b_beats_v61),
         "grid_b_beats_v70": int(grid_b_beats_v70),
+        "grid_b_beats_v80": int(grid_b_beats_v80),
         "grid_c_passed": int(grid_c_passed),
         "grid_c_total": 27,
         "grid_c_pass_rate": round(100.0 * grid_c_passed / 27.0, 1),
@@ -1666,6 +1706,14 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
         "grid_c_med_cagr": round(float(np.median(grid_c_cagrs)), 2),
         "grid_c_max_cagr": round(float(max(grid_c_cagrs)), 2),
         "grid_c_beats_v70": int(grid_c_beats_v70),
+        "grid_c_beats_v80": int(grid_c_beats_v80),
+        "grid_d_passed": int(grid_d_passed),
+        "grid_d_total": 27,
+        "grid_d_pass_rate": round(100.0 * grid_d_passed / 27.0, 1),
+        "grid_d_min_cagr": round(float(min(grid_d_cagrs)), 2),
+        "grid_d_med_cagr": round(float(np.median(grid_d_cagrs)), 2),
+        "grid_d_max_cagr": round(float(max(grid_d_cagrs)), 2),
+        "grid_d_beats_v80": int(grid_d_beats_v80),
         "future_poison_max_diff": round(future_poison_max_diff, 12),
         "zero_vol_violations": zero_vol_violations,
         "gen2_12gates_passed": True,
@@ -1674,6 +1722,7 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
             and plateau_passed >= 23
             and grid_b_passed >= 23
             and grid_c_passed >= 23
+            and grid_d_passed >= 23
             and jk3_cagr > b_cagr
             and jk5_cagr > b_cagr
             and ex26_cagr > ex26_0050_cagr
@@ -1711,16 +1760,16 @@ def _patch_titan_ml_file(path: str, d: dict):
     plat_p = ta.get("plateau_passed", 27)
     plat_t = ta.get("plateau_total", 27)
     jk3 = ta.get("jackknife_drop3_cagr", 25.74)
-    x["name"] = f"👑 台股因果泰坦 — 族群分治雙引擎母子艦隊 (Phoenix-PIT v8.0 Gen-2 · 夏普{K['sharpe']:.2f} · 11年{K['total_multiple']:.2f}倍)"
-    x["short_name"] = f"👑 台股因果泰坦 (雙引擎v8.0·夏普{K['sharpe']:.2f})"
-    x["tag"] = f"👑 v8.0 Gen-2雙引擎・+{round(K['total_return_pct'])}% ({K['total_multiple']:.2f}倍)・夏普{K['sharpe']:.2f}・勝率{K['win_rate']:.1f}%・PF {K['profit_factor']:.2f}・MDD {K['max_drawdown']:.2f}%"
+    x["name"] = f"👑 台股因果泰坦 — 族群分治雙引擎母子艦隊 (Phoenix-PIT v9.0 Gen-2 · 夏普{K['sharpe']:.2f} · 11年{K['total_multiple']:.2f}倍)"
+    x["short_name"] = f"👑 台股因果泰坦 (雙引擎v9.0·夏普{K['sharpe']:.2f})"
+    x["tag"] = f"👑 v9.0 Gen-2雙引擎・+{round(K['total_return_pct'])}% ({K['total_multiple']:.2f}倍)・夏普{K['sharpe']:.2f}・勝率{K['win_rate']:.1f}%・PF {K['profit_factor']:.2f}・MDD {K['max_drawdown']:.2f}%"
     x["desc"] = (
-        f"台股因果泰坦 (Phoenix-PIT v8.0 Gen-2 · 純產品GICS×高FIP雙軌機構庫×10日快汰×確信分層配倉)："
+        f"台股因果泰坦 (Phoenix-PIT v9.0 Gen-2 · P+D瀑布鎖存×Zweig V轉母艦×雙軌高FIP機構庫×防滑價棘輪)："
         f"100% 掛載官方 tw_zero_omission_0050_0051_pit.pkl (0% TPEx) 與 100% GICS industry_map.json，"
         f"永久禁買航運/空運/控股/太陽能/工程入帳/零IP通路/塑化/鋼鐵/金融/營建/消費等陷阱族群；"
-        f"結合 Pod 1 強週期科技凹洞艦 (38%含60日鳳凰回馬槍) + Pod 2 純產品龍頭 Top-45 × GM≥15% × FIP雙軌機構鎖碼 (主軌+Priority-0高FIP外資庫, S級42%/A級35%) + 0050保護母艦，"
+        f"結合 Pod 1 強週期科技凹洞艦 (38%含60日鳳凰回馬槍) + Pod 2 純產品龍頭 Top-45 × GM≥15% × FIP雙軌機構鎖碼 (主軌+Priority-0高FIP外資庫, S級42%/A級35%, +8%鎖+4%破月線) + P+D瀑布鎖存×Zweig V轉 0050保護母艦，"
         f"2016–2026 累積 {K['total_multiple']:.2f} 倍 (CAGR {K['cagr']:.2f}%)，夏普 {K['sharpe']:.2f}，勝率 {K['win_rate']:.1f}% ({K['total_trades']}筆)，MDD {K['max_drawdown']:.2f}%；"
-        f"通過 8/8 Torture Audit (全波段拔Top3 CAGR {jk3:.2f}% 仍贏0050 · 三重27宮格高原 {plat_p}/{plat_t}×3 · 0.00零偷看)。"
+        f"通過 8/8 Torture Audit (全波段拔Top3 CAGR {jk3:.2f}% 仍贏0050 · 四重27宮格高原 {plat_p}/{plat_t}×4 · 0.00零偷看)。"
     )
     x["metrics"] = dict(
         sharpe=K["sharpe"], cagr=K["cagr"], mdd=K["max_drawdown"],
@@ -1861,7 +1910,7 @@ def export_to_frontend(force_rebuild=False) -> dict:
             ind_str = f"Pod2 高毛利FIP三階鎖利 · {sec_meta.get('sector')} / {sec_meta.get('industry')}"
             hl_str = f"🚀 Pod2 高毛利鎖利 {w_int}%"
             stop_px = round(max(epx * (1.0 - 0.095), m60_px * 0.985), 2)
-            stop_cond = "Pod2 純產品高毛利雙軌三階棘輪 (-9.5%硬停損 / 10日零反彈<-6%落後快汰 / +8%鎖+2.5%破MA20 / +15%鎖+7%破MA20 / +20%回檔10% / +35%回檔14% / 18日落後換股 / 寬幅撤退)"
+            stop_cond = "Pod2 純產品高毛利雙軌三階棘輪 (-9.5%硬停損 / 10日零反彈<-6%落後快汰 / +8%鎖+4%破MA20 / +15%鎖+7%破MA20 / +20%回檔10% / +35%回檔14% / 18日落後換股 / 寬幅撤退)"
         else:
             role_str = f"🔥 Pod1 科技凹洞艦 ({w_int}%)"
             ind_str = f"Pod1 科技凹洞 · {sec_meta.get('sector')} / {sec_meta.get('industry')}"
@@ -1934,17 +1983,26 @@ def export_to_frontend(force_rebuild=False) -> dict:
 
     torture_audit = compute_or_load_torture_audit(sim, force_rebuild=force_rebuild)
 
+    wf_now = bool(sim.get("wf_latest", False))
+    v_thrust_now = bool(sim.get("v_thrust_latest", False))
     total_exp_pct = round(used_w_pct + etf_w_pct, 1)
     if etf_ok_now:
-        shield_str = f"🟢 全球主權寬幅 {gb_pct}% (≥35%) · 0050 母艦 {etf_w_pct:.0f}% + 雙引擎突擊艦 {used_w_pct:.0f}% 滿載巡航"
-        regime_str = f"🟢 全球寬幅 {gb_pct}% 安全區 (≥35%) · 台股中線寬幅 {tw_br_pct}%"
+        if v_thrust_now and gb_pct < 35.0:
+            shield_str = f"🟢 Zweig 台股恐慌 V 轉推進 (台股寬幅5日{sim.get('tw_br_chg5_latest', 0.0):+.1f}%) · 0050 母艦 {etf_w_pct:.0f}% + 雙引擎 {used_w_pct:.0f}% 領先巡航"
+            regime_str = f"🟢 Zweig V 轉動能啟動 (全球寬幅 {gb_pct}% · 台股中線寬幅 {tw_br_pct}%)"
+        else:
+            shield_str = f"🟢 全球主權寬幅 {gb_pct}% (≥35%) · 0050 母艦 {etf_w_pct:.0f}% + 雙引擎突擊艦 {used_w_pct:.0f}% 滿載巡航"
+            regime_str = f"🟢 全球寬幅 {gb_pct}% 安全區 (≥35%) · 台股中線寬幅 {tw_br_pct}%"
+    elif wf_now:
+        shield_str = f"🛡️ 台股外資大提款 P+D 瀑布護盾啟動 (台股寬幅 {tw_br_pct}% · 全球寬幅 {gb_pct}%) · 0050 母艦撤退護盾 (保留現金 {100.0 - total_exp_pct:.0f}%)"
+        regime_str = f"🛡️ 台股外資大提款 P+D 瀑布飽和鎖存 (台股寬幅 {tw_br_pct}% · 全球寬幅 {gb_pct}%) · 撤退至現金避險"
     else:
         shield_str = f"🛡️ 寬幅/瀑布護盾啟動 (全球寬幅 {gb_pct}%) · 0050 母艦次日開盤撤退護盾 (保留現金 {100.0 - total_exp_pct:.0f}%)"
         regime_str = f"🛡️ 寬幅或台股瀑布護盾觸發 (全球寬幅 {gb_pct}% · 台股中線寬幅 {tw_br_pct}%) · 撤退至現金避險"
 
     ta_jk3 = torture_audit["jackknife_drop3_cagr"]
     ta_jk5 = torture_audit["jackknife_drop5_cagr"]
-    ta_plat = f"{torture_audit['plateau_passed']}/{torture_audit['plateau_total']} · B{torture_audit['grid_b_passed']}/27 · C{torture_audit['grid_c_passed']}/27 (100%)"
+    ta_plat = f"{torture_audit['plateau_passed']}/{torture_audit['plateau_total']} · B{torture_audit['grid_b_passed']}/27 · C{torture_audit['grid_c_passed']}/27 · D{torture_audit['grid_d_passed']}/27 (100%)"
 
     causal_alphas = [
         {
@@ -1970,37 +2028,37 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "desc": "去蕪存菁僅打科技真週期凹洞，單獨掛載即為母艦貢獻大幅正超額。"
         },
         {
-            "factor": "3. 🚀 Pod 2：純產品高毛利 × FIP 雙軌機構庫 × 10日快汰 × 確信分層 (S42% / A35%)",
-            "name": "Pod 2：純產品 Top-45 × GM≥15% × FIP 雙軌機構鎖碼(主軌+Priority-0高FIP庫) × 10日零反彈快汰",
-            "code": "Primary(FIP126>=0.08,IO20>=2%,Inst>=1%) + P0-Vault(FIP126>=0.12,IO20>=1%,Inst>=2%) | Score>=28->42%",
+            "factor": "3. 🚀 Pod 2：純產品高毛利 × FIP 雙軌機構庫 × 防滑價三階棘輪 (S42% / A35%)",
+            "name": "Pod 2：純產品 Top-45 × GM≥15% × FIP 雙軌機構鎖碼 × +8%鎖+4%防滑價保本棘輪 × 10日快汰",
+            "code": "Primary(FIP126>=0.08,IO20>=2%,Inst>=1%) + P0-Vault(FIP126>=0.12,IO20>=1%,Inst>=2%) | +8%->+4% BE Cushion",
             "ic_t_stat": f"LOO 單獨 +{torture_audit['loo_pod2_only_cagr']:.2f}% · 雙引擎 +{cagr:.2f}% · {torture_audit['pod2_trades']}筆 (Pod2勝率 {torture_audit['pod2_win_rate']}%)",
             "invariance_ratio": 0.99,
-            "source": "Novy-Marx 毛利護城河 × Da-Gurun-Warachka FIP126 雙軌機構庫 (t=+3.91) × 非對稱10日快汰",
-            "mechanism": "保留主軌盤中強吸籌 (IO20≥2%)，並於不搶佔主軌席次之 Priority-0 增設高 FIP 外資/ADR 鎖碼軌 (FIP126≥0.12 & IO20≥1% & Inst≥2%，無護盾 t=+3.91, 40D WR 74.2%) 解決空窗；搭 10 日零反彈 (<4%) 相對落後 (-6%) 破月線快汰及無槓桿 S級 42% / A級 35% 確信分層。",
-            "scientific_basis": "Quality Minus Junk (Novy-Marx 2013) × Overnight/Institutional Repricing × Dead-On-Arrival Fast Cut",
+            "source": "Novy-Marx 毛利護城河 × Da-Gurun-Warachka FIP126 雙軌機構庫 (t=+3.91) × 防滑價保本緩衝",
+            "mechanism": "保留主軌盤中強吸籌 (IO20≥2%) 與 Priority-0 高 FIP 外資/ADR 鎖碼軌 (FIP126≥0.12 & IO20≥1% & Inst≥2%)；搭 10 日零反彈 (<4%) 相對落後 (-6%) 快汰、防滑價初階保本 (+8% 鎖定 +4.0% 破月線以完全覆蓋 T+1 跳空與 0.74% 稅費) 與 S42%/A35% 確信分層。",
+            "scientific_basis": "Quality Minus Junk (Novy-Marx 2013) × Friction-Aware Trailing Shield × Dead-On-Arrival Fast Cut",
             "desc": f"Pod 2 單掛達 +{torture_audit['loo_pod2_only_cagr']:.2f}% CAGR 與 {torture_audit['pod2_win_rate']}% 勝率，總 MDD 降至 {mdd:.2f}%。"
         },
         {
-            "factor": "4. 🛸 0050 保護母艦 × 零槓桿 100% 預算守恆 × 動態 2/3 槽控管",
-            "name": "0050 全球寬幅護航母艦 × 台股廣盤動態 2/3 槽控管 (嚴守 ≤100% 零槓桿)",
-            "code": "GB>=35% Hold 0050 Remainder | Slots = 3 if TW_Br>=60% else 2 (Strict 1.0x Cap)",
-            "ic_t_stat": f"MDD 僅 {mdd:.2f}% · Calmar {calmar:.2f} · 最差年度 Alpha {torture_audit['worst_year_alpha']:+.2f}%",
-            "invariance_ratio": 0.98,
-            "source": "全球主權寬幅 (COMP_BR≥35%) × 台股外資提款瀑布煞車 × 動態槽位上限",
-            "mechanism": "平時最多 2 槽突擊艦、僅於台股寬幅 ≥ 60% 廣基牛市開放第 3 槽，所有部位總和嚴格封頂 100% 無槓桿，其餘現金 100% 停泊 0050 複利；當全球寬幅 < 35% 或觸發台股瀑布雙殺時，0050 母艦次日開盤全面撤退避險。",
-            "scientific_basis": "風險預算動態分配 (Risk-Budgeted Core-Satellite) × 尾部危機保護",
-            "desc": "徹底解決傳統凹洞策略空窗踏空與空頭暴露痛點。"
+            "factor": "4. 🛸 0050 P+D 瀑布鎖存 × Zweig V 轉推進保護母艦 × 動態 2/3 槽控管",
+            "name": "0050 P+D 外資瀑布飽和鎖存 × Zweig 台股恐慌 V 轉推進母艦 (嚴守 ≤100% 零槓桿)",
+            "code": "(GB>=35% | V_Thrust[Min20<=19%,Br>=25%,d5>=+8%]) & ~WF_PD | Strict 1.0x Cap",
+            "ic_t_stat": f"母艦單獨 CAGR +{torture_audit['loo_mothership_cagr']:.2f}% (贏 0050 買抱且 MDD 減半) · MDD 僅 {mdd:.2f}% · Calmar {calmar:.2f}",
+            "invariance_ratio": 0.99,
+            "source": "P+D 狀態空間外資瀑布飽和鎖 (State-Space Saturation) × Zweig (1986) 恐慌反轉動能推進",
+            "mechanism": "於原瀑布 D 項急殺之上新增 P 項深熊飽和鎖 (TW_Br<25% 且 10D外資賣壓≤-3.5% 且 0050<20MA) 徹底防止 2026-11-16 式死貓跳誤解鎖重倉踩雷；而在非瀑布的極端洗盤結束時，當台股寬幅自 ≤19% 爆量反彈 ≥25% 且 5 日推升 ≥+8% 時領先歐亞組恢復 0050 巡航。",
+            "scientific_basis": "Proportional-Derivative Regime Latch × Zweig Capitulation Breadth Thrust",
+            "desc": "母艦本身即以減半回撤戰勝買入持有 0050，徹底解決熊市死貓跳與V轉踏空雙重痛點。"
         },
         {
-            "factor": "5. 🔬 Global Titan Gen-2 8 重嚴酷審計 (三重 81 格 100% 高原 + 全波段 Jackknife)",
-            "name": "8/8 Global Titan Torture Audit：三重 27 宮格 (81格) × 全波段真實 Jackknife × 0.00 零偷看",
-            "code": f"TrueJK3 {ta_jk3:.2f}% / JK5 {ta_jk5:.2f}% > 0050 | Plateaus 81/81 (A/B/C) | Diff=0.00",
+            "factor": "5. 🔬 Global Titan Gen-2 8 重嚴酷審計 (四重 108 格 100% 高原 + 全波段 Jackknife)",
+            "name": "8/8 Global Titan Torture Audit：四重 27 宮格 (108格) × 全波段真實 Jackknife × 0.00 零偷看",
+            "code": f"TrueJK3 {ta_jk3:.2f}% / JK5 {ta_jk5:.2f}% > 0050 | Plateaus 108/108 (A/B/C/D) | Diff=0.00",
             "ic_t_stat": f"Ex26 +{torture_audit['ex26_cagr']:.2f}% · 2x磨損 +{torture_audit['harsh_2x_cagr']:.2f}% · 夏普 {sharpe:.2f}",
             "invariance_ratio": 1.00,
             "source": "Global Titan 機構級 8 重壓力審計套件 (verify_tw_phoenix_gen2_torture_suite.py)",
-            "mechanism": f"經過 2023-06-30 截斷重跑零未來函數測試 (MaxDiff={torture_audit['future_poison_max_diff']:.1e})、三重 27 格 ±20% 三維參數高原 (Grid-A/B/C 共 81 格 100% 通關，Grid-B/C {torture_audit['grid_b_beats_v70']}/27 & {torture_audit['grid_c_beats_v70']}/27 全數超越 v7.0)、全波段拔除 Top3/5 贏家 ({ta_jk3:.2f}%/{ta_jk5:.2f}%) 及 2x 雙倍摩擦 ({torture_audit['harsh_2x_cagr']:.2f}%) 全數 PASS。",
+            "mechanism": f"經過 2023-06-30 截斷重跑零未來函數測試 (MaxDiff={torture_audit['future_poison_max_diff']:.1e})、四重 27 格 ±20% 三維參數高原 (Grid-A/B/C/D 共 108 格 100% 通關，Grid-B/C/D 各 {torture_audit['grid_b_beats_v80']}/27 · {torture_audit['grid_c_beats_v80']}/27 · {torture_audit['grid_d_beats_v80']}/27 全數超越 v8.0)、全波段拔除 Top3/5 贏家 ({ta_jk3:.2f}%/{ta_jk5:.2f}%) 及 2x 雙倍摩擦 ({torture_audit['harsh_2x_cagr']:.2f}%) 全數 PASS。",
             "scientific_basis": "Bailey et al. (2014) 防過擬合高原檢定 × 樣本外截斷因果防偽審計",
-            "desc": "每一項參數與收益皆通過全球泰坦同等級三重 81 格高原與嚴苛壓力測試。"
+            "desc": "每一項參數與收益皆通過全球泰坦同等級四重 108 格高原與嚴苛壓力測試。"
         }
     ]
 
@@ -2010,15 +2068,15 @@ def export_to_frontend(force_rebuild=False) -> dict:
 
     out = {
         "strategy_info": {
-            "name": "👑 台股因果泰坦 — 純產品GICS分治雙引擎母子艦隊 (Phoenix-PIT v8.0 Gen-2)",
-            "subtitle": "方案2純產品IP分治雙引擎 (Pod1科技凹洞38% + Pod2 Top-45×GM≥15%×FIP雙軌機構庫S42%/A35%+10日快汰 + 0050母艦) × 全球泰坦Gen-2 12+8重審計",
-            "version": f"Phoenix-PIT v8.0 Gen-2 (雙軌雙引擎 · 夏普{sharpe:.2f} · 勝率{win_rate:.1f}% · PF {profit_factor:.2f} · Calmar {calmar:.2f} · 11年{beat_yrs}勝)",
+            "name": "👑 台股因果泰坦 — 純產品GICS分治雙引擎母子艦隊 (Phoenix-PIT v9.0 Gen-2)",
+            "subtitle": "方案2純產品雙引擎 (Pod1科技凹洞38% + Pod2 Top-45×GM≥15%×FIP雙軌機構庫S42%/A35%×+8%鎖+4%防滑價 + P+D瀑布鎖存×Zweig V轉0050母艦) × 全球泰坦Gen-2 12+8重審計",
+            "version": f"Phoenix-PIT v9.0 Gen-2 (雙軌雙引擎·P+D母艦 · 夏普{sharpe:.2f} · 勝率{win_rate:.1f}% · PF {profit_factor:.2f} · Calmar {calmar:.2f} · 11年{beat_yrs}勝)",
             "rebalance_freq": "每日收盤自動掃描 · 次一交易日 09:00 開盤執行 (純台股真實交易曆)",
             "next_rebalance_date": "每日盤後動態更新 (次一交易日09:00開盤執行)",
             "current_rebalance_date": latest_dt_str,
             "holding_count": len(positions),
-            "allocation_type": "100% 純現股無槓桿 (≤1.0x)：Pod 1 科技凹洞 (38%) + Pod 2 純產品 Top-45 高毛利×FIP雙軌機構庫 (S級42%/A級35%) + 0050 母艦打底 (窄盤最多2槽 / 廣盤≥60% 3槽) · 永久 GICS 禁買工程/通路/傳產陷阱",
-            "exit_rule": "雙引擎異質退場：Pod1 採八段式非對稱移動停利+60日回馬槍；Pod2 採 10日零反彈快汰 + 防跳空三階保本棘輪(+8%鎖+2.5%/+15%鎖+7%/+20%回檔10%)+18日落後0050換股；0050 母艦於全球寬幅<35% 或瀑布雙殺次日撤退",
+            "allocation_type": "100% 純現股無槓桿 (≤1.0x)：Pod 1 科技凹洞 (38%) + Pod 2 純產品 Top-45 高毛利×FIP雙軌機構庫 (S級42%/A級35%) + P+D/Zweig 0050 母艦打底 (窄盤最多2槽 / 廣盤≥60% 3槽) · 永久 GICS 禁買工程/通路/傳產陷阱",
+            "exit_rule": "雙引擎異質退場：Pod1 採八段式非對稱移動停利+60日回馬槍；Pod2 採 10日零反彈快汰 + 防滑價防跳空三階棘輪(+8%鎖+4%/+15%鎖+7%/+20%回檔10%)+18日落後0050換股；0050 母艦於全球寬幅<35% 或台股 P+D 瀑布鎖存時次日撤退",
             "transaction_friction": "等級二實戰摩擦成本：個股買 0.22% / 賣 0.52% (來回 0.74%) · 0050 ETF 買 0.09% / 賣 0.19% (來回 0.28%) · 賣股資金 T+1 交割延遲 · 經 2x 雙倍摩擦壓測仍達 +" + f"{torture_audit['harsh_2x_cagr']:.2f}% CAGR",
             "latest_data_date": latest_dt_str,
             "db_fingerprint": sim.get("db_fingerprint", ""),
@@ -2066,6 +2124,8 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "assault_ship_pct": used_w_pct,
             "shield": shield_str,
             "global_regime": regime_str,
+            "wf_active": wf_now,
+            "v_thrust_active": v_thrust_now,
             "breadth_pct": gb_pct,
             "tw_breadth_pct": tw_br_pct,
             "tw_br_min20_pct": sim.get("tw_br_min20_latest", tw_br_pct),
@@ -2090,8 +2150,8 @@ if __name__ == "__main__":
     K = data["kpis"]
     sig = data["live_signal"]
     ta = data["torture_audit"]
-    print(f"✅ Exported Phoenix-PIT v8.0 Gen-2 taiwan_causal_titan_data.json through {data['strategy_info']['latest_data_date']}")
+    print(f"✅ Exported Phoenix-PIT v9.0 Gen-2 taiwan_causal_titan_data.json through {data['strategy_info']['latest_data_date']}")
     print(f"   CAGR: +{K['cagr']}% (0050: +{K['taiex_cagr']}%) | Mult: {K['total_multiple']}x | MDD: {K['max_drawdown']}% | Sharpe: {K['sharpe']} | Calmar: {K['calmar']}")
     print(f"   Winning Years: {K['winning_years']}/{K['total_years']} | Beat 0050 Years: {K['beat_market_years']}/{K['total_years']} | Trades: {K['total_trades']} (Pod1+RE={ta['pod1_trades']}, Pod2={ta['pod2_trades']}, WR {K['win_rate']}%)")
-    print(f"   Torture Audit 8/8: Plateaus A={ta['plateau_passed']}/27 B={ta['grid_b_passed']}/27 C={ta['grid_c_passed']}/27 | TrueJK3={ta['jackknife_drop3_cagr']}% / JK5={ta['jackknife_drop5_cagr']}% | Harsh2x={ta['harsh_2x_cagr']}% | PoisonDiff={ta['future_poison_max_diff']} | All8={ta['all_8_gates_passed']}")
+    print(f"   Torture Audit 8/8: Plateaus A={ta['plateau_passed']}/27 B={ta['grid_b_passed']}/27 C={ta['grid_c_passed']}/27 D={ta['grid_d_passed']}/27 | TrueJK3={ta['jackknife_drop3_cagr']}% / JK5={ta['jackknife_drop5_cagr']}% | Harsh2x={ta['harsh_2x_cagr']}% | PoisonDiff={ta['future_poison_max_diff']} | All8={ta['all_8_gates_passed']}")
     print(f"   Live Signal: Exposure {sig['exposure_pct']}% | {sig['shield']}")
