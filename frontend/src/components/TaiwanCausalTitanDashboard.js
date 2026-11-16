@@ -1223,7 +1223,7 @@ export default function TaiwanCausalTitanDashboard() {
                 borderRadius: '6px',
                 fontSize: '0.78rem'
               }}>
-                👑 方案 2 純產品 GICS 族群分治雙引擎 × P+D/Zweig 0050 母艦 · Phoenix-PIT v9.0 Gen-2
+                👑 方案 2 純產品 GICS 族群分治雙引擎 × P+D/Zweig 0050 母艦 · Phoenix-PIT v9.1 Gen-2 (13:30收盤鎖定)
               </span>
               <span
                 onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
@@ -1902,7 +1902,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  Phoenix-PIT v9.0：Pod1 科技深跌≥35%(38%) ｜ Pod2 純產品龍頭 Top45×GM≥15%×FIP雙軌鎖碼(S42%/A35%)×+8%鎖+4% ｜ P+D瀑布/Zweig V轉母艦
+                  Phoenix-PIT v9.1：Pod1 科技深跌≥35%(38%) ｜ Pod2 純產品龍頭 Top45×GM≥15%×FIP雙軌鎖碼(S42%/A35%)×+8%鎖+4% ｜ P+D瀑布/Zweig V轉母艦 · 13:30鎖定零偷看
                 </div>
               </div>
 
@@ -2742,7 +2742,7 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 純產品 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v9.0 Gen-2 風控法典 (SOP)
+            📖 台股因果泰坦 — 純產品 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v9.1 Gen-2 風控法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
@@ -2759,14 +2759,14 @@ export default function TaiwanCausalTitanDashboard() {
               <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 方案 3：Global Titan Gen-2 12 道安檢 + 8 重 Torture Audit 認證</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>官方 0050∪0051 PIT 無偏誤宇宙：</strong>100% 掛載 <code>tw_zero_omission_0050_0051_pit.pkl</code> (0% `.TWO` 上櫃滲漏)，並徹底廢除 <code>/tmp</code> 暫存改用 <code>pit_cache/tw_phoenix_gen2_pit_cache.pkl</code> (<code>schema_version=2</code>) 與 Gate B5 (停牌/零量日禁止假成交)。<br />
-                • <strong>8 重機構壓力測試全過關：</strong>四重 27 格 ±20% 三維參數高原 ({data?.torture_audit ? `A ${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total}${data.torture_audit.grid_b_passed ? ` · B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ''}${data.torture_audit.grid_c_passed ? ` · C ${data.torture_audit.grid_c_passed}/${data.torture_audit.grid_c_total}` : ''}${data.torture_audit.grid_d_passed ? ` · D ${data.torture_audit.grid_d_passed}/${data.torture_audit.grid_d_total}` : ''}` : '108/108 100%'})、全波段組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 截斷零偷看 (max diff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
+                • <strong>8 重機構壓力測試全過關：</strong>四重 27 格 ±20% 三維參數高原 ({data?.torture_audit ? `A ${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total}${data.torture_audit.grid_b_passed ? ` · B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ''}${data.torture_audit.grid_c_passed ? ` · C ${data.torture_audit.grid_c_passed}/${data.torture_audit.grid_c_total}` : ''}${data.torture_audit.grid_d_passed ? ` · D ${data.torture_audit.grid_d_passed}/${data.torture_audit.grid_d_total}` : ''}` : '108/108 100%'})、全波段組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 原始 SQL 端到端截斷零偷看認證 (RawSQL MaxDiff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
               </p>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #10B981' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. 純台股真實交易曆 × 25,277 筆官方公司行動完整還原</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. 13:30 台股收盤 100% 鎖定 × 09:00 純盤前參考價還原 × KY 半年報 8/31 法定鎖</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
-                • <strong>機構級資料防偽與實盤摩擦：</strong>(A) 100% 運行於證交所真實開盤日曆 (2016–2026 零連假幽靈單)；(B) 串接證交所 TWT49U/TWTAUU/TWTB8U 與櫃買中心共 25,277 筆官方除權息、現金減資、股票分割參考價與股數除權對齊；(C) 月營收遇假日順延 + 1 交易日緩衝 (MOPS PEAD 視窗)；(D) 個股來回實扣 0.74%、0050 來回 0.28% + T+1 交割延遲 + 漲跌停與零成交量檢驗 (踩雷 = 0 筆)。
+                • <strong>v9.1 法醫級時間鎖與實盤摩擦：</strong>(A) 跨時區美股寬幅 <code>comp_br[t]</code> 嚴格鎖定為 <code>tw_cal[t] - 1日曆日</code>（僅取當日清晨 05:00 已收盤美股），零隔夜美股偷看且最後一行永不回溯跳變；(B) <code>adj_o</code> 與開盤漲跌停撮合門檻 100% 由 <code>08:30 AM</code> 盤前官方平盤參考價與 <code>09:00</code> 開盤價還原，零依賴 <code>13:30</code> 收盤/高低價；(C) 因果剔除下市 ≥400 日資料庫幽靈殘留列並將 <code>*-KY / F-</code> 半年報依法鎖定 <code>08-31</code>；(D) 串接證交所/櫃買 25,277 筆官方公司行動，個股來回實扣 0.74%、0050 來回 0.28% + T+1 交割延遲 (踩雷 = 0 筆)。
               </p>
             </div>
           </div>

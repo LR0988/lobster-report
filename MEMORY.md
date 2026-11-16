@@ -393,7 +393,7 @@
 
 ---
 
-## 🇹🇼 十八、 2026-11-16 台股因果泰坦 `Phoenix-PIT v9.0 Gen-2`（P+D 狀態空間瀑布鎖存 × Zweig V轉推進母艦 × 防滑價三階棘輪）上線實盤 (`🪦 #80 ~ #82`)
+## 🇹🇼 十八、 2026-11-16 台股因果泰坦 `Phoenix-PIT v9.0 Gen-2`（P+D 狀態空間瀑布鎖存 × Zweig V轉推進母艦 × 防滑價三階棘輪，**已於同日夜間由第十九節 `v9.1 Gen-2` 13:30 收盤鎖定版取代**） (`🪦 #80 ~ #82`)
 
 1. **實盤異常偵錯與三大第一性原理正交升級（`2016-01-04 ~ 2026-11-16` 含 `11/16` 最新晚間盤後數據）**：
    - **Module M1a (`P+D 狀態空間瀑布飽和鎖存`, `wf_fr_th = -0.035`)**：捕獲並根除 `2026-11-12 -> 2026-11-16` 實盤 `D-only` 瀑布微分衰減漏洞 (`tw_br=21.4% < 25%` 且外資 10D 賣超 `-5.07%` 時因 5D `+5.3%` 死貓跳誤買 `0050` 致 `v8.0` MDD 跳升至 `-20.75%`)。新增比例飽和鎖 `tw_wf_p = (s50_c < s50_ma20) & (mkt_fr10 <= -0.035) & (tw_br < 0.25)` 與原 `tw_wf_d` 取聯集 (`🪦 #80`)，單項即將 MDD 壓回 **`-17.37%`** (`CAGR 44.64% -> 45.51%`, `Sharpe 1.79`) 並於 `2026-11-16` 實盤嚴守 `100%` 現金護盾。
@@ -408,4 +408,21 @@
      - **全波段 Jackknife**：`Drop-Top3 = 37.78%`、`Drop-Top5 = 34.24%` (`>> 0050 22.37%`)；
      - **雙世代 / Ex-2026 / 2x 滑價 / 零偷看**：`Ex26 = 42.45%`、`Era1 = 42.17%`、`Era2 = 52.17%`、`Harsh2x = 42.55%`、Cutoff `2023-06-30` **`max_abs_diff = 0.00e+00`**、`ZeroVol = 0`。
    - **基礎設施修復與全鏈路發布**：修復 [`pit_fundamental_service.py`](file:///Users/huanggin-chen/openclaw_test/pit_fundamental_service.py) `_get_tw_db_max_date()` 同步取 `max(SPY, 2330)` 並重建四大全局 PIT 快取與 Gen-2 Gatekeeper (`12+8` PASS)；完成 [`TaiwanCausalTitanDashboard.js`](file:///Users/huanggin-chen/openclaw_test/frontend/src/components/TaiwanCausalTitanDashboard.js) 108 格高原與 `P+D` 護盾狀態燈修正、Supabase `stock_ml_cache`、`localhost:8000` FastAPI、React Build、Git 與 `https://lobster-report.vercel.app` 上線驗證。
+
+---
+
+## 🇹🇼 十九、 2026-11-16 法醫級全鏈路 PIT 深層稽核與 `Phoenix-PIT v9.1 Gen-2`（13:30 台股收盤 100% 鎖定 × 09:00 純盤前參考價還原 × KY 半年報 8/31 法定鎖 × 原始 SQL 截斷 0.00 認證）上線實盤 (`🪦 #83`)
+
+1. **三項隱微 PIT 漏洞清除與 `Gate 6` 升級 (`🪦 #83`)**：
+   - **`13:30` 台股收盤鎖定 `comp_br[t] = tw_cal[t] - 1d`**：消除原 `tw_cal[t+1] - 1d` 在 `1,585` 日與 `81` 個長假中引用台灣收盤後美股及實盤最後一行回溯跳變之隱患，並統一 `gb_latest_live = comp_br.iloc[-1]`。
+   - **純 `09:00` 盤前平盤參考價還原 `adj_o` 與官方升降單位 `_twse_tick()` 漲跌停判定 (`open_lim_up / open_lim_dn`)**：徹底切除 `raw_o / raw_c`、`hi_arr`、`lo_arr` 對 `13:30` 收盤／高低價的依賴，並保留 `mi_ref = closing_price - signed_chg`（證交所 `08:30 AM` 官方平盤參考價）。
+   - **純因果 `>= 400` 日下市殭屍列清除 + `*-KY / F-` Q2 半年報 `08-31` 法定鎖**：剔除 `20260331` `43` 筆已下市股單日殘留列，依法鎖定外國發行人 `08-31` 財報生效日，並將 **Gate 6** 升級為直接對 `tw_stock.db` 下 `cutoff_date="20230630"` 從零重建的**端到端原始 SQL 截斷測試**。
+2. **權威純淨實證績效 (`2016-01-04 ~ 2026-11-16`, `100%` 零槓桿 & `0.74%` 實盤摩擦)**：
+   - **總體績效**：**`CAGR +46.03%`**（vs 同口徑嚴格 `v8.0 +43.80%`, `0050 +22.37%`, 累積 **`61.22x` / `+6,022.4%`**）、**`MDD -19.64%`**（vs 嚴格 `v8.0 -20.75%`, `0050 -33.97%`）、**`Sharpe 1.80`**、**`Sortino 2.63`**、**`Calmar 2.34`**、**`Profit Factor 13.18`**、**`N = 56`**（`Pod1+RE=13`, **`Pod2=43`**）、**`總勝率 78.57%`**（**`Pod 2 勝率 76.7%`**）、勝年 `9/11`、擊敗 `0050` 年數 **`9/11`**（`2019–2026` 八連勝）。
+   - **8/8 Torture Audit (`verify_tw_phoenix_gen2_torture_suite.py`) + 12+8 Gen-2 Gatekeeper (`pit_integrity_gatekeeper.py --self-test`) 全數 PASS**：
+     - **四重 27 宮格 (`108/108 = 100.0%`)**：`Grid-A 27/27 (36.46%~47.26%, med 43.73%)` · `Grid-B 27/27 (43.99%~46.63%, med 45.72%, 27/27 > v8.0_strict)` · `Grid-C 27/27 (44.69%~46.48%, med 45.54%, 27/27 > v8.0_strict)` · `Grid-D 27/27 (45.09%~46.74%, med 46.18%, 27/27 > v8.0_strict)`；
+     - **LOO 真實協同**：`MotherShip 22.63% -> Pod1 33.01% | Pod2 36.94% -> Dual 46.03%`；
+     - **全波段 Jackknife**：`Drop-Top3 = 36.46%`、`Drop-Top5 = 32.95%` (`>> 0050 22.37%`)；
+     - **雙世代 / Ex-2026 / 2x 滑價 / 原始 SQL 截斷**：`Ex26 = 41.24%`、`Era1 = 40.61%`、`Era2 = 50.89%`、`Harsh2x = 41.27%`、**`Raw-SQL Cutoff 2023-06-30 max_abs_diff = 0.00e+00`**、`ZeroVol = 0`。
+   - **實盤訊號 (`2026-11-16`) & 全鏈路發布**：`Exposure 0.0%`（`P+D` 瀑布飽和鎖存 · `100%` 現金護盾），同步靜態 JSON、Supabase `stock_ml_cache`、`localhost:8000` FastAPI、React Build、Git 與 `https://lobster-report.vercel.app`。
 
