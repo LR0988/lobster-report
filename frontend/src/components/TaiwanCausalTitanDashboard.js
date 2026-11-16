@@ -1223,7 +1223,7 @@ export default function TaiwanCausalTitanDashboard() {
                 borderRadius: '6px',
                 fontSize: '0.78rem'
               }}>
-                👑 方案 2 純 GICS 族群分治雙引擎 × 0050 母艦 · Phoenix-PIT v6.1 Gen-2
+                👑 方案 2 純 GICS 族群分治雙引擎 × 0050 母艦 · Phoenix-PIT v7.0 Gen-2
               </span>
               <span
                 onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
@@ -1242,7 +1242,7 @@ export default function TaiwanCausalTitanDashboard() {
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              方案 2 純 GICS 分治雙引擎 (🔥 Pod 1 強週期科技凹洞 35%＋回馬槍 · 🚀 Pod 2 科技/重電 Top-35 FIP126 雙階鎖利主升 35% · 🚫 航運/金融/營建價值陷阱永久禁買 · 🛸 0050 母艦廣盤最多3槽) × 方案 3 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 正報酬 {kpis.winning_years ?? 10}/{kpis.total_years ?? 11} 年</strong>
+              方案 2 純 GICS 分治雙引擎 (🔥 Pod 1 強週期科技凹洞 35%＋回馬槍 · 🚀 Pod 2 Top-45 高毛利護城河 GM≥15%×FIP126×防跳空三階鎖利主升 35% · 🚫 航運/金融/營建價值陷阱永久禁買 · 🛸 0050 母艦廣盤最多3槽) × 方案 3 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 正報酬 {kpis.winning_years ?? 10}/{kpis.total_years ?? 11} 年</strong>
             </p>
           </div>
 
@@ -1340,12 +1340,16 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
 
             <div style={{ background: 'rgba(56, 189, 248, 0.10)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '8px', padding: '0.55rem 0.75rem' }}>
-              <div style={{ fontSize: '0.7rem', color: '#7DD3FC', fontWeight: 'bold' }}>🌋 3D ±20% 27格參數高原</div>
+              <div style={{ fontSize: '0.7rem', color: '#7DD3FC', fontWeight: 'bold' }}>
+                {data.torture_audit.grid_b_passed ? '🌋 雙重 3D ±20% (54格) 參數高原' : '🌋 3D ±20% 27格參數高原'}
+              </div>
               <div style={{ fontSize: '0.84rem', color: '#F8FAFC', fontFamily: 'monospace', marginTop: '0.18rem' }}>
-                {data.torture_audit.plateau_passed}/{data.torture_audit.plateau_total} ({data.torture_audit.plateau_pass_rate}%) PASS
+                Grid-A {data.torture_audit.plateau_passed}/{data.torture_audit.plateau_total}{data.torture_audit.grid_b_passed ? ` · Grid-B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ` (${data.torture_audit.plateau_pass_rate}%)`} PASS
               </div>
               <div style={{ fontSize: '0.68rem', color: '#94A3B8', marginTop: '0.1rem' }}>
-                低谷 +{data.torture_audit.plateau_min_cagr}% / 中位 +{data.torture_audit.plateau_med_cagr}% / 高峰 +{data.torture_audit.plateau_max_cagr}%
+                {data.torture_audit.grid_b_passed
+                  ? `A區間 +${data.torture_audit.plateau_min_cagr}%~+${data.torture_audit.plateau_max_cagr}% · B區間 +${data.torture_audit.grid_b_min_cagr}%~+${data.torture_audit.grid_b_max_cagr}%`
+                  : `低谷 +${data.torture_audit.plateau_min_cagr}% / 中位 +${data.torture_audit.plateau_med_cagr}% / 高峰 +${data.torture_audit.plateau_max_cagr}%`}
               </div>
             </div>
 
@@ -1550,7 +1554,7 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
             {Array.isArray(data?.live_signal?.ranked) && data.live_signal.ranked.length > 0 && (
               <div style={{ fontSize: '0.76rem', color: '#94A3B8', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '0.55rem' }}>
-                🔍 <strong>雙引擎 0050∪0051 PIT 雷達觀察池 (Pod1 科技凹洞營收拐點 + Pod2 科技/重電 Top-35 FIP126 待機名單)：</strong>
+                🔍 <strong>雙引擎 0050∪0051 PIT 雷達觀察池 (Pod1 科技凹洞營收拐點 + Pod2 Top-45 高毛利GM≥15%×FIP126 待機名單)：</strong>
                 <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
                   {data.live_signal.ranked.map(r => (
                     <span key={r.stock_id} style={{
@@ -1860,7 +1864,7 @@ export default function TaiwanCausalTitanDashboard() {
                     🛡️ 雙引擎突擊艦候選診斷 & GICS 價值陷阱永久攔截表 (六道濾網闖關 · 共 {(data?.filtered_candidates || data?.live_signal?.filtered_candidates).length} 檔)
                   </h4>
                   <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.78rem', color: '#94A3B8' }}>
-                    列出最新交易日 ({strategy_info.latest_data_date}) 進入 🔥 Pod 1 科技凹洞 / 🚀 Pod 2 科技重電 FIP 鎖利 / 🚫 GICS 傳產航運價值陷阱永久禁買池之診斷與具體攔截原因（點擊 📊 可查看 K 線圖）。
+                    列出最新交易日 ({strategy_info.latest_data_date}) 進入 🔥 Pod 1 科技凹洞 / 🚀 Pod 2 高毛利 FIP 三階鎖利 / 🚫 GICS 傳產航運價值陷阱永久禁買池之診斷與具體攔截原因（點擊 📊 可查看 K 線圖）。
                   </p>
                 </div>
                 <div style={{
@@ -1872,7 +1876,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  雙引擎濾網：Pod1 科技深跌≥35%拐點VCP ｜ Pod2 Top35流動×FIP126≥0.08×盤中法人×YoY≥30%×Bias20≤8% ｜ 傳產/航運/金融 GICS 永久禁買
+                  雙引擎濾網：Pod1 科技深跌≥35%拐點VCP ｜ Pod2 Top45×GM≥15%×FIP126≥0.08×YoY≥30%×Bias20≤8.5% ｜ 傳產/航運/金融 GICS 永久禁買
                 </div>
               </div>
 
@@ -2708,7 +2712,7 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v6.1 Gen-2 風控法典 (SOP)
+            📖 台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊 · Phoenix-PIT v7.0 Gen-2 風控法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
@@ -2716,7 +2720,7 @@ export default function TaiwanCausalTitanDashboard() {
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>🚫 GICS 價值陷阱永久禁買鎖：</strong>依 <code>industry_map.json</code> 永久排除塑化、鋼鐵、航運、空運、陸運、控股、太陽能、消費、金融、營建、能源、公用事業等凹洞勝率低或週期陷阱族群（0 檔硬編碼）。<br />
                 • <strong>🔥 Pod 1 科技凹洞艦 (35% ＋ 60 日鳳凰回馬槍)：</strong>專打半導體 / 設備材料 / 電子零組件 / 網通 3 年深跌 ≥35% + 月營收拐點 + Piotroski 季報護航 + 法人雙鎖碼 + VCP≤1.10。<br />
-                • <strong>🚀 Pod 2 科技重電 Top-35 FIP 雙階鎖利主升艦 (35%)：</strong>鎖定 Top-35 流動龍頭 × FIP126≥0.08 穩健趨勢 × 盤中與法人雙吸籌 × 月營收 YoY≥30% × 月線乖離≤8% × 雙階保本鎖利 (+8%鎖+2.5% / +15%鎖+7%)，顯著拉升觸發次數、勝率與 LOO 雙引擎協同。<br />
+                • <strong>🚀 Pod 2 高毛利護城河 FIP 三階鎖利主升艦 (35%)：</strong>鎖定 Top-45 流動龍頭 × Novy-Marx 定價權毛利護城河 (GM_TTM≥15% 剔除低毛利組裝通路陷阱) × FIP126≥0.08 × 盤中/法人雙吸籌 × YoY≥30% × Bias20≤8.5%，搭配防跳空三階保本棘輪 (+20%回檔10% / +15%鎖+7% / +8%鎖+2.5%) 與 18 日落後0050換股。<br />
                 • <strong>🛸 0050 母艦廣盤動態 2/3 槽：</strong>常規上限 2 槽、台股 60MA 寬幅 ≥60% 開 3 槽，其餘現金停泊 0050.TW；全球寬幅 &lt;35% 或觸發台股外資瀑布雙殺時次日撤退避險。
               </p>
             </div>
@@ -2725,7 +2729,7 @@ export default function TaiwanCausalTitanDashboard() {
               <h5 style={{ margin: '0 0 0.5rem 0', color: '#FDE68A', fontSize: '1rem' }}>2. 方案 3：Global Titan Gen-2 12 道安檢 + 8 重 Torture Audit 認證</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>官方 0050∪0051 PIT 無偏誤宇宙：</strong>100% 掛載 <code>tw_zero_omission_0050_0051_pit.pkl</code> (0% `.TWO` 上櫃滲漏)，並徹底廢除 <code>/tmp</code> 暫存改用 <code>pit_cache/tw_phoenix_gen2_pit_cache.pkl</code> (<code>schema_version=2</code>) 與 Gate B5 (停牌/零量日禁止假成交)。<br />
-                • <strong>8 重機構壓力測試全過關：</strong>27 格 ±20% 三維參數高原 ({data?.torture_audit ? `${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total} (${data.torture_audit.plateau_pass_rate}%)` : '100%'})、真實重跑組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 截斷零偷看 (max diff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
+                • <strong>8 重機構壓力測試全過關：</strong>雙重 27 格 ±20% 三維參數高原 ({data?.torture_audit ? `Grid-A ${data.torture_audit.plateau_passed}/${data.torture_audit.plateau_total}${data.torture_audit.grid_b_passed ? ` · Grid-B ${data.torture_audit.grid_b_passed}/${data.torture_audit.grid_b_total}` : ''}` : '100%'})、全波段組合 Jackknife 拔除前 3 / 前 5 大贏家後仍贏 0050 ({data?.torture_audit ? `+${data.torture_audit.jackknife_drop3_cagr}% / +${data.torture_audit.jackknife_drop5_cagr}%` : 'PASS'})、雙倍滑價壓測 (+{data?.torture_audit?.harsh_2x_cagr ?? '-'}%) 與 2023-06-30 截斷零偷看 (max diff = {data?.torture_audit?.future_poison_max_diff ?? 0})。
               </p>
             </div>
 
