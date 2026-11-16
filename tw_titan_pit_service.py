@@ -1,6 +1,6 @@
 """
 tw_titan_pit_service.py
-台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊 (Phoenix-PIT v6.0 Gen-2: 0050 保護母艦 + Pod1 科技凹洞35% + Pod2 科技重電PEAD主升30%) 即時與回測同步服務。
+台股因果泰坦 — 純 GICS 族群分治雙引擎母子艦隊 (Phoenix-PIT v6.1 Gen-2: 0050 保護母艦 + Pod1 科技凹洞35% + Pod2 科技重電FIP雙階鎖利主升35%) 即時與回測同步服務。
 直接串接 tw_phoenix_turnaround_pit_engine.py (Global Titan Gen-2 12道安檢 + 8重 Torture Audit 引擎)，
 動態產出 taiwan_causal_titan_data.json 與同步 defaultMarketMlData.json / market_ml_prediction.json。
 """
