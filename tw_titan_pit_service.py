@@ -1,6 +1,6 @@
 """
 tw_titan_pit_service.py
-台股因果泰坦 — 純產品 GICS 族群分治雙引擎母子艦隊 (Phoenix-PIT v9.1 Gen-2 13:30收盤鎖定零偷看合規版: 0050 P+D 瀑布鎖存×Zweig V轉母艦 + Pod1 科技凹洞38% + Pod2 純產品龍頭雙軌FIP機構庫 S42%/A35%×+8%鎖+4%防滑價保本棘輪) 即時與回測同步服務。
+台股因果泰坦 — 純產品 GICS 雙引擎動能鎖碼母子艦隊 (Titan-PIT v10.0 Gen-2 13:30收盤鎖定零偷看合規版: 0050 P+D 瀑布鎖存×Zweig V轉母艦 + Pod1 大型高毛利機構鎖碼點火 38% + Pod2 純產品高成長FIP雙軌主升 S48%/A40%，100% 移除深跌猜底) 即時與回測同步服務。
 直接串接 tw_phoenix_turnaround_pit_engine.py (Global Titan Gen-2 12道安檢 + 8重 Torture Audit 引擎 + 原始 SQL 截斷驗證)，
 動態產出 taiwan_causal_titan_data.json 與同步 defaultMarketMlData.json / market_ml_prediction.json。
 """
@@ -51,7 +51,7 @@ def run(force_rebuild: bool = False) -> str:
     d = refresh_live(force_rebuild=force_rebuild)
     sig = d["live_signal"]
     return (
-        f"written 台股因果泰坦(大凹洞母子艦隊 PIT) 訊號 {d['strategy_info']['latest_data_date']} "
+        f"written 台股因果泰坦(Titan-PIT v10.0 純獲利雙引擎母子艦隊) 訊號 {d['strategy_info']['latest_data_date']} "
         f"曝險 {sig['exposure_pct']:.0f}% 持股 {len(d['current_positions'])} 檔 ({sig['shield']})"
     )
 
