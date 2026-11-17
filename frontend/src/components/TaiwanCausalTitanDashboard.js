@@ -32,7 +32,7 @@ const TEMPLATE_1012_TRANSACTIONS = [
     cash_flow_twd: 1000000,
     realized_pnl_twd: null,
     realized_return_pct: null,
-    note: '台股因果泰坦 — Titan-PIT v10.0 純獲利雙引擎母子艦隊 初始開倉本金 (100萬)'
+    note: '台股因果泰坦 — Titan-PIT v11.0 純獲利雙引擎·季線法人大波段母子艦隊 初始開倉本金 (100萬)'
   }
 ];
 
@@ -1223,7 +1223,7 @@ export default function TaiwanCausalTitanDashboard() {
                 borderRadius: '6px',
                 fontSize: '0.78rem'
               }}>
-                👑 Titan-PIT v10.0 Gen-2 純獲利雙引擎 × P+D/Zweig 0050 母艦 (13:30收盤鎖定·零偷看)
+                👑 Titan-PIT v11.0 Gen-2 純獲利雙引擎 × 季線/法人大波段棘輪 × P+D/Zweig 0050 母艦 (13:30收盤鎖定·零偷看)
               </span>
               <span
                 onClick={() => liveStatus.state !== 'loading' && loadLiveData(true)}
@@ -1242,7 +1242,7 @@ export default function TaiwanCausalTitanDashboard() {
               </h2>
             </div>
             <p style={{ margin: '0.5rem 0 0 0', color: '#94A3B8', fontSize: '0.86rem' }}>
-              v10.0 純獲利雙引擎 (⚡ Pod 1 大型高毛利機構鎖碼 Top-30·38% · 🚀 Pod 2 純產品 Top-45×GM≥15%×FIP雙軌主升 S48%/A40%×Bias20≤7%×FR5≥-5% · 🛸 P+D 瀑布鎖存＋Zweig V轉 0050 母艦 ≤100% 零槓桿) × 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 勝率 {kpis.win_rate ?? 77.8}%</strong>
+              v11.0 純獲利雙引擎·季線法人長波段棘輪 (⚡ Pod 1 大型高毛利機構鎖碼 Top-30·38% · 🚀 Pod 2 純產品 Top-45×GM≥15%×FIP雙軌主升 S48%/A40%×+11%鎖+4%×+45%季線大波段 · 🛸 P+D 瀑布鎖存＋Zweig V轉 0050 母艦 ≤100% 零槓桿) × 全球泰坦 Gen-2 合規 · <strong>11 年擊敗 0050 共 {kpis.beat_market_years ?? 9} 年 · 勝率 {kpis.win_rate ?? 74.4}%</strong>
             </p>
           </div>
 
@@ -1609,7 +1609,7 @@ export default function TaiwanCausalTitanDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.9rem', flexWrap: 'wrap', gap: '0.8rem' }}>
               <div>
                 <h4 style={{ margin: 0, color: '#FBBF24', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  🔄 台股因果泰坦 (Titan-PIT v10.0 純獲利雙引擎母子艦隊) · 持股更動建議試算器
+                  🔄 台股因果泰坦 (Titan-PIT v11.0 純獲利雙引擎·季線/法人大波段母子艦隊) · 持股更動建議試算器
                 </h4>
                 <p style={{ margin: '0.25rem 0 0 0', color: '#94A3B8', fontSize: '0.78rem' }}>
                   依據總淨資產 (NT$ {Math.round(totalNetAssetsTwd).toLocaleString()}) 與母子艦隊最新目標權重 ({targetAllocationConfig.length} 檔{targetAllocationConfig.length === 0 ? (data?.live_signal?.wf_active ? '，台股外資提款 P+D 瀑布鎖存觸發 0050 母艦撤退 100% 現金避險' : '，全球寬幅 < 35% 觸發 0050 母艦撤退全數空手避險') : ''}) 即時比對偏差。資料截止：<strong>{strategy_info.latest_data_date}</strong>。
@@ -1902,7 +1902,7 @@ export default function TaiwanCausalTitanDashboard() {
                   fontSize: '0.75rem',
                   fontFamily: 'monospace'
                 }}>
-                  Titan-PIT v10.0：Pod1 Top30×GM≥20%×機構鎖碼(38%) ｜ Pod2 Top45×GM≥15%×FIP雙軌(S48%/A40%)×Bias20≤7% ｜ P+D瀑布/Zweig V轉母艦 · 13:30鎖定零偷看
+                  Titan-PIT v11.0：Pod1 Top30×GM≥20%×機構鎖碼(38%) ｜ Pod2 Top45×GM≥15%×FIP雙軌(S48%/A40%)×Bias20≤7% ｜ +11%鎖+4%·+20%防派發·+45%季線大波段 ｜ 13:30鎖定零偷看
                 </div>
               </div>
 
@@ -2537,7 +2537,7 @@ export default function TaiwanCausalTitanDashboard() {
                 🏆 2016 - 2026 歷年年度績效 vs 0050.TW 實戰對比 ({yearly_stats.length} 年中 {kpis.beat_market_years || 9} 年擊敗 0050 · 勝率 {kpis.total_years ? ((kpis.beat_market_years / kpis.total_years) * 100).toFixed(1) : '81.8'}% · {kpis.winning_years ?? 9}/{yearly_stats.length} 年正報酬)
               </h4>
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                0050 P+D/Zweig 保護母艦 (全球寬幅≥35%或V轉推進續抱 / &lt;35%或P+D瀑布鎖存次日撤退) + Pod1 大型機構鎖碼 (Top-30·38%) + Pod2 純產品高成長FIP雙軌主升 (S48%/A40%·Bias20≤7%·+8%鎖+4%) · 四重 108 格 PIT 嚴格驗證
+                0050 P+D/Zweig 保護母艦 (全球寬幅≥35%或V轉推進續抱 / &lt;35%或P+D瀑布鎖存次日撤退) + Pod1 大型機構鎖碼 (Top-30·38%) + Pod2 純產品高成長FIP雙軌主升 (S48%/A40%·Bias20≤7%·+11%鎖+4%·+20%防派發·+45%季線大波段) · 四重 108 格 PIT 嚴格驗證
               </p>
             </div>
           </div>
@@ -2668,10 +2668,10 @@ export default function TaiwanCausalTitanDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
             <div>
               <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.2rem' }}>
-                📋 2016 - 2026 Titan-PIT v10.0 純獲利雙引擎全進出明細 (共 {trades.length.toLocaleString()} 筆完整紀錄)
+                📋 2016 - 2026 Titan-PIT v11.0 純獲利雙引擎全進出明細 (共 {trades.length.toLocaleString()} 筆完整紀錄)
               </h4>
               <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: '#94A3B8' }}>
-                嚴格執行盤前依昨收核定股數、次日開盤價真實成交 (Gate B5 零停牌成交)、T+1 交割延遲與雙引擎異質非對稱停損停利 (含 10 日快汰與防跳空棘輪)
+                嚴格執行盤前依昨收核定股數、次日開盤價真實成交 (Gate B5 零停牌成交)、T+1 交割延遲與多階季線/法人大波段護航棘輪 (+11%鎖+4% / +20%防派發 / +45%季線或破月線法人轉賣停利)
               </p>
             </div>
             <button
@@ -2742,15 +2742,15 @@ export default function TaiwanCausalTitanDashboard() {
       {activeTabSub === 'rules' && (
         <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '1.5rem' }}>
           <h4 style={{ margin: '0 0 1rem 0', color: '#FBBF24', fontSize: '1.25rem' }}>
-            📖 台股因果泰坦 — 純產品 GICS 雙引擎動能鎖碼母子艦隊 · Titan-PIT v10.0 Gen-2 風控法典 (SOP)
+            📖 台股因果泰坦 — 純產品 GICS 雙引擎動能鎖碼母子艦隊 · Titan-PIT v11.0 Gen-2 風控法典 (SOP)
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.2rem', lineHeight: '1.6' }}>
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #38BDF8' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. Titan-PIT v10.0：100% 移除深跌猜底 · 純獲利 GICS 雙引擎 + P+D/Zweig 0050 母艦</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#38BDF8', fontSize: '1rem' }}>1. Titan-PIT v11.0：100% 移除深跌猜底 · 純獲利 GICS 雙引擎 + 季線法人大波段棘輪</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>🚫 GICS 價值陷阱與工程/通路雜訊永久禁買鎖：</strong>依 <code>industry_map.json</code> 永久排除塑化、鋼鐵、航運、空運、陸運、控股、太陽能、消費、金融、營建、能源、公用及工程承攬 (完工百分比失真) 與零 IP 通路商（0 檔硬編碼）。<br />
-                • <strong>⚡ Pod 1 大型高毛利機構鎖碼點火艦 (Top-30 · 38% · Dual 上限 1 槽)：</strong>鎖定純產品/IP Top-30 權值龍頭 × 毛利率 GM_TTM≥20% × 營收 YoY≥20% ＆ 3月/12月營收擴張 (rmar≥1.05) × 20日法人≥2.5% ＋ 盤中買盤 IO20≥1.5% ＋ 外資5D≥0 ＋ RS60≥+4%，精準補足權值主升點火波段。<br />
-                • <strong>🚀 Pod 2 純產品高成長 FIP 雙軌主升艦 (Top-45 · S級 48% / A級 40%)：</strong>鎖定純產品/IP Top-45 × GM_TTM≥15% × YoY≥30% × 收斂不追高帶 (Bias20 -2%~+7.0%) × 外資5D≥-5% × RS60≥0%，結合主軌與 Priority-0 高 FIP 外資庫，搭配 10 日零反彈快汰與防滑價/防跳空三階棘輪 (+8%鎖+4%破MA20)。<br />
+                • <strong>⚡ Pod 1 大型高毛利機構鎖碼點火艦 (Top-30 · 38% · Dual 上限 1 槽)：</strong>鎖定純產品/IP Top-30 權值龍頭 × 毛利率 GM_TTM≥20% × 營收 YoY≥20% ＆ 3月/12月營收擴張 (rmar≥1.05) × 20日法人≥2.5% ＋ 盤中買盤 IO20≥1.5% ＋ 外資5D≥0 ＋ RS60≥+4%，精準補足權值主升點火波段 (+8%鎖+4%破MA20)。<br />
+                • <strong>🚀 Pod 2 純產品高成長 FIP 雙軌主升艦 (Top-45 · S級 48% / A級 40%)：</strong>鎖定純產品/IP Top-45 × GM_TTM≥15% × YoY≥30% × 收斂不追高帶 (Bias20 -2%~+7.0%) × 外資5D≥-5% × RS60≥0%，結合主軌與 Priority-0 高 FIP 外資庫，搭配多階季線法人大波段護航 (+11%鎖+4% · +20%防派發鎖利 · +45%破季線或破月線轉賣停利)。<br />
                 • <strong>🛸 P+D 瀑布鎖存 × Zweig V 轉推進 0050 母艦：</strong>常規上限 2 槽、台股 60MA 寬幅 ≥60% 開 3 槽，最小補倉 ≥22% 合計嚴格 ≤100% 零槓桿，其餘現金停泊 0050.TW；於 D 項急殺之上維持 P 項深熊飽和鎖並於極端恐慌爆量 V 轉推升時領先恢復母艦巡航。
               </p>
             </div>
@@ -2764,7 +2764,7 @@ export default function TaiwanCausalTitanDashboard() {
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '8px', borderLeft: '3px solid #10B981' }}>
-              <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. v10.0 法醫級時間鎖 (13:30 收盤鎖定 × 09:00 開盤還原 × KY 8/31 鎖)</h5>
+              <h5 style={{ margin: '0 0 0.5rem 0', color: '#34D399', fontSize: '1rem' }}>3. v11.0 法醫級時間鎖 (13:30 收盤鎖定 × 09:00 開盤還原 × KY 8/31 鎖)</h5>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#CBD5E1' }}>
                 • <strong>法醫級因果時間鎖與實盤摩擦：</strong>(A) 跨時區美股寬幅 <code>comp_br[t]</code> 嚴格鎖定為 <code>tw_cal[t] - 1日曆日</code>（僅取當日清晨 05:00 已收盤美股），零隔夜美股偷看且最後一行永不回溯跳變；(B) <code>adj_o</code> 與開盤漲跌停撮合門檻 100% 由 <code>08:30 AM</code> 盤前官方平盤參考價與 <code>09:00</code> 開盤價還原，零依賴 <code>13:30</code> 收盤/高低價；(C) 因果剔除下市 ≥400 日資料庫幽靈殘留列並將 <code>*-KY / F-</code> 半年報依法鎖定 <code>08-31</code>；(D) 串接證交所/櫃買 25,277 筆官方公司行動，個股來回實扣 0.74%、0050 來回 0.28% + T+1 交割延遲 (Zero Deep-Trough 認證)。
               </p>

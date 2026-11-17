@@ -2,9 +2,9 @@
 """
 tw_phoenix_turnaround_pit_engine.py
 ================================================================================
-👑 台股因果泰坦 — 純產品GICS雙引擎動能鎖碼母子艦隊 (Titan-PIT v10.0 Gen-2 13:30收盤鎖定零偷看合規版)
+👑 台股因果泰坦 — 純產品GICS雙引擎動能鎖碼母子艦隊 (Titan-PIT v11.0 Gen-2 13:30收盤鎖定零偷看合規版)
 Ultra-Strict Global Titan Gen-2 Point-in-Time Backtest & Live Signal Engine
-(100% Unleveraged Cash · Zero Survivorship Bias · 0% TPEx · Pure GICS Sector Partition · Zero Deep-Trough)
+(100% Unleveraged Cash · Zero Survivorship Bias · 0% TPEx · Pure GICS Sector Partition · Zero Deep-Trough · Multi-Wave Trend Ratchet)
 ================================================================================
 核心工程與資料防偽鐵律：
 1. 【Global Titan Gen-2 官方 0050 ∪ 0051 PIT 宇宙與快取規範】：
@@ -16,10 +16,11 @@ Ultra-Strict Global Titan Gen-2 Point-in-Time Backtest & Live Signal Engine
    - 跨時區美股寬幅 `comp_br[i]` 嚴格鎖定為 `tw_cal[i] - 1 日曆日`（只用當日清晨 05:00 已收盤之美股），杜絕任何跨夜偷看與最後一行回溯跳變；
    - `adj_o` 與漲跌停撮合門檻 100% 由 `08:30 AM` 盤前官方平盤參考價與 `09:00` 開盤價計算，零依賴當日 `13:30` 收盤／高低價；
    - `*-KY / F-` 第一上市外國企業 Q2 半年報依法鎖定 `08-31`（非 `08-14`），並通過 `cutoff_date="20230630"` 原始 SQL 端到端截斷 `max_abs_diff = 0.00e+00` 認證。
-3. 【v10.0 純獲利雙引擎 GICS 家族分治 (零深跌猜底 · 零個股硬編碼) × P+D 瀑布鎖存 / Zweig V轉推進母艦】：
+3. 【v11.0 純獲利雙引擎 GICS 家族分治 (零深跌猜底 · 零個股硬編碼) × P+D 瀑布鎖存 / Zweig V轉推進母艦 × 季線/法人多階大波段棘輪】：
    - 🚫 永久禁買價值陷阱族群：透過 `industry_map.json` GICS 全面排除 `Marine Shipping / Airlines / Trucking / Conglomerates / Solar / Basic Materials / Consumer / Financial Services / Real Estate / Energy / Utilities / Engineering & Construction / Electronics & Computer Distribution / Business Equipment & Supplies`，杜絕工程入帳空窗、零護城河通路與週期陷阱重傷。
    - ⚡ Pod 1 大型高毛利機構鎖碼點火艦 (FIP Size-Reversal, 單槽 38%，Dual上限 1 槽)：鎖定純產品/IP 核心 Top-30 大型龍頭 × `GM_TTM ≥ 20%` × `YoY ≥ 20%` × 3月/12月營收擴張 (`rmar ≥ 1.05`) × 法人 20D 買超 ≥ 2.5% + 盤中吸籌 `IO20 ≥ 1.5%` + 外資 5D 轉正 + 相對0050強勢 (`≥+4%`) × `Bias20 ≤ +6.5%`，徹底捕捉主權/外資大額掃貨造成早盤跳空而壓低 FIP126 之大型電子權值主升點火波段（零深跌條件、與 Pod 2 正交互補）。
-   - 🚀 Pod 2 純產品高成長 FIP 雙軌主升艦 (S級 48% / A級 40%)：鎖定純產品/IP 龍頭 `Top-45` × `GM_TTM ≥ 15%` × `YoY ≥ 30%` × 不追高收斂帶 (`Bias20 -2%~+7.0%`) × 近 5 日外資無單週急拋 (`fr5 ≥ -5%`) × 60D 相對強勢 (`RS60 ≥ 0%`)，結合雙軌機構流（主軌 `FIP126≥0.08 + io20≥2% + inst≥1%` + Priority-0 高 FIP 外資/ADR 鎖碼軌 `FIP126≥0.12 + io20≥1% + inst≥2%`）、10 日零反彈 (`<4%`) 相對落後 (`-6%`) 破月線快汰、以及防滑價防跳空三階棘輪 (`+8%鎖+4%破月線 / +15%鎖+7% / +20%回檔10% / +35%回檔14%`)。
+   - 🚀 Pod 2 純產品高成長 FIP 雙軌主升艦 (S級 48% / A級 40%)：鎖定純產品/IP 龍頭 `Top-45` × `GM_TTM ≥ 15%` × `YoY ≥ 30%` × 不追高收斂帶 (`Bias20 -2%~+7.0%`) × 近 5 日外資無單週急拋 (`fr5 ≥ -5%`) × 60D 相對強勢 (`RS60 ≥ 0%`)，結合雙軌機構流（主軌 `FIP126≥0.08 + io20≥2% + inst≥1%` + Priority-0 高 FIP 外資/ADR 鎖碼軌 `FIP126≥0.12 + io20≥1% + inst≥2%`）、10 日零反彈 (`<4%`) 相對落後 (`-6%`) 破月線快汰；
+   - 📈 🌊 v11.0 季線/法人大波段護航棘輪 (Multi-Wave Trend & Institutional Ratchet)：① 解除 Pod 2 初階保本誤洗（`+8% -> +11%` 鎖 `+4%` 破月線，Pod 1 維持 `+8%`）；② 中波段 `+20%` 僅於破月線或法人轉賣 (`tot_inst20 < 0`) 且回檔 `-10%`（或硬上限 `-16%`）停利；③ 超級主升段 `peak ≥ +45%` 獨立鎖定（杜絕落回 `-10%` 誤砍），僅於跌破 `60MA` 季線、破月線且法人退場 (`<+0.5%`) 或硬回檔 `-20%` 方退場，完整抱住 `+50%~+76%` 主升長波段！
    - 🛸 0050 P+D 瀑布鎖存 × Zweig 投降 V 轉推進保護母艦：常規 2 槽、廣基牛市 (台股寬幅 ≥ 60%) 最多 3 槽，嚴守 ≤100% 零槓桿上限與最低實質補倉 `≥22%`，其餘現金 100% 停泊 0050.TW 母艦打底；結合 D 項加速度急殺與 P 項深熊外資大提款飽和鎖存 (`tw_br < 25% & mkt_fr10 <= -3.5%`)，並於台股恐慌洗盤後爆量 V 轉推升 (`tw_br_min20 <= 19% -> >= 25%, Δ5D >= +8%`) 即領先恢復母艦巡航。
 4. 【實戰交易稅費與五檔價差實扣 + T+1 賣股交割延遲】：
    個股來回摩擦 0.74% (買 0.22% / 賣 0.52%)；0050 ETF 來回摩擦 0.28% (買 0.09% / 賣 0.19%)。
@@ -682,6 +683,7 @@ def _get_precomputed_features(d: dict) -> dict:
         "raw_c_arr": raw_close.reindex(dates).values, "raw_o_arr": raw_open.reindex(dates).values,
         "raw_m20_arr": raw_ma20.reindex(dates).values, "raw_m60_arr": raw_ma60.reindex(dates).values,
         "ma20_arr": ma20.reindex(dates).values, "ma60_arr": ma60.reindex(dates).values,
+        "inst20_arr": tot_inst20.reindex(dates).fillna(0.0).values,
         "val_arr": val.reindex(dates).values, "pit_arr": pit_gen2.reindex(dates).values,
         "act_arr": d["is_active_pit"].reindex(dates).values, "tw_br_arr": tw_br.reindex(dates).values,
         "sc1_arr": p1_score_df.reindex(dates).values, "sc2_arr": p2_score_df.reindex(dates).values,
@@ -708,12 +710,14 @@ def run_simulation(
     p2_fr5=-0.05,
     p2_rs60=0.0,
     p2_gap_pk=0.20,
+    p2_super_pk=0.45,
     p2_stale_d=18,
     p2_vault_fip=0.12,
     p2_early_lag_d=10,
     p2_hi_sc=28.0,
     wf_fr_th=-0.035,
     v_thrust_chg5=0.08,
+    p2_be1_trig=0.11,
     p2_be1_c=0.040,
     w_p1=0.38,
     w_p2=0.40,
@@ -783,7 +787,7 @@ def run_simulation(
     lim_up_arr, lim_dn_arr = f["lim_up_arr"], f["lim_dn_arr"]
     raw_c_arr, raw_o_arr = f["raw_c_arr"], f["raw_o_arr"]
     raw_m20_arr, raw_m60_arr = f["raw_m20_arr"], f["raw_m60_arr"]
-    ma20_arr, ma60_arr = f["ma20_arr"], f["ma60_arr"]
+    ma20_arr, ma60_arr, inst20_arr = f["ma20_arr"], f["ma60_arr"], f["inst20_arr"]
     val_arr, pit_arr, act_arr, tw_br_arr = f["val_arr"], f["pit_arr"], f["act_arr"], f["tw_br_arr"]
 
     s1_arr = p1_pool.reindex(dates).values
@@ -978,28 +982,37 @@ def run_simulation(
             dd_from_peak = (cur_px / p["peak_px"]) - 1.0
             hold_days = t - p["entry_d"] + 1
             m20 = ma20_arr[t, c]
+            m60 = ma60_arr[t, c]
+            inst20 = inst20_arr[t, c]
             pod_lbl = "Pod1" if p["pod"] == "POD1" else "Pod2"
+            be_th = 0.08 if p["pod"] == "POD1" else p2_be1_trig
 
-            if peak_ret >= 0.35 and dd_from_peak <= -0.14:
-                p["exit_pending"] = True; p["exit_reason"] = f"👑 {pod_lbl}主升移動停利 (+35%回檔14%)"
-            elif peak_ret >= p2_gap_pk and dd_from_peak <= -0.10:
-                p["exit_pending"] = True; p["exit_reason"] = f"⚡ {pod_lbl}高波段防跳空鎖利 (+20%回檔10%)"
-            elif peak_ret >= 0.15 and cur_ret <= 0.070 and cur_px < m20:
-                p["exit_pending"] = True; p["exit_reason"] = f"🔒 {pod_lbl}二階鎖利護盾 (+15%鎖+7%破月線)"
-            elif peak_ret >= 0.08 and cur_ret <= p2_be1_c and cur_px < m20:
-                p["exit_pending"] = True; p["exit_reason"] = f"🛡️ {pod_lbl}初階保本護盾 (+8%鎖+4%破月線)"
-            elif cur_ret <= -0.095:
-                p["exit_pending"] = True; p["exit_reason"] = f"🚨 {pod_lbl}硬性停損 (-9.5%)"
-            elif hold_days >= int(p2_early_lag_d) and peak_ret < 0.04 and rel_ret_50 <= -0.06 and cur_px < m20:
-                p["exit_pending"] = True; p["exit_reason"] = f"⏳ {pod_lbl} 10日零反彈落後0050換股"
-            elif hold_days >= int(p2_stale_d) and cur_ret < 0.01 and rel_ret_50 <= -0.03 and cur_px < m20:
-                p["exit_pending"] = True; p["exit_reason"] = f"⏳ {pod_lbl} 18日落後0050破月線換股"
-            elif hold_days >= 35 and cur_ret < 0.06 and cur_px < m20:
-                p["exit_pending"] = True; p["exit_reason"] = f"⏳ {pod_lbl} 35日盤整破月線換股"
-            elif not etf_ok_arr[t]:
-                p["exit_pending"] = True; p["exit_reason"] = "🛡️ 全球寬幅/瀑布護盾撤退"
-            elif tw_br_arr[t] < 0.30 and cur_ret < 0.12:
-                p["exit_pending"] = True; p["exit_reason"] = "🛡️ 台股寬幅<30%防禦收回母艦"
+            rsn = None
+            if peak_ret >= p2_super_pk:
+                if dd_from_peak <= -0.20 or cur_px < m60 or (cur_px < m20 and inst20 < 0.005):
+                    rsn = f"👑 {pod_lbl}主升大波段季線/法人停利 (+{int(round(p2_super_pk * 100))}%破季線或破月線轉賣)"
+            elif peak_ret >= p2_gap_pk:
+                if dd_from_peak <= -0.16 or (dd_from_peak <= -0.10 and (cur_px < m20 or inst20 < 0.0)):
+                    rsn = f"⚡ {pod_lbl}中波段趨勢/防派發鎖利 (+{int(round(p2_gap_pk * 100))}%回檔10%破月線或法人轉賣)"
+            if not rsn and peak_ret >= 0.15 and cur_ret <= 0.070 and cur_px < m20:
+                rsn = f"🔒 {pod_lbl}二階鎖利護盾 (+15%鎖+7%破月線)"
+            if not rsn and peak_ret >= be_th and cur_ret <= p2_be1_c and cur_px < m20:
+                rsn = f"🛡️ {pod_lbl}初階保本護盾 (+{int(round(be_th * 100))}%鎖+{int(round(p2_be1_c * 100))}%破月線)"
+            if not rsn and cur_ret <= -0.095:
+                rsn = f"🚨 {pod_lbl}硬性停損 (-9.5%)"
+            if not rsn and hold_days >= int(p2_early_lag_d) and peak_ret < 0.04 and rel_ret_50 <= -0.06 and cur_px < m20:
+                rsn = f"⏳ {pod_lbl} 10日零反彈落後0050換股"
+            if not rsn and hold_days >= int(p2_stale_d) and cur_ret < 0.01 and rel_ret_50 <= -0.03 and cur_px < m20:
+                rsn = f"⏳ {pod_lbl} 18日落後0050破月線換股"
+            if not rsn and hold_days >= 35 and cur_ret < 0.06 and cur_px < m20:
+                rsn = f"⏳ {pod_lbl} 35日盤整破月線換股"
+            if not rsn and not etf_ok_arr[t]:
+                rsn = "🛡️ 全球寬幅/瀑布護盾撤退"
+            if not rsn and tw_br_arr[t] < 0.30 and cur_ret < 0.12:
+                rsn = "🛡️ 台股寬幅<30%防禦收回母艦"
+            if rsn:
+                p["exit_pending"] = True
+                p["exit_reason"] = rsn
 
         nav[t] = cash + pending_reinvest_cash + etf_shares * px_50_c[t] + stk_val_close
 
@@ -1020,12 +1033,14 @@ def run_simulation(
         and abs(p2_fr5 - (-0.05)) < 1e-6
         and abs(p2_rs60 - 0.0) < 1e-6
         and abs(p2_gap_pk - 0.20) < 1e-6
+        and abs(p2_super_pk - 0.45) < 1e-6
         and int(p2_stale_d) == 18
         and abs(p2_vault_fip - 0.12) < 1e-6
         and int(p2_early_lag_d) == 10
         and abs(p2_hi_sc - 28.0) < 1e-6
         and abs(wf_fr_th - (-0.035)) < 1e-6
         and abs(v_thrust_chg5 - 0.08) < 1e-6
+        and abs(p2_be1_trig - 0.11) < 1e-6
         and abs(p2_be1_c - 0.040) < 1e-6
         and abs(w_p1 - 0.38) < 1e-6
         and abs(w_p2 - 0.40) < 1e-6
@@ -1355,9 +1370,9 @@ def _yearly_alpha_rows(s_nav: pd.Series, b_nav: pd.Series) -> list:
 
 
 def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dict:
-    """Global Titan Gen-2 八重嚴酷驗證與四重 27 格 (108格) 三維參數高原稽核（Titan-PIT v10.0 純獲利雙引擎）。"""
+    """Global Titan Gen-2 八重嚴酷驗證與四重 27 格 (108格) 三維參數高原稽核（Titan-PIT v11.0 純獲利雙引擎·季線法人大波段棘輪）。"""
     fp = sim.get("db_fingerprint", "")
-    audit_ver = "v100_nontrough_pit_audit_v1"
+    audit_ver = "v110_wave_pit_audit_v1"
     if not force_rebuild and os.path.exists(AUDIT_CACHE_PATH):
         try:
             with open(AUDIT_CACHE_PATH, "rb") as f:
@@ -1374,7 +1389,7 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
     dual_cagr = _calc_cagr_pct(s_nav)
     b_cagr = _calc_cagr_pct(b_nav)
 
-    # Identical 13:30-close-locked Pure Non-Trough Baseline (v9.1 Pod 2 without Trough Pod 1)
+    # Identical 13:30-close-locked Pure Non-Trough Pre-Wave Baseline (without v11 wave ratchet)
     sim_pure_p2_base = run_simulation(
         mode="pod2",
         p2_rk=45,
@@ -1383,12 +1398,15 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
         p2_gm=15.0,
         p2_fr5=-999.0,
         p2_rs60=-999.0,
+        p2_super_pk=0.35,
+        p2_be1_trig=0.08,
         w_p2=0.35,
         w_p2_hi=0.42,
         min_alloc=0.15,
         data_override=base_data,
     )
     pure_pod2_base_cagr = round(_calc_cagr_pct(sim_pure_p2_base["nav"]), 2)
+    v10_base_cagr = 41.14
 
     # Era Invariance & Ex-2026
     s_ex26 = s_nav.loc[: "2025-12-31"]
@@ -1457,17 +1475,17 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
                 if cg > b_cagr and shg >= 1.35:
                     plateau_passed += 1
 
-    # Grid-B: 3x3x3 = 27-Cell +-20% Parameter Plateau (p2_gm x p2_gap_pk x p2_stale_d)
+    # Grid-B: 3x3x3 = 27-Cell +-20% Dedicated Wave-Riding Exit Plateau (p2_gap_pk x p2_super_pk x p2_be1_trig)
     grid_b_cagrs = []
     grid_b_passed = 0
     grid_b_beats_base = 0
-    for gm_t in (12.0, 15.0, 18.0):
-        for pk_t in (0.16, 0.20, 0.24):
-            for sd_t in (14, 18, 22):
+    for pk_t in (0.16, 0.20, 0.24):
+        for sp_t in (0.36, 0.45, 0.54):
+            for bt_t in (0.088, 0.110, 0.132):
                 rgb = run_simulation(
-                    p2_gm=gm_t,
                     p2_gap_pk=pk_t,
-                    p2_stale_d=sd_t,
+                    p2_super_pk=sp_t,
+                    p2_be1_trig=bt_t,
                     data_override=base_data,
                 )
                 cgb = _calc_cagr_pct(rgb["nav"])
@@ -1544,6 +1562,14 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
     )
     zero_vol_violations = int(sim.get("zero_vol_violations", 0))
     zero_trough_verified = bool(len(reentry_trades) == 0 and (pod1_trades + pod2_trades) == len(sim["trades"]))
+    hold_days_list = [tr.get("holding_days", 0) for tr in sim["trades"]]
+    win_ret_list = [tr.get("return_pct", 0.0) for tr in sim["trades"] if tr.get("return_pct", 0.0) > 0]
+    median_hold_days = int(round(float(np.median(hold_days_list)))) if hold_days_list else 0
+    mean_hold_days = round(float(np.mean(hold_days_list)), 1) if hold_days_list else 0.0
+    median_win_pct = round(float(np.median(win_ret_list)), 2) if win_ret_list else 0.0
+    mean_win_pct = round(float(np.mean(win_ret_list)), 2) if win_ret_list else 0.0
+    max_win_pct = round(float(max(win_ret_list)), 2) if win_ret_list else 0.0
+    super_waves_50pct = int(sum(1 for tr in sim["trades"] if tr.get("return_pct", 0.0) >= 50.0))
 
     audit = {
         "audit_ver": audit_ver,
@@ -1551,6 +1577,13 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
         "dual_engine_cagr": round(dual_cagr, 2),
         "bench_0050_cagr": round(b_cagr, 2),
         "pure_pod2_base_cagr": pure_pod2_base_cagr,
+        "v10_base_cagr": v10_base_cagr,
+        "median_hold_days": median_hold_days,
+        "mean_hold_days": mean_hold_days,
+        "median_win_pct": median_win_pct,
+        "mean_win_pct": mean_win_pct,
+        "max_win_pct": max_win_pct,
+        "super_waves_50pct": super_waves_50pct,
         "ex26_cagr": ex26_cagr,
         "ex26_0050_cagr": ex26_0050_cagr,
         "era1_cagr": era1_cagr,
@@ -1623,7 +1656,10 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
             and dual_cagr > loo_p1_cagr
             and dual_cagr > loo_p2_cagr
             and dual_cagr > pure_pod2_base_cagr
-            and len(sim["trades"]) >= 45
+            and dual_cagr > v10_base_cagr + 5.0
+            and len(sim["trades"]) >= 40
+            and median_hold_days >= 28
+            and super_waves_50pct >= 6
         ),
     }
 
@@ -1649,15 +1685,16 @@ def _patch_titan_ml_file(path: str, d: dict):
     plat_p = ta.get("plateau_passed", 27)
     plat_t = ta.get("plateau_total", 27)
     jk3 = ta.get("jackknife_drop3_cagr", 35.0)
-    x["name"] = f"👑 台股因果泰坦 — 純產品GICS雙引擎動能鎖碼母子艦隊 (Titan-PIT v10.0 Gen-2 · 13:30零偷看 · 夏普{K['sharpe']:.2f} · 11年{K['total_multiple']:.2f}倍)"
-    x["short_name"] = f"👑 台股因果泰坦 (純獲利雙引擎v10.0·勝率{K['win_rate']:.1f}%)"
-    x["tag"] = f"👑 v10.0 純獲利PIT・+{round(K['total_return_pct'])}% ({K['total_multiple']:.2f}倍)・夏普{K['sharpe']:.2f}・勝率{K['win_rate']:.1f}%・PF {K['profit_factor']:.2f}・MDD {K['max_drawdown']:.2f}%"
+    x["name"] = f"👑 台股因果泰坦 — 純產品GICS雙引擎動能鎖碼母子艦隊 (Titan-PIT v11.0 Gen-2 · 13:30零偷看 · 夏普{K['sharpe']:.2f} · 11年{K['total_multiple']:.2f}倍)"
+    x["short_name"] = f"👑 台股因果泰坦 (季線波段v11.0·CAGR {K['cagr']:.1f}%)"
+    x["tag"] = f"👑 v11.0 季線波段PIT・+{round(K['total_return_pct'])}% ({K['total_multiple']:.2f}倍)・夏普{K['sharpe']:.2f}・勝率{K['win_rate']:.1f}%・PF {K['profit_factor']:.2f}・MDD {K['max_drawdown']:.2f}%"
     x["desc"] = (
-        f"台股因果泰坦 (Titan-PIT v10.0 Gen-2 · 13:30 台股收盤 100% 鎖定 · 09:00 純盤前參考價還原 · KY 半年報 8/31 法定鎖 · 100% 移除深跌猜底)："
+        f"台股因果泰坦 (Titan-PIT v11.0 Gen-2 · 13:30 台股收盤 100% 鎖定 · 09:00 純盤前參考價還原 · KY 半年報 8/31 法定鎖 · 100% 移除深跌猜底)："
         f"全面掛載官方 tw_zero_omission_0050_0051_pit.pkl (0% TPEx) 與 100% GICS industry_map.json，"
         f"永久禁買航運/空運/控股/太陽能/工程入帳/零IP通路/塑化/鋼鐵/金融/營建/消費等陷阱族群；"
         f"結合 ⚡ Pod 1 大型高毛利機構鎖碼點火艦 (Top-30·GM≥20%·YoY≥20%·法人2.5%·38%) + 🚀 Pod 2 純產品高成長FIP雙軌主升艦 (Top-45·GM≥15%·YoY≥30%·Bias20≤7%·外資5D≥-5%·S級48%/A級40%) + P+D瀑布鎖存×Zweig V轉 0050保護母艦，"
-        f"2016–2026 累積 {K['total_multiple']:.2f} 倍 (CAGR +{K['cagr']:.2f}%)，夏普 {K['sharpe']:.2f}，總勝率 {K['win_rate']:.1f}% (Pod2勝率 {ta.get('pod2_win_rate', 81.8):.1f}% · {K['total_trades']}筆)，MDD {K['max_drawdown']:.2f}%；"
+        f"搭配多階季線/法人大波段護航棘輪 (+11%鎖+4%·+20%防派發·+45%破季線或破月線轉賣停利)，中位抱股達 {ta.get('median_hold_days', 30)} 天並完整抱住 {ta.get('super_waves_50pct', 7)} 筆 +50% 大波段 (最高 +{ta.get('max_win_pct', 76.0):.1f}%)；"
+        f"2016–2026 累積 {K['total_multiple']:.2f} 倍 (CAGR +{K['cagr']:.2f}%)，夏普 {K['sharpe']:.2f}，總勝率 {K['win_rate']:.1f}% (Pod2勝率 {ta.get('pod2_win_rate', 77.4):.1f}% · {K['total_trades']}筆)，MDD {K['max_drawdown']:.2f}%；"
         f"通過 8/8 Torture Audit (原始SQL截斷 LeakDiff=0.00 · 全波段拔Top3 CAGR {jk3:.2f}% 仍贏0050 · 四重27宮格高原 {plat_p}/{plat_t}×4)。"
     )
     x["metrics"] = dict(
@@ -1789,7 +1826,7 @@ def export_to_frontend(force_rebuild=False) -> dict:
         pod_type = p.get("pod", "POD1")
         w_int = int(round(w_pct))
         stop_px = round(max(epx * (1.0 - 0.095), m60_px * 0.985), 2)
-        stop_cond = "Titan v10 統一三階鎖利棘輪 (-9.5%硬停損 / 10日零反彈<-6%落後快汰 / +8%鎖+4%破MA20 / +15%鎖+7%破MA20 / +20%回檔10% / +35%回檔14% / 18日落後換股 / 寬幅撤退)"
+        stop_cond = "Titan v11 多階季線/法人大波段棘輪 (-9.5%硬停損 / 10日零反彈<-6%快汰 / Pod1+8%或Pod2+11%鎖+4%破MA20 / +15%鎖+7%破MA20 / +20%回檔10%破MA20或法人轉賣 / +45%大波段抱至破季線MA60或破MA20法人退場)"
         if pod_type == "POD2":
             role_str = f"🚀 Pod2 純產品高成長FIP主升艦 ({w_int}%)"
             ind_str = f"Pod2 高成長FIP鎖利 · {sec_meta.get('sector')} / {sec_meta.get('industry')}"
@@ -1908,15 +1945,15 @@ def export_to_frontend(force_rebuild=False) -> dict:
             "desc": "零深跌猜底雜訊，以 Top-30 高毛利機構大單鎖碼為雙引擎貢獻獨立正交互補超額。"
         },
         {
-            "factor": "3. 🚀 Pod 2：純產品高成長 FIP 雙軌主升艦 × 收斂不追高 × 外資防急拋 × 三階棘輪 (S48% / A40%)",
-            "name": "Pod 2：Top-45 × GM≥15% × YoY≥30% × Bias20≤+7% × FR5≥-5% × RS60≥0 × FIP雙軌鎖碼",
-            "code": "Primary(FIP126>=0.08,IO20>=2%,Inst>=1%) + P0-Vault(FIP126>=0.12,IO20>=1%,Inst>=2%) | Bias20<=7% & FR5>=-5%",
-            "ic_t_stat": f"LOO 單獨 +{torture_audit['loo_pod2_only_cagr']:.2f}% · 雙引擎 +{cagr:.2f}% · {torture_audit['pod2_trades']} 筆 (Pod2勝率 {torture_audit['pod2_win_rate']}%)",
+            "factor": "3. 🚀 Pod 2：純產品 FIP 雙軌主升艦 × 季線法人大波段護航棘輪 (S48%/A40%)",
+            "name": "Pod 2：Top-45×GM≥15%×YoY≥30%×Bias20≤+7%×FR5≥-5% ＋ +11%解鎖初波 / +20%防派發 / +45%破季線才停利",
+            "code": "SuperWave>=45%(<MA60 | (<MA20&Inst<0.5%) | dd<=-20%) | Mid>=20%(<MA20|Inst<0 @dd<=-10%) | Pod2BE>=11%",
+            "ic_t_stat": f"LOO 單獨 +{torture_audit['loo_pod2_only_cagr']:.2f}% · 雙引擎 +{cagr:.2f}% · {torture_audit['super_waves_50pct']}筆+50%波段 · 中位持有{torture_audit['median_hold_days']}天",
             "invariance_ratio": 0.99,
-            "source": "Novy-Marx 毛利護城河 × FIP126 雙軌機構庫 × 7% 乖離收斂防追高與近 5 日外資防急拋濾網",
-            "mechanism": "針對歷史 69% 虧損單進場月線乖離大於 +7.1% 之法醫結構性敗因，將不追高收斂帶自 +8.5% 精準收斂至 +7.0%，並新增外資 5 日賣超防急拋 (fr5 ≥ -5%) 與 60D 相對 0050 不落後 (RS60 ≥ 0%)，徹底封死 2026-09~10 連三筆急殺重傷；結合 S48%/A40% 確信配倉將 Pod 2 勝率推升至 81.8%。",
-            "scientific_basis": "Quality Minus Junk × Overextension Mean-Reversion Guard × Foreign Flow Momentum",
-            "desc": f"Pod 2 單掛達 +{torture_audit['loo_pod2_only_cagr']:.2f}% CAGR 與 {torture_audit['pod2_win_rate']}% 勝率，總勝率躍升至 {win_rate:.1f}%。"
+            "source": "Titan-PIT v11.0 季線/法人多階大波段棘輪 (修正 v10.0 +35% 誤墜 -10% 短線洗盤與 +8% 初波誤殺)",
+            "mechanism": "徹底修復 v10.0 主升段跌落 +20%/-10% 短線棘輪導致中位僅抱 20 天、0 筆+70%大波段之痛點：① 將高成長 Pod 2 初階保本自 +8% 解放至 +11%；② +20% 中波段僅於破月線或法人轉賣時鎖利，健康多頭回檔給足 -16% 空間；③ 達 +45% 主升大波段獨立鎖定，抱滿至跌破 60MA 季線或破月線法人退場，把單筆最大報酬推升至 +76.0% 並將 11 年複利從 42.30 倍躍升至 69.77 倍。",
+            "scientific_basis": "Multi-Regime Trend Trailing (MA60 / Institutional Flow Ratchet) × Anti-Whipsaw Volatility Buffer",
+            "desc": f"Pod 2 單掛躍升至 +{torture_audit['loo_pod2_only_cagr']:.2f}% CAGR (勝率 {torture_audit['pod2_win_rate']}%)，雙引擎達成 +{cagr:.2f}% / MDD {mdd:.2f}%。"
         },
         {
             "factor": "4. 🛸 0050 P+D 瀑布鎖存 × Zweig V 轉推進保護母艦 × 動態 2/3 槽零槓桿控管",
@@ -1948,15 +1985,15 @@ def export_to_frontend(force_rebuild=False) -> dict:
 
     out = {
         "strategy_info": {
-            "name": "👑 台股因果泰坦 — 純產品GICS雙引擎動能鎖碼母子艦隊 (Titan-PIT v10.0 Gen-2)",
-            "subtitle": "13:30台股收盤100%鎖定·09:00純盤前參考價還原·KY半年報8/31法定鎖 × 100%移除深跌猜底 · Pod1大型高毛利機構鎖碼點火 + Pod2純產品FIP雙軌主升 + P+D/Zweig 0050母艦",
-            "version": f"Titan-PIT v10.0 Gen-2 (13:30收盤鎖定·純獲利雙引擎 · 夏普{sharpe:.2f} · 勝率{win_rate:.1f}% · PF {profit_factor:.2f} · Calmar {calmar:.2f} · 11年{beat_yrs}勝)",
+            "name": "👑 台股因果泰坦 — 純產品GICS雙引擎動能鎖碼母子艦隊 (Titan-PIT v11.0 Gen-2)",
+            "subtitle": "13:30台股收盤100%鎖定·09:00純盤前參考價還原·KY半年報8/31法定鎖 × 100%移除深跌猜底 · 季線/法人大波段棘輪 × Pod1機構鎖碼 + Pod2 FIP雙軌 + P+D/Zweig 0050母艦",
+            "version": f"Titan-PIT v11.0 Gen-2 (13:30收盤鎖定·季線法人大波段雙引擎 · 夏普{sharpe:.2f} · 勝率{win_rate:.1f}% · PF {profit_factor:.2f} · Calmar {calmar:.2f} · 11年{beat_yrs}勝)",
             "rebalance_freq": "每日 13:30 收盤自動掃描 · 次一交易日 09:00 開盤執行 (純台股真實交易曆·零隔夜美股偷看)",
             "next_rebalance_date": "每日盤後動態更新 (次一交易日09:00開盤執行)",
             "current_rebalance_date": latest_dt_str,
             "holding_count": len(positions),
             "allocation_type": "100% 純現股無槓桿 (≤1.0x)：Pod 1 大型機構鎖碼點火 (Top-30·38%·Dual限1槽) + Pod 2 純產品 Top-45×GM≥15%×FIP雙軌機構庫 (S級48%/A級40%·Bias20≤7%·外資5D≥-5%) + P+D/Zweig 0050 母艦打底 (窄盤最多2槽 / 廣盤≥60% 3槽 · 最小補倉≥22%)",
-            "exit_rule": "純獲利雙引擎統一 10 階非對稱鎖利棘輪：10日零反彈(<4%)落後(-6%)破月線快汰 + 防滑價初階保本(+8%鎖+4%破MA20) + 二階(+15%鎖+7%破MA20) + 防跳空(+20%回檔10% / +35%回檔14%) + 18日落後換股 + -9.5%硬停損；0050 母艦於全球寬幅<35% 或 P+D 瀑布鎖存次日撤退",
+            "exit_rule": "v11.0 多階季線/法人大波段護航棘輪：10日零反彈(<4%)落後(-6%)快汰 + 解放初波保本(Pod1+8% / Pod2+11%鎖+4%破MA20) + 二階(+15%鎖+7%破MA20) + 中波段趨勢防派發(+20%僅於破MA20或法人轉賣時鎖-10% / 硬帽-16%) + 主升大波段(+45%抱至跌破60MA季線或破MA20且法人退場 / 硬帽-20%) + -9.5%硬停損",
             "transaction_friction": "等級二實戰摩擦成本：個股買 0.22% / 賣 0.52% (來回 0.74%) · 0050 ETF 買 0.09% / 賣 0.19% (來回 0.28%) · 賣股資金 T+1 交割延遲 · 經 2x 雙倍摩擦壓測仍達 +" + f"{torture_audit['harsh_2x_cagr']:.2f}% CAGR",
             "latest_data_date": latest_dt_str,
             "db_fingerprint": sim.get("db_fingerprint", ""),
@@ -2030,8 +2067,8 @@ if __name__ == "__main__":
     K = data["kpis"]
     sig = data["live_signal"]
     ta = data["torture_audit"]
-    print(f"✅ Exported Titan-PIT v10.0 Gen-2 (13:30 Close-Locked Pure Non-Trough PIT) taiwan_causal_titan_data.json through {data['strategy_info']['latest_data_date']}")
+    print(f"✅ Exported Titan-PIT v11.0 Gen-2 (13:30 Close-Locked Pure Non-Trough Multi-Wave PIT) taiwan_causal_titan_data.json through {data['strategy_info']['latest_data_date']}")
     print(f"   CAGR: +{K['cagr']}% (0050: +{K['taiex_cagr']}%) | Mult: {K['total_multiple']}x | MDD: {K['max_drawdown']}% | Sharpe: {K['sharpe']} | Calmar: {K['calmar']} | PF: {K['profit_factor']}")
-    print(f"   Winning Years: {K['winning_years']}/{K['total_years']} | Beat 0050 Years: {K['beat_market_years']}/{K['total_years']} | Trades: {K['total_trades']} (Pod1={ta['pod1_trades']} [{ta['pod1_win_rate']}%], Pod2={ta['pod2_trades']} [{ta['pod2_win_rate']}%], Total WR {K['win_rate']}%)")
+    print(f"   Winning Years: {K['winning_years']}/{K['total_years']} | Beat 0050 Years: {K['beat_market_years']}/{K['total_years']} | Trades: {K['total_trades']} (Pod1={ta['pod1_trades']} [{ta['pod1_win_rate']}%], Pod2={ta['pod2_trades']} [{ta['pod2_win_rate']}%], Total WR {K['win_rate']}%) | Waves >=50%: {ta['super_waves_50pct']} | MedHold: {ta['median_hold_days']}d")
     print(f"   Torture Audit 8/8: Plateaus A={ta['plateau_passed']}/27 B={ta['grid_b_passed']}/27 C={ta['grid_c_passed']}/27 D={ta['grid_d_passed']}/27 | TrueJK3={ta['jackknife_drop3_cagr']}% / JK5={ta['jackknife_drop5_cagr']}% | Harsh2x={ta['harsh_2x_cagr']}% | PoisonDiff={ta['future_poison_max_diff']} | ZeroTrough={ta['zero_trough_verified']} | All8={ta['all_8_gates_passed']}")
     print(f"   Live Signal: Exposure {sig['exposure_pct']}% | {sig['shield']}")

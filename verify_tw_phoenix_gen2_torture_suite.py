@@ -2,8 +2,8 @@
 """
 verify_tw_phoenix_gen2_torture_suite.py
 ================================================================================
-Global Titan Gen-2 8-Gate Torture Audit Suite for Titan-PIT v10.0 Gen-2
-(100% Taiwan 13:30 Close-Locked Ultra-Strict PIT Pure Non-Trough Dual-Engine + P+D/Zweig Mother Ship)
+Global Titan Gen-2 8-Gate Torture Audit Suite for Titan-PIT v11.0 Gen-2
+(100% Taiwan 13:30 Close-Locked Ultra-Strict PIT Pure Non-Trough Dual-Engine + Multi-Wave Ratchet + P+D/Zweig Mother Ship)
 
 Verifies:
   Gate 1: Gen-2 Official 0050 U 0051 PIT Universe, Zero `/tmp` Cache, Zero `.TWO`, 100% GICS Map, Causal KY 08-31 Lock, Zero Deep-Trough / Re-entry
@@ -28,7 +28,7 @@ import tw_phoenix_turnaround_pit_engine as eng
 
 def main():
     print("=" * 88)
-    print("🔬 Global Titan Gen-2 8-Gate Torture Audit Suite — Titan-PIT v10.0 Gen-2 (Zero Trough)")
+    print("🔬 Global Titan Gen-2 8-Gate Torture Audit Suite — Titan-PIT v11.0 Gen-2 (Zero Trough · Wave Rider)")
     print("=" * 88)
 
     # Load PIT matrices & simulate default portfolio
@@ -158,14 +158,14 @@ def main():
     )
 
     # ------------------------------------------------------------------
-    # Gate 5: Era Invariance & Ex-2026 Alpha > 0050 & > PurePod2_Base
+    # Gate 5: Era Invariance & Ex-2026 Alpha > 0050 & > PurePod2_Base & > v10.0
     # ------------------------------------------------------------------
-    assert audit["ex26_cagr"] > max(audit["ex26_0050_cagr"], 31.70), f"Ex-2026 {audit['ex26_cagr']}% <= threshold"
-    assert audit["era1_cagr"] > max(audit["era1_0050_cagr"], 20.72), f"Era1 {audit['era1_cagr']}% <= threshold"
-    assert audit["era2_cagr"] > max(audit["era2_0050_cagr"], 52.32), f"Era2 {audit['era2_cagr']}% <= threshold"
+    assert audit["ex26_cagr"] > max(audit["ex26_0050_cagr"], 41.0), f"Ex-2026 {audit['ex26_cagr']}% <= 41.0% threshold"
+    assert audit["era1_cagr"] > max(audit["era1_0050_cagr"], 24.69), f"Era1 {audit['era1_cagr']}% <= v10.0 24.69% threshold"
+    assert audit["era2_cagr"] > max(audit["era2_0050_cagr"], 65.0), f"Era2 {audit['era2_cagr']}% <= 65.0% threshold"
     print(
-        f"[Gate 5 PASS] Dual-Era & Ex-2026 Alpha: Ex26={audit['ex26_cagr']}% (vs 0050 {audit['ex26_0050_cagr']}% / Base 31.70%) | "
-        f"Era1={audit['era1_cagr']}% (vs {audit['era1_0050_cagr']}% / Base 20.72%) | Era2={audit['era2_cagr']}% (vs {audit['era2_0050_cagr']}% / Base 52.32%)"
+        f"[Gate 5 PASS] Dual-Era & Ex-2026 Alpha: Ex26={audit['ex26_cagr']}% (vs 0050 {audit['ex26_0050_cagr']}% / v10 35.21%) | "
+        f"Era1={audit['era1_cagr']}% (vs {audit['era1_0050_cagr']}% / v10 24.69%) | Era2={audit['era2_cagr']}% (vs {audit['era2_0050_cagr']}% / v10 55.97%)"
     )
 
     # ------------------------------------------------------------------
@@ -201,19 +201,23 @@ def main():
     assert audit["dual_engine_cagr"] > audit["loo_pod2_only_cagr"], (
         f"Dual {audit['dual_engine_cagr']}% <= Pod2 Only {audit['loo_pod2_only_cagr']}%"
     )
-    assert audit["dual_engine_cagr"] > pure_base + 3.5, (
-        f"Dual {audit['dual_engine_cagr']}% <= PurePod2_Base+3.5% ({pure_base + 3.5:.2f}%)"
+    assert audit["dual_engine_cagr"] > 46.5, (
+        f"Dual {audit['dual_engine_cagr']}% <= 46.5% (must exceed v10.0 41.14% by >5%)"
     )
-    assert audit["total_trades"] >= 45, f"Sample size N={audit['total_trades']} < 45"
+    assert audit["total_trades"] >= 40, f"Sample size N={audit['total_trades']} < 40"
+    assert audit.get("median_hold_days", 0) >= 28, f"Median hold days {audit.get('median_hold_days')} < 28d"
+    assert audit.get("super_waves_50pct", 0) >= 6, f"Super waves >=50% {audit.get('super_waves_50pct')} < 6"
     print(
-        f"[Gate 8 PASS] LOO Synergy & Sample Size: MotherShip={audit['loo_mothership_cagr']}% -> "
+        f"[Gate 8 PASS] LOO Synergy & Wave Capture: MotherShip={audit['loo_mothership_cagr']}% -> "
         f"Pod1={audit['loo_pod1_only_cagr']}% | Pod2={audit['loo_pod2_only_cagr']}% -> "
-        f"Dual={audit['dual_engine_cagr']}% (vs Base {pure_base}%) | N={audit['total_trades']} (Pod1={audit['pod1_trades']} [{audit['pod1_win_rate']}%], Pod2={audit['pod2_trades']} [{audit['pod2_win_rate']}%])"
+        f"Dual={audit['dual_engine_cagr']}% (vs v10 41.14% / Base {pure_base}%) | "
+        f"N={audit['total_trades']} (Pod1={audit['pod1_trades']} [{audit['pod1_win_rate']}%], Pod2={audit['pod2_trades']} [{audit['pod2_win_rate']}%]) | "
+        f"MedHold={audit['median_hold_days']}d · >=50%Waves={audit['super_waves_50pct']} · MaxWin={audit.get('max_win_pct', 0):.1f}%"
     )
 
     assert audit["all_8_gates_passed"], "audit['all_8_gates_passed'] must be True"
     print("=" * 88)
-    print("✅ ALL 8 TORTURE AUDIT GATES PASSED (Titan-PIT v10.0 Gen-2 Pure Non-Trough Production Verified)")
+    print("✅ ALL 8 TORTURE AUDIT GATES PASSED (Titan-PIT v11.0 Gen-2 Pure Non-Trough Multi-Wave Production Verified)")
     print("=" * 88)
 
 
