@@ -3399,15 +3399,15 @@ def run_scheduled_pipeline():
             try:
                 import complementary_v3_service
                 complementary_v3_service.compute_complementary_v3_dashboard(force_rebuild=False, save_json=True)
-                print("[Scheduler Pipeline] 全球泰坦互補戰艦 V4 重倉版快照產出成功！")
+                print("[Scheduler Pipeline] 全球泰坦互補戰艦 V7 雙核堡壘版快照產出成功！")
             except Exception as e_v3:
-                print(f"[Scheduler Pipeline] 全球泰坦互補戰艦 V4 重倉版快照產出失敗: {e_v3}")
+                print(f"[Scheduler Pipeline] 全球泰坦互補戰艦 V7 雙核堡壘版快照產出失敗: {e_v3}")
             try:
                 import stock_sync
                 sb_c = stock_sync.get_supabase_conn()
                 stock_sync.sync_ml_cache(sb_c)
                 sb_c.close()
-                print("[Scheduler Pipeline] 全球泰坦與 V4 重倉版互補戰艦雲端 stock_ml_cache 自動同步成功！")
+                print("[Scheduler Pipeline] 全球泰坦與 V7 雙核堡壘版互補戰艦雲端 stock_ml_cache 自動同步成功！")
             except Exception as e_sb:
                 print(f"[Scheduler Pipeline] 雲端 stock_ml_cache 同步提醒: {e_sb}")
             print("[Scheduler Pipeline] 全球泰坦 G12-PIT 前端資料同步成功！")
@@ -4772,7 +4772,7 @@ def _ensure_comp_v3_portfolio_table(conn):
 @app.get("/api/complementary_v3/dashboard")
 @app.get("/api/complementary-v3/dashboard")
 def get_complementary_v3_dashboard(refresh: bool = False):
-    """全球泰坦互補戰艦 V4 重倉版看板：22Y 無空窗 0-day PIT 雙艙狙擊、即時報價與 8 道檢察官驗證"""
+    """全球泰坦互補戰艦 V7 雙核堡壘版看板：22Y 0-day PIT 雙核風險平價、週頻 19% 護欄、即時報價與 8 道檢察官驗證"""
     import importlib
     import complementary_v3_service
     try:
@@ -4802,7 +4802,7 @@ def get_complementary_v3_dashboard(refresh: bool = False):
 
 @app.get("/api/complementary_v3/portfolio")
 def get_complementary_v3_portfolio(username: str = "hotpotlu"):
-    """讀取使用者於全球泰坦互補戰艦 V4 重倉版之實戰交易流水帳與匯率設定"""
+    """讀取使用者於全球泰坦互補戰艦 V7 雙核堡壘版之實戰交易流水帳與匯率設定"""
     conn = get_db_connection()
     try:
         _ensure_comp_v3_portfolio_table(conn)
@@ -4826,7 +4826,7 @@ def get_complementary_v3_portfolio(username: str = "hotpotlu"):
 
 @app.post("/api/complementary_v3/portfolio")
 def save_complementary_v3_portfolio(payload: dict = Body(...)):
-    """儲存使用者於全球泰坦互補戰艦 V4 重倉版之實戰交易流水帳"""
+    """儲存使用者於全球泰坦互補戰艦 V7 雙核堡壘版之實戰交易流水帳"""
     username = str(payload.get("username") or "hotpotlu").strip() or "hotpotlu"
     usd_fx = float(payload.get("usd_fx") or 32.5)
     tx_history = json.dumps(payload.get("tx_history") or [], ensure_ascii=False)

@@ -22,7 +22,7 @@ const TEMPLATE_INIT_TX = {
   date: '2026-01-02',
   action: '投入現金',
   ticker: '-',
-  name: 'V4 重倉雙艙互補初始本金',
+  name: 'V7 雙核堡壘互補初始本金',
   currency: 'TWD',
   shares: 0,
   price: 0,
@@ -30,7 +30,7 @@ const TEMPLATE_INIT_TX = {
   cash_flow_twd: 1000000,
   realized_pnl_twd: null,
   realized_return_pct: null,
-  note: '全球泰坦互補戰艦 V4 重倉雙艙版初始入金 NT$ 1,000,000（可在上方隨時存入或調整本金）',
+  note: '全球泰坦互補戰艦 V7 雙核堡壘版初始入金 NT$ 1,000,000（可在上方隨時存入或調整本金）',
 };
 
 const fmtNum = (n, d = 2) => {
@@ -94,10 +94,10 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
   // Navigation & View States
-  const [engineLens, setEngineLens] = useState('v3_core'); // 'v3_core' | 'v3_champ' | 'barbell_50'
-  const [stationView, setStationView] = useState('all'); // 'all' | 'tranche_a' | 'tranche_b' | 'tranche_c'
+  const [engineLens, setEngineLens] = useState('v3_core'); // 'v3_core' | 'v7_cochamp' | 'v3_champ' | 'barbell_50'
+  const [stationView, setStationView] = useState('all'); // 'all' | 'pod_a_a' | 'pod_a_b' | 'pod_a_c' | 'pod_b_odd' | 'pod_b_even'
   const [picksTab, setPicksTab] = useState('tranches'); // 'tranches' | 'merged' | 'watchlist'
-  const [prosecutorTab, setProsecutorTab] = useState('grid27'); // 'gate0' | 'loop1' | 'loo' | 'phase' | 'grid27' | 'harsh_jk'
+  const [prosecutorTab, setProsecutorTab] = useState('grid27'); // 'grid27' | 'gate0' | 'loop1' | 'loo' | 'phase' | 'harsh_jk'
 
   // Equity Chart States
   const [chartWindow, setChartWindow] = useState('2010'); // '2010' | '2005' | '5y' | '2022' | '2020' | '2008'
@@ -135,7 +135,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       return [];
     }
   });
-  const [rebalMode, setRebalMode] = useState('full_100'); // 'full_100' | 'tranche_a' | 'tranche_b' | 'tranche_c'
+  const [rebalMode, setRebalMode] = useState('full_100'); // 'full_100' | sub_tranche key
   const [customEdits, setCustomEdits] = useState({});
   const [cashModalOpen, setCashModalOpen] = useState(false);
   const [cashAction, setCashAction] = useState('deposit');
@@ -148,7 +148,6 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
     setTimeout(() => setFeedbackMsg(''), 4500);
   };
 
-  // Persist user ledger locally + to local FastAPI when connected
   useEffect(() => {
     try {
       localStorage.setItem(keys.tx, JSON.stringify(txHistory));
@@ -197,7 +196,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
   const { idleCash, userPositions } = useMemo(() => {
     let cash = 0;
     const posMap = {};
-    const ordered = [...txHistory].reverse(); // process chronological oldest -> newest
+    const ordered = [...txHistory].reverse();
     for (const tx of ordered) {
       cash += Number(tx.cash_flow_twd || 0);
       const act = tx.action;
@@ -272,48 +271,71 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
   const totalNetProfitPct = totalInvestedPrincipal > 0 ? (totalNetProfitTwd / totalInvestedPrincipal) * 100 : 0;
   const userExposurePct = totalNetAssetsTwd > 0 ? (totalMarketValueTwd / totalNetAssetsTwd) * 100 : 0;
 
-  // Tranches Data
+  // Sub-Tranches (V7: 3 PodA quarterly + 2 PodB bi-monthly)
   const tranches = data?.official_active_tranches || {};
-  const trA = tranches.tranche_a || {};
-  const trB = tranches.tranche_b || {};
-  const trC = tranches.tranche_c || {};
-  const mergedHoldings = data?.merged_active_holdings || [];
+  const subTranches = useMemo(() => {
+    if (Array.isArray(tranches.sub_tranches) && tranches.sub_tranches.length > 0) {
+      return tranches.sub_tranches;
+    }
+    return ['tranche_a', 'tranche_b', 'tranche_c']
+      .map((k) => tranches[k])
+      .filter((x) => x && Array.isArray(x.picks));
+  }, [tranches]);
 
-  // Determine next upcoming rebalance across A/B/C
+  const mergedHoldings = data?.merged_active_holdings || [];
+  const activeSummary = data?.active_portfolio_summary || {};
+
+  // Next upcoming rebalance across all 5 V7 sub-tranches
   const nextRebalCountdown = useMemo(() => {
-    const todayStr = data?.latest_tw_date || data?.latest_data_date || '2026-11-18';
-    const cands = [
-      { id: 'A', label: '🅰️ A梯隊 (1/4/7/10)', next: trA.next_rebal_date },
-      { id: 'B', label: '🅱️ B梯隊 (2/5/8/11)', next: trB.next_rebal_date },
-      { id: 'C', label: '🅲 C梯隊 (3/6/9/12)', next: trC.next_rebal_date },
-    ]
-      .filter((x) => x.next && x.next !== '待排程')
-      .map((x) => ({ ...x, days: daysBetween(todayStr, x.next) ?? 999 }))
+    const todayStr = data?.latest_tw_date || data?.latest_us_date || data?.latest_data_date || '2026-11-18';
+    const cands = subTranches
+      .filter((st) => st.next_rebal_date && st.next_rebal_date !== '待排程')
+      .map((st) => ({
+        id: st.tranche_id,
+        label: st.short_label || st.tranche_name,
+        next: st.next_rebal_date,
+        sharePct: Number(st.capital_share_pct || 20),
+        days: daysBetween(todayStr, st.next_rebal_date) ?? 999,
+      }))
       .sort((a, b) => a.days - b.days);
-    return cands[0] || { label: '🅲 C梯隊', next: '2026-12-01', days: 13 };
-  }, [trA, trB, trC, data]);
+    if (cands.length === 0) {
+      return { label: 'PodA::C + PodB::Even', next: '2026-12-01', days: 12, sharePct: 41.3 };
+    }
+    const minDays = cands[0].days;
+    const dueSameDay = cands.filter((c) => c.days === minDays);
+    return {
+      label: dueSameDay.map((c) => c.label).join(' + '),
+      next: dueSameDay[0].next,
+      days: minDays,
+      sharePct: Math.round(dueSameDay.reduce((s, c) => s + c.sharePct, 0) * 10) / 10,
+    };
+  }, [subTranches, data]);
 
   // Follow-Trade Rebalance Suggestions Engine
+  const selectedSubTranche = useMemo(
+    () => subTranches.find((st) => st.tranche_id === rebalMode) || null,
+    [subTranches, rebalMode]
+  );
+
   const targetPicksForCalc = useMemo(() => {
-    if (rebalMode === 'tranche_a') {
-      return (trA.picks || []).map((p) => ({ ...p, calcWeightPct: p.tranche_weight_pct }));
-    }
-    if (rebalMode === 'tranche_b') {
-      return (trB.picks || []).map((p) => ({ ...p, calcWeightPct: p.tranche_weight_pct }));
-    }
-    if (rebalMode === 'tranche_c') {
-      return (trC.picks || []).map((p) => ({ ...p, calcWeightPct: p.tranche_weight_pct }));
+    if (selectedSubTranche) {
+      return (selectedSubTranche.picks || []).map((p) => ({
+        ...p,
+        calcWeightPct: p.tranche_weight_pct,
+      }));
     }
     return mergedHoldings.map((m) => ({
       ...m,
-      calcWeightPct: m.total_weight_pct,
+      calcWeightPct: m.actual_mtm_weight_pct ?? m.total_weight_pct,
       current_price: m.current_price,
     }));
-  }, [rebalMode, trA, trB, trC, mergedHoldings]);
+  }, [selectedSubTranche, mergedHoldings]);
 
   const rebalanceSuggestions = useMemo(() => {
     if (totalNetAssetsTwd <= 0) return [];
-    const capitalBaseTwd = rebalMode === 'full_100' ? totalNetAssetsTwd : totalNetAssetsTwd / 3.0;
+    const capitalBaseTwd = selectedSubTranche
+      ? totalNetAssetsTwd * (Number(selectedSubTranche.capital_share_pct || 20) / 100.0)
+      : totalNetAssetsTwd;
     const heldByTk = {};
     userPositions.forEach((p) => {
       heldByTk[p.ticker] = p;
@@ -381,7 +403,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       }
     }
     return list;
-  }, [targetPicksForCalc, userPositions, totalNetAssetsTwd, rebalMode, usdFx, dismissedSuggestions, data]);
+  }, [targetPicksForCalc, selectedSubTranche, userPositions, totalNetAssetsTwd, rebalMode, usdFx, dismissedSuggestions, data]);
 
   const executeSuggestion = (sugg) => {
     const ed = customEdits[sugg.key] || {};
@@ -416,7 +438,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           cash_flow_twd: -Math.round(totalCostTwd),
           realized_pnl_twd: null,
           realized_return_pct: null,
-          note: `V3 ${rebalMode} ${sugg.action} ${shares} 股 (目標 ${sugg.targetWeightPct}%)`,
+          note: `V7 ${rebalMode} ${sugg.action} ${shares} 股 (目標 ${sugg.targetWeightPct}%)`,
         },
         ...prev,
       ]);
@@ -442,7 +464,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           cash_flow_twd: Math.round(netCashTwd),
           realized_pnl_twd: netPnlTwd,
           realized_return_pct: retPct,
-          note: `V3 ${rebalMode} ${sugg.action} ${shares} 股 (實現 ${fmtTwd(netPnlTwd)})`,
+          note: `V7 ${rebalMode} ${sugg.action} ${shares} 股 (實現 ${fmtTwd(netPnlTwd)})`,
         },
         ...prev,
       ]);
@@ -531,7 +553,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
     const startCutoffMap = {
       '2010': '2010-01-04',
       '2005': '2005-03-01',
-      '5y': '2021-11-16',
+      '5y': '2021-11-18',
       '2022': '2022-01-03',
       '2020': '2020-01-02',
       '2008': '2007-10-01',
@@ -542,7 +564,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
     if (sub.length < 5) return { points: [], minY: 0.8, maxY: 2.0 };
 
     const base = sub[0];
-    const seriesKeys = ['v3_core', 'v3_champ', 'v4_single', 'bb50_sa', 'bb70_q', 'spy', ...(chartShowTitan ? ['titan'] : [])];
+    const seriesKeys = ['v3_core', 'v7_cochamp', 'v3_champ', 'v4_single', 'bb50_sa', 'bb70_q', 'spy', ...(chartShowTitan ? ['titan'] : [])];
     const pts = sub.map((row) => {
       const out = { d: row.d };
       seriesKeys.forEach((k) => {
@@ -593,84 +615,110 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
   const core05 = kpis.v3_core?.era_2005_2026 || {};
   const coreG1 = kpis.v3_core?.g1_2005_2015 || {};
   const coreG2 = kpis.v3_core?.g2_2016_2026 || {};
+  const cochamp10 = kpis.v7_cochamp?.era_2010_2026 || {};
+  const cochampEx26 = kpis.v7_cochamp?.era_2010_2025_ex26 || {};
+  const cochamp05 = kpis.v7_cochamp?.era_2005_2026 || {};
+  const cochampG1 = kpis.v7_cochamp?.g1_2005_2015 || {};
+  const cochampG2 = kpis.v7_cochamp?.g2_2016_2026 || {};
   const champ10 = kpis.v3_champ?.era_2010_2026 || {};
+  const champEx26 = kpis.v3_champ?.era_2010_2025_ex26 || {};
   const champ05 = kpis.v3_champ?.era_2005_2026 || {};
   const champG1 = kpis.v3_champ?.g1_2005_2015 || {};
   const champG2 = kpis.v3_champ?.g2_2016_2026 || {};
-  const single10 = kpis.v4_single?.era_2010_2026 || {};
+  const v4Prev10 = kpis.v4_prev?.era_2010_2026 || {};
   const bb50sa = kpis.barbells?.bb50_sa?.era_2010_2026 || {};
   const bb50saEx26 = kpis.barbells?.bb50_sa?.era_2010_2025_ex26 || {};
   const bb50sa05 = kpis.barbells?.bb50_sa?.era_2005_2026 || {};
+  const bb50co = kpis.barbells?.bb50_co_sa?.era_2010_2026 || {};
   const bb70q = kpis.barbells?.bb70_q?.era_2010_2026 || {};
   const bb50Spy = kpis.barbells?.bb50_spy_sa?.era_2010_2026 || {};
   const bb50Spy05 = kpis.barbells?.bb50_spy_sa?.era_2005_2026 || {};
   const spy10 = kpis.spy?.era_2010_2026 || {};
   const pa = data?.prosecutor_audit || {};
+  const crashV7 = pa?.titan_crash_months?.sleeves?.V7_Dual_FortVal52_InfCat48_Cap15_Trim || {};
 
   const activeLensCards = useMemo(() => {
+    if (engineLens === 'v7_cochamp') {
+      return [
+        { lbl: 'V7_CoChampion 10–26 年化', val: `${cochamp10.cagr ?? 31.00}%`, sub: `${cochamp10.mult ?? 95.11}x ｜ Ex26 ${cochampEx26.cagr ?? 27.81}% (vs SPY ${spy10.cagr ?? 13.65}%)`, col: '#34D399' },
+        { lbl: '05–26 全22年 & G1/G2', val: `${cochamp05.cagr ?? 27.71}%`, sub: `${cochamp05.mult ?? 202.56}x ｜ G1 ${cochampG1.cagr ?? 17.97}% / G2 ${cochampG2.cagr ?? 38.47}%`, col: '#38BDF8' },
+        { lbl: '10–26 mMDD / dMDD', val: `${cochamp10.m_mdd ?? -16.21}% / ${cochamp10.d_mdd ?? -25.29}%`, sub: `50% PodA_FortVal + 50% PodB_InfCat (16.68% 封頂)`, col: '#FBBF24' },
+        { lbl: 'Sharpe / Sortino / Calmar', val: `${cochamp10.sharpe ?? 1.70} / ${cochamp10.sortino ?? 2.58} / ${cochamp10.calmar ?? 1.91}`, sub: `16/17 正報酬年 ｜ 2022 +0.83% ｜ 50/50 槓鈴 ${bb50co.cagr ?? 40.48}%`, col: '#A78BFA' },
+        { lbl: 'vs Titan 嚴格正交度', val: `ExSPY +${kpis.v7_cochamp?.corr_ex_spy_vs_titan ?? 0.113}`, sub: `每日重疊 ${kpis.v7_cochamp?.mean_weight_overlap_pct ?? 0.41}% ｜ MaxW ${kpis.v7_cochamp?.cur_max_single_stock_w_pct ?? 16.68}%`, col: '#6EE7B7' },
+      ];
+    }
     if (engineLens === 'v3_champ') {
       return [
-        { lbl: 'V4_SOV3 10–26 抗震年化', val: `${champ10.cagr ?? 23.30}%`, sub: `${champ10.mult ?? 34.22}x ｜ Ex26 ${kpis.v3_champ?.era_2010_2025_ex26?.cagr ?? 22.23}%`, col: '#34D399' },
-        { lbl: '05–26 全22年實股年化', val: `${champ05.cagr ?? 21.38}%`, sub: `${champ05.mult ?? 67.09}x ｜ G1 ${champG1.cagr ?? 16.04}% / G2 ${champG2.cagr ?? 27.09}%`, col: '#38BDF8' },
-        { lbl: '10–26 mMDD / dMDD', val: `${champ10.m_mdd ?? -18.62}% / ${champ10.d_mdd ?? -18.73}%`, sub: 'SOV3 sv=16% 下行半方差護盾', col: '#FBBF24' },
-        { lbl: 'Sharpe / Calmar', val: `${champ10.sharpe ?? 1.54} / ${champ10.calmar ?? 1.25}`, sub: `2008 -16.70% ｜ 2022 +2.14% (勝大盤 ${champ10.beat_spy ?? '14/17'}年)`, col: '#A78BFA' },
-        { lbl: 'vs Titan 獨立度 & 曝險', val: `ExSPY +0.129`, sub: `均值曝險 ${kpis.v3_champ?.avg_exposure_pct ?? 92.7}% ｜ 重疊 0.26%`, col: '#6EE7B7' },
+        { lbl: 'V7_SOV3 10–26 抗震年化', val: `${champ10.cagr ?? 27.07}%`, sub: `${champ10.mult ?? 56.92}x ｜ Ex26 ${champEx26.cagr ?? 25.25}%`, col: '#34D399' },
+        { lbl: '05–26 全22年實股年化', val: `${champ05.cagr ?? 24.39}%`, sub: `${champ05.mult ?? 114.42}x ｜ G1 ${champG1.cagr ?? 16.57}% / G2 ${champG2.cagr ?? 32.97}%`, col: '#38BDF8' },
+        { lbl: '10–26 mMDD / dMDD', val: `${champ10.m_mdd ?? -15.15}% / ${champ10.d_mdd ?? -18.32}%`, sub: 'SOV3 sv=16% 下行半方差護盾 (22Y mMDD -28.66%)', col: '#FBBF24' },
+        { lbl: 'Sharpe / Sortino / Calmar', val: `${champ10.sharpe ?? 1.70} / ${champ10.sortino ?? 2.60} / ${champ10.calmar ?? 1.79}`, sub: `2008 -19.77% ｜ 20Q1 -15.23% ｜ 2022 +2.21%`, col: '#A78BFA' },
+        { lbl: 'vs Titan 獨立度 & 曝險', val: `ExSPY +${champ10.cagr ? (kpis.v3_champ?.corr_ex_spy_vs_titan_10_26 ?? 0.103) : 0.103}`, sub: `均值曝險 ${kpis.v3_champ?.avg_exposure_pct ?? 92.9}% ｜ 0 檔重疊`, col: '#6EE7B7' },
       ];
     }
     if (engineLens === 'barbell_50') {
       return [
-        { lbl: '50/50 泰坦×V4 重倉 (SA)', val: `${bb50sa.cagr ?? 37.87}%`, sub: `${bb50sa.mult ?? 225.12}x ｜ Ex26 ${bb50saEx26.cagr ?? 33.61}% ｜ 70/30 Q 達 ${bb70q.cagr ?? 41.34}%`, col: '#F59E0B' },
-        { lbl: '05–26 全22年槓鈴年化', val: `${bb50sa05.cagr ?? 34.94}%`, sub: `mMDD ${bb50sa05.m_mdd ?? -18.88}% ｜ 同比例 Titan+SPY ${bb50Spy05.cagr ?? 28.69}%`, col: '#38BDF8' },
-        { lbl: '10–26 mMDD / dMDD', val: `${bb50sa.m_mdd ?? -12.65}% / ${bb50sa.d_mdd ?? -22.06}%`, sub: `遠勝 50/50 Titan+SPY (${bb50Spy.m_mdd ?? -14.32}% / ${bb50Spy.d_mdd ?? -27.70}%)`, col: '#34D399' },
-        { lbl: 'Sharpe / Calmar', val: `${bb50sa.sharpe ?? 1.72} / ${bb50sa.calmar ?? 2.99}`, sub: `2010–26 ${bb50sa.win_yrs ?? '17/17'} 零虧損年 ｜ 2022 +2.74%`, col: '#A78BFA' },
-        { lbl: '泰坦重挫月保護 (32次<-3%)', val: `96.9% 勝泰坦`, sub: `V4 單體均 -0.47% (vs SPY -1.99%) ｜ 0 檔重疊`, col: '#6EE7B7' },
+        { lbl: '50/50 泰坦×V7 槓鈴 (SA)', val: `${bb50sa.cagr ?? 40.26}%`, sub: `${bb50sa.mult ?? 298.89}x ｜ Ex26 ${bb50saEx26.cagr ?? 35.32}% ｜ 70/30 Q 達 ${bb70q.cagr ?? 42.61}%`, col: '#F59E0B' },
+        { lbl: '05–26 全22年槓鈴年化', val: `${bb50sa05.cagr ?? 36.87}%`, sub: `mMDD ${bb50sa05.m_mdd ?? -17.34}% ｜ 同比例 Titan+SPY ${bb50Spy05.cagr ?? 28.51}%`, col: '#38BDF8' },
+        { lbl: '10–26 mMDD / dMDD', val: `${bb50sa.m_mdd ?? -14.44}% / ${bb50sa.d_mdd ?? -24.21}%`, sub: `遠勝單跑 Titan (${kpis.titan_official?.era_2010_2026?.m_mdd ?? -24.64}%) 與 SPY (${bb50Spy.d_mdd ?? -27.70}%)`, col: '#34D399' },
+        { lbl: 'Sharpe / Calmar', val: `${bb50sa.sharpe ?? 1.80} / ${bb50sa.calmar ?? 2.79}`, sub: `2010–26 ${bb50sa.win_yrs ?? '17/17'} 零虧損年 ｜ 2022 正報酬收紅`, col: '#A78BFA' },
+        { lbl: '泰坦重挫月保護 (32次<-3%)', val: `${crashV7.pct_beat_titan ?? 90.6}% 勝泰坦`, sub: `V7 單體均 ${crashV7.mean_ret_pct ?? -0.41}% (正月率 ${crashV7.pct_positive ?? 50.0}% vs SPY -2.05%)`, col: '#6EE7B7' },
       ];
     }
     return [
-      { lbl: 'V4_Heavy 10–26 年化', val: `${core10.cagr ?? 26.14}%`, sub: `${core10.mult ?? 50.19}x ｜ Ex26 ${coreEx26.cagr ?? 24.36}% (vs SPY ${spy10.cagr ?? 13.79}%)`, col: '#34D399' },
-      { lbl: '05–26 全22年 & G1/G2', val: `${core05.cagr ?? 23.36}%`, sub: `${core05.mult ?? 95.47}x ｜ G1 ${coreG1.cagr ?? 16.51}% / G2 ${coreG2.cagr ?? 30.76}%`, col: '#38BDF8' },
-      { lbl: '10–26 mMDD / dMDD', val: `${core10.m_mdd ?? -23.89}% / ${core10.d_mdd ?? -23.94}%`, sub: `單艙純股 V4_Single: ${single10.cagr ?? 23.21}% (Shp ${single10.sharpe ?? 1.26})`, col: '#FBBF24' },
-      { lbl: 'Sharpe / Calmar', val: `${core10.sharpe ?? 1.50} / ${core10.calmar ?? 1.09}`, sub: `Sortino ${core10.sortino ?? 2.26} ｜ 勝大盤 ${core10.beat_spy ?? '14/17'} 年`, col: '#A78BFA' },
-      { lbl: 'vs Titan 嚴格正交度', val: `ExSPY +${kpis.v3_core?.corr_ex_spy_vs_titan ?? 0.123}`, sub: `每日重疊 ${kpis.v3_core?.mean_weight_overlap_pct ?? 0.26}% ｜ 當期 ${kpis.v3_core?.active_overlap_count ?? 0} 檔重疊`, col: '#6EE7B7' },
+      { lbl: 'V7_Champion 10–26 年化', val: `${core10.cagr ?? 30.53}%`, sub: `${core10.mult ?? 89.55}x ｜ Ex26 ${coreEx26.cagr ?? 27.56}% (較舊 V4 ${v4Prev10.cagr ?? 25.88}% 提升 +4.65%)`, col: '#34D399' },
+      { lbl: '05–26 全22年 & G1/G2', val: `${core05.cagr ?? 26.87}%`, sub: `${core05.mult ?? 175.72}x ｜ G1 ${coreG1.cagr ?? 17.00}% / G2 ${coreG2.cagr ?? 37.81}%`, col: '#38BDF8' },
+      { lbl: '10–26 mMDD / dMDD', val: `${core10.m_mdd ?? -14.96}% / ${core10.d_mdd ?? -26.17}%`, sub: `創歷代新低月回撤 (舊 V4 -23.89%) ｜ 單股最高 ${activeSummary.max_single_stock_mtm_pct ?? 16.69}%`, col: '#FBBF24' },
+      { lbl: 'Sharpe / Sortino / Calmar', val: `${core10.sharpe ?? 1.67} / ${core10.sortino ?? 2.53} / ${core10.calmar ?? 2.04}`, sub: `Calmar 突破 2.0 ｜ 16/17 勝年 (2022 +2.66%) ｜ 27/27 高原全過`, col: '#A78BFA' },
+      { lbl: 'vs Titan 嚴格正交度', val: `ExSPY +${kpis.v3_core?.corr_ex_spy_vs_titan ?? 0.098}`, sub: `每日重疊 ${kpis.v3_core?.mean_weight_overlap_pct ?? 0.40}% ｜ 當期 ${kpis.v3_core?.active_overlap_count ?? 0} 檔重疊`, col: '#6EE7B7' },
     ];
-  }, [engineLens, core10, coreEx26, core05, coreG1, coreG2, champ10, champ05, champG1, champG2, single10, bb50sa, bb50saEx26, bb50sa05, bb70q, bb50Spy, bb50Spy05, spy10, kpis]);
+  }, [
+    engineLens, core10, coreEx26, core05, coreG1, coreG2, cochamp10, cochampEx26, cochamp05, cochampG1, cochampG2,
+    champ10, champEx26, champ05, champG1, champG2, v4Prev10, bb50sa, bb50saEx26, bb50sa05, bb50co, bb70q,
+    bb50Spy, bb50Spy05, spy10, kpis, activeSummary, crashV7,
+  ]);
 
-  const renderTrancheCard = (tObj, accentColor) => {
+  const visibleSubTranches = useMemo(() => {
+    if (stationView === 'all') return subTranches;
+    return subTranches.filter((st) => st.tranche_id === stationView);
+  }, [subTranches, stationView]);
+
+  const renderTrancheCard = (tObj) => {
     const picks = tObj?.picks || [];
+    const accentColor = tObj.accent || (tObj.pod === 'PodA_FortVal' ? '#38BDF8' : '#A855F7');
     return (
-      <div className="glass-card" style={{ padding: '1rem', borderTop: `3px solid ${accentColor}`, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+      <div key={tObj.tranche_id} className="glass-card" style={{ padding: '1rem', borderTop: `3px solid ${accentColor}`, display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.4rem' }}>
           <div>
-            <div style={{ fontWeight: 'bold', fontSize: '0.98rem', color: accentColor }}>{tObj.tranche_name || '梯隊'}</div>
+            <div style={{ fontWeight: 'bold', fontSize: '0.96rem', color: accentColor }}>{tObj.tranche_name || '子梯隊'}</div>
             <div style={{ fontSize: '0.73rem', color: '#94A3B8', marginTop: '2px' }}>
               訊號日 <strong>{tObj.rebal_date}</strong> ➔ 進場 <strong>{tObj.entry_date}</strong> ｜ 下次換倉 <strong style={{ color: '#FDE047' }}>{tObj.next_rebal_date}</strong>
             </div>
           </div>
           <span style={{ fontSize: '0.72rem', background: 'rgba(16,185,129,0.16)', color: '#34D399', padding: '2px 8px', borderRadius: '99px', border: '1px solid rgba(16,185,129,0.35)', fontWeight: 'bold' }}>
-            {picks.length} 檔滿倉 ({tObj.exposure_pct || 100}%)
+            {picks.length} 檔滿倉 ({fmtNum(tObj.capital_share_pct, 1)}% 資金)
           </span>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+          <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
             <thead>
               <tr>
                 <th>#</th>
-                <th>標的 & 子艙來源</th>
+                <th>標的 & 狀態</th>
                 <th>板塊</th>
-                <th style={{ textAlign: 'right' }}>梯隊%</th>
-                <th style={{ textAlign: 'right' }}>總倉%</th>
+                <th style={{ textAlign: 'right' }}>梯內%</th>
+                <th style={{ textAlign: 'right' }}>進場總倉%</th>
                 <th style={{ textAlign: 'right' }}>進場開盤</th>
                 <th style={{ textAlign: 'right' }}>最新現價</th>
                 <th style={{ textAlign: 'right' }}>股價報酬</th>
-                <th style={{ textAlign: 'right' }}>合意/五柱Z</th>
+                <th style={{ textAlign: 'right' }}>合意 Z / 因子分項</th>
               </tr>
             </thead>
             <tbody>
               {picks.map((pk) => {
                 const isUp = Number(pk.price_ret_pct ?? pk.period_ret_pct) >= 0;
                 const retShow = pk.price_ret_pct ?? pk.period_ret_pct;
-                const podBadgeCol = String(pk.pod_tag || '').includes('共振') ? '#F59E0B' : String(pk.pod_tag || '').includes('PodA') ? '#38BDF8' : '#C084FC';
                 return (
                   <tr key={`${tObj.tranche_id}_${pk.ticker}`}>
                     <td>{pk.rank}</td>
@@ -684,9 +732,9 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
                             <span style={{ fontWeight: 'bold', color: pk.market === 'TW' ? '#FDE047' : '#93C5FD' }}>{pk.ticker}</span>
-                            {pk.pod_tag && (
-                              <span style={{ fontSize: '0.64rem', color: podBadgeCol, border: `1px solid ${podBadgeCol}55`, padding: '0 4px', borderRadius: '4px' }}>
-                                {pk.pod_tag}
+                            {pk.action && (
+                              <span style={{ fontSize: '0.63rem', color: '#94A3B8', border: '1px solid rgba(148,163,184,0.28)', padding: '0 4px', borderRadius: '4px' }}>
+                                {pk.action}
                               </span>
                             )}
                           </div>
@@ -704,7 +752,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                     </td>
                     <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.68rem', color: '#CBD5E1' }}>
                       <strong style={{ color: '#FDE047' }}>{fmtNum(pk.composite, 2)}</strong>
-                      <div style={{ color: '#64748B' }}>G{fmtNum(pk.z_grw, 1)} C{fmtNum(pk.z_cbop, 1)} A{fmtNum(pk.z_acq, 1)}</div>
+                      <div style={{ color: '#64748B' }}>G{fmtNum(pk.z_grw, 1)} C{fmtNum(pk.z_cbop, 1)} {tObj.pod === 'PodA_FortVal' ? `A${fmtNum(pk.z_acq, 1)}` : `Cat${fmtNum(pk.z_asym_cat, 1)}`}</div>
                     </td>
                   </tr>
                 );
@@ -743,12 +791,13 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(pt[k]).toFixed(1)}`).join(' ');
 
     const seriesMeta = [
-      { key: 'bb70_q', label: '70/30 泰坦×V4重倉 (Q)', color: '#F59E0B', width: 2.2 },
-      { key: 'bb50_sa', label: '50/50 泰坦×V4重倉 (SA)', color: '#38BDF8', width: 2.4 },
-      { key: 'v3_core', label: 'V4_Heavy 雙艙重倉 (26.14%)', color: '#34D399', width: 2.8 },
-      { key: 'v3_champ', label: 'V4_SOV3 抗震重倉 (23.30%)', color: '#A78BFA', width: 2.0 },
-      { key: 'v4_single', label: 'V4_Single 單艙重倉 (23.21%)', color: '#FBBF24', width: 1.7, dash: '2,2' },
-      { key: 'spy', label: 'SPY 大盤基準 (13.79%)', color: '#94A3B8', width: 1.5, dash: '4,4' },
+      { key: 'bb70_q', label: '70/30 泰坦×V7 (Q)', color: '#F59E0B', width: 2.2 },
+      { key: 'bb50_sa', label: '50/50 泰坦×V7 (40.26%)', color: '#38BDF8', width: 2.4 },
+      { key: 'v7_cochamp', label: 'V7_CoChamp (31.00%)', color: '#FDE047', width: 2.0, dash: '3,2' },
+      { key: 'v3_core', label: 'V7_Champion 旗艦 (30.53%)', color: '#34D399', width: 2.9 },
+      { key: 'v3_champ', label: 'V7_SOV3 抗震 (27.07%)', color: '#A78BFA', width: 2.0 },
+      { key: 'v4_single', label: '前代 V4_Heavy (25.88%)', color: '#FB7185', width: 1.6, dash: '2,2' },
+      { key: 'spy', label: 'SPY 大盤基準 (13.65%)', color: '#94A3B8', width: 1.5, dash: '4,4' },
       ...(chartShowTitan ? [{ key: 'titan', label: 'Global Titan R26-GOLD', color: '#F43F5E', width: 1.8, dash: '6,3' }] : []),
     ];
 
@@ -770,7 +819,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
 
     return (
       <div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem', fontSize: '0.76rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', fontSize: '0.75rem', marginBottom: '0.5rem', alignItems: 'center' }}>
           <span style={{ color: '#94A3B8' }}>日期：<strong style={{ color: '#F8FAFC' }}>{hoverPt?.d}</strong></span>
           {seriesMeta.map((s) => (
             <span key={s.key} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: s.color, fontWeight: 'bold' }}>
@@ -885,9 +934,10 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.35)', padding: '4px', borderRadius: '8px' }}>
             {[
-              { id: 'v3_core', label: `🚀 V4_Heavy 雙艙重倉旗艦 (${core10.cagr ?? 26.14}% / Shp ${core10.sharpe ?? 1.50})` },
-              { id: 'v3_champ', label: `🛡️ V4_SOV3 抗震降波重倉 (${champ10.cagr ?? 23.30}% / Shp ${champ10.sharpe ?? 1.54})` },
-              { id: 'barbell_50', label: `⚡ 50/50 泰坦×V4 重倉槓鈴 (${bb50sa.cagr ?? 37.87}% / Shp ${bb50sa.sharpe ?? 1.72})` },
+              { id: 'v3_core', label: `🚀 V7_Champion 雙核堡壘旗艦 (${core10.cagr ?? 30.53}% / Cal ${core10.calmar ?? 2.04})` },
+              { id: 'v7_cochamp', label: `🥈 V7_CoChampion 50/50 雙生 (${cochamp10.cagr ?? 31.00}% / Shp ${cochamp10.sharpe ?? 1.70})` },
+              { id: 'v3_champ', label: `🛡️ V7_SOV3 抗震護盾 (${champ10.cagr ?? 27.07}% / dMDD ${champ10.d_mdd ?? -18.32}%)` },
+              { id: 'barbell_50', label: `⚡ 50/50 泰坦×V7 槓鈴 (${bb50sa.cagr ?? 40.26}% / Shp ${bb50sa.sharpe ?? 1.80})` },
             ].map((l) => (
               <button
                 key={l.id}
@@ -897,7 +947,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                   border: 'none',
                   borderRadius: '6px',
                   padding: '0.34rem 0.75rem',
-                  fontSize: '0.77rem',
+                  fontSize: '0.76rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: engineLens === l.id ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent',
@@ -909,7 +959,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
             ))}
           </div>
           <div style={{ fontSize: '0.74rem', color: '#6EE7B7' }}>
-            ✅ Gen-2 守門員 B1~B5 稽核：{pa?.gatekeeper_b1_b5_report?.rebalance_periods_checked ?? 526} 期 / {pa?.gatekeeper_b1_b5_report?.total_picks_checked ?? 1578} 筆選股・0-day 嚴格 PIT 0 違規・0 異常值 ｜ 2018 投毒 0.00e+00
+            ✅ Gen-2 守門員 B1~B5 稽核：{pa?.gatekeeper_b1_b5_report?.rebalance_periods_checked ?? 526} 期 / {pa?.gatekeeper_b1_b5_report?.total_picks_checked ?? 1576} 筆選股・0-day 嚴格 PIT 0 違規・0 異常值 ｜ 2018 投毒 0.00e+00
           </div>
         </div>
 
@@ -951,13 +1001,13 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          2. 🧭 三梯隊季度錯峰時序導航與視角切換台
+          2. 🧭 V7 五子梯錯峰時序導航與「如何運作」白話解說
          ================================================================= */}
       <div className="glass-card" style={{ padding: '0.85rem 1.2rem', border: '1px solid rgba(56,189,248,0.28)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.65rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.76rem', color: '#FDE047', background: 'rgba(245,158,11,0.16)', border: '1px solid rgba(245,158,11,0.4)', padding: '0.26rem 0.65rem', borderRadius: '5px', fontWeight: 'bold' }}>
-              ⏳ 下次錯峰輪動：{nextRebalCountdown.label} ➔ {nextRebalCountdown.next}（倒數 {nextRebalCountdown.days} 天・每次僅輪動 1/3 資金）
+              ⏳ 下次錯峰輪動：{nextRebalCountdown.label} ➔ {nextRebalCountdown.next}（倒數 {nextRebalCountdown.days} 天・輪動約 {nextRebalCountdown.sharePct}% 資金）
             </span>
             <span style={{ fontSize: '0.75rem', color: '#A7F3D0', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', padding: '0.26rem 0.65rem', borderRadius: '5px' }}>
               🌐 與泰坦雙重隔離：PodA <strong>g5 &le; 90%</strong> / PodB <strong>g5 &le; 85%</strong> ＋ 剔除公用事業/REITs ＋ 當期 {data?.titan_active_tickers?.length ?? 5} 檔泰坦 <strong>0 檔重疊</strong>
@@ -966,10 +1016,13 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
 
           <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', padding: '3px', borderRadius: '7px', gap: '4px', flexWrap: 'wrap' }}>
             {[
-              { id: 'all', label: '🌐 三梯隊合流總覽', mode: 'full_100', col: '#10B981' },
-              { id: 'tranche_a', label: '🅰️ A梯 (1/4/7/10)', mode: 'tranche_a', col: '#0EA5E9' },
-              { id: 'tranche_b', label: '🅱️ B梯 (2/5/8/11)', mode: 'tranche_b', col: '#A855F7' },
-              { id: 'tranche_c', label: '🅲 C梯 (3/6/9/12)', mode: 'tranche_c', col: '#F59E0B' },
+              { id: 'all', label: '🌐 五梯合流總覽', mode: 'full_100', col: '#10B981' },
+              ...subTranches.map((st) => ({
+                id: st.tranche_id,
+                label: `${st.short_label} (${fmtNum(st.capital_share_pct, 1)}%)`,
+                mode: st.tranche_id,
+                col: st.accent || '#38BDF8',
+              })),
             ].map((st) => (
               <button
                 key={st.id}
@@ -978,8 +1031,8 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                 style={{
                   border: 'none',
                   borderRadius: '5px',
-                  padding: '0.3rem 0.7rem',
-                  fontSize: '0.76rem',
+                  padding: '0.3rem 0.65rem',
+                  fontSize: '0.74rem',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   background: stationView === st.id ? st.col : 'transparent',
@@ -992,31 +1045,31 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '0.55rem', fontSize: '0.73rem', color: '#CBD5E1', background: 'rgba(0,0,0,0.28)', padding: '0.5rem 0.8rem', borderRadius: '6px' }}>
-          <div><strong style={{ color: '#38BDF8' }}>① 50/50 雙艙對稱狙擊架構</strong>：50% <strong>PodA 深價值催化</strong> (30% ACQ＋30% CbOP＋25% GRW＋15% SHY) ＋ 50% <strong>PodB 營運拐點</strong> (45% GRW＋40% CbOP＋15% FIP)，每季再平衡賺取互補紅利。</div>
-          <div><strong style={{ color: '#34D399' }}>② `3美+3台` 精銳濃縮</strong>：砍掉第 5～12 名平庸稀釋尾端，PodA 選 <strong>2美1台</strong>、PodB 選 <strong>1美2台</strong>，美台對稱平衡（台股約 44.2%），實盤總持股濃縮至 ~11 檔（100% 滿倉無空窗）。</div>
-          <div><strong style={{ color: '#A78BFA' }}>③ 緩衝鎖倉 `1.67x` ＋ `RankInvSV`</strong>：單一板塊限 2 檔，舊持倉維持名次緩衝不頻繁換手；若強勢股同時獲兩艙三梯共振可自然放大至 ~20–32% 重倉（嚴控 2x 雙倍成本仍達 25.31%）。</div>
-          <div><strong style={{ color: '#FBBF24' }}>④ 22 年零異常逐筆 PIT 驗證</strong>：1,578 筆選股通過 Gen-2 B1~B5 ＋ 0-day Buffer 精確成分核對，G1 (2005–15) 年化 16.51%、G2 (2016–26) 年化 30.76%，非單時期奇蹟。</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(235px, 1fr))', gap: '0.55rem', fontSize: '0.73rem', color: '#CBD5E1', background: 'rgba(0,0,0,0.28)', padding: '0.55rem 0.85rem', borderRadius: '6px' }}>
+          <div><strong style={{ color: '#38BDF8' }}>① 去重雙核架構 (52% + 48%)</strong>：消滅 V6 雙價值艙重疊，合併為 <strong>PodA_FortVal</strong>（35% ACQ＋28% CbOP＋13% GRW＋12% SHY＋12% FCF 堡壘，季錯峰 2美1台）＋ <strong>PodB_InfCat</strong>（38% GRW＋34% CbOP＋15% 不對稱催化＋13% FIP，雙月交錯 1美2台）。</div>
+          <div><strong style={{ color: '#34D399' }}>② 跨市風險平價 &amp; 15% 封頂</strong>：用當日橫截面 <code>P7_MKT_NORM_SEMIVOL</code> 將美股與台股下行波動率對齊至同尺，消除隱性超配美股偏差；跨艙統一限制單股進場上限 <strong>15%</strong> ＋ 半年 &plusmn;45% 軟走廊。</div>
+          <div><strong style={{ color: '#A78BFA' }}>③ 不對稱轉折催化 (NW-t +5.05)</strong>：<code>P7_ASYM_CATALYST</code> 合流美股買回/OCF/PEAD 與台股季報營運加速，全池 Ex26 63D 利差 +1.93%，把 <code>Ex-2026</code> 年化從 V6 25.09% 拉升至 <strong>27.56%</strong> 且 ExSPY 壓低至 <strong>+0.098</strong>。</div>
+          <div><strong style={{ color: '#FBBF24' }}>④ 週頻 19% 護欄＋兄弟股再投資</strong>：每 5 交易日檢查 T-1 收盤若單股飆破 <strong>19.0%</strong>，隔日開盤自動收割回 <strong>16.2%</strong> 並將現金即時補買同艙未滿額兄弟股（例：鎖住 APP 於 16.69%，補買 2451.TW），零報酬損耗控管集中度。</div>
         </div>
       </div>
 
       {/* =================================================================
-          3. 🏛️ 當期官方三梯隊持倉 / 三隊合併總權重 / 候補雷達
+          3. 🏛️ 當期五子梯持倉 / 合流總權重 (`<=16.69%`) / 候補雷達
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.1rem', borderTop: '3px solid #38BDF8' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.8rem' }}>
           <div>
             <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.05rem' }}>
-              🏛️ V4_Heavy 雙艙重倉當期實盤持倉 ({mergedHoldings.length} 檔不重複標的・台股均值 {data?.kpis?.v3_core?.mean_tw_weight_pct ?? 44.2}%)
+              🏛️ V7_Champion 雙核堡壘當期實盤持倉 ({mergedHoldings.length} 檔不重複標的・股票實重 {activeSummary.stocks_mtm_sum_pct ?? 94.39}% ＋ SOV3 保留 {activeSummary.sov3_cash_buffer_pct ?? 5.61}%)
             </h4>
-            <div style={{ fontSize: '0.73rem', color: '#FBBF24', marginTop: '3px' }}>
-              ⚠️ 重倉集中度提示：極端高信念股若同時被 PodA 與 PodB 跨梯隊重複入選（如當期雙艙共振標的），總權重會自然集中以換取爆發力；欲控制單檔波動可搭配 V4_SOV3 (sv16)。
+            <div style={{ fontSize: '0.73rem', color: '#6EE7B7', marginTop: '3px' }}>
+              🛡️ 週頻飆股護欄生效紀錄：進場跨艙封頂 15.0%，當 APP 暴衝突破 19.0% 後已於開盤自動收割壓回 16.2%（現實重 {activeSummary.max_single_stock_mtm_pct ?? 16.69}% &le; 20%），淨收益已再投資未滿額兄弟股，剩餘 {activeSummary.sov3_cash_buffer_pct ?? 5.61}% 暫泊 SOV3 美債待下期 12/01 輪動。
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
             {[
-              { id: 'tranches', label: '📋 三梯隊獨立明細 (每梯約 5 檔共振融合)' },
-              { id: 'merged', label: `🌐 合流總目標權重表 (${mergedHoldings.length} 檔 = 100%)` },
+              { id: 'tranches', label: `📋 五子梯獨立明細 (${visibleSubTranches.length} 梯)` },
+              { id: 'merged', label: `🌐 合流總目標權重表 (${mergedHoldings.length} 檔)` },
               { id: 'watchlist', label: '📡 非泰坦實體營運候補雷達' },
             ].map((tb) => (
               <button
@@ -1034,26 +1087,25 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
 
         {picksTab === 'tranches' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '0.9rem' }}>
-            {(stationView === 'all' || stationView === 'tranche_a') && renderTrancheCard(trA, '#0EA5E9')}
-            {(stationView === 'all' || stationView === 'tranche_b') && renderTrancheCard(trB, '#A855F7')}
-            {(stationView === 'all' || stationView === 'tranche_c') && renderTrancheCard(trC, '#F59E0B')}
+            {visibleSubTranches.map((stObj) => renderTrancheCard(stObj))}
           </div>
         )}
 
         {picksTab === 'merged' && (
           <div style={{ overflowX: 'auto' }}>
-            <table className="custom-table" style={{ width: '100%', fontSize: '0.8rem' }}>
+            <table className="custom-table" style={{ width: '100%', fontSize: '0.79rem' }}>
               <thead>
                 <tr>
-                  <th>標的 & 子艙共振</th>
+                  <th>標的 &amp; 雙核來源</th>
                   <th>市場 / 行業</th>
-                  <th>涵蓋梯隊</th>
-                  <th style={{ textAlign: 'right' }}>總組合目標權重</th>
+                  <th>涵蓋子梯隊</th>
+                  <th style={{ textAlign: 'right' }}>護欄實重 MtM%</th>
+                  <th style={{ textAlign: 'right' }}>建倉初重 Init%</th>
                   <th style={{ textAlign: 'right' }}>最早進場日</th>
                   <th style={{ textAlign: 'right' }}>加權成本價</th>
                   <th style={{ textAlign: 'right' }}>最新市價</th>
                   <th style={{ textAlign: 'right' }}>股價報酬</th>
-                  <th style={{ textAlign: 'right' }}>綜合 Z / 五柱分項</th>
+                  <th style={{ textAlign: 'right' }}>合意 Z / 七柱分項</th>
                   <th style={{ textAlign: 'center' }}>泰坦重疊</th>
                 </tr>
               </thead>
@@ -1070,7 +1122,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
                               <span style={{ fontWeight: 'bold', color: m.market === 'TW' ? '#FDE047' : '#93C5FD' }}>{m.ticker}</span>
                               {m.pod_tag && (
-                                <span style={{ fontSize: '0.66rem', color: podCol, border: `1px solid ${podCol}55`, padding: '0 4px', borderRadius: '4px' }}>
+                                <span style={{ fontSize: '0.65rem', color: podCol, border: `1px solid ${podCol}55`, padding: '0 4px', borderRadius: '4px' }}>
                                   {m.pod_tag}
                                 </span>
                               )}
@@ -1081,19 +1133,20 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                       </td>
                       <td style={{ fontSize: '0.74rem' }}>{m.market} ・ {m.sector}</td>
                       <td>
-                        {m.tranches.map((t) => (
-                          <span key={t} style={{ display: 'inline-block', fontSize: '0.68rem', fontWeight: 'bold', padding: '1px 5px', borderRadius: '4px', marginRight: '3px', background: t === 'A' ? 'rgba(14,165,233,0.22)' : t === 'B' ? 'rgba(168,85,247,0.22)' : 'rgba(245,158,11,0.22)', color: '#F8FAFC' }}>
+                        {(m.tranches || []).map((t) => (
+                          <span key={t} style={{ display: 'inline-block', fontSize: '0.66rem', fontWeight: 'bold', padding: '1px 5px', borderRadius: '4px', marginRight: '3px', marginBottom: '2px', background: t.includes('PodA') ? 'rgba(14,165,233,0.22)' : 'rgba(168,85,247,0.22)', color: '#F8FAFC' }}>
                             {t}
                           </span>
                         ))}
                       </td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8' }}>{fmtNum(m.total_weight_pct, 2)}%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#38BDF8' }}>{fmtNum(m.actual_mtm_weight_pct ?? m.total_weight_pct, 2)}%</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>{fmtNum(m.init_target_weight_pct ?? m.total_weight_pct, 2)}%</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{m.earliest_entry_date}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{fmtNum(m.avg_entry_price, 2)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>{fmtNum(m.current_price, 2)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: isUp ? '#F87171' : '#34D399' }}>{fmtPct(m.price_ret_pct)}</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.72rem' }}>
-                        <strong style={{ color: '#FDE047' }}>{fmtNum(m.composite, 2)}</strong> (G:{fmtNum(m.z_grw, 1)} C:{fmtNum(m.z_cbop, 1)} A:{fmtNum(m.z_acq, 1)} F:{fmtNum(m.z_fip, 1)})
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.71rem' }}>
+                        <strong style={{ color: '#FDE047' }}>{fmtNum(m.composite, 2)}</strong> (G:{fmtNum(m.z_grw, 1)} C:{fmtNum(m.z_cbop, 1)} A:{fmtNum(m.z_acq, 1)} Cat:{fmtNum(m.z_asym_cat, 1)})
                       </td>
                       <td style={{ textAlign: 'center' }}>{m.in_titan_active ? '⚠️ 重疊' : '✅ 0 重疊'}</td>
                     </tr>
@@ -1107,8 +1160,8 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         {picksTab === 'watchlist' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(430px, 1fr))', gap: '1rem' }}>
             {[
-              { title: '🇺🇸 美股 S&P 500 PIT 候補 Top 15 (非泰坦・雙艙合意)', list: data?.top_watchlist_candidates?.us || [] },
-              { title: '🇹🇼 台股純上市 0050∪0051 PIT 候補 Top 12 (非泰坦・雙艙合意)', list: data?.top_watchlist_candidates?.tw || [] },
+              { title: '🇺🇸 美股 S&P 500 PIT 候補 Top 15 (非泰坦・V7 雙核合意)', list: data?.top_watchlist_candidates?.us || [] },
+              { title: '🇹🇼 台股純上市 0050∪0051 PIT 候補 Top 12 (非泰坦・V7 雙核合意)', list: data?.top_watchlist_candidates?.tw || [] },
             ].map((grp) => (
               <div key={grp.title}>
                 <div style={{ fontWeight: 'bold', color: '#93C5FD', marginBottom: '0.45rem', fontSize: '0.88rem' }}>{grp.title}</div>
@@ -1119,8 +1172,9 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                       <th>標的</th>
                       <th>行業</th>
                       <th style={{ textAlign: 'right' }}>現價</th>
-                      <th style={{ textAlign: 'right' }}>G5動能分位</th>
-                      <th style={{ textAlign: 'right' }}>雙艙合意Z</th>
+                      <th style={{ textAlign: 'right' }}>G5分位</th>
+                      <th style={{ textAlign: 'right' }}>PodA / PodB Z</th>
+                      <th style={{ textAlign: 'right' }}>合意Z</th>
                       <th style={{ textAlign: 'center' }}>狀態</th>
                     </tr>
                   </thead>
@@ -1140,6 +1194,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                         <td style={{ fontSize: '0.7rem' }}>{w.sector}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{fmtNum(w.price, 2)}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>{fmtNum(w.g5_pct, 1)}%</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.7rem', color: '#CBD5E1' }}>{fmtNum(w.composite_poda, 1)} / {fmtNum(w.composite_podb, 1)}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: '#34D399' }}>{fmtNum(w.composite, 2)}</td>
                         <td style={{ textAlign: 'center' }}>{w.in_active ? '🟢 持倉中' : '⚪ 觀察中'}</td>
                       </tr>
@@ -1153,22 +1208,23 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          4. 🎯 跟單調倉建議與 💼 我的目前持股 & 交易流水帳
+          4. 🎯 V7 跟單調倉建議與 💼 我的目前持股 & 交易流水帳
          ================================================================= */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '1rem' }}>
-        {/* 跟單計算機 */}
         <div className="glass-card" style={{ padding: '1rem', borderTop: '3px solid #F59E0B' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <h4 style={{ margin: 0, color: '#FDE047' }}>🎯 V4 重倉跟單下單計算機 ({rebalanceSuggestions.length} 筆建議)</h4>
+            <h4 style={{ margin: 0, color: '#FDE047' }}>🎯 V7 雙核跟單下單計算機 ({rebalanceSuggestions.length} 筆建議)</h4>
             <select
               value={rebalMode}
               onChange={(e) => setRebalMode(e.target.value)}
-              style={{ background: 'rgba(15,23,42,0.85)', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '0.28rem 0.55rem', fontSize: '0.76rem' }}
+              style={{ background: 'rgba(15,23,42,0.85)', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '0.28rem 0.55rem', fontSize: '0.75rem' }}
             >
-              <option value="full_100">{`🌐 合流 100% 一鍵建倉 (${mergedHoldings.length}檔目標)`}</option>
-              <option value="tranche_a">🅰️ 僅 A 梯隊建倉 (總資金 1/3)</option>
-              <option value="tranche_b">🅱️ 僅 B 梯隊建倉 (總資金 1/3)</option>
-              <option value="tranche_c">🅲 僅 C 梯隊建倉 (總資金 1/3)</option>
+              <option value="full_100">{`🌐 合流實戰權重一鍵建倉 (${mergedHoldings.length}檔・現股 ${activeSummary.stocks_mtm_sum_pct ?? 94.39}%)`}</option>
+              {subTranches.map((st) => (
+                <option key={st.tranche_id} value={st.tranche_id}>
+                  {`${st.short_label} (${st.rebal_schedule}・佔 ${fmtNum(st.capital_share_pct, 1)}%)`}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -1310,11 +1366,11 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          5. 📈 互動式多策略累積淨值曲線與雙艙槓鈴壓力比較
+          5. 📈 互動式多策略累積淨值曲線與 V7 雙核槓鈴壓力比較
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #A855F7' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
-          <h4 style={{ margin: 0, color: '#E9D5FF' }}>📈 累積淨值走勢對照（V4_Heavy 重倉 × V4_SOV3 × 泰坦雙艙槓鈴 vs SPY 大盤）</h4>
+          <h4 style={{ margin: 0, color: '#E9D5FF' }}>📈 累積淨值走勢對照（V7_Champion × CoChampion × SOV3 × 泰坦雙艙槓鈴 vs 舊 V4 &amp; SPY）</h4>
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {[
               { id: '2010', label: '2010–2026 主期' },
@@ -1338,7 +1394,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
               {chartLogScale ? '📐 對數刻度' : '📏 線性刻度'}
             </button>
             <button type="button" className="btn btn-secondary" onClick={() => setChartShowTitan((x) => !x)} style={{ fontSize: '0.73rem', padding: '0.26rem 0.6rem' }}>
-              {chartShowTitan ? '隱藏單泰坦母艦' : '疊加單泰坦 (630x)'}
+              {chartShowTitan ? '隱藏單泰坦母艦' : '疊加單泰坦 (604x)'}
             </button>
           </div>
         </div>
@@ -1347,17 +1403,18 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
 
         {/* 危機區間抗震表現總表 */}
         <div style={{ marginTop: '1rem', overflowX: 'auto' }}>
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+          <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
             <thead>
               <tr>
                 <th>歷史壓力區間</th>
                 <th style={{ textAlign: 'right' }}>SPY 大盤</th>
                 <th style={{ textAlign: 'right' }}>Global Titan</th>
-                <th style={{ textAlign: 'right' }}>V4_Heavy (雙艙)</th>
-                <th style={{ textAlign: 'right' }}>V4_SOV3 (sv16)</th>
-                <th style={{ textAlign: 'right' }}>V4_Single (單艙)</th>
-                <th style={{ textAlign: 'right' }}>50/50 泰坦×V4 (SA)</th>
-                <th style={{ textAlign: 'right' }}>70/30 泰坦×V4 (Q)</th>
+                <th style={{ textAlign: 'right' }}>前代 V4_Heavy</th>
+                <th style={{ textAlign: 'right' }}>V7_Champion</th>
+                <th style={{ textAlign: 'right' }}>V7_CoChamp</th>
+                <th style={{ textAlign: 'right' }}>V7_SOV3</th>
+                <th style={{ textAlign: 'right' }}>50/50 泰坦×V7 (SA)</th>
+                <th style={{ textAlign: 'right' }}>70/30 泰坦×V7 (Q)</th>
                 <th style={{ textAlign: 'right' }}>50/50 泰坦×SPY</th>
               </tr>
             </thead>
@@ -1370,11 +1427,11 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                 { key: 'covid_2020_q1', label: '2020 Q1 新冠熔斷' },
                 { key: 'vaccine_rot_2020_11', label: '2020-11 疫苗價值輪動' },
                 { key: 'bear_2022', label: '2022 升息股債雙殺' },
-                { key: 'ytd_2026', label: '2026 YTD (截至 11/16)' },
+                { key: 'ytd_2026', label: '2026 YTD (截至 11/18)' },
               ].map((rg) => (
                 <tr key={rg.key}>
                   <td><strong>{rg.label}</strong></td>
-                  {['spy', 'titan', 'v3_core', 'v3_champ', 'v4_single', 'bb50_sa', 'bb70_q', 'bb50_spy_sa'].map((sk) => {
+                  {['spy', 'titan', 'v4_single', 'v3_core', 'v7_cochamp', 'v3_champ', 'bb50_sa', 'bb70_q', 'bb50_spy_sa'].map((sk) => {
                     const val = kpis?.regimes?.[sk]?.[rg.key];
                     return (
                       <td key={sk} style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: sk === 'v3_core' || sk === 'bb50_sa' ? 'bold' : 'normal', color: val >= 0 ? '#34D399' : '#F87171' }}>
@@ -1390,15 +1447,15 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          6. 📅 2005–2026 全 22 年 PIT 逐年績效與 263 期錯峰調倉溯源帳本
+          6. 📅 2005–2026 全 22 年 PIT 逐年績效與 526 期五子梯溯源帳本
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #3B82F6' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
-          <h4 style={{ margin: 0, color: '#93C5FD' }}>📅 2005–2026 全 22 年零空窗 PIT 逐年績效與逐筆明細帳本</h4>
+          <h4 style={{ margin: 0, color: '#93C5FD' }}>📅 2005–2026 全 22 年零空窗 PIT 逐年績效與 526 期逐筆明細帳本</h4>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <input
               type="text"
-              placeholder="搜尋股票代號或名稱 (如 2330 / TPR)..."
+              placeholder="搜尋股票代號或名稱 (如 APP / 2451)..."
               value={histSearch}
               onChange={(e) => setHistSearch(e.target.value)}
               style={{ background: 'rgba(15,23,42,0.85)', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '6px', padding: '0.3rem 0.65rem', fontSize: '0.76rem', width: '230px' }}
@@ -1417,17 +1474,18 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.78rem' }}>
+          <table className="custom-table" style={{ width: '100%', fontSize: '0.77rem' }}>
             <thead>
               <tr>
                 <th>年份</th>
-                <th style={{ textAlign: 'right' }}>V4_Heavy 雙艙</th>
-                <th style={{ textAlign: 'right' }}>V4_SOV3 (sv16)</th>
+                <th style={{ textAlign: 'right' }}>V7_Champion</th>
+                <th style={{ textAlign: 'right' }}>V7_CoChamp</th>
+                <th style={{ textAlign: 'right' }}>V7_SOV3 (sv16)</th>
                 <th style={{ textAlign: 'right' }}>50/50 槓鈴</th>
                 <th style={{ textAlign: 'right' }}>Global Titan</th>
                 <th style={{ textAlign: 'right' }}>SPY 大盤</th>
                 <th style={{ textAlign: 'right' }}>超額 SPY</th>
-                <th style={{ textAlign: 'right' }}>V4 年內 MDD</th>
+                <th style={{ textAlign: 'right' }}>V7 年內 MDD</th>
                 <th style={{ textAlign: 'center' }}>調倉期數 / 明細</th>
               </tr>
             </thead>
@@ -1439,9 +1497,10 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                     <tr style={{ cursor: 'pointer' }} onClick={() => setExpandedYears((p) => ({ ...p, [yr.year]: !p[yr.year] }))}>
                       <td><strong>{isOpen ? '▼' : '▶'} {yr.year}</strong></td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: yr.return_pct >= 0 ? '#34D399' : '#F87171' }}>{fmtPct(yr.return_pct)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: (yr.cochamp_ret_pct ?? 0) >= 0 ? '#FDE047' : '#FCA5A5' }}>{fmtPct(yr.cochamp_ret_pct)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.champ_ret_pct >= 0 ? '#A7F3D0' : '#FCA5A5' }}>{fmtPct(yr.champ_ret_pct)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold' }}>{fmtPct(yr.bb50_sa_ret_pct)}</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FDE047' }}>{fmtPct(yr.titan_ret_pct)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#FBBF24' }}>{fmtPct(yr.titan_ret_pct)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#94A3B8' }}>{fmtPct(yr.spy_ret_pct)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.alpha_vs_spy >= 0 ? '#34D399' : '#F87171' }}>{fmtPct(yr.alpha_vs_spy)}</td>
                       <td style={{ textAlign: 'right', fontFamily: 'monospace', color: yr.yearly_mdd_pct >= -15 ? '#34D399' : '#FBBF24' }}>{fmtPct(yr.yearly_mdd_pct, false)}</td>
@@ -1449,7 +1508,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                     </tr>
                     {isOpen && (
                       <tr>
-                        <td colSpan={9} style={{ padding: '0.6rem', background: 'rgba(15,23,42,0.72)' }}>
+                        <td colSpan={10} style={{ padding: '0.6rem', background: 'rgba(15,23,42,0.72)' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
                             {(yr.rebalances || []).map((rb, idxRb) => (
                               <div key={`${rb.tranche}_${rb.rebal_date}_${idxRb}`} style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '0.5rem 0.7rem' }}>
@@ -1463,7 +1522,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                                       <div key={`${pk.ticker}_${pk.entry_date}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.71rem', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.07)' }}>
                                         <StockChartButton ticker={pk.ticker} name={pk.name} trade={{ entry_date: pk.entry_date, entry_price: pk.entry_price, exit_date: pk.exit_date, exit_price: pk.exit_price }} />
                                         <strong style={{ color: pk.market === 'TW' ? '#FDE047' : '#CBD5E1' }}>{pk.ticker}</strong>
-                                        {pk.pod_tag && <span style={{ fontSize: '0.64rem', color: pk.pod_tag === 'A+B' ? '#F59E0B' : '#94A3B8' }}>[{pk.pod_tag}]</span>}
+                                        {pk.pod_tag && <span style={{ fontSize: '0.64rem', color: pk.pod_tag === 'A' ? '#38BDF8' : '#C084FC' }}>[{pk.pod_tag}]</span>}
                                         <span style={{ color: '#94A3B8' }}>{fmtNum(pk.weight, 1)}%</span>
                                         <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: pos ? '#F87171' : '#34D399' }}>{fmtPct(pk.period_ret)}</span>
                                       </div>
@@ -1485,17 +1544,17 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          7. 🔬 Round 4 重倉版 8 道檢察官嚴酷拷問與逐筆 PIT 實證
+          7. 🔬 Round 7 雙核堡壘 8 道檢察官嚴酷拷問與逐筆 PIT 實證
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #10B981' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.8rem' }}>
-          <h4 style={{ margin: 0, color: '#6EE7B7' }}>🔬 Round 4 重倉版 8 道檢察官嚴酷拷問與逐筆 PIT 驗證</h4>
+          <h4 style={{ margin: 0, color: '#6EE7B7' }}>🔬 Round 7 (`V7_Champion`) 8 道檢察官嚴酷拷問與逐筆 PIT 實證</h4>
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
             {[
-              { id: 'grid27', label: '📐 雙組27參數高原' },
-              { id: 'gate0', label: '🌪️ 雙世代G1/G2 & 泰坦崩盤保護' },
-              { id: 'loop1', label: '🪜 集中化階梯 N=12→3' },
-              { id: 'loo', label: '✂️ LOO 因子&子艙消融' },
+              { id: 'grid27', label: '📐 27 參數高原 (27/27)' },
+              { id: 'gate0', label: '🌪️ Gate 0 裸訊號 & 雙世代 & 崩盤保護' },
+              { id: 'loop1', label: '🪜 證偽對照 & V6→V7 五階梯' },
+              { id: 'loo', label: '✂️ LOO 雙核/7因子/護欄消融' },
               { id: 'phase', label: '📅 三相日曆測試' },
               { id: 'harsh_jk', label: '💸 2x成本 & 刀切去Top-10' },
             ].map((pt) => (
@@ -1513,83 +1572,110 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         </div>
 
         {prosecutorTab === 'grid27' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <div style={{ fontSize: '0.8rem', color: '#CBD5E1', marginBottom: '0.55rem' }}>
-                👑 <strong>DualPod 雙艙 27 格高原</strong>：中位數 CAGR = <strong style={{ color: '#34D399' }}>{pa?.grid_27_summary?.median_cagr_10_26}%</strong> (Ex26 {pa?.grid_27_summary?.median_ex26_cagr}%) ｜
-                區間 <strong>[{pa?.grid_27_summary?.min_cagr_10_26}%, {pa?.grid_27_summary?.max_cagr_10_26}%]</strong> ｜
-                中位 Sharpe = <strong>{pa?.grid_27_summary?.median_sharpe_10_26}</strong> ｜
-                嚴格正交 = <strong style={{ color: '#FDE047' }}>{pa?.grid_27_summary?.pass_ortho_count} / {pa?.grid_27_summary?.n_cells}</strong>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(178px, 1fr))', gap: '0.45rem' }}>
-                {(pa?.grid_27_summary?.cells || []).map((c) => (
+          <div>
+            <div style={{ fontSize: '0.8rem', color: '#CBD5E1', marginBottom: '0.55rem' }}>
+              👑 <strong>V7_Champion 27 格參數高原 (Cap&isin;&#123;13,15,17%&#125; &times; Buf&isin;&#123;1.33,1.67,2.0&#125; &times; PodA&isin;&#123;48,52,56%&#125;)</strong>：
+              中位 CAGR = <strong style={{ color: '#34D399' }}>{pa?.grid_27_summary?.median_cagr_10_26}%</strong> (Ex26 {pa?.grid_27_summary?.median_ex26_cagr}%) ｜
+              全距 <strong>[{pa?.grid_27_summary?.min_cagr_10_26}%, {pa?.grid_27_summary?.max_cagr_10_26}%]</strong> ｜
+              中位 Sharpe / Calmar = <strong>{pa?.grid_27_summary?.median_sharpe_10_26} / {pa?.grid_27_summary?.median_calmar_10_26}</strong> ｜
+              正交 &amp; MaxW&le;20% &amp; 過標 = <strong style={{ color: '#FDE047' }}>{pa?.grid_27_summary?.pass_v7_bar_count ?? pa?.grid_27_summary?.pass_ortho_count} / {pa?.grid_27_summary?.n_cells} (100%)</strong>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '0.45rem' }}>
+              {(pa?.grid_27_summary?.cells || []).map((c) => {
+                const ok = c.pass_v7_bar ?? c.pass_ortho;
+                return (
                   <div
                     key={c.label}
                     style={{
-                      background: c.pass_ortho ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                      border: `1px solid ${c.pass_ortho ? 'rgba(16,185,129,0.28)' : 'rgba(245,158,11,0.35)'}`,
+                      background: ok ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                      border: `1px solid ${ok ? 'rgba(16,185,129,0.28)' : 'rgba(245,158,11,0.35)'}`,
                       borderRadius: '6px',
                       padding: '0.45rem 0.6rem',
                       fontSize: '0.72rem',
                     }}
                   >
-                    <div style={{ fontWeight: 'bold', color: '#E2E8F0' }}>{c.label.replace('DualGrid_', '')} {c.pass_ortho ? '✅' : '⚠️'}</div>
-                    <div style={{ fontFamily: 'monospace', color: c.pass_ortho ? '#34D399' : '#FBBF24', fontWeight: 'bold', fontSize: '0.88rem' }}>{c.cagr_10_26}% (Ex26 {c.ex26_cagr}%)</div>
-                    <div style={{ fontFamily: 'monospace', color: '#94A3B8' }}>Shp {c.sharpe_10_26} ｜ ExC {c.ex_spy_corr >= 0 ? '+' : ''}{c.ex_spy_corr}</div>
+                    <div style={{ fontWeight: 'bold', color: '#E2E8F0' }}>{c.label.replace('V7Grid_', '')} {ok ? '✅' : '⚠️'}</div>
+                    <div style={{ fontFamily: 'monospace', color: ok ? '#34D399' : '#FBBF24', fontWeight: 'bold', fontSize: '0.86rem' }}>{c.cagr_10_26}% (Ex26 {c.ex26_cagr}%)</div>
+                    <div style={{ fontFamily: 'monospace', color: '#94A3B8' }}>Cal {c.calmar_10_26} ｜ Shp {c.sharpe_10_26} ｜ MaxW {c.cur_max_w}%</div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-
-            {pa?.grid_27_single_summary?.cells && (
-              <div>
-                <div style={{ fontSize: '0.8rem', color: '#CBD5E1', marginBottom: '0.5rem' }}>
-                  🏆 <strong>Single_Heavy 單艙 27 格高原</strong>：中位數 CAGR = <strong style={{ color: '#38BDF8' }}>{pa?.grid_27_single_summary?.median_cagr_10_26}%</strong> ｜
-                  區間 <strong>[{pa?.grid_27_single_summary?.min_cagr_10_26}%, {pa?.grid_27_single_summary?.max_cagr_10_26}%]</strong> ｜
-                  全數過嚴格正交+達標 = <strong style={{ color: '#34D399' }}>{pa?.grid_27_single_summary?.pass_ortho_count} / {pa?.grid_27_single_summary?.n_cells} (100%)</strong>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(178px, 1fr))', gap: '0.45rem' }}>
-                  {(pa?.grid_27_single_summary?.cells || []).map((c) => (
-                    <div key={c.label} style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.25)', borderRadius: '6px', padding: '0.45rem 0.6rem', fontSize: '0.72rem' }}>
-                      <div style={{ fontWeight: 'bold', color: '#E2E8F0' }}>{c.label.replace('SingleGrid_', '')} ✅</div>
-                      <div style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 'bold', fontSize: '0.86rem' }}>{c.cagr_10_26}% (Ex26 {c.ex26_cagr}%)</div>
-                      <div style={{ fontFamily: 'monospace', color: '#94A3B8' }}>Shp {c.sharpe_10_26} ｜ mMDD {c.m_mdd_10_26}%</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
         {prosecutorTab === 'gate0' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowX: 'auto' }}>
+            {pa?.gate0_naked_event_study?.['63D_Quarterly'] && (
+              <div>
+                <div style={{ fontWeight: 'bold', color: '#34D399', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
+                  🔍 Gate 0 裸訊號 Q5−Q1 多空 63D 事件研究（2005–2025 Ex-2026，Pooled 1,745 vs 美股 US vs 台股 TW）
+                </div>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.74rem' }}>
+                  <thead>
+                    <tr>
+                      <th>因子矩陣</th>
+                      <th style={{ textAlign: 'right' }}>63D 全池 (NW-t)</th>
+                      <th style={{ textAlign: 'right' }}>63D 美股 US (NW-t)</th>
+                      <th style={{ textAlign: 'right' }}>63D 台股 TW (NW-t)</th>
+                      <th style={{ textAlign: 'right' }}>G1 (05–15) / G2 (16–25)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(pa.gate0_naked_event_study['63D_Quarterly']).map(([k, v]) => {
+                      const isCtrl = k.startsWith('Ctrl_');
+                      return (
+                        <tr key={k}>
+                          <td><strong style={{ color: isCtrl ? '#F87171' : '#E2E8F0' }}>{k}{isCtrl ? ' (證偽對照)' : ''}</strong></td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: v.pooled?.ex26_mean_pct >= 0.5 ? '#34D399' : '#F87171' }}>
+                            {fmtPct(v.pooled?.ex26_mean_pct)} ({v.pooled?.nw_t >= 0 ? '+' : ''}{v.pooled?.nw_t})
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            {fmtPct(v.us?.ex26_mean_pct)} ({v.us?.nw_t >= 0 ? '+' : ''}{v.us?.nw_t})
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            {v.tw?.ex26_mean_pct !== undefined ? `${fmtPct(v.tw?.ex26_mean_pct)} (${v.tw?.nw_t >= 0 ? '+' : ''}${v.tw?.nw_t})` : '--'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
+                            {fmtPct(v.pooled?.g1_05_15_pct)} / {fmtPct(v.pooled?.g2_16_25_pct)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             <div>
-              <div style={{ fontWeight: 'bold', color: '#93C5FD', fontSize: '0.82rem', marginBottom: '0.35rem' }}>📐 雙世代穩健度審計：G1 (2005–2015 含海嘯) vs G2 (2016–2026) 與嚴格正交檢核</div>
-              <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
+              <div style={{ fontWeight: 'bold', color: '#93C5FD', fontSize: '0.82rem', marginBottom: '0.35rem' }}>📐 雙世代穩健度審計：G1 (2005–2015 含海嘯) vs G2 (2016–2026) 與 MaxW&le;20% 正交檢核</div>
+              <table className="custom-table" style={{ width: '100%', fontSize: '0.74rem' }}>
                 <thead>
                   <tr>
                     <th>策略引擎</th>
-                    <th style={{ textAlign: 'right' }}>G1 (05–15) 年化 / Sharpe</th>
-                    <th style={{ textAlign: 'right' }}>G2 (16–26) 年化 / Sharpe</th>
-                    <th style={{ textAlign: 'right' }}>10–26 CAGR</th>
-                    <th style={{ textAlign: 'right' }}>Ex26 CAGR</th>
-                    <th style={{ textAlign: 'right' }}>ExSPY / TotC / Ov</th>
-                    <th style={{ textAlign: 'center' }}>嚴格正交</th>
+                    <th style={{ textAlign: 'right' }}>G1 (05–15)</th>
+                    <th style={{ textAlign: 'right' }}>G2 (16–26)</th>
+                    <th style={{ textAlign: 'right' }}>10–26 CAGR / Cal</th>
+                    <th style={{ textAlign: 'right' }}>Ex26</th>
+                    <th style={{ textAlign: 'right' }}>ExSPY / Ov / MaxW</th>
+                    <th style={{ textAlign: 'center' }}>正交&amp;控重</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(pa?.dual_era_audit || {}).map(([k, v]) => (
-                    <tr key={k}>
-                      <td><strong>{k}</strong></td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.g1_05_15?.cagr}% (Shp {v.g1_05_15?.sharpe})</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399' }}>{v.g2_16_26?.cagr}% (Shp {v.g2_16_26?.sharpe})</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>{v.cagr_10_26}%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.cagr_ex26}%</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.ex_spy_corr >= 0 ? '+' : ''}{v.ex_spy_corr} / {v.tot_corr >= 0 ? '+' : ''}{v.tot_corr} / {v.overlap_pct}%</td>
-                      <td style={{ textAlign: 'center' }}>{v.strictly_orthogonal ? '✅ 過關' : '⚠️ TW偏重'}</td>
-                    </tr>
-                  ))}
+                  {Object.entries(pa?.dual_era_audit || {}).map(([k, v]) => {
+                    const ok = v.strictly_orthogonal_max20 ?? v.strictly_orthogonal;
+                    return (
+                      <tr key={k}>
+                        <td><strong>{k}</strong></td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.g1_05_15?.cagr}% (Shp {v.g1_05_15?.sharpe})</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', color: '#34D399' }}>{v.g2_16_26?.cagr}% (Shp {v.g2_16_26?.sharpe})</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>{v.cagr_10_26}% / {v.calmar_10_26}</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.cagr_ex26}%</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.ex_spy_corr >= 0 ? '+' : ''}{v.ex_spy_corr} / {v.overlap_pct}% / {v.cur_max_w}%</td>
+                        <td style={{ textAlign: 'center' }}>{ok ? '✅ 過關' : '⚠️ MaxW>20%'}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1599,7 +1685,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                 <div style={{ fontWeight: 'bold', color: '#FBBF24', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
                   🌪️ 泰坦重挫月份護航實測（2010–2026 共 {pa?.titan_crash_months?.n_crash_months} 個泰坦月跌 &lt; -3%，泰坦平均 {pa?.titan_crash_months?.titan_mean_pct}%）
                 </div>
-                <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.74rem' }}>
                   <thead>
                     <tr>
                       <th>對比標的 / 組合</th>
@@ -1625,45 +1711,47 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         )}
 
         {prosecutorTab === 'loop1' && (
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+          <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
             <thead>
               <tr>
-                <th>集中化階梯 (N=12 → N=3) + MA60 反指標對照</th>
+                <th>Loop 1：4 組證偽對照 ＆ V6 → V7 五階升級實證階梯</th>
                 <th style={{ textAlign: 'right' }}>10–26 CAGR</th>
                 <th style={{ textAlign: 'right' }}>Ex26</th>
                 <th style={{ textAlign: 'right' }}>05–26 全期</th>
                 <th style={{ textAlign: 'right' }}>mMDD</th>
-                <th style={{ textAlign: 'right' }}>Sharpe</th>
-                <th style={{ textAlign: 'right' }}>ExSPY</th>
-                <th style={{ textAlign: 'right' }}>台股比重%</th>
+                <th style={{ textAlign: 'right' }}>Sharpe / Calmar</th>
+                <th style={{ textAlign: 'right' }}>ExSPY / MaxW</th>
               </tr>
             </thead>
             <tbody>
-              {Object.entries(pa?.loop1_ablations || {}).map(([k, ev]) => (
-                <tr key={k}>
-                  <td><strong>{k}</strong></td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: k.includes('NegCtrl') ? '#F87171' : '#34D399' }}>{ev.era_2010_2026?.cagr}%</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2025_ex26?.cagr}%</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2005_2026?.cagr}%</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.m_mdd}%</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe}</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.corr_ex_spy_vs_titan_10_26 >= 0 ? '+' : ''}{ev.corr_ex_spy_vs_titan_10_26}</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.continuity?.mean_tw_weight_pct_10_26}%</td>
-                </tr>
-              ))}
+              {Object.entries(pa?.loop1_ablations || {}).map(([k, ev]) => {
+                const isFal = k.includes('Falsified');
+                return (
+                  <tr key={k}>
+                    <td><strong style={{ color: isFal ? '#F87171' : '#E2E8F0' }}>{isFal ? '⛔ ' : '✅ '}{k}</strong></td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: isFal ? '#F87171' : '#34D399' }}>{ev.era_2010_2026?.cagr}%</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2025_ex26?.cagr}%</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2005_2026?.cagr}%</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.m_mdd}%</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe} / {ev.era_2010_2026?.calmar}</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.corr_ex_spy_vs_titan_10_26 >= 0 ? '+' : ''}{ev.corr_ex_spy_vs_titan_10_26} / {ev.continuity?.cur_max_single_stock_w_pct}%</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
 
         {prosecutorTab === 'loo' && (
-          <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+          <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
             <thead>
               <tr>
-                <th>LOO 因子與子艙減法消融 (DualPod)</th>
+                <th>LOO 雙核・七因子・週頻護欄消融檢定 (V7_Champion)</th>
                 <th style={{ textAlign: 'right' }}>10–26 CAGR</th>
                 <th style={{ textAlign: 'right' }}>Ex26</th>
                 <th style={{ textAlign: 'right' }}>mMDD / dMDD</th>
                 <th style={{ textAlign: 'right' }}>Sharpe / Calmar</th>
+                <th style={{ textAlign: 'right' }}>MaxW%</th>
                 <th>結構必要性檢定</th>
               </tr>
             </thead>
@@ -1675,7 +1763,16 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                   <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2025_ex26?.cagr}%</td>
                   <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.m_mdd}% / {ev.era_2010_2026?.d_mdd}%</td>
                   <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe} / {ev.era_2010_2026?.calmar}</td>
-                  <td>{k === 'Full_Base' ? '👑 完整雙艙全開（夏普＆年化最優平衡）' : k.includes('Pod') ? '⚠️ 單艙失去對稱互補平衡' : '✅ 剔除即掉年化與夏普・具實質貢獻'}</td>
+                  <td style={{ textAlign: 'right', fontFamily: 'monospace', color: (ev.continuity?.cur_max_single_stock_w_pct ?? 0) > 20 ? '#F87171' : '#CBD5E1' }}>{ev.continuity?.cur_max_single_stock_w_pct}%</td>
+                  <td>
+                    {k === 'Full_Base'
+                      ? '🏆 完整雙核堡壘（零冗餘最優解）'
+                      : k.includes('RunawayTrim')
+                        ? '⚠️ 關閉後 MaxW 失控升至 24.53%'
+                        : k.includes('Pod')
+                          ? '✅ 拔除單核績效與 Calmar 暴跌（無冗餘）'
+                          : '✅ 具實質報酬、Ex26、Calmar 或抗回撤貢獻'}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -1685,17 +1782,17 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         {prosecutorTab === 'phase' && (
           <div>
             <div style={{ fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '0.5rem' }}>
-              三條單梯隊季線均值 = <strong style={{ color: '#34D399' }}>{pa?.phase_invariance?.mean_cagr ?? 24.13}%</strong> ｜ 均值 Sharpe = <strong>{pa?.phase_invariance?.mean_sharpe ?? 1.31}</strong>（三條全勝 SPY 13.79%，三梯隊錯峰合成達 26.14% / Shp 1.50）
+              三條單季日曆相位均值 = <strong style={{ color: '#34D399' }}>{pa?.phase_invariance?.mean_cagr ?? 25.12}%</strong> ｜ 均值 Sharpe = <strong>{pa?.phase_invariance?.mean_sharpe ?? 1.40}</strong>（五子梯錯峰＋雙月拐點合成達 <strong>30.53% / Calmar 2.04</strong>，確證交錯結構紅利）
             </div>
             <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
               <thead>
                 <tr>
-                  <th>獨立單季日曆相位 (DualPod)</th>
+                  <th>獨立單季日曆相位 (V7)</th>
                   <th style={{ textAlign: 'right' }}>10–26 CAGR</th>
                   <th style={{ textAlign: 'right' }}>Ex26</th>
                   <th style={{ textAlign: 'right' }}>05–26 全期</th>
                   <th style={{ textAlign: 'right' }}>mMDD</th>
-                  <th style={{ textAlign: 'right' }}>Sharpe</th>
+                  <th style={{ textAlign: 'right' }}>Sharpe / Calmar</th>
                 </tr>
               </thead>
               <tbody>
@@ -1706,7 +1803,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2025_ex26?.cagr}%</td>
                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2005_2026?.cagr}%</td>
                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.m_mdd}%</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe}</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe} / {ev.era_2010_2026?.calmar}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1716,23 +1813,25 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
 
         {prosecutorTab === 'harsh_jk' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
+            <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
               <thead>
                 <tr>
                   <th>雙倍成本 (2x Harsh) 與 全週期刀切法 (Jackknife) 壓測</th>
                   <th style={{ textAlign: 'right' }}>10–26 CAGR</th>
-                  <th style={{ textAlign: 'right' }}>Harsh Ex26</th>
+                  <th style={{ textAlign: 'right' }}>Harsh / Ex26</th>
                   <th style={{ textAlign: 'right' }}>05–26</th>
                   <th style={{ textAlign: 'right' }}>mMDD</th>
-                  <th style={{ textAlign: 'right' }}>Sharpe</th>
+                  <th style={{ textAlign: 'right' }}>Sharpe / Calmar</th>
                 </tr>
               </thead>
               <tbody>
                 {[
                   ...Object.entries(pa?.harsh_2x_cost || {}).map(([k, v]) => [k, v]),
-                  ['DualPod 永久剔除累積 Top-3 飆股', pa?.jackknife_drop_top3_top5?.drop_top3],
-                  ['DualPod 永久剔除累積 Top-5 飆股', pa?.jackknife_drop_top3_top5?.drop_top5],
-                  ['DualPod 永久剔除累積 Top-10 飆股', pa?.jackknife_drop_top3_top5?.drop_top10],
+                  ['V7_Champion 永久剔除累積 Top-3 大贏家', pa?.jackknife_drop_top3_top5?.drop_top3],
+                  ['V7_Champion 永久剔除累積 Top-5 大贏家', pa?.jackknife_drop_top3_top5?.drop_top5],
+                  ['V7_Champion 永久剔除累積 Top-10 大贏家', pa?.jackknife_drop_top3_top5?.drop_top10],
+                  ['V7_CoChampion 永久剔除累積 Top-3 大贏家', pa?.jackknife_drop_top3_top5?.cochamp?.drop_top3],
+                  ['V7_CoChampion 永久剔除累積 Top-10 大贏家', pa?.jackknife_drop_top3_top5?.cochamp?.drop_top10],
                 ].map(([lbl, ev]) => ev && (
                   <tr key={lbl}>
                     <td><strong>{lbl}</strong></td>
@@ -1740,13 +1839,13 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2025_ex26?.cagr}%</td>
                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2005_2026?.cagr}%</td>
                     <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.m_mdd}%</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe}</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{ev.era_2010_2026?.sharpe} / {ev.era_2010_2026?.calmar}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <div style={{ fontSize: '0.74rem', color: '#94A3B8' }}>
-              🏅 全週期 17 年累計 Top-10 功臣股剔除名單：{(pa?.jackknife_drop_top3_top5?.top10_contributors || pa?.jackknife_drop_top3_top5?.top5_contributors || []).map(([t, v]) => `${t} (${v}%)`).join('、')}
+              🏅 全週期 17 年累計 Top-10 功臣股剔除名單：{(pa?.jackknife_drop_top3_top5?.top10_contributors || []).map(([t, v]) => `${t} (${v}%)`).join('、')}
             </div>
           </div>
         )}
@@ -1758,7 +1857,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       {cashModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.68)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <form className="glass-card" onSubmit={handleSaveCashModal} style={{ maxWidth: '420px', width: '100%', padding: '1.25rem' }}>
-            <h4 style={{ margin: '0 0 0.85rem 0', color: '#FDE047' }}>💰 V4 重倉互補帳戶資金管理</h4>
+            <h4 style={{ margin: '0 0 0.85rem 0', color: '#FDE047' }}>💰 V7 雙核互補帳戶資金管理</h4>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
               <button type="button" className={cashAction === 'deposit' ? 'btn' : 'btn btn-secondary'} onClick={() => setCashAction('deposit')}>追加存入</button>
               <button type="button" className={cashAction === 'set' ? 'btn' : 'btn btn-secondary'} onClick={() => setCashAction('set')}>直接重設現金餘額</button>
