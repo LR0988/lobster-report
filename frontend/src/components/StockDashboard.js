@@ -4301,7 +4301,7 @@ function StockDashboard() {
             { id: 'market_ml', label: '📊 股市策略總覽' },
             { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦 (上限1億)' },
             { id: 'global_sovereign', label: '👑 全球主權泰坦 (無上限)' },
-            { id: 'complementary_v3', label: '🛡️ 全球泰坦互補 V3 (無上限)' },
+            { id: 'complementary_v3', label: '🛡️ 全球泰坦互補 V4 重倉 (無上限)' },
             { id: 'commodity_cta', label: '🛢️ 全球原物料期貨 CTA (無上限)' },
             { id: 'oversold_sniper', label: '🎯 超賣快打 (上限500萬)' },
             { id: 'asymmetric_alpha', label: '⚡ 可轉債暴擊 (CB:5000萬/CBAS:300萬)' },
