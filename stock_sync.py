@@ -139,6 +139,23 @@ def sync_ml_cache(sb_conn):
     except Exception as e:
         print(f"  ✗ 同步全球主權泰坦失敗: {e}")
 
+    # 上傳全球泰坦互補戰艦 V3 最新數據 (complementary_v3_dashboard)
+    try:
+        import importlib
+        import complementary_v3_service
+        importlib.reload(complementary_v3_service)
+        v3_data = complementary_v3_service.get_complementary_v3_dashboard_data(force_refresh=False)
+        if v3_data and v3_data.get("status") == "ok":
+            cur.execute("""
+                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+                VALUES (%s, %s, CURRENT_TIMESTAMP)
+                ON CONFLICT (model_type) DO UPDATE
+                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+            """, ("complementary_v3_dashboard", json.dumps(v3_data, ensure_ascii=False)))
+            print("  ✓ 全球泰坦互補戰艦 V3 最新即時數據同步至 stock_ml_cache 完成")
+    except Exception as e:
+        print(f"  ✗ 同步全球泰坦互補戰艦 V3 失敗: {e}")
+
     # 上傳台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT) 最新數據 (causal_titan_dashboard)
     try:
         import importlib

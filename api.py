@@ -3397,11 +3397,17 @@ def run_scheduled_pipeline():
             with open(os.path.join(FRONTEND_DIR, 'src/data/defaultGlobalSovereignData.json'), 'w', encoding='utf-8') as f:
                 json.dump(gs_data, f, ensure_ascii=False, indent=2)
             try:
+                import complementary_v3_service
+                complementary_v3_service.compute_complementary_v3_dashboard(force_rebuild=False, save_json=True)
+                print("[Scheduler Pipeline] 全球泰坦互補戰艦 V3 快照產出成功！")
+            except Exception as e_v3:
+                print(f"[Scheduler Pipeline] 全球泰坦互補戰艦 V3 快照產出失敗: {e_v3}")
+            try:
                 import stock_sync
                 sb_c = stock_sync.get_supabase_conn()
                 stock_sync.sync_ml_cache(sb_c)
                 sb_c.close()
-                print("[Scheduler Pipeline] 全球泰坦雲端 stock_ml_cache 自動同步成功！")
+                print("[Scheduler Pipeline] 全球泰坦與 V3 互補戰艦雲端 stock_ml_cache 自動同步成功！")
             except Exception as e_sb:
                 print(f"[Scheduler Pipeline] 雲端 stock_ml_cache 同步提醒: {e_sb}")
             print("[Scheduler Pipeline] 全球泰坦 G12-PIT 前端資料同步成功！")
@@ -4658,14 +4664,58 @@ def get_low_freq_top30():
         "top30": res.get("top30_recommendations", [])
     }
 
+_gs_dash_lock = threading.Lock()
+_gs_dash_cache = {"sig": None, "data": None}
+
+
+def _get_gs_dash_signature():
+    """極速 (<1ms) 計算全球主權泰坦看板相依檔案與資料庫狀態指紋，避免無變動時重複重算阻塞單核心事件循環。"""
+    svc_path = os.path.join(BASE_DIR, "global_sovereign_service.py")
+    hist_path = os.path.join(BASE_DIR, "frontend", "src", "data", "g11_pit_yearly_history.json")
+    svc_mtime = os.path.getmtime(svc_path) if os.path.exists(svc_path) else 0.0
+    hist_mtime = os.path.getmtime(hist_path) if os.path.exists(hist_path) else 0.0
+    conn = get_db_connection()
+    try:
+        c = conn.cursor()
+        max_gs = c.execute("SELECT MAX(date) FROM global_stock_daily").fetchone()[0]
+        max_sov = c.execute("SELECT MAX(date) FROM global_sovereign_daily").fetchone()[0]
+        max_tw = c.execute("SELECT MAX(date) FROM daily_stock").fetchone()[0]
+        pos_cnt, pos_sh = c.execute(
+            "SELECT COUNT(*), COALESCE(SUM(shares), 0.0) FROM global_sovereign_positions"
+        ).fetchone()
+        tr_cnt = c.execute("SELECT COUNT(*) FROM global_sovereign_trades").fetchone()[0]
+        acc_rows = tuple(c.execute("SELECT key, value FROM global_sovereign_account ORDER BY key").fetchall())
+        acc_sig = tuple((r[0], r[1]) for r in acc_rows)
+        return (svc_mtime, hist_mtime, max_gs, max_sov, max_tw, pos_cnt, round(float(pos_sh or 0.0), 6), tr_cnt, acc_sig)
+    finally:
+        conn.close()
+
+
 @app.get("/api/global_sovereign/dashboard")
 @app.get("/api/global-sovereign/dashboard")
-def get_global_sovereign_dashboard():
+def get_global_sovereign_dashboard(refresh: bool = False):
     """全球主權國家泰坦看板：即時國運動能排行、歷史回測清單與歷年獲利"""
     import importlib
     import global_sovereign_service
-    importlib.reload(global_sovereign_service)
-    return global_sovereign_service.get_global_sovereign_dashboard_data()
+    try:
+        sig = _get_gs_dash_signature()
+    except Exception:
+        sig = None
+    if not refresh and sig is not None and _gs_dash_cache["data"] is not None and _gs_dash_cache["sig"] == sig:
+        return _gs_dash_cache["data"]
+    with _gs_dash_lock:
+        try:
+            sig = _get_gs_dash_signature()
+        except Exception:
+            sig = None
+        if not refresh and sig is not None and _gs_dash_cache["data"] is not None and _gs_dash_cache["sig"] == sig:
+            return _gs_dash_cache["data"]
+        importlib.reload(global_sovereign_service)
+        res = global_sovereign_service.get_global_sovereign_dashboard_data(force_refresh=refresh)
+        if sig is not None and isinstance(res, dict):
+            _gs_dash_cache["sig"] = sig
+            _gs_dash_cache["data"] = res
+        return res
 
 @app.get("/api/global_sovereign/dml-dsr")
 @app.get("/api/global-sovereign/dml-dsr")
@@ -4686,6 +4736,121 @@ def get_global_sovereign_rank_ic(start_date: str = None, end_date: str = None, f
     """全球泰坦 Rank IC 動態因子檢驗 API：支援任意時間範圍與六大因子評估"""
     import global_sovereign_service
     return global_sovereign_service.get_global_titan_rank_ic_analysis(start_date, end_date, factor)
+
+_comp_v3_lock = threading.Lock()
+_comp_v3_cache = {"sig": None, "data": None}
+
+
+def _get_comp_v3_signature():
+    json_path = os.path.join(BASE_DIR, "frontend", "src", "data", "defaultComplementaryV3Data.json")
+    svc_path = os.path.join(BASE_DIR, "complementary_v3_service.py")
+    j_mtime = os.path.getmtime(json_path) if os.path.exists(json_path) else 0.0
+    s_mtime = os.path.getmtime(svc_path) if os.path.exists(svc_path) else 0.0
+    conn = get_db_connection()
+    try:
+        c = conn.cursor()
+        max_tw = c.execute("SELECT MAX(date) FROM daily_stock").fetchone()[0]
+        max_gs = c.execute("SELECT MAX(date) FROM global_stock_daily").fetchone()[0]
+        return (j_mtime, s_mtime, max_tw, max_gs)
+    finally:
+        conn.close()
+
+
+def _ensure_comp_v3_portfolio_table(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS complementary_v3_user_state (
+            username TEXT PRIMARY KEY,
+            usd_fx REAL DEFAULT 32.5,
+            tx_history TEXT DEFAULT '[]',
+            dismissed_suggestions TEXT DEFAULT '[]',
+            updated_at TEXT
+        )
+    """)
+    conn.commit()
+
+
+@app.get("/api/complementary_v3/dashboard")
+@app.get("/api/complementary-v3/dashboard")
+def get_complementary_v3_dashboard(refresh: bool = False):
+    """全球泰坦互補戰艦 V3 看板：22Y 無空窗 PIT 多梯隊選股、即時報價與 8 道檢察官驗證"""
+    import importlib
+    import complementary_v3_service
+    try:
+        sig = _get_comp_v3_signature()
+    except Exception:
+        sig = None
+    if not refresh and sig is not None and _comp_v3_cache["data"] is not None and _comp_v3_cache["sig"] == sig:
+        return _comp_v3_cache["data"]
+    with _comp_v3_lock:
+        try:
+            sig = _get_comp_v3_signature()
+        except Exception:
+            sig = None
+        if not refresh and sig is not None and _comp_v3_cache["data"] is not None and _comp_v3_cache["sig"] == sig:
+            return _comp_v3_cache["data"]
+        importlib.reload(complementary_v3_service)
+        res = (
+            complementary_v3_service.compute_complementary_v3_dashboard(force_rebuild=True, save_json=True)
+            if refresh
+            else complementary_v3_service.get_complementary_v3_dashboard_data(force_refresh=False)
+        )
+        if sig is not None and isinstance(res, dict) and res.get("status") == "ok":
+            _comp_v3_cache["sig"] = sig
+            _comp_v3_cache["data"] = res
+        return res
+
+
+@app.get("/api/complementary_v3/portfolio")
+def get_complementary_v3_portfolio(username: str = "hotpotlu"):
+    """讀取使用者於全球泰坦互補戰艦 V3 之實戰交易流水帳與匯率設定"""
+    conn = get_db_connection()
+    try:
+        _ensure_comp_v3_portfolio_table(conn)
+        row = conn.execute(
+            "SELECT username, usd_fx, tx_history, dismissed_suggestions, updated_at FROM complementary_v3_user_state WHERE username = ?",
+            (username,),
+        ).fetchone()
+        if not row:
+            return {"status": "empty", "username": username}
+        return {
+            "status": "ok",
+            "username": row[0],
+            "usd_fx": float(row[1] or 32.5),
+            "tx_history": json.loads(row[2] or "[]"),
+            "dismissed_suggestions": json.loads(row[3] or "[]"),
+            "updated_at": row[4],
+        }
+    finally:
+        conn.close()
+
+
+@app.post("/api/complementary_v3/portfolio")
+def save_complementary_v3_portfolio(payload: dict = Body(...)):
+    """儲存使用者於全球泰坦互補戰艦 V3 之實戰交易流水帳"""
+    username = str(payload.get("username") or "hotpotlu").strip() or "hotpotlu"
+    usd_fx = float(payload.get("usd_fx") or 32.5)
+    tx_history = json.dumps(payload.get("tx_history") or [], ensure_ascii=False)
+    dismissed = json.dumps(payload.get("dismissed_suggestions") or [], ensure_ascii=False)
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_db_connection()
+    try:
+        _ensure_comp_v3_portfolio_table(conn)
+        conn.execute(
+            """
+            INSERT INTO complementary_v3_user_state (username, usd_fx, tx_history, dismissed_suggestions, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(username) DO UPDATE SET
+                usd_fx = excluded.usd_fx,
+                tx_history = excluded.tx_history,
+                dismissed_suggestions = excluded.dismissed_suggestions,
+                updated_at = excluded.updated_at
+            """,
+            (username, usd_fx, tx_history, dismissed, now_str),
+        )
+        conn.commit()
+        return {"status": "ok", "username": username, "updated_at": now_str}
+    finally:
+        conn.close()
 
 _causal_titan_lock = threading.Lock()
 

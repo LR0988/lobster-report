@@ -15,6 +15,7 @@ import pureSniperCurveData from '../data/pure_sniper_curve.json';
 import etf0020HoldingsData from '../data/etf_0020_holdings.json';
 import defaultPodcastData from '../data/defaultPodcastData.json';
 import GlobalSovereignDashboard from './GlobalSovereignDashboard';
+import GlobalComplementaryV3Dashboard from './GlobalComplementaryV3Dashboard';
 import TaiwanCausalTitanDashboard from './TaiwanCausalTitanDashboard';
 import OversoldSniperDashboard from './OversoldSniperDashboard';
 import TwAsymmetricAlphaDashboard from './TwAsymmetricAlphaDashboard';
@@ -4300,6 +4301,7 @@ function StockDashboard() {
             { id: 'market_ml', label: '📊 股市策略總覽' },
             { id: 'taiwan_causal_titan', label: '👑 台股因果泰坦 (上限1億)' },
             { id: 'global_sovereign', label: '👑 全球主權泰坦 (無上限)' },
+            { id: 'complementary_v3', label: '🛡️ 全球泰坦互補 V3 (無上限)' },
             { id: 'commodity_cta', label: '🛢️ 全球原物料期貨 CTA (無上限)' },
             { id: 'oversold_sniper', label: '🎯 超賣快打 (上限500萬)' },
             { id: 'asymmetric_alpha', label: '⚡ 可轉債暴擊 (CB:5000萬/CBAS:300萬)' },
@@ -8444,6 +8446,16 @@ function StockDashboard() {
         {activeTab === 'global_sovereign' && (
           <GlobalSovereignDashboard 
             key={scraperLiveStatus?.finished_at || 'init'} 
+            onTriggerScraper={() => handleTriggerDbScraper('all', '全市場 24 張核心資料表與四大策略訊號', 'all_tables')}
+            isScraperRunning={Boolean(scraperLiveStatus?.is_running)}
+            scraperStatus={scraperLiveStatus}
+          />
+        )}
+
+        {/* ===== 🛡️ 全球泰坦互補戰艦 V3 看板 ===== */}
+        {activeTab === 'complementary_v3' && (
+          <GlobalComplementaryV3Dashboard
+            key={scraperLiveStatus?.finished_at || 'init'}
             onTriggerScraper={() => handleTriggerDbScraper('all', '全市場 24 張核心資料表與四大策略訊號', 'all_tables')}
             isScraperRunning={Boolean(scraperLiveStatus?.is_running)}
             scraperStatus={scraperLiveStatus}

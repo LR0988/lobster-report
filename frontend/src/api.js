@@ -1410,3 +1410,63 @@ export async function apiDeleteCommodityCtaTrade(tradeId) {
   return await res.json();
 }
 
+// ==========================================
+// 🛡️ 全球泰坦互補戰艦 V3 Dashboard & Portfolio API (本機 tw_stock.db + Supabase 雲端備援)
+// ==========================================
+export async function apiGetComplementaryV3Dashboard(refresh = false) {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/complementary_v3/dashboard?refresh=${refresh ? 'true' : 'false'}&t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.status === 'ok') {
+        return { ...json, _source: 'local_api' };
+      }
+    }
+  } catch (err) {
+    console.warn(`本機 ${base}/api/complementary_v3/dashboard 未連線，嘗試雲端備援:`, err.message);
+  }
+
+  try {
+    const supRes = await supabaseDirectFetch(`/stock_ml_cache?model_type=eq.complementary_v3_dashboard&select=payload&t=${Date.now()}`);
+    if (supRes.ok) {
+      const rows = await supRes.json();
+      if (rows && rows.length > 0 && rows[0].payload) {
+        const parsed = typeof rows[0].payload === 'string' ? JSON.parse(rows[0].payload) : rows[0].payload;
+        if (parsed && parsed.status === 'ok') {
+          return { ...parsed, _source: 'supabase_cache' };
+        }
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+export async function apiGetComplementaryV3Portfolio(username = 'hotpotlu') {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/complementary_v3/portfolio?username=${encodeURIComponent(username)}&t=${Date.now()}`, { cache: 'no-store' });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+  return null;
+}
+
+export async function apiSaveComplementaryV3Portfolio(payload) {
+  const base = await resolveApiBase();
+  try {
+    const res = await fetch(`${base}/api/complementary_v3/portfolio`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {}
+  return null;
+}
+
+
