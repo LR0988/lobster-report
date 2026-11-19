@@ -139,7 +139,7 @@ def sync_ml_cache(sb_conn):
     except Exception as e:
         print(f"  ✗ 同步全球主權泰坦失敗: {e}")
 
-    # 上傳全球泰坦互補戰艦 V9 五檔精銳22號同步版最新數據 (complementary_v3_dashboard)
+    # 上傳全球泰坦互補戰艦 V10 五檔精銳22號同步版最新數據 (complementary_v3_dashboard)
     try:
         import importlib
         import complementary_v3_service
@@ -152,9 +152,9 @@ def sync_ml_cache(sb_conn):
                 ON CONFLICT (model_type) DO UPDATE
                 SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
             """, ("complementary_v3_dashboard", json.dumps(v3_data, ensure_ascii=False)))
-            print("  ✓ 全球泰坦互補戰艦 V9 五檔精銳22號同步版最新即時數據同步至 stock_ml_cache 完成")
+            print("  ✓ 全球泰坦互補戰艦 V10 五檔精銳22號同步版最新即時數據同步至 stock_ml_cache 完成")
     except Exception as e:
-        print(f"  ✗ 同步全球泰坦互補戰艦 V9 五檔精銳22號同步版失敗: {e}")
+        print(f"  ✗ 同步全球泰坦互補戰艦 V10 五檔精銳22號同步版失敗: {e}")
 
     # 上傳台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT) 最新數據 (causal_titan_dashboard)
     try:
