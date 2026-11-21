@@ -22,7 +22,7 @@ const TEMPLATE_INIT_TX = {
   date: '2026-01-02',
   action: '投入現金',
   ticker: '-',
-  name: 'V10 五檔22號同步初始本金',
+  name: 'V12 五檔22號同步初始本金',
   currency: 'TWD',
   shares: 0,
   price: 0,
@@ -30,7 +30,7 @@ const TEMPLATE_INIT_TX = {
   cash_flow_twd: 1000000,
   realized_pnl_twd: null,
   realized_return_pct: null,
-  note: '全球泰坦互補戰艦 V10 五檔精銳22號同步版初始入金 NT$ 1,000,000（可在上方隨時存入或調整本金）',
+  note: '全球泰坦互補戰艦 V12 五檔精銳22號同步版初始入金 NT$ 1,000,000（可在上方隨時存入或調整本金）',
 };
 
 const fmtNum = (n, d = 2) => {
@@ -270,7 +270,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
   const totalNetProfitPct = totalInvestedPrincipal > 0 ? (totalNetProfitTwd / totalInvestedPrincipal) * 100 : 0;
   const userExposurePct = totalNetAssetsTwd > 0 ? (totalMarketValueTwd / totalNetAssetsTwd) * 100 : 0;
 
-  // V10 Single-Table Holdings & Countdown (`Monthly 22nd Titan Sync`)
+  // V12 Single-Table Holdings & Countdown (`Monthly 22nd Titan Sync`)
   const tranches = data?.official_active_tranches || {};
   const syncTranche = tranches.sync_22 || (Array.isArray(tranches.sub_tranches) ? tranches.sub_tranches[0] : null) || {};
   const mergedHoldings = data?.merged_active_holdings || [];
@@ -401,7 +401,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           cash_flow_twd: -Math.round(totalCostTwd),
           realized_pnl_twd: null,
           realized_return_pct: null,
-          note: `V10 五檔22號同步 ${sugg.action} ${shares} 股 (目標 ${sugg.targetWeightPct}%)`,
+          note: `V12 五檔22號同步 ${sugg.action} ${shares} 股 (目標 ${sugg.targetWeightPct}%)`,
         },
         ...prev,
       ]);
@@ -427,7 +427,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           cash_flow_twd: Math.round(netCashTwd),
           realized_pnl_twd: netPnlTwd,
           realized_return_pct: retPct,
-          note: `V10 五檔22號同步 ${sugg.action} ${shares} 股 (實現 ${fmtTwd(netPnlTwd)})`,
+          note: `V12 五檔22號同步 ${sugg.action} ${shares} 股 (實現 ${fmtTwd(netPnlTwd)})`,
         },
         ...prev,
       ]);
@@ -599,47 +599,47 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
   const bb50Spy05 = kpis.barbells?.bb50_spy_sa?.era_2005_2026 || {};
   const spy10 = kpis.spy?.era_2010_2026 || {};
   const pa = data?.prosecutor_audit || {};
-  const crashV10 = pa?.titan_crash_months?.sleeves?.V10_Sync22_Champion || pa?.titan_crash_months?.sleeves?.V9_Sync22_Champion || {};
+  const crashV12 = pa?.titan_crash_months?.sleeves?.V12_Sync22_Champion || pa?.titan_crash_months?.sleeves?.Live_V10_Sync22_Champion || {};
 
   const activeLensCards = useMemo(() => {
     if (engineLens === 'v7_cochamp') {
       return [
-        { lbl: 'V10_N6 均衡 6 檔年化 (10–26)', val: `${cochamp10.cagr ?? 25.76}%`, sub: `${cochamp10.mult ?? 47.82}x ｜ Ex26 ${cochampEx26.cagr ?? 23.91}% (vs SPY ${spy10.cagr ?? 13.62}%)`, col: '#FDE047' },
-        { lbl: '05–26 全22年 & G1/G2', val: `${cochamp05.cagr ?? 23.15}%`, sub: `G1 ${cochampG1.cagr ?? 18.4}% / G2 ${cochampG2.cagr ?? 28.28}%`, col: '#38BDF8' },
-        { lbl: '極簡配置 (3 美股 + 3 台股)', val: `${n6Holdings.length || 6} 檔滿倉`, sub: `每月 22 號操作 1 次 ｜ mMDD ${cochamp10.m_mdd ?? -18.12}%`, col: '#FBBF24' },
-        { lbl: 'Sharpe / Calmar / 2x成本', val: `${cochamp10.sharpe ?? 1.5} / ${cochamp10.calmar ?? 1.42}`, sub: `2x 交易成本仍 24.33% ｜ 50/50 槓鈴 ${bb50co.cagr ?? 37.42}%`, col: '#A78BFA' },
-        { lbl: 'vs 泰坦嚴格正交度', val: `ExSPY +${kpis.v7_cochamp?.corr_ex_spy_vs_titan ?? 0.091}`, sub: `每日重疊 ${kpis.v7_cochamp?.mean_weight_overlap_pct ?? 0.11}% ｜ 當期 0 檔重疊`, col: '#6EE7B7' },
+        { lbl: 'V12_N6 均衡 6 檔年化 (10–26)', val: `${cochamp10.cagr ?? 24.21}%`, sub: `${cochamp10.mult ?? 38.8}x ｜ Ex26 ${cochampEx26.cagr ?? 22.23}% (vs SPY ${spy10.cagr ?? 13.62}%)`, col: '#FDE047' },
+        { lbl: '05–26 全22年 & G1/G2', val: `${cochamp05.cagr ?? 21.14}%`, sub: `G1 ${cochampG1.cagr ?? 15.98}% / G2 ${cochampG2.cagr ?? 26.69}%`, col: '#38BDF8' },
+        { lbl: '極簡配置 (3 美股 + 3 台股)', val: `${n6Holdings.length || 6} 檔滿倉`, sub: `每月 22 號操作 1 次 ｜ mMDD ${cochamp10.m_mdd ?? -18.03}%`, col: '#FBBF24' },
+        { lbl: 'Sharpe / Calmar / 2x成本', val: `${cochamp10.sharpe ?? 1.39} / ${cochamp10.calmar ?? 1.34}`, sub: `2x 交易成本仍 22.62% ｜ 50/50 槓鈴 ${bb50co.cagr ?? 36.55}%`, col: '#A78BFA' },
+        { lbl: 'vs 泰坦嚴格正交度', val: `ExSPY +${kpis.v7_cochamp?.corr_ex_spy_vs_titan ?? 0.081}`, sub: `每日重疊 ${kpis.v7_cochamp?.mean_weight_overlap_pct ?? 0.25}% ｜ 當期 0 檔重疊`, col: '#6EE7B7' },
       ];
     }
     if (engineLens === 'v3_champ') {
       return [
-        { lbl: 'V10_SOV3 月頻護盾年化', val: `${champ10.cagr ?? 25.27}%`, sub: `Ex26 ${champEx26.cagr ?? 24.84}% (月頻換倉連動，零週頻操作)`, col: '#34D399' },
-        { lbl: '05–26 全22年實股年化', val: `${champ05.cagr ?? 22.27}%`, sub: `G1 ${champG1.cagr ?? 14.76}% / G2 ${champG2.cagr ?? 30.48}%`, col: '#38BDF8' },
-        { lbl: '10–26 mMDD / dMDD', val: `${champ10.m_mdd ?? -17.14}% / ${champ10.d_mdd ?? -19.74}%`, sub: `SOV3 sv=16% 下行保護 (2008 金融海嘯僅 -17.10%)`, col: '#FBBF24' },
-        { lbl: 'Sharpe / Sortino / Calmar', val: `${champ10.sharpe ?? 1.6} / ${champ10.sortino ?? 2.41} / ${champ10.calmar ?? 1.47}`, sub: `2022 升息熊市僅 -2.35% (2x 成本仍 23.56%)`, col: '#A78BFA' },
-        { lbl: '月頻平均實股曝險', val: `${kpis.v3_champ?.avg_exposure_pct ?? 92.5}%`, sub: `均值重疊 ${kpis.v3_champ?.overlap?.mean_weight_overlap_pct ?? 0.16}% ｜ 0 檔重疊`, col: '#6EE7B7' },
+        { lbl: 'V12_SOV3 月頻護盾年化', val: `${champ10.cagr ?? 29.1}%`, sub: `Ex26 ${champEx26.cagr ?? 27.85}% (月頻換倉連動，零週頻操作)`, col: '#34D399' },
+        { lbl: '05–26 全22年實股年化', val: `${champ05.cagr ?? 24.51}%`, sub: `G1 ${champG1.cagr ?? 14.82}% / G2 ${champG2.cagr ?? 35.26}%`, col: '#38BDF8' },
+        { lbl: '10–26 mMDD / dMDD', val: `${champ10.m_mdd ?? -12.86}% / ${champ10.d_mdd ?? -17.99}%`, sub: `SOV3 sv=16% 下行保護 (2008 金融海嘯僅 -23.93%)`, col: '#FBBF24' },
+        { lbl: 'Sharpe / Sortino / Calmar', val: `${champ10.sharpe ?? 1.77} / ${champ10.sortino ?? 2.75} / ${champ10.calmar ?? 2.26}`, sub: `2022 升息熊市逆勢 +7.15% (2x 成本仍 27.19%)`, col: '#A78BFA' },
+        { lbl: '月頻平均實股曝險', val: `${kpis.v3_champ?.avg_exposure_pct ?? 92.6}%`, sub: `均值重疊 ${kpis.v3_champ?.overlap?.mean_weight_overlap_pct ?? 0.21}% ｜ 0 檔重疊`, col: '#6EE7B7' },
       ];
     }
     if (engineLens === 'barbell_50') {
       return [
-        { lbl: '50/50 泰坦×V10 槓鈴 (SA)', val: `${bb50sa.cagr ?? 38.96}%`, sub: `${bb50sa.mult ?? 257.62}x ｜ Ex26 ${bb50saEx26.cagr ?? 35.45}% ｜ 70/30 Q 達 ${bb70q.cagr ?? 41.71}%`, col: '#F59E0B' },
-        { lbl: '05–26 全22年槓鈴年化', val: `${bb50sa05.cagr ?? 36.38}%`, sub: `mMDD ${bb50sa05.m_mdd ?? -18.05}% ｜ 同比例 Titan+SPY ${bb50Spy05.cagr ?? 28.44}%`, col: '#38BDF8' },
-        { lbl: '10–26 mMDD / dMDD', val: `${bb50sa.m_mdd ?? -18.05}% / ${bb50sa.d_mdd ?? -22.21}%`, sub: `遠勝單跑 Titan (${kpis.titan_official?.era_2010_2026?.m_mdd ?? -26.07}%) 與 SPY (${bb50Spy.d_mdd ?? -27.70}%)`, col: '#34D399' },
-        { lbl: 'Sharpe / Calmar', val: `${bb50sa.sharpe ?? 1.77} / ${bb50sa.calmar ?? 2.16}`, sub: `2010–26 ${bb50sa.win_yrs ?? '17/17'} 零虧損年 ｜ 2022 熊市 +3.58%`, col: '#A78BFA' },
-        { lbl: '泰坦重挫月保護 (32次<-3%)', val: `${crashV10.pct_beat_titan ?? 93.8}% 勝泰坦`, sub: `V10 單體均 ${crashV10.mean_ret_pct ?? -0.26}% (vs SPY -2.06% / 舊 V9 -0.56%)`, col: '#6EE7B7' },
+        { lbl: '50/50 泰坦×V12 槓鈴 (SA)', val: `${bb50sa.cagr ?? 40.8}%`, sub: `${bb50sa.mult ?? 321.71}x ｜ Ex26 ${bb50saEx26.cagr ?? 36.94}% ｜ 70/30 Q 達 ${bb70q.cagr ?? 42.78}%`, col: '#F59E0B' },
+        { lbl: '05–26 全22年槓鈴年化', val: `${bb50sa05.cagr ?? 37.19}%`, sub: `mMDD ${bb50sa05.m_mdd ?? -19.83}% ｜ 同比例 Titan+SPY ${bb50Spy05.cagr ?? 28.39}%`, col: '#38BDF8' },
+        { lbl: '10–26 mMDD / dMDD', val: `${bb50sa.m_mdd ?? -15.72}% / ${bb50sa.d_mdd ?? -22.23}%`, sub: `遠勝單跑 Titan (${kpis.titan_official?.era_2010_2026?.m_mdd ?? -26.07}%) 與 SPY (${bb50Spy.d_mdd ?? -27.7}%)`, col: '#34D399' },
+        { lbl: 'Sharpe / Calmar', val: `${bb50sa.sharpe ?? 1.85} / ${bb50sa.calmar ?? 2.59}`, sub: `2010–26 ${bb50sa.win_yrs ?? '17/17'} 零虧損年 ｜ 2022 熊市 +11.91%`, col: '#A78BFA' },
+        { lbl: '泰坦重挫月保護 (32次<-3%)', val: `${crashV12.pct_beat_titan ?? 90.6}% 勝泰坦`, sub: `V12 單體均漲 +${crashV12.mean_ret_pct ?? 0.21}% (vs SPY -2.06% / 舊 V10 -0.26%)`, col: '#6EE7B7' },
       ];
     }
     return [
-      { lbl: 'V10_Sync22 五檔旗艦 (10–26)', val: `${core10.cagr ?? 28.24}%`, sub: `${core10.mult ?? 66.48}x ｜ Ex26 ${coreEx26.cagr ?? 27.6}% (vs 舊 V9 26.37%)`, col: '#34D399' },
-      { lbl: '05–26 全22年 & G1/G2', val: `${core05.cagr ?? 25.37}%`, sub: `G1 ${coreG1.cagr ?? 18.08}% / G2 ${coreG2.cagr ?? 33.33}% (零過擬合跨代穩健)`, col: '#38BDF8' },
-      { lbl: '10–26 mMDD / dMDD', val: `${core10.m_mdd ?? -19.45}% / ${core10.d_mdd ?? -25.79}%`, sub: `僅抱 5 檔 (2美3台) ｜ 2022 升息熊市逆勢 +1.30%`, col: '#FBBF24' },
-      { lbl: 'Sharpe / Calmar & 2x成本', val: `${core10.sharpe ?? 1.56} / ${core10.calmar ?? 1.45}`, sub: `2x 交易成本仍 26.45% ｜ ${core10.win_yrs ?? '16/17'} 正報酬年 (vs V4 ${v4Prev10.m_mdd ?? -23.89}%)`, col: '#A78BFA' },
-      { lbl: 'vs 泰坦嚴格正交度', val: `ExSPY +${kpis.v3_core?.corr_ex_spy_vs_titan ?? 0.072}`, sub: `每日重疊 ${kpis.v3_core?.mean_weight_overlap_pct ?? 0.16}% ｜ 當期 ${kpis.v3_core?.active_overlap_count ?? 0} 檔重疊`, col: '#6EE7B7' },
+      { lbl: 'V12_Sync22 五檔旗艦 (10–26)', val: `${core10.cagr ?? 31.8}%`, sub: `${core10.mult ?? 105.49}x ｜ Ex26 ${coreEx26.cagr ?? 30.44}% (vs 舊 V10 28.24%)`, col: '#34D399' },
+      { lbl: '05–26 全22年 & G1/G2', val: `${core05.cagr ?? 26.95}%`, sub: `G1 ${coreG1.cagr ?? 17.14}% / G2 ${coreG2.cagr ?? 37.84}% (零過擬合跨代穩健)`, col: '#38BDF8' },
+      { lbl: '10–26 mMDD / dMDD', val: `${core10.m_mdd ?? -14.67}% / ${core10.d_mdd ?? -25.92}%`, sub: `僅抱 5 檔 (2美3台) ｜ 2022 升息熊市逆勢 +15.21%`, col: '#FBBF24' },
+      { lbl: 'Sharpe / Calmar & 2x成本', val: `${core10.sharpe ?? 1.69} / ${core10.calmar ?? 2.17}`, sub: `2x 交易成本仍 29.84% ｜ ${core10.win_yrs ?? '16/17'} 正報酬年 (vs V4 ${v4Prev10.m_mdd ?? -23.89}%)`, col: '#A78BFA' },
+      { lbl: 'vs 泰坦嚴格正交度', val: `ExSPY +${kpis.v3_core?.corr_ex_spy_vs_titan ?? 0.082}`, sub: `每日重疊 ${kpis.v3_core?.mean_weight_overlap_pct ?? 0.21}% ｜ 當期 ${kpis.v3_core?.active_overlap_count ?? 0} 檔重疊`, col: '#6EE7B7' },
     ];
   }, [
     engineLens, core10, coreEx26, core05, coreG1, coreG2, cochamp10, cochampEx26, cochamp05, cochampG1, cochampG2,
     champ10, champEx26, champ05, champG1, champG2, v4Prev10, bb50sa, bb50saEx26, bb50sa05, bb50co, bb70q,
-    bb50Spy, bb50Spy05, spy10, kpis, n6Holdings.length, crashV10,
+    bb50Spy, bb50Spy05, spy10, kpis, n6Holdings.length, crashV12,
   ]);
 
   const renderSingleHoldingsTable = (rows) => {
@@ -750,12 +750,12 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(pt[k]).toFixed(1)}`).join(' ');
 
     const seriesMeta = [
-      { key: 'bb70_q', label: `70/30 泰坦×V10 (${bb70q.cagr ?? 41.71}%)`, color: '#F59E0B', width: 2.1 },
-      { key: 'bb50_sa', label: `50/50 泰坦×V10 (${bb50sa.cagr ?? 38.96}%)`, color: '#38BDF8', width: 2.5 },
+      { key: 'bb70_q', label: `70/30 泰坦×V12 (${bb70q.cagr ?? 42.78}%)`, color: '#F59E0B', width: 2.1 },
+      { key: 'bb50_sa', label: `50/50 泰坦×V12 (${bb50sa.cagr ?? 40.8}%)`, color: '#38BDF8', width: 2.5 },
+      { key: 'v3_core', label: `V12_Sync22 旗艦5檔 (${core10.cagr ?? 31.8}%)`, color: '#34D399', width: 3.0 },
       { key: 'v7_lowturn', label: `舊 V7 五梯複雜版 (${v7Prev10.cagr ?? 30.35}%)`, color: '#FB7185', width: 1.5, dash: '2,2' },
-      { key: 'v3_core', label: `V10_Sync22 旗艦5檔 (${core10.cagr ?? 28.24}%)`, color: '#34D399', width: 3.0 },
-      { key: 'v7_cochamp', label: `V10_N6 均衡6檔 (${cochamp10.cagr ?? 25.76}%)`, color: '#FDE047', width: 2.0, dash: '3,2' },
-      { key: 'v3_champ', label: `V10_SOV3 月頻護盾 (${champ10.cagr ?? 25.27}%)`, color: '#A78BFA', width: 1.9 },
+      { key: 'v3_champ', label: `V12_SOV3 月頻護盾 (${champ10.cagr ?? 29.1}%)`, color: '#A78BFA', width: 1.9 },
+      { key: 'v7_cochamp', label: `V12_N6 均衡6檔 (${cochamp10.cagr ?? 24.21}%)`, color: '#FDE047', width: 2.0, dash: '3,2' },
       { key: 'spy', label: `SPY 大盤 (${spy10.cagr ?? 13.62}%)`, color: '#94A3B8', width: 1.5, dash: '4,4' },
       ...(chartShowTitan ? [{ key: 'titan', label: 'Global Titan R26-GOLD', color: '#F43F5E', width: 1.8, dash: '6,3' }] : []),
     ];
@@ -893,10 +893,10 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', background: 'rgba(0,0,0,0.35)', padding: '4px', borderRadius: '8px' }}>
             {[
-              { id: 'v3_core', label: `🚀 V10_Sync22 旗艦 5 檔 (${core10.cagr ?? 28.24}% / Ex26 ${coreEx26.cagr ?? 27.6}%)` },
-              { id: 'v7_cochamp', label: `⚖️ V10_N6 均衡 6 檔 (${cochamp10.cagr ?? 25.76}% / Cal ${cochamp10.calmar ?? 1.42})` },
-              { id: 'v3_champ', label: `🛡️ V10_SOV3 月頻護盾 (${champ10.cagr ?? 25.27}% / mMDD ${champ10.m_mdd ?? -17.14}%)` },
-              { id: 'barbell_50', label: `⚡ 50/50 泰坦×V10 槓鈴 (${bb50sa.cagr ?? 38.96}% / 17勝年)` },
+              { id: 'v3_core', label: `🚀 V12_Sync22 旗艦 5 檔 (${core10.cagr ?? 31.8}% / Ex26 ${coreEx26.cagr ?? 30.44}%)` },
+              { id: 'v7_cochamp', label: `⚖️ V12_N6 均衡 6 檔 (${cochamp10.cagr ?? 24.21}% / Cal ${cochamp10.calmar ?? 1.34})` },
+              { id: 'v3_champ', label: `🛡️ V12_SOV3 月頻護盾 (${champ10.cagr ?? 29.1}% / mMDD ${champ10.m_mdd ?? -12.86}%)` },
+              { id: 'barbell_50', label: `⚡ 50/50 泰坦×V12 槓鈴 (${bb50sa.cagr ?? 40.8}% / 17勝年)` },
             ].map((l) => (
               <button
                 key={l.id}
@@ -960,7 +960,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          2. 🗓️ V10 五檔精銳每月 22 號泰坦 B 梯同步操作排程與三大因果升級
+          2. 🗓️ V12 五檔精銳每月 22 號泰坦 B 梯同步操作排程與四大因果升級
          ================================================================= */}
       <div className="glass-card" style={{ padding: '0.9rem 1.2rem', border: '1px solid rgba(56,189,248,0.3)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginBottom: '0.65rem' }}>
@@ -969,16 +969,16 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
               🗓️ 每月 22 號與【全球泰坦 B 梯】同步操作一次（僅 5 檔・0 子梯隊）｜本期：{nextRebalCountdown.rebalDate} 訊號 ➔ {nextRebalCountdown.entryDate} 開盤｜下次換倉：{nextRebalCountdown.next}（11/22 遇週日順延・倒數 {nextRebalCountdown.days} 天）
             </span>
             <span style={{ fontSize: '0.74rem', color: '#A7F3D0', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', padding: '0.3rem 0.65rem', borderRadius: '6px' }}>
-              🌐 嚴格非動能與對稱衛生隔離：<strong>g5 &le; 85%</strong> 進場 / <strong>&le; 93%</strong> 續抱（進場與續抱對稱排除反瀑布/機構派發）＋ 當期泰坦 ({(data?.titan_active_tickers || []).join(', ')}) <strong>0 檔重疊</strong>
+              🌐 嚴格非動能與對稱衛生隔離：<strong>g5 &le; 85%</strong> 進場 / <strong>&le; 93% + 破底汰弱</strong> 續抱（保持六柱排名 100% 純淨）＋ 當期泰坦 ({(data?.titan_active_tickers || []).join(', ')}) <strong>0 檔重疊</strong>
             </span>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(235px, 1fr))', gap: '0.55rem', fontSize: '0.73rem', color: '#CBD5E1', background: 'rgba(0,0,0,0.28)', padding: '0.6rem 0.85rem', borderRadius: '6px', marginBottom: '0.55rem' }}>
-          <div><strong style={{ color: '#38BDF8' }}>① 對稱續抱衛生紀律 (el93_clean)</strong>：補齊舊 V9 續抱緩衝區未排除 <code>Waterfall / InstDist</code> 之漏洞（<code>+0.86%</code> 年化，<code>Ex26</code> 由 <code>26.37% ➔ 27.27%</code>），避免持有基本面或籌碼已崩潰的價值陷阱。</div>
-          <div><strong style={{ color: '#34D399' }}>② Minsky 過熱循環低波修正 (P10_MINSKY_ONLY_BAB_SEMIVOL)</strong>：對過去 <code>252D</code> 大漲 <code>&gt; +50%</code> 的景氣強股調升風險平價分母，修正上漲期靜態波動率假平靜錯覺，將 <code>10–26 / Ex26</code> 推至 <strong>28.23% / 27.59%</strong>。</div>
-          <div><strong style={{ color: '#A78BFA' }}>③ QQQ 崩盤貝塔尾部風險平價 (P10_MINSKY_QCRASH_BAB_SEMIVOL)</strong>：僅統計 <code>QQQ &lt; -1.0%</code> 科技重挫日的條件下行貝塔並對高敏感股自動減重，將 <code>ExSPY Corr</code> 壓低至 <strong>+0.072</strong>、泰坦重挫月均跌僅 <strong>-0.26%</strong>。</div>
-          <div><strong style={{ color: '#FBBF24' }}>④ 2.0x 緩衝 ＋ &plusmn;3% 免摩擦換倉</strong>：維持 <code>5 檔</code>（2 美股＋3 台股）月 22 號單表操作一次、舊持股 <code>2.0&times;</code> 排名內且權重漂移 &le; <strong>&plusmn;3%</strong> 即原單續抱（保留 <code>1.30%</code> 現金尾差），雙倍成本壓測仍保 <strong>26.45%</strong>。</div>
+          <div><strong style={{ color: '#38BDF8' }}>① Markowitz 逆半變異數 × FortSHY 資本底座 (V11 Base)</strong>：將下行風險平價從一階 <code>1/&sigma;_-</code> 升級為 <code>1/&sigma;_-&sup2; &times; FortSHY</code> 凸配置，淘汰虛假低波陷阱，把年化從 V10 <code>28.24%</code> 墊高至 <strong>29.02% / Ex26 28.33%</strong>。</div>
+          <div><strong style={{ color: '#34D399' }}>② 結構跌勢降權 × 60D 機構吸籌 × 純堡壘資金分配</strong>：維持六柱排名 100% 純淨，僅在風險預算分母加入 <code>3M/6M</code> 跌勢減重與 <code>IO60 + PureFortress</code> 加權，純權重版即躍升至 <strong>32.07% / Ex26 31.04%</strong>。</div>
+          <div><strong style={{ color: '#A78BFA' }}>③ 126D 本地市場下行貝塔縮放 (beta_dn^0.70)</strong>：計算個股相對本地大盤 (SPY / TW PIT) 下跌日的條件貝塔，預先對高敏感循環股縮容；不設硬性單股上限即保全 <strong>31.78% / 17 勝年</strong> 並維持極優正交。</div>
+          <div><strong style={{ color: '#FBBF24' }}>④ 非對稱舊持股雙期破底汰弱 (r63 &amp; r126 &lt; -16%)</strong>：全歷史 <code>1,310</code> 槽位僅釋放 <code>56</code> 次破底舊股續抱保護（當期由萬海 <code>2615.TW</code> 取代破底的亞德客），將 <code>mMDD</code> 一舉壓降至 <strong>-14.67%</strong>（2x 成本仍 <strong>29.84%</strong>）。</div>
         </div>
 
         {syncTranche?.previous_rebal_note && (
@@ -989,13 +989,13 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          3. 🏛️ 當期 V10 極簡 22 號單表實盤持倉 (`5 檔旗艦` / `6 檔均衡` / `候補雷達`)
+          3. 🏛️ 當期 V12 極簡 22 號單表實盤持倉 (`5 檔旗艦` / `6 檔均衡` / `候補雷達`)
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.1rem', borderTop: '3px solid #38BDF8' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.8rem' }}>
           <div>
             <h4 style={{ margin: 0, color: '#F8FAFC', fontSize: '1.05rem' }}>
-              🏛️ V10_Sync22 當期實盤五檔精銳單表（{mergedHoldings.length} 檔實佔 {activeSummary.stocks_mtm_sum_pct ?? 98.70}%・0 子梯隊）
+              🏛️ V12_Sync22 當期實盤五檔精銳單表（{mergedHoldings.length} 檔實佔 {activeSummary.stocks_mtm_sum_pct ?? 100.0}%・0 子梯隊）
             </h4>
             <div style={{ fontSize: '0.73rem', color: '#6EE7B7', marginTop: '3px' }}>
               ✅ 與全球主權泰坦【每月 22 號 B 梯】同日動作一次（{nextRebalCountdown.rebalDate} 訊號 ➔ {nextRebalCountdown.entryDate} 開盤成交），全月免再調整，下次回測換倉日：{nextRebalCountdown.next}。
@@ -1003,8 +1003,8 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           </div>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
             {[
-              { id: 'holdings', label: `🎯 旗艦精銳 5 檔單表 (${mergedHoldings.length} 檔 = ${activeSummary.stocks_mtm_sum_pct ?? 98.70}%)` },
-              { id: 'n6_holdings', label: `⚖️ 穩健均衡 6 檔對照 (${n6Holdings.length} 檔 = ${activeSummary.n6_stocks_mtm_sum_pct ?? 96.38}%)` },
+              { id: 'holdings', label: `🎯 旗艦精銳 5 檔單表 (${mergedHoldings.length} 檔 = ${activeSummary.stocks_mtm_sum_pct ?? 100.0}%)` },
+              { id: 'n6_holdings', label: `⚖️ 穩健均衡 6 檔對照 (${n6Holdings.length} 檔 = ${activeSummary.n6_stocks_mtm_sum_pct ?? 100.0}%)` },
               { id: 'watchlist', label: '📡 非泰坦實體營運候補雷達' },
             ].map((tb) => (
               <button
@@ -1030,8 +1030,8 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         {picksTab === 'watchlist' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(430px, 1fr))', gap: '1rem' }}>
             {[
-              { title: '🇺🇸 美股 S&P 500 PIT 候補 Top 15 (非泰坦・V10_Sync22 六柱合意)', list: data?.top_watchlist_candidates?.us || [] },
-              { title: '🇹🇼 台股純上市 0050∪0051 PIT 候補 Top 12 (非泰坦・V10_Sync22 六柱合意)', list: data?.top_watchlist_candidates?.tw || [] },
+              { title: '🇺🇸 美股 S&P 500 PIT 候補 Top 15 (非泰坦・V12_Sync22 六柱合意)', list: data?.top_watchlist_candidates?.us || [] },
+              { title: '🇹🇼 台股純上市 0050∪0051 PIT 候補 Top 12 (非泰坦・V12_Sync22 六柱合意)', list: data?.top_watchlist_candidates?.tw || [] },
             ].map((grp) => (
               <div key={grp.title}>
                 <div style={{ fontWeight: 'bold', color: '#93C5FD', marginBottom: '0.45rem', fontSize: '0.88rem' }}>{grp.title}</div>
@@ -1078,20 +1078,20 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          4. 🎯 V10 五檔22號一鍵同步跟單計算機 與 💼 我的目前持股 & 交易流水帳
+          4. 🎯 V12 五檔22號一鍵同步跟單計算機 與 💼 我的目前持股 & 交易流水帳
          ================================================================= */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '1rem' }}>
         <div className="glass-card" style={{ padding: '1rem', borderTop: '3px solid #F59E0B' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <h4 style={{ margin: 0, color: '#FDE047' }}>🎯 V10 五檔每月 22 號跟單下單計算機 ({rebalanceSuggestions.length} 筆建議)</h4>
+            <h4 style={{ margin: 0, color: '#FDE047' }}>🎯 V12 五檔每月 22 號跟單下單計算機 ({rebalanceSuggestions.length} 筆建議)</h4>
             <select
               value={rebalMode}
               onChange={(e) => setRebalMode(e.target.value)}
               style={{ background: 'rgba(15,23,42,0.85)', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', padding: '0.28rem 0.55rem', fontSize: '0.75rem' }}
             >
-              <option value="sync22_n5">{`🎯 旗艦精銳 5 檔單表 (V10_Sync22・主力推薦)`}</option>
+              <option value="sync22_n5">{`🎯 旗艦精銳 5 檔單表 (V12_Sync22・主力推薦)`}</option>
               {n6Holdings.length > 0 && (
-                <option value="sync22_n6">{`⚖️ 穩健均衡 6 檔單表 (V10_N6_Balanced)`}</option>
+                <option value="sync22_n6">{`⚖️ 穩健均衡 6 檔單表 (V12_N6_Balanced)`}</option>
               )}
             </select>
           </div>
@@ -1234,11 +1234,11 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          5. 📈 互動式多策略累積淨值曲線與泰坦×V10 槓鈴壓力比較
+          5. 📈 互動式多策略累積淨值曲線與泰坦×V12 槓鈴壓力比較
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #A855F7' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.75rem' }}>
-          <h4 style={{ margin: 0, color: '#E9D5FF' }}>📈 累積淨值走勢對照（V10_Sync22 五檔旗艦 × V10_N6 × V10_SOV3 × 泰坦雙艙槓鈴 vs 舊 V7 &amp; SPY）</h4>
+          <h4 style={{ margin: 0, color: '#E9D5FF' }}>📈 累積淨值走勢對照（V12_Sync22 五檔旗艦 × V12_SOV3 × V12_N6 × 泰坦雙艙槓鈴 vs 舊 V7 &amp; SPY）</h4>
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
             {[
               { id: '2010', label: '2010–2026 主期' },
@@ -1278,11 +1278,11 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                 <th style={{ textAlign: 'right' }}>SPY 大盤</th>
                 <th style={{ textAlign: 'right' }}>Global Titan</th>
                 <th style={{ textAlign: 'right' }}>舊 V7 五梯</th>
-                <th style={{ textAlign: 'right' }}>V10_Sync22 (5檔)</th>
-                <th style={{ textAlign: 'right' }}>V10_N6 (6檔)</th>
-                <th style={{ textAlign: 'right' }}>V10_SOV3</th>
-                <th style={{ textAlign: 'right' }}>50/50 泰坦×V10 (SA)</th>
-                <th style={{ textAlign: 'right' }}>70/30 泰坦×V10 (Q)</th>
+                <th style={{ textAlign: 'right' }}>V12_Sync22 (5檔)</th>
+                <th style={{ textAlign: 'right' }}>V12_N6 (6檔)</th>
+                <th style={{ textAlign: 'right' }}>V12_SOV3</th>
+                <th style={{ textAlign: 'right' }}>50/50 泰坦×V12 (SA)</th>
+                <th style={{ textAlign: 'right' }}>70/30 泰坦×V12 (Q)</th>
                 <th style={{ textAlign: 'right' }}>50/50 泰坦×SPY</th>
               </tr>
             </thead>
@@ -1346,14 +1346,14 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
             <thead>
               <tr>
                 <th>年份</th>
-                <th style={{ textAlign: 'right' }}>V10_Sync22 (5檔)</th>
-                <th style={{ textAlign: 'right' }}>V10_N6 (6檔)</th>
-                <th style={{ textAlign: 'right' }}>V10_SOV3</th>
+                <th style={{ textAlign: 'right' }}>V12_Sync22 (5檔)</th>
+                <th style={{ textAlign: 'right' }}>V12_N6 (6檔)</th>
+                <th style={{ textAlign: 'right' }}>V12_SOV3</th>
                 <th style={{ textAlign: 'right' }}>50/50 槓鈴</th>
                 <th style={{ textAlign: 'right' }}>Global Titan</th>
                 <th style={{ textAlign: 'right' }}>SPY 大盤</th>
                 <th style={{ textAlign: 'right' }}>超額 SPY</th>
-                <th style={{ textAlign: 'right' }}>V10 年內 MDD</th>
+                <th style={{ textAlign: 'right' }}>V12 年內 MDD</th>
                 <th style={{ textAlign: 'center' }}>22號調倉期 / 持股</th>
               </tr>
             </thead>
@@ -1411,17 +1411,17 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       </div>
 
       {/* =================================================================
-          7. 🔬 Round 10 (`V10_Sync22`) 8 道檢察官嚴酷拷問與逐筆 PIT 實證
+          7. 🔬 Round 12 (`V12_Sync22`) 8 道檢察官嚴酷拷問與逐筆 PIT 實證
          ================================================================= */}
       <div className="glass-card" style={{ padding: '1.15rem', borderTop: '3px solid #10B981' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.8rem' }}>
-          <h4 style={{ margin: 0, color: '#6EE7B7' }}>🔬 Round 10 (<code>V10_Sync22</code>) 8 道檢察官嚴酷拷問與逐筆 PIT 實證</h4>
+          <h4 style={{ margin: 0, color: '#6EE7B7' }}>🔬 Round 12 (<code>V12_Sync22</code>) 8 道檢察官嚴酷拷問與逐筆 PIT 實證</h4>
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
             {[
-              { id: 'grid27', label: '📐 27 參數高原' },
-              { id: 'gate0', label: '🌪️ Gate 0 日22裸訊號 & 崩盤保護' },
-              { id: 'loop1', label: '🪜 證偽對照 & V10 三階升級' },
-              { id: 'loo', label: '✂️ LOO 六因子・對稱防呆・Minsky・QCrash消融' },
+              { id: 'grid27', label: '📐 雙組 27 參數高原' },
+              { id: 'gate0', label: '🌪️ Gate 0 裸訊號 / 風險預算 & 崩盤保護' },
+              { id: 'loop1', label: '🪜 證偽對照 & V12 四階升級' },
+              { id: 'loo', label: '✂️ LOO 六因子 & V12 風險預算消融' },
               { id: 'phase', label: '📅 月內 1/10/15/22 號錨點' },
               { id: 'harsh_jk', label: '💸 2x成本 & 刀切去 Top-10' },
             ].map((pt) => (
@@ -1439,40 +1439,114 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         </div>
 
         {prosecutorTab === 'grid27' && (
-          <div>
-            <div style={{ fontSize: '0.8rem', color: '#CBD5E1', marginBottom: '0.55rem' }}>
-              👑 <strong>V10_Sync22 五檔旗艦 27 格參數高原 (HB&isin;&#123;1.8,2.0,2.2&#125; &times; DriftTol&isin;&#123;2%,3%,4%&#125; &times; CatTilt&isin;&#123;-3%,0,+3%&#125;)</strong>：
-              中位 CAGR = <strong style={{ color: '#34D399' }}>{pa?.grid_27_summary?.median_cagr_10_26}%</strong> (Ex26 {pa?.grid_27_summary?.median_ex26_cagr}%) ｜
-              全距 <strong>[{pa?.grid_27_summary?.min_cagr_10_26}%, {pa?.grid_27_summary?.max_cagr_10_26}%]</strong> ｜
-              中位 Sharpe / Calmar = <strong>{pa?.grid_27_summary?.median_sharpe_10_26} / {pa?.grid_27_summary?.median_calmar_10_26}</strong> ｜
-              正交 <strong style={{ color: '#34D399' }}>{pa?.grid_27_summary?.pass_ortho_count ?? 27}/{pa?.grid_27_summary?.n_cells}</strong> 全過 ｜ &ge;24.5% 達標 = <strong style={{ color: '#FDE047' }}>{pa?.grid_27_summary?.pass_bar_count ?? 18} / {pa?.grid_27_summary?.n_cells}</strong>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '0.45rem' }}>
-              {(pa?.grid_27_summary?.cells || []).map((c) => {
-                const ok = c.pass_bar ?? c.pass_v8_bar ?? c.pass_ortho;
-                return (
-                  <div
-                    key={c.label}
-                    style={{
-                      background: ok ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                      border: `1px solid ${ok ? 'rgba(16,185,129,0.28)' : 'rgba(245,158,11,0.35)'}`,
-                      borderRadius: '6px',
-                      padding: '0.45rem 0.6rem',
-                      fontSize: '0.72rem',
-                    }}
-                  >
-                    <div style={{ fontWeight: 'bold', color: '#E2E8F0' }}>{c.label.replace(/^V(?:8|9|10)\w*_HB/, 'HB')} {ok ? '✅' : '⚠️'}</div>
-                    <div style={{ fontFamily: 'monospace', color: ok ? '#34D399' : '#FBBF24', fontWeight: 'bold', fontSize: '0.86rem' }}>{c.cagr_10_26}% (Ex26 {c.ex26_cagr}%)</div>
-                    <div style={{ fontFamily: 'monospace', color: '#94A3B8' }}>Cal {c.calmar_10_26} ｜ Shp {c.sharpe_10_26} ｜ ExC {c.ex_spy_corr >= 0 ? '+' : ''}{c.ex_spy_corr}</div>
-                  </div>
-                );
-              })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+            {pa?.grid_27_hyperparam_summary?.cells?.length > 0 && (
+              <div>
+                <div style={{ fontSize: '0.8rem', color: '#CBD5E1', marginBottom: '0.55rem' }}>
+                  👑 <strong>V12 超參數 27 格參數高原 (thBreakdown&isin;&#123;-15%,-16%,-17%&#125; &times; SVMult&isin;&#123;1.15,1.25,1.35&#125; &times; BetaDnPow&isin;&#123;0.5,0.7,0.9&#125;)</strong>：
+                  中位 CAGR = <strong style={{ color: '#34D399' }}>{pa.grid_27_hyperparam_summary.median_cagr_10_26}%</strong> (Ex26 {pa.grid_27_hyperparam_summary.median_ex26_cagr}% / 全距 [{pa.grid_27_hyperparam_summary.min_cagr_10_26}%, {pa.grid_27_hyperparam_summary.max_cagr_10_26}%]) ｜
+                  中位 mMDD = <strong style={{ color: '#FDE047' }}>{pa.grid_27_hyperparam_summary.median_m_mdd_10_26}%</strong> ｜
+                  中位 Sharpe / Calmar = <strong>{pa.grid_27_hyperparam_summary.median_sharpe_10_26} / {pa.grid_27_hyperparam_summary.median_calmar_10_26}</strong> ｜
+                  CAGR&gt;30% <strong style={{ color: '#34D399' }}>{pa.grid_27_hyperparam_summary.pass_cagr30_count}/27</strong> ｜
+                  雙達標 (&gt;30% &amp; mMDD&lt;15%) <strong style={{ color: '#FDE047' }}>{pa.grid_27_hyperparam_summary.pass_cagr30_and_mdd15_count}/27</strong>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(195px, 1fr))', gap: '0.45rem' }}>
+                  {pa.grid_27_hyperparam_summary.cells.map((c) => {
+                    const ok = c.pass_goals ?? (c.cagr_10_26 >= 30 && Math.abs(c.m_mdd_10_26) < 15);
+                    return (
+                      <div
+                        key={c.label}
+                        style={{
+                          background: ok ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                          border: `1px solid ${ok ? 'rgba(16,185,129,0.28)' : 'rgba(245,158,11,0.35)'}`,
+                          borderRadius: '6px',
+                          padding: '0.45rem 0.6rem',
+                          fontSize: '0.72rem',
+                        }}
+                      >
+                        <div style={{ fontWeight: 'bold', color: '#E2E8F0' }}>{c.label.replace(/^HP_/, '')} {ok ? '✅' : '⚠️'}</div>
+                        <div style={{ fontFamily: 'monospace', color: ok ? '#34D399' : '#FBBF24', fontWeight: 'bold', fontSize: '0.85rem' }}>{c.cagr_10_26}% (Ex26 {c.ex26_cagr}%)</div>
+                        <div style={{ fontFamily: 'monospace', color: '#94A3B8' }}>mMDD {c.m_mdd_10_26}% ｜ Cal {c.calmar_10_26} ｜ ExC +{c.ex_spy_corr}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <div style={{ fontSize: '0.8rem', color: '#CBD5E1', marginBottom: '0.55rem' }}>
+                🧩 <strong>V12_Sync22 六柱權重與緩衝 27 格參數高原 (HB&isin;&#123;1.8,2.0,2.2&#125; &times; DriftTol&isin;&#123;2%,3%,4%&#125; &times; CatTilt&isin;&#123;-3%,0,+3%&#125;)</strong>：
+                中位 CAGR = <strong style={{ color: '#34D399' }}>{pa?.grid_27_summary?.median_cagr_10_26}%</strong> (Ex26 {pa?.grid_27_summary?.median_ex26_cagr}%) ｜
+                中位 mMDD = <strong style={{ color: '#FDE047' }}>{pa?.grid_27_summary?.median_m_mdd_10_26}%</strong> ｜
+                全距 <strong>[{pa?.grid_27_summary?.min_cagr_10_26}%, {pa?.grid_27_summary?.max_cagr_10_26}%]</strong> ｜
+                中位 Sharpe / Calmar = <strong>{pa?.grid_27_summary?.median_sharpe_10_26} / {pa?.grid_27_summary?.median_calmar_10_26}</strong> ｜
+                正交 <strong style={{ color: '#34D399' }}>{pa?.grid_27_summary?.pass_ortho_count ?? 27}/{pa?.grid_27_summary?.n_cells}</strong> 全過 ｜ &ge;{pa?.grid_27_summary?.cagr_bar ?? 28.0}% 達標 = <strong style={{ color: '#FDE047' }}>{pa?.grid_27_summary?.pass_bar_count ?? 18} / {pa?.grid_27_summary?.n_cells}</strong>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(195px, 1fr))', gap: '0.45rem' }}>
+                {(pa?.grid_27_summary?.cells || []).map((c) => {
+                  const ok = c.pass_bar ?? c.pass_v8_bar ?? c.pass_ortho;
+                  return (
+                    <div
+                      key={c.label}
+                      style={{
+                        background: ok ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                        border: `1px solid ${ok ? 'rgba(16,185,129,0.28)' : 'rgba(245,158,11,0.35)'}`,
+                        borderRadius: '6px',
+                        padding: '0.45rem 0.6rem',
+                        fontSize: '0.72rem',
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold', color: '#E2E8F0' }}>{c.label.replace(/^V(?:8|9|10|11|12)\w*_HB/, 'HB')} {ok ? '✅' : '⚠️'}</div>
+                      <div style={{ fontFamily: 'monospace', color: ok ? '#34D399' : '#FBBF24', fontWeight: 'bold', fontSize: '0.85rem' }}>{c.cagr_10_26}% (Ex26 {c.ex26_cagr}%)</div>
+                      <div style={{ fontFamily: 'monospace', color: '#94A3B8' }}>mMDD {c.m_mdd_10_26}% ｜ Cal {c.calmar_10_26} ｜ ExC {c.ex_spy_corr >= 0 ? '+' : ''}{c.ex_spy_corr}</div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
 
         {prosecutorTab === 'gate0' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowX: 'auto' }}>
+            {pa?.gate0_naked_event_study?.naked_risk_sizing_top20_ex26 && (
+              <div>
+                <div style={{ fontWeight: 'bold', color: '#A78BFA', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
+                  ⚖️ Gate 0 無篩選等權 Top-20 風險預算單調實證（2005–2025 Ex-2026・純比較分母風險縮放對波動、回撤與夏普的改善）
+                </div>
+                <table className="custom-table" style={{ width: '100%', fontSize: '0.74rem' }}>
+                  <thead>
+                    <tr>
+                      <th>Top-20 風險配置引擎</th>
+                      <th style={{ textAlign: 'right' }}>Ex-26 CAGR</th>
+                      <th style={{ textAlign: 'right' }}>年化波動</th>
+                      <th style={{ textAlign: 'right' }}>mMDD</th>
+                      <th style={{ textAlign: 'right' }}>Sharpe</th>
+                      <th style={{ textAlign: 'right' }}>Calmar</th>
+                      <th style={{ textAlign: 'right' }}>月勝率</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(pa.gate0_naked_event_study.naked_risk_sizing_top20_ex26).map(([k, v]) => {
+                      const isCtrl = k.startsWith('Ctrl_');
+                      return (
+                        <tr key={k}>
+                          <td><strong style={{ color: isCtrl ? '#F87171' : k.includes('V12') ? '#34D399' : '#E2E8F0' }}>{k}{isCtrl ? ' (反轉對照)' : ''}</strong></td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.cagr_pct}%</td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold', color: !isCtrl && v.ann_vol_pct <= 16.5 ? '#34D399' : '#CBD5E1' }}>{v.ann_vol_pct}%</td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.m_mdd_pct}%</td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 'bold' }}>{v.sharpe}</td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.calmar}</td>
+                          <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{v.win_month_pct}%</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             {pa?.gate0_naked_event_study?.['21D_Monthly'] && (
               <div>
                 <div style={{ fontWeight: 'bold', color: '#34D399', fontSize: '0.82rem', marginBottom: '0.35rem' }}>
@@ -1613,7 +1687,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
           <table className="custom-table" style={{ width: '100%', fontSize: '0.75rem' }}>
             <thead>
               <tr>
-                <th>LOO 六因子・對稱防呆・Minsky・QCrash 消融檢定 (V10_Sync22 五檔)</th>
+                <th>LOO 六因子與 V12 四階風險預算消融檢定 (V12_Sync22 五檔)</th>
                 <th style={{ textAlign: 'right' }}>10–26 CAGR</th>
                 <th style={{ textAlign: 'right' }}>Ex26</th>
                 <th style={{ textAlign: 'right' }}>mMDD / dMDD</th>
@@ -1635,18 +1709,30 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
                   </td>
                   <td>
                     {k === 'Full_Base'
-                      ? '🏆 完整 V10 五檔 22 號單表（零冗餘最優解）'
-                      : k.includes('SymHoldHygiene')
-                        ? '⚠️ 退回舊 V9 非對稱續抱，年化掉 -0.83%'
-                        : k.includes('MinskyQCrashSV')
-                          ? '⚠️ 退回舊 V9 BAB 分母，Sharpe 降且 ExSPY 升至 +0.088'
-                          : k.includes('HoldBuffer')
-                            ? '⚠️ 拿掉 2.0x 緩衝後週轉暴增、報酬掉 -4.11%'
-                            : k.includes('oplev') || k.includes('Drop_Factor_grw')
-                              ? '⚠️ 拿掉後年化下滑且 ExSPY 破 0.189 失正交'
-                              : k.includes('AntiTrap')
-                                ? '⚠️ 拿掉進場與續抱防呆回撤惡化至 -22.26%'
-                                : '✅ 具實質報酬、正交度或回撤貢獻'}
+                      ? '🏆 完整 V12 五檔 22 號單表（CAGR 31.80% & mMDD -14.67% 雙達標）'
+                      : k.includes('IncumbentBreakdownVeto')
+                        ? '⚠️ 取消破底汰弱保護後 mMDD 惡化至 -17.90%（超越 -15% 紅線）'
+                        : k.includes('DownsideBeta_To_Step2')
+                          ? '⚠️ 拔除下行貝塔縮放與破底汰弱後 mMDD 惡化至 -18.08%'
+                          : k.includes('DownsideBeta_Only_KeepVeto')
+                            ? '⚠️ 拔除 126D 下行貝塔後 mMDD 回彈至 -15.04% 且 ExSPY 升'
+                            : k.includes('TrendDecay')
+                              ? '⚠️ 拿掉 3M/6M 結構跌勢降權後年化與 Ex26 雙降 -1.0%~-1.3%'
+                              : k.includes('Inst60')
+                                ? '⚠️ 拿掉 60D 機構吸籌加權後年化掉 -1.47%、mMDD 破 -15%'
+                                : k.includes('PureFort')
+                                  ? '⚠️ 拿掉純堡壘加權後年化減且 ExSPY 升至 +0.098'
+                                  : k.includes('PrevV11') || k.includes('LiveV10')
+                                    ? '⚠️ 退回舊世代 V11/V10，年化退 -2.8%~-3.6% 且回撤 -17.8%~-19.5%'
+                                    : k.includes('SymHoldHygiene')
+                                      ? '⚠️ 取消續抱清潔衛生後年化暴跌 -3.09%'
+                                      : k.includes('HoldBuffer')
+                                        ? '⚠️ 拿掉 2.0x 緩衝後週轉暴增、年化掉 -5.86%'
+                                        : k.includes('oplev') || k.includes('Drop_Factor_grw')
+                                          ? '⚠️ 拿掉後年化下滑且 ExSPY 破 0.20 失正交'
+                                          : k.includes('AntiTrap')
+                                            ? '⚠️ 拿掉進場與續抱防呆回撤惡化至 -18.18%'
+                                            : '✅ 具實質報酬、正交度或回撤貢獻'}
                   </td>
                 </tr>
               ))}
@@ -1657,7 +1743,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
         {prosecutorTab === 'phase' && (
           <div>
             <div style={{ fontSize: '0.78rem', color: '#CBD5E1', marginBottom: '0.5rem' }}>
-              月內四大日曆錨點對照均值 = <strong style={{ color: '#34D399' }}>{pa?.phase_invariance?.mean_cagr ?? 23.96}%</strong> ｜ 避開月初買盤湧入（Day 01 ExSPY +0.153 失正交），<strong>22 號（泰坦 B 梯同步）</strong>創下全錨點最高 <code>28.24% / Ex-2026 27.60%</code> 與極優正交（<code>ExSPY +0.072</code>）。
+              月內四大日曆錨點對照均值 = <strong style={{ color: '#34D399' }}>{pa?.phase_invariance?.mean_cagr ?? 24.48}%</strong> ｜ 避開月中結算波動與擁擠買盤（Day 15 ExSPY +0.154），<strong>22 號（泰坦 B 梯同步）</strong>創下全錨點最高 <code>31.80% / Ex-2026 30.44%</code> 與極優正交（<code>ExSPY +0.082</code>）。
             </div>
             <table className="custom-table" style={{ width: '100%', fontSize: '0.76rem' }}>
               <thead>
@@ -1702,11 +1788,11 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
               <tbody>
                 {[
                   ...Object.entries(pa?.harsh_2x_cost || {}).map(([k, v]) => [k, v]),
-                  ['V10_Sync22 五檔旗艦永久剔除 Top-3 大贏家', pa?.jackknife_drop_top3_top5?.drop_top3],
-                  ['V10_Sync22 五檔旗艦永久剔除 Top-5 大贏家', pa?.jackknife_drop_top3_top5?.drop_top5],
-                  ['V10_Sync22 五檔旗艦永久剔除 Top-10 大贏家', pa?.jackknife_drop_top3_top5?.drop_top10],
-                  ['V10_N6 均衡六檔永久剔除 Top-3 大贏家', pa?.jackknife_drop_top3_top5?.cochamp?.drop_top3],
-                  ['V10_N6 均衡六檔永久剔除 Top-10 大贏家', pa?.jackknife_drop_top3_top5?.cochamp?.drop_top10],
+                  ['V12_Sync22 五檔旗艦永久剔除 Top-3 大贏家', pa?.jackknife_drop_top3_top5?.drop_top3],
+                  ['V12_Sync22 五檔旗艦永久剔除 Top-5 大贏家', pa?.jackknife_drop_top3_top5?.drop_top5],
+                  ['V12_Sync22 五檔旗艦永久剔除 Top-10 大贏家', pa?.jackknife_drop_top3_top5?.drop_top10],
+                  ['V12_N6 均衡六檔永久剔除 Top-3 大贏家', pa?.jackknife_drop_top3_top5?.cochamp?.drop_top3],
+                  ['V12_N6 均衡六檔永久剔除 Top-10 大贏家', pa?.jackknife_drop_top3_top5?.cochamp?.drop_top10],
                 ].map(([lbl, ev]) => ev && (
                   <tr key={lbl}>
                     <td><strong>{lbl}</strong></td>
@@ -1732,7 +1818,7 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
       {cashModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.68)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <form className="glass-card" onSubmit={handleSaveCashModal} style={{ maxWidth: '420px', width: '100%', padding: '1.25rem' }}>
-            <h4 style={{ margin: '0 0 0.85rem 0', color: '#FDE047' }}>💰 V10 22號互補帳戶資金管理</h4>
+            <h4 style={{ margin: '0 0 0.85rem 0', color: '#FDE047' }}>💰 V12 22號互補帳戶資金管理</h4>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
               <button type="button" className={cashAction === 'deposit' ? 'btn' : 'btn btn-secondary'} onClick={() => setCashAction('deposit')}>追加存入</button>
               <button type="button" className={cashAction === 'set' ? 'btn' : 'btn btn-secondary'} onClick={() => setCashAction('set')}>直接重設現金餘額</button>
