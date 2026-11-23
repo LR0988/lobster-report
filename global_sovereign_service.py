@@ -2526,6 +2526,15 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
                     tranches_obj["updated_at"] = max_us_dt or max_dt or tranches_obj.get("updated_at", "2026-11-04")
                     for tr_key in ("tranche_a", "tranche_b"):
                         tr_item = tranches_obj.get(tr_key, {})
+                        nxt_raw = str(tr_item.get("next_rebal_date") or "").strip()[:10]
+                        if len(nxt_raw) == 10:
+                            try:
+                                nxt_ts = pd.Timestamp(nxt_raw)
+                                while nxt_ts.weekday() >= 5 or (nxt_ts.month == 1 and nxt_ts.day == 1):
+                                    nxt_ts += pd.Timedelta(days=1)
+                                tr_item["next_rebal_date"] = nxt_ts.strftime("%Y-%m-%d")
+                            except Exception:
+                                pass
                         for p_item in tr_item.get("picks", []):
                             tk_p = p_item.get("ticker", "")
                             st_p = live_prices.get(tk_p) or (live_prices.get(tk_p.split(".")[0]) if "." in tk_p else None)

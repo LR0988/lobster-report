@@ -1619,12 +1619,11 @@ def main():
 
                     next_sched_str = "預計下次月初換倉" if day_target == 1 else "預計下次月下旬換倉"
                     if is_active_tranche:
-                        if day_target == 1:
-                            ny, nm = (t_date.year + 1, 1) if t_date.month == 12 else (t_date.year, t_date.month + 1)
-                            next_sched_str = f"持有中 (預計 {ny:04d}-{nm:02d}-01 換倉)"
-                        else:
-                            ny, nm = (t_date.year + 1, 1) if t_date.month == 12 else (t_date.year, t_date.month + 1)
-                            next_sched_str = f"持有中 (預計 {ny:04d}-{nm:02d}-22 換倉)"
+                        ny, nm = (t_date.year + 1, 1) if t_date.month == 12 else (t_date.year, t_date.month + 1)
+                        cand_nxt = pd.Timestamp(year=ny, month=nm, day=(1 if day_target == 1 else 22))
+                        while cand_nxt.weekday() >= 5 or (cand_nxt.month == 1 and cand_nxt.day == 1):
+                            cand_nxt += pd.Timedelta(days=1)
+                        next_sched_str = f"持有中 (預計 {cand_nxt.strftime('%Y-%m-%d')} 換倉)"
                     cur_tranche_rec = {
                         "year": int(t_date.year),
                         "rebal_date": str(t_date)[:10],

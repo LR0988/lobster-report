@@ -1542,13 +1542,9 @@ def run_scraper_task(task_type: str):
                 print(f"[x] [API Scraper] 台股因果泰坦更新失敗: {e}")
 
             try:
-                import importlib
-                import global_sovereign_service
-                importlib.reload(global_sovereign_service)
-                global_sovereign_service.get_global_sovereign_dashboard_data(force_refresh=True)
-                add_scraper_log("✓ 全球高流動性主權泰坦 2.0 最新報價與實盤持倉已同步刷新")
+                _sync_global_titan_and_v12_tranches_if_stale(log_fn=add_scraper_log)
             except Exception as e:
-                add_scraper_log(f"⚠️ 全球主權泰坦刷新警告: {e}")
+                add_scraper_log(f"⚠️ 全球主權泰坦與 V12 互補戰艦自動更新警告: {e}")
 
             try:
                 import importlib
@@ -1638,6 +1634,11 @@ def run_scraper_task(task_type: str):
                 add_scraper_log(f"⚠️ 更新全球旗艦資產警告: {e}")
                 print(f"[x] [API Scraper] 更新全球旗艦資產失敗: {e}")
                 
+            try:
+                _sync_global_titan_and_v12_tranches_if_stale(log_fn=add_scraper_log)
+            except Exception as e_sync_gt:
+                add_scraper_log(f"⚠️ 全球主權泰坦與 V12 互補戰艦自動更新警告: {e_sync_gt}")
+
             set_scraper_progress(task_type, 'Supabase 雲端備援庫', 'stock_database_preview', '全球泰坦雲端同步', '步驟 3/3：正在同步全球泰坦最新數據與實盤持倉現價至雲端快照...', 3, 3, 90)
             try:
                 import stock_sync
@@ -3391,17 +3392,8 @@ def run_scheduled_pipeline():
 
         # 執行全球泰坦 2.0、超跌狙擊手與可轉債好球帶自動化快照產出
         try:
-            print("[Scheduler Pipeline] 開始執行全球泰坦 G12-PIT (S&P 500 PIT + 台股 0050∪0051 純上市) 與戰情室快照產出...")
-            import global_sovereign_service
-            gs_data = global_sovereign_service.get_global_sovereign_dashboard_data()
-            with open(os.path.join(FRONTEND_DIR, 'src/data/defaultGlobalSovereignData.json'), 'w', encoding='utf-8') as f:
-                json.dump(gs_data, f, ensure_ascii=False, indent=2)
-            try:
-                import complementary_v3_service
-                complementary_v3_service.compute_complementary_v3_dashboard(force_rebuild=False, save_json=True)
-                print("[Scheduler Pipeline] 全球泰坦互補戰艦 V12 五檔精銳22號同步版快照產出成功！")
-            except Exception as e_v3:
-                print(f"[Scheduler Pipeline] 全球泰坦互補戰艦 V12 五檔精銳22號同步版快照產出失敗: {e_v3}")
+            print("[Scheduler Pipeline] 開始執行全球泰坦 G12-PIT (S&P 500 PIT + 台股 0050∪0051 純上市) 與 V12 互補戰艦自動檢查與產出...")
+            _sync_global_titan_and_v12_tranches_if_stale()
             try:
                 import stock_sync
                 sb_c = stock_sync.get_supabase_conn()
@@ -4664,8 +4656,89 @@ def get_low_freq_top30():
         "top30": res.get("top30_recommendations", [])
     }
 
+_titan_v12_sync_lock = threading.Lock()
 _gs_dash_lock = threading.Lock()
 _gs_dash_cache = {"sig": None, "data": None}
+
+
+def _sync_global_titan_and_v12_tranches_if_stale(log_fn=None):
+    """當美台雙市聯合最新日推進超過靜態回測匯出日時，自動同步 PIT 快取、重跑全球泰坦 (A/B 梯隊自動翻期) 與 V12 互補戰艦。"""
+    import importlib
+    import subprocess
+    import global_sovereign_service
+    import complementary_v3_service
+
+    def _log(msg: str):
+        print(msg)
+        if log_fn is not None:
+            try:
+                log_fn(msg)
+            except Exception:
+                pass
+
+    def _norm_dt(val) -> str:
+        s = str(val or "").strip()
+        if len(s) == 8 and s.isdigit():
+            return f"{s[:4]}-{s[4:6]}-{s[6:8]}"
+        return s[:10] if len(s) >= 10 else ""
+
+    conn = get_db_connection()
+    try:
+        r_spy = conn.execute("SELECT MAX(date) FROM global_stock_daily WHERE ticker = 'SPY'").fetchone()
+        r_tw = conn.execute("SELECT MAX(date) FROM daily_stock WHERE stock_id = '2330'").fetchone()
+    finally:
+        conn.close()
+
+    max_spy_dt = _norm_dt(r_spy[0] if r_spy else "")
+    max_tw_dt = _norm_dt(r_tw[0] if r_tw else "")
+    joint_max = min(max_spy_dt, max_tw_dt) if (len(max_spy_dt) == 10 and len(max_tw_dt) == 10) else ""
+
+    venv_py = os.path.join(BASE_DIR, "venv", "bin", "python")
+    py_exe = venv_py if os.path.exists(venv_py) else sys.executable
+    g11_hist_path = os.path.join(BASE_DIR, "frontend", "src", "data", "g11_pit_yearly_history.json")
+    v12_json_path = os.path.join(BASE_DIR, "frontend", "src", "data", "defaultComplementaryV3Data.json")
+
+    with _titan_v12_sync_lock:
+        g11_upd = ""
+        if os.path.exists(g11_hist_path):
+            try:
+                with open(g11_hist_path, "r", encoding="utf-8") as f_g:
+                    g11_obj = json.load(f_g)
+                g11_upd = str((g11_obj.get("official_active_tranches") or {}).get("updated_at") or "")[:10]
+            except Exception:
+                g11_upd = ""
+
+        if joint_max and g11_upd < joint_max:
+            _log(f"⏳ [自動翻期] 偵測到美台聯合收盤日 {joint_max} 領先泰坦回測快照 ({g11_upd or '無'})，自動重算 PIT 快取並更新 A/B 梯隊...")
+            subprocess.run(
+                [py_exe, os.path.join(BASE_DIR, "export_g11_pit_detailed_history.py")],
+                cwd=BASE_DIR,
+                check=True,
+            )
+            _log(f"✓ 全球泰坦 R26-GOLD PIT 快取與官方 A/B 梯隊已自動更新至 {joint_max}")
+
+        importlib.reload(global_sovereign_service)
+        gs_data = global_sovereign_service.get_global_sovereign_dashboard_data(force_refresh=True)
+        _log("✓ 全球高流動性主權泰坦 2.0 最新報價與實盤持倉已同步刷新")
+
+        v12_upd = ""
+        if os.path.exists(v12_json_path):
+            try:
+                with open(v12_json_path, "r", encoding="utf-8") as f_v:
+                    v12_obj = json.load(f_v)
+                v12_upd = str(v12_obj.get("latest_data_date") or "")[:10]
+            except Exception:
+                v12_upd = ""
+
+        if joint_max and v12_upd < joint_max:
+            _log(f"⏳ [自動翻期] 偵測到美台聯合收盤日 {joint_max} 領先互補戰艦 V12 快照 ({v12_upd or '無'})，自動重建因子快取並結算最新持倉...")
+            importlib.reload(complementary_v3_service)
+            complementary_v3_service.compute_complementary_v3_dashboard(force_rebuild=False, save_json=True)
+            _log(f"✓ 全球泰坦互補戰艦 V12 五檔精銳同步版已自動更新至 {joint_max}")
+
+        _gs_dash_cache["sig"] = None
+        _comp_v3_cache["sig"] = None
+        return gs_data
 
 
 def _get_gs_dash_signature():
