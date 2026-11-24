@@ -5,6 +5,7 @@ Global Sovereign Service (Scheme A Upgrade - Direct SQLite Database Connection)
 """
 
 import os
+import copy
 import json
 import pickle
 import sqlite3
@@ -2522,7 +2523,26 @@ def get_global_sovereign_dashboard_data(force_refresh: bool = False):
             with open(pit_hist_file, "r", encoding="utf-8") as f_pit:
                 pit_json = json.load(f_pit)
                 if "official_active_tranches" in pit_json:
-                    tranches_obj = pit_json["official_active_tranches"]
+                    tranches_obj = copy.deepcopy(pit_json["official_active_tranches"])
+                    data["realized_active_tranches"] = copy.deepcopy(tranches_obj)
+                    pending_map = copy.deepcopy(pit_json.get("pending_next_open_rebalances") or {})
+                    if pending_map:
+                        data["pending_next_open_rebalances"] = pending_map
+                    sov3_leg_now = str((data.get("macro_status") or {}).get("sov3_active_leg") or "").strip()
+                    for tr_key in ("tranche_a", "tranche_b"):
+                        p_tr = pending_map.get(tr_key)
+                        r_tr = tranches_obj.get(tr_key) or {}
+                        if isinstance(p_tr, dict) and str(p_tr.get("rebal_date") or "") > str(r_tr.get("rebal_date") or ""):
+                            promoted_tr = copy.deepcopy(p_tr)
+                            if float(promoted_tr.get("exposure_pct") or 0.0) <= 0.0 and sov3_leg_now:
+                                promoted_tr["sov3_active_leg"] = sov3_leg_now
+                                dr_txt = str(promoted_tr.get("defense_reason") or "")
+                                if sov3_leg_now not in dr_txt:
+                                    promoted_tr["defense_reason"] = f"{dr_txt}（避險停泊：{sov3_leg_now}）" if dr_txt else f"避險停泊：{sov3_leg_now}"
+                                prn_txt = str(promoted_tr.get("previous_rebal_note") or "")
+                                if "GLD/IEF/TBF/BIL" in prn_txt:
+                                    promoted_tr["previous_rebal_note"] = prn_txt.replace("GLD/IEF/TBF/BIL", sov3_leg_now)
+                            tranches_obj[tr_key] = promoted_tr
                     tranches_obj["updated_at"] = max_us_dt or max_dt or tranches_obj.get("updated_at", "2026-11-04")
                     for tr_key in ("tranche_a", "tranche_b"):
                         tr_item = tranches_obj.get(tr_key, {})

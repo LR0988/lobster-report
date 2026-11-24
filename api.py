@@ -4745,21 +4745,42 @@ def _get_gs_dash_signature():
     """極速 (<1ms) 計算全球主權泰坦看板相依檔案與資料庫狀態指紋，避免無變動時重複重算阻塞單核心事件循環。"""
     svc_path = os.path.join(BASE_DIR, "global_sovereign_service.py")
     hist_path = os.path.join(BASE_DIR, "frontend", "src", "data", "g11_pit_yearly_history.json")
+    default_gs_path = os.path.join(BASE_DIR, "frontend", "src", "data", "defaultGlobalSovereignData.json")
     svc_mtime = os.path.getmtime(svc_path) if os.path.exists(svc_path) else 0.0
     hist_mtime = os.path.getmtime(hist_path) if os.path.exists(hist_path) else 0.0
+    default_gs_mtime = os.path.getmtime(default_gs_path) if os.path.exists(default_gs_path) else 0.0
     conn = get_db_connection()
     try:
         c = conn.cursor()
         max_gs = c.execute("SELECT MAX(date) FROM global_stock_daily").fetchone()[0]
         max_sov = c.execute("SELECT MAX(date) FROM global_sovereign_daily").fetchone()[0]
         max_tw = c.execute("SELECT MAX(date) FROM daily_stock").fetchone()[0]
+        spy_sov = c.execute(
+            "SELECT close, volume FROM global_sovereign_daily WHERE ticker = 'SPY' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        spy_stk = c.execute(
+            "SELECT close, volume FROM global_stock_daily WHERE ticker = 'SPY' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
         pos_cnt, pos_sh = c.execute(
             "SELECT COUNT(*), COALESCE(SUM(shares), 0.0) FROM global_sovereign_positions"
         ).fetchone()
         tr_cnt = c.execute("SELECT COUNT(*) FROM global_sovereign_trades").fetchone()[0]
         acc_rows = tuple(c.execute("SELECT key, value FROM global_sovereign_account ORDER BY key").fetchall())
         acc_sig = tuple((r[0], r[1]) for r in acc_rows)
-        return (svc_mtime, hist_mtime, max_gs, max_sov, max_tw, pos_cnt, round(float(pos_sh or 0.0), 6), tr_cnt, acc_sig)
+        return (
+            svc_mtime,
+            hist_mtime,
+            default_gs_mtime,
+            max_gs,
+            max_sov,
+            max_tw,
+            tuple(spy_sov) if spy_sov else None,
+            tuple(spy_stk) if spy_stk else None,
+            pos_cnt,
+            round(float(pos_sh or 0.0), 6),
+            tr_cnt,
+            acc_sig,
+        )
     finally:
         conn.close()
 
@@ -4824,7 +4845,10 @@ def _get_comp_v3_signature():
         c = conn.cursor()
         max_tw = c.execute("SELECT MAX(date) FROM daily_stock").fetchone()[0]
         max_gs = c.execute("SELECT MAX(date) FROM global_stock_daily").fetchone()[0]
-        return (j_mtime, s_mtime, max_tw, max_gs)
+        spy_stk = c.execute(
+            "SELECT close, volume FROM global_stock_daily WHERE ticker = 'SPY' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        return (j_mtime, s_mtime, max_tw, max_gs, tuple(spy_stk) if spy_stk else None)
     finally:
         conn.close()
 

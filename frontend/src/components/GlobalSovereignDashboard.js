@@ -893,8 +893,8 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
         })
       };
     };
-    const rawA = src.tranche_a && Array.isArray(src.tranche_a.picks) && src.tranche_a.picks.length > 0 ? src.tranche_a : fallbackA;
-    const rawB = src.tranche_b && Array.isArray(src.tranche_b.picks) && src.tranche_b.picks.length > 0 ? src.tranche_b : fallbackB;
+    const rawA = src.tranche_a && src.tranche_a.rebal_date && Array.isArray(src.tranche_a.picks) ? src.tranche_a : fallbackA;
+    const rawB = src.tranche_b && src.tranche_b.rebal_date && Array.isArray(src.tranche_b.picks) ? src.tranche_b : fallbackB;
     return {
       officialTrancheA: enrichTrancheWithLivePrices(rawA),
       officialTrancheB: enrichTrancheWithLivePrices(rawB)
@@ -2716,7 +2716,13 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       </tr>
                     </thead>
                     <tbody>
-                      {(officialTrancheA.picks || []).map((p) => {
+                      {(officialTrancheA.picks || []).length === 0 ? (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '0.85rem 0.6rem', color: '#FDE047', fontWeight: 'bold', background: 'rgba(234, 179, 8, 0.08)' }}>
+                            🛡️ 本期 0% 股票曝險 — 資金 100% 停泊於主權避險池（{macro.sov3_active_leg || officialTrancheA.sov3_active_leg || '100% BIL'}）
+                          </td>
+                        </tr>
+                      ) : (officialTrancheA.picks || []).map((p) => {
                         const isPos = (p.period_ret_pct || 0) >= 0;
                         const curr = p.market === 'US' ? '$' : 'NT$';
                         return (
@@ -2821,7 +2827,13 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
                       </tr>
                     </thead>
                     <tbody>
-                      {(officialTrancheB.picks || []).map((p) => {
+                      {(officialTrancheB.picks || []).length === 0 ? (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '0.85rem 0.6rem', color: '#FDE047', fontWeight: 'bold', background: 'rgba(234, 179, 8, 0.08)' }}>
+                            🛡️ 本期 0% 股票曝險 — 資金 100% 停泊於主權避險池（{macro.sov3_active_leg || officialTrancheB.sov3_active_leg || '100% BIL'}）
+                          </td>
+                        </tr>
+                      ) : (officialTrancheB.picks || []).map((p) => {
                         const isPos = (p.period_ret_pct || 0) >= 0;
                         const curr = p.market === 'US' ? '$' : 'NT$';
                         return (

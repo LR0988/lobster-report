@@ -121,14 +121,48 @@ def _load_or_build_sov3_ohlc(dates_idx: pd.DatetimeIndex, conn_twse: sqlite3.Con
     etf_close = pd.DataFrame(index=dates_idx)
     etf_open = pd.DataFrame(index=dates_idx)
     end_str = (req_max + pd.Timedelta(days=3)).strftime("%Y-%m-%d")
+    import requests
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
     for tk in ["IEF", "TBF"]:
         d = yf.download(tk, start="2004-01-01", end=end_str, progress=False, auto_adjust=True)
         if isinstance(d.columns, pd.MultiIndex):
             d.columns = d.columns.get_level_values(0)
         if d.empty:
             raise RuntimeError(f"yfinance failed to download {tk} for SOV3_CASH.")
-        etf_close[tk] = d["Close"].dropna().reindex(dates_idx).ffill()
-        etf_open[tk] = d["Open"].dropna().reindex(dates_idx).ffill()
+        c_ser = d["Close"].dropna().copy()
+        o_ser = d["Open"].dropna().copy()
+        if getattr(c_ser.index, "tz", None) is not None:
+            c_ser.index = c_ser.index.tz_localize(None)
+        if getattr(o_ser.index, "tz", None) is not None:
+            o_ser.index = o_ser.index.tz_localize(None)
+        # Fallback to Yahoo Chart API meta.regularMarketPrice if yf.download has trailing Close=NaN or lags req_max
+        if d["Close"].dropna().empty or c_ser.index.max() < req_max or pd.isna(d["Close"].iloc[-1]):
+            try:
+                r = requests.get(
+                    f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}?range=5d&interval=1d",
+                    headers={"User-Agent": "Mozilla/5.0"},
+                    timeout=8,
+                ).json()
+                res = r["chart"]["result"][0]
+                meta = res["meta"]
+                rmp = meta.get("regularMarketPrice")
+                rmt = meta.get("regularMarketTime")
+                if rmp is not None and rmt:
+                    tz = ZoneInfo(meta.get("exchangeTimezoneName", "America/New_York"))
+                    d_ts = pd.Timestamp(datetime.fromtimestamp(rmt, tz).strftime("%Y-%m-%d"))
+                    q = (res.get("indicators", {}).get("quote") or [{}])[0]
+                    q_opens = [x for x in (q.get("open") or []) if x is not None]
+                    raw_o = meta.get("regularMarketOpen") or (q_opens[-1] if q_opens else rmp)
+                    c_ser.loc[d_ts] = float(rmp)
+                    o_ser.loc[d_ts] = float(raw_o)
+                    c_ser = c_ser.sort_index()
+                    o_ser = o_ser.sort_index()
+            except Exception as e_yf_meta:
+                print(f"  ⚠️ SOV3 {tk} meta fallback warning: {e_yf_meta}")
+        etf_close[tk] = c_ser.reindex(dates_idx).ffill()
+        etf_open[tk] = o_ser.reindex(dates_idx).ffill()
 
     df_gld_db = pd.read_sql_query(
         "SELECT date, open, close, adj_close FROM global_sovereign_daily WHERE ticker='GLD' ORDER BY date ASC",
@@ -1047,6 +1081,7 @@ def main():
         return tk
 
     all_tranche_records = []
+    pending_next_open_rebalances = {}
 
     N_DATES = len(dates_idx)
     daily_sorted = [None] * N_DATES
@@ -1259,20 +1294,23 @@ def main():
         rebal_dates = pd.DatetimeIndex(sorted(list(set(rebal_dates))))
         rebal_dates = rebal_dates[rebal_dates >= pd.Timestamp("2005-01-01")]
 
+        exec_rebal_dates = pd.DatetimeIndex([td for td in rebal_dates if len(both_open_dates[both_open_dates > td]) > 0])
+        pending_rebal_dates = pd.DatetimeIndex([td for td in rebal_dates if len(both_open_dates[both_open_dates > td]) == 0])
+
         periods = []
-        for i in range(len(rebal_dates) - 1):
-            t_date = rebal_dates[i]
+        for i in range(len(exec_rebal_dates) - 1):
+            t_date = exec_rebal_dates[i]
             fut = both_open_dates[both_open_dates > t_date]
             if len(fut) == 0: break
             t_in = fut[0]
-            next_rebal = rebal_dates[i + 1]
+            next_rebal = exec_rebal_dates[i + 1]
             fut_next = both_open_dates[both_open_dates > next_rebal]
             if len(fut_next) == 0: break
             t_out = fut_next[0]
             periods.append((t_date, t_in, t_out, False))
         eq_cutoff = periods[-1][2]
-        if len(rebal_dates) > 0:
-            t_last = rebal_dates[-1]
+        if len(exec_rebal_dates) > 0:
+            t_last = exec_rebal_dates[-1]
             fut_last = both_open_dates[both_open_dates > t_last]
             if len(fut_last) > 0:
                 periods.append((t_last, fut_last[0], dates_idx[-1], True))
@@ -2004,6 +2042,240 @@ def main():
                     val += hinfo["shares"] * float(px_adj_arr[cur_pos, c_i])
             daily_equity.loc[current_dt] = val
 
+        if len(pending_rebal_dates) > 0:
+            t_date = pending_rebal_dates[-1]
+            t_pos = dt_to_pos[t_date]
+            sorted_indices = daily_sorted[t_pos]
+            exposure = float(daily_exp[t_pos])
+            sc_row = score_arr[t_pos]
+            br = float(br_arr[t_pos])
+            q_ge20 = float(qqq_p_arr[t_pos]) >= float(qqq_m20_arr[t_pos])
+            t5_io = float(daily_top5_io20[t_pos])
+            td_triggered = False
+            if (0.40 < exposure <= 0.65) and q_ge20:
+                td_triggered = True
+                exposure = 0.0 if t5_io <= -0.10 else 0.16
+
+            cand_entry = t_date + pd.Timedelta(days=1)
+            while cand_entry.weekday() >= 5 or (cand_entry.month == 1 and cand_entry.day == 1):
+                cand_entry += pd.Timedelta(days=1)
+            ny, nm_m = (t_date.year + 1, 1) if t_date.month == 12 else (t_date.year, t_date.month + 1)
+            cand_nxt = pd.Timestamp(year=ny, month=nm_m, day=day_target)
+            while cand_nxt.weekday() >= 5 or (cand_nxt.month == 1 and cand_nxt.day == 1):
+                cand_nxt += pd.Timedelta(days=1)
+
+            tr_recs_here = [lg for lg in all_tranche_records if lg["tranche"] == tranche_name]
+            prev_rec = tr_recs_here[-1] if tr_recs_here else None
+            prev_syms = " / ".join(x["ticker"] for x in (prev_rec.get("picks", []) if prev_rec else [])) if prev_rec else "無"
+            prev_rebal_dt_str = prev_rec["rebal_date"] if prev_rec else "-"
+            is_a = (day_target == 1)
+            tr_key = "tranche_a" if is_a else "tranche_b"
+            out_picks = []
+
+            if exposure > 0 and sorted_indices is not None and len(sorted_indices) > 0:
+                old_holdings_set = set(holdings.keys())
+                ticker_rank = {int(c_i): rk + 1 for rk, c_i in enumerate(sorted_indices)}
+                selected_stks = []
+                for c_i in list(holdings.keys()):
+                    if 0 <= last_valid_pos_arr[c_i] < N_DATES - 1 and t_pos >= last_valid_pos_arr[c_i]:
+                        continue
+                    if veto_s1_arr[t_pos, c_i]:
+                        continue
+                    if float(sc_row[c_i]) < min_score_thr:
+                        continue
+                    tenure = holding_tenure.get(c_i, 0)
+                    rk = ticker_rank.get(c_i, None)
+                    cur_c = float(px_adj_arr[t_pos, c_i])
+                    m20_c = float(ma20_arr[t_pos, c_i])
+                    if rk is not None and tenure < 4:
+                        if rk <= 4 or (rk == 5 and float(io20_arr[t_pos, c_i]) > 0.0 and not (cur_c < m20_c and float(io5_arr[t_pos, c_i]) <= -0.015)):
+                            selected_stks.append(c_i)
+
+                top5_cands = list(sorted_indices[:pool_k])
+                has_star_45 = any(_is_pit_fund_star(t_pos, int(x)) and int(x) not in selected_stks for x in top5_cands[3:pool_k]) if len(top5_cands) > 3 else False
+                has_sw_45 = any(_is_super_winner(t_pos, int(x)) and int(x) not in selected_stks for x in top5_cands[3:pool_k]) if len(top5_cands) > 3 else False
+                has_rgl_45 = any(_is_resilient_group_leader(t_pos, int(x)) and int(x) not in selected_stks for x in top5_cands[3:pool_k]) if len(top5_cands) > 3 else False
+                for c_i in top5_cands:
+                    if len(selected_stks) >= 3:
+                        break
+                    c_i = int(c_i)
+                    if (c_i not in old_holdings_set) and (not _can_trade_today(t_pos, c_i)):
+                        continue
+                    tenure = holding_tenure.get(c_i, 0)
+                    if c_i not in selected_stks and tenure < 4:
+                        if c_i == int(sorted_indices[0]):
+                            if float(bias60_arr[t_pos, c_i]) > 0.45 and float(io20_arr[t_pos, c_i]) <= 0.005 and (has_star_45 or has_sw_45 or has_rgl_45):
+                                continue
+                            selected_stks.append(c_i)
+                        else:
+                            io_ok = float(io20_arr[t_pos, c_i]) >= -0.025
+                            fund_ok = not (has_star_45 and _is_pit_fund_defect(t_pos, c_i))
+                            if has_sw_45 and float(rmom5_arr[t_pos, c_i]) >= 0.06 and float(io20_arr[t_pos, c_i]) < 0.0:
+                                fund_ok = False
+                            if (has_sw_45 or has_star_45 or has_rgl_45) and _is_crowded_outflow(t_pos, c_i):
+                                fund_ok = False
+                            if (has_sw_45 or has_star_45 or has_rgl_45) and _is_overhead_supply_trap(t_pos, c_i):
+                                fund_ok = False
+                            if float(bias60_arr[t_pos, c_i]) > 0.45 and float(io20_arr[t_pos, c_i]) <= 0.01 and (has_star_45 or has_sw_45 or has_rgl_45):
+                                fund_ok = False
+                            if io_ok and fund_ok:
+                                selected_stks.append(c_i)
+
+                for c_i in sorted_indices:
+                    if len(selected_stks) >= 3:
+                        break
+                    c_i = int(c_i)
+                    if (c_i not in old_holdings_set) and (not _can_trade_today(t_pos, c_i)):
+                        continue
+                    if c_i not in selected_stks and holding_tenure.get(c_i, 0) < 4:
+                        selected_stks.append(c_i)
+
+                for c_i in sorted_indices:
+                    if len(selected_stks) >= 3:
+                        break
+                    c_i = int(c_i)
+                    if (c_i not in old_holdings_set) and (not _can_trade_today(t_pos, c_i)):
+                        continue
+                    if c_i not in selected_stks:
+                        selected_stks.append(c_i)
+
+                n = min(3, len(selected_stks))
+                selected_stks = selected_stks[:n]
+                if n == 3:
+                    old_s0 = selected_stks[0]
+                    s0_bad = (
+                        _is_crowded_outflow(t_pos, old_s0)
+                        or _is_pit_fund_defect(t_pos, old_s0)
+                        or (float(io20_arr[t_pos, old_s0]) < 0.0 and ticker_rank.get(old_s0, 99) >= 3)
+                        or (_is_overhead_supply_trap(t_pos, old_s0) and ticker_rank.get(old_s0, 99) >= 2)
+                    )
+                    if s0_bad:
+                        for idx_k in [1, 2]:
+                            ck = selected_stks[idx_k]
+                            if (_is_super_winner(t_pos, ck) or _is_resilient_group_leader(t_pos, ck) or _is_pit_fund_star(t_pos, ck)) and not _is_crowded_outflow(t_pos, ck):
+                                selected_stks[0], selected_stks[idx_k] = selected_stks[idx_k], selected_stks[0]
+                                break
+
+                if n == 3:
+                    s0 = max(float(sc_row[selected_stks[0]]), 0.05)
+                    s1 = max(float(sc_row[selected_stks[1]]), 0.05)
+                    s2 = max(float(sc_row[selected_stks[2]]), 0.05)
+                    dv0 = max(float(down_vol20_arr[t_pos, selected_stks[0]]), 0.12)
+                    dv1 = max(float(down_vol20_arr[t_pos, selected_stks[1]]), 0.12)
+                    dv2 = max(float(down_vol20_arr[t_pos, selected_stks[2]]), 0.12)
+                    io0, io1, io2 = float(io20_arr[t_pos, selected_stks[0]]), float(io20_arr[t_pos, selected_stks[1]]), float(io20_arr[t_pos, selected_stks[2]])
+                    fs0 = float(f_score_mat[t_pos, selected_stks[0]]) if not np.isnan(f_score_mat[t_pos, selected_stks[0]]) else 0.0
+                    fs1 = float(f_score_mat[t_pos, selected_stks[1]]) if not np.isnan(f_score_mat[t_pos, selected_stks[1]]) else 0.0
+                    fs2 = float(f_score_mat[t_pos, selected_stks[2]]) if not np.isnan(f_score_mat[t_pos, selected_stks[2]]) else 0.0
+
+                    def _get_b_bonus_p(ci_x):
+                        b_val = 0.09 if (_is_super_winner(t_pos, ci_x) or _is_resilient_group_leader(t_pos, ci_x)) else 0.0
+                        if float(good_bad_vol_ratio_arr[t_pos, ci_x]) >= 1.55 and float(prox_52w_arr[t_pos, ci_x]) >= 0.94 and float(io20_arr[t_pos, ci_x]) >= 0.02:
+                            b_val += 0.05
+                        return b_val
+
+                    b0, b1, b2 = _get_b_bonus_p(selected_stks[0]), _get_b_bonus_p(selected_stks[1]), _get_b_bonus_p(selected_stks[2])
+                    ratio_01 = s0 / (s1 + 1e-6)
+                    cur_w0_cap = 0.65 if (b0 >= 0.09 and float(prox_52w_arr[t_pos, selected_stks[0]]) >= 0.92 and not _is_crowded_outflow(t_pos, selected_stks[0])) else 0.62
+                    w0 = float(np.clip(
+                        0.52 + 0.20 * (ratio_01 - 1.08) - 0.25 * (dv0 - 0.25)
+                        + 0.20 * np.clip(io0, -0.10, 0.15) + 0.08 * np.clip(fs0, -0.15, 0.30) + b0,
+                        0.45, cur_w0_cap
+                    ))
+                    rem = 1.0 - w0
+                    k1 = (s1 * (1.0 + 0.20 * np.clip(io1, -0.10, 0.15) + 0.08 * np.clip(fs1, -0.15, 0.30) + b1)) / (dv1 ** 0.35)
+                    k2 = (s2 * (1.0 + 0.20 * np.clip(io2, -0.10, 0.15) + 0.08 * np.clip(fs2, -0.15, 0.30) + b2)) / (dv2 ** 0.35)
+                    if (_is_crowded_outflow(t_pos, selected_stks[2]) or _is_pit_fund_defect(t_pos, selected_stks[2])) and not _is_crowded_outflow(t_pos, selected_stks[1]):
+                        k2 *= 0.60
+                    norm_weights = [w0, rem * (k1 / (k1 + k2 + 1e-9)), rem * (k2 / (k1 + k2 + 1e-9))]
+                elif n > 0:
+                    bw_slice = base_weights[:n]
+                    tot_bw = sum(bw_slice)
+                    norm_weights = [w / tot_bw for w in bw_slice]
+                else:
+                    norm_weights = []
+
+                adj_weights = list(norm_weights)
+                oh_flags, oh_retains = [], []
+                for i in range(n):
+                    ci = selected_stks[i]
+                    b60 = float(bias60_arr[t_pos, ci])
+                    r5 = float(rmom5_arr[t_pos, ci])
+                    is_oh = (b60 > 0.25 and r5 > 0.05)
+                    retain_mult = 0.65
+                    if is_oh and (_is_super_winner(t_pos, ci) or (float(io20_arr[t_pos, ci]) >= 0.03 and not _is_pit_fund_defect(t_pos, ci))) and b60 <= 0.45:
+                        retain_mult = 0.85
+                    oh_flags.append(is_oh)
+                    oh_retains.append(retain_mult)
+                non_oh_idx = [i for i in range(n) if not oh_flags[i]]
+                if len(non_oh_idx) > 0 and any(oh_flags):
+                    cut_sum = 0.0
+                    for i in range(n):
+                        if oh_flags[i]:
+                            c_w = adj_weights[i] * (1.0 - oh_retains[i])
+                            adj_weights[i] -= c_w
+                            cut_sum += c_w
+                    add_each = cut_sum / len(non_oh_idx)
+                    for i in non_oh_idx:
+                        adj_weights[i] += add_each
+
+                raw_tw_df = env.get("raw_px_tw", None)
+                raw_us_df = env.get("raw_px_us", None)
+                for idx_s, c_i in enumerate(selected_stks):
+                    sym = cols[c_i]
+                    disp_in = float(px_adj_arr[t_pos, c_i])
+                    if sym.endswith(".TW") and raw_tw_df is not None and sym in raw_tw_df.columns:
+                        raw_c = float(raw_tw_df.iloc[t_pos][sym])
+                        if raw_c > 0 and not np.isnan(raw_c):
+                            disp_in = raw_c
+                    elif (not sym.endswith(".TW")) and raw_us_df is not None and sym in raw_us_df.columns:
+                        raw_c = float(raw_us_df.iloc[t_pos][sym])
+                        if raw_c > 0 and not np.isnan(raw_c):
+                            disp_in = raw_c
+                    disp_in = round(disp_in, 2)
+                    w_tr = round(adj_weights[idx_s] * exposure * 100.0, 1)
+                    is_retained = c_i in old_holdings_set
+                    out_picks.append({
+                        "rank": idx_s + 1,
+                        "ticker": sym,
+                        "name": get_stock_name(sym),
+                        "market": "TW" if sym.endswith(".TW") else "US",
+                        "sector": "🇹🇼 台股 0050∪0051 領頭羊" if sym.endswith(".TW") else "🇺🇸 S&P 500 領頭羊",
+                        "tranche_weight_pct": w_tr,
+                        "total_portfolio_weight_pct": round(w_tr * 0.5, 2),
+                        "entry_date": cand_entry.strftime("%Y-%m-%d"),
+                        "entry_price": disp_in,
+                        "current_price": disp_in,
+                        "period_ret_pct": 0.0,
+                        "stop_loss_price": round(disp_in * 0.85, 2),
+                        "action": "⏳ T+1開盤續抱" if is_retained else "🟢 T+1開盤待買進",
+                    })
+                cur_syms = " / ".join(f"{x['ticker']} ({x['tranche_weight_pct']}%)" for x in out_picks)
+                prev_note = (
+                    f"上一期 ({prev_rebal_dt_str}) 持倉 {prev_syms} 將於 {cand_entry.strftime('%Y-%m-%d')} (T+1開盤) 期滿換倉；"
+                    f"本期 ({str(t_date)[:10]} 收盤訊號) 預計建倉 {cur_syms}"
+                )
+            else:
+                prev_note = (
+                    f"上一期 ({prev_rebal_dt_str}) 持倉 {prev_syms} 將於 {cand_entry.strftime('%Y-%m-%d')} (T+1開盤) 期滿出清；"
+                    f"本期 ({str(t_date)[:10]} 收盤訊號) 轉入 100% 主權避險現金池 (GLD/IEF/TBF/BIL)"
+                )
+
+            pending_next_open_rebalances[tr_key] = {
+                "tranche_id": "A" if is_a else "B",
+                "tranche_name": "🅰️ A 梯隊 (每月 1 號調倉・佔總資金 50%)" if is_a else "🅱️ B 梯隊 (每月 22 號調倉・佔總資金 50%)",
+                "rebal_schedule": "每月 1 號 (遇假日順延)" if is_a else "每月 22 號 (遇假日順延)",
+                "capital_share_pct": 50.0,
+                "rebal_date": str(t_date)[:10],
+                "entry_date": cand_entry.strftime("%Y-%m-%d"),
+                "next_rebal_date": cand_nxt.strftime("%Y-%m-%d"),
+                "exposure_pct": round(max(0.0, exposure) * 100.0, 1),
+                "defense_reason": build_exposure_reason(round(max(0.0, exposure) * 100.0, 1), round(br, 2), td_triggered=td_triggered),
+                "previous_rebal_note": prev_note,
+                "pending_t1_execution": True,
+                "picks": out_picks,
+            }
+
         return daily_equity
 
     eq_a = sim_tranche(1, "A梯隊 (月初調倉)")
@@ -2282,6 +2554,7 @@ def main():
         "yearly_history": yearly_summary,
         "recent_2026_rebalances": recent_2026_rebalances,
         "official_active_tranches": official_active_tranches,
+        "pending_next_open_rebalances": pending_next_open_rebalances,
         "all_trades_lookup": all_trades_lookup
     }
 
@@ -2295,6 +2568,7 @@ def main():
             d_gov = json.load(f)
         d_gov["recent_2026_rebalances"] = recent_2026_rebalances
         d_gov["official_active_tranches"] = official_active_tranches
+        d_gov["pending_next_open_rebalances"] = pending_next_open_rebalances
         with open(default_gov_path, "w", encoding="utf-8") as f:
             json.dump(d_gov, f, ensure_ascii=False, indent=2)
         print(f"✅ 已同步 2026 最新調倉明細與官方 AB 梯隊持倉至 {default_gov_path}")

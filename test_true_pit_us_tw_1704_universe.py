@@ -252,6 +252,36 @@ def build_1704_pit_engine():
         },
     }
 
+    # 自動檢查 pit_fund_rebal_cache.pkl 是否落後最新資料庫交易日，若過舊或缺少則於 Gate A7 驗證前自動重建
+    import pit_fundamental_service as pfs
+    fc_path = pfs.REBAL_FUND_PKL_PATH
+    need_fund_rebuild = True
+    req_tw_dt = str(env_tw.get("db_max_date_tw") or "").replace("-", "")[:8]
+    req_spy_dt = str(env_tw.get("db_max_date_spy") or "").replace("-", "")[:8]
+    req_max_dt = max(req_tw_dt, req_spy_dt)
+    req_cols_hash = pfs._cols_hash(all_1704_tickers)
+    if os.path.exists(fc_path):
+        try:
+            with open(fc_path, "rb") as _fp_fc:
+                _fc_obj = pickle.load(_fp_fc)
+            _fc_ver = int(_fc_obj.get("schema_version") or 0)
+            _fc_dt = str(_fc_obj.get("db_max_date") or "").replace("-", "")[:8]
+            _fc_hash = _fc_obj.get("cols_hash")
+            _fc_idx = pd.DatetimeIndex(_fc_obj.get("dates_idx")) if _fc_obj.get("dates_idx") is not None else pd.DatetimeIndex([])
+            if (
+                _fc_ver >= 2
+                and _fc_dt >= req_max_dt
+                and _fc_hash == req_cols_hash
+                and len(_fc_idx) > 0
+                and _fc_idx.max() >= common_dates[-1]
+            ):
+                need_fund_rebuild = False
+        except Exception:
+            need_fund_rebuild = True
+    if need_fund_rebuild:
+        print(f"🔄 偵測到 PIT 財報矩陣快取落後最新資料庫交易日 (req>={req_max_dt}, env_end={str(common_dates[-1])[:10]})，自動重建 pit_fund_rebal_cache.pkl...")
+        pfs.rebuild_full_pit_fund_caches(common_dates, all_1704_tickers, force_sec=False)
+
     # 強制執行回測前 PIT 與無拆股斷層硬斷言守門員 (失敗將直接 raise PITIntegrityViolationError 停機)
     from pit_integrity_gatekeeper import assert_pre_backtest_env_integrity
     assert_pre_backtest_env_integrity(env_1704, us_pit=us_pit, verbose=True)
