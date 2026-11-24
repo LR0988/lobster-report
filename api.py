@@ -4807,7 +4807,10 @@ def get_global_sovereign_dashboard(refresh: bool = False):
         importlib.reload(global_sovereign_service)
         res = global_sovereign_service.get_global_sovereign_dashboard_data(force_refresh=refresh)
         if sig is not None and isinstance(res, dict):
-            _gs_dash_cache["sig"] = sig
+            try:
+                _gs_dash_cache["sig"] = _get_gs_dash_signature()
+            except Exception:
+                _gs_dash_cache["sig"] = sig
             _gs_dash_cache["data"] = res
         return res
 
