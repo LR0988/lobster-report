@@ -13,15 +13,14 @@ import subprocess
 import requests
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOCAL_DIR = "/Users/huanggin-chen/gemini-stock-analysis"
-DB_PATH = os.path.join(LOCAL_DIR, "tw_stock.db")
+DB_PATH = os.path.join(BASE_DIR, "tw_stock.db")
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 
 def get_db_connection():
     if not os.path.exists(DB_PATH):
         raise FileNotFoundError(f"找不到本地台股資料庫: {DB_PATH}")
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
     return conn
 

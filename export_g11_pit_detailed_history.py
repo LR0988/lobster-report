@@ -99,8 +99,22 @@ def _causal_align_series(raw_s: pd.Series, dates_idx: pd.DatetimeIndex, fill_val
 
 def _load_or_build_sov3_ohlc(dates_idx: pd.DatetimeIndex, conn_twse: sqlite3.Connection) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load or build PIT-aligned Open/Close DataFrames for SOV3_CASH ETFs (IEF, TBF, GLD_DB)."""
+    import requests
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
     cache_path = os.path.join("pit_cache", "sov3_etf_ohlc.pkl")
     req_max = dates_idx[-1]
+    try:
+        r_spy_sig = conn_twse.execute(
+            "SELECT date, close, volume FROM global_sovereign_daily WHERE ticker='SPY' ORDER BY date DESC LIMIT 1"
+        ).fetchone()
+        sov3_sig = f"{r_spy_sig[0]}|{round(float(r_spy_sig[1] or 0), 4)}|{int(float(r_spy_sig[2] or 0))}" if r_spy_sig else ""
+    except Exception:
+        sov3_sig = ""
+
+    cached_c = None
+    cached_o = None
     if os.path.exists(cache_path):
         try:
             with open(cache_path, "rb") as fp:
@@ -112,55 +126,109 @@ def _load_or_build_sov3_ohlc(dates_idx: pd.DatetimeIndex, conn_twse: sqlite3.Con
                 and isinstance(o_df, pd.DataFrame)
                 and {"IEF", "TBF", "GLD_DB"}.issubset(c_df.columns)
                 and {"IEF", "TBF", "GLD_DB"}.issubset(o_df.columns)
-                and c_df.index.max() >= req_max
             ):
-                return c_df.reindex(dates_idx).ffill(), o_df.reindex(dates_idx).ffill()
+                cached_c, cached_o = c_df, o_df
+                if c_df.index.max() >= req_max and (not sov3_sig or cached.get("sov3_sig") == sov3_sig):
+                    return c_df.reindex(dates_idx).ffill(), o_df.reindex(dates_idx).ffill()
         except Exception:
             pass
+
+    use_incremental = (
+        cached_c is not None
+        and cached_o is not None
+        and len(cached_c) >= 4000
+        and cached_c.index.min() <= pd.Timestamp("2010-01-01")
+    )
 
     etf_close = pd.DataFrame(index=dates_idx)
     etf_open = pd.DataFrame(index=dates_idx)
     end_str = (req_max + pd.Timedelta(days=3)).strftime("%Y-%m-%d")
-    import requests
-    from datetime import datetime
-    from zoneinfo import ZoneInfo
+
+    def _fetch_chart_api_series(tk_sym: str, incremental_tail: bool) -> tuple[pd.Series, pd.Series]:
+        try:
+            if incremental_tail:
+                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{tk_sym}?range=2mo&interval=1d"
+            else:
+                p2 = int(time.time()) + 86400 * 3
+                url = f"https://query1.finance.yahoo.com/v8/finance/chart/{tk_sym}?period1=1072915200&period2={p2}&interval=1d"
+            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15).json()
+            res = r["chart"]["result"][0]
+            meta = res["meta"]
+            tz = ZoneInfo(meta.get("exchangeTimezoneName", "America/New_York"))
+            ts_list = res.get("timestamp") or []
+            q = (res.get("indicators", {}).get("quote") or [{}])[0]
+            adj_arr = ((res.get("indicators", {}).get("adjclose") or [{}])[0]).get("adjclose") or []
+            o_raw = q.get("open") or []
+            c_raw = q.get("close") or []
+            c_dict, o_dict = {}, {}
+            for idx_k, ts_v in enumerate(ts_list):
+                cv = c_raw[idx_k] if idx_k < len(c_raw) else None
+                ov = o_raw[idx_k] if idx_k < len(o_raw) else None
+                av = adj_arr[idx_k] if idx_k < len(adj_arr) else cv
+                if cv is None or float(cv) <= 0:
+                    continue
+                cv_f = float(cv)
+                av_f = float(av) if (av is not None and float(av) > 0) else cv_f
+                ov_f = float(ov) if (ov is not None and float(ov) > 0) else cv_f
+                ratio = av_f / cv_f
+                d_ts = pd.Timestamp(datetime.fromtimestamp(ts_v, tz).strftime("%Y-%m-%d"))
+                c_dict[d_ts] = av_f
+                o_dict[d_ts] = ov_f * ratio
+            rmp = meta.get("regularMarketPrice")
+            rmt = meta.get("regularMarketTime")
+            if rmp is not None and rmt:
+                d_ts = pd.Timestamp(datetime.fromtimestamp(rmt, tz).strftime("%Y-%m-%d"))
+                q_opens = [x for x in o_raw if x is not None]
+                raw_o = meta.get("regularMarketOpen") or (q_opens[-1] if q_opens else rmp)
+                c_dict[d_ts] = float(rmp)
+                o_dict[d_ts] = float(raw_o)
+            c_s = pd.Series(c_dict, dtype=float).sort_index()
+            o_s = pd.Series(o_dict, dtype=float).sort_index()
+            return c_s, o_s
+        except Exception as e_api:
+            print(f"  ⚠️ SOV3 {tk_sym} Yahoo Chart API fallback warning: {e_api}")
+            return pd.Series(dtype=float), pd.Series(dtype=float)
 
     for tk in ["IEF", "TBF"]:
-        d = yf.download(tk, start="2004-01-01", end=end_str, progress=False, auto_adjust=True)
-        if isinstance(d.columns, pd.MultiIndex):
-            d.columns = d.columns.get_level_values(0)
-        if d.empty:
-            raise RuntimeError(f"yfinance failed to download {tk} for SOV3_CASH.")
-        c_ser = d["Close"].dropna().copy()
-        o_ser = d["Open"].dropna().copy()
-        if getattr(c_ser.index, "tz", None) is not None:
-            c_ser.index = c_ser.index.tz_localize(None)
-        if getattr(o_ser.index, "tz", None) is not None:
-            o_ser.index = o_ser.index.tz_localize(None)
-        # Fallback to Yahoo Chart API meta.regularMarketPrice if yf.download has trailing Close=NaN or lags req_max
-        if d["Close"].dropna().empty or c_ser.index.max() < req_max or pd.isna(d["Close"].iloc[-1]):
+        c_ser = pd.Series(dtype=float)
+        o_ser = pd.Series(dtype=float)
+        for attempt in range(2):
             try:
-                r = requests.get(
-                    f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}?range=5d&interval=1d",
-                    headers={"User-Agent": "Mozilla/5.0"},
-                    timeout=8,
-                ).json()
-                res = r["chart"]["result"][0]
-                meta = res["meta"]
-                rmp = meta.get("regularMarketPrice")
-                rmt = meta.get("regularMarketTime")
-                if rmp is not None and rmt:
-                    tz = ZoneInfo(meta.get("exchangeTimezoneName", "America/New_York"))
-                    d_ts = pd.Timestamp(datetime.fromtimestamp(rmt, tz).strftime("%Y-%m-%d"))
-                    q = (res.get("indicators", {}).get("quote") or [{}])[0]
-                    q_opens = [x for x in (q.get("open") or []) if x is not None]
-                    raw_o = meta.get("regularMarketOpen") or (q_opens[-1] if q_opens else rmp)
-                    c_ser.loc[d_ts] = float(rmp)
-                    o_ser.loc[d_ts] = float(raw_o)
-                    c_ser = c_ser.sort_index()
-                    o_ser = o_ser.sort_index()
-            except Exception as e_yf_meta:
-                print(f"  ⚠️ SOV3 {tk} meta fallback warning: {e_yf_meta}")
+                if use_incremental:
+                    d = yf.download(tk, period="2mo", progress=False, auto_adjust=True)
+                else:
+                    d = yf.download(tk, start="2004-01-01", end=end_str, progress=False, auto_adjust=True)
+                if isinstance(d.columns, pd.MultiIndex):
+                    d.columns = d.columns.get_level_values(0)
+                if not d.empty and not d["Close"].dropna().empty:
+                    c_ser = d["Close"].dropna().copy()
+                    o_ser = d["Open"].dropna().copy()
+                    if getattr(c_ser.index, "tz", None) is not None:
+                        c_ser.index = c_ser.index.tz_localize(None)
+                    if getattr(o_ser.index, "tz", None) is not None:
+                        o_ser.index = o_ser.index.tz_localize(None)
+                    break
+            except Exception:
+                pass
+            time.sleep(1.0)
+
+        # Fallback to direct Yahoo Chart API v8 if yf.download failed or lags req_max / live meta
+        if c_ser.empty or c_ser.index.max() < req_max or pd.isna(c_ser.iloc[-1]):
+            api_c, api_o = _fetch_chart_api_series(tk, incremental_tail=(use_incremental and not c_ser.empty))
+            if not api_c.empty:
+                c_ser = api_c.combine_first(c_ser) if not c_ser.empty else api_c
+                o_ser = api_o.combine_first(o_ser) if not o_ser.empty else api_o
+
+        # Preserve full cached history if available
+        if cached_c is not None and tk in cached_c.columns and cached_o is not None and tk in cached_o.columns:
+            hist_c = cached_c[tk].dropna()
+            hist_o = cached_o[tk].dropna()
+            c_ser = c_ser.combine_first(hist_c) if not c_ser.empty else hist_c
+            o_ser = o_ser.combine_first(hist_o) if not o_ser.empty else hist_o
+
+        if c_ser.empty:
+            raise RuntimeError(f"yfinance failed to download {tk} for SOV3_CASH.")
+
         etf_close[tk] = c_ser.reindex(dates_idx).ffill()
         etf_open[tk] = o_ser.reindex(dates_idx).ffill()
 
@@ -176,7 +244,7 @@ def _load_or_build_sov3_ohlc(dates_idx: pd.DatetimeIndex, conn_twse: sqlite3.Con
 
     os.makedirs("pit_cache", exist_ok=True)
     with open(cache_path, "wb") as fp:
-        pickle.dump({"close": etf_close, "open": etf_open}, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump({"close": etf_close, "open": etf_open, "sov3_sig": sov3_sig}, fp, protocol=pickle.HIGHEST_PROTOCOL)
     return etf_close, etf_open
 
 def _build_sov3_cash_series(
@@ -307,28 +375,45 @@ def _load_or_build_vix_close_series(dates_idx: pd.DatetimeIndex) -> pd.Series:
     """Load cached CBOE VIX close series or refresh from official CBOE CSV (zero lookahead)."""
     cache_path = os.path.join("pit_cache", "r21_exogenous_published_cache.pkl")
     req_end = str(dates_idx[-1].date())
+    cached_vix_s = None
     if os.path.exists(cache_path):
         try:
             with open(cache_path, "rb") as fp:
                 cached = pickle.load(fp)
+            if isinstance(cached.get("vix_df"), pd.DataFrame) and "CLOSE" in cached["vix_df"].columns:
+                cached_vix_s = cached["vix_df"]["CLOSE"]
             if (
                 cached.get("cache_version") == 1
                 and cached.get("max_date") == req_end
-                and len(cached.get("vix_df", [])) == len(dates_idx)
+                and cached_vix_s is not None
+                and len(cached_vix_s) == len(dates_idx)
             ):
-                return cached["vix_df"]["CLOSE"]
+                return cached_vix_s
         except Exception:
             pass
 
-    req = urllib.request.Request(
-        "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
-        headers={"User-Agent": "Mozilla/5.0"},
-    )
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        vix_raw = pd.read_csv(io.BytesIO(resp.read()))
-    vix_raw["dt"] = pd.to_datetime(vix_raw["DATE"], format="mixed")
-    vix_dedup = vix_raw.drop_duplicates("dt", keep="last").set_index("dt")["CLOSE"].sort_index()
-    return _causal_align_series(vix_dedup, dates_idx, fill_val=15.0)
+    try:
+        req = urllib.request.Request(
+            "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            vix_raw = pd.read_csv(io.BytesIO(resp.read()))
+        vix_raw["dt"] = pd.to_datetime(vix_raw["DATE"], format="mixed")
+        vix_dedup = vix_raw.drop_duplicates("dt", keep="last").set_index("dt")["CLOSE"].sort_index()
+        aligned = _causal_align_series(vix_dedup, dates_idx, fill_val=15.0)
+        try:
+            os.makedirs("pit_cache", exist_ok=True)
+            with open(cache_path, "wb") as fp:
+                pickle.dump({"cache_version": 1, "max_date": req_end, "vix_df": pd.DataFrame({"CLOSE": aligned})}, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        except Exception:
+            pass
+        return aligned
+    except Exception as e_vix:
+        if cached_vix_s is not None and not cached_vix_s.empty:
+            print(f"  ⚠️ CBOE VIX fetch warning ({e_vix}), falling back to forward-filled cached VIX")
+            return _causal_align_series(cached_vix_s, dates_idx, fill_val=15.0)
+        raise
 
 def _build_r21_vf_z60(
     stk_adj_df: pd.DataFrame,
@@ -2429,6 +2514,14 @@ def main():
             "rebalances": logs_y_sorted
         })
 
+    try:
+        _r_s = conn_twse.execute("SELECT date, close, volume FROM global_stock_daily WHERE ticker='SPY' ORDER BY date DESC LIMIT 1").fetchone()
+        _r_t = conn_twse.execute("SELECT date, closing_price, trade_volume FROM daily_stock WHERE stock_id='2330' ORDER BY date DESC LIMIT 1").fetchone()
+        _tw_d_fmt = f"{_r_t[0][:4]}-{_r_t[0][4:6]}-{_r_t[0][6:8]}" if (_r_t and len(str(_r_t[0])) == 8) else str(_r_t[0] if _r_t else "")
+        _source_db_fp = f"{_tw_d_fmt}|{round(float(_r_t[1] or 0), 2)}|{_r_s[0]}|{round(float(_r_s[1] or 0), 4)}|{int(float(_r_s[2] or 0))}" if (_r_s and _r_t) else ""
+    except Exception:
+        _source_db_fp = ""
+
     conn_twse.close()
 
     _yrs = (eq_d.index[-1] - eq_d.index[0]).days / 365.25
@@ -2512,6 +2605,7 @@ def main():
 
     official_active_tranches = {
         "updated_at": str(eq_d.index[-1])[:10],
+        "source_db_fingerprint": _source_db_fp,
         "tranche_a": _build_official_tranche_obj(act_a_list[-1], prev_a_list[-1] if prev_a_list else None, "A") if act_a_list else {},
         "tranche_b": _build_official_tranche_obj(act_b_list[-1], prev_b_list[-1] if prev_b_list else None, "B") if act_b_list else {},
     }

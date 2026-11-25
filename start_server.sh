@@ -30,7 +30,11 @@ else
 fi
 
 # 4. 啟動 Cloudflare 遠端安全通道 (支援外部與手機 HTTPS 遠端存取)
-python3 manage_tunnel.py > tunnel.log 2>&1 &
+if [ -f "./venv/bin/python" ]; then
+    ./venv/bin/python -u manage_tunnel.py > tunnel.log 2>&1 &
+else
+    python3 -u manage_tunnel.py > tunnel.log 2>&1 &
+fi
 TUNNEL_PID=$!
 trap "kill -9 $TUNNEL_PID 2>/dev/null || true; exit" INT TERM EXIT
 

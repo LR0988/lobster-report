@@ -159,33 +159,61 @@ COMMODITY_SPECS = [
 ]
 
 
-def fetch_all_and_ingest(start_date="2004-01-01"):
+def fetch_all_and_ingest(start_date="2004-01-01", incremental: bool = False):
     fut_tickers = [c["ticker"] for c in COMMODITY_SPECS]
     etf_tickers = list({c["etf_proxy"] for c in COMMODITY_SPECS} | {"DBC", "GSG", "USCI", "BIL", "DBB", "SPY", "QQQ"})
     def_tickers = [c["deferred_ticker"] for c in COMMODITY_SPECS]
 
-    print("1. Fetching futures OHLCV...")
-    raw_fut = yf.download(fut_tickers, start=start_date, progress=False, group_by="ticker")
+    is_incremental_mode = False
+    if incremental and os.path.exists(DB_PATH):
+        try:
+            chk_conn = sqlite3.connect(DB_PATH, timeout=30.0)
+            ex_cnt = chk_conn.execute("SELECT COUNT(*) FROM commodity_futures_daily").fetchone()[0]
+            chk_conn.close()
+            if ex_cnt >= 50000:
+                is_incremental_mode = True
+        except Exception:
+            is_incremental_mode = False
+
+    if is_incremental_mode:
+        print("1. Fetching incremental futures OHLCV (period=6mo)...")
+        raw_fut = yf.download(fut_tickers, period="6mo", progress=False, group_by="ticker")
+    else:
+        print("1. Fetching full futures OHLCV...")
+        raw_fut = yf.download(fut_tickers, start=start_date, progress=False, group_by="ticker")
+
     # Check any missing tickers and retry individually
     fut_dict = {}
     for tk in fut_tickers:
-        df_tk = raw_fut[tk].dropna(how="all") if tk in raw_fut.columns.get_level_values(0) else pd.DataFrame()
-        if len(df_tk) < 100:
+        df_tk = raw_fut[tk].dropna(how="all") if isinstance(raw_fut.columns, pd.MultiIndex) and tk in raw_fut.columns.get_level_values(0) else pd.DataFrame()
+        if df_tk.empty or len(df_tk) < (20 if is_incremental_mode else 100):
             print(f"   Retrying {tk} individually...")
-            time.sleep(1)
-            df_tk = yf.Ticker(tk).history(start=start_date)
+            time.sleep(0.5)
+            df_tk = yf.Ticker(tk).history(period="6mo") if is_incremental_mode else yf.Ticker(tk).history(start=start_date)
+            if not df_tk.empty and getattr(df_tk.index, "tz", None) is not None:
+                df_tk.index = df_tk.index.tz_localize(None)
+        elif getattr(df_tk.index, "tz", None) is not None:
             df_tk.index = df_tk.index.tz_localize(None)
         fut_dict[tk] = df_tk
-        print(f"   {tk:6s}: {len(df_tk):4d} rows ({df_tk.index.min().strftime('%Y-%m-%d')} ~ {df_tk.index.max().strftime('%Y-%m-%d')})")
+        if not df_tk.empty:
+            print(f"   {tk:6s}: {len(df_tk):4d} rows ({df_tk.index.min().strftime('%Y-%m-%d')} ~ {df_tk.index.max().strftime('%Y-%m-%d')})")
 
     print("2. Fetching ETF Roll Benchmarks...")
-    raw_etf = yf.download(etf_tickers, start=start_date, progress=False)["Close"]
+    raw_etf = (
+        yf.download(etf_tickers, period="6mo", progress=False)["Close"]
+        if is_incremental_mode
+        else yf.download(etf_tickers, start=start_date, progress=False)["Close"]
+    )
+    if getattr(raw_etf.index, "tz", None) is not None:
+        raw_etf.index = raw_etf.index.tz_localize(None)
     for etk in etf_tickers:
-        if etk not in raw_etf.columns or len(raw_etf[etk].dropna()) < 50:
+        if etk not in raw_etf.columns or len(raw_etf[etk].dropna()) < (10 if is_incremental_mode else 50):
             print(f"   Retrying ETF {etk} individually...")
-            time.sleep(1)
-            s = yf.Ticker(etk).history(start=start_date)["Close"]
-            s.index = s.index.tz_localize(None)
+            time.sleep(0.5)
+            h_s = yf.Ticker(etk).history(period="6mo") if is_incremental_mode else yf.Ticker(etk).history(start=start_date)
+            s = h_s["Close"] if not h_s.empty else pd.Series(dtype=float)
+            if not s.empty and getattr(s.index, "tz", None) is not None:
+                s.index = s.index.tz_localize(None)
             raw_etf[etk] = s
 
     print("3. Fetching Deferred Contracts for Live Term Structure...")
@@ -224,7 +252,7 @@ def fetch_all_and_ingest(start_date="2004-01-01"):
     crush_spread = close_df["ZM=F"] * 0.022 + close_df["ZL=F"] * 0.11 - (close_df["ZS=F"] / 100.0)
 
     # Connect to tw_stock.db and create tables
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     cur = conn.cursor()
 
     cur.execute("""
@@ -388,7 +416,10 @@ def fetch_all_and_ingest(start_date="2004-01-01"):
         else:
             phys_s = close_df["HG=F"] / (close_df["GC=F"] + 1e-6) * 1000.0
 
+        cutoff_upsert = (all_dates.max() - pd.Timedelta(days=35)) if (is_incremental_mode and len(all_dates) > 0) else None
         valid_idx = s_close.dropna().index
+        if cutoff_upsert is not None:
+            valid_idx = valid_idx[valid_idx >= cutoff_upsert]
         for dt in valid_idx:
             d_str = dt.strftime("%Y-%m-%d")
             daily_rows.append((
@@ -426,8 +457,9 @@ def fetch_all_and_ingest(start_date="2004-01-01"):
     cur.execute("SELECT COUNT(*), MIN(date), MAX(date) FROM commodity_futures_daily")
     d_cnt, min_d, max_d = cur.fetchone()
     conn.close()
-    print(f"✅ Successfully wrote {m_cnt} contracts into commodity_futures_metadata and {d_cnt:,} rows ({min_d} ~ {max_d}) into commodity_futures_daily in tw_stock.db!")
+    print(f"✅ Successfully wrote {m_cnt} contracts into commodity_futures_metadata and {d_cnt:,} rows ({min_d} ~ {max_d}) into commodity_futures_daily in tw_stock.db! (upserted {len(daily_rows):,} rows)")
+    return {"metadata_count": m_cnt, "daily_count": d_cnt, "upserted": len(daily_rows), "min_date": min_d, "max_date": max_d}
 
 
 if __name__ == "__main__":
-    fetch_all_and_ingest()
+    fetch_all_and_ingest(incremental=False)

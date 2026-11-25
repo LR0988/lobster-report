@@ -217,7 +217,7 @@ def _get_tw_db_max_date() -> str:
     if not os.path.exists(TW_DB_PATH):
         return ""
     try:
-        conn = sqlite3.connect(TW_DB_PATH)
+        conn = sqlite3.connect(TW_DB_PATH, timeout=30.0)
         r_spy = conn.execute("SELECT MAX(date) FROM global_stock_daily WHERE ticker = 'SPY'").fetchone()
         r_tw = conn.execute("SELECT MAX(date) FROM daily_stock WHERE stock_id = '2330'").fetchone()
         conn.close()
@@ -395,6 +395,12 @@ def rebuild_full_pit_fund_caches(dates_idx: pd.DatetimeIndex, cols: list, force_
                 if ent_r is not None and not ent_r["rev"].empty:
                     us_dict[sym_r] = ent_r
                     ok_cnt += 1
+                elif code_r in (200, 204, 404):
+                    prev_ent = us_dict.get(sym_r)
+                    if not isinstance(prev_ent, dict):
+                        prev_ent = {"rev": pd.DataFrame(), "opinc": pd.DataFrame(), "gp": pd.DataFrame(), "netinc": pd.DataFrame(), "eps": pd.DataFrame(), "surprise": pd.DataFrame()}
+                    prev_ent["last_checked"] = today_str
+                    us_dict[sym_r] = prev_ent
                 elif code_r in (403, 429):
                     fail_429 += 1
                 if idx_f % 80 == 0:
@@ -421,44 +427,190 @@ def rebuild_full_pit_fund_caches(dates_idx: pd.DatetimeIndex, cols: list, force_
 
     col_to_idx = {c: i for i, c in enumerate(cols)}
     dt_min, dt_max = dates_idx[0], dates_idx[-1]
+    epoch_ts = pd.Timestamp("1970-01-01")
+    dates_days = (dates_idx.normalize() - epoch_ts).days.values.astype(np.int64)
+    min_day = int(dates_days[0])
+    max_day = int(dates_days[-1])
 
-    # Precompute US matrices via unique filing/expiry milestones (100% day-exact, ~3s total)
+    def _df_to_sorted_split(df_k):
+        """Returns (q_rows, fy_rows, filed_days_for_ms, end_days_for_ms) sorted by (end_day, filed_day)."""
+        if df_k is None or df_k.empty or "filed" not in df_k.columns or "end" not in df_k.columns:
+            return [], [], []
+        f_ser = pd.to_datetime(df_k["filed"], errors="coerce")
+        e_ser = pd.to_datetime(df_k["end"], errors="coerce")
+        v_ser = pd.to_numeric(df_k["val"], errors="coerce")
+        valid = f_ser.notna() & e_ser.notna()
+        if not valid.any():
+            return [], [], []
+        f_d = (f_ser[valid].dt.normalize() - epoch_ts).dt.days.to_numpy(dtype=np.int64)
+        e_d = (e_ser[valid].dt.normalize() - epoch_ts).dt.days.to_numpy(dtype=np.int64)
+        vals = v_ser[valid].to_numpy(dtype=np.float64)
+        q_t = df_k.loc[valid, "q_type"].to_numpy()
+        # Sort stably by (end_day, filed_day) preserving original relative order on ties
+        order = np.lexsort((f_d, e_d))
+        q_rows, fy_rows, ms_list = [], [], []
+        for idx_o in order:
+            fd = int(f_d[idx_o])
+            ed = int(e_d[idx_o])
+            vv = float(vals[idx_o])
+            if min_day <= fd <= max_day:
+                ms_list.append(fd)
+            exp_d = ed + 191
+            if min_day <= exp_d <= max_day:
+                ms_list.append(exp_d)
+            if q_t[idx_o] == "Q":
+                q_rows.append((ed, fd, vv))
+            elif q_t[idx_o] == "FY":
+                fy_rows.append((ed, fd, vv))
+        return q_rows, fy_rows, ms_list
+
+    def _latest_by_end(rows, m_day: int) -> dict:
+        out = {}
+        for ed, fd, vv in rows:
+            if fd <= m_day:
+                out[ed] = vv
+        return out
+
+    def _calc_fast_yoy_accel(q_rows, fy_rows, m_day: int, is_eps: bool):
+        q_map = _latest_by_end(q_rows, m_day)
+        if len(q_map) >= 2:
+            q_ends = list(q_map.keys())
+            q_vals = list(q_map.values())
+            end_0 = q_ends[-1]
+            val_0 = q_vals[-1]
+            if (m_day - end_0) <= 190:
+                yoy_0 = np.nan
+                val_m4 = None
+                for k_i in range(len(q_ends) - 1, -1, -1):
+                    d0 = end_0 - q_ends[k_i]
+                    if 335 <= d0 <= 395:
+                        val_m4 = q_vals[k_i]
+                        break
+                if val_m4 is not None:
+                    denom = max(abs(val_m4), 0.10) if is_eps else max(abs(val_m4), 1e6)
+                    if is_eps or val_m4 > 0:
+                        yoy_0 = (val_0 - val_m4) / denom
+                accel = np.nan
+                end_m1 = None
+                val_m1 = None
+                for k_i in range(len(q_ends) - 1, -1, -1):
+                    d0 = end_0 - q_ends[k_i]
+                    if 65 <= d0 <= 120:
+                        end_m1 = q_ends[k_i]
+                        val_m1 = q_vals[k_i]
+                        break
+                if end_m1 is not None and not np.isnan(yoy_0):
+                    val_m5 = None
+                    for k_i in range(len(q_ends) - 1, -1, -1):
+                        d1 = end_m1 - q_ends[k_i]
+                        if 335 <= d1 <= 395:
+                            val_m5 = q_vals[k_i]
+                            break
+                    if val_m5 is not None:
+                        denom_5 = max(abs(val_m5), 0.10) if is_eps else max(abs(val_m5), 1e6)
+                        if is_eps or val_m5 > 0:
+                            yoy_m1 = (val_m1 - val_m5) / denom_5
+                            accel = yoy_0 - yoy_m1
+                return yoy_0, accel
+
+        fy_map = _latest_by_end(fy_rows, m_day)
+        if len(fy_map) >= 2:
+            fy_ends = list(fy_map.keys())
+            fy_vals = list(fy_map.values())
+            end_0 = fy_ends[-1]
+            val_0 = fy_vals[-1]
+            if (m_day - end_0) <= 190:
+                val_m4 = None
+                for k_i in range(len(fy_ends) - 1, -1, -1):
+                    d0 = end_0 - fy_ends[k_i]
+                    if 335 <= d0 <= 395:
+                        val_m4 = fy_vals[k_i]
+                        break
+                if val_m4 is not None:
+                    denom = max(abs(val_m4), 0.20) if is_eps else max(abs(val_m4), 1e6)
+                    if is_eps or val_m4 > 0:
+                        return (val_0 - val_m4) / denom, np.nan
+        return np.nan, np.nan
+
+    # Precompute US matrices via unique filing/expiry milestones (100% bit-exact PIT, ~1.5s total)
     for sym in us_cols:
         ent = us_dict.get(sym)
         if not ent:
             continue
         ci = col_to_idx[sym]
-        ms_dates = {dt_max}
-        for key, dcol in (("rev", "filed"), ("opinc", "filed"), ("eps", "filed"), ("surprise", "ann_dt")):
-            df_k = ent.get(key)
-            if df_k is not None and not df_k.empty and dcol in df_k.columns:
-                dts = pd.to_datetime(df_k[dcol], errors="coerce").dropna()
-                for x in dts:
-                    if dt_min <= x <= dt_max:
-                        ms_dates.add(x)
-                if "end" in df_k.columns:
-                    ends = pd.to_datetime(df_k["end"], errors="coerce").dropna()
-                    for e in ends:
-                        exp_d = e + pd.Timedelta(days=191)
-                        if dt_min <= exp_d <= dt_max:
-                            ms_dates.add(exp_d)
-        sorted_ms = sorted(ms_dates)
+        rev_q, rev_fy, ms_rev = _df_to_sorted_split(ent.get("rev"))
+        op_q, op_fy, ms_op = _df_to_sorted_split(ent.get("opinc"))
+        eps_q, eps_fy, ms_eps = _df_to_sorted_split(ent.get("eps"))
+
+        surp_ann_days, surp_vals = [], []
+        df_s = ent.get("surprise")
+        if df_s is not None and not df_s.empty and "ann_dt" in df_s.columns:
+            a_ser = pd.to_datetime(df_s["ann_dt"], errors="coerce")
+            s_vals = pd.to_numeric(df_s["Surprise(%)"], errors="coerce")
+            for a_ts, sv in zip(a_ser, s_vals):
+                if pd.notna(a_ts):
+                    ad = int((a_ts.normalize() - epoch_ts).days)
+                    surp_ann_days.append(ad)
+                    surp_vals.append(float(sv) if pd.notna(sv) else np.nan)
+
+        ms_set = {max_day}
+        ms_set.update(ms_rev)
+        ms_set.update(ms_op)
+        ms_set.update(ms_eps)
+        for ad in surp_ann_days:
+            if min_day <= ad <= max_day:
+                ms_set.add(ad)
+        sorted_ms = sorted(ms_set)
         if not sorted_ms:
             continue
-        # Evaluate at each milestone and fill forward to next milestone (bounded by <= 65 trading days safety)
-        for m_i, m_dt in enumerate(sorted_ms):
-            res = compute_us_pit_metrics_at_date(ent, m_dt)
-            if not res["has_data"] and np.isnan(res["margin_expand"]):
+
+        for m_i, m_day in enumerate(sorted_ms):
+            ry, ra = _calc_fast_yoy_accel(rev_q, rev_fy, m_day, False)
+            ey, _ = _calc_fast_yoy_accel(eps_q, eps_fy, m_day, True)
+            oy, _ = _calc_fast_yoy_accel(op_q, op_fy, m_day, False)
+            if np.isnan(ey) and not np.isnan(oy):
+                ey = oy
+
+            me = np.nan
+            if rev_q and op_q:
+                r_map = _latest_by_end(rev_q, m_day)
+                o_map = _latest_by_end(op_q, m_day)
+                common_e = [e for e in r_map.keys() if e in o_map]
+                if common_e:
+                    e0 = common_e[-1]
+                    if (m_day - e0) <= 190:
+                        r0 = r_map[e0]
+                        if r0 > 0:
+                            om0 = o_map[e0] / r0
+                            for k_i in range(len(common_e) - 1, -1, -1):
+                                e4 = common_e[k_i]
+                                if 335 <= (e0 - e4) <= 395:
+                                    r4 = r_map[e4]
+                                    if r4 > 0:
+                                        me = om0 - (o_map[e4] / r4)
+                                    break
+
+            su = np.nan
+            for k_i in range(len(surp_ann_days) - 1, -1, -1):
+                ad = surp_ann_days[k_i]
+                if ad <= m_day:
+                    if (m_day - ad) <= 115 and not np.isnan(surp_vals[k_i]):
+                        su = surp_vals[k_i] / 100.0
+                    break
+
+            has_data = not (np.isnan(ry) and np.isnan(ey) and np.isnan(su))
+            if not has_data and np.isnan(me):
                 continue
-            p_start = int(dates_idx.searchsorted(m_dt, side="left"))
+
+            p_start = int(dates_days.searchsorted(m_day, side="left"))
             if m_i + 1 < len(sorted_ms):
-                p_end = int(dates_idx.searchsorted(sorted_ms[m_i + 1], side="left"))
+                p_end = int(dates_days.searchsorted(sorted_ms[m_i + 1], side="left"))
             else:
                 p_end = n_d
             p_end = min(p_end, p_start + 106, n_d)
             if p_start >= p_end:
                 continue
-            ry, ra, ey, me, su = res["rev_yoy"], res["rev_accel"], res["eps_yoy"], res["margin_expand"], res["eps_surprise"]
+
             rev_yoy_mat[p_start:p_end, ci] = ry
             rev_acc_mat[p_start:p_end, ci] = ra
             eps_yoy_mat[p_start:p_end, ci] = ey
@@ -473,7 +625,7 @@ def rebuild_full_pit_fund_caches(dates_idx: pd.DatetimeIndex, cols: list, force_
 
     # Batch-load TW monthly_revenue and quarterly_margins in memory once
     if tw_cols and os.path.exists(TW_DB_PATH):
-        conn = sqlite3.connect(TW_DB_PATH)
+        conn = sqlite3.connect(TW_DB_PATH, timeout=30.0)
         df_m_all = pd.read_sql_query("SELECT stock_id, revenue_date, yoy FROM monthly_revenue WHERE yoy IS NOT NULL", conn)
         df_q_all = pd.read_sql_query("SELECT stock_id, year, season, rev_q, om_q FROM quarterly_margins ORDER BY stock_id, year, season", conn)
         conn.close()

@@ -189,6 +189,9 @@ export default function GlobalComplementaryV3Dashboard({ onTriggerScraper, isScr
 
   useEffect(() => {
     loadDashboard(false);
+    const onUpdated = () => { loadDashboard(false); };
+    window.addEventListener('lobster:data-updated', onUpdated);
+    return () => window.removeEventListener('lobster:data-updated', onUpdated);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive Cash & Positions 100% from txHistory (Single Source of Truth)

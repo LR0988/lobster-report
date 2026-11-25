@@ -163,6 +163,9 @@ export default function TwAsymmetricAlphaDashboard() {
   // 開啟「💎 可轉債」分頁時立即直連 tw_stock.db 即時運算最新可轉債好球帶雷達 (零靜態延遲)
   useEffect(() => {
     fetchLatest(false);
+    const onUpdated = () => { fetchLatest(false); };
+    window.addEventListener('lobster:data-updated', onUpdated);
+    return () => window.removeEventListener('lobster:data-updated', onUpdated);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 計算每檔槽位預算 (固定最多 3 檔槽位，每檔 1/3)

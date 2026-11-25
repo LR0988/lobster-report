@@ -29,11 +29,20 @@ def get_supabase_conn():
 def get_sqlite_conn():
     if not os.path.exists(LOCAL_STOCK_DB):
         raise FileNotFoundError(f"找不到本地台股資料庫: {LOCAL_STOCK_DB}")
-    conn = sqlite3.connect(LOCAL_STOCK_DB)
+    conn = sqlite3.connect(LOCAL_STOCK_DB, timeout=30.0)
     conn.row_factory = sqlite3.Row
     return conn
 
-def sync_ml_cache(sb_conn):
+def _load_fresh_json_if_exists(path: str):
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return None
+    return None
+
+def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
     """同步 11 種機器學習模型預測及低頻量化報告至 Supabase stock_ml_cache"""
     print("[*] 正在同步 ML 模型預測快取至 Supabase...")
     cur = sb_conn.cursor()
@@ -118,10 +127,17 @@ def sync_ml_cache(sb_conn):
 
     # 上傳全球主權泰坦最新數據 (global_sovereign_dashboard)
     try:
-        import importlib
-        import global_sovereign_service
-        importlib.reload(global_sovereign_service)
-        gs_data = global_sovereign_service.get_global_sovereign_dashboard_data()
+        def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "defaultGlobalSovereignData.json")
+        gs_data = _load_fresh_json_if_exists(def_path) if reuse_fresh_json else None
+        if not gs_data or gs_data.get("status") != "ok":
+            import importlib
+            import global_sovereign_service
+            importlib.reload(global_sovereign_service)
+            gs_data = global_sovereign_service.get_global_sovereign_dashboard_data()
+            if gs_data and gs_data.get("status") == "ok" and os.path.exists(os.path.dirname(def_path)):
+                with open(def_path, "w", encoding="utf-8") as f:
+                    json.dump(gs_data, f, ensure_ascii=False, indent=2)
+                print("  ✓ 全球主權泰坦前端 defaultGlobalSovereignData.json 同步完成")
         if gs_data and gs_data.get("status") == "ok":
             cur.execute("""
                 INSERT INTO stock_ml_cache (model_type, payload, updated_at)
@@ -130,21 +146,18 @@ def sync_ml_cache(sb_conn):
                 SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
             """, ("global_sovereign_dashboard", json.dumps(gs_data, ensure_ascii=False)))
             print("  ✓ 全球主權泰坦最新即時數據同步至 stock_ml_cache")
-
-            def_path = "/Users/huanggin-chen/openclaw_test/frontend/src/data/defaultGlobalSovereignData.json"
-            if os.path.exists(os.path.dirname(def_path)):
-                with open(def_path, "w", encoding="utf-8") as f:
-                    json.dump(gs_data, f, ensure_ascii=False, indent=2)
-                print("  ✓ 全球主權泰坦前端 defaultGlobalSovereignData.json 同步完成")
     except Exception as e:
         print(f"  ✗ 同步全球主權泰坦失敗: {e}")
 
     # 上傳全球泰坦互補戰艦 V12 五檔精銳22號同步版最新數據 (complementary_v3_dashboard)
     try:
-        import importlib
-        import complementary_v3_service
-        importlib.reload(complementary_v3_service)
-        v3_data = complementary_v3_service.get_complementary_v3_dashboard_data(force_refresh=False)
+        v12_def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "defaultComplementaryV3Data.json")
+        v3_data = _load_fresh_json_if_exists(v12_def_path) if reuse_fresh_json else None
+        if not v3_data or v3_data.get("status") != "ok":
+            import importlib
+            import complementary_v3_service
+            importlib.reload(complementary_v3_service)
+            v3_data = complementary_v3_service.get_complementary_v3_dashboard_data(force_refresh=False)
         if v3_data and v3_data.get("status") == "ok":
             cur.execute("""
                 INSERT INTO stock_ml_cache (model_type, payload, updated_at)
@@ -158,10 +171,13 @@ def sync_ml_cache(sb_conn):
 
     # 上傳台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT) 最新數據 (causal_titan_dashboard)
     try:
-        import importlib
-        import tw_titan_pit_service
-        importlib.reload(tw_titan_pit_service)
-        ct_data = tw_titan_pit_service.refresh_live(force_rebuild=False)
+        ct_def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "taiwan_causal_titan_data.json")
+        ct_data = _load_fresh_json_if_exists(ct_def_path) if reuse_fresh_json else None
+        if not ct_data:
+            import importlib
+            import tw_titan_pit_service
+            importlib.reload(tw_titan_pit_service)
+            ct_data = tw_titan_pit_service.refresh_live(force_rebuild=False)
         if ct_data:
             ct_data["status"] = "ok"
             cur.execute("""
@@ -176,10 +192,13 @@ def sync_ml_cache(sb_conn):
 
     # 上傳強勢股超賣快打 3.0 最新數據 (oversold_sniper_dashboard)
     try:
-        import importlib
-        import oversold_sniper_service
-        importlib.reload(oversold_sniper_service)
-        os_data = oversold_sniper_service.get_oversold_sniper_dashboard_data()
+        os_def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "defaultOversoldSniperData.json")
+        os_data = _load_fresh_json_if_exists(os_def_path) if reuse_fresh_json else None
+        if not os_data or os_data.get("status") != "ok":
+            import importlib
+            import oversold_sniper_service
+            importlib.reload(oversold_sniper_service)
+            os_data = oversold_sniper_service.get_oversold_sniper_dashboard_data()
         if os_data and os_data.get("status") == "ok":
             cur.execute("""
                 INSERT INTO stock_ml_cache (model_type, payload, updated_at)
@@ -193,13 +212,20 @@ def sync_ml_cache(sb_conn):
 
     # 上傳台股事件與ETF吃豆腐 & 可轉債主力與急跌狙擊最新數據
     try:
-        import importlib
-        import tw_special_strategies_service
-        importlib.reload(tw_special_strategies_service)
-        sp_out = tw_special_strategies_service.compute_tw_special_strategies(save_json=True)
+        ev_def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "defaultTwEventRadarData.json")
+        asym_def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "defaultTwAsymmetricAlphaData.json")
+        ev_obj = _load_fresh_json_if_exists(ev_def_path) if reuse_fresh_json else None
+        asym_obj = _load_fresh_json_if_exists(asym_def_path) if reuse_fresh_json else None
+        if not (ev_obj and ev_obj.get("status") == "ok" and asym_obj and asym_obj.get("status") == "ok"):
+            import importlib
+            import tw_special_strategies_service
+            importlib.reload(tw_special_strategies_service)
+            sp_out = tw_special_strategies_service.compute_tw_special_strategies(save_json=True)
+            ev_obj = sp_out.get("tw_event_radar")
+            asym_obj = sp_out.get("tw_asymmetric_alpha")
         for cache_key, payload_obj in [
-            ("tw_event_radar_dashboard", sp_out.get("tw_event_radar")),
-            ("tw_asymmetric_alpha_dashboard", sp_out.get("tw_asymmetric_alpha")),
+            ("tw_event_radar_dashboard", ev_obj),
+            ("tw_asymmetric_alpha_dashboard", asym_obj),
         ]:
             if payload_obj and payload_obj.get("status") == "ok":
                 cur.execute("""
@@ -214,10 +240,13 @@ def sync_ml_cache(sb_conn):
 
     # 上傳全球原物料期貨 CTA 泰坦最新數據 (commodity_cta_dashboard)
     try:
-        import importlib
-        import commodity_cta_service
-        importlib.reload(commodity_cta_service)
-        cta_data = commodity_cta_service.get_commodity_cta_dashboard_data(force_refresh=False)
+        cta_def_path = os.path.join(LOCAL_DIR, "frontend", "src", "data", "defaultCommodityCtaData.json")
+        cta_data = _load_fresh_json_if_exists(cta_def_path) if reuse_fresh_json else None
+        if not cta_data or cta_data.get("status") != "ok":
+            import importlib
+            import commodity_cta_service
+            importlib.reload(commodity_cta_service)
+            cta_data = commodity_cta_service.get_commodity_cta_dashboard_data(force_refresh=False)
         if cta_data and cta_data.get("status") == "ok":
             cur.execute("""
                 INSERT INTO stock_ml_cache (model_type, payload, updated_at)
@@ -364,9 +393,14 @@ def sync_database_previews(sb_conn, local_conn):
     sb_cur = sb_conn.cursor()
 
     tables = [
-        "daily_stock", "monthly_revenue", "institutional_trades", "institutional_futures", "shareholder_concentration",
+        "daily_stock", "monthly_revenue", "institutional_trades", "institutional_futures",
+        "stock_margin_daily", "shareholder_concentration",
         "daily_index", "market_breadth", "options_pc_ratio", "macro_indicators",
-        "global_stock_daily", "global_sovereign_daily", "futures_1m", "futures_5m",
+        "tpex_cb_metadata", "tpex_cb_quotes",
+        "global_stock_daily", "global_sovereign_daily",
+        "commodity_futures_daily", "commodity_futures_metadata", "commodity_cta_user_trades",
+        "futures_1m", "futures_5m",
+        "quarterly_eps", "quarterly_margins", "official_corporate_actions",
         "portfolio", "watchlist", "settings", "titan_live_account", "titan_live_positions", "titan_live_trades",
         "global_sovereign_metadata", "global_stock_metadata",
         "global_sovereign_positions", "global_sovereign_trades", "global_sovereign_account"
@@ -386,12 +420,12 @@ def sync_database_previews(sb_conn, local_conn):
             cols = [col["name"] for col in local_cur.fetchall()]
             if not cols:
                 continue
-            order_col = "datetime" if "datetime" in cols else "date" if "date" in cols else "revenue_date" if "revenue_date" in cols else None
+            order_col = "datetime" if "datetime" in cols else "date" if "date" in cols else "trade_date" if "trade_date" in cols else "revenue_date" if "revenue_date" in cols else None
             order_clause = f"ORDER BY {order_col} DESC" if order_col else ""
             local_cur.execute(f"SELECT * FROM {t} {order_clause} LIMIT 100")
             data_rows = [dict(r) for r in local_cur.fetchall()]
 
-            if t in stat1_counts and stat1_counts[t] > 10000:
+            if t in stat1_counts and stat1_counts[t] > 200000:
                 row_count = stat1_counts[t]
             else:
                 local_cur.execute(f"SELECT count(*) FROM {t}")
@@ -522,7 +556,7 @@ def sync_titan_portfolios(sb_conn, local_conn):
     except Exception as e:
         print(f"  ⚠️ 同步台股泰坦持倉報價失敗: {e}")
 
-def run_full_sync():
+def run_full_sync(reuse_fresh_json: bool = False):
     """執行完整一次性全同步"""
     print("=" * 60)
     print("🦞 蝦報 - 本機台股資料與模型同步作業開始")
@@ -531,7 +565,7 @@ def run_full_sync():
     local_conn = get_sqlite_conn()
 
     try:
-        sync_ml_cache(sb_conn)
+        sync_ml_cache(sb_conn, reuse_fresh_json=reuse_fresh_json)
         sync_portfolio(sb_conn, local_conn)
         sync_titan_portfolios(sb_conn, local_conn)
         sync_watchlist(sb_conn, local_conn)

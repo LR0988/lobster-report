@@ -20,6 +20,7 @@ V6.0 八重低自由度正交升級 (嚴格 T+1 開盤成交 + 漲跌停/無量�
 """
 import os
 import json
+import pickle
 import sqlite3
 import urllib.request
 from datetime import datetime
@@ -1441,14 +1442,14 @@ def _compute_anti_overfit_audit(
     }
 
 
-def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool = True):
+def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool = True, force_audit: bool = False):
     if not os.path.exists(DB_PATH):
         if os.path.exists(DEFAULT_CTA_JSON_PATH):
             with open(DEFAULT_CTA_JSON_PATH, "r", encoding="utf-8") as f:
                 return json.load(f)
         return {"status": "error", "message": "tw_stock.db not found"}
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     _ensure_user_cta_table(conn)
 
     meta_df = pd.read_sql_query("SELECT * FROM commodity_futures_metadata", conn)
@@ -1607,9 +1608,28 @@ def compute_commodity_cta_dashboard(save_json: bool = True, run_full_audit: bool
     tw_stats = _compute_trade_win_rate_stats(
         res_v6["trade_logs"], res_v5["trade_logs"], res_v41["trade_logs"], meta_map, ratchet_exits=res_v6["ratchet_exits"]
     )
-    anti_overfit = _compute_anti_overfit_audit(
-        env, res_v6, m6, m5, m41, m6_12bp, m5_12bp, m41_12bp, tw_stats
-    ) if run_full_audit else {}
+    audit_cache_path = os.path.join(BASE_DIR, "pit_cache", "commodity_cta_audit_cache.pkl")
+    anti_overfit = {}
+    if run_full_audit:
+        if not force_audit and os.path.exists(audit_cache_path):
+            try:
+                if (datetime.now().timestamp() - os.path.getmtime(audit_cache_path)) < (7 * 86400):
+                    with open(audit_cache_path, "rb") as f_aud:
+                        cached_aud = pickle.load(f_aud)
+                    if isinstance(cached_aud, dict) and "all_9_gates_passed" in cached_aud:
+                        anti_overfit = cached_aud
+            except Exception:
+                anti_overfit = {}
+        if not anti_overfit:
+            anti_overfit = _compute_anti_overfit_audit(
+                env, res_v6, m6, m5, m41, m6_12bp, m5_12bp, m41_12bp, tw_stats
+            )
+            try:
+                os.makedirs(os.path.dirname(audit_cache_path), exist_ok=True)
+                with open(audit_cache_path, "wb") as f_aud:
+                    pickle.dump(anti_overfit, f_aud, protocol=pickle.HIGHEST_PROTOCOL)
+            except Exception:
+                pass
 
     # Attach win-rate metadata onto flagship V6.0, V5.0 & V4.1 summaries for UI table
     m6["single_trade_win_rate_pct"] = tw_stats["win_rate_clean_pct"]

@@ -52,7 +52,12 @@ export default function TaiwanCausalTitanDashboard() {
       setLiveStatus({ state: 'offline', msg: '⚠️ 未連上本機資料庫，顯示內建快照 (' + (defaultTitanData.strategy_info?.latest_data_date || '-') + ')' });
     }
   };
-  useEffect(() => { loadLiveData(false); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    loadLiveData(false);
+    const onUpdated = () => { loadLiveData(false); };
+    window.addEventListener('lobster:data-updated', onUpdated);
+    return () => window.removeEventListener('lobster:data-updated', onUpdated);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const { strategy_info = {}, kpis = {}, curve = [], yearly_stats = [], causal_alphas = [], trades = [] } = data;
 
   // 使用者身分與本地存儲

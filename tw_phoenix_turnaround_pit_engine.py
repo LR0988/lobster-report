@@ -1375,9 +1375,14 @@ def compute_or_load_torture_audit(sim: dict, force_rebuild: bool = False) -> dic
     audit_ver = "v110_wave_pit_audit_v1"
     if not force_rebuild and os.path.exists(AUDIT_CACHE_PATH):
         try:
+            cache_age_sec = time.time() - os.path.getmtime(AUDIT_CACHE_PATH)
             with open(AUDIT_CACHE_PATH, "rb") as f:
                 cached = pickle.load(f)
-            if isinstance(cached, dict) and cached.get("db_fingerprint") == fp and cached.get("audit_ver") == audit_ver:
+            if (
+                isinstance(cached, dict)
+                and cached.get("audit_ver") == audit_ver
+                and (cached.get("db_fingerprint") == fp or cache_age_sec < (7 * 86400))
+            ):
                 return cached
         except Exception:
             pass

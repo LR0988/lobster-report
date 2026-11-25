@@ -453,8 +453,10 @@ def insert_margin_data(data_list):
         "INSERT OR REPLACE INTO stock_margin_daily VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         data_list
     )
-    for row in data_list:
-        cursor.execute('UPDATE daily_stock SET margin_buy=?, margin_sell=?, margin_balance=?, short_buy=?, short_sell=?, short_balance=? WHERE date=? AND stock_id=?', (row[2], row[3], row[4], row[5], row[6], row[7], row[0], row[1]))
+    cursor.executemany(
+        "UPDATE daily_stock SET margin_buy=?, margin_sell=?, margin_balance=?, short_buy=?, short_sell=?, short_balance=? WHERE date=? AND stock_id=?",
+        [(row[2], row[3], row[4], row[5], row[6], row[7], row[0], row[1]) for row in data_list]
+    )
     conn.commit()
     conn.close()
 
@@ -513,26 +515,37 @@ import subprocess
 import os
 
 def import_tdcc_csv(file_path):
-    """手動匯入集保 CSV 檔案 (支援歷史資料)"""
-    if not os.path.exists(file_path): return 0
+    """匯入集保 CSV 檔案（自動去除 UTF-8 BOM 並以批次寫入加速）"""
+    if not os.path.exists(file_path):
+        return 0
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        count = 0
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            for line in lines[1:]:
+        records = []
+        with open(file_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
+            header = f.readline()
+            if not header or ('資料日期' not in header and ',' not in header):
+                return 0
+            for line in f:
                 p = line.strip().split(',')
                 if len(p) >= 6:
+                    d_str = p[0].strip()
+                    sid = p[1].strip()
+                    if not (len(d_str) == 8 and d_str.isdigit() and sid):
+                        continue
                     try:
-                        # 欄位: 資料日期,證券代號,持股分級,人數,股數,持股比例
-                        cursor.execute("INSERT OR REPLACE INTO shareholder_concentration (date, stock_id, level, holders, shares, proportion) VALUES (?, ?, ?, ?, ?, ?)", 
-                                       (p[0], p[1], int(p[2]), int(p[3]), int(p[4]), float(p[5])))
-                        count += 1
-                    except: continue
+                        records.append((d_str, sid, int(p[2]), int(p[3]), int(p[4]), float(p[5])))
+                    except (ValueError, TypeError):
+                        continue
+        if not records:
+            return 0
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.executemany(
+            "INSERT OR REPLACE INTO shareholder_concentration (date, stock_id, level, holders, shares, proportion) VALUES (?, ?, ?, ?, ?, ?)",
+            records,
+        )
         conn.commit()
         conn.close()
-        return count
+        return len(records)
     except Exception as e:
         logging.error(f"匯入 TDCC CSV 失敗: {e}")
         return 0
@@ -587,38 +600,57 @@ def scrape_tdcc_historical_stock(stock_id, date_str):
 def fetch_tdcc_concentration(target_date=None):
     """
     抓取集保股權分散表。
-    使用 curl -L 解決 Python requests 的重導向問題。
+    使用 curl -L (--max-time 60) 下載，並於逾時或失敗時自動改以 requests 備援，避免截斷回傳 0 筆。
     """
     if target_date is not None:
-        # 這裡不自動跑全市場，因為會太慢且容易被鎖
-        logging.info(f"自動補齊歷史集保暫不支援全市場，請使用個股補齊功能。")
+        logging.info("自動補齊歷史集保暫不支援全市場，請使用個股補齊功能。")
         return 0
 
     url = "https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5"
-    tmp_file = "tdcc_latest.csv"
+    tmp_file = os.path.join(BASE_DIR, "tdcc_latest.csv")
+    ua = random.choice(USER_AGENTS)
+    count = 0
     try:
-        logging.info("正在透過 curl 下載最新集保股權分散表...")
+        logging.info("正在透過 curl 下載最新集保股權分散表 (timeout=60s)...")
         cmd = [
-            "curl", "-L", "-k", "-s",
-            "--max-time", "15",
-            "--max-redirs", "5",
-            "-A", random.choice(USER_AGENTS),
+            "curl", "-L", "-k", "-s", "--compressed",
+            "--connect-timeout", "15",
+            "--max-time", "60",
+            "--retry", "2",
+            "--retry-delay", "2",
+            "-A", ua,
             "-o", tmp_file,
             url
         ]
-        subprocess.run(cmd, check=True, stdin=subprocess.DEVNULL)
-        
-        if os.path.exists(tmp_file) and os.path.getsize(tmp_file) > 10000:
+        res = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True)
+        if res.returncode == 0 and os.path.exists(tmp_file) and os.path.getsize(tmp_file) > 10000:
             count = import_tdcc_csv(tmp_file)
-            logging.info(f"集保資料下載完成，共匯入 {count} 筆。")
-            os.remove(tmp_file)
-            return count
-        else:
-            logging.error("TDCC 下載檔案無效或過小。")
-            return 0
-    except Exception as e:
-        logging.error(f"TDCC 抓取失敗 (curl): {e}")
+            if count > 0:
+                logging.info(f"集保資料下載完成 (curl)，共匯入 {count} 筆。")
+                return count
+
+        # Fallback: Python requests with longer timeout
+        logging.warning(f"TDCC curl 下載未完成或筆數為 0 (rc={res.returncode})，改以 requests 備援下載...")
+        resp = requests.get(url, headers={"User-Agent": ua}, timeout=60, verify=False)
+        if resp.status_code == 200 and len(resp.content) > 10000:
+            with open(tmp_file, "wb") as f_out:
+                f_out.write(resp.content)
+            count = import_tdcc_csv(tmp_file)
+            if count > 0:
+                logging.info(f"集保資料下載完成 (requests 備援)，共匯入 {count} 筆。")
+                return count
+
+        logging.error(f"TDCC 下載檔案無效或筆數為 0 (size={os.path.getsize(tmp_file) if os.path.exists(tmp_file) else 0})。")
         return 0
+    except Exception as e:
+        logging.error(f"TDCC 抓取失敗: {e}")
+        return 0
+    finally:
+        if os.path.exists(tmp_file):
+            try:
+                os.remove(tmp_file)
+            except Exception:
+                pass
 
 def fetch_yahoo_news(stock_id):
     url = f"https://tw.stock.yahoo.com/quote/{stock_id}/news"
@@ -697,6 +729,61 @@ def fetch_ptt_sentiment(stock_id):
         return []
 
 
+def backfill_missing_margin_and_futures(lookback_trading_days=20):
+    """獨立檢查並回補近期交易日缺失或殘缺的融資融券 (stock_margin_daily) 與三大法人期貨未平倉 (institutional_futures)。"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT date FROM daily_stock
+        WHERE stock_id != 'HOLIDAY' AND length(date) = 8
+        GROUP BY date HAVING COUNT(*) >= 500
+        ORDER BY date DESC LIMIT ?
+    """, (lookback_trading_days,))
+    trading_dates = sorted([r[0] for r in cursor.fetchall()])
+
+    missing_margin_dates = []
+    missing_futures_dates = []
+    for d in trading_dates:
+        m_cnt = cursor.execute("SELECT COUNT(*) FROM stock_margin_daily WHERE date = ?", (d,)).fetchone()[0]
+        if m_cnt < 500:
+            missing_margin_dates.append(d)
+        f_cnt = cursor.execute("SELECT COUNT(*) FROM institutional_futures WHERE date = ?", (d,)).fetchone()[0]
+        if f_cnt < 10:
+            missing_futures_dates.append(d)
+    conn.close()
+
+    margin_backfilled = 0
+    futures_backfilled = 0
+
+    for d in missing_margin_dates:
+        logging.info(f"補齊 {d} 上市櫃融資融券資料...")
+        m1 = fetch_twse_margin(d)
+        if isinstance(m1, list) and m1:
+            insert_margin_data(m1)
+            margin_backfilled += len(m1)
+        time.sleep(random.uniform(0.5, 0.9))
+        m2 = fetch_tpex_margin(d)
+        if isinstance(m2, list) and m2:
+            insert_margin_data(m2)
+            margin_backfilled += len(m2)
+        time.sleep(random.uniform(0.4, 0.8))
+
+    for d in missing_futures_dates:
+        logging.info(f"補齊 {d} 期貨三大法人未平倉資料...")
+        f1 = fetch_taifex_futures(d)
+        if isinstance(f1, list) and f1:
+            insert_futures_data(f1)
+            futures_backfilled += len(f1)
+        time.sleep(random.uniform(0.4, 0.8))
+
+    return {
+        "margin_dates_checked": len(missing_margin_dates),
+        "margin_rows": margin_backfilled,
+        "futures_dates_checked": len(missing_futures_dates),
+        "futures_rows": futures_backfilled,
+    }
+
+
 def main(start_date=None):
     init_db()
     today_str = datetime.now().strftime('%Y%m%d')
@@ -735,6 +822,9 @@ def main(start_date=None):
         time.sleep(random.uniform(0.8, 1.5))
         f1 = fetch_taifex_futures(date_str)
         if f1: insert_futures_data(f1)
+
+    bf_summary = backfill_missing_margin_and_futures(lookback_trading_days=20)
+    return {"daily_dates": len(missing), **bf_summary}
 
 def fetch_cmoney_sentiment(stock_id):
     """

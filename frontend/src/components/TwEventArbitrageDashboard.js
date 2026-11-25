@@ -26,6 +26,9 @@ export default function TwEventArbitrageDashboard() {
 
   useEffect(() => {
     fetchLatest();
+    const onUpdated = () => { fetchLatest(); };
+    window.addEventListener('lobster:data-updated', onUpdated);
+    return () => window.removeEventListener('lobster:data-updated', onUpdated);
   }, []);
 
   const kpi = data?.summary_kpi || {};

@@ -57,7 +57,12 @@ export default function CommodityCtaDashboard() {
       }
     }
     load();
-    return () => { mounted = false; };
+    const onUpdated = () => { load(); };
+    window.addEventListener('lobster:data-updated', onUpdated);
+    return () => {
+      mounted = false;
+      window.removeEventListener('lobster:data-updated', onUpdated);
+    };
   }, []);
 
   const handleRescan = async () => {

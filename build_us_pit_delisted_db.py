@@ -93,18 +93,25 @@ def read_qlib_bin_series(zf: zipfile.ZipFile, path: str, calendar_dates: pd.Date
 
 
 def build_us_pit_database(force_rebuild: bool = False):
-    conn_chk = sqlite3.connect(DB_PATH)
-    row_spy_dt = conn_chk.execute("SELECT MAX(date) FROM global_sovereign_daily WHERE ticker='SPY'").fetchone()
+    conn_chk = sqlite3.connect(DB_PATH, timeout=30.0)
+    row_spy_dt = conn_chk.execute(
+        "SELECT date, close, volume FROM global_sovereign_daily WHERE ticker='SPY' ORDER BY date DESC LIMIT 1"
+    ).fetchone()
     conn_chk.close()
     latest_spy_str = str(row_spy_dt[0])[:10] if (row_spy_dt and row_spy_dt[0]) else "2026-11-12"
+    latest_spy_sig = f"{latest_spy_str}|{round(float(row_spy_dt[1] or 0), 4)}|{int(float(row_spy_dt[2] or 0))}" if row_spy_dt else latest_spy_str
 
     if not force_rebuild and os.path.exists(US_PIT_CACHE_PATH):
         with open(US_PIT_CACHE_PATH, "rb") as f:
             cached = pickle.load(f)
-        if cached.get("schema_version") == 2 and cached.get("db_max_date", "") >= latest_spy_str:
+        if (
+            cached.get("schema_version") == 2
+            and cached.get("db_max_date", "") >= latest_spy_str
+            and cached.get("spy_sig") == latest_spy_sig
+        ):
             print(f"⚡ 載入已建置之美股 PIT 無生存者偏誤快取: {US_PIT_CACHE_PATH}")
             return cached
-        print(f"🔄 偵測到 DB 日期更新 ({latest_spy_str}) 或快取版本升級，自動重建美股 PIT 資料庫...")
+        print(f"🔄 偵測到 DB 日期或收盤指紋更新 ({latest_spy_sig}) 或快取版本升級，自動重建美股 PIT 資料庫...")
 
     t0 = time.time()
     print("=" * 110)
@@ -709,6 +716,7 @@ def build_us_pit_database(force_rebuild: bool = False):
     res = {
         "schema_version": 2,
         "db_max_date": latest_spy_str,
+        "spy_sig": latest_spy_sig,
         "verified_rename_pairs": SP500_VERIFIED_RENAME_PAIRS,
         "us_tickers": us_cols,
         "adj_close": us_adj_close_ff5,

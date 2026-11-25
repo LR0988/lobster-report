@@ -716,6 +716,9 @@ export default function GlobalSovereignDashboard({ onTriggerScraper, isScraperRu
 
   useEffect(() => {
     fetchData();
+    const onUpdated = () => { fetchData(); };
+    window.addEventListener('lobster:data-updated', onUpdated);
+    return () => window.removeEventListener('lobster:data-updated', onUpdated);
   }, []);
 
   const macro = data?.macro_status || {};

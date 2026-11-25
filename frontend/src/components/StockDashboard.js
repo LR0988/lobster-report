@@ -641,10 +641,23 @@ const DEFAULT_DB_TABLES = [
     category: '籌碼面',
     categoryKey: 'chips',
     frequency: '每週五盤後更新',
-    task_type: 'daily',
+    task_type: 'tdcc',
     row_count: 8525330,
     latest_date: '2026/10/08',
     columns_count: 6,
+    status: 'active'
+  },
+  {
+    id: 'stock_margin_daily',
+    name: '上市櫃個股融資融券 (stock_margin_daily)',
+    desc: '每日個股融資買賣餘額、融券放空餘額與券資比變化',
+    category: '籌碼面',
+    categoryKey: 'chips',
+    frequency: '每個交易日 21:00',
+    task_type: 'margin',
+    row_count: 0,
+    latest_date: '-',
+    columns_count: 8,
     status: 'active'
   },
   {
@@ -654,7 +667,7 @@ const DEFAULT_DB_TABLES = [
     category: '期貨籌碼',
     categoryKey: 'chips',
     frequency: '每個交易日 15:30 盤後',
-    task_type: 'options',
+    task_type: 'futures',
     row_count: 49780,
     latest_date: '2026/10/08',
     columns_count: 8,
@@ -710,6 +723,32 @@ const DEFAULT_DB_TABLES = [
     row_count: 5676,
     latest_date: '2026/10/07',
     columns_count: 18,
+    status: 'active'
+  },
+  {
+    id: 'tpex_cb_metadata',
+    name: '櫃買可轉債發行條件 (tpex_cb_metadata)',
+    desc: '全市場可轉債母股對照、轉換價、賣回價與流通餘額',
+    category: '可轉債雷達',
+    categoryKey: 'core',
+    frequency: '每日更新',
+    task_type: 'tpex_cb',
+    row_count: 400,
+    latest_date: '-',
+    columns_count: 12,
+    status: 'active'
+  },
+  {
+    id: 'tpex_cb_quotes',
+    name: '櫃買可轉債每日等價報價 (tpex_cb_quotes)',
+    desc: '核心可轉債收盤價、轉換價值 Parity 與轉換溢價率',
+    category: '可轉債雷達',
+    categoryKey: 'core',
+    frequency: '每個交易日盤後',
+    task_type: 'tpex_cb',
+    row_count: 0,
+    latest_date: '-',
+    columns_count: 11,
     status: 'active'
   },
   {
@@ -771,7 +810,7 @@ const DEFAULT_DB_TABLES = [
     category: '高頻當沖',
     categoryKey: 'futures',
     frequency: '交易時段連續同步',
-    task_type: 'futures',
+    task_type: 'futures_intraday',
     row_count: 139488,
     latest_date: '2026/10/08 13:44',
     columns_count: 9,
@@ -784,7 +823,7 @@ const DEFAULT_DB_TABLES = [
     category: '高頻當沖',
     categoryKey: 'futures',
     frequency: '交易時段連續同步',
-    task_type: 'futures',
+    task_type: 'futures_intraday',
     row_count: 41905,
     latest_date: '2026/10/08 13:40',
     columns_count: 9,
@@ -3237,14 +3276,21 @@ function StockDashboard() {
             if (status.is_running || status.status === 'running') {
               setShowScraperBanner(true);
             } else if (scraperLiveStatus?.is_running && !status.is_running) {
-              // 任務甫完成，延遲 300ms 刷新資料庫總量、全球泰坦與最新資料
+              // 任務甫完成，延遲 300ms 強制穿透快取刷新資料庫總量、策略看板與持股
               setTimeout(() => {
-                fetchDbStatus();
+                fetchDbStatus(true);
                 fetchMarketMlData();
                 fetchPortfolio();
                 if (activeDbTable) {
                   loadDbTableData(activeDbTable, dbPage, dbPageSize, dbSearchQuery, dbSortKey, dbSortDir);
                 }
+                window.dispatchEvent(new CustomEvent('lobster:data-updated', {
+                  detail: {
+                    task_type: status.task_type,
+                    status: status.status,
+                    finished_at: status.finished_at
+                  }
+                }));
               }, 300);
             }
           }
@@ -3682,14 +3728,25 @@ function StockDashboard() {
         progress_percent: 5,
         status: 'running',
         started_at: new Date().toLocaleTimeString(),
-        logs: [`► [${new Date().toLocaleTimeString()}] 收到爬蟲啟動指令...`]
+        logs: [{
+          time: new Date().toLocaleTimeString(),
+          step: '[1/10]',
+          message: `收到「${taskLabel}」啟動指令，正在連線後端排程...`,
+          status: 'running'
+        }]
       });
-      
+
       let backendStarted = false;
       try {
         const res = await stockFetch(`/api/scraper/${taskType}`, { method: 'POST' });
         if (res.ok) {
+          const json = await res.json();
           backendStarted = true;
+          if (json.status === 'already_running') {
+            setScraperStatus(`ℹ️ ${json.message || '已有更新任務執行中，將自動顯示即時進度。'}`);
+          } else {
+            setScraperStatus(`✅「${taskLabel}」更新任務已在伺服器背景執行中！`);
+          }
           await fetchScraperLiveStatus();
         }
       } catch (e) {
@@ -3931,9 +3988,10 @@ function StockDashboard() {
     return null;
   };
 
-  const fetchDbStatus = async () => {
+  const fetchDbStatus = async (force = false) => {
     try {
-      const res = await stockFetch('/api/database/status');
+      const endpoint = force ? '/api/database/status?force=true' : '/api/database/status';
+      const res = await stockFetch(endpoint);
       if (res.ok) {
         const json = await res.json();
         if (json.tables && json.tables.length > 0) {
@@ -4177,6 +4235,7 @@ function StockDashboard() {
 
     setDbUpdatingTableId(tableId || 'global_daily');
     setShowScraperBanner(true);
+    setShowScraperLogs(true);
     // 立即將狀態設為執行中，確保前端毫秒級即時跳出進度看板，不漏掉任何細節
     setScraperLiveStatus({
       is_running: true,
@@ -4186,19 +4245,28 @@ function StockDashboard() {
       target_table_name: displayTableName,
       current_step: `🚀 正在連線啟動「${displayTableName}」更新作業...`,
       step_index: 1,
-      total_steps: 5,
+      total_steps: actualTaskType === 'all' || actualTaskType === 'daily' ? 10 : 2,
       progress_percent: 5,
       status: 'running',
       started_at: new Date().toLocaleTimeString(),
-      logs: [`► [${new Date().toLocaleTimeString()}] 收到更新指令，準備執行「${displayTableName}」...`]
+      logs: [{
+        time: new Date().toLocaleTimeString(),
+        step: '[1]',
+        message: `收到更新指令，準備執行「${displayTableName}」...`,
+        status: 'running'
+      }]
     });
     setDbActionBanner(`⏳ 正在啟動「${displayTableName}」更新任務... 目標資料庫：${targetDbName}`);
-    
+
     try {
       const res = await stockFetch(`/api/scraper/${actualTaskType}`, { method: 'POST' });
       if (res.ok) {
         const json = await res.json();
-        setDbActionBanner(`🚀 已成功啟動「${json.target_table_name || displayTableName}」更新作業！正在更新資料庫：${json.target_db || targetDbName}`);
+        if (json.status === 'already_running') {
+          setDbActionBanner(`ℹ️ ${json.message || '已有更新任務執行中，正在顯示即時進度...'}`);
+        } else {
+          setDbActionBanner(`🚀 已成功啟動「${json.target_table_name || displayTableName}」更新作業！正在更新資料庫：${json.target_db || targetDbName}`);
+        }
       }
       await fetchScraperLiveStatus();
     } catch (err) {
@@ -4227,8 +4295,8 @@ function StockDashboard() {
           status: 'running',
           started_at: new Date().toLocaleTimeString(),
           logs: [
-            `► [${new Date().toLocaleTimeString()}] 任務指令已下發至 Supabase stock_screener_jobs`,
-            `► 本機後端將自動排程處理並將最新資料同步回雲端快照`
+            { time: new Date().toLocaleTimeString(), step: '[1/3]', message: '任務指令已下發至 Supabase stock_screener_jobs', status: 'running' },
+            { time: new Date().toLocaleTimeString(), step: '[1/3]', message: '本機後端將自動排程處理並將最新資料同步回雲端快照', status: 'running' }
           ]
         });
       } catch (cloudErr) {
@@ -4238,7 +4306,7 @@ function StockDashboard() {
           is_running: false,
           status: 'error',
           current_step: `❌ 啟動失敗: ${err.message}`,
-          logs: [...(prev?.logs || []), `❌ 錯誤: ${err.message}`]
+          logs: [...(prev?.logs || []), { time: new Date().toLocaleTimeString(), step: '[ERR]', message: `錯誤: ${err.message}`, status: 'error' }]
         }));
       }
     } finally {
@@ -8527,25 +8595,26 @@ function StockDashboard() {
             }}>
               <div style={{ flex: '1 1 480px' }}>
                 <h3 style={{ margin: '0 0 0.4rem 0', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#F8FAFC' }}>
-                  <span>🚀 一鍵全自動更新全部資料庫與雙泰坦實盤訊號</span>
+                  <span>🚀 一鍵全自動更新全部資料庫與全部量化策略訊號</span>
                   <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '999px', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', border: '1px solid rgba(16, 185, 129, 0.4)' }}>
-                    9 大模組全自動串聯
+                    10 大模組全自動串聯
                   </span>
                 </h3>
                 <p style={{ margin: '0 0 0.6rem 0', fontSize: '0.86rem', color: '#94A3B8', lineHeight: '1.5' }}>
-                  無須分開點擊多個按鈕！點擊右側單一總控按鈕，系統即自動依序完成全市場 24 張資料表補齊、重算策略訊號並同步至雲端：
+                  無須分開點擊多個按鈕！點擊右側單一總控按鈕，系統即自動依序補齊全市場資料表、重算全部策略並同步至雲端：
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', fontSize: '0.76rem' }}>
                   {[
-                    '① 台股日K/法人/期貨',
+                    '① 台股日K/法人/融資券/期貨',
                     '② 全市場最新月營收',
                     '③ 集保千張大戶籌碼',
-                    '④ 大盤加權指數与廣度',
-                    '⑤ 總經與原油裂解價差',
-                    '⑥ 選擇權 P/C Ratio',
-                    '⑦ 全球18國ETF與美股S&P500',
-                    '⑧ 重算台股母子艦隊＆全球泰坦',
-                    '⑨ 同步 Supabase 雲端快取'
+                    '④ 指數/P-C/台指1m·5m分K',
+                    '⑤ 總經與3-2-1裂解價差',
+                    '⑥ 18國ETF與S&P500 PIT',
+                    '⑦ 19大原物料期貨 CTA V6.0',
+                    '⑧ 櫃買可轉債 CB 行情',
+                    '⑨ 重算台股因果/全球泰坦/V12/快打',
+                    '⑩ 同步 Supabase 全表與看板'
                   ].map((stepLabel, idx) => (
                     <span key={idx} style={{
                       padding: '3px 8px',
@@ -8570,24 +8639,24 @@ function StockDashboard() {
                     background: 'linear-gradient(135deg, #2563EB, #06B6D4)',
                     boxShadow: '0 6px 20px rgba(37, 99, 235, 0.4)'
                   }}
-                  onClick={() => handleTriggerDbScraper('all', '全資料庫 24 表與雙泰坦訊號一鍵全量更新', 'all_tables')}
-                  disabled={dbUpdatingTableId !== null}
+                  onClick={() => handleTriggerDbScraper('all', '全資料庫與全部策略一鍵全量更新', 'all_tables')}
+                  disabled={dbUpdatingTableId !== null || Boolean(scraperLiveStatus?.is_running)}
                 >
-                  {dbUpdatingTableId !== null ? (
+                  {(dbUpdatingTableId !== null || scraperLiveStatus?.is_running) ? (
                     <>
                       <span className="loader" style={{ width: '16px', height: '16px', borderWidth: '2px' }}></span>
                       <span>正在一鍵全量更新中...</span>
                     </>
                   ) : (
                     <>
-                      <span>🚀 一鍵更新全部資料庫 (台股/月營收/法人/集保/全球泰坦/雲端)</span>
+                      <span>🚀 一鍵更新全部資料庫與全部策略</span>
                     </>
                   )}
                 </button>
                 <button
                   className="btn btn-secondary"
-                  onClick={fetchDbStatus}
-                  title="重新整理資料庫與爬蟲狀態"
+                  onClick={() => fetchDbStatus(true)}
+                  title="強制重新掃描資料庫最新日期與筆數"
                   style={{ padding: '0.8rem 1rem', fontSize: '0.9rem' }}
                 >
                   🔄 刷新狀態
@@ -8596,14 +8665,16 @@ function StockDashboard() {
             </div>
 
             {/* 3. 即時爬蟲與資料庫同步進度看板 (清楚標明正在更新的資料庫、資料表與具體進度) */}
-            {(scraperLiveStatus && (scraperLiveStatus.is_running || showScraperBanner || scraperLiveStatus.status === 'running' || scraperLiveStatus.status === 'success' || scraperLiveStatus.status === 'error')) && (
+            {(scraperLiveStatus && (scraperLiveStatus.is_running || showScraperBanner || scraperLiveStatus.status === 'running' || scraperLiveStatus.status === 'success' || scraperLiveStatus.status === 'warning' || scraperLiveStatus.status === 'error')) && (
               <div style={{
-                background: scraperLiveStatus.is_running 
+                background: scraperLiveStatus.is_running
                   ? 'linear-gradient(135deg, rgba(30, 58, 138, 0.45), rgba(15, 23, 42, 0.75))'
                   : scraperLiveStatus.status === 'success'
                   ? 'linear-gradient(135deg, rgba(6, 78, 59, 0.45), rgba(15, 23, 42, 0.75))'
+                  : scraperLiveStatus.status === 'warning'
+                  ? 'linear-gradient(135deg, rgba(120, 53, 15, 0.45), rgba(15, 23, 42, 0.75))'
                   : 'linear-gradient(135deg, rgba(127, 29, 29, 0.45), rgba(15, 23, 42, 0.75))',
-                border: `1px solid ${scraperLiveStatus.is_running ? '#3B82F6' : scraperLiveStatus.status === 'success' ? '#10B981' : '#EF4444'}`,
+                border: `1px solid ${scraperLiveStatus.is_running ? '#3B82F6' : scraperLiveStatus.status === 'success' ? '#10B981' : scraperLiveStatus.status === 'warning' ? '#F59E0B' : '#EF4444'}`,
                 borderRadius: '12px',
                 padding: '1.25rem',
                 marginBottom: '1.25rem',
@@ -8616,11 +8687,13 @@ function StockDashboard() {
                         <span className="live-pulse-dot" style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#60A5FA', display: 'inline-block' }}></span>
                       ) : scraperLiveStatus.status === 'success' ? (
                         <span style={{ fontSize: '1.15rem' }}>✅</span>
+                      ) : scraperLiveStatus.status === 'warning' ? (
+                        <span style={{ fontSize: '1.15rem' }}>⚠️</span>
                       ) : (
                         <span style={{ fontSize: '1.15rem' }}>❌</span>
                       )}
-                      <strong style={{ fontSize: '1.08rem', color: scraperLiveStatus.is_running ? '#93C5FD' : scraperLiveStatus.status === 'success' ? '#6EE7B7' : '#FCA5A5' }}>
-                        {scraperLiveStatus.is_running ? '⚡ 資料庫同步任務正在執行中...' : scraperLiveStatus.status === 'success' ? '🎉 資料庫更新同步完成！' : '⚠️ 更新過程發生異常'}
+                      <strong style={{ fontSize: '1.08rem', color: scraperLiveStatus.is_running ? '#93C5FD' : scraperLiveStatus.status === 'success' ? '#6EE7B7' : scraperLiveStatus.status === 'warning' ? '#FCD34D' : '#FCA5A5' }}>
+                        {scraperLiveStatus.is_running ? '⚡ 資料庫與策略全自動同步進行中...' : scraperLiveStatus.status === 'success' ? '🎉 全部資料庫與策略更新同步完成！' : scraperLiveStatus.status === 'warning' ? '⚠️ 更新完成，但部分項目存在警告' : '❌ 更新過程發生錯誤中斷'}
                       </strong>
                       <span style={{
                         fontSize: '0.75rem',
@@ -8721,13 +8794,18 @@ function StockDashboard() {
                     fontSize: '0.8rem',
                     lineHeight: '1.6'
                   }}>
-                    {scraperLiveStatus.logs.map((log, lIdx) => (
-                      <div key={lIdx} style={{ display: 'flex', gap: '0.6rem', color: log.status === 'error' ? '#FCA5A5' : log.status === 'success' ? '#6EE7B7' : '#CBD5E1' }}>
-                        <span style={{ opacity: 0.6 }}>[{log.time}]</span>
-                        <span style={{ color: '#60A5FA' }}>{log.step}</span>
-                        <span>{log.message}</span>
-                      </div>
-                    ))}
+                    {scraperLiveStatus.logs.map((log, lIdx) => {
+                      const isStr = typeof log === 'string';
+                      const lStatus = isStr ? 'running' : log.status;
+                      const lColor = lStatus === 'error' ? '#FCA5A5' : lStatus === 'warning' ? '#FCD34D' : lStatus === 'success' ? '#6EE7B7' : '#CBD5E1';
+                      return (
+                        <div key={lIdx} style={{ display: 'flex', gap: '0.6rem', color: lColor }}>
+                          {!isStr && <span style={{ opacity: 0.6 }}>[{log.time}]</span>}
+                          {!isStr && <span style={{ color: '#60A5FA' }}>{log.step}</span>}
+                          <span>{isStr ? log : log.message}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
