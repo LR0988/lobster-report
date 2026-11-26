@@ -8,6 +8,7 @@ import os
 import sys
 import glob
 import json
+import time
 import sqlite3
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -21,10 +22,135 @@ LOCAL_DIR = "/Users/huanggin-chen/openclaw_test"
 LOCAL_STOCK_DB = os.path.join(LOCAL_DIR, "tw_stock.db")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+_UPSERT_ML_SQL = """
+    INSERT INTO stock_ml_cache (model_type, payload, updated_at)
+    VALUES (%s, %s, CURRENT_TIMESTAMP)
+    ON CONFLICT (model_type) DO UPDATE
+    SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
+"""
+
+
 def get_supabase_conn():
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL 環境變數未設定")
-    return psycopg2.connect(DATABASE_URL, sslmode="require")
+    return psycopg2.connect(
+        DATABASE_URL,
+        sslmode="require",
+        connect_timeout=15,
+        keepalives=1,
+        keepalives_idle=20,
+        keepalives_interval=10,
+        keepalives_count=3,
+        options="-c statement_timeout=45000",
+    )
+
+
+class ResilientSupabaseSession:
+    """Supabase PostgreSQL 彈性連線包裝：每筆獨立 commit、SSL/網路斷線自動重連與 3 次重試。"""
+
+    def __init__(self, conn=None):
+        self.conn = conn if conn is not None else get_supabase_conn()
+
+    def _reconnect(self):
+        try:
+            if self.conn is not None and self.conn.closed == 0:
+                self.conn.close()
+        except Exception:
+            pass
+        self.conn = get_supabase_conn()
+
+    def _is_connection_error(self, exc: Exception) -> bool:
+        if isinstance(exc, (psycopg2.OperationalError, psycopg2.InterfaceError)):
+            return True
+        if self.conn is None or self.conn.closed != 0:
+            return True
+        msg = str(exc).lower()
+        return any(
+            k in msg
+            for k in (
+                "cursor already closed",
+                "connection already closed",
+                "ssl syscall",
+                "operation timed out",
+                "eof detected",
+                "server closed the connection",
+                "reset by peer",
+                "broken pipe",
+                "terminating connection",
+            )
+        )
+
+    def _recover_after_error(self, exc: Exception):
+        if self._is_connection_error(exc):
+            self._reconnect()
+            return
+        try:
+            if self.conn is not None and self.conn.closed == 0:
+                self.conn.rollback()
+            else:
+                self._reconnect()
+        except Exception:
+            self._reconnect()
+
+    def execute_commit(self, sql: str, params=None, retries: int = 3, label: str = ""):
+        for attempt in range(1, retries + 1):
+            try:
+                if self.conn is None or self.conn.closed != 0:
+                    self._reconnect()
+                with self.conn.cursor() as cur:
+                    cur.execute(sql, params)
+                self.conn.commit()
+                return
+            except Exception as e:
+                is_conn = self._is_connection_error(e)
+                if attempt < retries and (is_conn or isinstance(e, psycopg2.DatabaseError)):
+                    first_ln = str(e).splitlines()[0] if str(e) else repr(e)
+                    print(f"  ↻ Supabase 寫入重試 ({attempt}/{retries}) [{label or 'query'}]: {first_ln}")
+                    self._recover_after_error(e)
+                    time.sleep(min(1.5 * attempt, 5.0))
+                    continue
+                try:
+                    if self.conn is not None and self.conn.closed == 0:
+                        self.conn.rollback()
+                except Exception:
+                    pass
+                raise
+
+    def fetchall_retry(self, sql: str, params=None, retries: int = 3, label: str = ""):
+        for attempt in range(1, retries + 1):
+            try:
+                if self.conn is None or self.conn.closed != 0:
+                    self._reconnect()
+                with self.conn.cursor() as cur:
+                    cur.execute(sql, params)
+                    return cur.fetchall()
+            except Exception as e:
+                is_conn = self._is_connection_error(e)
+                if attempt < retries and (is_conn or isinstance(e, psycopg2.DatabaseError)):
+                    first_ln = str(e).splitlines()[0] if str(e) else repr(e)
+                    print(f"  ↻ Supabase 查詢重試 ({attempt}/{retries}) [{label or 'select'}]: {first_ln}")
+                    self._recover_after_error(e)
+                    time.sleep(min(1.5 * attempt, 5.0))
+                    continue
+                try:
+                    if self.conn is not None and self.conn.closed == 0:
+                        self.conn.rollback()
+                except Exception:
+                    pass
+                raise
+
+    def close(self):
+        try:
+            if self.conn is not None and self.conn.closed == 0:
+                self.conn.close()
+        except Exception:
+            pass
+
+
+def _ensure_session(sb_conn) -> ResilientSupabaseSession:
+    if isinstance(sb_conn, ResilientSupabaseSession):
+        return sb_conn
+    return ResilientSupabaseSession(sb_conn)
 
 def get_sqlite_conn():
     if not os.path.exists(LOCAL_STOCK_DB):
@@ -45,9 +171,10 @@ def _load_fresh_json_if_exists(path: str):
 def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
     """同步 11 種機器學習模型預測及低頻量化報告至 Supabase stock_ml_cache"""
     print("[*] 正在同步 ML 模型預測快取至 Supabase...")
-    cur = sb_conn.cursor()
+    sb = _ensure_session(sb_conn)
     ml_files = glob.glob(os.path.join(LOCAL_DIR, "ml_predictions_*.json"))
     status_all = {}
+    critical_failures = []
 
     for f in ml_files:
         filename = os.path.basename(f)
@@ -55,7 +182,7 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
         try:
             with open(f, "r", encoding="utf-8") as fp:
                 data = json.load(fp)
-            
+
             status_all[model_type] = {
                 "status": "ready",
                 "trained_at": data.get("trained_at", ""),
@@ -64,24 +191,18 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
                 "count": data.get("count", len(data.get("data", [])))
             }
 
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, (model_type, json.dumps(data)))
+            sb.execute_commit(_UPSERT_ML_SQL, (model_type, json.dumps(data)), label=f"ml:{model_type}")
             print(f"  ✓ ML 模型: {model_type} ({len(data.get('data', []))} 筆推薦)")
         except Exception as e:
             print(f"  ✗ 同步模型 {model_type} 失敗: {e}")
 
     # 上傳 status_all 匯總狀態
-    cur.execute("""
-        INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-        VALUES (%s, %s, CURRENT_TIMESTAMP)
-        ON CONFLICT (model_type) DO UPDATE
-        SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-    """, ("status_all", json.dumps(status_all)))
-    print("  ✓ 匯總模型狀態 status_all 同步完成")
+    try:
+        sb.execute_commit(_UPSERT_ML_SQL, ("status_all", json.dumps(status_all)), label="ml:status_all")
+        print("  ✓ 匯總模型狀態 status_all 同步完成")
+    except Exception as e:
+        print(f"  ✗ 同步匯總狀態 status_all 失敗: {e}")
+        critical_failures.append(f"status_all: {e}")
 
     # 上傳大盤 ML 預測 (taiex_macro) — 移除超過 50MB 的多年度歷史全量明細以確保雲端同步秒級完成
     market_pred_file = os.path.join(LOCAL_DIR, "market_ml_prediction.json")
@@ -99,12 +220,7 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
                     bs_slim["periods"] = {k: v for k, v in bs_slim["periods"].items() if k in (def_pk, "6m", "1y")}
                 market_data = dict(market_data)
                 market_data["backtest_simulation"] = bs_slim
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("taiex_macro", json.dumps(market_data)))
+            sb.execute_commit(_UPSERT_ML_SQL, ("taiex_macro", json.dumps(market_data)), label="taiex_macro")
             print("  ✓ 大盤 ML 預測 (taiex_macro) 同步完成")
         except Exception as e:
             print(f"  ✗ 同步大盤 ML 失敗: {e}")
@@ -115,12 +231,7 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
         try:
             with open(low_freq_path, "r", encoding="utf-8") as fp:
                 lf_data = json.load(fp)
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("low_freq", json.dumps(lf_data)))
+            sb.execute_commit(_UPSERT_ML_SQL, ("low_freq", json.dumps(lf_data)), label="low_freq")
             print("  ✓ 低頻量化回測結果同步完成")
         except Exception as e:
             print(f"  ✗ 低頻量化同步失敗: {e}")
@@ -139,15 +250,15 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
                     json.dump(gs_data, f, ensure_ascii=False, indent=2)
                 print("  ✓ 全球主權泰坦前端 defaultGlobalSovereignData.json 同步完成")
         if gs_data and gs_data.get("status") == "ok":
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("global_sovereign_dashboard", json.dumps(gs_data, ensure_ascii=False)))
+            sb.execute_commit(
+                _UPSERT_ML_SQL,
+                ("global_sovereign_dashboard", json.dumps(gs_data, ensure_ascii=False)),
+                label="global_sovereign_dashboard",
+            )
             print("  ✓ 全球主權泰坦最新即時數據同步至 stock_ml_cache")
     except Exception as e:
         print(f"  ✗ 同步全球主權泰坦失敗: {e}")
+        critical_failures.append(f"global_sovereign_dashboard: {e}")
 
     # 上傳全球泰坦互補戰艦 V12 五檔精銳22號同步版最新數據 (complementary_v3_dashboard)
     try:
@@ -159,15 +270,15 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
             importlib.reload(complementary_v3_service)
             v3_data = complementary_v3_service.get_complementary_v3_dashboard_data(force_refresh=False)
         if v3_data and v3_data.get("status") == "ok":
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("complementary_v3_dashboard", json.dumps(v3_data, ensure_ascii=False)))
+            sb.execute_commit(
+                _UPSERT_ML_SQL,
+                ("complementary_v3_dashboard", json.dumps(v3_data, ensure_ascii=False)),
+                label="complementary_v3_dashboard",
+            )
             print("  ✓ 全球泰坦互補戰艦 V12 五檔精銳22號同步版最新即時數據同步至 stock_ml_cache 完成")
     except Exception as e:
         print(f"  ✗ 同步全球泰坦互補戰艦 V12 五檔精銳22號同步版失敗: {e}")
+        critical_failures.append(f"complementary_v3_dashboard: {e}")
 
     # 上傳台股因果泰坦 (大凹洞轉型波段母子艦隊 PIT) 最新數據 (causal_titan_dashboard)
     try:
@@ -180,15 +291,15 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
             ct_data = tw_titan_pit_service.refresh_live(force_rebuild=False)
         if ct_data:
             ct_data["status"] = "ok"
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("causal_titan_dashboard", json.dumps(ct_data, ensure_ascii=False)))
+            sb.execute_commit(
+                _UPSERT_ML_SQL,
+                ("causal_titan_dashboard", json.dumps(ct_data, ensure_ascii=False)),
+                label="causal_titan_dashboard",
+            )
             print("  ✓ 台股因果泰坦 (大凹洞母子艦隊 PIT) 最新即時數據同步至 stock_ml_cache 完成")
     except Exception as e:
         print(f"  ✗ 同步台股因果泰坦失敗: {e}")
+        critical_failures.append(f"causal_titan_dashboard: {e}")
 
     # 上傳強勢股超賣快打 3.0 最新數據 (oversold_sniper_dashboard)
     try:
@@ -200,15 +311,15 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
             importlib.reload(oversold_sniper_service)
             os_data = oversold_sniper_service.get_oversold_sniper_dashboard_data()
         if os_data and os_data.get("status") == "ok":
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("oversold_sniper_dashboard", json.dumps(os_data, ensure_ascii=False)))
+            sb.execute_commit(
+                _UPSERT_ML_SQL,
+                ("oversold_sniper_dashboard", json.dumps(os_data, ensure_ascii=False)),
+                label="oversold_sniper_dashboard",
+            )
             print("  ✓ 強勢股超賣快打 3.0 最新即時數據同步至 stock_ml_cache 完成")
     except Exception as e:
         print(f"  ✗ 同步強勢股超賣快打失敗: {e}")
+        critical_failures.append(f"oversold_sniper_dashboard: {e}")
 
     # 上傳台股事件與ETF吃豆腐 & 可轉債主力與急跌狙擊最新數據
     try:
@@ -228,15 +339,15 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
             ("tw_asymmetric_alpha_dashboard", asym_obj),
         ]:
             if payload_obj and payload_obj.get("status") == "ok":
-                cur.execute("""
-                    INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                    VALUES (%s, %s, CURRENT_TIMESTAMP)
-                    ON CONFLICT (model_type) DO UPDATE
-                    SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-                """, (cache_key, json.dumps(payload_obj, ensure_ascii=False)))
+                sb.execute_commit(
+                    _UPSERT_ML_SQL,
+                    (cache_key, json.dumps(payload_obj, ensure_ascii=False)),
+                    label=cache_key,
+                )
         print("  ✓ 台股事件吃豆腐與可轉債落難天使好球帶雷達同步至 stock_ml_cache 完成")
     except Exception as e:
         print(f"  ✗ 同步台股特殊策略失敗: {e}")
+        critical_failures.append(f"tw_special_strategies: {e}")
 
     # 上傳全球原物料期貨 CTA 泰坦最新數據 (commodity_cta_dashboard)
     try:
@@ -248,23 +359,24 @@ def sync_ml_cache(sb_conn, reuse_fresh_json: bool = False):
             importlib.reload(commodity_cta_service)
             cta_data = commodity_cta_service.get_commodity_cta_dashboard_data(force_refresh=False)
         if cta_data and cta_data.get("status") == "ok":
-            cur.execute("""
-                INSERT INTO stock_ml_cache (model_type, payload, updated_at)
-                VALUES (%s, %s, CURRENT_TIMESTAMP)
-                ON CONFLICT (model_type) DO UPDATE
-                SET payload = EXCLUDED.payload, updated_at = CURRENT_TIMESTAMP;
-            """, ("commodity_cta_dashboard", json.dumps(cta_data, ensure_ascii=False)))
+            sb.execute_commit(
+                _UPSERT_ML_SQL,
+                ("commodity_cta_dashboard", json.dumps(cta_data, ensure_ascii=False)),
+                label="commodity_cta_dashboard",
+            )
             print("  ✓ 全球原物料期貨 CTA 泰坦最新即時數據同步至 stock_ml_cache 完成")
     except Exception as e:
         print(f"  ✗ 同步全球原物料期貨 CTA 泰坦失敗: {e}")
+        critical_failures.append(f"commodity_cta_dashboard: {e}")
 
-    sb_conn.commit()
+    if critical_failures:
+        raise RuntimeError(f"關鍵策略看板同步 Supabase 失敗: {' | '.join(critical_failures)}")
 
 def sync_portfolio(sb_conn, local_conn):
     """同步持股清單與最新價格、燈號、分析報告"""
     print("[*] 正在同步持股 (Portfolio) 資料...")
     local_cur = local_conn.cursor()
-    sb_cur = sb_conn.cursor()
+    sb = _ensure_session(sb_conn)
 
     local_cur.execute("""
         SELECT 
@@ -287,7 +399,7 @@ def sync_portfolio(sb_conn, local_conn):
     rows = local_cur.fetchall()
     for r in rows:
         name = r["stock_name"] or r["official_name"] or "未知股"
-        sb_cur.execute("""
+        sb.execute_commit("""
             INSERT INTO stock_portfolio (
                 stock_id, stock_name, buy_price, notes, auto_analyze,
                 latest_price, latest_date, latest_signal, latest_analysis_date,
@@ -311,15 +423,14 @@ def sync_portfolio(sb_conn, local_conn):
             r["stock_id"], name, r["buy_price"], r["notes"], r["auto_analyze"],
             r["latest_price"], r["latest_date"], r["latest_signal"], r["latest_analysis_date"],
             r["sentiment_score"], r["sentiment_direction"], r["has_rumor"], r["analysis_report"]
-        ))
-    sb_conn.commit()
+        ), label=f"portfolio:{r['stock_id']}")
     print(f"  ✓ 成功同步 {len(rows)} 檔持股明細")
 
 def sync_watchlist(sb_conn, local_conn):
     """同步自選追蹤清單與 MA5/20/60"""
     print("[*] 正在同步自選追蹤清單 (Watchlist)...")
     local_cur = local_conn.cursor()
-    sb_cur = sb_conn.cursor()
+    sb = _ensure_session(sb_conn)
 
     local_cur.execute("SELECT * FROM watchlist")
     rows = local_cur.fetchall()
@@ -341,7 +452,7 @@ def sync_watchlist(sb_conn, local_conn):
             ma20 = round(sum(p["closing_price"] for p in prices[:20]) / 20.0, 2) if n >= 20 else None
             ma60 = round(sum(p["closing_price"] for p in prices[:60]) / 60.0, 2) if n >= 60 else None
 
-        sb_cur.execute("""
+        sb.execute_commit("""
             INSERT INTO stock_watchlist (
                 stock_id, stock_name, target_price_high, target_price_low,
                 compare_ma5, compare_ma20, compare_ma60, latest_price, latest_date,
@@ -364,33 +475,31 @@ def sync_watchlist(sb_conn, local_conn):
             stock_id, name, w["target_price_high"], w["target_price_low"],
             w["compare_ma5"], w["compare_ma20"], w["compare_ma60"],
             latest_price, latest_date, ma5, ma20, ma60
-        ))
-    sb_conn.commit()
+        ), label=f"watchlist:{stock_id}")
     print(f"  ✓ 成功同步 {len(rows)} 檔自選股")
 
 def sync_settings(sb_conn, local_conn):
     """同步系統設定與回測參數"""
     print("[*] 正在同步系統與回測設定...")
     local_cur = local_conn.cursor()
-    sb_cur = sb_conn.cursor()
+    sb = _ensure_session(sb_conn)
 
     local_cur.execute("SELECT key, value FROM settings")
     rows = local_cur.fetchall()
     for s in rows:
-        sb_cur.execute("""
+        sb.execute_commit("""
             INSERT INTO stock_settings (key, value, updated_at)
             VALUES (%s, %s, CURRENT_TIMESTAMP)
             ON CONFLICT (key) DO UPDATE SET
                 value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP;
-        """, (s["key"], s["value"]))
-    sb_conn.commit()
+        """, (s["key"], s["value"]), label=f"setting:{s['key']}")
     print(f"  ✓ 成功同步 {len(rows)} 項設定參數")
 
 def sync_database_previews(sb_conn, local_conn):
     """同步五大核心資料庫表格的最新 100 筆快照至 Supabase 供前端瞬時瀏覽"""
     print("[*] 正在同步資料庫檢視快照...")
     local_cur = local_conn.cursor()
-    sb_cur = sb_conn.cursor()
+    sb = _ensure_session(sb_conn)
 
     tables = [
         "daily_stock", "monthly_revenue", "institutional_trades", "institutional_futures",
@@ -431,7 +540,7 @@ def sync_database_previews(sb_conn, local_conn):
                 local_cur.execute(f"SELECT count(*) FROM {t}")
                 row_count = local_cur.fetchone()[0] or 0
 
-            sb_cur.execute("""
+            sb.execute_commit("""
                 INSERT INTO stock_database_preview (table_name, columns, data, row_count, updated_at)
                 VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
                 ON CONFLICT (table_name) DO UPDATE SET
@@ -439,20 +548,18 @@ def sync_database_previews(sb_conn, local_conn):
                     data = EXCLUDED.data,
                     row_count = EXCLUDED.row_count,
                     updated_at = CURRENT_TIMESTAMP;
-            """, (t, json.dumps(cols), json.dumps(data_rows), row_count))
+            """, (t, json.dumps(cols), json.dumps(data_rows), row_count), label=f"preview:{t}")
             print(f"  ✓ 資料表 {t}: 快照 {len(data_rows)} 筆 (總量 {row_count:,} 筆)")
         except Exception as e:
             print(f"  ⚠️ 資料表 {t} 快照失敗: {e}")
-    sb_conn.commit()
 
 def sync_titan_portfolios(sb_conn, local_conn):
     """同步雲端使用者的全球泰坦與台股泰坦實盤持倉現價 (直連 SQLite 最新價)"""
     print("[*] 正在同步全球泰坦與台股泰坦雲端持倉最新報價...")
     local_cur = local_conn.cursor()
-    sb_cur = sb_conn.cursor()
+    sb = _ensure_session(sb_conn)
     try:
-        sb_cur.execute("SELECT username, positions FROM user_titan_portfolios;")
-        users = sb_cur.fetchall()
+        users = sb.fetchall_retry("SELECT username, positions FROM user_titan_portfolios;", label="user_titan_portfolios")
         for u_name, pos_raw in users:
             if not pos_raw:
                 continue
@@ -481,20 +588,18 @@ def sync_titan_portfolios(sb_conn, local_conn):
                             p["price_date"] = real_dt
                             changed = True
             if changed:
-                sb_cur.execute("""
+                sb.execute_commit("""
                     UPDATE user_titan_portfolios 
                     SET positions = %s, updated_at = CURRENT_TIMESTAMP 
                     WHERE username = %s;
-                """, (json.dumps(pos_list, ensure_ascii=False), u_name))
+                """, (json.dumps(pos_list, ensure_ascii=False), u_name), label=f"titan_pos:{u_name}")
                 print(f"  ✓ 成功同步 {u_name} 的全球泰坦實盤持倉最新報價")
-        sb_conn.commit()
     except Exception as e:
         print(f"  ⚠️ 同步全球泰坦持倉報價失敗: {e}")
 
     # 同步台股泰坦雲端持倉最新報價 (user_taiwan_titan_portfolios) 與前端 titan_open_positions.json
     try:
-        sb_cur.execute("SELECT username, positions FROM user_taiwan_titan_portfolios;")
-        tw_users = sb_cur.fetchall()
+        tw_users = sb.fetchall_retry("SELECT username, positions FROM user_taiwan_titan_portfolios;", label="user_taiwan_titan_portfolios")
         for u_name, pos_raw in tw_users:
             if not pos_raw:
                 continue
@@ -514,13 +619,12 @@ def sync_titan_portfolios(sb_conn, local_conn):
                             p["price_date"] = real_dt
                             changed = True
             if changed:
-                sb_cur.execute("""
+                sb.execute_commit("""
                     UPDATE user_taiwan_titan_portfolios 
                     SET positions = %s, updated_at = CURRENT_TIMESTAMP 
                     WHERE username = %s;
-                """, (json.dumps(pos_list, ensure_ascii=False), u_name))
+                """, (json.dumps(pos_list, ensure_ascii=False), u_name), label=f"tw_titan_pos:{u_name}")
                 print(f"  ✓ 成功同步 {u_name} 的台股泰坦實盤持倉最新報價")
-        sb_conn.commit()
 
         tw_open_path = "/Users/huanggin-chen/openclaw_test/frontend/src/data/titan_open_positions.json"
         if os.path.exists(tw_open_path):
@@ -561,22 +665,22 @@ def run_full_sync(reuse_fresh_json: bool = False):
     print("=" * 60)
     print("🦞 蝦報 - 本機台股資料與模型同步作業開始")
     print("=" * 60)
-    sb_conn = get_supabase_conn()
+    sb_session = ResilientSupabaseSession()
     local_conn = get_sqlite_conn()
 
     try:
-        sync_ml_cache(sb_conn, reuse_fresh_json=reuse_fresh_json)
-        sync_portfolio(sb_conn, local_conn)
-        sync_titan_portfolios(sb_conn, local_conn)
-        sync_watchlist(sb_conn, local_conn)
-        sync_settings(sb_conn, local_conn)
-        sync_database_previews(sb_conn, local_conn)
+        sync_ml_cache(sb_session, reuse_fresh_json=reuse_fresh_json)
+        sync_portfolio(sb_session, local_conn)
+        sync_titan_portfolios(sb_session, local_conn)
+        sync_watchlist(sb_session, local_conn)
+        sync_settings(sb_session, local_conn)
+        sync_database_previews(sb_session, local_conn)
         print("=" * 60)
         print("✨ 所有資料與模型已成功同步至 Supabase 雲端！")
         print("=" * 60)
     finally:
         local_conn.close()
-        sb_conn.close()
+        sb_session.close()
 
 if __name__ == "__main__":
     run_full_sync()
